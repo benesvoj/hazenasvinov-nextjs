@@ -1,0 +1,1 @@
+export const BlankIcon = () => <svg className="h-6 w-6" />
