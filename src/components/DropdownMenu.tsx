@@ -30,7 +30,8 @@ export default function DropdownMenu(props: Props) {
 				<div
 					className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm/6 shadow-lg ring-1 ring-gray-900/5">
 					<div className="p-4">
-						{menuItems.map((menuItem) => (
+						<div className='grid grid-cols-2 gap-4'>
+							{menuItems.map((menuItem) => (
 								<div key={menuItem.title}
 									 className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
 									<div>
@@ -39,12 +40,13 @@ export default function DropdownMenu(props: Props) {
 											<span className="absolute inset-0"/>
 										</a>
 										{menuItem.description && (
-										<p className="mt-1 text-gray-600">{menuItem.description}</p>
+											<p className="mt-1 text-gray-600">{menuItem.description}</p>
 										)}
 									</div>
 								</div>
-						))
-						}
+							))
+							}
+						</div>
 					</div>
 				</div>
 			</PopoverPanel>

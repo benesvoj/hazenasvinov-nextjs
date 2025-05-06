@@ -11,6 +11,11 @@ const menuItems: MenuItem[] = [
 	{
 		title: 'Kategorie', children: [
 			{
+				title: 'Kuřátka',
+				route: '/categories/young-lings',
+				description: 'Connect with third-party tools',
+			},
+			{
 				title: 'Přípravka',
 				route: '/categories/young-lings',
 				description: 'Connect with third-party tools',
