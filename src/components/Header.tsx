@@ -30,7 +30,7 @@ export const Header = () => {
 			</div>
 			<div className='flex items-center space-x-4 leading-5 sm:space-x-6 pt-4 justify-center'>
 				<div
-					className="no-scrollbar hidden items-center space-x-4 overflow-x-auto sm:flex sm:space-x-6">
+					className="no-scrollbar hidden items-center space-x-4  sm:flex sm:space-x-6">
 					{menuItems
 						.map((item) => {
 								return item.hasOwnProperty('children') ? (

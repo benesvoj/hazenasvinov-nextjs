@@ -3,6 +3,7 @@ import {Inter} from "next/font/google";
 import "./globals.css";
 import {ThemeProviders} from "@/app/theme-providers";
 import {Header} from "@/components/Header";
+import React from "react";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -18,19 +19,18 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-		<body className={inter.className}>
-		<ThemeProviders>
-			<div className='w-full h-dvh p-4 xl:px-40'>
-				<Header/>
-				<nav className='w-max h-8'></nav>
-				<main className='w-max h-auto'>
-					{children}
-
-				</main>
-				<footer className='w-max h-8'></footer>
-			</div>
-		</ThemeProviders>
-		</body>
+			<body className={inter.className}>
+			<ThemeProviders>
+				<div className='w-full h-dvh p-4 xl:px-40'>
+						<Header/>
+						<main className='w-max h-auto'>
+							{children}
+						</main>
+					<footer className='w-max h-8'></footer>
+				</div>
+			</ThemeProviders>
+			</body>
 		</html>
-	);
+	)
+		;
 }
