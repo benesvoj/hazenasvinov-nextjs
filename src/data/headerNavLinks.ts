@@ -12,12 +12,12 @@ const menuItems: MenuItem[] = [
 		title: 'Kategorie', children: [
 			{
 				title: 'Kuřátka',
-				route: '/categories/young-lings',
+				route: '/categories/youngest-kids',
 				description: 'Nejmladší se zájmem o pohyb',
 			},
 			{
 				title: 'Přípravka',
-				route: '/categories/young-lings',
+				route: '/categories/prep-kids',
 				description: 'Děti 5--10 let, turnajové kategorie',
 			},
 			{
