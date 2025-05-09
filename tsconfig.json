@@ -27,6 +27,9 @@
       ],
       "@data/*": [
         "./data/*"
+      ],
+      "@components/*": [
+        "./components/*"
       ]
     },
     "target": "ES2017"
