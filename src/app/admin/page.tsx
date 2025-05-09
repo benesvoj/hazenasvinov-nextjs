@@ -7,8 +7,10 @@ import {clsx} from "clsx";
 const SIGNIN_ERROR_URL = "/error"
 
 export default async function Page(props: {
-	searchParams: { callbackUrl: string | undefined }
+	searchParams: Promise<{ callbackUrl: string | undefined }>
 }) {
+	const resolvedSearchParams = await props.searchParams;
+
 	return (
 		<div className="flex flex-col gap-2">
 			<form
@@ -55,7 +57,7 @@ export default async function Page(props: {
 						"use server"
 						try {
 							await signIn(provider.id, {
-								redirectTo: props.searchParams?.callbackUrl ?? "",
+								redirectTo: resolvedSearchParams?.callbackUrl ?? "",
 							})
 						} catch (error) {
 							// Signin can fail for a number of reasons, such as the user
