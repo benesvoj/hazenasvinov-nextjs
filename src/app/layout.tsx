@@ -19,17 +19,11 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={inter.className}>
-			<ThemeProviders>
-				<div className='w-full h-dvh p-4 xl:px-40'>
-						<Header/>
-						<main className='w-max h-auto'>
-							{children}
-						</main>
-					<footer className='w-max h-8'></footer>
-				</div>
-			</ThemeProviders>
-			</body>
+		<body className={inter.className}>
+		<ThemeProviders>
+			{children}
+		</ThemeProviders>
+		</body>
 		</html>
 	)
 		;
