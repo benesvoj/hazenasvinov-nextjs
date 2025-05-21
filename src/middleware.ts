@@ -42,7 +42,7 @@ export const config = {
 		 * Feel free to modify this pattern to include more paths.
 		 */
 		// Only protect the following paths
-		`${privateRoutes.dashboard}/:path*`,
+		'/admin/:path*',
 		// '/admin/:path*',
 		// Exclude all other routes - especially main routes
 		'/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
