@@ -2,7 +2,7 @@ import Image from "next/image";
 import {texts} from "@/utils/texts";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import Link from "@/components/Link";
-import menuItems from "../data/headerNavLinks";
+import routes from "../routes/routes";
 import DropdownMenu from "@/components/DropdownMenu";
 
 export const Header = () => {
@@ -31,7 +31,7 @@ export const Header = () => {
 			<div className='flex items-center space-x-4 leading-5 sm:space-x-6 pt-4 justify-center'>
 				<div
 					className="no-scrollbar hidden items-center space-x-4  sm:flex sm:space-x-6">
-					{menuItems
+					{routes
 						.map((item) => {
 								return item.hasOwnProperty('children') ? (
 									<DropdownMenu key={item.title} item={item}/>

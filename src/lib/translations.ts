@@ -19,5 +19,11 @@ export const translations = {
 	},
 	youngerGirls: {
 		title: 'Mladší žačky',
-	}
+	},
+	email: 'email',
+	password: 'heslo',
+	login: 'Přihlásit se',
+	signup: 'Registrovat se',
+	logout: 'Odhlásit se',
+	returnBackToHomepage: 'Zpět na úvodní stránku',
 } as const;

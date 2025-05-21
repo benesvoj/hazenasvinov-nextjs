@@ -2,7 +2,7 @@
 
 import {Popover, PopoverButton, PopoverPanel} from '@headlessui/react'
 import {ChevronDownIcon} from '@heroicons/react/16/solid'
-import {MenuItem} from "@/data/headerNavLinks";
+import {MenuItem} from "@/routes/routes";
 
 interface Props {
 	item: MenuItem
