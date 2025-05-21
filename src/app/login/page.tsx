@@ -1,6 +1,6 @@
 import {Button, Field, Input, Label} from "@headlessui/react";
 import {clsx} from "clsx";
-import {login, signup} from "@/utils/supabase/actions";
+import {login} from "@/utils/supabase/actions";
 import Link from "next/link";
 import {publicRoutes} from "@/routes/routes";
 import {translations} from "@/lib/translations";
@@ -23,11 +23,13 @@ export default async function Page() {
 					<Input className={inputStyle} id="password" name="password" type="password" required/>
 				</Field>
 				<div className='flex gap-2 py-4'>
-					<Button formAction={login} type='submit' className={buttonStyle}><span>{translations.login}</span></Button>
-					<Button formAction={signup} type='submit' className={buttonStyle}><span>{translations.signup}</span></Button>
+					<Button formAction={login} type='submit'
+							className={buttonStyle}><span>{translations.login}</span></Button>
+
+					{/*<Button formAction={signup} type='submit' className={buttonStyle}><span>{translations.signup}</span></Button>*/}
 				</div>
 			</form>
-			<Link href={publicRoutes.home} >{translations.returnBackToHomepage}</Link>
+			<Link href={publicRoutes.home}>{translations.returnBackToHomepage}</Link>
 		</div>
 	)
 }
