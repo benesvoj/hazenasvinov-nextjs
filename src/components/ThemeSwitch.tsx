@@ -3,10 +3,7 @@
 import {Fragment, useEffect, useState} from 'react'
 import {useTheme} from 'next-themes'
 import {Menu, RadioGroup, Transition} from '@headlessui/react'
-import {MoonIcon} from "@/lib/icons/MoonIcon";
-import {SunIcon} from "@/lib/icons/SunIcon";
-import {BlankIcon} from "@/lib/icons/BlankIcon";
-import {MonitorIcon} from "@/lib/icons/MonitorIcon";
+import { MoonIcon, SunIcon, BlankIcon, MonitorIcon } from "@/lib/icons";
 
 const ThemeSwitch = () => {
 	const [mounted, setMounted] = useState(false)
