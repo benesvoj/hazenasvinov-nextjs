@@ -26,4 +26,7 @@ export const translations = {
 	signup: 'Registrovat se',
 	logout: 'Odhlásit se',
 	returnBackToHomepage: 'Zpět na úvodní stránku',
+	admin: {
+		title: 'Administrace',
+	}
 } as const;

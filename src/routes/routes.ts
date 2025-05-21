@@ -97,6 +97,7 @@ export const privateRoutes = {
 	articles: '/admin/articles',
 	teams: '/admin/teams',
 	players: '/admin/players',
+	users: '/admin/users',
 } as const;
 
 export default routes
