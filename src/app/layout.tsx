@@ -7,10 +7,11 @@ import {HeroUIProvider} from "@heroui/system";
 
 const inter = Inter({subsets: ["latin"]});
 
+
 export const metadata: Metadata = {
 	title: "TJ Sokol Svinov",
 	description: "Oddíl národní házené ve Svinově",
-};
+}
 
 export default function RootLayout({
 									   children,
@@ -18,7 +19,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 		<body className={inter.className}>
 		<ThemeProviders>
 			<HeroUIProvider>
