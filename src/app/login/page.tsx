@@ -28,7 +28,6 @@ export default async function Page() {
 				</div>
 			</form>
 			<Link href={publicRoutes.home} >{translations.returnBackToHomepage}</Link>
-			<a href={publicRoutes.home} >Return back</a>
 		</div>
 	)
 }
