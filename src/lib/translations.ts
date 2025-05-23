@@ -28,5 +28,14 @@ export const translations = {
 	returnBackToHomepage: 'Zpět na úvodní stránku',
 	admin: {
 		title: 'Administrace',
+	},
+	button: {
+		add: 'Přidat',
+		edit: 'Upravit',
+		delete: 'Smazat',
+		save: 'Uložit',
+		cancel: 'Zrušit',
+		confirm: 'Potvrdit',
+		decline: 'Zamítnout',
 	}
 } as const;
