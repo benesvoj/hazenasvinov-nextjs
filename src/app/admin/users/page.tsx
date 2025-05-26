@@ -1,44 +1,16 @@
 'use client';
 
 import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/table";
-import {useEffect, useState} from "react";
-import {Api} from "@/app/api/api";
-import {Button, ButtonGroup} from "@heroui/button";
+import {Button} from "@heroui/button";
 import {translations} from "@/lib/translations";
 import {PlusIcon} from "@heroicons/react/16/solid";
 import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure} from "@heroui/modal";
-
-interface SupabaseUser {
-	id: string
-	email: string
-	updated_at: string
-	created_at: string
-}
+import {useFetchUsers} from "@/hooks/useFetchUsers";
 
 export default function Page() {
-
 	const {button} = translations
-
-	const [users, setUsers] = useState<SupabaseUser[]>([])
-	const [loading, setLoading] = useState(true)
-
+	const {users, loading, error} = useFetchUsers();
 	const {isOpen, onOpen, onOpenChange} = useDisclosure();
-
-	useEffect(() => {
-		const fetchUsers = async () => {
-			try {
-				const res = await fetch(Api.getUsers)
-				const data = await res.json()
-				setUsers(data)
-			} catch (err) {
-				console.error('Failed to fetch users', err)
-			} finally {
-				setLoading(false)
-			}
-		}
-
-		fetchUsers()
-	}, [])
 
 	if (loading) return <p>Loading...</p>
 
@@ -46,7 +18,8 @@ export default function Page() {
 		<div className={"flex flex-col gap-2 border-2 rounded-lg p-4 bg-white/5"}>
 			<div className="flex justify-between items-center min-w-max">
 				<h1>Seznam uzivatelu do administrace</h1>
-				<Button color='primary' size="sm" startContent={<PlusIcon />} variant={'ghost'} onPress={onOpen}>{button.add}</Button>
+				<Button color='primary' size="sm" startContent={<PlusIcon/>} variant={'ghost'}
+						onPress={onOpen}>{button.add}</Button>
 			</div>
 
 			<Modal isOpen={isOpen} onOpenChange={onOpenChange}>
