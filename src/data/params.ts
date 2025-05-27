@@ -6,3 +6,4 @@ export const URL_juniorBoys = 'https://docs.google.com/spreadsheets/d/e/2PACX-1v
 export const URL_juniorGirls = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSIeJd_X7eVmVZqleAlEOY11NQ3HGu5QcEy5wLV7Cbsn1qbToPkXEDwjuGnRsKh2kZmxuHmAXDmH2lc/pub?gid=44744017&single=true&output=csv';
 export const URL_women = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTEdofXDNCkGIUuEFG26aKOQOuqBAbVoub47_NBMfce8SxxL_0_CVYkRHyQoc8SDKSaSABnHBPaOUGX/pub?gid=385248816&single=true&output=csv';
 export const URL_men = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT4MHY9BoGphcKQZbohYVWB8IvpjIgN7QYZLFBHFEbd_nHgKNR6f6YBMecHH8yTk1b_UKy2NGSeD0r0/pub?output=csv'
+export const URL_men_matches = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT4MHY9BoGphcKQZbohYVWB8IvpjIgN7QYZLFBHFEbd_nHgKNR6f6YBMecHH8yTk1b_UKy2NGSeD0r0/pub?gid=534948150&single=true&output=csv'
