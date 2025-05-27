@@ -1,28 +1,28 @@
 import {useEffect, useState} from "react";
 import {Api} from "@/app/api/api";
-import {SupabaseUser} from "@/types/types";
+import {CategoryProps} from "@/types/types";
 
-export function useFetchUsers() {
-	const [users, setUsers] = useState<SupabaseUser[]>([]);
+export function useFetchCategories() {
+	const [data, setData] = useState<CategoryProps[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 
 	useEffect(() => {
-		const fetchUsers = async () => {
+		const fetchData = async () => {
 			try {
-				const res = await fetch(Api.getUsers);
+				const res = await fetch(Api.getCategories);
 				const data = await res.json();
-				setUsers(data);
+				setData(data);
 			} catch (err) {
-				console.error('Failed to fetch users', err);
+				console.error('Failed to fetch data', err);
 				setError(err instanceof Error ? err : new Error('Unknown error'));
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		fetchUsers();
+		fetchData();
 	}, []);
 
-	return {users, loading, error};
+	return { data, loading, error };
 }

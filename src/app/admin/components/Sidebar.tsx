@@ -6,6 +6,7 @@ import {Spacer} from "@heroui/spacer";
 import Link from "next/link";
 import routes, {privateRoutes} from "@/routes/routes";
 import {Listbox, ListboxItem} from "@heroui/listbox";
+import {Tooltip} from "@heroui/tooltip";
 
 export const Sidebar = () => {
 
@@ -20,10 +21,12 @@ export const Sidebar = () => {
 			<div>
 				<Listbox aria-label="Admin Sidebar" className="flex flex-col gap-2" items={items}>
 					{(item) => (
-							<ListboxItem key={item.route}>
+						<ListboxItem key={item.route} textValue={item.title}>
+							<Tooltip content={item.description}>
 								<Link href={item.route || privateRoutes.dashboard}>{item.title}</Link>
-							</ListboxItem>
-						)}
+							</Tooltip>
+						</ListboxItem>
+					)}
 				</Listbox>
 			</div>
 

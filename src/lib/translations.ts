@@ -1,4 +1,10 @@
 export const translations = {
+	categories: {
+		title: 'Kategorie',
+		description: 'Správa kategorií, které jsou dostupné v systému.',
+		edit: 'Upravit kategorii',
+		editDescription: 'Upravte informace o kategorii. Změny budou uloženy po kliknutí na tlačítko "Uložit".',
+	},
 	men: {
 		title: 'Muži',
 	},
@@ -59,5 +65,16 @@ export const translations = {
 			title: 'Přidat uživatele',
 			description: 'Přidejte nového uživatele, který se může přihlásit do systému. Na uvedený email bude odeslán odkaz pro nastavení hesla.',
 		}
+	},
+	competitions: {
+		title: 'Soutěže',
+		description: 'Správa soutěží, které se konají v rámci systému.',
+	},
+	season: {
+		title: 'Sezóna',
+		description: 'Správa sezón, které jsou dostupné v systému.',
+	},
+	error:{
+		fetchCategories: 'Chyba při načítání kategorií',
 	}
 } as const;
