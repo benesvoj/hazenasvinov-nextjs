@@ -1,9 +1,9 @@
+import "./globals.css";
+
 import type {Metadata} from "next";
 import {Inter} from "next/font/google";
-import "./globals.css";
 import {ThemeProviders} from "@/app/theme-providers";
 import React from "react";
-import {HeroUIProvider} from "@heroui/system";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -22,9 +22,7 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning>
 		<body className={inter.className}>
 		<ThemeProviders>
-			<HeroUIProvider>
-				{children}
-			</HeroUIProvider>
+			{children}
 		</ThemeProviders>
 		</body>
 		</html>

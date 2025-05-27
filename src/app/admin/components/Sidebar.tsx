@@ -1,3 +1,5 @@
+'use client';
+
 import React from "react";
 import {translations} from "@/lib/translations";
 import {Spacer} from "@heroui/spacer";

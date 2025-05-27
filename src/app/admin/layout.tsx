@@ -5,7 +5,7 @@ export default async function AdminLayout({children}: { children: React.ReactNod
 
 	return (
 		<div className="flex min-h-screen">
-			<Sidebar />
+			<Sidebar/>
 			<main className="flex-1 p-6 bg-gray-100">{children}</main>
 		</div>
 	);
