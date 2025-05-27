@@ -8,7 +8,7 @@ const config = {
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
-    "./node_modules/@heroui/theme/dist/components/(button|modal|spacer|table|ripple|spinner|checkbox|form).js"
+    "./node_modules/@heroui/theme/dist/components/(button|input|modal|spacer|table|ripple|spinner|form|checkbox).js"
   ],
   prefix: "",
   theme: {
