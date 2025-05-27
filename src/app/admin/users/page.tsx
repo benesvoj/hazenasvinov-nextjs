@@ -33,7 +33,7 @@ export default function Page() {
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		if (submitted.email || submitted.name) {
+		if (submitted?.email || submitted?.name) {
 			// Reset the form if it was previously submitted
 			setSubmitted(initialFormData);
 		}
