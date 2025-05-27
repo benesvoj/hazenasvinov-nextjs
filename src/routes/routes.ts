@@ -4,6 +4,7 @@ export interface MenuItem {
 	route?: string;
 	children?: MenuItem[];
 	description?: string;
+	isPrivate?: boolean;
 }
 
 export const publicRoutes = {
@@ -25,6 +26,17 @@ export const publicRoutes = {
 	juniorGirls: '/categories/junior-girls',
 	men: '/categories/men',
 	women: '/categories/women',
+} as const;
+
+
+
+export const privateRoutes = {
+	dashboard: '/admin',
+	articles: '/admin/articles',
+	teams: '/admin/teams',
+	players: '/admin/players',
+	users: '/admin/users',
+	params: '/admin/params',
 } as const;
 
 const routes: MenuItem[] = [
@@ -88,16 +100,10 @@ const routes: MenuItem[] = [
 	{route: publicRoutes.contact, title: 'Kontakt'},
 	{route: publicRoutes.about, title: 'O oddílu'},
 	{route: publicRoutes.celebration, title: '100 let'},
-	{route: publicRoutes.login, title: 'Admin'}
+	{route: publicRoutes.login, title: 'Admin'},
+	{route: privateRoutes.dashboard, title: 'Dashboard', isPrivate: true, description: 'Správa obsahu a nastavení systému.'},
+	{route: privateRoutes.params, title: 'Parametry', isPrivate: true, description: 'Správa parametrů a nastavení systému.'},
+	{route: privateRoutes.users, title: 'Uživatelé', isPrivate: true, description: 'Správa uživatelů, kteří se mohou přihlásit do systému.'},
 ]
-
-
-export const privateRoutes = {
-	dashboard: '/admin',
-	articles: '/admin/articles',
-	teams: '/admin/teams',
-	players: '/admin/players',
-	users: '/admin/users',
-} as const;
 
 export default routes

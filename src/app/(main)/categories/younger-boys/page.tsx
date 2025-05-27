@@ -1,7 +1,7 @@
 'use client';
 
 import {URL_youngerBoys} from "@/data/params";
-import {StandingsTable} from "@/components/StandingsTable";
+import {CustomTable} from "@/components/CustomTable";
 import {translations} from "@/lib/translations";
 import CSVTable from "@/components/CSVTable";
 
@@ -9,7 +9,7 @@ export default function Page() {
 	return (
 		<>
 			<CSVTable />
-			<StandingsTable csvData={URL_youngerBoys} tableTitle={translations.youngerBoys.title} />
+			<CustomTable csvData={URL_youngerBoys} tableTitle={translations.youngerBoys.title} />
 		</>
 	);
 }

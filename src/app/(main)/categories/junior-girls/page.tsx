@@ -1,13 +1,13 @@
 'use client';
 
-import {StandingsTable} from "@/components/StandingsTable";
+import {CustomTable} from "@/components/CustomTable";
 import {URL_juniorGirls,} from "@/data/params";
 import {translations} from "@/lib/translations";
 
 export default function Page() {
 	return(
 		<>
-			<StandingsTable  csvData={URL_juniorGirls} tableTitle={translations.juniorGirls.title} />
+			<CustomTable csvData={URL_juniorGirls} tableTitle={translations.juniorGirls.title} />
 		</>
 	)
 }

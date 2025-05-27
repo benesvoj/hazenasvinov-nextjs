@@ -32,6 +32,7 @@ export const Header = () => {
 				<div
 					className="no-scrollbar hidden items-center space-x-4  sm:flex sm:space-x-6">
 					{routes
+						.filter((item) => item.isPrivate === false || item.isPrivate === undefined)
 						.map((item) => {
 								return item.hasOwnProperty('children') ? (
 									<DropdownMenu key={item.title} item={item}/>

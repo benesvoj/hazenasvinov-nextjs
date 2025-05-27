@@ -2,13 +2,12 @@ import {heroui} from '@heroui/theme';
 import type { Config } from "tailwindcss"
 
 const config = {
-  darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
-    "./node_modules/@heroui/theme/dist/components/(button|input|modal|spacer|table|tabs|ripple|spinner|form|checkbox).js"
+    "./node_modules/@heroui/theme/dist/components/(button|input|listbox|modal|skeleton|spacer|spinner|table|tabs|ripple|form|divider|checkbox).js"
   ],
   prefix: "",
   theme: {

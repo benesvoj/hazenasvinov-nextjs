@@ -8,6 +8,7 @@ import {PlusIcon} from "@heroicons/react/16/solid";
 import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure} from "@heroui/modal";
 import {useFetchUsers} from "@/hooks/useFetchUsers";
 import React, {useState} from "react";
+import {Skeleton} from "@heroui/skeleton";
 
 type FormData = {
 	email: string;
@@ -28,7 +29,7 @@ export default function Page() {
 
 	const [submitted, setSubmitted] = useState<FormData | null>(initialFormData);
 
-	if (loading) return <p>Loading...</p>
+	if (loading) return <Skeleton />
 
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
