@@ -75,7 +75,7 @@ const config = {
 			},
 		},
 	},
-	plugins: [require("tailwindcss-animate"), heroui()],
+	plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography"), heroui()],
 } satisfies Config
 
 export default config
