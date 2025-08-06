@@ -8,7 +8,6 @@ import {publicRoutes, privateRoutes} from "@/routes/routes";
 
 export async function login(formData: FormData) {
 	const supabase = await createClient()
-
 	// type-casting here for convenience
 	// in practice, you should validate your inputs
 	const data = {

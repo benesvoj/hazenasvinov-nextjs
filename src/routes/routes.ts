@@ -15,7 +15,8 @@ export const publicRoutes = {
 	downloads: '/downloads',
 	contact: '/contact',
 	about: '/about',
-	celebration: '/celebration',
+	celebration: '/100',
+	blog: '/blog',
 	login: '/login',
 	youngestKids: '/categories/youngest-kids',
 	prepKids: '/categories/prep-kids',
@@ -96,6 +97,7 @@ const routes: MenuItem[] = [
 			},
 		]
 	},
+	{route: publicRoutes.blog, title: 'Novinky'},
 	{route: publicRoutes.chronicle, title: 'Kronika'},
 	{route: publicRoutes.downloads, title: 'Dokumenty'},
 	{route: publicRoutes.contact, title: 'Kontakt'},

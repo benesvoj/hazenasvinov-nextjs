@@ -3,7 +3,22 @@ export const translations = {
 		title: 'Kategorie',
 		description: 'Správa kategorií, které jsou dostupné v systému.',
 		edit: 'Upravit kategorii',
-		editDescription: 'Upravte informace o kategorii. Změny budou uloženy po kliknutí na tlačítko "Uložit".',
+		editDescription: 'Upravte informace o kategorii. Změny budou uloženy po kliknutí na tlačítko "Uložit". Úpravy se projeví na všech stránkách, které tuto kategorii používají.',
+		table: {
+			id: 'ID',
+			name: 'Název',
+			namePlaceholder: 'Zadejte název kategorie',
+			nameError: 'Zadejte unikátní název kategorie',
+			description: 'Popis',
+			descriptionPlaceholder: 'Zadejte popis kategorie',
+			descriptionError: 'Zadejte popis kategorie',
+			route: 'Cesta',
+			routePlaceholder: 'Zadejte URL kategorie',
+			routeError: 'Zadejte unikátní URL kategorie',
+			updatedAt: 'Aktualizováno',
+			createdAt: 'Vytvořeno',
+			actions: 'Akce'
+		}
 	},
 	men: {
 		title: 'Muži',

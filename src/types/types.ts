@@ -2,8 +2,8 @@ type CategoryProps = {
 	id: string;
 	name: string;
 	description?: string;
-	created_at: string;
-	updated_at: string;
+	created_at?: string;
+	updated_at?: string;
 	route?: string;
 }
 
@@ -24,4 +24,11 @@ type SupabaseUser = {
 }
 
 
-export type { CategoryProps, SeasonProps, SupabaseUser }
+type ColumnType = {
+	key: string;
+	label: React.ReactNode;
+	// Add other properties if they exist
+};
+
+
+export type { CategoryProps, SeasonProps, SupabaseUser, ColumnType }
