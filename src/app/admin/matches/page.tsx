@@ -97,7 +97,7 @@ interface Match {
 
 interface Standing {
   position: number;
-  team: string;
+  team: { name: string };
   matches: number;
   wins: number;
   draws: number;
@@ -293,7 +293,10 @@ export default function MatchesAdminPage() {
     try {
       let query = supabase
         .from('standings')
-        .select('*')
+        .select(`
+          *,
+          team:team_id(name)
+        `)
         .order('position');
 
       if (selectedCategory) {
@@ -778,7 +781,7 @@ export default function MatchesAdminPage() {
                                   .map((standing, index) => (
                                     <tr key={index} className="hover:bg-gray-50">
                                       <td className="border px-4 py-2 font-medium">{standing.position}</td>
-                                      <td className="border px-4 py-2">{standing.team}</td>
+                                      <td className="border px-4 py-2">{standing.team?.name || 'N/A'}</td>
                                       <td className="border px-4 py-2 text-center">{standing.matches}</td>
                                       <td className="border px-4 py-2 text-center">{standing.wins}</td>
                                       <td className="border px-4 py-2 text-center">{standing.draws}</td>

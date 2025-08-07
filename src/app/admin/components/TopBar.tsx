@@ -100,11 +100,12 @@ export const TopBar = () => {
             <InformationCircleIcon className="w-5 h-5 text-gray-600" />
             {notifications > 0 && (
               <Badge 
-                content={notifications} 
                 color="danger" 
                 size="sm"
                 className="absolute -top-1 -right-1"
-              />
+              >
+                {notifications}
+              </Badge>
             )}
           </Button>
 
@@ -119,11 +120,12 @@ export const TopBar = () => {
             <BellIcon className="w-5 h-5 text-gray-600" />
             {notifications > 0 && (
               <Badge 
-                content={notifications} 
                 color="danger" 
                 size="sm"
                 className="absolute -top-1 -right-1"
-              />
+              >
+                {notifications}
+              </Badge>
             )}
           </Button>
 
