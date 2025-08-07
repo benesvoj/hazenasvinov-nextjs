@@ -65,10 +65,19 @@ export default function Page() {
             <div className="flex flex-wrap gap-4">
               <Button 
                 as={Link} 
-                href="/categories/men" 
+                href="/matches" 
                 color="primary" 
                 size="lg"
                 className="bg-white text-blue-600 hover:bg-blue-50"
+              >
+                Program zápasů
+              </Button>
+              <Button 
+                as={Link} 
+                href="/categories/men" 
+                variant="bordered" 
+                size="lg"
+                className="border-white text-white hover:bg-white hover:text-blue-600"
               >
                 Aktuální výsledky
               </Button>
