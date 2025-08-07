@@ -234,22 +234,7 @@ export default function TeamsAdminPage() {
 
       if (error) throw error;
       
-      onAddTeamClose();
-      setFormData({
-        name: '',
-        short_name: '',
-        city: '',
-        region: '',
-        logo_url: '',
-        website: '',
-        email: '',
-        phone: '',
-        contact_person: '',
-        founded_year: '',
-        home_venue: '',
-        is_active: true
-      });
-      clearLogoPreview();
+      handleCloseAddTeam();
       fetchTeams();
     } catch (error) {
       setError('Chyba při přidávání týmu');
@@ -282,23 +267,7 @@ export default function TeamsAdminPage() {
 
       if (error) throw error;
       
-      onEditTeamClose();
-      setSelectedTeam(null);
-      setFormData({
-        name: '',
-        short_name: '',
-        city: '',
-        region: '',
-        logo_url: '',
-        website: '',
-        email: '',
-        phone: '',
-        contact_person: '',
-        founded_year: '',
-        home_venue: '',
-        is_active: true
-      });
-      clearLogoPreview();
+      handleCloseEditTeam();
       fetchTeams();
     } catch (error) {
       setError('Chyba při aktualizaci týmu');
@@ -415,6 +384,67 @@ export default function TeamsAdminPage() {
   const clearLogoPreview = () => {
     setLogoFile(null);
     setLogoPreview('');
+  };
+
+  // Handle opening add team modal with clean form
+  const handleOpenAddTeam = () => {
+    setFormData({
+      name: '',
+      short_name: '',
+      city: '',
+      region: '',
+      logo_url: '',
+      website: '',
+      email: '',
+      phone: '',
+      contact_person: '',
+      founded_year: '',
+      home_venue: '',
+      is_active: true
+    });
+    clearLogoPreview();
+    onAddTeamOpen();
+  };
+
+  // Handle closing edit team modal with clean form
+  const handleCloseEditTeam = () => {
+    setFormData({
+      name: '',
+      short_name: '',
+      city: '',
+      region: '',
+      logo_url: '',
+      website: '',
+      email: '',
+      phone: '',
+      contact_person: '',
+      founded_year: '',
+      home_venue: '',
+      is_active: true
+    });
+    clearLogoPreview();
+    setSelectedTeam(null);
+    onEditTeamClose();
+  };
+
+  // Handle closing add team modal with clean form
+  const handleCloseAddTeam = () => {
+    setFormData({
+      name: '',
+      short_name: '',
+      city: '',
+      region: '',
+      logo_url: '',
+      website: '',
+      email: '',
+      phone: '',
+      contact_person: '',
+      founded_year: '',
+      home_venue: '',
+      is_active: true
+    });
+    clearLogoPreview();
+    onAddTeamClose();
   };
 
   // Add team category
@@ -534,7 +564,7 @@ export default function TeamsAdminPage() {
         <Button 
           color="primary" 
           startContent={<PlusIcon className="w-4 h-4" />}
-          onPress={onAddTeamOpen}
+          onPress={handleOpenAddTeam}
         >
           Přidat tým
         </Button>
@@ -651,112 +681,119 @@ export default function TeamsAdminPage() {
       </Card>
 
       {/* Add Team Modal */}
-      <Modal isOpen={isAddTeamOpen} onClose={onAddTeamClose}>
+      <Modal isOpen={isAddTeamOpen} onClose={handleCloseAddTeam} size="3xl">
         <ModalContent>
           <ModalHeader>Přidat nový tým</ModalHeader>
           <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Název týmu *"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-              />
-              <Input
-                label="Zkratka"
-                value={formData.short_name}
-                onChange={(e) => setFormData({...formData, short_name: e.target.value})}
-              />
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Základní údaje</h4>
                 <Input
-                  label="Město"
-                  value={formData.city}
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  label="Název týmu *"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  required
                 />
                 <Input
-                  label="Kraj"
-                  value={formData.region}
-                  onChange={(e) => setFormData({...formData, region: e.target.value})}
+                  label="Zkratka"
+                  value={formData.short_name}
+                  onChange={(e) => setFormData({...formData, short_name: e.target.value})}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    label="Město"
+                    value={formData.city}
+                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  />
+                  <Input
+                    label="Kraj"
+                    value={formData.region}
+                    onChange={(e) => setFormData({...formData, region: e.target.value})}
+                  />
+                </div>
+                <Input
+                  label="Domácí hala"
+                  value={formData.home_venue}
+                  onChange={(e) => setFormData({...formData, home_venue: e.target.value})}
+                />
+                <Input
+                  label="Rok založení"
+                  type="number"
+                  value={formData.founded_year}
+                  onChange={(e) => setFormData({...formData, founded_year: e.target.value})}
                 />
               </div>
-              <Input
-                label="Domácí hala"
-                value={formData.home_venue}
-                onChange={(e) => setFormData({...formData, home_venue: e.target.value})}
-              />
-              <Input
-                label="Webové stránky"
-                value={formData.website}
-                onChange={(e) => setFormData({...formData, website: e.target.value})}
-              />
-              <Input
-                label="Email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-              />
-              <Input
-                label="Telefon"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              />
-              <Input
-                label="Kontaktní osoba"
-                value={formData.contact_person}
-                onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
-              />
-              <Input
-                label="Rok založení"
-                type="number"
-                value={formData.founded_year}
-                onChange={(e) => setFormData({...formData, founded_year: e.target.value})}
-              />
-              
-              {/* Logo Upload Section */}
-              <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">
-                  Logo týmu
-                </label>
-                
-                {/* Current logo preview */}
-                {(logoPreview || formData.logo_url) && (
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={logoPreview || formData.logo_url} 
-                      alt="Logo preview"
-                      className="w-16 h-16 object-contain border rounded-lg bg-gray-50"
-                    />
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="flat"
-                      onPress={clearLogoPreview}
-                    >
-                      Odstranit
-                    </Button>
-                  </div>
-                )}
-                
-                {/* File upload */}
-                <input
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp"
-                  onChange={handleLogoFileChange}
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-full file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100"
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Kontaktní údaje</h4>
+                <Input
+                  label="Webové stránky"
+                  value={formData.website}
+                  onChange={(e) => setFormData({...formData, website: e.target.value})}
                 />
-                <p className="text-xs text-gray-500">
-                  Podporované formáty: JPEG, PNG, WebP (max 2MB)
-                </p>
+                <Input
+                  label="Email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+                <Input
+                  label="Telefon"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                />
+                <Input
+                  label="Kontaktní osoba"
+                  value={formData.contact_person}
+                  onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
+                />
+
+                {/* Logo Upload Section */}
+                <div className="space-y-3 pt-2">
+                  <h5 className="font-medium text-gray-900 dark:text-gray-100">Logo týmu</h5>
+                  
+                  {/* Current logo preview */}
+                  {(logoPreview || formData.logo_url) && (
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={logoPreview || formData.logo_url} 
+                        alt="Logo preview"
+                        className="w-16 h-16 object-contain border rounded-lg bg-gray-50"
+                      />
+                      <Button
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        onPress={clearLogoPreview}
+                      >
+                        Odstranit
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* File upload */}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleLogoFileChange}
+                    className="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-50 file:text-blue-700
+                      hover:file:bg-blue-100"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Podporované formáty: JPEG, PNG, WebP (max 2MB)
+                  </p>
+                </div>
               </div>
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onAddTeamClose}>
+            <Button color="danger" variant="flat" onPress={handleCloseAddTeam}>
               Zrušit
             </Button>
             <Button color="primary" onPress={handleAddTeam}>
@@ -767,137 +804,144 @@ export default function TeamsAdminPage() {
       </Modal>
 
       {/* Edit Team Modal */}
-      <Modal isOpen={isEditTeamOpen} onClose={onEditTeamClose}>
+      <Modal isOpen={isEditTeamOpen} onClose={handleCloseEditTeam} size="3xl">
         <ModalContent>
           <ModalHeader>Upravit tým</ModalHeader>
           <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Název týmu *"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-              />
-              <Input
-                label="Zkratka"
-                value={formData.short_name}
-                onChange={(e) => setFormData({...formData, short_name: e.target.value})}
-              />
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Základní údaje</h4>
                 <Input
-                  label="Město"
-                  value={formData.city}
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  label="Název týmu *"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  required
                 />
                 <Input
-                  label="Kraj"
-                  value={formData.region}
-                  onChange={(e) => setFormData({...formData, region: e.target.value})}
+                  label="Zkratka"
+                  value={formData.short_name}
+                  onChange={(e) => setFormData({...formData, short_name: e.target.value})}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    label="Město"
+                    value={formData.city}
+                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  />
+                  <Input
+                    label="Kraj"
+                    value={formData.region}
+                    onChange={(e) => setFormData({...formData, region: e.target.value})}
+                  />
+                </div>
+                <Input
+                  label="Domácí hala"
+                  value={formData.home_venue}
+                  onChange={(e) => setFormData({...formData, home_venue: e.target.value})}
+                />
+                <Input
+                  label="Rok založení"
+                  type="number"
+                  value={formData.founded_year}
+                  onChange={(e) => setFormData({...formData, founded_year: e.target.value})}
                 />
               </div>
-              <Input
-                label="Domácí hala"
-                value={formData.home_venue}
-                onChange={(e) => setFormData({...formData, home_venue: e.target.value})}
-              />
-              <Input
-                label="Webové stránky"
-                value={formData.website}
-                onChange={(e) => setFormData({...formData, website: e.target.value})}
-              />
-              <Input
-                label="Email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-              />
-              <Input
-                label="Telefon"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              />
-              <Input
-                label="Kontaktní osoba"
-                value={formData.contact_person}
-                onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
-              />
-              <Input
-                label="Rok založení"
-                type="number"
-                value={formData.founded_year}
-                onChange={(e) => setFormData({...formData, founded_year: e.target.value})}
-              />
-              
-              {/* Logo Upload Section */}
-              <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">
-                  Logo týmu
-                </label>
-                
-                {/* Current logo preview */}
-                {(logoPreview || formData.logo_url) && (
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={logoPreview || formData.logo_url} 
-                      alt="Logo preview"
-                      className="w-16 h-16 object-contain border rounded-lg bg-gray-50"
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        color="danger"
-                        variant="flat"
-                        onPress={clearLogoPreview}
-                      >
-                        Odstranit náhled
-                      </Button>
-                      {selectedTeam && (
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Kontaktní údaje & Logo</h4>
+                <Input
+                  label="Webové stránky"
+                  value={formData.website}
+                  onChange={(e) => setFormData({...formData, website: e.target.value})}
+                />
+                <Input
+                  label="Email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+                <Input
+                  label="Telefon"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                />
+                <Input
+                  label="Kontaktní osoba"
+                  value={formData.contact_person}
+                  onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
+                />
+
+                {/* Logo Upload Section */}
+                <div className="space-y-3 pt-2">
+                  <h5 className="font-medium text-gray-900 dark:text-gray-100">Logo týmu</h5>
+                  
+                  {/* Current logo preview */}
+                  {(logoPreview || formData.logo_url) && (
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={logoPreview || formData.logo_url} 
+                        alt="Logo preview"
+                        className="w-16 h-16 object-contain border rounded-lg bg-gray-50"
+                      />
+                      <div className="flex flex-col gap-2">
                         <Button
                           size="sm"
                           color="danger"
-                          variant="solid"
-                          onPress={() => handleLogoDelete(selectedTeam.id)}
-                          isLoading={logoUploading}
+                          variant="flat"
+                          onPress={clearLogoPreview}
                         >
-                          Smazat logo
+                          Odstranit náhled
                         </Button>
-                      )}
+                        {selectedTeam && (
+                          <Button
+                            size="sm"
+                            color="danger"
+                            variant="solid"
+                            onPress={() => handleLogoDelete(selectedTeam.id)}
+                            isLoading={logoUploading}
+                          >
+                            Smazat logo
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                {/* File upload */}
-                <input
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp"
-                  onChange={handleLogoFileChange}
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-full file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100"
-                />
-                <p className="text-xs text-gray-500">
-                  Podporované formáty: JPEG, PNG, WebP (max 2MB)
-                </p>
-                
-                {/* Upload button for new logo */}
-                {logoFile && selectedTeam && (
-                  <Button
-                    color="primary"
-                    onPress={() => handleLogoUpload(selectedTeam.id)}
-                    isLoading={logoUploading}
-                    className="w-full"
-                  >
-                    {logoUploading ? 'Nahrávání...' : 'Nahrát nové logo'}
-                  </Button>
-                )}
+                  )}
+                  
+                  {/* File upload */}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleLogoFileChange}
+                    className="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-50 file:text-blue-700
+                      hover:file:bg-blue-100"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Podporované formáty: JPEG, PNG, WebP (max 2MB)
+                  </p>
+                  
+                  {/* Upload button for new logo */}
+                  {logoFile && selectedTeam && (
+                    <Button
+                      color="primary"
+                      onPress={() => handleLogoUpload(selectedTeam.id)}
+                      isLoading={logoUploading}
+                      className="w-full"
+                    >
+                      {logoUploading ? 'Nahrávání...' : 'Nahrát nové logo'}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onEditTeamClose}>
+            <Button color="danger" variant="flat" onPress={handleCloseEditTeam}>
               Zrušit
             </Button>
             <Button color="primary" onPress={handleUpdateTeam}>

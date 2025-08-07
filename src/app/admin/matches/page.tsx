@@ -137,6 +137,7 @@ export default function MatchesAdminPage() {
   // Modal states
   const { isOpen: isAddMatchOpen, onOpen: onAddMatchOpen, onClose: onAddMatchClose } = useDisclosure();
   const { isOpen: isAddResultOpen, onOpen: onAddResultOpen, onClose: onAddResultClose } = useDisclosure();
+  const { isOpen: isEditMatchOpen, onOpen: onEditMatchOpen, onClose: onEditMatchClose } = useDisclosure();
   
   const [formData, setFormData] = useState({
     date: '',
@@ -151,6 +152,17 @@ export default function MatchesAdminPage() {
   const [resultData, setResultData] = useState({
     home_score: '',
     away_score: ''
+  });
+
+  const [editData, setEditData] = useState({
+    date: '',
+    time: '',
+    home_team_id: '',
+    away_team_id: '',
+    venue: '',
+    home_score: '',
+    away_score: '',
+    status: 'completed' as 'upcoming' | 'completed'
   });
 
   const supabase = createClient();
@@ -417,12 +429,12 @@ export default function MatchesAdminPage() {
           if (match.home_score > match.away_score) {
             // Home team wins
             homeStanding.wins++;
-            homeStanding.points += 3;
+            homeStanding.points += 2;
             awayStanding.losses++;
           } else if (match.home_score < match.away_score) {
             // Away team wins
             awayStanding.wins++;
-            awayStanding.points += 3;
+            awayStanding.points += 2;
             homeStanding.losses++;
           } else {
             // Draw
@@ -591,6 +603,102 @@ export default function MatchesAdminPage() {
     }
   };
 
+  // Open edit match modal
+  const handleEditMatch = (match: Match) => {
+    setSelectedMatch(match);
+    setEditData({
+      date: match.date,
+      time: match.time,
+      home_team_id: match.home_team_id,
+      away_team_id: match.away_team_id,
+      venue: match.venue,
+      home_score: match.home_score?.toString() || '',
+      away_score: match.away_score?.toString() || '',
+      status: match.status
+    });
+    onEditMatchOpen();
+  };
+
+  // Update match
+  const handleUpdateMatch = async () => {
+    if (isSeasonClosed()) {
+      setError('Nelze upravit zápas v uzavřené sezóně');
+      return;
+    }
+
+    if (!selectedMatch) return;
+
+    try {
+      // Validate required fields
+      if (!editData.date || !editData.time || !editData.venue) {
+        setError('Prosím vyplňte všechna povinná pole');
+        return;
+      }
+
+      // Validate teams are different
+      if (editData.home_team_id === editData.away_team_id) {
+        setError('Domácí a hostující tým musí být různé');
+        return;
+      }
+
+      // Calculate result if scores are provided
+      let result = selectedMatch.result;
+      if (editData.home_score && editData.away_score) {
+        const homeScore = parseInt(editData.home_score);
+        const awayScore = parseInt(editData.away_score);
+        
+        if (homeScore > awayScore) {
+          result = 'win';
+        } else if (homeScore < awayScore) {
+          result = 'loss';
+        } else {
+          result = 'draw';
+        }
+      }
+
+      const updateData: any = {
+        date: editData.date,
+        time: editData.time,
+        home_team_id: editData.home_team_id,
+        away_team_id: editData.away_team_id,
+        venue: editData.venue,
+        status: editData.status
+      };
+
+      // Only update scores if they are provided
+      if (editData.home_score && editData.away_score) {
+        updateData.home_score = parseInt(editData.home_score);
+        updateData.away_score = parseInt(editData.away_score);
+        updateData.result = result;
+      }
+
+      const { error } = await supabase
+        .from('matches')
+        .update(updateData)
+        .eq('id', selectedMatch.id);
+
+      if (error) throw error;
+      
+      onEditMatchClose();
+      setEditData({
+        date: '',
+        time: '',
+        home_team_id: '',
+        away_team_id: '',
+        venue: '',
+        home_score: '',
+        away_score: '',
+        status: 'completed'
+      });
+      setSelectedMatch(null);
+      fetchMatches();
+      setError('');
+    } catch (error) {
+      setError('Chyba při aktualizaci zápasu');
+      console.error('Error updating match:', error);
+    }
+  };
+
   // Helper functions for badges
   const getResultBadge = (result: string) => {
     switch (result) {
@@ -739,6 +847,17 @@ export default function MatchesAdminPage() {
                                       isDisabled={isSeasonClosed()}
                                     >
                                       Výsledek
+                                    </Button>
+                                  )}
+                                  {match.status === 'completed' && (
+                                    <Button
+                                      size="sm"
+                                      color="warning"
+                                      startContent={<PencilIcon className="w-4 h-4" />}
+                                      onPress={() => handleEditMatch(match)}
+                                      isDisabled={isSeasonClosed()}
+                                    >
+                                      Upravit
                                     </Button>
                                   )}
                                   <Button
@@ -947,6 +1066,122 @@ export default function MatchesAdminPage() {
             </Button>
             <Button color="primary" onPress={handleUpdateResult}>
               Uložit výsledek
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Edit Match Modal */}
+      <Modal isOpen={isEditMatchOpen} onClose={onEditMatchClose} size="3xl">
+        <ModalContent>
+          <ModalHeader>Upravit zápas</ModalHeader>
+          <ModalBody>
+            {selectedMatch && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column - Basic Info */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Základní údaje</h4>
+                  <Input
+                    label="Datum"
+                    type="date"
+                    value={editData.date}
+                    onChange={(e) => setEditData({...editData, date: e.target.value})}
+                  />
+                  <Input
+                    label="Čas"
+                    type="time"
+                    value={editData.time}
+                    onChange={(e) => setEditData({...editData, time: e.target.value})}
+                  />
+                  <Input
+                    label="Místo konání"
+                    value={editData.venue}
+                    onChange={(e) => setEditData({...editData, venue: e.target.value})}
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Status
+                    </label>
+                    <select
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={editData.status}
+                      onChange={(e) => setEditData({...editData, status: e.target.value as 'upcoming' | 'completed'})}
+                    >
+                      <option value="upcoming">Nadcházející</option>
+                      <option value="completed">Ukončený</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Right Column - Teams & Scores */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Týmy & Skóre</h4>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Domácí tým
+                    </label>
+                    <select
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={editData.home_team_id}
+                      onChange={(e) => setEditData({...editData, home_team_id: e.target.value})}
+                    >
+                      <option value="">Vyberte domácí tým</option>
+                      {teams.map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Hostující tým
+                    </label>
+                    <select
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={editData.away_team_id}
+                      onChange={(e) => setEditData({...editData, away_team_id: e.target.value})}
+                    >
+                      <option value="">Vyberte hostující tým</option>
+                      {teams.map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Scores - only show if match is completed */}
+                  {editData.status === 'completed' && (
+                    <div className="space-y-4 pt-4 border-t">
+                      <h5 className="font-medium text-gray-900 dark:text-gray-100">Skóre</h5>
+                      <div className="flex items-center space-x-4">
+                        <Input
+                          label="Domácí skóre"
+                          type="number"
+                          value={editData.home_score}
+                          onChange={(e) => setEditData({...editData, home_score: e.target.value})}
+                        />
+                        <span className="text-2xl font-bold">:</span>
+                        <Input
+                          label="Hostující skóre"
+                          type="number"
+                          value={editData.away_score}
+                          onChange={(e) => setEditData({...editData, away_score: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="flat" onPress={onEditMatchClose}>
+              Zrušit
+            </Button>
+            <Button color="primary" onPress={handleUpdateMatch}>
+              Uložit změny
             </Button>
           </ModalFooter>
         </ModalContent>

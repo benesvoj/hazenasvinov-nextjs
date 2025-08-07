@@ -423,42 +423,60 @@ export default function TeamCategoriesAdminPage() {
       </Card>
 
       {/* Add Category Modal */}
-      <Modal isOpen={isAddCategoryOpen} onClose={onAddCategoryClose}>
+      <Modal isOpen={isAddCategoryOpen} onClose={onAddCategoryClose} size="2xl">
         <ModalContent>
           <ModalHeader>Přidat kategorii týmu</ModalHeader>
           <ModalBody>
-            <div className="space-y-4">
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={formData.team_id}
-                onChange={(e) => setFormData({ ...formData, team_id: e.target.value })}
-              >
-                <option value="">Vyberte tým</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>{team.name}</option>
-                ))}
-              </select>
-              
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={formData.category_id}
-                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-              >
-                <option value="">Vyberte kategorii</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
-                ))}
-              </select>
-              
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
-              </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Tým *
+                  </label>
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                    value={formData.team_id}
+                    onChange={(e) => setFormData({ ...formData, team_id: e.target.value })}
+                  >
+                    <option value="">Vyberte tým</option>
+                    {teams.map((team) => (
+                      <option key={team.id} value={team.id}>{team.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Kategorie *
+                  </label>
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                    value={formData.category_id}
+                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                  >
+                    <option value="">Vyberte kategorii</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="pt-8">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      checked={formData.is_active}
+                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
+                  </label>
+                </div>
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
@@ -473,42 +491,60 @@ export default function TeamCategoriesAdminPage() {
       </Modal>
 
       {/* Edit Category Modal */}
-      <Modal isOpen={isEditCategoryOpen} onClose={onEditCategoryClose}>
+      <Modal isOpen={isEditCategoryOpen} onClose={onEditCategoryClose} size="2xl">
         <ModalContent>
           <ModalHeader>Upravit kategorii týmu</ModalHeader>
           <ModalBody>
-            <div className="space-y-4">
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={formData.team_id}
-                onChange={(e) => setFormData({ ...formData, team_id: e.target.value })}
-              >
-                <option value="">Vyberte tým</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>{team.name}</option>
-                ))}
-              </select>
-              
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={formData.category_id}
-                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-              >
-                <option value="">Vyberte kategorii</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
-                ))}
-              </select>
-              
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
-              </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Tým *
+                  </label>
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                    value={formData.team_id}
+                    onChange={(e) => setFormData({ ...formData, team_id: e.target.value })}
+                  >
+                    <option value="">Vyberte tým</option>
+                    {teams.map((team) => (
+                      <option key={team.id} value={team.id}>{team.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Kategorie *
+                  </label>
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                    value={formData.category_id}
+                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                  >
+                    <option value="">Vyberte kategorii</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="pt-8">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      checked={formData.is_active}
+                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
+                  </label>
+                </div>
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
