@@ -7,7 +7,8 @@ const supabase = createClient(
 	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export async function POST({name, description, route, updated_at, id}: CategoryProps) {
+export async function POST(request: Request) {
+	const {name, description, route, updated_at, id}: CategoryProps = await request.json();
 	const {error} = await supabase
 		.from('categories')
 		.update({
