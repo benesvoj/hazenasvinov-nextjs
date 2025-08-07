@@ -45,6 +45,7 @@ interface Season {
   start_date: string;
   end_date: string;
   is_active: boolean;
+  is_closed: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -191,7 +192,7 @@ export default function MatchesAdminPage() {
 
   // Fetch matches with team data
   const fetchMatches = useCallback(async () => {
-    if (!selectedCategory) return;
+    if (!selectedCategory || !selectedSeason) return;
     
     try {
       setLoading(true);
@@ -204,6 +205,7 @@ export default function MatchesAdminPage() {
           category:categories(*)
         `)
         .eq('category_id', selectedCategory)
+        .eq('season_id', selectedSeason)
         .order('date', { ascending: true });
 
       if (error) throw error;
@@ -214,11 +216,11 @@ export default function MatchesAdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, supabase]);
+  }, [selectedCategory, selectedSeason, supabase]);
 
   // Fetch standings
   const fetchStandings = useCallback(async () => {
-    if (!selectedCategory) return;
+    if (!selectedCategory || !selectedSeason) return;
     
     try {
       const { data, error } = await supabase
@@ -228,6 +230,7 @@ export default function MatchesAdminPage() {
           team:team_id(name)
         `)
         .eq('category_id', selectedCategory)
+        .eq('season_id', selectedSeason)
         .order('position', { ascending: true });
 
       if (error) throw error;
@@ -242,10 +245,15 @@ export default function MatchesAdminPage() {
     } catch (error) {
       console.error('Error fetching standings:', error);
     }
-  }, [selectedCategory, supabase]);
+  }, [selectedCategory, selectedSeason, supabase]);
 
   // Calculate standings from matches
   const calculateStandings = async () => {
+    if (isSeasonClosed()) {
+      setError('Nelze přepočítat tabulku v uzavřené sezóně');
+      return;
+    }
+
     try {
       const completedMatches = matches.filter(match => match.status === 'completed');
       const teamsMap = new Map<string, Standing>();
@@ -333,10 +341,15 @@ export default function MatchesAdminPage() {
         .upsert(sortedTeams.map(team => {
           // Find the team ID by name from the teams state
           const teamRecord = teams.find((t: Team) => t.name === team.team);
+          if (!teamRecord) {
+            console.warn(`Team not found: ${team.team}`);
+            return null;
+          }
           return {
             category_id: selectedCategory,
+            season_id: selectedSeason,
             position: team.position,
-            team_id: teamRecord?.id || null,
+            team_id: teamRecord.id,
             matches: team.matches,
             wins: team.wins,
             draws: team.draws,
@@ -345,14 +358,18 @@ export default function MatchesAdminPage() {
             goals_against: team.goals_against,
             points: team.points
           };
-        }), {
-          onConflict: 'category_id,team_id'
+        }).filter(Boolean), {
+          onConflict: 'category_id,season_id,team_id'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
       setStandings(sortedTeams);
     } catch (error) {
       console.error('Error calculating standings:', error);
+      setError('Chyba při výpočtu tabulky');
     }
   };
 
@@ -379,20 +396,32 @@ export default function MatchesAdminPage() {
   }, [fetchSeasons, fetchCategories, fetchTeams]);
 
   useEffect(() => {
-    if (selectedCategory) {
+    if (selectedCategory && selectedSeason) {
       fetchMatches();
       fetchStandings();
     }
-  }, [selectedCategory, fetchMatches, fetchStandings]);
+  }, [selectedCategory, selectedSeason, fetchMatches, fetchStandings]);
+
+  // Check if current season is closed
+  const isSeasonClosed = () => {
+    const currentSeason = seasons.find(s => s.id === selectedSeason);
+    return currentSeason?.is_closed || false;
+  };
 
   // Add new match
   const handleAddMatch = async () => {
+    if (isSeasonClosed()) {
+      setError('Nelze přidat zápas do uzavřené sezóny');
+      return;
+    }
+
     try {
       const categoryInfo = getCategoryInfo(selectedCategory, categories);
       const { error } = await supabase
         .from('matches')
         .insert({
           category_id: selectedCategory,
+          season_id: selectedSeason,
           date: formData.date,
           time: formData.time,
           home_team_id: formData.home_team_id,
@@ -424,6 +453,11 @@ export default function MatchesAdminPage() {
   // Update match result
   const handleUpdateResult = async () => {
     if (!selectedMatch) return;
+
+    if (isSeasonClosed()) {
+      setError('Nelze upravit výsledek v uzavřené sezóně');
+      return;
+    }
 
     try {
       const homeScore = parseInt(resultData.home_score);
@@ -464,6 +498,11 @@ export default function MatchesAdminPage() {
   // Delete match
   const handleDeleteMatch = async (matchId: string) => {
     if (!confirm('Opravdu chcete smazat tento zápas?')) return;
+
+    if (isSeasonClosed()) {
+      setError('Nelze smazat zápas v uzavřené sezóně');
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -556,15 +595,23 @@ export default function MatchesAdminPage() {
             {selectedCategory ? getCategoryInfo(selectedCategory, categories).competition : ''}
           </h2>
           {selectedSeason && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Sezóna: {seasons.find(s => s.id === selectedSeason)?.name}
-            </p>
+            <div className="mt-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Sezóna: {seasons.find(s => s.id === selectedSeason)?.name}
+              </p>
+              {isSeasonClosed() && (
+                <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                  ⚠️ Uzavřená sezóna - nelze upravovat
+                </p>
+              )}
+            </div>
           )}
         </div>
         <Button 
           color="primary" 
           startContent={<PlusIcon className="w-4 h-4" />}
           onPress={onAddMatchOpen}
+          isDisabled={isSeasonClosed()}
         >
           Přidat zápas
         </Button>
@@ -632,6 +679,7 @@ export default function MatchesAdminPage() {
                               setSelectedMatch(match);
                               onAddResultOpen();
                             }}
+                            isDisabled={isSeasonClosed()}
                           >
                             Výsledek
                           </Button>
@@ -642,6 +690,7 @@ export default function MatchesAdminPage() {
                           variant="flat"
                           startContent={<TrashIcon className="w-3 h-3" />}
                           onPress={() => handleDeleteMatch(match.id)}
+                          isDisabled={isSeasonClosed()}
                         >
                           Smazat
                         </Button>
@@ -669,6 +718,7 @@ export default function MatchesAdminPage() {
               color="secondary" 
               variant="flat"
               onPress={calculateStandings}
+              isDisabled={isSeasonClosed()}
             >
               Přepočítat tabulku
             </Button>

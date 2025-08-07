@@ -22,6 +22,7 @@ interface Season {
   start_date: string;
   end_date: string;
   is_active: boolean;
+  is_closed: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -41,7 +42,8 @@ export default function SeasonsAdminPage() {
     name: '',
     start_date: '',
     end_date: '',
-    is_active: false
+    is_active: false,
+    is_closed: false
   });
 
   const supabase = createClient();
@@ -98,7 +100,8 @@ export default function SeasonsAdminPage() {
           name: formData.name,
           start_date: formData.start_date,
           end_date: formData.end_date,
-          is_active: formData.is_active
+          is_active: formData.is_active,
+          is_closed: formData.is_closed
         });
 
       if (error) throw error;
@@ -108,7 +111,8 @@ export default function SeasonsAdminPage() {
         name: '',
         start_date: '',
         end_date: '',
-        is_active: false
+        is_active: false,
+        is_closed: false
       });
       fetchSeasons();
       setError('');
@@ -150,7 +154,8 @@ export default function SeasonsAdminPage() {
           name: formData.name,
           start_date: formData.start_date,
           end_date: formData.end_date,
-          is_active: formData.is_active
+          is_active: formData.is_active,
+          is_closed: formData.is_closed
         })
         .eq('id', selectedSeason.id);
 
@@ -162,7 +167,8 @@ export default function SeasonsAdminPage() {
         name: '',
         start_date: '',
         end_date: '',
-        is_active: false
+        is_active: false,
+        is_closed: false
       });
       fetchSeasons();
       setError('');
@@ -200,7 +206,8 @@ export default function SeasonsAdminPage() {
       name: season.name,
       start_date: season.start_date,
       end_date: season.end_date,
-      is_active: season.is_active
+      is_active: season.is_active,
+      is_closed: season.is_closed
     });
     onEditSeasonOpen();
   };
@@ -217,7 +224,8 @@ export default function SeasonsAdminPage() {
       name: '',
       start_date: '',
       end_date: '',
-      is_active: false
+      is_active: false,
+      is_closed: false
     });
     setError('');
   };
@@ -284,22 +292,40 @@ export default function SeasonsAdminPage() {
                         {new Date(season.end_date).toLocaleDateString('cs-CZ')}
                       </td>
                       <td className="py-3 px-4">
-                        <Badge 
-                          color={season.is_active ? 'success' : 'default'} 
-                          variant="flat"
-                        >
-                          {season.is_active ? (
-                            <>
-                              <CheckIcon className="w-3 h-3 mr-1" />
-                              Aktivní
-                            </>
-                          ) : (
-                            <>
-                              <XMarkIcon className="w-3 h-3 mr-1" />
-                              Neaktivní
-                            </>
-                          )}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge 
+                            color={season.is_active ? 'success' : 'default'} 
+                            variant="flat"
+                          >
+                            {season.is_active ? (
+                              <>
+                                <CheckIcon className="w-3 h-3 mr-1" />
+                                Aktivní
+                              </>
+                            ) : (
+                              <>
+                                <XMarkIcon className="w-3 h-3 mr-1" />
+                                Neaktivní
+                              </>
+                            )}
+                          </Badge>
+                          <Badge 
+                            color={season.is_closed ? 'danger' : 'default'} 
+                            variant="flat"
+                          >
+                            {season.is_closed ? (
+                              <>
+                                <XMarkIcon className="w-3 h-3 mr-1" />
+                                Uzavřená
+                              </>
+                            ) : (
+                              <>
+                                <CheckIcon className="w-3 h-3 mr-1" />
+                                Otevřená
+                              </>
+                            )}
+                          </Badge>
+                        </div>
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex justify-center gap-2">
@@ -376,6 +402,16 @@ export default function SeasonsAdminPage() {
                 />
                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní sezóna</span>
               </label>
+              
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  checked={formData.is_closed}
+                  onChange={(e) => setFormData({ ...formData, is_closed: e.target.checked })}
+                />
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Uzavřená sezóna</span>
+              </label>
             </div>
           </ModalBody>
           <ModalFooter>
@@ -427,6 +463,16 @@ export default function SeasonsAdminPage() {
                   onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                 />
                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní sezóna</span>
+              </label>
+              
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  checked={formData.is_closed}
+                  onChange={(e) => setFormData({ ...formData, is_closed: e.target.checked })}
+                />
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Uzavřená sezóna</span>
               </label>
             </div>
           </ModalBody>

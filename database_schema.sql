@@ -19,10 +19,37 @@ CREATE TABLE teams (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Seasons table (moved before tables that reference it)
+CREATE TABLE seasons (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name VARCHAR(100) NOT NULL, -- e.g., '2023/2024', '2024/2025'
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    is_active BOOLEAN DEFAULT false,
+    is_closed BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Categories table (moved before tables that reference it)
+CREATE TABLE categories (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE, -- 'men', 'women', 'juniorBoys', etc.
+    name VARCHAR(100) NOT NULL, -- 'Muži', 'Ženy', 'Dorostenci', etc.
+    description TEXT,
+    age_group VARCHAR(50), -- 'adults', 'juniors', 'youth', 'kids'
+    gender VARCHAR(20), -- 'male', 'female', 'mixed'
+    is_active BOOLEAN DEFAULT true,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Matches table
 CREATE TABLE matches (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     category VARCHAR(50) NOT NULL, -- 'men', 'women', 'juniorBoys', 'juniorGirls'
+    season_id UUID REFERENCES seasons(id),
     date DATE NOT NULL,
     time TIME NOT NULL,
     home_team_id UUID REFERENCES teams(id),
@@ -44,6 +71,7 @@ CREATE TABLE standings (
     category VARCHAR(50) NOT NULL, -- 'men', 'women', 'juniorBoys', 'juniorGirls'
     position INTEGER NOT NULL,
     team_id UUID REFERENCES teams(id),
+    season_id UUID REFERENCES seasons(id),
     matches INTEGER DEFAULT 0,
     wins INTEGER DEFAULT 0,
     draws INTEGER DEFAULT 0,
@@ -53,7 +81,7 @@ CREATE TABLE standings (
     points INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(category, team_id)
+    UNIQUE(category, season_id, team_id)
 );
 
 -- Indexes for better performance
@@ -64,9 +92,11 @@ CREATE INDEX idx_matches_date ON matches(date);
 CREATE INDEX idx_matches_status ON matches(status);
 CREATE INDEX idx_matches_home_team ON matches(home_team_id);
 CREATE INDEX idx_matches_away_team ON matches(away_team_id);
+CREATE INDEX idx_matches_season ON matches(season_id);
 CREATE INDEX idx_standings_category ON standings(category);
 CREATE INDEX idx_standings_position ON standings(position);
 CREATE INDEX idx_standings_team ON standings(team_id);
+CREATE INDEX idx_standings_season ON standings(season_id);
 
 -- Row Level Security (RLS) policies
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
@@ -152,7 +182,7 @@ CREATE TABLE members (
     name VARCHAR(100) NOT NULL,
     surname VARCHAR(100) NOT NULL,
     date_of_birth DATE NOT NULL,
-    category VARCHAR(50) NOT NULL, -- 'men', 'women', 'juniorBoys', 'juniorGirls', 'prepKids', 'youngestKids', 'youngerBoys', 'youngerGirls', 'olderBoys', 'olderGirls'
+    category_id UUID NOT NULL REFERENCES categories(id),
     sex VARCHAR(10) NOT NULL CHECK (sex IN ('male', 'female')),
     functions TEXT[] DEFAULT '{}', -- Array of functions: 'player', 'coach', 'referee', 'club_management'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -162,7 +192,7 @@ CREATE TABLE members (
 -- Indexes for members table
 CREATE INDEX idx_members_surname ON members(surname);
 CREATE INDEX idx_members_name ON members(name);
-CREATE INDEX idx_members_category ON members(category);
+CREATE INDEX idx_members_category ON members(category_id);
 CREATE INDEX idx_members_sex ON members(sex);
 
 -- Row Level Security (RLS) policies for members table
@@ -184,27 +214,16 @@ CREATE POLICY "Members are deletable by authenticated users" ON members
 CREATE TRIGGER update_members_updated_at BEFORE UPDATE ON members
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Seasons table
-CREATE TABLE seasons (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name VARCHAR(100) NOT NULL, -- e.g., '2023/2024', '2024/2025'
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    is_active BOOLEAN DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- Team Categories table (many-to-many relationship between teams and categories per season)
 CREATE TABLE team_categories (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
     season_id UUID NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
-    category VARCHAR(50) NOT NULL, -- 'men', 'women', 'juniorBoys', 'juniorGirls', 'prepKids', 'youngestKids', 'youngerBoys', 'youngerGirls', 'olderBoys', 'olderGirls'
+    category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(team_id, season_id, category)
+    UNIQUE(team_id, season_id, category_id)
 );
 
 -- Indexes for new tables
@@ -212,7 +231,7 @@ CREATE INDEX idx_seasons_active ON seasons(is_active);
 CREATE INDEX idx_seasons_dates ON seasons(start_date, end_date);
 CREATE INDEX idx_team_categories_team ON team_categories(team_id);
 CREATE INDEX idx_team_categories_season ON team_categories(season_id);
-CREATE INDEX idx_team_categories_category ON team_categories(category);
+CREATE INDEX idx_team_categories_category ON team_categories(category_id);
 CREATE INDEX idx_team_categories_active ON team_categories(is_active);
 
 -- Row Level Security (RLS) policies for new tables
@@ -253,23 +272,9 @@ CREATE TRIGGER update_team_categories_updated_at BEFORE UPDATE ON team_categorie
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Sample seasons data
-INSERT INTO seasons (name, start_date, end_date, is_active) VALUES
-('2023/2024', '2023-09-01', '2024-06-30', false),
-('2024/2025', '2024-09-01', '2025-06-30', true);
-
--- Categories table
-CREATE TABLE categories (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    code VARCHAR(50) NOT NULL UNIQUE, -- 'men', 'women', 'juniorBoys', etc.
-    name VARCHAR(100) NOT NULL, -- 'Muži', 'Ženy', 'Dorostenci', etc.
-    description TEXT,
-    age_group VARCHAR(50), -- 'adults', 'juniors', 'youth', 'kids'
-    gender VARCHAR(20), -- 'male', 'female', 'mixed'
-    is_active BOOLEAN DEFAULT true,
-    sort_order INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+INSERT INTO seasons (name, start_date, end_date, is_active, is_closed) VALUES
+('2023/2024', '2023-09-01', '2024-06-30', false, true),
+('2024/2025', '2024-09-01', '2025-06-30', true, false);
 
 -- Indexes for categories table
 CREATE INDEX idx_categories_code ON categories(code);
@@ -308,9 +313,7 @@ INSERT INTO categories (code, name, description, age_group, gender, sort_order) 
 ('prepKids', 'Přípravka', 'Děti 5-10 let', 'kids', 'mixed', 9),
 ('youngestKids', 'Nejmladší děti', 'Děti 3-6 let', 'kids', 'mixed', 10);
 
--- Update team_categories table to reference categories
-ALTER TABLE team_categories DROP COLUMN category;
-ALTER TABLE team_categories ADD COLUMN category_id UUID REFERENCES categories(id);
+-- Update team_categories table to reference categories (not needed since table is created with category_id)
 
 -- Update matches table to reference categories
 ALTER TABLE matches DROP COLUMN category;
@@ -320,9 +323,11 @@ ALTER TABLE matches ADD COLUMN category_id UUID REFERENCES categories(id);
 ALTER TABLE standings DROP COLUMN category;
 ALTER TABLE standings ADD COLUMN category_id UUID REFERENCES categories(id);
 
--- Update members table to reference categories
-ALTER TABLE members DROP COLUMN category;
-ALTER TABLE members ADD COLUMN category_id UUID REFERENCES categories(id);
+-- Update unique constraint for standings (after columns are added)
+ALTER TABLE standings DROP CONSTRAINT IF EXISTS standings_category_season_id_team_id_key;
+ALTER TABLE standings ADD CONSTRAINT standings_category_id_season_id_team_id_key UNIQUE(category_id, season_id, team_id);
+
+-- Update members table to reference categories (not needed since table is created with category_id)
 
 -- Sample team categories data (updated to use category_id)
 INSERT INTO team_categories (team_id, season_id, category_id) VALUES
@@ -358,29 +363,6 @@ INSERT INTO members (name, surname, date_of_birth, category_id, sex) VALUES
 ('David', 'Procházka', '2007-06-08', (SELECT id FROM categories WHERE code = 'olderBoys'), 'male'),
 ('Karolína', 'Kučerová', '2008-12-14', (SELECT id FROM categories WHERE code = 'olderGirls'), 'female');
 
--- Sample match data for testing (updated to use category_id and team IDs)
-INSERT INTO matches (category_id, date, time, home_team_id, away_team_id, venue, competition, is_home, status) VALUES
-((SELECT id FROM categories WHERE code = 'men'), '2024-09-21', '15:00', 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Ostrava'), 
- 'Sportovní hala Svinov', '1. liga muži', true, 'completed'),
-((SELECT id FROM categories WHERE code = 'men'), '2024-09-28', '16:30', 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Frýdek-Místek'), 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
- 'Sportovní hala Frýdek-Místek', '1. liga muži', false, 'upcoming'),
-((SELECT id FROM categories WHERE code = 'men'), '2024-10-05', '15:00', 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Karviná'), 
- 'Sportovní hala Svinov', '1. liga muži', true, 'upcoming'),
-((SELECT id FROM categories WHERE code = 'women'), '2024-09-22', '16:00', 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Ostrava'), 
- 'Sportovní hala Svinov', '1. liga ženy', true, 'completed'),
-((SELECT id FROM categories WHERE code = 'women'), '2024-10-06', '15:30', 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Poruba'), 
- (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
- 'Sportovní hala Poruba', '1. liga ženy', false, 'upcoming');
-
 -- Update some matches with results
 UPDATE matches SET 
     home_score = 18, 
@@ -399,3 +381,37 @@ UPDATE matches SET
 WHERE home_team_id = (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov') 
   AND away_team_id = (SELECT id FROM teams WHERE name = 'TJ Sokol Ostrava') 
   AND category_id = (SELECT id FROM categories WHERE code = 'women');
+
+-- Sample match data for testing (updated to use category_id, season_id and team IDs)
+INSERT INTO matches (category_id, season_id, date, time, home_team_id, away_team_id, venue, competition, is_home, status) VALUES
+((SELECT id FROM categories WHERE code = 'men'), (SELECT id FROM seasons WHERE name = '2024/2025'), '2024-09-21', '15:00', 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Ostrava'), 
+ 'Sportovní hala Svinov', '1. liga muži', true, 'completed'),
+((SELECT id FROM categories WHERE code = 'men'), (SELECT id FROM seasons WHERE name = '2024/2025'), '2024-09-28', '16:30', 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Frýdek-Místek'), 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
+ 'Sportovní hala Frýdek-Místek', '1. liga muži', false, 'upcoming'),
+((SELECT id FROM categories WHERE code = 'men'), (SELECT id FROM seasons WHERE name = '2024/2025'), '2024-10-05', '15:00', 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Karviná'), 
+ 'Sportovní hala Svinov', '1. liga muži', true, 'upcoming'),
+((SELECT id FROM categories WHERE code = 'women'), (SELECT id FROM seasons WHERE name = '2024/2025'), '2024-09-22', '16:00', 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Ostrava'), 
+ 'Sportovní hala Svinov', '1. liga ženy', true, 'completed'),
+((SELECT id FROM categories WHERE code = 'women'), (SELECT id FROM seasons WHERE name = '2024/2025'), '2024-10-06', '15:30', 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Poruba'), 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
+ 'Sportovní hala Poruba', '1. liga ženy', false, 'upcoming');
+
+-- Sample match data for previous season (2023/2024)
+INSERT INTO matches (category_id, season_id, date, time, home_team_id, away_team_id, venue, competition, is_home, status) VALUES
+((SELECT id FROM categories WHERE code = 'men'), (SELECT id FROM seasons WHERE name = '2023/2024'), '2023-09-15', '15:00', 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Ostrava'), 
+ 'Sportovní hala Svinov', '1. liga muži', true, 'completed'),
+((SELECT id FROM categories WHERE code = 'women'), (SELECT id FROM seasons WHERE name = '2023/2024'), '2023-09-20', '16:00', 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Svinov'), 
+ (SELECT id FROM teams WHERE name = 'TJ Sokol Frýdek-Místek'), 
+ 'Sportovní hala Svinov', '1. liga ženy', true, 'completed');
