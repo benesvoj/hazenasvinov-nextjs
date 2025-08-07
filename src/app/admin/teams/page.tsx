@@ -24,6 +24,7 @@ import {
   XMarkIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
+import { uploadTeamLogo, deleteTeamLogo } from "@/utils/supabase/storage";
 
 interface Team {
   id: string;
@@ -105,6 +106,11 @@ export default function TeamsAdminPage() {
     home_venue: '',
     is_active: true
   });
+
+  // Logo upload states
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>('');
+  const [logoUploading, setLogoUploading] = useState(false);
 
   const [categoryFormData, setCategoryFormData] = useState({
     season_id: '',
@@ -243,6 +249,7 @@ export default function TeamsAdminPage() {
         home_venue: '',
         is_active: true
       });
+      clearLogoPreview();
       fetchTeams();
     } catch (error) {
       setError('Chyba při přidávání týmu');
@@ -291,6 +298,7 @@ export default function TeamsAdminPage() {
         home_venue: '',
         is_active: true
       });
+      clearLogoPreview();
       fetchTeams();
     } catch (error) {
       setError('Chyba při aktualizaci týmu');
@@ -333,6 +341,7 @@ export default function TeamsAdminPage() {
       home_venue: team.home_venue || '',
       is_active: team.is_active
     });
+    setLogoPreview(team.logo_url || '');
     onEditTeamOpen();
   };
 
@@ -341,6 +350,71 @@ export default function TeamsAdminPage() {
     setSelectedTeam(team);
     setActiveTab('details');
     onViewTeamOpen();
+  };
+
+  // Logo upload handlers
+  const handleLogoFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLogoUpload = async (teamId: string) => {
+    if (!logoFile) return false;
+
+    try {
+      setLogoUploading(true);
+      const result = await uploadTeamLogo(teamId, logoFile);
+      
+      if (result.success) {
+        setFormData(prev => ({ ...prev, logo_url: result.url || '' }));
+        setLogoFile(null);
+        setLogoPreview('');
+        await fetchTeams(); // Refresh teams list
+        return true;
+      } else {
+        setError(result.error || 'Failed to upload logo');
+        return false;
+      }
+    } catch (error) {
+      setError('Error uploading logo');
+      console.error('Logo upload error:', error);
+      return false;
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
+  const handleLogoDelete = async (teamId: string) => {
+    try {
+      setLogoUploading(true);
+      const success = await deleteTeamLogo(teamId);
+      
+      if (success) {
+        setFormData(prev => ({ ...prev, logo_url: '' }));
+        await fetchTeams(); // Refresh teams list
+      } else {
+        setError('Failed to delete logo');
+      }
+    } catch (error) {
+      setError('Error deleting logo');
+      console.error('Logo delete error:', error);
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
+  const clearLogoPreview = () => {
+    setLogoFile(null);
+    setLogoPreview('');
   };
 
   // Add team category
@@ -484,7 +558,21 @@ export default function TeamsAdminPage() {
                 <div key={team.id} className="border rounded-lg p-6 hover:bg-gray-50 dark:hover:bg-gray-800">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <BuildingOfficeIcon className="w-8 h-8 text-blue-600" />
+                      {team.logo_url ? (
+                        <img 
+                          src={team.logo_url} 
+                          alt={`${team.name} logo`}
+                          className="w-8 h-8 object-contain"
+                          onError={(e) => {
+                            // Fallback to icon if image fails to load
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <BuildingOfficeIcon 
+                        className={`w-8 h-8 text-blue-600 ${team.logo_url ? 'hidden' : ''}`} 
+                      />
                       <div>
                         <h3 className="text-lg font-semibold">{team.name}</h3>
                         {team.short_name && (
@@ -623,11 +711,48 @@ export default function TeamsAdminPage() {
                 value={formData.founded_year}
                 onChange={(e) => setFormData({...formData, founded_year: e.target.value})}
               />
-              <Input
-                label="Logo URL"
-                value={formData.logo_url}
-                onChange={(e) => setFormData({...formData, logo_url: e.target.value})}
-              />
+              
+              {/* Logo Upload Section */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  Logo týmu
+                </label>
+                
+                {/* Current logo preview */}
+                {(logoPreview || formData.logo_url) && (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={logoPreview || formData.logo_url} 
+                      alt="Logo preview"
+                      className="w-16 h-16 object-contain border rounded-lg bg-gray-50"
+                    />
+                    <Button
+                      size="sm"
+                      color="danger"
+                      variant="flat"
+                      onPress={clearLogoPreview}
+                    >
+                      Odstranit
+                    </Button>
+                  </div>
+                )}
+                
+                {/* File upload */}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleLogoFileChange}
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100"
+                />
+                <p className="text-xs text-gray-500">
+                  Podporované formáty: JPEG, PNG, WebP (max 2MB)
+                </p>
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
@@ -702,11 +827,73 @@ export default function TeamsAdminPage() {
                 value={formData.founded_year}
                 onChange={(e) => setFormData({...formData, founded_year: e.target.value})}
               />
-              <Input
-                label="Logo URL"
-                value={formData.logo_url}
-                onChange={(e) => setFormData({...formData, logo_url: e.target.value})}
-              />
+              
+              {/* Logo Upload Section */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  Logo týmu
+                </label>
+                
+                {/* Current logo preview */}
+                {(logoPreview || formData.logo_url) && (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={logoPreview || formData.logo_url} 
+                      alt="Logo preview"
+                      className="w-16 h-16 object-contain border rounded-lg bg-gray-50"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        onPress={clearLogoPreview}
+                      >
+                        Odstranit náhled
+                      </Button>
+                      {selectedTeam && (
+                        <Button
+                          size="sm"
+                          color="danger"
+                          variant="solid"
+                          onPress={() => handleLogoDelete(selectedTeam.id)}
+                          isLoading={logoUploading}
+                        >
+                          Smazat logo
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* File upload */}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleLogoFileChange}
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100"
+                />
+                <p className="text-xs text-gray-500">
+                  Podporované formáty: JPEG, PNG, WebP (max 2MB)
+                </p>
+                
+                {/* Upload button for new logo */}
+                {logoFile && selectedTeam && (
+                  <Button
+                    color="primary"
+                    onPress={() => handleLogoUpload(selectedTeam.id)}
+                    isLoading={logoUploading}
+                    className="w-full"
+                  >
+                    {logoUploading ? 'Nahrávání...' : 'Nahrát nové logo'}
+                  </Button>
+                )}
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
@@ -755,7 +942,21 @@ export default function TeamsAdminPage() {
                 {activeTab === 'details' && (
                   <div className="space-y-6">
                     <div className="text-center">
-                      <BuildingOfficeIcon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+                      {selectedTeam.logo_url ? (
+                        <img 
+                          src={selectedTeam.logo_url} 
+                          alt={`${selectedTeam.name} logo`}
+                          className="w-16 h-16 object-contain mx-auto mb-4"
+                          onError={(e) => {
+                            // Fallback to icon if image fails to load
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <BuildingOfficeIcon 
+                        className={`w-16 h-16 text-blue-600 mx-auto mb-4 ${selectedTeam.logo_url ? 'hidden' : ''}`} 
+                      />
                       <h3 className="text-2xl font-bold">{selectedTeam.name}</h3>
                       {selectedTeam.short_name && (
                         <p className="text-lg text-gray-600 dark:text-gray-400">
