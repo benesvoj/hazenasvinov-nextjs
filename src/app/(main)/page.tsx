@@ -55,11 +55,11 @@ export default function Page() {
       <section className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl p-8 lg:p-12">
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           <div>
-            <h1 className="text-4xl lg:text-6xl font-bold mb-4">
-              Vítejte v TJ Sokol Svinov
+            <h1 className='text-xl lg:text-2xl font-bold mb-4'>
+              Tradice národní házené už více než 90 let
             </h1>
-            <p className="text-xl mb-6 text-blue-100">
-              {texts.club.description}
+            <p className="text-l mb-6 text-blue-100">
+              V TJ Sokol Svinov žijeme národní házenou – sportem s ryze českými kořeny a bohatou historií. Už přes 90 let jsme součástí českého sportovního prostředí a během této doby jsme nasbírali řadu úspěchů v soutěžích dospělých i mládeže.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button 
@@ -97,28 +97,28 @@ export default function Page() {
       {/* Quick Stats */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="text-center">
-          <CardBody>
+          <CardBody className='flex flex-col items-center'>
             <TrophyIcon className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
             <h3 className="text-2xl font-bold">90+</h3>
             <p className="text-gray-600">Let tradice</p>
           </CardBody>
         </Card>
         <Card className="text-center">
-          <CardBody>
+          <CardBody className='flex flex-col items-center'>
             <UserGroupIcon className="w-8 h-8 mx-auto mb-2 text-blue-500" />
             <h3 className="text-2xl font-bold">10</h3>
             <p className="text-gray-600">Týmových kategorií</p>
           </CardBody>
         </Card>
         <Card className="text-center">
-          <CardBody>
+          <CardBody className='flex flex-col items-center'>
             <CalendarIcon className="w-8 h-8 mx-auto mb-2 text-green-500" />
             <h3 className="text-2xl font-bold">2</h3>
             <p className="text-gray-600">Sezóny ročně</p>
           </CardBody>
         </Card>
         <Card className="text-center">
-          <CardBody>
+          <CardBody className='flex flex-col items-center'>
             <MapPinIcon className="w-8 h-8 mx-auto mb-2 text-red-500" />
             <h3 className="text-2xl font-bold">SM</h3>
             <p className="text-gray-600">Oblastní soutěže</p>
@@ -376,12 +376,16 @@ export default function Page() {
           </CardHeader>
           <CardBody>
             <p className="text-gray-600 mb-4">
-              TJ Sokol Svinov má více než 90letou tradici v českém sportu Národní házená. 
-              Máme za sebou řadu úspěchů jak v soutěžích dospělých, tak v žákovských kategoriích.
+              Jsme sportovní oddíl s bohatou tradicí sahající až do počátku 20. století. Již více než devět dekád reprezentujeme český sport Národní házená – ryze českou kolektivní hru s hlubokými kořeny.
             </p>
             <p className="text-gray-600 mb-4">
-              Snažíme se o propagaci našeho milovaného, ryze českého sportu mezi veřejností 
-              a hlavně dodat dětem, mladistvým a dospělým sportovní průpravu v dnešní sedavé době.
+              Na kontě máme řadu úspěchů v soutěžích dospělých i mládeže. Naším cílem však není jen vítězit – především chceme přivádět děti, mládež i dospělé ke sportu, fair play a aktivnímu životnímu stylu.
+            </p>
+            <p className="text-gray-600 mb-4">
+              V době, kdy pohyb často ustupuje obrazovkám, nabízíme smysluplné trávení volného času, sportovní průpravu a pevné zázemí v přátelském kolektivu.
+            </p>
+            <p>
+              Přijďte si vyzkoušet národní házenou a staňte se součástí naší sportovní rodiny!
             </p>
             <Button 
               as={Link} 
