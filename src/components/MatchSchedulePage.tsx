@@ -12,9 +12,24 @@ import {
   TrophyIcon,
   UserGroupIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ArrowRightIcon,
+  ArrowTopRightOnSquareIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
+import Link from "@/components/Link";
+
+// Helper function to format time from HH:MM:SS to HH:MM
+function formatTime(time: string): string {
+  if (!time) return "";
+  // If time is already in HH:MM format, return as is
+  if (time.match(/^\d{2}:\d{2}$/)) return time;
+  // If time is in HH:MM:SS format, extract HH:MM
+  if (time.match(/^\d{2}:\d{2}:\d{2}$/)) {
+    return time.substring(0, 5);
+  }
+  return time;
+}
 
 // Category configuration
 const categories = {
@@ -31,8 +46,8 @@ interface Match {
   time: string;
   home_team_id: string;
   away_team_id: string;
-  home_team: { name: string };
-  away_team: { name: string };
+  home_team: { name: string; logo_url?: string };
+  away_team: { name: string; logo_url?: string };
   venue: string;
   competition: string;
   is_home: boolean;
@@ -43,8 +58,9 @@ interface Match {
 }
 
 interface Standing {
+  id: string;
   position: number;
-  team: string;
+  team: { name: string };
   matches: number;
   wins: number;
   draws: number;
@@ -104,23 +120,79 @@ export default function MatchSchedulePage() {
   const [standings, setStandings] = useState<Standing[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("all");
+  const [categories, setCategories] = useState<any[]>([]);
+  const [activeSeason, setActiveSeason] = useState<any>(null);
 
   const supabase = createClient();
+
+  // Fetch active season
+  const fetchActiveSeason = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('seasons')
+        .select('*')
+        .eq('is_active', true)
+        .single();
+
+      if (error) {
+        console.error('Error fetching active season:', error);
+        return;
+      }
+      setActiveSeason(data);
+    } catch (error) {
+      console.error('Error fetching active season:', error);
+    }
+  }, [supabase]);
+
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, code, name')
+        .eq('is_active', true)
+        .order('sort_order');
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  }, [supabase]);
 
   // Fetch matches and standings for selected category
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       
-      // Fetch matches with team names
+      // Check if we have active season and categories
+      if (!activeSeason || categories.length === 0) {
+        console.log('Missing active season or categories');
+        setMatches([]);
+        setStandings([]);
+        return;
+      }
+
+      // Get the category ID for the selected category code
+      const selectedCategoryData = categories.find(cat => cat.code === selectedCategory);
+      if (!selectedCategoryData) {
+        console.log('Category not found for code:', selectedCategory);
+        setMatches([]);
+        setStandings([]);
+        return;
+      }
+
+      // Fetch matches with team names and logos
       const { data: matchesData, error: matchesError } = await supabase
         .from('matches')
         .select(`
           *,
-          home_team:home_team_id(name),
-          away_team:away_team_id(name)
+          home_team:home_team_id(name, logo_url),
+          away_team:away_team_id(name, logo_url),
+          category:categories(code, name)
         `)
-        .eq('category', selectedCategory)
+        .eq('category_id', selectedCategoryData.id)
+        .eq('season_id', activeSeason.id)
         .order('date', { ascending: true });
 
       if (matchesError) throw matchesError;
@@ -128,8 +200,12 @@ export default function MatchSchedulePage() {
       // Fetch standings
       const { data: standingsData, error: standingsError } = await supabase
         .from('standings')
-        .select('*')
-        .eq('category', selectedCategory)
+        .select(`
+          *,
+          team:team_id(name)
+        `)
+        .eq('category_id', selectedCategoryData.id)
+        .eq('season_id', activeSeason.id)
         .order('position', { ascending: true });
 
       if (standingsError) throw standingsError;
@@ -141,11 +217,20 @@ export default function MatchSchedulePage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, supabase]);
+  }, [selectedCategory, supabase, activeSeason, categories]);
 
+  // Initial data fetch
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchActiveSeason();
+    fetchCategories();
+  }, [fetchActiveSeason, fetchCategories]);
+
+  // Fetch matches when dependencies change
+  useEffect(() => {
+    if (activeSeason && categories.length > 0) {
+      fetchData();
+    }
+  }, [fetchData, activeSeason, categories]);
 
   // Group matches by month
   const groupedMatches = useMemo(() => {
@@ -200,8 +285,9 @@ export default function MatchSchedulePage() {
     return filtered;
   }, [groupedMatches, filterType]);
 
-  const currentCategory = categories[selectedCategory as keyof typeof categories];
+  const currentCategory = categories.find(cat => cat.code === selectedCategory);
   const currentStandings = standings;
+  const currentCompetition = matches.length > 0 ? matches[0].competition : 'N/A';
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -218,8 +304,8 @@ export default function MatchSchedulePage() {
             <div>
               <h4 className="font-semibold mb-2">Základní informace</h4>
               <div className="space-y-2 text-sm">
-                <div><span className="font-medium">Kategorie:</span> {currentCategory.name}</div>
-                <div><span className="font-medium">Soutěž:</span> {currentCategory.competition}</div>
+                <div><span className="font-medium">Kategorie:</span> {currentCategory?.name || 'N/A'}</div>
+                <div><span className="font-medium">Soutěž:</span> {currentCompetition}</div>
                 <div><span className="font-medium">Sezóna:</span> 2024/2025</div>
                 <div><span className="font-medium">Trenér:</span> Jan Novák</div>
                 <div><span className="font-medium">Asistent:</span> Petr Svoboda</div>
@@ -243,9 +329,21 @@ export default function MatchSchedulePage() {
       {/* Recent Results */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <TrophyIcon className="w-5 h-5 text-yellow-500" />
-            <h3 className="text-xl font-semibold">Poslední výsledky</h3>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrophyIcon className="w-5 h-5 text-yellow-500" />
+              <h3 className="text-xl font-semibold">Poslední výsledky</h3>
+            </div>
+            <Button 
+              as={Link} 
+              href="/matches" 
+              variant="light" 
+              size="sm"
+              color="primary"
+              endContent={<ArrowRightIcon className="w-4 h-4" />}
+            >
+              Všechny zápasy
+            </Button>
           </div>
         </CardHeader>
         <CardBody>
@@ -257,32 +355,64 @@ export default function MatchSchedulePage() {
                 .filter(match => match.status === "completed")
                 .slice(0, 3)
                 .map((match) => (
-                  <div key={match.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {new Date(match.date).toLocaleDateString('cs-CZ')}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className={match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.home_team.name}
-                        </span>
-                        <span className="text-gray-500">vs</span>
-                        <span className={!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.away_team.name}
-                        </span>
+                  <div key={match.id} className="p-4 border rounded-lg">
+                    <div className="space-y-3">
+                      {/* Teams with Logos at Start */}
+                      <div className="flex items-center justify-start gap-4">
+                        {/* Home Team */}
+                        <div className="flex items-center gap-3">
+                          {match.home_team.logo_url && (
+                            <img 
+                              src={match.home_team.logo_url} 
+                              alt={`${match.home_team.name} logo`}
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          )}
+                          <span className={`text-base font-semibold ${match.is_home ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                            {match.home_team.name}
+                          </span>
+                        </div>
+                        
+                        <span className="text-gray-500 font-medium">vs</span>
+                        
+                        {/* Away Team */}
+                        <div className="flex items-center gap-3">
+                          {match.away_team.logo_url && (
+                            <img 
+                              src={match.away_team.logo_url} 
+                              alt={`${match.away_team.name} logo`}
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          )}
+                          <span className={`text-base font-semibold ${!match.is_home ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                            {match.away_team.name}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                          {match.home_score}
-                        </span>
-                        <span className="text-gray-500">:</span>
-                        <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                          {match.away_score}
-                        </span>
+                      
+                      {/* Date and Result below */}
+                      <div className="flex items-center justify-start gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <CalendarIcon className="w-4 h-4" />
+                          <span>{new Date(match.date).toLocaleDateString('cs-CZ', { 
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long'
+                          })}</span>
+                        </div>
+                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                          {match.home_score !== undefined && match.away_score !== undefined 
+                            ? `${match.home_score} : ${match.away_score}` 
+                            : "-:-"}
+                        </div>
+                        {getResultBadge(match.result!)}
                       </div>
-                      {getResultBadge(match.result!)}
                     </div>
                   </div>
                 ))}
@@ -299,9 +429,21 @@ export default function MatchSchedulePage() {
       {/* Upcoming Matches */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="w-5 h-5 text-blue-500" />
-            <h3 className="text-xl font-semibold">Nadcházející zápasy</h3>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="w-5 h-5 text-blue-500" />
+              <h3 className="text-xl font-semibold">Nadcházející zápasy</h3>
+            </div>
+            <Button 
+              as={Link} 
+              href="/matches" 
+              variant="light" 
+              size="sm"
+              color="primary"
+              endContent={<ArrowRightIcon className="w-4 h-4" />}
+            >
+              Všechny zápasy
+            </Button>
           </div>
         </CardHeader>
         <CardBody>
@@ -313,33 +455,104 @@ export default function MatchSchedulePage() {
                 .filter(match => match.status === "upcoming")
                 .slice(0, 3)
                 .map((match) => (
-                  <div key={match.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {new Date(match.date).toLocaleDateString('cs-CZ')} v {match.time}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className={match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.home_team.name}
-                        </span>
-                        <span className="text-gray-500">vs</span>
-                        <span className={!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.away_team.name}
-                        </span>
+                  <div key={match.id} className="p-4 border rounded-lg">
+                    <div className="space-y-3">
+                      {/* Teams Row */}
+                      <div className="flex items-center justify-center gap-4">
+                        {/* Home Team */}
+                        <div className="flex items-center gap-3">
+                          {match.home_team.logo_url && (
+                            <img 
+                              src={match.home_team.logo_url} 
+                              alt={`${match.home_team.name} logo`}
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          )}
+                          <span className={`text-base font-semibold ${match.is_home ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                            {match.home_team.name}
+                          </span>
+                        </div>
+                        
+                        <span className="text-gray-500 font-medium">vs</span>
+                        
+                        {/* Away Team */}
+                        <div className="flex items-center gap-3">
+                          {match.away_team.logo_url && (
+                            <img 
+                              src={match.away_team.logo_url} 
+                              alt={`${match.away_team.name} logo`}
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          )}
+                          <span className={`text-base font-semibold ${!match.is_home ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                            {match.away_team.name}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPinIcon className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {match.venue}
-                      </span>
-                      {getStatusBadge(match.status)}
+                      
+                      {/* Action Button Row - Center */}
+                      <div className="flex justify-center">
+                        <Button 
+                          as={Link} 
+                          href={`/matches/${match.id}`}
+                          variant="light" 
+                          size="sm"
+                          color="primary"
+                          isIconOnly
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                          </svg>
+                        </Button>
+                      </div>
+                      
+                      {/* Date, Time and Venue below */}
+                      <div className="flex items-center justify-start gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <CalendarIcon className="w-4 h-4" />
+                          <span>{new Date(match.date).toLocaleDateString('cs-CZ', { 
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long'
+                          })}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <ClockIcon className="w-4 h-4" />
+                          <span className="font-semibold">{formatTime(match.time)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPinIcon className="w-4 h-4" />
+                          <span>{match.venue}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
               {matches.filter(match => match.status === "upcoming").length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   Žádné nadcházející zápasy
+                </div>
+              )}
+              
+              {/* Show All Matches Button */}
+              {matches.filter(match => match.status === "upcoming").length > 0 && (
+                <div className="flex justify-center pt-4">
+                  <Button 
+                    as={Link} 
+                    href="/matches" 
+                    variant="bordered" 
+                    size="sm"
+                    color="primary"
+                    endContent={<ArrowRightIcon className="w-4 h-4" />}
+                  >
+                    Zobrazit všechny zápasy
+                  </Button>
                 </div>
               )}
             </div>
@@ -419,7 +632,7 @@ export default function MatchSchedulePage() {
                                   })}
                                 </div>
                                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                                  {match.time}
+                                  {formatTime(match.time)}
                                 </div>
                               </div>
                             </div>
@@ -427,22 +640,42 @@ export default function MatchSchedulePage() {
                             {/* Teams */}
                             <div className="text-center">
                               <div className="flex items-center justify-center gap-4">
-                                <div className={`text-right ${match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}>
+                                <div className={`text-right flex items-center gap-2 ${match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}>
+                                  {match.home_team.logo_url && (
+                                    <img 
+                                      src={match.home_team.logo_url} 
+                                      alt={`${match.home_team.name} logo`}
+                                      className="w-6 h-6 object-contain"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  )}
                                   {match.home_team.name}
                                 </div>
                                 <div className="text-gray-500">vs</div>
-                                <div className={`text-left ${!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}>
+                                <div className={`text-left flex items-center gap-2 ${!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}>
                                   {match.away_team.name}
+                                  {match.away_team.logo_url && (
+                                    <img 
+                                      src={match.away_team.logo_url} 
+                                      alt={`${match.away_team.name} logo`}
+                                      className="w-6 h-6 object-contain"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  )}
                                 </div>
                               </div>
                               {match.status === "completed" && (
                                 <div className="flex items-center justify-center gap-2 mt-2">
                                   <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                    {match.home_score}
+                                    {match.home_score !== undefined ? match.home_score : "-"}
                                   </span>
                                   <span className="text-gray-500">:</span>
                                   <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                    {match.away_score}
+                                    {match.away_score !== undefined ? match.away_score : "-"}
                                   </span>
                                 </div>
                               )}
@@ -494,7 +727,7 @@ export default function MatchSchedulePage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <TrophyIcon className="w-5 h-5 text-green-500" />
-            <h3 className="text-xl font-semibold">Tabulka - {currentCategory.competition}</h3>
+            <h3 className="text-xl font-semibold">Tabulka - {currentCompetition}</h3>
           </div>
         </CardHeader>
         <CardBody>
@@ -517,9 +750,9 @@ export default function MatchSchedulePage() {
                 </thead>
                 <tbody>
                   {currentStandings.map((team) => (
-                    <tr key={team.team} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <tr key={team.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <td className="py-2 px-2 font-semibold">{team.position}.</td>
-                      <td className="py-2 px-2 font-medium">{team.team}</td>
+                      <td className="py-2 px-2 font-medium">{team.team?.name || 'N/A'}</td>
                       <td className="py-2 px-2 text-center">{team.matches}</td>
                       <td className="py-2 px-2 text-center text-green-600">{team.wins}</td>
                       <td className="py-2 px-2 text-center text-yellow-600">{team.draws}</td>
@@ -547,10 +780,10 @@ export default function MatchSchedulePage() {
       {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          {currentCategory.name}
+          {currentCategory?.name || 'Načítání...'}
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          {currentCategory.competition}
+          {currentCompetition}
         </p>
       </div>
 
