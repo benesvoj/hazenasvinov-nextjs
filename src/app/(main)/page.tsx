@@ -4,6 +4,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Spacer } from "@heroui/spacer";
 import { CustomTable } from "@/components/CustomTable";
+import { MatchSchedule } from "@/components/MatchSchedule";
 import { URL_men } from "@/data/params";
 import { translations } from "@/lib/translations";
 import { texts } from "@/utils/texts";
@@ -126,6 +127,9 @@ export default function Page() {
         </Card>
       </section>
 
+      {/* Match Schedule & Results */}
+      <MatchSchedule />
+
       {/* Latest News */}
       <section>
         <div className="flex items-center justify-between mb-6">
@@ -142,16 +146,16 @@ export default function Page() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {latestPosts.map((post) => (
             <Card key={post.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-0">
+              <CardHeader className="pb-0 flex flex-col items-start">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
+                  {post.title}
+                </h3>
                 <div className="flex items-center gap-2 mb-2">
                   <TagIcon className="w-4 h-4 text-blue-500" />
                   <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
                     {post.category}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-                  {post.title}
-                </h3>
               </CardHeader>
               <CardBody>
                 <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
@@ -174,32 +178,6 @@ export default function Page() {
             </Card>
           ))}
         </div>
-      </section>
-
-      {/* Latest Results - Men's Team */}
-      <section>
-        <Card>
-          <CardHeader>
-            <h2 className="text-2xl font-bold">Aktuální výsledky - Muži</h2>
-            <p className="text-gray-600">Nejnovější výsledky našeho mužského týmu</p>
-          </CardHeader>
-          <CardBody>
-            <CustomTable 
-              csvData={URL_men} 
-              tableTitle="" 
-              isStrippedAllowed={true}
-            />
-            <div className="mt-4 text-center">
-              <Button 
-                as={Link} 
-                href="/categories/men" 
-                color="primary"
-              >
-                Zobrazit všechny výsledky
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
       </section>
 
       {/* Team Categories */}
