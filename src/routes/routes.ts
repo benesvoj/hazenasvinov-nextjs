@@ -39,6 +39,7 @@ export const privateRoutes = {
 	players: '/admin/players',
 	users: '/admin/users',
 	competitions: '/admin/competitions',
+	matches: '/admin/matches',
 } as const;
 
 const routes: MenuItem[] = [
@@ -106,6 +107,7 @@ const routes: MenuItem[] = [
 	{route: publicRoutes.login, title: 'Admin'},
 	{route: privateRoutes.dashboard, title: 'Dashboard', isPrivate: true, description: 'Správa obsahu a nastavení systému.'},
 	{route: privateRoutes.competitions, title: translations.competitions.title, isPrivate: true, description: translations.competitions.description},
+	{route: privateRoutes.matches, title: 'Zápasy', isPrivate: true, description: 'Správa zápasů, výsledků a tabulek pro všechny kategorie.'},
 	{route: privateRoutes.users, title: 'Uživatelé', isPrivate: true, description: 'Správa uživatelů, kteří se mohou přihlásit do systému.'},
 ]
 

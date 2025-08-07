@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Spacer } from "@heroui/spacer";
 import { CustomTable } from "@/components/CustomTable";
-import { MatchSchedule } from "@/components/MatchSchedule";
+import MatchSchedule from "@/components/MatchSchedule";
 import { URL_men } from "@/data/params";
 import { translations } from "@/lib/translations";
 import { texts } from "@/utils/texts";
