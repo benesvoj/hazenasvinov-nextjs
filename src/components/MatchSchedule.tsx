@@ -23,11 +23,31 @@ const categories = {
   juniorGirls: { name: "Dorostenky", competition: "Dorostenecká liga žen" }
 };
 
+interface RawMatch {
+  id: string;
+  category: string;
+  date: string;
+  time: string;
+  home_team_id: string;
+  away_team_id: string;
+  home_team: { name: string };
+  away_team: { name: string };
+  venue: string;
+  competition: string;
+  is_home: boolean;
+  status: 'upcoming' | 'completed';
+  home_score?: number;
+  away_score?: number;
+  result?: 'win' | 'loss' | 'draw';
+}
+
 interface Match {
   id: string;
   category: string;
   date: string;
   time: string;
+  home_team_id: string;
+  away_team_id: string;
   home_team: string;
   away_team: string;
   venue: string;
@@ -88,26 +108,46 @@ export default function MatchSchedule() {
     try {
       setLoading(true);
       
-      // Fetch matches
+      // Fetch matches with team names
       const { data: matchesData, error: matchesError } = await supabase
         .from('matches')
-        .select('*')
+        .select(`
+          *,
+          home_team:home_team_id(name),
+          away_team:away_team_id(name)
+        `)
         .eq('category', selectedCategory)
         .order('date', { ascending: true });
 
+      // Transform the data to flatten team names
+      const transformedMatches = (matchesData as RawMatch[])?.map(match => ({
+        ...match,
+        home_team: match.home_team?.name || '',
+        away_team: match.away_team?.name || ''
+      })) || [];
+
       if (matchesError) throw matchesError;
 
-      // Fetch standings
+      // Fetch standings with team names
       const { data: standingsData, error: standingsError } = await supabase
         .from('standings')
-        .select('*')
+        .select(`
+          *,
+          team:team_id(name)
+        `)
         .eq('category', selectedCategory)
         .order('position', { ascending: true });
 
+      // Transform standings data to flatten team names
+      const transformedStandings = (standingsData as any[])?.map(standing => ({
+        ...standing,
+        team: standing.team?.name || ''
+      })) || [];
+
       if (standingsError) throw standingsError;
 
-      setMatches(matchesData || []);
-      setStandings(standingsData || []);
+      setMatches(transformedMatches);
+      setStandings(transformedStandings);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -223,8 +263,8 @@ export default function MatchSchedule() {
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className={result.home_team.includes('Svinov') ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                                {result.home_team}
+                              <span className={typeof result.home_team === 'string' && result.home_team.includes('Svinov') ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
+                                {result.home_team || 'N/A'}
                               </span>
                               <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
                                 {result.home_score}
@@ -233,8 +273,8 @@ export default function MatchSchedule() {
                               <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
                                 {result.away_score}
                               </span>
-                              <span className={result.away_team.includes('Svinov') ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                                {result.away_team}
+                              <span className={typeof result.away_team === 'string' && result.away_team.includes('Svinov') ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
+                                {result.away_team || 'N/A'}
                               </span>
                             </div>
                           </div>

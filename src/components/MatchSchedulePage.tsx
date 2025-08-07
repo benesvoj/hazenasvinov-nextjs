@@ -29,8 +29,10 @@ interface Match {
   category: string;
   date: string;
   time: string;
-  home_team: string;
-  away_team: string;
+  home_team_id: string;
+  away_team_id: string;
+  home_team: { name: string };
+  away_team: { name: string };
   venue: string;
   competition: string;
   is_home: boolean;
@@ -110,10 +112,14 @@ export default function MatchSchedulePage() {
     try {
       setLoading(true);
       
-      // Fetch matches
+      // Fetch matches with team names
       const { data: matchesData, error: matchesError } = await supabase
         .from('matches')
-        .select('*')
+        .select(`
+          *,
+          home_team:home_team_id(name),
+          away_team:away_team_id(name)
+        `)
         .eq('category', selectedCategory)
         .order('date', { ascending: true });
 
@@ -258,11 +264,11 @@ export default function MatchSchedulePage() {
                       </span>
                       <div className="flex items-center gap-2">
                         <span className={match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.home_team}
+                          {match.home_team.name}
                         </span>
                         <span className="text-gray-500">vs</span>
                         <span className={!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.away_team}
+                          {match.away_team.name}
                         </span>
                       </div>
                     </div>
@@ -314,11 +320,11 @@ export default function MatchSchedulePage() {
                       </span>
                       <div className="flex items-center gap-2">
                         <span className={match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.home_team}
+                          {match.home_team.name}
                         </span>
                         <span className="text-gray-500">vs</span>
                         <span className={!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.away_team}
+                          {match.away_team.name}
                         </span>
                       </div>
                     </div>
@@ -422,11 +428,11 @@ export default function MatchSchedulePage() {
                             <div className="text-center">
                               <div className="flex items-center justify-center gap-4">
                                 <div className={`text-right ${match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}>
-                                  {match.home_team}
+                                  {match.home_team.name}
                                 </div>
                                 <div className="text-gray-500">vs</div>
                                 <div className={`text-left ${!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}>
-                                  {match.away_team}
+                                  {match.away_team.name}
                                 </div>
                               </div>
                               {match.status === "completed" && (
