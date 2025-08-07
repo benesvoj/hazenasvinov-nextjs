@@ -169,25 +169,22 @@ function renderCategoryCell(item: CategoryProps, columnKey: React.Key) {
 		return columnRenders[columnKey](item);
 	}
 	return typeof columnKey === 'string' && columnKey in item
-	? (item as Record<string, unknown>)[columnKey] as React.ReactNode
+	? (item as Record<string, unknown>)[columnKey]
 	: null;
 }
 
 
 // helpers
 const CategoriesTableLoading = () => <Skeleton/>;
-CategoriesTableLoading.displayName = 'CategoriesTableLoading';
-
 const CategoriesTableError = () => (
 	<div className="text-red-500">{translations.error.fetchCategories}</div>
 );
-CategoriesTableError.displayName = 'CategoriesTableError';
 
 const ALIGN_CENTER = 'center';
 const ALIGN_START = 'start';
 
 function renderTableHeaderColumns(columns: ColumnType[]) {
-	const HeaderColumn = (column: ColumnType) => (
+	return (column: ColumnType) => (
 		<TableColumn
 			key={column.key}
 			align={column.key === COLUMN_ACTIONS ? ALIGN_CENTER : ALIGN_START}
@@ -195,20 +192,16 @@ function renderTableHeaderColumns(columns: ColumnType[]) {
 			{column.label}
 		</TableColumn>
 	);
-	HeaderColumn.displayName = 'HeaderColumn';
-	return HeaderColumn;
 }
 
 function renderTableRows(items: CategoryProps[]) {
-	const TableRowComponent = (item: CategoryProps) => (
+	return (item: CategoryProps) => (
 		<TableRow key={item.id}>
 			{(columnKey: React.Key) => (
 				<TableCell>{renderCategoryCell(item, columnKey)}</TableCell>
 			)}
 		</TableRow>
 	);
-	TableRowComponent.displayName = 'TableRowComponent';
-	return TableRowComponent;
 }
 
 
