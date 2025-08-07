@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -87,7 +87,7 @@ export default function MatchesAdminPage() {
   const supabase = createClient();
 
   // Fetch matches
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -104,10 +104,10 @@ export default function MatchesAdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, supabase]);
 
   // Fetch standings
-  const fetchStandings = async () => {
+  const fetchStandings = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('standings')
@@ -120,7 +120,7 @@ export default function MatchesAdminPage() {
     } catch (error) {
       console.error('Error fetching standings:', error);
     }
-  };
+  }, [selectedCategory, supabase]);
 
   // Calculate standings from matches
   const calculateStandings = async () => {
@@ -220,7 +220,7 @@ export default function MatchesAdminPage() {
   useEffect(() => {
     fetchMatches();
     fetchStandings();
-  }, [selectedCategory]);
+  }, [fetchMatches, fetchStandings]);
 
   // Add new match
   const handleAddMatch = async () => {

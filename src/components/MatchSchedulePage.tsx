@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Badge } from "@heroui/badge";
@@ -106,40 +106,40 @@ export default function MatchSchedulePage() {
   const supabase = createClient();
 
   // Fetch matches and standings for selected category
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch matches
+      const { data: matchesData, error: matchesError } = await supabase
+        .from('matches')
+        .select('*')
+        .eq('category', selectedCategory)
+        .order('date', { ascending: true });
+
+      if (matchesError) throw matchesError;
+
+      // Fetch standings
+      const { data: standingsData, error: standingsError } = await supabase
+        .from('standings')
+        .select('*')
+        .eq('category', selectedCategory)
+        .order('position', { ascending: true });
+
+      if (standingsError) throw standingsError;
+
+      setMatches(matchesData || []);
+      setStandings(standingsData || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCategory, supabase]);
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch matches
-        const { data: matchesData, error: matchesError } = await supabase
-          .from('matches')
-          .select('*')
-          .eq('category', selectedCategory)
-          .order('date', { ascending: true });
-
-        if (matchesError) throw matchesError;
-
-        // Fetch standings
-        const { data: standingsData, error: standingsError } = await supabase
-          .from('standings')
-          .select('*')
-          .eq('category', selectedCategory)
-          .order('position', { ascending: true });
-
-        if (standingsError) throw standingsError;
-
-        setMatches(matchesData || []);
-        setStandings(standingsData || []);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, [selectedCategory]);
+  }, [fetchData]);
 
   // Group matches by month
   const groupedMatches = useMemo(() => {
