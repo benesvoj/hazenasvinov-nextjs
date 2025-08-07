@@ -61,9 +61,21 @@ interface Category {
   sort_order: number;
 }
 
+interface TeamCategory {
+  id: string;
+  team_id: string;
+  season_id: string;
+  category_id: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  team?: Team;
+}
+
 interface Match {
   id: string;
   category_id: string;
+  season_id: string;
   date: string;
   time: string;
   home_team_id: string;
@@ -80,6 +92,7 @@ interface Match {
   home_team?: Team;
   away_team?: Team;
   category?: Category;
+  season?: Season;
 }
 
 interface Standing {
@@ -92,6 +105,9 @@ interface Standing {
   goals_for: number;
   goals_against: number;
   points: number;
+  category_id?: string;
+  season_id?: string;
+  team_id?: string;
 }
 
 // Helper function to get category info
@@ -99,57 +115,122 @@ const getCategoryInfo = (categoryId: string, categories: Category[]) => {
   const category = categories.find(c => c.id === categoryId);
   if (!category) return { name: "Neznámá kategorie", competition: "Neznámá soutěž" };
   
-  // Map category codes to competition names
-  const competitionMap: { [key: string]: string } = {
-    'men': '1. liga muži',
-    'women': '1. liga ženy', 
-    'juniorBoys': 'Dorostenecká liga',
-    'juniorGirls': 'Dorostenecká liga žen',
-    'prepKids': 'Přípravka',
-    'youngestKids': 'Nejmladší děti',
-    'youngerBoys': 'Mladší žáci',
-    'youngerGirls': 'Mladší žákyně',
-    'olderBoys': 'Starší žáci',
-    'olderGirls': 'Starší žákyně'
-  };
-  
   return {
     name: category.name,
-    competition: competitionMap[category.code] || 'Neznámá soutěž'
+    competition: `${category.name} - ${category.description || 'Soutěž'}`
   };
 };
 
 export default function MatchesAdminPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedSeason, setSelectedSeason] = useState<string>("");
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [filteredTeams, setFilteredTeams] = useState<Team[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
-  const [matches, setMatches] = useState<Match[]>([]);
   const [standings, setStandings] = useState<Standing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSeason, setSelectedSeason] = useState<string>("");
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   
   // Modal states
   const { isOpen: isAddMatchOpen, onOpen: onAddMatchOpen, onClose: onAddMatchClose } = useDisclosure();
-  const { isOpen: isEditMatchOpen, onOpen: onEditMatchOpen, onClose: onEditMatchClose } = useDisclosure();
   const { isOpen: isAddResultOpen, onOpen: onAddResultOpen, onClose: onAddResultClose } = useDisclosure();
   
-  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [teams, setTeams] = useState<Team[]>([]);
   const [formData, setFormData] = useState({
     date: '',
     time: '',
     home_team_id: '',
     away_team_id: '',
     venue: '',
-    is_home: true
+    category_id: '',
+    season_id: ''
   });
+
   const [resultData, setResultData] = useState({
     home_score: '',
     away_score: ''
   });
 
   const supabase = createClient();
+
+  // Fetch teams assigned to selected category and season
+  const fetchFilteredTeams = useCallback(async (categoryId: string, seasonId: string) => {
+    if (!categoryId || !seasonId) {
+      setFilteredTeams([]);
+      return;
+    }
+
+    try {
+      console.log('Fetching teams for category:', categoryId, 'season:', seasonId);
+      
+      const { data, error } = await supabase
+        .from('team_categories')
+        .select(`
+          team_id,
+          teams!inner(*)
+        `)
+        .eq('category_id', categoryId)
+        .eq('season_id', seasonId)
+        .eq('is_active', true);
+
+      if (error) {
+        console.error('Error fetching filtered teams:', error);
+        throw error;
+      }
+      
+      console.log('Raw team_categories data:', data);
+      
+      // Extract team data from the nested structure
+      const teamData = data?.map(item => item.teams).filter(Boolean) as unknown as Team[];
+      console.log('Extracted team data:', teamData);
+      
+      setFilteredTeams(teamData || []);
+    } catch (error) {
+      console.error('Error fetching filtered teams:', error);
+      setFilteredTeams([]);
+    }
+  }, [supabase]);
+
+  // Fetch all teams
+  const fetchTeams = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      setTeams(data || []);
+    } catch (error) {
+      setError('Chyba při načítání týmů');
+      console.error('Error fetching teams:', error);
+    }
+  }, [supabase]);
+
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+
+      if (error) throw error;
+      setCategories(data || []);
+      
+      // Set first category as default if categories are loaded and no category is selected
+      if (data && data.length > 0 && !selectedCategory) {
+        setSelectedCategory(data[0].id);
+      }
+    } catch (error) {
+      setError('Chyba při načítání kategorií');
+      console.error('Error fetching categories:', error);
+    }
+  }, [supabase, selectedCategory]);
 
   // Fetch seasons
   const fetchSeasons = useCallback(async () => {
@@ -161,52 +242,41 @@ export default function MatchesAdminPage() {
 
       if (error) throw error;
       setSeasons(data || []);
-      if (data && data.length > 0) {
-        // Set active season as default, or first season if no active
-        const activeSeason = data.find(s => s.is_active);
-        setSelectedSeason(activeSeason?.id || data[0].id);
+      
+      // Set active season as default
+      const activeSeason = data?.find(season => season.is_active);
+      if (activeSeason) {
+        setSelectedSeason(activeSeason.id);
       }
     } catch (error) {
+      setError('Chyba při načítání sezón');
       console.error('Error fetching seasons:', error);
     }
   }, [supabase]);
 
-  // Fetch categories
-  const fetchCategories = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-      setCategories(data || []);
-      if (data && data.length > 0) {
-        setSelectedCategory(data[0].id);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  }, [supabase]);
-
-  // Fetch matches with team data
+  // Fetch matches
   const fetchMatches = useCallback(async () => {
-    if (!selectedCategory || !selectedSeason) return;
-    
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from('matches')
         .select(`
           *,
           home_team:teams!home_team_id(*),
           away_team:teams!away_team_id(*),
-          category:categories(*)
+          category:categories(*),
+          season:seasons(*)
         `)
-        .eq('category_id', selectedCategory)
-        .eq('season_id', selectedSeason)
-        .order('date', { ascending: true });
+        .order('date', { ascending: false });
+
+      if (selectedCategory) {
+        query = query.eq('category_id', selectedCategory);
+      }
+      if (selectedSeason) {
+        query = query.eq('season_id', selectedSeason);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setMatches(data || []);
@@ -216,196 +286,187 @@ export default function MatchesAdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, selectedSeason, supabase]);
+  }, [supabase, selectedCategory, selectedSeason]);
 
   // Fetch standings
   const fetchStandings = useCallback(async () => {
-    if (!selectedCategory || !selectedSeason) return;
-    
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('standings')
-        .select(`
-          *,
-          team:team_id(name)
-        `)
-        .eq('category_id', selectedCategory)
-        .eq('season_id', selectedSeason)
-        .order('position', { ascending: true });
+        .select('*')
+        .order('position');
+
+      if (selectedCategory) {
+        query = query.eq('category_id', selectedCategory);
+      }
+      if (selectedSeason) {
+        query = query.eq('season_id', selectedSeason);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
-      
-      // Transform standings data to flatten team names
-      const transformedStandings = (data as any[])?.map(standing => ({
-        ...standing,
-        team: standing.team?.name || ''
-      })) || [];
-      
-      setStandings(transformedStandings);
+      setStandings(data || []);
     } catch (error) {
+      setError('Chyba při načítání tabulky');
       console.error('Error fetching standings:', error);
     }
-  }, [selectedCategory, selectedSeason, supabase]);
+  }, [supabase, selectedCategory, selectedSeason]);
 
-  // Calculate standings from matches
+  // Update filtered teams when category or season changes
+  useEffect(() => {
+    console.log('Category/Season changed:', { selectedCategory, selectedSeason });
+    if (selectedCategory && selectedSeason) {
+      fetchFilteredTeams(selectedCategory, selectedSeason);
+    } else {
+      setFilteredTeams([]);
+    }
+  }, [selectedCategory, selectedSeason, fetchFilteredTeams]);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchTeams();
+    fetchCategories();
+    fetchSeasons();
+  }, [fetchTeams, fetchCategories, fetchSeasons]);
+
+  // Fetch matches and standings when filters change
+  useEffect(() => {
+    fetchMatches();
+    fetchStandings();
+  }, [fetchMatches, fetchStandings]);
+
+  // Calculate standings
   const calculateStandings = async () => {
     if (isSeasonClosed()) {
-      setError('Nelze přepočítat tabulku v uzavřené sezóně');
+      setError('Nelze přepočítat tabulku pro uzavřenou sezónu');
       return;
     }
 
     try {
-      const completedMatches = matches.filter(match => match.status === 'completed');
-      const teamsMap = new Map<string, Standing>();
+      // Get completed matches for the selected category and season
+      const { data: completedMatches, error: matchesError } = await supabase
+        .from('matches')
+        .select('*')
+        .eq('category_id', selectedCategory)
+        .eq('season_id', selectedSeason)
+        .eq('status', 'completed');
 
-      // Initialize teams
+      if (matchesError) throw matchesError;
+
+      if (!completedMatches || completedMatches.length === 0) {
+        setError('Žádné dokončené zápasy k výpočtu tabulky');
+        return;
+      }
+
+      // Get teams for this category and season
+      const { data: teamCategories, error: teamsError } = await supabase
+        .from('team_categories')
+        .select('team_id')
+        .eq('category_id', selectedCategory)
+        .eq('season_id', selectedSeason)
+        .eq('is_active', true);
+
+      if (teamsError) throw teamsError;
+
+      if (!teamCategories || teamCategories.length === 0) {
+        setError('Žádné týmy v této kategorii a sezóně');
+        return;
+      }
+
+      // Initialize standings for all teams
+      const standingsMap = new Map();
+      teamCategories.forEach(tc => {
+        standingsMap.set(tc.team_id, {
+          team_id: tc.team_id,
+          category_id: selectedCategory,
+          season_id: selectedSeason,
+          position: 0,
+          matches: 0,
+          wins: 0,
+          draws: 0,
+          losses: 0,
+          goals_for: 0,
+          goals_against: 0,
+          points: 0
+        });
+      });
+
+      // Calculate standings from matches
       completedMatches.forEach(match => {
-        const homeTeamName = match.home_team?.name || 'Neznámý tým';
-        const awayTeamName = match.away_team?.name || 'Neznámý tým';
-        
-        if (!teamsMap.has(homeTeamName)) {
-          teamsMap.set(homeTeamName, {
-            position: 0,
-            team: homeTeamName,
-            matches: 0,
-            wins: 0,
-            draws: 0,
-            losses: 0,
-            goals_for: 0,
-            goals_against: 0,
-            points: 0
-          });
-        }
-        if (!teamsMap.has(awayTeamName)) {
-          teamsMap.set(awayTeamName, {
-            position: 0,
-            team: awayTeamName,
-            matches: 0,
-            wins: 0,
-            draws: 0,
-            losses: 0,
-            goals_for: 0,
-            goals_against: 0,
-            points: 0
-          });
+        if (!match.home_score || !match.away_score) return;
+
+        const homeStanding = standingsMap.get(match.home_team_id);
+        const awayStanding = standingsMap.get(match.away_team_id);
+
+        if (homeStanding && awayStanding) {
+          // Update matches played
+          homeStanding.matches++;
+          awayStanding.matches++;
+
+          // Update goals
+          homeStanding.goals_for += match.home_score;
+          homeStanding.goals_against += match.away_score;
+          awayStanding.goals_for += match.away_score;
+          awayStanding.goals_against += match.home_score;
+
+          // Update points and wins/draws/losses
+          if (match.home_score > match.away_score) {
+            // Home team wins
+            homeStanding.wins++;
+            homeStanding.points += 3;
+            awayStanding.losses++;
+          } else if (match.home_score < match.away_score) {
+            // Away team wins
+            awayStanding.wins++;
+            awayStanding.points += 3;
+            homeStanding.losses++;
+          } else {
+            // Draw
+            homeStanding.draws++;
+            homeStanding.points += 1;
+            awayStanding.draws++;
+            awayStanding.points += 1;
+          }
         }
       });
 
-      // Calculate statistics
-      completedMatches.forEach(match => {
-        const homeTeamName = match.home_team?.name || 'Neznámý tým';
-        const awayTeamName = match.away_team?.name || 'Neznámý tým';
-        const homeTeam = teamsMap.get(homeTeamName)!;
-        const awayTeam = teamsMap.get(awayTeamName)!;
-
-        homeTeam.matches++;
-        awayTeam.matches++;
-        homeTeam.goals_for += match.home_score || 0;
-        homeTeam.goals_against += match.away_score || 0;
-        awayTeam.goals_for += match.away_score || 0;
-        awayTeam.goals_against += match.home_score || 0;
-
-        if (match.result === 'win') {
-          homeTeam.wins++;
-          awayTeam.losses++;
-          homeTeam.points += 2;
-        } else if (match.result === 'loss') {
-          homeTeam.losses++;
-          awayTeam.wins++;
-          awayTeam.points += 2;
-        } else if (match.result === 'draw') {
-          homeTeam.draws++;
-          awayTeam.draws++;
-          homeTeam.points += 1;
-          awayTeam.points += 1;
-        }
-      });
-
-      // Sort by points, then goal difference
-      const sortedTeams = Array.from(teamsMap.values()).sort((a, b) => {
-        if (a.points !== b.points) return b.points - a.points;
+      // Convert to array and sort by points, then goal difference
+      const standingsArray = Array.from(standingsMap.values()).sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
         const aGoalDiff = a.goals_for - a.goals_against;
         const bGoalDiff = b.goals_for - b.goals_against;
-        if (aGoalDiff !== bGoalDiff) return bGoalDiff - aGoalDiff;
+        if (bGoalDiff !== aGoalDiff) return bGoalDiff - aGoalDiff;
         return b.goals_for - a.goals_for;
       });
 
       // Update positions
-      sortedTeams.forEach((team, index) => {
-        team.position = index + 1;
+      standingsArray.forEach((standing, index) => {
+        standing.position = index + 1;
       });
 
-      // Save to database - use upsert to handle existing records
-      const { error } = await supabase
+      // Upsert standings to database
+      const { error: upsertError } = await supabase
         .from('standings')
-        .upsert(sortedTeams.map(team => {
-          // Find the team ID by name from the teams state
-          const teamRecord = teams.find((t: Team) => t.name === team.team);
-          if (!teamRecord) {
-            console.warn(`Team not found: ${team.team}`);
-            return null;
-          }
-          return {
-            category_id: selectedCategory,
-            season_id: selectedSeason,
-            position: team.position,
-            team_id: teamRecord.id,
-            matches: team.matches,
-            wins: team.wins,
-            draws: team.draws,
-            losses: team.losses,
-            goals_for: team.goals_for,
-            goals_against: team.goals_against,
-            points: team.points
-          };
-        }).filter(Boolean), {
+        .upsert(standingsArray, {
           onConflict: 'category_id,season_id,team_id'
         });
 
-      if (error) {
-        console.error('Database error:', error);
-        throw error;
-      }
-      setStandings(sortedTeams);
+      if (upsertError) throw upsertError;
+
+      // Refresh standings
+      fetchStandings();
+      setError('');
     } catch (error) {
-      console.error('Error calculating standings:', error);
       setError('Chyba při výpočtu tabulky');
+      console.error('Error calculating standings:', error);
     }
   };
 
-  // Fetch teams
-  const fetchTeams = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('teams')
-        .select('*')
-        .eq('is_active', true)
-        .order('name', { ascending: true });
-
-      if (error) throw error;
-      setTeams(data || []);
-    } catch (error) {
-      console.error('Error fetching teams:', error);
-    }
-  }, [supabase]);
-
-  useEffect(() => {
-    fetchSeasons();
-    fetchCategories();
-    fetchTeams();
-  }, [fetchSeasons, fetchCategories, fetchTeams]);
-
-  useEffect(() => {
-    if (selectedCategory && selectedSeason) {
-      fetchMatches();
-      fetchStandings();
-    }
-  }, [selectedCategory, selectedSeason, fetchMatches, fetchStandings]);
-
-  // Check if current season is closed
+  // Check if selected season is closed
   const isSeasonClosed = () => {
-    const currentSeason = seasons.find(s => s.id === selectedSeason);
-    return currentSeason?.is_closed || false;
+    const season = seasons.find(s => s.id === selectedSeason);
+    return season?.is_closed || false;
   };
 
   // Add new match
@@ -416,7 +477,11 @@ export default function MatchesAdminPage() {
     }
 
     try {
-      const categoryInfo = getCategoryInfo(selectedCategory, categories);
+      if (!formData.date || !formData.time || !formData.home_team_id || !formData.away_team_id || !formData.venue) {
+        setError('Prosím vyplňte všechna povinná pole');
+        return;
+      }
+
       const { error } = await supabase
         .from('matches')
         .insert({
@@ -427,8 +492,8 @@ export default function MatchesAdminPage() {
           home_team_id: formData.home_team_id,
           away_team_id: formData.away_team_id,
           venue: formData.venue,
-          competition: categoryInfo.competition,
-          is_home: formData.is_home,
+          competition: getCategoryInfo(selectedCategory, categories).competition,
+          is_home: true,
           status: 'upcoming'
         });
 
@@ -441,9 +506,11 @@ export default function MatchesAdminPage() {
         home_team_id: '',
         away_team_id: '',
         venue: '',
-        is_home: true
+        category_id: '',
+        season_id: ''
       });
       fetchMatches();
+      setError('');
     } catch (error) {
       setError('Chyba při přidávání zápasu');
       console.error('Error adding match:', error);
@@ -452,24 +519,27 @@ export default function MatchesAdminPage() {
 
   // Update match result
   const handleUpdateResult = async () => {
-    if (!selectedMatch) return;
-
     if (isSeasonClosed()) {
       setError('Nelze upravit výsledek v uzavřené sezóně');
       return;
     }
 
+    if (!selectedMatch) return;
+
     try {
+      if (!resultData.home_score || !resultData.away_score) {
+        setError('Prosím vyplňte oba skóre');
+        return;
+      }
+
       const homeScore = parseInt(resultData.home_score);
       const awayScore = parseInt(resultData.away_score);
-      let result: 'win' | 'loss' | 'draw';
 
+      let result = 'draw';
       if (homeScore > awayScore) {
         result = 'win';
       } else if (homeScore < awayScore) {
         result = 'loss';
-      } else {
-        result = 'draw';
       }
 
       const { error } = await supabase
@@ -488,7 +558,7 @@ export default function MatchesAdminPage() {
       setResultData({ home_score: '', away_score: '' });
       setSelectedMatch(null);
       fetchMatches();
-      calculateStandings();
+      setError('');
     } catch (error) {
       setError('Chyba při aktualizaci výsledku');
       console.error('Error updating result:', error);
@@ -497,10 +567,8 @@ export default function MatchesAdminPage() {
 
   // Delete match
   const handleDeleteMatch = async (matchId: string) => {
-    if (!confirm('Opravdu chcete smazat tento zápas?')) return;
-
     if (isSeasonClosed()) {
-      setError('Nelze smazat zápas v uzavřené sezóně');
+      setError('Nelze smazat zápas z uzavřené sezóny');
       return;
     }
 
@@ -511,243 +579,227 @@ export default function MatchesAdminPage() {
         .eq('id', matchId);
 
       if (error) throw error;
+      
       fetchMatches();
-      calculateStandings();
+      setError('');
     } catch (error) {
       setError('Chyba při mazání zápasu');
       console.error('Error deleting match:', error);
     }
   };
 
+  // Helper functions for badges
   const getResultBadge = (result: string) => {
     switch (result) {
       case 'win':
-        return <Badge color="success" variant="flat">Výhra</Badge>;
+        return <Badge color="success">Výhra</Badge>;
       case 'loss':
-        return <Badge color="danger" variant="flat">Prohra</Badge>;
+        return <Badge color="danger">Prohra</Badge>;
       case 'draw':
-        return <Badge color="warning" variant="flat">Remíza</Badge>;
+        return <Badge color="warning">Remíza</Badge>;
       default:
-        return null;
+        return <Badge color="default">N/A</Badge>;
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'upcoming':
-        return <Badge color="primary" variant="flat">Nadcházející</Badge>;
+        return <Badge color="primary">Připravuje se</Badge>;
       case 'completed':
-        return <Badge color="default" variant="flat">Dokončeno</Badge>;
+        return <Badge color="success">Dokončeno</Badge>;
       default:
-        return null;
+        return <Badge color="default">Neznámý</Badge>;
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-
-      {/* Season and Category Selection */}
-      <div className="flex items-center gap-4 mb-6 pt-4">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="w-5 h-5 text-blue-500" />
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sezóna:</label>
-          <select
-            className="p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-            value={selectedSeason}
-            onChange={(e) => setSelectedSeason(e.target.value)}
-          >
-            {seasons.map((season) => (
-              <option key={season.id} value={season.id}>
-                {season.name} {season.is_active && '(Aktivní)'}
-              </option>
-            ))}
-          </select>
+    <div className="p-6">
+      {/* Season closed warning */}
+      {selectedSeason && isSeasonClosed() && (
+        <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+          <strong>Upozornění:</strong> Tato sezóna je uzavřená. Nelze přidávat ani upravovat zápasy.
         </div>
-      </div>
+      )}
 
-      {/* Category Tabs */}
-      <Tabs 
-        selectedKey={selectedCategory} 
-        onSelectionChange={(key) => setSelectedCategory(key as string)}
-        className="w-full"
-        color="primary"
-        variant="underlined"
-      >
-        {categories.map((category) => (
-          <Tab key={category.id} title={category.name} />
-        ))}
-      </Tabs>
-
-      {/* Action Buttons */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">
-            {selectedCategory ? getCategoryInfo(selectedCategory, categories).name : 'Vyberte kategorii'} - 
-            {selectedCategory ? getCategoryInfo(selectedCategory, categories).competition : ''}
-          </h2>
-          {selectedSeason && (
-            <div className="mt-1">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Sezóna: {seasons.find(s => s.id === selectedSeason)?.name}
-              </p>
-              {isSeasonClosed() && (
-                <p className="text-sm text-red-600 dark:text-red-400 font-medium">
-                  ⚠️ Uzavřená sezóna - nelze upravovat
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-        <Button 
-          color="primary" 
-          startContent={<PlusIcon className="w-4 h-4" />}
-          onPress={onAddMatchOpen}
-          isDisabled={isSeasonClosed()}
-        >
-          Přidat zápas
-        </Button>
-      </div>
-
-      {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
         </div>
       )}
 
-      {/* Matches List */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-xl font-semibold">Seznam zápasů</h3>
-        </CardHeader>
-        <CardBody>
-          {loading ? (
-            <div className="text-center py-8">Načítání...</div>
-          ) : (
-            <div className="space-y-4">
-              {matches.map((match) => (
-                <div key={match.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {new Date(match.date).toLocaleDateString('cs-CZ')} v {match.time}
-                        </span>
-                      </div>
-                                             <div className="flex items-center gap-2">
-                         <span className={match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                           {match.home_team?.name || 'Neznámý tým'}
-                         </span>
-                         <span className="text-gray-500">vs</span>
-                         <span className={!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                           {match.away_team?.name || 'Neznámý tým'}
-                         </span>
-                       </div>
-                      {match.status === 'completed' && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                            {match.home_score}
-                          </span>
-                          <span className="text-gray-500">:</span>
-                          <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                            {match.away_score}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {match.status === 'completed' && getResultBadge(match.result!)}
-                      {getStatusBadge(match.status)}
-                      <div className="flex gap-1">
-                        {match.status === 'upcoming' && (
-                          <Button
-                            size="sm"
-                            color="primary"
-                            variant="flat"
-                            startContent={<PencilIcon className="w-3 h-3" />}
-                            onPress={() => {
-                              setSelectedMatch(match);
-                              onAddResultOpen();
-                            }}
-                            isDisabled={isSeasonClosed()}
-                          >
-                            Výsledek
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          color="danger"
-                          variant="flat"
-                          startContent={<TrashIcon className="w-3 h-3" />}
-                          onPress={() => handleDeleteMatch(match.id)}
-                          isDisabled={isSeasonClosed()}
-                        >
-                          Smazat
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {matches.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  Žádné zápasy nebyly nalezeny
-                </div>
-              )}
-            </div>
-          )}
-        </CardBody>
-      </Card>
+      {/* Season selector */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Vyberte sezónu:
+        </label>
+        <select
+          className="w-full md:w-64 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          value={selectedSeason}
+          onChange={(e) => setSelectedSeason(e.target.value)}
+        >
+          <option value="">Vyberte sezónu</option>
+          {seasons.map((season) => (
+            <option key={season.id} value={season.id}>
+              {season.name} {season.is_closed ? '(Uzavřená)' : ''}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {/* Standings Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold">Tabulka</h3>
-            <Button 
-              color="secondary" 
-              variant="flat"
-              onPress={calculateStandings}
-              isDisabled={isSeasonClosed()}
-            >
-              Přepočítat tabulku
-            </Button>
-          </div>
-        </CardHeader>
-        <CardBody>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left py-2 px-2">Poz.</th>
-                  <th className="text-left py-2 px-2">Tým</th>
-                  <th className="text-center py-2 px-2">Z</th>
-                  <th className="text-center py-2 px-2">V</th>
-                  <th className="text-center py-2 px-2">R</th>
-                  <th className="text-center py-2 px-2">P</th>
-                  <th className="text-center py-2 px-2">Skóre</th>
-                  <th className="text-center py-2 px-2">Body</th>
-                </tr>
-              </thead>
-              <tbody>
-                {standings.map((team) => (
-                  <tr key={team.team} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="py-2 px-2 font-semibold">{team.position}.</td>
-                    <td className="py-2 px-2 font-medium">{team.team}</td>
-                    <td className="py-2 px-2 text-center">{team.matches}</td>
-                    <td className="py-2 px-2 text-center text-green-600">{team.wins}</td>
-                    <td className="py-2 px-2 text-center text-yellow-600">{team.draws}</td>
-                    <td className="py-2 px-2 text-center text-red-600">{team.losses}</td>
-                    <td className="py-2 px-2 text-center">{team.goals_for}:{team.goals_against}</td>
-                    <td className="py-2 px-2 text-center font-bold">{team.points}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardBody>
-      </Card>
+      {selectedSeason && (
+        <>
+          <Card>
+            <CardHeader className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <TrophyIcon className="w-5 h-5 text-blue-500" />
+                <h2 className="text-xl font-semibold">Zápasy</h2>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  color="primary" 
+                  startContent={<PlusIcon className="w-4 h-4" />}
+                  onPress={onAddMatchOpen}
+                  isDisabled={isSeasonClosed()}
+                >
+                  Přidat zápas
+                </Button>
+                <Button 
+                  color="secondary" 
+                  onPress={calculateStandings}
+                  isDisabled={isSeasonClosed()}
+                >
+                  Přepočítat tabulku
+                </Button>
+              </div>
+            </CardHeader>
+            <CardBody>
+              {loading ? (
+                <div className="text-center py-8">Načítání...</div>
+              ) : (
+                <Tabs 
+                  aria-label="Categories"
+                  selectedKey={selectedCategory}
+                  onSelectionChange={(key) => {
+                    console.log('Category selected:', key);
+                    setSelectedCategory(key as string);
+                  }}
+                >
+                  {categories.map((category) => (
+                    <Tab key={category.id} title={category.name}>
+                      <div className="mt-4">
+                        <h3 className="text-lg font-semibold mb-4">
+                          {category.name} - {getCategoryInfo(category.id, categories).competition}
+                        </h3>
+                        
+                        {/* Matches for this category */}
+                        <div className="space-y-4">
+                          {matches
+                            .filter(match => match.category_id === category.id)
+                            .map((match) => (
+                              <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-4">
+                                    <div className="text-sm text-gray-500">
+                                      {new Date(match.date).toLocaleDateString('cs-CZ')} {match.time}
+                                    </div>
+                                    <div className="font-medium">
+                                      {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <MapPinIcon className="w-4 h-4 text-gray-400" />
+                                      <span className="text-sm text-gray-600">{match.venue}</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    {match.status === 'completed' ? (
+                                      <div className="text-lg font-bold">
+                                        {match.home_score} : {match.away_score}
+                                      </div>
+                                    ) : (
+                                      <div className="text-sm text-gray-500">Skóre zatím není k dispozici</div>
+                                    )}
+                                    {getStatusBadge(match.status)}
+                                    {match.status === 'completed' && getResultBadge(match.result || '')}
+                                  </div>
+                                </div>
+                                <div className="mt-3 flex justify-end space-x-2">
+                                  {match.status === 'upcoming' && (
+                                    <Button
+                                      size="sm"
+                                      color="primary"
+                                      startContent={<EyeIcon className="w-4 h-4" />}
+                                      onPress={() => {
+                                        setSelectedMatch(match);
+                                        onAddResultOpen();
+                                      }}
+                                      isDisabled={isSeasonClosed()}
+                                    >
+                                      Výsledek
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    color="danger"
+                                    startContent={<TrashIcon className="w-4 h-4" />}
+                                    onPress={() => handleDeleteMatch(match.id)}
+                                    isDisabled={isSeasonClosed()}
+                                  >
+                                    Smazat
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+
+                        {/* Standings for this category */}
+                        <div className="mt-8">
+                          <h4 className="text-lg font-semibold mb-4">Tabulka - {category.name}</h4>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border px-4 py-2 text-left">Pozice</th>
+                                  <th className="border px-4 py-2 text-left">Tým</th>
+                                  <th className="border px-4 py-2 text-center">Z</th>
+                                  <th className="border px-4 py-2 text-center">V</th>
+                                  <th className="border px-4 py-2 text-center">R</th>
+                                  <th className="border px-4 py-2 text-center">P</th>
+                                  <th className="border px-4 py-2 text-center">Skóre</th>
+                                  <th className="border px-4 py-2 text-center">Body</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {standings
+                                  .filter(standing => {
+                                    const match = matches.find(m => m.category_id === category.id);
+                                    return match && standing.category_id === category.id;
+                                  })
+                                  .map((standing, index) => (
+                                    <tr key={index} className="hover:bg-gray-50">
+                                      <td className="border px-4 py-2 font-medium">{standing.position}</td>
+                                      <td className="border px-4 py-2">{standing.team}</td>
+                                      <td className="border px-4 py-2 text-center">{standing.matches}</td>
+                                      <td className="border px-4 py-2 text-center">{standing.wins}</td>
+                                      <td className="border px-4 py-2 text-center">{standing.draws}</td>
+                                      <td className="border px-4 py-2 text-center">{standing.losses}</td>
+                                      <td className="border px-4 py-2 text-center">{standing.goals_for}:{standing.goals_against}</td>
+                                      <td className="border px-4 py-2 text-center font-bold">{standing.points}</td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </Tab>
+                  ))}
+                </Tabs>
+              )}
+            </CardBody>
+          </Card>
+        </>
+      )}
 
       {/* Add Match Modal */}
       <Modal isOpen={isAddMatchOpen} onClose={onAddMatchClose}>
@@ -767,30 +819,64 @@ export default function MatchesAdminPage() {
                 value={formData.time}
                 onChange={(e) => setFormData({...formData, time: e.target.value})}
               />
-              <select
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={formData.home_team_id}
-                onChange={(e) => setFormData({...formData, home_team_id: e.target.value})}
-              >
-                <option value="">Vyberte domácí tým</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={formData.away_team_id}
-                onChange={(e) => setFormData({...formData, away_team_id: e.target.value})}
-              >
-                <option value="">Vyberte hostující tým</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
+                              <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Domácí tým (přiřazené k vybrané kategorii a sezóně)
+                  </label>
+                  <div className="text-xs text-gray-500 mb-2">
+                    Debug: Category: {selectedCategory}, Season: {selectedSeason}, Teams: {filteredTeams.length}
+                  </div>
+                  <select
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.home_team_id}
+                    onChange={(e) => {
+                      const selectedTeamId = e.target.value;
+                      const selectedTeam = filteredTeams.find(team => team.id === selectedTeamId);
+                      setFormData({
+                        ...formData, 
+                        home_team_id: selectedTeamId,
+                        venue: selectedTeam?.home_venue || formData.venue
+                      });
+                    }}
+                  >
+                    <option value="">Vyberte domácí tým</option>
+                    {filteredTeams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                  {filteredTeams.length === 0 && selectedCategory && selectedSeason && (
+                    <p className="text-sm text-red-600 mt-1">
+                      Žádné týmy nejsou přiřazeny k této kategorii a sezóně
+                    </p>
+                  )}
+                </div>
+                              <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hostující tým (přiřazené k vybrané kategorii a sezóně)
+                  </label>
+                  <div className="text-xs text-gray-500 mb-2">
+                    Debug: Category: {selectedCategory}, Season: {selectedSeason}, Teams: {filteredTeams.length}
+                  </div>
+                  <select
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.away_team_id}
+                    onChange={(e) => setFormData({...formData, away_team_id: e.target.value})}
+                  >
+                    <option value="">Vyberte hostující tým</option>
+                    {filteredTeams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                  {filteredTeams.length === 0 && selectedCategory && selectedSeason && (
+                    <p className="text-sm text-red-600 mt-1">
+                      Žádné týmy nejsou přiřazeny k této kategorii a sezóně
+                    </p>
+                  )}
+                </div>
               <Input
                 label="Místo konání"
                 value={formData.venue}
