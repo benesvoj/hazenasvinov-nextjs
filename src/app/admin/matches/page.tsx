@@ -39,9 +39,30 @@ interface Team {
   updated_at: string;
 }
 
+interface Season {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Category {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  age_group?: string;
+  gender?: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
 interface Match {
   id: string;
-  category: string;
+  category_id: string;
   date: string;
   time: string;
   home_team_id: string;
@@ -57,6 +78,7 @@ interface Match {
   updated_at: string;
   home_team?: Team;
   away_team?: Team;
+  category?: Category;
 }
 
 interface Standing {
@@ -71,15 +93,36 @@ interface Standing {
   points: number;
 }
 
-const categories = {
-  men: { name: "Muži", competition: "1. liga muži" },
-  women: { name: "Ženy", competition: "1. liga ženy" },
-  juniorBoys: { name: "Dorostenci", competition: "Dorostenecká liga" },
-  juniorGirls: { name: "Dorostenky", competition: "Dorostenecká liga žen" }
+// Helper function to get category info
+const getCategoryInfo = (categoryId: string, categories: Category[]) => {
+  const category = categories.find(c => c.id === categoryId);
+  if (!category) return { name: "Neznámá kategorie", competition: "Neznámá soutěž" };
+  
+  // Map category codes to competition names
+  const competitionMap: { [key: string]: string } = {
+    'men': '1. liga muži',
+    'women': '1. liga ženy', 
+    'juniorBoys': 'Dorostenecká liga',
+    'juniorGirls': 'Dorostenecká liga žen',
+    'prepKids': 'Přípravka',
+    'youngestKids': 'Nejmladší děti',
+    'youngerBoys': 'Mladší žáci',
+    'youngerGirls': 'Mladší žákyně',
+    'olderBoys': 'Starší žáci',
+    'olderGirls': 'Starší žákyně'
+  };
+  
+  return {
+    name: category.name,
+    competition: competitionMap[category.code] || 'Neznámá soutěž'
+  };
 };
 
 export default function MatchesAdminPage() {
-  const [selectedCategory, setSelectedCategory] = useState("men");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSeason, setSelectedSeason] = useState<string>("");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [standings, setStandings] = useState<Standing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,8 +150,49 @@ export default function MatchesAdminPage() {
 
   const supabase = createClient();
 
+  // Fetch seasons
+  const fetchSeasons = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('seasons')
+        .select('*')
+        .order('name', { ascending: false });
+
+      if (error) throw error;
+      setSeasons(data || []);
+      if (data && data.length > 0) {
+        // Set active season as default, or first season if no active
+        const activeSeason = data.find(s => s.is_active);
+        setSelectedSeason(activeSeason?.id || data[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching seasons:', error);
+    }
+  }, [supabase]);
+
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+      if (data && data.length > 0) {
+        setSelectedCategory(data[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  }, [supabase]);
+
   // Fetch matches with team data
   const fetchMatches = useCallback(async () => {
+    if (!selectedCategory) return;
+    
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -116,9 +200,10 @@ export default function MatchesAdminPage() {
         .select(`
           *,
           home_team:teams!home_team_id(*),
-          away_team:teams!away_team_id(*)
+          away_team:teams!away_team_id(*),
+          category:categories(*)
         `)
-        .eq('category', selectedCategory)
+        .eq('category_id', selectedCategory)
         .order('date', { ascending: true });
 
       if (error) throw error;
@@ -133,6 +218,8 @@ export default function MatchesAdminPage() {
 
   // Fetch standings
   const fetchStandings = useCallback(async () => {
+    if (!selectedCategory) return;
+    
     try {
       const { data, error } = await supabase
         .from('standings')
@@ -140,7 +227,7 @@ export default function MatchesAdminPage() {
           *,
           team:team_id(name)
         `)
-        .eq('category', selectedCategory)
+        .eq('category_id', selectedCategory)
         .order('position', { ascending: true });
 
       if (error) throw error;
@@ -247,7 +334,7 @@ export default function MatchesAdminPage() {
           // Find the team ID by name from the teams state
           const teamRecord = teams.find((t: Team) => t.name === team.team);
           return {
-            category: selectedCategory,
+            category_id: selectedCategory,
             position: team.position,
             team_id: teamRecord?.id || null,
             matches: team.matches,
@@ -259,7 +346,7 @@ export default function MatchesAdminPage() {
             points: team.points
           };
         }), {
-          onConflict: 'category,team_id'
+          onConflict: 'category_id,team_id'
         });
 
       if (error) throw error;
@@ -286,24 +373,32 @@ export default function MatchesAdminPage() {
   }, [supabase]);
 
   useEffect(() => {
-    fetchMatches();
-    fetchStandings();
+    fetchSeasons();
+    fetchCategories();
     fetchTeams();
-  }, [fetchMatches, fetchStandings, fetchTeams]);
+  }, [fetchSeasons, fetchCategories, fetchTeams]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchMatches();
+      fetchStandings();
+    }
+  }, [selectedCategory, fetchMatches, fetchStandings]);
 
   // Add new match
   const handleAddMatch = async () => {
     try {
+      const categoryInfo = getCategoryInfo(selectedCategory, categories);
       const { error } = await supabase
         .from('matches')
         .insert({
-          category: selectedCategory,
+          category_id: selectedCategory,
           date: formData.date,
           time: formData.time,
           home_team_id: formData.home_team_id,
           away_team_id: formData.away_team_id,
           venue: formData.venue,
-          competition: categories[selectedCategory as keyof typeof categories].competition,
+          competition: categoryInfo.competition,
           is_home: formData.is_home,
           status: 'upcoming'
         });
@@ -421,6 +516,25 @@ export default function MatchesAdminPage() {
         </p>
       </div>
 
+      {/* Season and Category Selection */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="w-5 h-5 text-blue-500" />
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sezóna:</label>
+          <select
+            className="p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+            value={selectedSeason}
+            onChange={(e) => setSelectedSeason(e.target.value)}
+          >
+            {seasons.map((season) => (
+              <option key={season.id} value={season.id}>
+                {season.name} {season.is_active && '(Aktivní)'}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Category Tabs */}
       <Tabs 
         selectedKey={selectedCategory} 
@@ -429,18 +543,24 @@ export default function MatchesAdminPage() {
         color="primary"
         variant="underlined"
       >
-        <Tab key="men" title="Muži" />
-        <Tab key="women" title="Ženy" />
-        <Tab key="juniorBoys" title="Dorostenci" />
-        <Tab key="juniorGirls" title="Dorostenky" />
+        {categories.map((category) => (
+          <Tab key={category.id} title={category.name} />
+        ))}
       </Tabs>
 
       {/* Action Buttons */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">
-          {categories[selectedCategory as keyof typeof categories].name} - 
-          {categories[selectedCategory as keyof typeof categories].competition}
-        </h2>
+        <div>
+          <h2 className="text-2xl font-bold">
+            {selectedCategory ? getCategoryInfo(selectedCategory, categories).name : 'Vyberte kategorii'} - 
+            {selectedCategory ? getCategoryInfo(selectedCategory, categories).competition : ''}
+          </h2>
+          {selectedSeason && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Sezóna: {seasons.find(s => s.id === selectedSeason)?.name}
+            </p>
+          )}
+        </div>
         <Button 
           color="primary" 
           startContent={<PlusIcon className="w-4 h-4" />}
