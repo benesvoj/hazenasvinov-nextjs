@@ -1,35 +1,141 @@
 'use client';
 
-import React from "react";
-import {translations} from "@/lib/translations";
-import {Spacer} from "@heroui/spacer";
+import React, { useState } from "react";
+import { translations } from "@/lib/translations";
 import Link from "next/link";
-import routes, {privateRoutes} from "@/routes/routes";
-import {Listbox, ListboxItem} from "@heroui/listbox";
-import {Tooltip} from "@heroui/tooltip";
+import { usePathname } from "next/navigation";
+import routes, { privateRoutes } from "@/routes/routes";
+import { 
+  HomeIcon,
+  UserGroupIcon,
+  CalendarIcon,
+  TrophyIcon,
+  UsersIcon,
+  Cog6ToothIcon,
+  ChartBarIcon,
+  CalendarDaysIcon,
+  UserIcon,
+  BuildingOfficeIcon
+} from "@heroicons/react/24/outline";
+
+// Icon mapping for admin routes
+const getRouteIcon = (route: string) => {
+  switch (route) {
+    case privateRoutes.dashboard:
+      return <HomeIcon className="w-5 h-5" />;
+    case privateRoutes.teams:
+      return <BuildingOfficeIcon className="w-5 h-5" />;
+    case privateRoutes.matches:
+      return <CalendarIcon className="w-5 h-5" />;
+    case privateRoutes.members:
+      return <UsersIcon className="w-5 h-5" />;
+    case privateRoutes.seasons:
+      return <CalendarDaysIcon className="w-5 h-5" />;
+    case privateRoutes.categories:
+      return <TrophyIcon className="w-5 h-5" />;
+    case privateRoutes.users:
+      return <UserIcon className="w-5 h-5" />;
+    case privateRoutes.competitions:
+      return <ChartBarIcon className="w-5 h-5" />;
+    default:
+      return <Cog6ToothIcon className="w-5 h-5" />;
+  }
+};
 
 export const Sidebar = () => {
+  const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-	const items = routes.filter((item) => item.isPrivate === true && !item.hidden)
+  const items = routes.filter((item) => item.isPrivate === true && !item.hidden);
 
-	return (
-		<aside className="w-64 bg-gray-900 text-white p-4">
-			<h1>{translations.admin.title}</h1>
+  return (
+    <aside className={`fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white transition-all duration-300 ease-in-out z-50 shadow-xl ${
+      isCollapsed ? 'w-16' : 'w-64'
+    }`}>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+        {!isCollapsed && (
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <TrophyIcon className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-white">{translations.admin.title}</h1>
+              <p className="text-xs text-gray-400">Administrace</p>
+            </div>
+          </div>
+        )}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-2 rounded-lg hover:bg-gray-700/50 transition-all duration-200 hover:scale-105"
+          title={isCollapsed ? "Rozbalit menu" : "Sbalit menu"}
+        >
+          <svg
+            className={`w-5 h-5 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
 
-			<Spacer y={4}/>
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        <div className="space-y-2 px-3">
+          {items.map((item) => {
+            const isActive = pathname === item.route;
+            const icon = getRouteIcon(item.route || '');
+            
+            return (
+              <Link
+                key={item.route}
+                href={item.route || privateRoutes.dashboard}
+                className={`group flex items-center px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
+                  isActive
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg transform scale-105'
+                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:transform hover:scale-105'
+                }`}
+                title={isCollapsed ? item.title : undefined}
+              >
+                {/* Active background glow */}
+                {isActive && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-500/20 rounded-xl"></div>
+                )}
+                
+                <div className={`flex items-center relative z-10 ${isCollapsed ? 'justify-center w-full' : 'space-x-3'}`}>
+                  <div className={`flex-shrink-0 p-1 rounded-lg transition-all duration-200 ${
+                    isActive 
+                      ? 'text-white bg-white/20' 
+                      : 'text-gray-400 group-hover:text-white group-hover:bg-gray-600/30'
+                  }`}>
+                    {icon}
+                  </div>
+                  {!isCollapsed && (
+                    <span className="text-sm font-medium">{item.title}</span>
+                  )}
+                </div>
+                
+                {/* Active indicator */}
+                {isActive && !isCollapsed && (
+                  <div className="absolute right-3 w-2 h-2 bg-white rounded-full shadow-lg"></div>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
-			<div>
-				<Listbox aria-label="Admin Sidebar" className="flex flex-col gap-2" items={items}>
-					{(item) => (
-						<ListboxItem key={item.route} textValue={item.title}>
-							{/* <Tooltip content={item.description}> */}
-								<Link href={item.route || privateRoutes.dashboard}>{item.title}</Link>
-							{/* </Tooltip> */}
-						</ListboxItem>
-					)}
-				</Listbox>
-			</div>
-
-		</aside>
-	)
-}
+      {/* Footer */}
+      {!isCollapsed && (
+        <div className="p-4 border-t border-gray-700 bg-gray-800/30">
+          <div className="text-center">
+            <div className="text-xs text-gray-400 mb-1">TJ Sokol Svinov</div>
+            <div className="text-xs text-gray-500">Administrace</div>
+          </div>
+        </div>
+      )}
+    </aside>
+  );
+};
