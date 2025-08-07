@@ -10,7 +10,7 @@ import {Tooltip} from "@heroui/tooltip";
 
 export const Sidebar = () => {
 
-	const items = routes.filter((item) => item.isPrivate === true)
+	const items = routes.filter((item) => item.isPrivate === true && !item.hidden)
 
 	return (
 		<aside className="w-64 bg-gray-900 text-white p-4">
@@ -22,9 +22,9 @@ export const Sidebar = () => {
 				<Listbox aria-label="Admin Sidebar" className="flex flex-col gap-2" items={items}>
 					{(item) => (
 						<ListboxItem key={item.route} textValue={item.title}>
-							<Tooltip content={item.description}>
+							{/* <Tooltip content={item.description}> */}
 								<Link href={item.route || privateRoutes.dashboard}>{item.title}</Link>
-							</Tooltip>
+							{/* </Tooltip> */}
 						</ListboxItem>
 					)}
 				</Listbox>

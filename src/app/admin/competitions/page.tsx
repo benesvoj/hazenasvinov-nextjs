@@ -14,10 +14,10 @@ export default function Page() {
 			<div className="flex w-full flex-col">
 			<Tabs aria-label={translations.competitions.title}>
 				<Tab key={translations.categories.title} title={translations.categories.title}>
-					<CategoriesTable />
+					{/* <CategoriesTable /> */}
 				</Tab>
 				<Tab key={translations.season.title} title={translations.season.title}>
-					<SeasonsTable />
+					{/* <SeasonsTable /> */}
 				</Tab>
 			</Tabs>
 			</div>

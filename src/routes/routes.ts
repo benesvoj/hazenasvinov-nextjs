@@ -6,6 +6,7 @@ export interface MenuItem {
 	children?: MenuItem[];
 	description?: string;
 	isPrivate?: boolean;
+	hidden?: boolean;
 }
 
 export const publicRoutes = {
@@ -40,6 +41,10 @@ export const privateRoutes = {
 	users: '/admin/users',
 	competitions: '/admin/competitions',
 	matches: '/admin/matches',
+	members: '/admin/members',
+	teamCategories: '/admin/team-categories',
+	categories: '/admin/categories',
+	seasons: '/admin/seasons',
 } as const;
 
 const routes: MenuItem[] = [
@@ -106,9 +111,13 @@ const routes: MenuItem[] = [
 	{route: publicRoutes.celebration, title: '100 let'},
 	{route: publicRoutes.login, title: 'Admin'},
 	{route: privateRoutes.dashboard, title: 'Dashboard', isPrivate: true, description: 'Správa obsahu a nastavení systému.'},
-	{route: privateRoutes.competitions, title: translations.competitions.title, isPrivate: true, description: translations.competitions.description},
+	{route: privateRoutes.competitions, title: translations.competitions.title, isPrivate: true, description: translations.competitions.description, hidden: true},
 	{route: privateRoutes.teams, title: 'Týmy', isPrivate: true, description: 'Správa týmů a jejich informací.'},
 	{route: privateRoutes.matches, title: 'Zápasy', isPrivate: true, description: 'Správa zápasů, výsledků a tabulek pro všechny kategorie.'},
+	{route: privateRoutes.members, title: 'Členové', isPrivate: true, description: 'Správa členů klubu - přidávání, úprava a mazání členů.'},
+	{route: privateRoutes.teamCategories, title: 'Kategorie týmů', isPrivate: true, description: 'Správa kategorií týmů pro různé sezóny.', hidden: true},
+	{route: privateRoutes.seasons, title: translations.seasons.title, isPrivate: true, description: translations.seasons.description},
+	{route: privateRoutes.categories, title: 'Kategorie', isPrivate: true, description: 'Správa kategorií pro týmové soutěže a členy klubu.'},
 	{route: privateRoutes.users, title: 'Uživatelé', isPrivate: true, description: 'Správa uživatelů, kteří se mohou přihlásit do systému.'},
 ]
 

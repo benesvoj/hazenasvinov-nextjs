@@ -18,7 +18,10 @@ import {
   PhoneIcon,
   UserIcon,
   CalendarIcon,
-  HomeIcon
+  HomeIcon,
+  UserGroupIcon,
+  CheckIcon,
+  XMarkIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 
@@ -40,11 +43,48 @@ interface Team {
   updated_at: string;
 }
 
+interface Season {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+}
+
+interface Category {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  age_group?: string;
+  gender?: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
+interface TeamCategory {
+  id: string;
+  team_id: string;
+  season_id: string;
+  category_id: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  team?: Team;
+  season?: Season;
+  category?: Category;
+}
+
 export default function TeamsAdminPage() {
   const [teams, setTeams] = useState<Team[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [teamCategories, setTeamCategories] = useState<TeamCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [selectedSeason, setSelectedSeason] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'details' | 'categories'>('details');
   
   // Modal states
   const { isOpen: isAddTeamOpen, onOpen: onAddTeamOpen, onClose: onAddTeamClose } = useDisclosure();
@@ -63,6 +103,12 @@ export default function TeamsAdminPage() {
     contact_person: '',
     founded_year: '',
     home_venue: '',
+    is_active: true
+  });
+
+  const [categoryFormData, setCategoryFormData] = useState({
+    season_id: '',
+    category_id: '',
     is_active: true
   });
 
@@ -87,9 +133,78 @@ export default function TeamsAdminPage() {
     }
   }, [supabase]);
 
+  // Fetch seasons
+  const fetchSeasons = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('seasons')
+        .select('*')
+        .order('name', { ascending: false });
+
+      if (error) throw error;
+      setSeasons(data || []);
+      if (data && data.length > 0) {
+        setSelectedSeason(data[0].id);
+        setCategoryFormData(prev => ({ ...prev, season_id: data[0].id }));
+      }
+    } catch (error) {
+      console.error('Error fetching seasons:', error);
+    }
+  }, [supabase]);
+
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+      if (data && data.length > 0) {
+        setCategoryFormData(prev => ({ ...prev, category_id: data[0].id }));
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  }, [supabase]);
+
+  // Fetch team categories
+  const fetchTeamCategories = useCallback(async () => {
+    if (!selectedTeam || !selectedSeason) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('team_categories')
+        .select(`
+          *,
+          season:seasons(*),
+          category:categories(*)
+        `)
+        .eq('team_id', selectedTeam.id)
+        .eq('season_id', selectedSeason)
+        .order('category_id', { ascending: true });
+
+      if (error) throw error;
+      setTeamCategories(data || []);
+    } catch (error) {
+      console.error('Error fetching team categories:', error);
+    }
+  }, [selectedTeam, selectedSeason, supabase]);
+
   useEffect(() => {
     fetchTeams();
-  }, [fetchTeams]);
+    fetchSeasons();
+    fetchCategories();
+  }, [fetchTeams, fetchSeasons, fetchCategories]);
+
+  useEffect(() => {
+    if (selectedTeam && selectedSeason) {
+      fetchTeamCategories();
+    }
+  }, [selectedTeam, selectedSeason, fetchTeamCategories]);
 
   // Add new team
   const handleAddTeam = async () => {
@@ -224,7 +339,109 @@ export default function TeamsAdminPage() {
   // Open view modal
   const handleViewTeam = (team: Team) => {
     setSelectedTeam(team);
+    setActiveTab('details');
     onViewTeamOpen();
+  };
+
+  // Add team category
+  const handleAddTeamCategory = async () => {
+    if (!selectedTeam) return;
+
+    try {
+      const { error } = await supabase
+        .from('team_categories')
+        .insert({
+          team_id: selectedTeam.id,
+          season_id: categoryFormData.season_id,
+          category_id: categoryFormData.category_id,
+          is_active: categoryFormData.is_active
+        });
+
+      if (error) throw error;
+      
+      setCategoryFormData({
+        season_id: selectedSeason,
+        category_id: categories.length > 0 ? categories[0].id : '',
+        is_active: true
+      });
+      fetchTeamCategories();
+    } catch (error) {
+      setError('Chyba při přidávání kategorie týmu');
+      console.error('Error adding team category:', error);
+    }
+  };
+
+  // Add all categories to team
+  const handleAddAllCategories = async () => {
+    if (!selectedTeam) return;
+
+    try {
+      // Get existing category IDs for this team and season
+      const existingCategoryIds = teamCategories.map(tc => tc.category_id);
+      
+      // Filter out categories that are already assigned
+      const categoriesToAdd = categories.filter(category => 
+        !existingCategoryIds.includes(category.id)
+      );
+
+      if (categoriesToAdd.length === 0) {
+        setError('Všechny kategorie jsou již přiřazeny');
+        return;
+      }
+
+      // Prepare data for bulk insert
+      const categoriesData = categoriesToAdd.map(category => ({
+        team_id: selectedTeam.id,
+        season_id: selectedSeason,
+        category_id: category.id,
+        is_active: true
+      }));
+
+      const { error } = await supabase
+        .from('team_categories')
+        .insert(categoriesData);
+
+      if (error) throw error;
+      
+      fetchTeamCategories();
+      setError('');
+    } catch (error) {
+      setError('Chyba při přidávání všech kategorií');
+      console.error('Error adding all categories:', error);
+    }
+  };
+
+  // Delete team category
+  const handleDeleteTeamCategory = async (categoryId: string) => {
+    try {
+      const { error } = await supabase
+        .from('team_categories')
+        .delete()
+        .eq('id', categoryId);
+
+      if (error) throw error;
+      fetchTeamCategories();
+    } catch (error) {
+      setError('Chyba při mazání kategorie týmu');
+      console.error('Error deleting team category:', error);
+    }
+  };
+
+  // Get category badge color
+  const getCategoryBadgeColor = (categoryCode: string) => {
+    switch (categoryCode) {
+      case 'men': return 'primary';
+      case 'women': return 'secondary';
+      case 'juniorBoys': return 'success';
+      case 'juniorGirls': return 'warning';
+      case 'prepKids': return 'danger';
+      case 'youngestKids': return 'default';
+      case 'youngerBoys': return 'primary';
+      case 'youngerGirls': return 'secondary';
+      case 'olderBoys': return 'success';
+      case 'olderGirls': return 'warning';
+      default: return 'default';
+    }
   };
 
   const getStatusBadge = (isActive: boolean) => {
@@ -514,81 +731,245 @@ export default function TeamsAdminPage() {
       </Modal>
 
       {/* View Team Modal */}
-      <Modal isOpen={isViewTeamOpen} onClose={onViewTeamClose}>
+      <Modal isOpen={isViewTeamOpen} onClose={onViewTeamClose} size="4xl">
         <ModalContent>
-          <ModalHeader>Detail týmu</ModalHeader>
+          <ModalHeader>Detail týmu - {selectedTeam?.name}</ModalHeader>
           <ModalBody>
             {selectedTeam && (
               <div className="space-y-6">
-                <div className="text-center">
-                  <BuildingOfficeIcon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold">{selectedTeam.name}</h3>
-                  {selectedTeam.short_name && (
-                    <p className="text-lg text-gray-600 dark:text-gray-400">
-                      {selectedTeam.short_name}
-                    </p>
-                  )}
-                  {getStatusBadge(selectedTeam.is_active)}
+                {/* Tabs */}
+                <div className="flex border-b border-gray-200 dark:border-gray-700">
+                  <button
+                    className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+                      activeTab === 'details'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                    }`}
+                    onClick={() => setActiveTab('details')}
+                  >
+                    Detaily
+                  </button>
+                  <button
+                    className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+                      activeTab === 'categories'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                    }`}
+                    onClick={() => setActiveTab('categories')}
+                  >
+                    Kategorie
+                  </button>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-lg">Základní informace</h4>
-                    <div className="space-y-3">
-                      {selectedTeam.city && (
-                        <div className="flex items-center gap-2">
-                          <MapPinIcon className="w-4 h-4 text-gray-500" />
-                          <span>{selectedTeam.city}</span>
-                          {selectedTeam.region && <span className="text-gray-500">({selectedTeam.region})</span>}
-                        </div>
+
+                {/* Details Tab */}
+                {activeTab === 'details' && (
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <BuildingOfficeIcon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+                      <h3 className="text-2xl font-bold">{selectedTeam.name}</h3>
+                      {selectedTeam.short_name && (
+                        <p className="text-lg text-gray-600 dark:text-gray-400">
+                          {selectedTeam.short_name}
+                        </p>
                       )}
-                      {selectedTeam.home_venue && (
-                        <div className="flex items-center gap-2">
-                          <HomeIcon className="w-4 h-4 text-gray-500" />
-                          <span>{selectedTeam.home_venue}</span>
+                      {getStatusBadge(selectedTeam.is_active)}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-lg">Základní informace</h4>
+                        <div className="space-y-3">
+                          {selectedTeam.city && (
+                            <div className="flex items-center gap-2">
+                              <MapPinIcon className="w-4 h-4 text-gray-500" />
+                              <span>{selectedTeam.city}</span>
+                              {selectedTeam.region && <span className="text-gray-500">({selectedTeam.region})</span>}
+                            </div>
+                          )}
+                          {selectedTeam.home_venue && (
+                            <div className="flex items-center gap-2">
+                              <HomeIcon className="w-4 h-4 text-gray-500" />
+                              <span>{selectedTeam.home_venue}</span>
+                            </div>
+                          )}
+                          {selectedTeam.founded_year && (
+                            <div className="flex items-center gap-2">
+                              <CalendarIcon className="w-4 h-4 text-gray-500" />
+                              <span>Založen {selectedTeam.founded_year}</span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {selectedTeam.founded_year && (
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="w-4 h-4 text-gray-500" />
-                          <span>Založen {selectedTeam.founded_year}</span>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-lg">Kontakt</h4>
+                        <div className="space-y-3">
+                          {selectedTeam.contact_person && (
+                            <div className="flex items-center gap-2">
+                              <UserIcon className="w-4 h-4 text-gray-500" />
+                              <span>{selectedTeam.contact_person}</span>
+                            </div>
+                          )}
+                          {selectedTeam.email && (
+                            <div className="flex items-center gap-2">
+                              <EnvelopeIcon className="w-4 h-4 text-gray-500" />
+                              <span>{selectedTeam.email}</span>
+                            </div>
+                          )}
+                          {selectedTeam.phone && (
+                            <div className="flex items-center gap-2">
+                              <PhoneIcon className="w-4 h-4 text-gray-500" />
+                              <span>{selectedTeam.phone}</span>
+                            </div>
+                          )}
+                          {selectedTeam.website && (
+                            <div className="flex items-center gap-2">
+                              <GlobeAltIcon className="w-4 h-4 text-gray-500" />
+                              <a href={selectedTeam.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {selectedTeam.website}
+                              </a>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-lg">Kontakt</h4>
-                    <div className="space-y-3">
-                      {selectedTeam.contact_person && (
-                        <div className="flex items-center gap-2">
-                          <UserIcon className="w-4 h-4 text-gray-500" />
-                          <span>{selectedTeam.contact_person}</span>
-                        </div>
-                      )}
-                      {selectedTeam.email && (
-                        <div className="flex items-center gap-2">
-                          <EnvelopeIcon className="w-4 h-4 text-gray-500" />
-                          <span>{selectedTeam.email}</span>
-                        </div>
-                      )}
-                      {selectedTeam.phone && (
-                        <div className="flex items-center gap-2">
-                          <PhoneIcon className="w-4 h-4 text-gray-500" />
-                          <span>{selectedTeam.phone}</span>
-                        </div>
-                      )}
-                      {selectedTeam.website && (
-                        <div className="flex items-center gap-2">
-                          <GlobeAltIcon className="w-4 h-4 text-gray-500" />
-                          <a href={selectedTeam.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                            {selectedTeam.website}
-                          </a>
-                        </div>
-                      )}
+                )}
+
+                {/* Categories Tab */}
+                {activeTab === 'categories' && (
+                  <div className="space-y-6">
+                                         <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-4">
+                         <h4 className="font-semibold text-lg">Kategorie týmu</h4>
+                         <select
+                           className="p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                           value={selectedSeason}
+                           onChange={(e) => {
+                             setSelectedSeason(e.target.value);
+                             setCategoryFormData(prev => ({ ...prev, season_id: e.target.value }));
+                           }}
+                         >
+                           {seasons.map((season) => (
+                             <option key={season.id} value={season.id}>
+                               {season.name} {season.is_active && '(Aktivní)'}
+                             </option>
+                           ))}
+                         </select>
+                       </div>
+                       <div className="flex gap-2">
+                         <Button 
+                           color="secondary" 
+                           size="sm"
+                           startContent={<UserGroupIcon className="w-4 h-4" />}
+                           onPress={handleAddAllCategories}
+                         >
+                           Přidat všechny
+                         </Button>
+                         <Button 
+                           color="primary" 
+                           size="sm"
+                           startContent={<PlusIcon className="w-4 h-4" />}
+                           onPress={handleAddTeamCategory}
+                         >
+                           Přidat kategorii
+                         </Button>
+                       </div>
+                     </div>
+
+                    {/* Add Category Form */}
+                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                      <h5 className="font-medium mb-3">Přidat novou kategorii</h5>
+                      <div className="grid grid-cols-3 gap-4">
+                        <select
+                          className="p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                          value={categoryFormData.category_id}
+                          onChange={(e) => setCategoryFormData({ ...categoryFormData, category_id: e.target.value })}
+                        >
+                          <option value="">Vyberte kategorii</option>
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>{category.name}</option>
+                          ))}
+                        </select>
+                        
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={categoryFormData.is_active}
+                            onChange={(e) => setCategoryFormData({ ...categoryFormData, is_active: e.target.checked })}
+                          />
+                          <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
+                        </label>
+                      </div>
                     </div>
+
+                                         {/* Categories List */}
+                     <div className="space-y-3">
+                       <h5 className="font-medium">Přiřazené kategorie</h5>
+                       {teamCategories.length === 0 ? (
+                         <p className="text-gray-500 text-center py-4">Žádné kategorie nebyly přiřazeny</p>
+                       ) : (
+                         <div className="overflow-x-auto">
+                           <table className="w-full">
+                             <thead>
+                               <tr className="border-b border-gray-200 dark:border-gray-700">
+                                 <th className="text-left py-2 px-3">Kategorie</th>
+                                 <th className="text-left py-2 px-3">Status</th>
+                                 <th className="text-center py-2 px-3">Akce</th>
+                               </tr>
+                             </thead>
+                             <tbody>
+                               {teamCategories.map((teamCategory) => (
+                                 <tr key={teamCategory.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                   <td className="py-2 px-3">
+                                     <Badge 
+                                       color={getCategoryBadgeColor(teamCategory.category?.code || '')} 
+                                       variant="flat"
+                                     >
+                                       {teamCategory.category?.name || 'Neznámá kategorie'}
+                                     </Badge>
+                                   </td>
+                                   <td className="py-2 px-3">
+                                     <Badge 
+                                       color={teamCategory.is_active ? 'success' : 'default'} 
+                                       variant="flat"
+                                     >
+                                       {teamCategory.is_active ? (
+                                         <>
+                                           <CheckIcon className="w-3 h-3 mr-1" />
+                                           Aktivní
+                                         </>
+                                       ) : (
+                                         <>
+                                           <XMarkIcon className="w-3 h-3 mr-1" />
+                                           Neaktivní
+                                         </>
+                                       )}
+                                     </Badge>
+                                   </td>
+                                   <td className="py-2 px-3">
+                                     <div className="flex justify-center">
+                                       <Button
+                                         size="sm"
+                                         color="danger"
+                                         variant="light"
+                                         startContent={<TrashIcon className="w-4 h-4" />}
+                                         onPress={() => handleDeleteTeamCategory(teamCategory.id)}
+                                       >
+                                         Smazat
+                                       </Button>
+                                     </div>
+                                   </td>
+                                 </tr>
+                               ))}
+                             </tbody>
+                           </table>
+                         </div>
+                       )}
+                     </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </ModalBody>

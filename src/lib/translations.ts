@@ -85,6 +85,10 @@ export const translations = {
 		title: 'Soutěže',
 		description: 'Správa soutěží, které se konají v rámci systému.',
 	},
+	seasons: {
+		title: 'Sezóny',
+		description: 'Správa sezón pro organizaci soutěží a týmů.',
+	},
 	season: {
 		title: 'Sezóna',
 		description: 'Správa sezón, které jsou dostupné v systému.',
