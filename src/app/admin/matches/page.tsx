@@ -97,7 +97,7 @@ interface Match {
 
 interface Standing {
   position: number;
-  team: { name: string };
+  team: { name: string; logo_url?: string };
   matches: number;
   wins: number;
   draws: number;
@@ -295,7 +295,7 @@ export default function MatchesAdminPage() {
         .from('standings')
         .select(`
           *,
-          team:team_id(name)
+          team:team_id(name, logo_url)
         `)
         .order('position');
 
@@ -781,7 +781,21 @@ export default function MatchesAdminPage() {
                                   .map((standing, index) => (
                                     <tr key={index} className="hover:bg-gray-50">
                                       <td className="border px-4 py-2 font-medium">{standing.position}</td>
-                                      <td className="border px-4 py-2">{standing.team?.name || 'N/A'}</td>
+                                      <td className="border px-4 py-2">
+                                        <div className="flex items-center gap-2">
+                                          {standing.team?.logo_url && (
+                                            <img 
+                                              src={standing.team.logo_url} 
+                                              alt={`${standing.team.name} logo`}
+                                              className="w-6 h-6 object-contain"
+                                              onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                              }}
+                                            />
+                                          )}
+                                          <span>{standing.team?.name || 'N/A'}</span>
+                                        </div>
+                                      </td>
                                       <td className="border px-4 py-2 text-center">{standing.matches}</td>
                                       <td className="border px-4 py-2 text-center">{standing.wins}</td>
                                       <td className="border px-4 py-2 text-center">{standing.draws}</td>

@@ -74,6 +74,7 @@ interface Match {
 interface Standing {
   position: number;
   team: string;
+  team_logo: string;
   matches: number;
   wins: number;
   draws: number;
@@ -201,7 +202,7 @@ export default function MatchSchedule() {
         .from('standings')
         .select(`
           *,
-          team:team_id(name)
+          team:team_id(name, logo_url)
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
@@ -209,10 +210,11 @@ export default function MatchSchedule() {
 
       if (standingsError) throw standingsError;
 
-      // Transform standings data to flatten team names
+      // Transform standings data to flatten team names and logos
       const transformedStandings = (standingsData as any[])?.map(standing => ({
         ...standing,
-        team: standing.team?.name || ''
+        team: standing.team?.name || '',
+        team_logo: standing.team?.logo_url || ''
       })) || [];
 
       setMatches(transformedMatches);
@@ -549,7 +551,21 @@ export default function MatchSchedule() {
                         {standings.map((team, index) => (
                           <tr key={index} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
                             <td className="py-2 px-2 font-semibold">{team.position}.</td>
-                            <td className="py-2 px-2 font-medium">{team.team}</td>
+                            <td className="py-2 px-2 font-medium">
+                              <div className="flex items-center gap-2">
+                                {team.team_logo && (
+                                  <img 
+                                    src={team.team_logo} 
+                                    alt={`${team.team} logo`}
+                                    className="w-6 h-6 object-contain"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                )}
+                                <span>{team.team}</span>
+                              </div>
+                            </td>
                             <td className="py-2 px-2 text-center">{team.matches}</td>
                             <td className="py-2 px-2 text-center text-green-600">{team.wins}</td>
                             <td className="py-2 px-2 text-center text-yellow-600">{team.draws}</td>

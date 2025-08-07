@@ -60,7 +60,7 @@ interface Match {
 interface Standing {
   id: string;
   position: number;
-  team: { name: string };
+  team: { name: string; logo_url?: string };
   matches: number;
   wins: number;
   draws: number;
@@ -202,7 +202,7 @@ export default function MatchSchedulePage() {
         .from('standings')
         .select(`
           *,
-          team:team_id(name)
+          team:team_id(name, logo_url)
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
@@ -752,7 +752,21 @@ export default function MatchSchedulePage() {
                   {currentStandings.map((team) => (
                     <tr key={team.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <td className="py-2 px-2 font-semibold">{team.position}.</td>
-                      <td className="py-2 px-2 font-medium">{team.team?.name || 'N/A'}</td>
+                      <td className="py-2 px-2 font-medium">
+                        <div className="flex items-center gap-2">
+                          {team.team?.logo_url && (
+                            <img 
+                              src={team.team.logo_url} 
+                              alt={`${team.team.name} logo`}
+                              className="w-6 h-6 object-contain"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          )}
+                          <span>{team.team?.name || 'N/A'}</span>
+                        </div>
+                      </td>
                       <td className="py-2 px-2 text-center">{team.matches}</td>
                       <td className="py-2 px-2 text-center text-green-600">{team.wins}</td>
                       <td className="py-2 px-2 text-center text-yellow-600">{team.draws}</td>
