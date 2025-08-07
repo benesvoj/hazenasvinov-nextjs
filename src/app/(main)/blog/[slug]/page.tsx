@@ -71,7 +71,8 @@ const relatedPosts = [
   }
 ];
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Back Button */}
