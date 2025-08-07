@@ -21,13 +21,31 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
 
+interface Team {
+  id: string;
+  name: string;
+  short_name?: string;
+  city?: string;
+  region?: string;
+  logo_url?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  contact_person?: string;
+  founded_year?: number;
+  home_venue?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 interface Match {
   id: string;
   category: string;
   date: string;
   time: string;
-  home_team: string;
-  away_team: string;
+  home_team_id: string;
+  away_team_id: string;
   venue: string;
   competition: string;
   is_home: boolean;
@@ -37,6 +55,8 @@ interface Match {
   result?: 'win' | 'loss' | 'draw';
   created_at: string;
   updated_at: string;
+  home_team?: Team;
+  away_team?: Team;
 }
 
 interface Standing {
@@ -71,11 +91,12 @@ export default function MatchesAdminPage() {
   const { isOpen: isAddResultOpen, onOpen: onAddResultOpen, onClose: onAddResultClose } = useDisclosure();
   
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [formData, setFormData] = useState({
     date: '',
     time: '',
-    home_team: '',
-    away_team: '',
+    home_team_id: '',
+    away_team_id: '',
     venue: '',
     is_home: true
   });
@@ -86,13 +107,17 @@ export default function MatchesAdminPage() {
 
   const supabase = createClient();
 
-  // Fetch matches
+  // Fetch matches with team data
   const fetchMatches = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('matches')
-        .select('*')
+        .select(`
+          *,
+          home_team:teams!home_team_id(*),
+          away_team:teams!away_team_id(*)
+        `)
         .eq('category', selectedCategory)
         .order('date', { ascending: true });
 
@@ -130,10 +155,13 @@ export default function MatchesAdminPage() {
 
       // Initialize teams
       completedMatches.forEach(match => {
-        if (!teams.has(match.home_team)) {
-          teams.set(match.home_team, {
+        const homeTeamName = match.home_team?.name || 'Neznámý tým';
+        const awayTeamName = match.away_team?.name || 'Neznámý tým';
+        
+        if (!teams.has(homeTeamName)) {
+          teams.set(homeTeamName, {
             position: 0,
-            team: match.home_team,
+            team: homeTeamName,
             matches: 0,
             wins: 0,
             draws: 0,
@@ -143,10 +171,10 @@ export default function MatchesAdminPage() {
             points: 0
           });
         }
-        if (!teams.has(match.away_team)) {
-          teams.set(match.away_team, {
+        if (!teams.has(awayTeamName)) {
+          teams.set(awayTeamName, {
             position: 0,
-            team: match.away_team,
+            team: awayTeamName,
             matches: 0,
             wins: 0,
             draws: 0,
@@ -160,8 +188,10 @@ export default function MatchesAdminPage() {
 
       // Calculate statistics
       completedMatches.forEach(match => {
-        const homeTeam = teams.get(match.home_team)!;
-        const awayTeam = teams.get(match.away_team)!;
+        const homeTeamName = match.home_team?.name || 'Neznámý tým';
+        const awayTeamName = match.away_team?.name || 'Neznámý tým';
+        const homeTeam = teams.get(homeTeamName)!;
+        const awayTeam = teams.get(awayTeamName)!;
 
         homeTeam.matches++;
         awayTeam.matches++;
@@ -217,10 +247,27 @@ export default function MatchesAdminPage() {
     }
   };
 
+  // Fetch teams
+  const fetchTeams = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('*')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setTeams(data || []);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+    }
+  }, [supabase]);
+
   useEffect(() => {
     fetchMatches();
     fetchStandings();
-  }, [fetchMatches, fetchStandings]);
+    fetchTeams();
+  }, [fetchMatches, fetchStandings, fetchTeams]);
 
   // Add new match
   const handleAddMatch = async () => {
@@ -231,8 +278,8 @@ export default function MatchesAdminPage() {
           category: selectedCategory,
           date: formData.date,
           time: formData.time,
-          home_team: formData.home_team,
-          away_team: formData.away_team,
+          home_team_id: formData.home_team_id,
+          away_team_id: formData.away_team_id,
           venue: formData.venue,
           competition: categories[selectedCategory as keyof typeof categories].competition,
           is_home: formData.is_home,
@@ -245,8 +292,8 @@ export default function MatchesAdminPage() {
       setFormData({
         date: '',
         time: '',
-        home_team: '',
-        away_team: '',
+        home_team_id: '',
+        away_team_id: '',
         venue: '',
         is_home: true
       });
@@ -408,15 +455,15 @@ export default function MatchesAdminPage() {
                           {new Date(match.date).toLocaleDateString('cs-CZ')} v {match.time}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className={match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.home_team}
-                        </span>
-                        <span className="text-gray-500">vs</span>
-                        <span className={!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
-                          {match.away_team}
-                        </span>
-                      </div>
+                                             <div className="flex items-center gap-2">
+                         <span className={match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
+                           {match.home_team?.name || 'Neznámý tým'}
+                         </span>
+                         <span className="text-gray-500">vs</span>
+                         <span className={!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}>
+                           {match.away_team?.name || 'Neznámý tým'}
+                         </span>
+                       </div>
                       {match.status === 'completed' && (
                         <div className="flex items-center gap-2">
                           <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
@@ -537,16 +584,30 @@ export default function MatchesAdminPage() {
                 value={formData.time}
                 onChange={(e) => setFormData({...formData, time: e.target.value})}
               />
-              <Input
-                label="Domácí tým"
-                value={formData.home_team}
-                onChange={(e) => setFormData({...formData, home_team: e.target.value})}
-              />
-              <Input
-                label="Hostující tým"
-                value={formData.away_team}
-                onChange={(e) => setFormData({...formData, away_team: e.target.value})}
-              />
+              <select
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={formData.home_team_id}
+                onChange={(e) => setFormData({...formData, home_team_id: e.target.value})}
+              >
+                <option value="">Vyberte domácí tým</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={formData.away_team_id}
+                onChange={(e) => setFormData({...formData, away_team_id: e.target.value})}
+              >
+                <option value="">Vyberte hostující tým</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
               <Input
                 label="Místo konání"
                 value={formData.venue}
@@ -573,19 +634,19 @@ export default function MatchesAdminPage() {
             {selectedMatch && (
               <div className="space-y-4">
                 <div className="text-center">
-                  <h3 className="font-semibold mb-2">{selectedMatch.home_team} vs {selectedMatch.away_team}</h3>
+                  <h3 className="font-semibold mb-2">{selectedMatch.home_team?.name || 'Neznámý tým'} vs {selectedMatch.away_team?.name || 'Neznámý tým'}</h3>
                   <p className="text-sm text-gray-600">{new Date(selectedMatch.date).toLocaleDateString('cs-CZ')}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <Input
-                    label={`Skóre ${selectedMatch.home_team}`}
+                    label={`Skóre ${selectedMatch.home_team?.name || 'Domácí tým'}`}
                     type="number"
                     value={resultData.home_score}
                     onChange={(e) => setResultData({...resultData, home_score: e.target.value})}
                   />
                   <span className="text-2xl font-bold">:</span>
                   <Input
-                    label={`Skóre ${selectedMatch.away_team}`}
+                    label={`Skóre ${selectedMatch.away_team?.name || 'Hostující tým'}`}
                     type="number"
                     value={resultData.away_score}
                     onChange={(e) => setResultData({...resultData, away_score: e.target.value})}
