@@ -1,5 +1,12 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+@plugin '../../hero.ts';
+/* Note: You may need to change the path to fit your project structure */
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@custom-variant dark (&:is(.dark *));
 
+:root {
+  --radix-accordion-content-height: 100%; /* Default value */
+}
 @theme {
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -53,13 +60,16 @@
   }
 }
 
-@utility container {
+.container {
   margin-inline: auto;
   padding-inline: 2rem;
-  @media (width >= --theme(--breakpoint-sm)) {
-    max-width: none;
-  }
-  @media (width >= 1400px) {
+  max-width: none;
+
+  /* This is the earliest valid CSS for custom breakpoint, you need this resolved by your toolchain */
+}
+
+@media (min-width: 1400px) {
+  .container {
     max-width: 1400px;
   }
 }

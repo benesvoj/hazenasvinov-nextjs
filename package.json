@@ -17,6 +17,7 @@
     "@heroui/input": "^2.4.19",
     "@heroui/listbox": "^2.3.18",
     "@heroui/modal": "^2.2.16",
+    "@heroui/react": "^2.8.2",
     "@heroui/skeleton": "^2.2.12",
     "@heroui/spacer": "^2.2.14",
     "@heroui/spinner": "^2.2.16",
