@@ -65,30 +65,140 @@ const categoryData = {
         status: "completed"
       }
     ],
-    teamStandings: [
-      {
-        position: 1,
-        team: "TJ Sokol Svinov",
-        matches: 3,
-        wins: 2,
-        draws: 1,
-        losses: 0,
-        goalsFor: 49,
-        goalsAgainst: 41,
-        points: 5
-      },
-      {
-        position: 2,
-        team: "TJ Sokol Ostrava",
-        matches: 3,
-        wins: 2,
-        draws: 0,
-        losses: 1,
-        goalsFor: 45,
-        goalsAgainst: 38,
-        points: 4
-      }
-    ]
+         teamStandings: [
+       {
+         position: 1,
+         team: "TJ Sokol Svinov",
+         matches: 3,
+         wins: 2,
+         draws: 1,
+         losses: 0,
+         goalsFor: 49,
+         goalsAgainst: 41,
+         points: 5
+       },
+       {
+         position: 2,
+         team: "TJ Sokol Ostrava",
+         matches: 3,
+         wins: 2,
+         draws: 0,
+         losses: 1,
+         goalsFor: 45,
+         goalsAgainst: 38,
+         points: 4
+       },
+       {
+         position: 3,
+         team: "TJ Sokol Frýdek-Místek",
+         matches: 3,
+         wins: 1,
+         draws: 1,
+         losses: 1,
+         goalsFor: 42,
+         goalsAgainst: 40,
+         points: 3
+       },
+       {
+         position: 4,
+         team: "TJ Sokol Karviná",
+         matches: 3,
+         wins: 1,
+         draws: 0,
+         losses: 2,
+         goalsFor: 38,
+         goalsAgainst: 42,
+         points: 2
+       },
+       {
+         position: 5,
+         team: "TJ Sokol Poruba",
+         matches: 3,
+         wins: 0,
+         draws: 2,
+         losses: 1,
+         goalsFor: 35,
+         goalsAgainst: 37,
+         points: 2
+       },
+       {
+         position: 6,
+         team: "TJ Sokol Klimkovice",
+         matches: 3,
+         wins: 0,
+         draws: 1,
+         losses: 2,
+         goalsFor: 32,
+         goalsAgainst: 40,
+         points: 1
+       },
+       {
+         position: 7,
+         team: "TJ Sokol Bohumín",
+         matches: 3,
+         wins: 0,
+         draws: 1,
+         losses: 2,
+         goalsFor: 30,
+         goalsAgainst: 38,
+         points: 1
+       },
+       {
+         position: 8,
+         team: "TJ Sokol Havířov",
+         matches: 3,
+         wins: 0,
+         draws: 0,
+         losses: 3,
+         goalsFor: 28,
+         goalsAgainst: 45,
+         points: 0
+       },
+       {
+         position: 9,
+         team: "TJ Sokol Třinec",
+         matches: 3,
+         wins: 0,
+         draws: 0,
+         losses: 3,
+         goalsFor: 25,
+         goalsAgainst: 42,
+         points: 0
+       },
+       {
+         position: 10,
+         team: "TJ Sokol Opava",
+         matches: 3,
+         wins: 0,
+         draws: 0,
+         losses: 3,
+         goalsFor: 22,
+         goalsAgainst: 48,
+         points: 0
+       },
+       {
+         position: 11,
+         team: "TJ Sokol Krnov",
+         matches: 3,
+         wins: 0,
+         draws: 0,
+         losses: 3,
+         goalsFor: 20,
+         goalsAgainst: 50,
+         points: 0
+       },
+       {
+         position: 12,
+         team: "TJ Sokol Bruntál",
+         matches: 3,
+         wins: 0,
+         draws: 0,
+         losses: 3,
+         goalsFor: 18,
+         goalsAgainst: 52,
+         points: 0
+       }
+     ]
   },
   women: {
     name: "Ženy",
@@ -118,19 +228,140 @@ const categoryData = {
         status: "completed"
       }
     ],
-    teamStandings: [
-      {
-        position: 1,
-        team: "TJ Sokol Svinov",
-        matches: 2,
-        wins: 2,
-        draws: 0,
-        losses: 0,
-        goalsFor: 32,
-        goalsAgainst: 28,
-        points: 4
-      }
-    ]
+         teamStandings: [
+       {
+         position: 1,
+         team: "TJ Sokol Svinov",
+         matches: 2,
+         wins: 2,
+         draws: 0,
+         losses: 0,
+         goalsFor: 32,
+         goalsAgainst: 28,
+         points: 4
+       },
+       {
+         position: 2,
+         team: "TJ Sokol Ostrava",
+         matches: 2,
+         wins: 1,
+         draws: 1,
+         losses: 0,
+         goalsFor: 30,
+         goalsAgainst: 25,
+         points: 3
+       },
+       {
+         position: 3,
+         team: "TJ Sokol Frýdek-Místek",
+         matches: 2,
+         wins: 1,
+         draws: 0,
+         losses: 1,
+         goalsFor: 28,
+         goalsAgainst: 26,
+         points: 2
+       },
+       {
+         position: 4,
+         team: "TJ Sokol Karviná",
+         matches: 2,
+         wins: 1,
+         draws: 0,
+         losses: 1,
+         goalsFor: 26,
+         goalsAgainst: 24,
+         points: 2
+       },
+       {
+         position: 5,
+         team: "TJ Sokol Poruba",
+         matches: 2,
+         wins: 0,
+         draws: 1,
+         losses: 1,
+         goalsFor: 24,
+         goalsAgainst: 26,
+         points: 1
+       },
+       {
+         position: 6,
+         team: "TJ Sokol Klimkovice",
+         matches: 2,
+         wins: 0,
+         draws: 1,
+         losses: 1,
+         goalsFor: 22,
+         goalsAgainst: 28,
+         points: 1
+       },
+       {
+         position: 7,
+         team: "TJ Sokol Bohumín",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 20,
+         goalsAgainst: 30,
+         points: 0
+       },
+       {
+         position: 8,
+         team: "TJ Sokol Havířov",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 18,
+         goalsAgainst: 32,
+         points: 0
+       },
+       {
+         position: 9,
+         team: "TJ Sokol Třinec",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 16,
+         goalsAgainst: 34,
+         points: 0
+       },
+       {
+         position: 10,
+         team: "TJ Sokol Opava",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 14,
+         goalsAgainst: 36,
+         points: 0
+       },
+       {
+         position: 11,
+         team: "TJ Sokol Krnov",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 12,
+         goalsAgainst: 38,
+         points: 0
+       },
+       {
+         position: 12,
+         team: "TJ Sokol Bruntál",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 10,
+         goalsAgainst: 40,
+         points: 0
+       }
+     ]
   },
   juniorBoys: {
     name: "Dorostenci",
@@ -160,19 +391,140 @@ const categoryData = {
         status: "completed"
       }
     ],
-    teamStandings: [
-      {
-        position: 1,
-        team: "TJ Sokol Svinov",
-        matches: 2,
-        wins: 2,
-        draws: 0,
-        losses: 0,
-        goalsFor: 30,
-        goalsAgainst: 22,
-        points: 4
-      }
-    ]
+         teamStandings: [
+       {
+         position: 1,
+         team: "TJ Sokol Svinov",
+         matches: 2,
+         wins: 2,
+         draws: 0,
+         losses: 0,
+         goalsFor: 30,
+         goalsAgainst: 22,
+         points: 4
+       },
+       {
+         position: 2,
+         team: "TJ Sokol Ostrava",
+         matches: 2,
+         wins: 1,
+         draws: 1,
+         losses: 0,
+         goalsFor: 28,
+         goalsAgainst: 20,
+         points: 3
+       },
+       {
+         position: 3,
+         team: "TJ Sokol Frýdek-Místek",
+         matches: 2,
+         wins: 1,
+         draws: 0,
+         losses: 1,
+         goalsFor: 26,
+         goalsAgainst: 24,
+         points: 2
+       },
+       {
+         position: 4,
+         team: "TJ Sokol Karviná",
+         matches: 2,
+         wins: 1,
+         draws: 0,
+         losses: 1,
+         goalsFor: 24,
+         goalsAgainst: 22,
+         points: 2
+       },
+       {
+         position: 5,
+         team: "TJ Sokol Poruba",
+         matches: 2,
+         wins: 0,
+         draws: 1,
+         losses: 1,
+         goalsFor: 22,
+         goalsAgainst: 24,
+         points: 1
+       },
+       {
+         position: 6,
+         team: "TJ Sokol Klimkovice",
+         matches: 2,
+         wins: 0,
+         draws: 1,
+         losses: 1,
+         goalsFor: 20,
+         goalsAgainst: 26,
+         points: 1
+       },
+       {
+         position: 7,
+         team: "TJ Sokol Bohumín",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 18,
+         goalsAgainst: 28,
+         points: 0
+       },
+       {
+         position: 8,
+         team: "TJ Sokol Havířov",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 16,
+         goalsAgainst: 30,
+         points: 0
+       },
+       {
+         position: 9,
+         team: "TJ Sokol Třinec",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 14,
+         goalsAgainst: 32,
+         points: 0
+       },
+       {
+         position: 10,
+         team: "TJ Sokol Opava",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 12,
+         goalsAgainst: 34,
+         points: 0
+       },
+       {
+         position: 11,
+         team: "TJ Sokol Krnov",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 10,
+         goalsAgainst: 36,
+         points: 0
+       },
+       {
+         position: 12,
+         team: "TJ Sokol Bruntál",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 8,
+         goalsAgainst: 38,
+         points: 0
+       }
+     ]
   },
   juniorGirls: {
     name: "Dorostenky",
@@ -202,19 +554,140 @@ const categoryData = {
         status: "completed"
       }
     ],
-    teamStandings: [
-      {
-        position: 1,
-        team: "TJ Sokol Svinov",
-        matches: 2,
-        wins: 2,
-        draws: 0,
-        losses: 0,
-        goalsFor: 28,
-        goalsAgainst: 18,
-        points: 4
-      }
-    ]
+         teamStandings: [
+       {
+         position: 1,
+         team: "TJ Sokol Svinov",
+         matches: 2,
+         wins: 2,
+         draws: 0,
+         losses: 0,
+         goalsFor: 28,
+         goalsAgainst: 18,
+         points: 4
+       },
+       {
+         position: 2,
+         team: "TJ Sokol Ostrava",
+         matches: 2,
+         wins: 1,
+         draws: 1,
+         losses: 0,
+         goalsFor: 26,
+         goalsAgainst: 16,
+         points: 3
+       },
+       {
+         position: 3,
+         team: "TJ Sokol Frýdek-Místek",
+         matches: 2,
+         wins: 1,
+         draws: 0,
+         losses: 1,
+         goalsFor: 24,
+         goalsAgainst: 20,
+         points: 2
+       },
+       {
+         position: 4,
+         team: "TJ Sokol Karviná",
+         matches: 2,
+         wins: 1,
+         draws: 0,
+         losses: 1,
+         goalsFor: 22,
+         goalsAgainst: 18,
+         points: 2
+       },
+       {
+         position: 5,
+         team: "TJ Sokol Poruba",
+         matches: 2,
+         wins: 0,
+         draws: 1,
+         losses: 1,
+         goalsFor: 20,
+         goalsAgainst: 22,
+         points: 1
+       },
+       {
+         position: 6,
+         team: "TJ Sokol Klimkovice",
+         matches: 2,
+         wins: 0,
+         draws: 1,
+         losses: 1,
+         goalsFor: 18,
+         goalsAgainst: 24,
+         points: 1
+       },
+       {
+         position: 7,
+         team: "TJ Sokol Bohumín",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 16,
+         goalsAgainst: 26,
+         points: 0
+       },
+       {
+         position: 8,
+         team: "TJ Sokol Havířov",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 14,
+         goalsAgainst: 28,
+         points: 0
+       },
+       {
+         position: 9,
+         team: "TJ Sokol Třinec",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 12,
+         goalsAgainst: 30,
+         points: 0
+       },
+       {
+         position: 10,
+         team: "TJ Sokol Opava",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 10,
+         goalsAgainst: 32,
+         points: 0
+       },
+       {
+         position: 11,
+         team: "TJ Sokol Krnov",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 8,
+         goalsAgainst: 34,
+         points: 0
+       },
+       {
+         position: 12,
+         team: "TJ Sokol Bruntál",
+         matches: 2,
+         wins: 0,
+         draws: 0,
+         losses: 2,
+         goalsFor: 6,
+         goalsAgainst: 36,
+         points: 0
+       }
+     ]
   }
 };
 
@@ -273,110 +746,165 @@ export const MatchSchedule = () => {
       </Tabs>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Upcoming Matches */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-blue-500" />
-              <h3 className="text-xl font-semibold">Nadcházející zápasy</h3>
-            </div>
-          </CardHeader>
-          <CardBody>
-            <div className="space-y-4">
-              {currentData.upcomingMatches.map((match: any) => (
-                <div key={match.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <ClockIcon className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {new Date(match.date).toLocaleDateString('cs-CZ')} v {match.time}
-                      </span>
-                    </div>
-                    {getStatusBadge(match.status)}
-                  </div>
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className={`font-semibold ${match.isHome ? 'text-blue-600 dark:text-blue-400' : ''}`}>
-                        {match.homeTeam}
-                      </span>
-                      <span className="text-gray-500">vs</span>
-                      <span className={`font-semibold ${!match.isHome ? 'text-blue-600 dark:text-blue-400' : ''}`}>
-                        {match.awayTeam}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                    <div className="flex items-center gap-1">
-                      <MapPinIcon className="w-4 h-4" />
-                      <span>{match.venue}</span>
-                    </div>
-                    <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                      {match.competition}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-4 text-center">
-              <Button 
-                color="primary" 
-                variant="bordered"
-                size="sm"
-              >
-                Zobrazit celý program
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Recent Results */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <TrophyIcon className="w-5 h-5 text-yellow-500" />
-              <h3 className="text-xl font-semibold">Poslední výsledky</h3>
-            </div>
-          </CardHeader>
-          <CardBody>
-            <div className="space-y-4">
-              {currentData.recentResults.map((match: any) => (
-                <div key={match.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {new Date(match.date).toLocaleDateString('cs-CZ')}
-                      </span>
-                    </div>
-                    {getResultBadge(match.result)}
-                  </div>
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold">{match.homeTeam}</span>
+        {/* Left Column - Matches and Results */}
+        <div className="space-y-6">
+          {/* Upcoming Matches */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-blue-500" />
+                <h3 className="text-xl font-semibold">Nadcházející zápasy</h3>
+              </div>
+            </CardHeader>
+            <CardBody>
+              <div className="space-y-4">
+                {currentData.upcomingMatches.map((match: any) => (
+                  <div key={match.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                          {match.homeScore}
-                        </span>
-                        <span className="text-gray-500">:</span>
-                        <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                          {match.awayScore}
+                        <ClockIcon className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {new Date(match.date).toLocaleDateString('cs-CZ')} v {match.time}
                         </span>
                       </div>
-                      <span className="font-semibold">{match.awayTeam}</span>
+                      {getStatusBadge(match.status)}
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-semibold ${match.isHome ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                          {match.homeTeam}
+                        </span>
+                        <span className="text-gray-500">vs</span>
+                        <span className={`font-semibold ${!match.isHome ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                          {match.awayTeam}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <MapPinIcon className="w-4 h-4" />
+                        <span>{match.venue}</span>
+                      </div>
+                      <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                        {match.competition}
+                      </span>
                     </div>
                   </div>
-                  
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                      {match.competition}
-                    </span>
+                ))}
+              </div>
+              
+              <div className="mt-4 text-center">
+                <Button 
+                  color="primary" 
+                  variant="bordered"
+                  size="sm"
+                >
+                  Zobrazit celý program
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* Recent Results */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <TrophyIcon className="w-5 h-5 text-yellow-500" />
+                <h3 className="text-xl font-semibold">Poslední výsledky</h3>
+              </div>
+            </CardHeader>
+            <CardBody>
+              <div className="space-y-4">
+                {currentData.recentResults.map((match: any) => (
+                  <div key={match.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {new Date(match.date).toLocaleDateString('cs-CZ')}
+                        </span>
+                      </div>
+                      {getResultBadge(match.result)}
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold">{match.homeTeam}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            {match.homeScore}
+                          </span>
+                          <span className="text-gray-500">:</span>
+                          <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            {match.awayScore}
+                          </span>
+                        </div>
+                        <span className="font-semibold">{match.awayTeam}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                        {match.competition}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              
+              <div className="mt-4 text-center">
+                <Button 
+                  color="primary" 
+                  variant="bordered"
+                  size="sm"
+                >
+                  Zobrazit všechny výsledky
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+
+        {/* Right Column - Team Standings */}
+        <Card className="h-full">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <UserGroupIcon className="w-5 h-5 text-green-500" />
+              <h3 className="text-xl font-semibold">Tabulka - {currentData.name}</h3>
+          </div>
+          </CardHeader>
+          <CardBody className="flex flex-col h-full">
+            <div className="flex-1 overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-2 px-2">Poz.</th>
+                    <th className="text-left py-2 px-2">Tým</th>
+                    <th className="text-center py-2 px-2">Z</th>
+                    <th className="text-center py-2 px-2">V</th>
+                    <th className="text-center py-2 px-2">R</th>
+                    <th className="text-center py-2 px-2">P</th>
+                    <th className="text-center py-2 px-2">Skóre</th>
+                    <th className="text-center py-2 px-2">Body</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentData.teamStandings.map((team: any) => (
+                    <tr key={team.position} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <td className="py-2 px-2 font-semibold">{team.position}.</td>
+                      <td className="py-2 px-2 font-medium">{team.team}</td>
+                      <td className="py-2 px-2 text-center">{team.matches}</td>
+                      <td className="py-2 px-2 text-center text-green-600">{team.wins}</td>
+                      <td className="py-2 px-2 text-center text-yellow-600">{team.draws}</td>
+                      <td className="py-2 px-2 text-center text-red-600">{team.losses}</td>
+                      <td className="py-2 px-2 text-center">{team.goalsFor}:{team.goalsAgainst}</td>
+                      <td className="py-2 px-2 text-center font-bold">{team.points}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
             
             <div className="mt-4 text-center">
@@ -385,64 +913,12 @@ export const MatchSchedule = () => {
                 variant="bordered"
                 size="sm"
               >
-                Zobrazit všechny výsledky
+                Zobrazit kompletní tabulku
               </Button>
             </div>
           </CardBody>
         </Card>
       </div>
-
-      {/* Team Standings */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <UserGroupIcon className="w-5 h-5 text-green-500" />
-            <h3 className="text-xl font-semibold">Tabulka - {currentData.name}</h3>
-          </div>
-        </CardHeader>
-        <CardBody>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left py-2 px-2">Poz.</th>
-                  <th className="text-left py-2 px-2">Tým</th>
-                  <th className="text-center py-2 px-2">Z</th>
-                  <th className="text-center py-2 px-2">V</th>
-                  <th className="text-center py-2 px-2">R</th>
-                  <th className="text-center py-2 px-2">P</th>
-                  <th className="text-center py-2 px-2">Skóre</th>
-                  <th className="text-center py-2 px-2">Body</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentData.teamStandings.map((team: any) => (
-                  <tr key={team.position} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="py-2 px-2 font-semibold">{team.position}.</td>
-                    <td className="py-2 px-2 font-medium">{team.team}</td>
-                    <td className="py-2 px-2 text-center">{team.matches}</td>
-                    <td className="py-2 px-2 text-center text-green-600">{team.wins}</td>
-                    <td className="py-2 px-2 text-center text-yellow-600">{team.draws}</td>
-                    <td className="py-2 px-2 text-center text-red-600">{team.losses}</td>
-                    <td className="py-2 px-2 text-center">{team.goalsFor}:{team.goalsAgainst}</td>
-                    <td className="py-2 px-2 text-center font-bold">{team.points}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          <div className="mt-4 text-center">
-            <Button 
-              color="primary" 
-              variant="bordered"
-              size="sm"
-            >
-              Zobrazit kompletní tabulku
-            </Button>
-          </div>
-        </CardBody>
-      </Card>
     </div>
   );
 };
