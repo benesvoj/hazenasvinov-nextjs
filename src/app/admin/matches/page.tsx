@@ -136,12 +136,22 @@ export default function MatchesAdminPage() {
     try {
       const { data, error } = await supabase
         .from('standings')
-        .select('*')
+        .select(`
+          *,
+          team:team_id(name)
+        `)
         .eq('category', selectedCategory)
         .order('position', { ascending: true });
 
       if (error) throw error;
-      setStandings(data || []);
+      
+      // Transform standings data to flatten team names
+      const transformedStandings = (data as any[])?.map(standing => ({
+        ...standing,
+        team: standing.team?.name || ''
+      })) || [];
+      
+      setStandings(transformedStandings);
     } catch (error) {
       console.error('Error fetching standings:', error);
     }
@@ -151,15 +161,15 @@ export default function MatchesAdminPage() {
   const calculateStandings = async () => {
     try {
       const completedMatches = matches.filter(match => match.status === 'completed');
-      const teams = new Map<string, Standing>();
+      const teamsMap = new Map<string, Standing>();
 
       // Initialize teams
       completedMatches.forEach(match => {
         const homeTeamName = match.home_team?.name || 'Neznámý tým';
         const awayTeamName = match.away_team?.name || 'Neznámý tým';
         
-        if (!teams.has(homeTeamName)) {
-          teams.set(homeTeamName, {
+        if (!teamsMap.has(homeTeamName)) {
+          teamsMap.set(homeTeamName, {
             position: 0,
             team: homeTeamName,
             matches: 0,
@@ -171,8 +181,8 @@ export default function MatchesAdminPage() {
             points: 0
           });
         }
-        if (!teams.has(awayTeamName)) {
-          teams.set(awayTeamName, {
+        if (!teamsMap.has(awayTeamName)) {
+          teamsMap.set(awayTeamName, {
             position: 0,
             team: awayTeamName,
             matches: 0,
@@ -190,8 +200,8 @@ export default function MatchesAdminPage() {
       completedMatches.forEach(match => {
         const homeTeamName = match.home_team?.name || 'Neznámý tým';
         const awayTeamName = match.away_team?.name || 'Neznámý tým';
-        const homeTeam = teams.get(homeTeamName)!;
-        const awayTeam = teams.get(awayTeamName)!;
+        const homeTeam = teamsMap.get(homeTeamName)!;
+        const awayTeam = teamsMap.get(awayTeamName)!;
 
         homeTeam.matches++;
         awayTeam.matches++;
@@ -217,7 +227,7 @@ export default function MatchesAdminPage() {
       });
 
       // Sort by points, then goal difference
-      const sortedTeams = Array.from(teams.values()).sort((a, b) => {
+      const sortedTeams = Array.from(teamsMap.values()).sort((a, b) => {
         if (a.points !== b.points) return b.points - a.points;
         const aGoalDiff = a.goals_for - a.goals_against;
         const bGoalDiff = b.goals_for - b.goals_against;
@@ -233,11 +243,23 @@ export default function MatchesAdminPage() {
       // Save to database - use upsert to handle existing records
       const { error } = await supabase
         .from('standings')
-        .upsert(sortedTeams.map(team => ({
-          ...team,
-          category: selectedCategory
-        })), {
-          onConflict: 'category,team'
+        .upsert(sortedTeams.map(team => {
+          // Find the team ID by name from the teams state
+          const teamRecord = teams.find((t: Team) => t.name === team.team);
+          return {
+            category: selectedCategory,
+            position: team.position,
+            team_id: teamRecord?.id || null,
+            matches: team.matches,
+            wins: team.wins,
+            draws: team.draws,
+            losses: team.losses,
+            goals_for: team.goals_for,
+            goals_against: team.goals_against,
+            points: team.points
+          };
+        }), {
+          onConflict: 'category,team_id'
         });
 
       if (error) throw error;
