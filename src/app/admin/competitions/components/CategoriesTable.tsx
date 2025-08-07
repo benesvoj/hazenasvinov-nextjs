@@ -164,12 +164,12 @@ const columnRenders: Record<string, (item: CategoryProps) => React.ReactNode> = 
 	[COLUMN_ACTIONS]: (item) => <ActionsCell category={item}/>
 }
 
-function renderCategoryCell(item: CategoryProps, columnKey: React.Key) {
+function renderCategoryCell(item: CategoryProps, columnKey: React.Key): React.ReactNode {
 	if(typeof columnKey === 'string' && columnRenders[columnKey]) {
 		return columnRenders[columnKey](item);
 	}
 	return typeof columnKey === 'string' && columnKey in item
-	? (item as Record<string, unknown>)[columnKey]
+	? String((item as Record<string, unknown>)[columnKey])
 	: null;
 }
 
@@ -184,7 +184,7 @@ const ALIGN_CENTER = 'center';
 const ALIGN_START = 'start';
 
 function renderTableHeaderColumns(columns: ColumnType[]) {
-	return (column: ColumnType) => (
+	const TableHeaderColumn = (column: ColumnType) => (
 		<TableColumn
 			key={column.key}
 			align={column.key === COLUMN_ACTIONS ? ALIGN_CENTER : ALIGN_START}
@@ -192,16 +192,20 @@ function renderTableHeaderColumns(columns: ColumnType[]) {
 			{column.label}
 		</TableColumn>
 	);
+	TableHeaderColumn.displayName = 'TableHeaderColumn';
+	return TableHeaderColumn;
 }
 
 function renderTableRows(items: CategoryProps[]) {
-	return (item: CategoryProps) => (
+	const TableRowComponent = (item: CategoryProps) => (
 		<TableRow key={item.id}>
 			{(columnKey: React.Key) => (
 				<TableCell>{renderCategoryCell(item, columnKey)}</TableCell>
 			)}
 		</TableRow>
 	);
+	TableRowComponent.displayName = 'TableRowComponent';
+	return TableRowComponent;
 }
 
 
