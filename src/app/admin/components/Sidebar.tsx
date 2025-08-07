@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from "react";
+import React from "react";
 import { translations } from "@/lib/translations";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import routes, { privateRoutes } from "@/routes/routes";
+import { useSidebar } from "./SidebarContext";
 import { 
   HomeIcon,
   UserGroupIcon,
@@ -44,7 +45,7 @@ const getRouteIcon = (route: string) => {
 
 export const Sidebar = () => {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isCollapsed, setIsCollapsed } = useSidebar();
 
   const items = routes.filter((item) => item.isPrivate === true && !item.hidden);
 

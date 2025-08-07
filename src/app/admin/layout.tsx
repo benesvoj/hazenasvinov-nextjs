@@ -2,16 +2,23 @@
 
 import React from "react";
 import { Sidebar } from "@/app/admin/components/Sidebar";
+import { TopBar } from "@/app/admin/components/TopBar";
+import { SidebarProvider } from "@/app/admin/components/SidebarContext";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      <main className="flex-1 ml-64 p-6 transition-all duration-300 ease-in-out lg:ml-64 md:ml-16 sm:ml-0">
-        <div className="max-w-7xl mx-auto">
-          {children}
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 ml-64 transition-all duration-300 ease-in-out">
+          <TopBar />
+          <main className="pt-16 p-6">
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
+          </main>
         </div>
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 }

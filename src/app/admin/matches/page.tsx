@@ -545,18 +545,9 @@ export default function MatchesAdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          Správa zápasů
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Spravujte zápasy, výsledky a tabulky pro všechny kategorie
-        </p>
-      </div>
 
       {/* Season and Category Selection */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-6 pt-4">
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-5 h-5 text-blue-500" />
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sezóna:</label>

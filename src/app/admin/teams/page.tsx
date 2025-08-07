@@ -454,18 +454,8 @@ export default function TeamsAdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          Správa týmů
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Spravujte informace o všech týmech v soutěžích
-        </p>
-      </div>
-
       {/* Action Buttons */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center pt-4">
         <h2 className="text-2xl font-bold">Seznam týmů</h2>
         <Button 
           color="primary" 
