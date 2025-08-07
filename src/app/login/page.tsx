@@ -5,7 +5,7 @@ import Link from "next/link";
 import {publicRoutes} from "@/routes/routes";
 import {translations} from "@/lib/translations";
 
-const inputStyle = clsx('mt-3 block w-full rounded-lg border-2 bg-white/5 px-3 py-1.5 text-sm/6 focus:not-data-focus:outline-none data-focus:outline-2 data-focus:-outline-offset-2 data-focus:outline-white/25')
+const inputStyle = clsx('mt-3 block w-full rounded-lg border-2 bg-white/5 px-3 py-1.5 text-sm/6 focus:not-data-focus:outline-hidden data-focus:outline-2 data-focus:-outline-offset-2 data-focus:outline-white/25')
 const buttonStyle = 'rounded bg-sky-600 px-4 py-2 text-sm text-white data-active:bg-sky-700 data-hover:bg-sky-500'
 const labelStyle = 'text-sm/6 font-medium'
 

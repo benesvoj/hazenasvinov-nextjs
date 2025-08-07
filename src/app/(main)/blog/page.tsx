@@ -158,7 +158,7 @@ export default function BlogPage() {
       </div>
 
       {/* Newsletter Signup */}
-      <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+      <Card className="bg-linear-to-r from-blue-600 to-blue-700 text-white">
         <CardBody className="text-center">
           <h3 className="text-2xl font-bold mb-2">
             Nechte si posílat novinky

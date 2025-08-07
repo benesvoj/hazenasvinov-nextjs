@@ -52,7 +52,7 @@ export default function Page() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl p-8 lg:p-12">
+      <section className="relative bg-linear-to-r from-blue-600 to-blue-800 text-white rounded-xl p-8 lg:p-12">
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           <div>
             <h1 className='text-xl lg:text-2xl font-bold mb-4'>
@@ -429,7 +429,7 @@ export default function Page() {
       </section>
 
       {/* Call to Action */}
-      <section className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl p-8 text-center">
+      <section className="bg-linear-to-r from-green-600 to-green-700 text-white rounded-xl p-8 text-center">
         <h2 className="text-3xl font-bold mb-4">Chcete se připojit k našemu týmu?</h2>
         <p className="text-xl mb-6 text-green-100">
           Přijďte si vyzkoušet národní házenou a stát se součástí naší tradiční rodiny!

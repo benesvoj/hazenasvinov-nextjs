@@ -43,6 +43,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/papaparse": "^5.3.16",
@@ -51,7 +52,7 @@
     "eslint": "^9.27.0",
     "eslint-config-next": "^15.4.0-canary.51",
     "postcss": "^8",
-    "tailwindcss": "^3.4.1",
+    "tailwindcss": "^4.1.11",
     "typescript": "^5"
   }
 }
