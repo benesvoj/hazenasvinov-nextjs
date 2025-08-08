@@ -93,7 +93,7 @@ export default function AdminDashboard() {
       const supabase = createClient();
       const { data, error } = await supabase.auth.getUser();
       
-      if (error || !data?.user) {
+	if (error || !data?.user) {
         redirect('/login');
       }
       
@@ -391,9 +391,9 @@ export default function AdminDashboard() {
         </div>
       </div>
     );
-  }
+	}
 
-  return (
+	return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
@@ -988,6 +988,6 @@ export default function AdminDashboard() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </div>
+		</div>
   );
 }

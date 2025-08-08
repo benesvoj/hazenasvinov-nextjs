@@ -183,29 +183,33 @@ export default function MatchSchedulePage() {
       }
 
       // Fetch matches with team names and logos
+      // Filter for matches where either home or away team is the own club
       const { data: matchesData, error: matchesError } = await supabase
         .from('matches')
         .select(`
           *,
-          home_team:home_team_id(name, logo_url),
-          away_team:away_team_id(name, logo_url),
+          home_team:home_team_id(name, logo_url, is_own_club),
+          away_team:away_team_id(name, logo_url, is_own_club),
           category:categories(code, name)
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
+        .or(`home_team.is_own_club.eq.true,away_team.is_own_club.eq.true`)
         .order('date', { ascending: true });
 
       if (matchesError) throw matchesError;
 
       // Fetch standings
+      // Filter for own club teams only
       const { data: standingsData, error: standingsError } = await supabase
         .from('standings')
         .select(`
           *,
-          team:team_id(name, logo_url)
+          team:team_id(name, logo_url, is_own_club)
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
+        .eq('team.is_own_club', true)
         .order('position', { ascending: true });
 
       if (standingsError) throw standingsError;
