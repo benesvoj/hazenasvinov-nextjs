@@ -12,6 +12,7 @@ import {
   PencilIcon,
   TrashIcon
 } from "@heroicons/react/24/outline";
+import { Tabs, Tab } from "@heroui/tabs";
 import { createClient } from "@/utils/supabase/client";
 
 interface Category {
@@ -40,8 +41,15 @@ const genders = {
   mixed: "Smíšené"
 };
 
+const competitionTypes = {
+  league: "Liga",
+  league_playoff: "Liga s playoff",
+  tournament: "Turnaj"
+};
+
 export default function CategoriesAdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [seasons, setSeasons] = useState<{id: string; name: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
@@ -62,6 +70,21 @@ export default function CategoriesAdminPage() {
   });
 
   const supabase = createClient();
+
+  // Fetch seasons
+  const fetchSeasons = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('seasons')
+        .select('id, name')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setSeasons(data || []);
+    } catch (error) {
+      console.error('Error fetching seasons:', error);
+    }
+  }, [supabase]);
 
   // Fetch categories
   const fetchCategories = useCallback(async () => {
@@ -84,13 +107,14 @@ export default function CategoriesAdminPage() {
   }, [supabase]);
 
   useEffect(() => {
+    fetchSeasons();
     fetchCategories();
-  }, [fetchCategories]);
+  }, [fetchSeasons, fetchCategories]);
 
   // Add new category
   const handleAddCategory = async () => {
     try {
-      const { error } = await supabase
+      const { data: newCategory, error } = await supabase
         .from('categories')
         .insert({
           code: formData.code,
@@ -100,7 +124,13 @@ export default function CategoriesAdminPage() {
           gender: formData.gender || null,
           is_active: formData.is_active,
           sort_order: formData.sort_order
-        });
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+
 
       if (error) throw error;
       
@@ -114,6 +144,7 @@ export default function CategoriesAdminPage() {
         is_active: true,
         sort_order: 0
       });
+
       fetchCategories();
     } catch (error) {
       setError('Chyba při přidávání kategorie');
@@ -149,6 +180,11 @@ export default function CategoriesAdminPage() {
         description: '',
         age_group: '',
         gender: '',
+        season_id: '',
+        matchweek_count: 0,
+        competition_type: 'league',
+        team_count: 0,
+        allow_team_duplicates: false,
         is_active: true,
         sort_order: 0
       });
@@ -256,6 +292,10 @@ export default function CategoriesAdminPage() {
                     <th className="text-left py-3 px-4">Kód</th>
                     <th className="text-left py-3 px-4">Název</th>
                     <th className="text-left py-3 px-4">Popis</th>
+                    <th className="text-left py-3 px-4">Sezóna</th>
+                    <th className="text-left py-3 px-4">Typ soutěže</th>
+                    <th className="text-left py-3 px-4">Kola</th>
+                    <th className="text-left py-3 px-4">Týmy</th>
                     <th className="text-left py-3 px-4">Věková skupina</th>
                     <th className="text-left py-3 px-4">Pohlaví</th>
                     <th className="text-left py-3 px-4">Status</th>
@@ -270,6 +310,18 @@ export default function CategoriesAdminPage() {
                       <td className="py-3 px-4 font-medium">{category.name}</td>
                       <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
                         {category.description || '-'}
+                      </td>
+                      <td className="py-3 px-4 text-sm">
+                        -
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-gray-400">-</span>
+                      </td>
+                      <td className="py-3 px-4 text-sm">
+                        -
+                      </td>
+                      <td className="py-3 px-4 text-sm">
+                        -
                       </td>
                       <td className="py-3 px-4">
                         {category.age_group ? (
@@ -332,67 +384,82 @@ export default function CategoriesAdminPage() {
       </Card>
 
       {/* Add Category Modal */}
-      <Modal isOpen={isAddCategoryOpen} onClose={onAddCategoryClose}>
+      <Modal isOpen={isAddCategoryOpen} onClose={onAddCategoryClose} size="3xl">
         <ModalContent>
           <ModalHeader>Přidat kategorii</ModalHeader>
           <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Kód"
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                isRequired
-                placeholder="např. men, women, juniorBoys"
-              />
-              <Input
-                label="Název"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                isRequired
-                placeholder="např. Muži, Ženy, Dorostenci"
-              />
-              <Input
-                label="Popis"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Volitelný popis kategorie"
-              />
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={formData.age_group}
-                onChange={(e) => setFormData({ ...formData, age_group: e.target.value })}
-              >
-                <option value="">Vyberte věkovou skupinu</option>
-                {Object.entries(ageGroups).map(([key, value]) => (
-                  <option key={key} value={key}>{value}</option>
-                ))}
-              </select>
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={formData.gender}
-                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-              >
-                <option value="">Vyberte pohlaví</option>
-                {Object.entries(genders).map(([key, value]) => (
-                  <option key={key} value={key}>{value}</option>
-                ))}
-              </select>
-              <Input
-                label="Pořadí"
-                type="number"
-                value={formData.sort_order.toString()}
-                onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                placeholder="0"
-              />
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Basic Information */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Základní údaje</h4>
+                <Input
+                  label="Kód"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                  isRequired
+                  placeholder="např. men, women, juniorBoys"
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
-              </label>
+                <Input
+                  label="Název"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  isRequired
+                  placeholder="např. Muži, Ženy, Dorostenci"
+                />
+                <Input
+                  label="Popis"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Volitelný popis kategorie"
+                />
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                  value={formData.age_group}
+                  onChange={(e) => setFormData({ ...formData, age_group: e.target.value })}
+                >
+                  <option value="">Vyberte věkovou skupinu</option>
+                  {Object.entries(ageGroups).map(([key, value]) => (
+                    <option key={key} value={key}>{value}</option>
+                  ))}
+                </select>
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                  value={formData.gender}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                >
+                  <option value="">Vyberte pohlaví</option>
+                  {Object.entries(genders).map(([key, value]) => (
+                    <option key={key} value={key}>{value}</option>
+                  ))}
+                </select>
+                <Input
+                  label="Pořadí"
+                  type="number"
+                  value={formData.sort_order.toString()}
+                  onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                  placeholder="0"
+                />
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={formData.is_active}
+                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                  />
+                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
+                </label>
+              </div>
+
+              {/* Right Column - Competition Settings */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Nastavení soutěže</h4>
+                
+                              <div className="p-4 bg-yellow-50 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  ⚠️ Funkce pro správu sezón bude implementována v další verzi.
+                </p>
+              </div>
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
@@ -407,68 +474,89 @@ export default function CategoriesAdminPage() {
       </Modal>
 
       {/* Edit Category Modal */}
-      <Modal isOpen={isEditCategoryOpen} onClose={onEditCategoryClose}>
+      <Modal isOpen={isEditCategoryOpen} onClose={onEditCategoryClose} size="3xl">
         <ModalContent>
           <ModalHeader>Upravit kategorii</ModalHeader>
           <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Kód"
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                isRequired
-                placeholder="např. men, women, juniorBoys"
-              />
-              <Input
-                label="Název"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                isRequired
-                placeholder="např. Muži, Ženy, Dorostenci"
-              />
-              <Input
-                label="Popis"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Volitelný popis kategorie"
-              />
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={formData.age_group}
-                onChange={(e) => setFormData({ ...formData, age_group: e.target.value })}
-              >
-                <option value="">Vyberte věkovou skupinu</option>
-                {Object.entries(ageGroups).map(([key, value]) => (
-                  <option key={key} value={key}>{value}</option>
-                ))}
-              </select>
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={formData.gender}
-                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-              >
-                <option value="">Vyberte pohlaví</option>
-                {Object.entries(genders).map(([key, value]) => (
-                  <option key={key} value={key}>{value}</option>
-                ))}
-              </select>
-              <Input
-                label="Pořadí"
-                type="number"
-                value={formData.sort_order.toString()}
-                onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                placeholder="0"
-              />
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
-              </label>
-            </div>
+            <Tabs aria-label="Category edit tabs" className="w-full">
+              <Tab key="basic" title="Základní údaje">
+                <div className="space-y-4 pt-4">
+                  <Input
+                    label="Kód"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    isRequired
+                    placeholder="např. men, women, juniorBoys"
+                  />
+                  <Input
+                    label="Název"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    isRequired
+                    placeholder="např. Muži, Ženy, Dorostenci"
+                  />
+                  <Input
+                    label="Popis"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Volitelný popis kategorie"
+                  />
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                    value={formData.age_group}
+                    onChange={(e) => setFormData({ ...formData, age_group: e.target.value })}
+                  >
+                    <option value="">Vyberte věkovou skupinu</option>
+                    {Object.entries(ageGroups).map(([key, value]) => (
+                      <option key={key} value={key}>{value}</option>
+                    ))}
+                  </select>
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                    value={formData.gender}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                  >
+                    <option value="">Vyberte pohlaví</option>
+                    {Object.entries(genders).map(([key, value]) => (
+                      <option key={key} value={key}>{value}</option>
+                    ))}
+                  </select>
+                  <Input
+                    label="Pořadí"
+                    type="number"
+                    value={formData.sort_order.toString()}
+                    onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                    placeholder="0"
+                  />
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      checked={formData.is_active}
+                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
+                  </label>
+                </div>
+              </Tab>
+              
+              <Tab key="seasons" title="Sezóny">
+                <div className="space-y-4 pt-4">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      Zde můžete spravovat sezóny pro tuto kategorii. 
+                      Každá kategorie může být použita v několika sezónách s různými nastaveními.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-yellow-50 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      ⚠️ Funkce pro správu sezón bude implementována v další verzi.
+                    </p>
+                  </div>
+                </div>
+              </Tab>
+            </Tabs>
           </ModalBody>
           <ModalFooter>
             <Button variant="light" onPress={onEditCategoryClose}>

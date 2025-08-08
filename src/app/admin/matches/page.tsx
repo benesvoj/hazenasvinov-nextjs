@@ -16,7 +16,8 @@ import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
-  EyeIcon
+  EyeIcon,
+  ArrowPathIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
@@ -57,6 +58,11 @@ interface Category {
   description?: string;
   age_group?: string;
   gender?: string;
+  season_id?: string;
+  matchweek_count?: number;
+  competition_type?: 'league' | 'league_playoff' | 'tournament';
+  team_count?: number;
+  allow_team_duplicates?: boolean;
   is_active: boolean;
   sort_order: number;
 }
@@ -87,6 +93,7 @@ interface Match {
   home_score?: number;
   away_score?: number;
   result?: 'win' | 'loss' | 'draw';
+  matchweek?: number;
   created_at: string;
   updated_at: string;
   home_team?: Team;
@@ -138,6 +145,7 @@ export default function MatchesAdminPage() {
   const { isOpen: isAddMatchOpen, onOpen: onAddMatchOpen, onClose: onAddMatchClose } = useDisclosure();
   const { isOpen: isAddResultOpen, onOpen: onAddResultOpen, onClose: onAddResultClose } = useDisclosure();
   const { isOpen: isEditMatchOpen, onOpen: onEditMatchOpen, onClose: onEditMatchClose } = useDisclosure();
+  const { isOpen: isBulkUpdateOpen, onOpen: onBulkUpdateOpen, onClose: onBulkUpdateClose } = useDisclosure();
   
   const [formData, setFormData] = useState({
     date: '',
@@ -146,7 +154,8 @@ export default function MatchesAdminPage() {
     away_team_id: '',
     venue: '',
     category_id: '',
-    season_id: ''
+    season_id: '',
+    matchweek: ''
   });
 
   const [resultData, setResultData] = useState({
@@ -162,7 +171,14 @@ export default function MatchesAdminPage() {
     venue: '',
     home_score: '',
     away_score: '',
-    status: 'completed' as 'upcoming' | 'completed'
+    status: 'completed' as 'upcoming' | 'completed',
+    matchweek: '',
+    category_id: ''
+  });
+
+  const [bulkUpdateData, setBulkUpdateData] = useState({
+    categoryId: '',
+    matchweek: ''
   });
 
   const supabase = createClient();
@@ -497,20 +513,29 @@ export default function MatchesAdminPage() {
         return;
       }
 
+      const insertData: any = {
+        category_id: selectedCategory,
+        season_id: selectedSeason,
+        date: formData.date,
+        time: formData.time,
+        home_team_id: formData.home_team_id,
+        away_team_id: formData.away_team_id,
+        venue: formData.venue,
+        competition: getCategoryInfo(selectedCategory, categories).competition,
+        is_home: true,
+        status: 'upcoming'
+      };
+
+      // Handle matchweek - allow setting to null if empty, or parse the value
+      if (formData.matchweek === '') {
+        insertData.matchweek = null;
+      } else if (formData.matchweek) {
+        insertData.matchweek = parseInt(formData.matchweek);
+      }
+
       const { error } = await supabase
         .from('matches')
-        .insert({
-          category_id: selectedCategory,
-          season_id: selectedSeason,
-          date: formData.date,
-          time: formData.time,
-          home_team_id: formData.home_team_id,
-          away_team_id: formData.away_team_id,
-          venue: formData.venue,
-          competition: getCategoryInfo(selectedCategory, categories).competition,
-          is_home: true,
-          status: 'upcoming'
-        });
+        .insert(insertData);
 
       if (error) throw error;
       
@@ -522,7 +547,8 @@ export default function MatchesAdminPage() {
         away_team_id: '',
         venue: '',
         category_id: '',
-        season_id: ''
+        season_id: '',
+        matchweek: ''
       });
       fetchMatches();
       setError('');
@@ -614,7 +640,9 @@ export default function MatchesAdminPage() {
       venue: match.venue,
       home_score: match.home_score?.toString() || '',
       away_score: match.away_score?.toString() || '',
-      status: match.status
+      status: match.status,
+      matchweek: match.matchweek ? match.matchweek.toString() : '',
+      category_id: match.category_id
     });
     onEditMatchOpen();
   };
@@ -665,6 +693,13 @@ export default function MatchesAdminPage() {
         status: editData.status
       };
 
+      // Handle matchweek - allow setting to null if empty, or parse the value
+      if (editData.matchweek === '') {
+        updateData.matchweek = null;
+      } else if (editData.matchweek) {
+        updateData.matchweek = parseInt(editData.matchweek);
+      }
+
       // Only update scores if they are provided
       if (editData.home_score && editData.away_score) {
         updateData.home_score = parseInt(editData.home_score);
@@ -677,7 +712,10 @@ export default function MatchesAdminPage() {
         .update(updateData)
         .eq('id', selectedMatch.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
       
       onEditMatchClose();
       setEditData({
@@ -688,15 +726,85 @@ export default function MatchesAdminPage() {
         venue: '',
         home_score: '',
         away_score: '',
-        status: 'completed'
+        status: 'completed',
+        matchweek: '',
+        category_id: ''
       });
       setSelectedMatch(null);
       fetchMatches();
       setError('');
     } catch (error) {
-      setError('Chyba při aktualizaci zápasu');
-      console.error('Error updating match:', error);
+      console.error('Full error details:', error);
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError(`Chyba při aktualizaci zápasu: ${error.message}`);
+      } else {
+        setError('Chyba při aktualizaci zápasu');
+      }
     }
+  };
+
+  // Bulk update matchweek for matches without matchweek
+  const handleBulkUpdateMatchweek = async () => {
+    if (!bulkUpdateData.categoryId || !bulkUpdateData.matchweek) {
+      setError('Prosím vyberte kategorii a kolo');
+      return;
+    }
+
+    try {
+      // Find matches without matchweek for the selected category
+      const matchesToUpdate = matches.filter(match => 
+        match.category_id === bulkUpdateData.categoryId && 
+        !match.matchweek
+      );
+
+      if (matchesToUpdate.length === 0) {
+        setError('Nebyly nalezeny žádné zápasy bez kola pro vybranou kategorii');
+        return;
+      }
+
+      const matchweekNumber = parseInt(bulkUpdateData.matchweek);
+      
+      // Update all matches in bulk
+      const { error } = await supabase
+        .from('matches')
+        .update({ matchweek: matchweekNumber })
+        .in('id', matchesToUpdate.map(match => match.id));
+
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
+
+      setError('');
+      onBulkUpdateClose();
+      setBulkUpdateData({ categoryId: '', matchweek: '' });
+      fetchMatches(); // Refresh the matches list
+      
+    } catch (error) {
+      console.error('Full error details:', error);
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError(`Chyba při hromadné aktualizaci: ${error.message}`);
+      } else {
+        setError('Chyba při hromadné aktualizaci');
+      }
+    }
+  };
+
+  // Helper function to generate matchweek options based on category
+  const getMatchweekOptions = (categoryId?: string) => {
+    const options = [];
+    // Add "No matchweek" option
+    options.push({ value: '', label: 'Bez kola' });
+    
+    // Find the category to get its matchweek_count
+    const category = categories.find(cat => cat.id === categoryId);
+    const maxMatchweeks = category?.matchweek_count || 20; // Default to 20 if not set
+    
+    // Add matchweek numbers based on category setting
+    for (let i = 1; i <= maxMatchweeks; i++) {
+      options.push({ value: i.toString(), label: `Kolo ${i}` });
+    }
+    return options;
   };
 
   // Helper functions for badges
@@ -776,6 +884,14 @@ export default function MatchesAdminPage() {
                   Přidat zápas
                 </Button>
                 <Button 
+                  color="warning" 
+                  startContent={<ArrowPathIcon className="w-4 h-4" />}
+                  onPress={onBulkUpdateOpen}
+                  isDisabled={isSeasonClosed()}
+                >
+                  Hromadná úprava kol
+                </Button>
+                <Button 
                   color="secondary" 
                   onPress={calculateStandings}
                   isDisabled={isSeasonClosed()}
@@ -803,75 +919,107 @@ export default function MatchesAdminPage() {
                           {category.name} - {getCategoryInfo(category.id, categories).competition}
                         </h3>
                         
-                        {/* Matches for this category */}
-                        <div className="space-y-4">
-                          {matches
-                            .filter(match => match.category_id === category.id)
-                            .map((match) => (
-                              <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-4">
-                                    <div className="text-sm text-gray-500">
-                                      {new Date(match.date).toLocaleDateString('cs-CZ')} {match.time}
-                                    </div>
-                                    <div className="font-medium">
-                                      {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <MapPinIcon className="w-4 h-4 text-gray-400" />
-                                      <span className="text-sm text-gray-600">{match.venue}</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    {match.status === 'completed' ? (
-                                      <div className="text-lg font-bold">
-                                        {match.home_score} : {match.away_score}
+                        {/* Matches for this category grouped by matchweek */}
+                        <div className="space-y-6">
+                          {(() => {
+                            // Group matches by matchweek
+                            const matchesForCategory = matches.filter(match => match.category_id === category.id);
+                            const groupedMatches = new Map<number, Match[]>();
+                            
+                            // Group by matchweek, put matches without matchweek at the end
+                            matchesForCategory.forEach(match => {
+                              const matchweek = match.matchweek || 0;
+                              if (!groupedMatches.has(matchweek)) {
+                                groupedMatches.set(matchweek, []);
+                              }
+                              groupedMatches.get(matchweek)!.push(match);
+                            });
+                            
+                            // Sort matchweeks and convert to array
+                            const sortedMatchweeks = Array.from(groupedMatches.keys()).sort((a, b) => {
+                              if (a === 0) return 1; // No matchweek goes last
+                              if (b === 0) return -1;
+                              return a - b;
+                            });
+                            
+                            return sortedMatchweeks.map(matchweek => {
+                              const weekMatches = groupedMatches.get(matchweek)!;
+                              const weekTitle = matchweek === 0 ? 'Bez kola' : `Kolo ${matchweek}`;
+                              
+                              return (
+                                <div key={matchweek} className="border rounded-lg p-4 bg-gray-50">
+                                  <h4 className="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">
+                                    {weekTitle} ({weekMatches.length} zápas{weekMatches.length !== 1 ? 'ů' : ''})
+                                  </h4>
+                                  <div className="space-y-3">
+                                    {weekMatches.map((match) => (
+                                      <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center space-x-4">
+                                            <div className="text-sm text-gray-500">
+                                              {new Date(match.date).toLocaleDateString('cs-CZ')} {match.time}
+                                            </div>
+                                            <div className="font-medium">
+                                              {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                              <MapPinIcon className="w-4 h-4 text-gray-400" />
+                                              <span className="text-sm text-gray-600">{match.venue}</span>
+                                            </div>
+                                          </div>
+                                          <div className="flex items-center space-x-2">
+                                            {match.status === 'completed' ? (
+                                              <div className="text-lg font-bold">
+                                                {match.home_score} : {match.away_score}
+                                              </div>
+                                            ) : (
+                                              <div className="text-sm text-gray-500">Skóre zatím není k dispozici</div>
+                                            )}
+                                            {getStatusBadge(match.status)}
+                                            {match.status === 'completed' && getResultBadge(match.result || '')}
+                                          </div>
+                                        </div>
+                                        <div className="mt-3 flex justify-end space-x-2">
+                                          {match.status === 'upcoming' && (
+                                            <Button
+                                              size="sm"
+                                              color="primary"
+                                              startContent={<EyeIcon className="w-4 h-4" />}
+                                              onPress={() => {
+                                                setSelectedMatch(match);
+                                                onAddResultOpen();
+                                              }}
+                                              isDisabled={isSeasonClosed()}
+                                            >
+                                              Výsledek
+                                            </Button>
+                                          )}
+                                          <Button
+                                            size="sm"
+                                            color="warning"
+                                            startContent={<PencilIcon className="w-4 h-4" />}
+                                            onPress={() => handleEditMatch(match)}
+                                            isDisabled={isSeasonClosed()}
+                                          >
+                                            Upravit
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            color="danger"
+                                            startContent={<TrashIcon className="w-4 h-4" />}
+                                            onPress={() => handleDeleteMatch(match.id)}
+                                            isDisabled={isSeasonClosed()}
+                                          >
+                                            Smazat
+                                          </Button>
+                                        </div>
                                       </div>
-                                    ) : (
-                                      <div className="text-sm text-gray-500">Skóre zatím není k dispozici</div>
-                                    )}
-                                    {getStatusBadge(match.status)}
-                                    {match.status === 'completed' && getResultBadge(match.result || '')}
+                                    ))}
                                   </div>
                                 </div>
-                                <div className="mt-3 flex justify-end space-x-2">
-                                  {match.status === 'upcoming' && (
-                                    <Button
-                                      size="sm"
-                                      color="primary"
-                                      startContent={<EyeIcon className="w-4 h-4" />}
-                                      onPress={() => {
-                                        setSelectedMatch(match);
-                                        onAddResultOpen();
-                                      }}
-                                      isDisabled={isSeasonClosed()}
-                                    >
-                                      Výsledek
-                                    </Button>
-                                  )}
-                                  {match.status === 'completed' && (
-                                    <Button
-                                      size="sm"
-                                      color="warning"
-                                      startContent={<PencilIcon className="w-4 h-4" />}
-                                      onPress={() => handleEditMatch(match)}
-                                      isDisabled={isSeasonClosed()}
-                                    >
-                                      Upravit
-                                    </Button>
-                                  )}
-                                  <Button
-                                    size="sm"
-                                    color="danger"
-                                    startContent={<TrashIcon className="w-4 h-4" />}
-                                    onPress={() => handleDeleteMatch(match.id)}
-                                    isDisabled={isSeasonClosed()}
-                                  >
-                                    Smazat
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            });
+                          })()}
                         </div>
 
                         {/* Standings for this category */}
@@ -1018,6 +1166,22 @@ export default function MatchesAdminPage() {
                 value={formData.venue}
                 onChange={(e) => setFormData({...formData, venue: e.target.value})}
               />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Kolo
+                </label>
+                <select
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  value={formData.matchweek}
+                  onChange={(e) => setFormData({...formData, matchweek: e.target.value})}
+                >
+                  {getMatchweekOptions(formData.category_id).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
@@ -1098,6 +1262,22 @@ export default function MatchesAdminPage() {
                     value={editData.venue}
                     onChange={(e) => setEditData({...editData, venue: e.target.value})}
                   />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Kolo
+                    </label>
+                    <select
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                      value={editData.matchweek}
+                      onChange={(e) => setEditData({...editData, matchweek: e.target.value})}
+                    >
+                                        {getMatchweekOptions(editData.category_id).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Status
@@ -1182,6 +1362,78 @@ export default function MatchesAdminPage() {
             </Button>
             <Button color="primary" onPress={handleUpdateMatch}>
               Uložit změny
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Bulk Update Matchweek Modal */}
+      <Modal isOpen={isBulkUpdateOpen} onClose={onBulkUpdateClose} size="lg">
+        <ModalContent>
+          <ModalHeader>Hromadná úprava kol</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Tato funkce umožní nastavit stejné kolo pro všechny zápasy bez kola v dané kategorii.
+              </p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Kategorie
+                </label>
+                <select
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  value={bulkUpdateData.categoryId}
+                  onChange={(e) => setBulkUpdateData({...bulkUpdateData, categoryId: e.target.value})}
+                >
+                  <option value="">Vyberte kategorii</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Kolo
+                </label>
+                <select
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  value={bulkUpdateData.matchweek}
+                  onChange={(e) => setBulkUpdateData({...bulkUpdateData, matchweek: e.target.value})}
+                >
+                  <option value="">Vyberte kolo</option>
+                  {getMatchweekOptions().slice(1).map((option) => ( // Skip the "Bez kola" option
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {bulkUpdateData.categoryId && (
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    Nalezeno {matches.filter(match => 
+                      match.category_id === bulkUpdateData.categoryId && !match.matchweek
+                    ).length} zápasů bez kola v kategorii "{categories.find(c => c.id === bulkUpdateData.categoryId)?.name}"
+                  </p>
+                </div>
+              )}
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="flat" onPress={onBulkUpdateClose}>
+              Zrušit
+            </Button>
+            <Button 
+              color="primary" 
+              onPress={handleBulkUpdateMatchweek}
+              isDisabled={!bulkUpdateData.categoryId || !bulkUpdateData.matchweek}
+            >
+              Hromadně upravit
             </Button>
           </ModalFooter>
         </ModalContent>
