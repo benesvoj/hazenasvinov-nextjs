@@ -22,7 +22,9 @@ import {
   WrenchScrewdriverIcon,
   BugAntIcon,
   SparklesIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  InformationCircleIcon,
+  ExclamationCircleIcon
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
@@ -268,6 +270,26 @@ export default function AdminDashboard() {
       case 'improvement': return <WrenchScrewdriverIcon className="w-4 h-4" />;
       case 'technical': return <Cog6ToothIcon className="w-4 h-4" />;
       default: return <WrenchScrewdriverIcon className="w-4 h-4" />;
+    }
+  };
+
+  const getCommentTypeIcon = (type: Comment['type']) => {
+    switch (type) {
+      case 'general': return <InformationCircleIcon className="w-4 h-4" />;
+      case 'bug': return <BugAntIcon className="w-4 h-4" />;
+      case 'feature': return <SparklesIcon className="w-4 h-4" />;
+      case 'improvement': return <WrenchScrewdriverIcon className="w-4 h-4" />;
+      default: return <InformationCircleIcon className="w-4 h-4" />;
+    }
+  };
+
+  const getCommentTypeLabel = (type: Comment['type']) => {
+    switch (type) {
+      case 'general': return 'General';
+      case 'bug': return 'Bug Report';
+      case 'feature': return 'Feature Request';
+      case 'improvement': return 'Improvement';
+      default: return 'General';
     }
   };
 
@@ -585,18 +607,27 @@ export default function AdminDashboard() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                              {comment.user_email}
-                            </span>
-                            <Badge color="primary" variant="flat" size="sm">
-                              {comment.type}
-                            </Badge>
+                            <div className="flex items-center gap-1" title={`Type: ${getCommentTypeLabel(comment.type)}`}>
+                              {getCommentTypeIcon(comment.type)}
+                              <span className="text-xs text-gray-500">{getCommentTypeLabel(comment.type)}</span>
+                            </div>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                             {comment.content}
                           </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>Created: {new Date(comment.created_at).toLocaleDateString()}</span>
+                          <div className="grid gap-4 text-xs text-gray-500 mt-3 grid-cols-1 md:grid-cols-12">
+                            <div className="md:col-span-6 min-w-0">
+                              <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Created by</div>
+                              <div className="truncate">{comment.user_email}</div>
+                            </div>
+                            <div className="md:col-span-6 min-w-0">
+                              <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Created</div>
+                              <div className="truncate">{new Date(comment.created_at).toLocaleDateString('en-CA', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit'
+                              })}</div>
+                            </div>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -743,12 +774,17 @@ export default function AdminDashboard() {
                 isRequired
                 placeholder="Enter todo title"
               />
-              <Input
-                label="Description"
-                value={todoFormData.description}
-                onChange={(e) => setTodoFormData({ ...todoFormData, description: e.target.value })}
-                placeholder="Enter description (optional)"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
+                  value={todoFormData.description}
+                  onChange={(e) => setTodoFormData({ ...todoFormData, description: e.target.value })}
+                  placeholder="Enter description (optional)"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
@@ -803,12 +839,17 @@ export default function AdminDashboard() {
                 isRequired
                 placeholder="Enter todo title"
               />
-              <Input
-                label="Description"
-                value={todoFormData.description}
-                onChange={(e) => setTodoFormData({ ...todoFormData, description: e.target.value })}
-                placeholder="Enter description (optional)"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
+                  value={todoFormData.description}
+                  onChange={(e) => setTodoFormData({ ...todoFormData, description: e.target.value })}
+                  placeholder="Enter description (optional)"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
@@ -865,18 +906,23 @@ export default function AdminDashboard() {
           <ModalHeader>Add Comment</ModalHeader>
           <ModalBody>
             <div className="space-y-4">
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={commentFormData.type}
-                onChange={(e) => setCommentFormData({ ...commentFormData, type: e.target.value as Comment['type'] })}
-              >
-                <option value="general">General</option>
-                <option value="bug">Bug Report</option>
-                <option value="feature">Feature Request</option>
-                <option value="improvement">Improvement</option>
-              </select>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Comment Type
+                </label>
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                  value={commentFormData.type}
+                  onChange={(e) => setCommentFormData({ ...commentFormData, type: e.target.value as Comment['type'] })}
+                >
+                  <option value="general">ℹ️ General</option>
+                  <option value="bug">🐛 Bug Report</option>
+                  <option value="feature">✨ Feature Request</option>
+                  <option value="improvement">🔧 Improvement</option>
+                </select>
+              </div>
               <textarea
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 min-h-[100px]"
+                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
                 value={commentFormData.content}
                 onChange={(e) => setCommentFormData({ ...commentFormData, content: e.target.value })}
                 placeholder="Enter your comment..."
@@ -908,18 +954,23 @@ export default function AdminDashboard() {
                   <strong>Created:</strong> {selectedComment?.created_at ? new Date(selectedComment.created_at).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={editCommentFormData.type}
-                onChange={(e) => setEditCommentFormData({ ...editCommentFormData, type: e.target.value as Comment['type'] })}
-              >
-                <option value="general">General</option>
-                <option value="bug">Bug Report</option>
-                <option value="feature">Feature Request</option>
-                <option value="improvement">Improvement</option>
-              </select>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Comment Type
+                </label>
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+                  value={editCommentFormData.type}
+                  onChange={(e) => setEditCommentFormData({ ...editCommentFormData, type: e.target.value as Comment['type'] })}
+                >
+                  <option value="general">ℹ️ General</option>
+                  <option value="bug">🐛 Bug Report</option>
+                  <option value="feature">✨ Feature Request</option>
+                  <option value="improvement">🔧 Improvement</option>
+                </select>
+              </div>
               <textarea
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 min-h-[100px]"
+                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
                 value={editCommentFormData.content}
                 onChange={(e) => setEditCommentFormData({ ...editCommentFormData, content: e.target.value })}
                 placeholder="Enter your comment..."
