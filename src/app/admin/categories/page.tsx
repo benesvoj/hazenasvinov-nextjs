@@ -788,7 +788,7 @@ export default function CategoriesAdminPage() {
                   ) : (
                     <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                       <p>Žádné sezóny nejsou přiřazeny k této kategorii.</p>
-                      <p className="text-sm mt-2">Klikněte na "Přidat sezónu" pro přiřazení první sezóny.</p>
+                      <p className="text-sm mt-2">Klikněte na &quot;Přidat sezónu&quot; pro přiřazení první sezóny.</p>
                     </div>
                   )}
                 </div>

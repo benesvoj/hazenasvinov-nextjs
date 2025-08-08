@@ -237,7 +237,7 @@ export default function MatchSchedule() {
     if (categories.length > 0 && activeSeason) {
       fetchData();
     }
-  }, [fetchData]);
+  }, [fetchData, activeSeason, categories.length]);
 
   // Filter upcoming and completed matches
   const upcomingMatches = matches.filter(match => match.status === 'upcoming').slice(0, 3);

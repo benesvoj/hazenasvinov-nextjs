@@ -1418,7 +1418,7 @@ export default function MatchesAdminPage() {
                   <p className="text-sm text-blue-800">
                     Nalezeno {matches.filter(match => 
                       match.category_id === bulkUpdateData.categoryId && !match.matchweek
-                    ).length} zápasů bez kola v kategorii "{categories.find(c => c.id === bulkUpdateData.categoryId)?.name}"
+                    ).length} zápasů bez kola v kategorii &quot;{categories.find(c => c.id === bulkUpdateData.categoryId)?.name}&quot;
                   </p>
                 </div>
               )}
