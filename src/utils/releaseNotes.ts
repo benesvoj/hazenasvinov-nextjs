@@ -10,6 +10,36 @@ export interface ReleaseNote {
 // Static release notes data
 export const releaseNotesData: ReleaseNote[] = [
   {
+    version: '1.5.0',
+    date: 'August 2025',
+    features: [
+      'Match Detail System: Complete match detail pages with comprehensive information display',
+      'Matchweek Integration: Added matchweek information throughout the application',
+      'Enhanced Match Layout: New horizontal 3-column layout matching professional sports design',
+      'Advanced Match Filtering: Category and status-based filtering for all matches',
+      'Navigation Integration: Added "Zápasy" to main navigation with proper routing'
+    ],
+    improvements: [
+      'Match Display Consistency: Unified layout across landing page, schedule page, and detail pages',
+      'Team Logo Presentation: Circular logos with proper fallback handling and consistent sizing',
+      'Date and Time Formatting: Improved time display with HH:MM format and proper localization',
+      'Responsive Design: Enhanced mobile and desktop layouts for all match displays',
+      'Error Handling: Graceful handling of missing matches and loading states'
+    ],
+    bugFixes: [
+      'React Key Conflicts: Fixed duplicate route entries causing React rendering errors',
+      'Navigation Duplication: Resolved duplicate "Zápasy" entries in routes configuration',
+      'TypeScript Interface Updates: Added matchweek property to all match interfaces',
+      'Data Transformation: Ensured matchweek data is properly preserved in all components'
+    ],
+    technicalUpdates: [
+      'Dynamic Routing: Implemented Next.js dynamic routes for match detail pages',
+      'Database Query Optimization: Enhanced Supabase queries with proper joins and filtering',
+      'Component Architecture: Modular match display components with consistent styling',
+      'Route Management: Updated routing system to support match detail navigation'
+    ]
+  },
+  {
     version: '1.4.0',
     date: 'August 2024',
     features: [
