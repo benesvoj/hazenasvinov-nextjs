@@ -42,6 +42,7 @@ import {
   ReleaseNote,
   getReleaseNotes
 } from "@/utils/releaseNotes";
+import { Chip } from "@heroui/react";
 
 const buttonStyle = 'rounded bg-sky-600 px-4 py-2 text-sm text-white data-active:bg-sky-700 data-hover:bg-sky-500';
 
@@ -692,9 +693,9 @@ export default function AdminDashboard() {
                         </p>
                       </div>
                       {index === 0 && (
-                        <div className="inline-flex items-center mx-3 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm font-medium animate-pulse border border-green-200 dark:border-green-700">
+                        <Chip color='success' variant="shadow" size='sm' className="mx-3">
                           Current Version
-                        </div>
+                        </Chip>
                       )}
                     </div>
                   </CardHeader>

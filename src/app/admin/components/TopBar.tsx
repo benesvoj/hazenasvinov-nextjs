@@ -22,7 +22,8 @@ import {
   Modal,
   ModalContent,
   ModalHeader,
-  ModalBody
+  ModalBody,
+  Chip
 } from "@heroui/react";
 import { ReleaseNote, getReleaseNotes } from "@/utils/releaseNotes";
 
@@ -233,9 +234,9 @@ export const TopBar = () => {
                       </p>
                     </div>
                     {index === 0 && (
-                      <Badge color="success" variant="flat">
+                      <Chip color="success" variant="shadow">
                         Current
-                      </Badge>
+                      </Chip>
                     )}
                   </div>
                   
