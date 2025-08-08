@@ -692,9 +692,9 @@ export default function AdminDashboard() {
                         </p>
                       </div>
                       {index === 0 && (
-                        <Badge color="success" variant="flat">
-                          Current
-                        </Badge>
+                        <div className="inline-flex items-center mx-3 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm font-medium animate-pulse border border-green-200 dark:border-green-700">
+                          Current Version
+                        </div>
                       )}
                     </div>
                   </CardHeader>

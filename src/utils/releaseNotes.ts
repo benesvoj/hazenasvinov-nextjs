@@ -11,7 +11,7 @@ export interface ReleaseNote {
 export const releaseNotesData: ReleaseNote[] = [
   {
     version: '1.3.0',
-    date: 'December 2024',
+    date: 'August 2025',
     features: [
       'Visual Todo Management: Added intuitive icons for priority, status, and category indicators',
       'Smart Todo Sorting: Automatic sorting by priority (urgent > high > medium > low) and due date',
