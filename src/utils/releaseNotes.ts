@@ -10,6 +10,35 @@ export interface ReleaseNote {
 // Static release notes data
 export const releaseNotesData: ReleaseNote[] = [
   {
+    version: '1.4.0',
+    date: 'August 2024',
+    features: [
+      'Committee Management System: Complete CRUD operations for regional competition committees',
+      'Own Club Filtering: Landing page now shows only matches and results for your own club',
+      'Team Logo Integration: Display team logos throughout the application with fallback handling',
+      'Enhanced Match Display: Improved layout with team logos, action buttons, and better information hierarchy'
+    ],
+    improvements: [
+      'Database Schema Evolution: Migrated from simple region field to structured committees table',
+      'Team Management: Added committee assignment and own club designation for teams',
+      'Match Schedule Filtering: Smart filtering for own club matches while showing complete standings',
+      'Form Auto-fill Prevention: Fixed issue where forms retained data from previously opened dialogs',
+      'Committee Code Immutability: Prevented editing of committee codes after creation for data integrity'
+    ],
+    bugFixes: [
+      'Supabase Query Syntax: Fixed invalid .or() clause syntax that was causing database errors',
+      'TypeScript Interface Updates: Added missing is_own_club properties to team interfaces',
+      'Form State Management: Resolved committee form auto-fill issues with proper reset functions',
+      'Database Schema Issues: Added missing columns and proper foreign key relationships'
+    ],
+    technicalUpdates: [
+      'Committee System Architecture: New committees table with proper RLS policies and triggers',
+      'JavaScript Filtering: Replaced problematic Supabase .or() clauses with client-side filtering',
+      'Enhanced Error Handling: Added detailed logging and diagnostic scripts for better debugging',
+      'Database Migration Scripts: Comprehensive SQL scripts for schema updates and data validation'
+    ]
+  },
+  {
     version: '1.3.0',
     date: 'August 2025',
     features: [
