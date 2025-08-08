@@ -165,6 +165,12 @@ export default function MatchSchedulePage() {
     try {
       setLoading(true);
       
+      console.log('Starting fetchData with:', {
+        activeSeason: activeSeason?.id,
+        selectedCategory,
+        categoriesCount: categories.length
+      });
+      
       // Check if we have active season and categories
       if (!activeSeason || categories.length === 0) {
         console.log('Missing active season or categories');
@@ -181,9 +187,13 @@ export default function MatchSchedulePage() {
         setStandings([]);
         return;
       }
+      
+      console.log('Selected category data:', selectedCategoryData);
 
       // Fetch matches with team names and logos
-      // Filter for matches where either home or away team is the own club
+      // We'll filter for own club matches in JavaScript after fetching
+      console.log('Fetching matches for category:', selectedCategoryData.id, 'season:', activeSeason.id);
+      
       const { data: matchesData, error: matchesError } = await supabase
         .from('matches')
         .select(`
@@ -194,13 +204,22 @@ export default function MatchSchedulePage() {
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
-        .or(`home_team.is_own_club.eq.true,away_team.is_own_club.eq.true`)
         .order('date', { ascending: true });
 
+      console.log('Matches query result:', { data: matchesData?.length, error: matchesError });
       if (matchesError) throw matchesError;
 
+      // Filter matches for own club teams
+      const ownClubMatches = (matchesData as any[])?.filter(match => 
+        match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
+      ) || [];
+      
+      console.log('Own club matches found:', ownClubMatches.length);
+
       // Fetch standings
-      // Filter for own club teams only
+      // Show complete standings table for the category
+      console.log('Fetching standings for category:', selectedCategoryData.id, 'season:', activeSeason.id);
+      
       const { data: standingsData, error: standingsError } = await supabase
         .from('standings')
         .select(`
@@ -209,15 +228,21 @@ export default function MatchSchedulePage() {
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
-        .eq('team.is_own_club', true)
         .order('position', { ascending: true });
 
+      console.log('Standings query result:', { data: standingsData?.length, error: standingsError });
       if (standingsError) throw standingsError;
 
-      setMatches(matchesData || []);
+      setMatches(ownClubMatches || []);
       setStandings(standingsData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
+      console.error('Error details:', {
+        activeSeason: activeSeason?.id,
+        selectedCategory,
+        categories: categories.map(c => ({ id: c.id, code: c.code })),
+        selectedCategoryData: categories.find(cat => cat.code === selectedCategory)
+      });
     } finally {
       setLoading(false);
     }

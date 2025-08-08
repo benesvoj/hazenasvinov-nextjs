@@ -823,13 +823,16 @@ export default function TeamsAdminPage() {
 										onChange={(e) => setFormData({...formData, city: e.target.value})}
 									/>
 								</div>
-                <Select 
-                    className='max-w' 
-                    label='Komise' 
-                    placeholder='Vyberte komisi'
-                    selectedKeys={formData.committee_id ? [formData.committee_id] : []}
-                    onChange={(e) => setFormData({...formData, committee_id: e.target.value})}
-                  >
+                                 <Select 
+                     className='max-w' 
+                     label='Komise' 
+                     placeholder='Vyberte komisi'
+                     selectedKeys={formData.committee_id ? [formData.committee_id] : []}
+                     onSelectionChange={(keys) => {
+                       const selectedKey = Array.from(keys)[0] as string;
+                       setFormData({...formData, committee_id: selectedKey || ''});
+                     }}
+                   >
                     {committees.map((committee) => (
                       <SelectItem key={committee.id}>{committee.name}</SelectItem>
                     ))}

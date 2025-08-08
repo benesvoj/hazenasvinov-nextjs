@@ -26,6 +26,8 @@ const getRouteIcon = (route: string) => {
       return <HomeIcon className="w-5 h-5" />;
     case privateRoutes.teams:
       return <BuildingOfficeIcon className="w-5 h-5" />;
+    case privateRoutes.committees:
+      return <BuildingOfficeIcon className="w-5 h-5" />;
     case privateRoutes.matches:
       return <CalendarIcon className="w-5 h-5" />;
     case privateRoutes.members:

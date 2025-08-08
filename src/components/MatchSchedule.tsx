@@ -37,8 +37,8 @@ interface RawMatch {
   time: string;
   home_team_id: string;
   away_team_id: string;
-  home_team: { name: string; logo_url?: string };
-  away_team: { name: string; logo_url?: string };
+  home_team: { name: string; logo_url?: string; is_own_club?: boolean };
+  away_team: { name: string; logo_url?: string; is_own_club?: boolean };
   venue: string;
   competition: string;
   is_home: boolean;
@@ -155,6 +155,12 @@ export default function MatchSchedule() {
     try {
       setLoading(true);
       
+      console.log('Starting fetchData with:', {
+        activeSeason: activeSeason?.id,
+        selectedCategory,
+        categoriesCount: categories.length
+      });
+      
       // Check if we have active season and categories
       if (!activeSeason || categories.length === 0) {
         console.log('Missing active season or categories');
@@ -171,9 +177,13 @@ export default function MatchSchedule() {
         setStandings([]);
         return;
       }
+      
+      console.log('Selected category data:', selectedCategoryData);
 
       // Fetch matches with team names, logos and category info for active season
-      // Filter for matches where either home or away team is the own club
+      // We'll filter for own club matches in JavaScript after fetching
+      console.log('Fetching matches for category:', selectedCategoryData.id, 'season:', activeSeason.id);
+      
       const { data: matchesData, error: matchesError } = await supabase
         .from('matches')
         .select(`
@@ -184,13 +194,20 @@ export default function MatchSchedule() {
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
-        .or(`home_team.is_own_club.eq.true,away_team.is_own_club.eq.true`)
         .order('date', { ascending: true });
 
+      console.log('Matches query result:', { data: matchesData?.length, error: matchesError });
       if (matchesError) throw matchesError;
 
+      // Filter matches for own club teams and transform the data
+      const ownClubMatches = (matchesData as RawMatch[])?.filter(match => 
+        match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
+      ) || [];
+      
+      console.log('Own club matches found:', ownClubMatches.length);
+
       // Transform the data to flatten team names and include logos
-      const transformedMatches = (matchesData as RawMatch[])?.map(match => ({
+      const transformedMatches = ownClubMatches.map(match => ({
         ...match,
         home_team: match.home_team?.name || '',
         away_team: match.away_team?.name || '',
@@ -200,7 +217,9 @@ export default function MatchSchedule() {
       })) || [];
 
       // Fetch standings with team names for active season
-      // Filter for own club teams only
+      // Show complete standings table for the category
+      console.log('Fetching standings for category:', selectedCategoryData.id, 'season:', activeSeason.id);
+      
       const { data: standingsData, error: standingsError } = await supabase
         .from('standings')
         .select(`
@@ -209,12 +228,12 @@ export default function MatchSchedule() {
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
-        .eq('team.is_own_club', true)
         .order('position', { ascending: true });
 
+      console.log('Standings query result:', { data: standingsData?.length, error: standingsError });
       if (standingsError) throw standingsError;
 
-      // Transform standings data to flatten team names and logos
+      // Transform standings data to flatten team names and logos (no filtering)
       const transformedStandings = (standingsData as any[])?.map(standing => ({
         ...standing,
         team: standing.team?.name || '',
@@ -223,8 +242,21 @@ export default function MatchSchedule() {
 
       setMatches(transformedMatches);
       setStandings(transformedStandings);
+      
+      // Log if no own club matches found
+      if (transformedMatches.length === 0) {
+        console.log('No matches found for own club. Make sure you have:');
+        console.log('1. At least one team marked as "own club" (is_own_club = true)');
+        console.log('2. Matches for that team in the selected category and season');
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
+      console.error('Error details:', {
+        activeSeason: activeSeason?.id,
+        selectedCategory,
+        categories: categories.map(c => ({ id: c.id, code: c.code })),
+        selectedCategoryData: categories.find(cat => cat.code === selectedCategory)
+      });
     } finally {
       setLoading(false);
     }
@@ -255,7 +287,7 @@ export default function MatchSchedule() {
             VÝSLEDKY & AKTUÁLNÍ PROGRAM
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            Sledujte aktuální výsledky a program zápasů našich týmů
+            Sledujte aktuální výsledky a program zápasů našeho klubu
           </p>
           {activeSeason && (
             <div className="mt-4">
@@ -389,7 +421,10 @@ export default function MatchSchedule() {
                     ))}
                     {upcomingMatches.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
-                        Žádné nadcházející zápasy
+                        <div className="mb-2">Žádné nadcházející zápasy pro náš klub</div>
+                        <div className="text-sm text-gray-400">
+                          Zkontrolujte, zda máte nastavený vlastní klub v administraci
+                        </div>
                       </div>
                     )}
                     
@@ -517,7 +552,10 @@ export default function MatchSchedule() {
                     ))}
                     {recentResults.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
-                        Žádné nedávné výsledky
+                        <div className="mb-2">Žádné nedávné výsledky pro náš klub</div>
+                        <div className="text-sm text-gray-400">
+                          Zkontrolujte, zda máte nastavený vlastní klub v administraci
+                        </div>
                       </div>
                     )}
                   </div>
@@ -581,7 +619,10 @@ export default function MatchSchedule() {
                         {standings.length === 0 && (
                           <tr>
                             <td colSpan={8} className="text-center py-8 text-gray-500">
-                              Žádná data pro tabulku
+                              <div className="mb-2">Žádná data pro tabulku</div>
+                              <div className="text-sm text-gray-400">
+                                Pro vybranou kategorii a sezónu nejsou k dispozici žádná data
+                              </div>
                             </td>
                           </tr>
                         )}
