@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import routes, { privateRoutes } from "@/routes/routes";
 import { useSidebar } from "./SidebarContext";
@@ -9,7 +9,8 @@ import {
   ArrowRightOnRectangleIcon,
   BellIcon,
   InformationCircleIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  DocumentTextIcon
 } from "@heroicons/react/24/outline";
 import { 
   Dropdown, 
@@ -17,8 +18,13 @@ import {
   DropdownMenu, 
   DropdownItem,
   Button,
-  Badge
+  Badge,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody
 } from "@heroui/react";
+import { ReleaseNote, getReleaseNotes } from "@/utils/releaseNotes";
 
 // Get current section info based on pathname
 const getCurrentSection = (pathname: string) => {
@@ -59,8 +65,23 @@ export const TopBar = () => {
   const { isCollapsed } = useSidebar();
   const [notifications, setNotifications] = useState(3); // Mock notification count
   const [showReleaseNotes, setShowReleaseNotes] = useState(false);
+  const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
   
   const currentSection = getCurrentSection(pathname);
+
+  useEffect(() => {
+    loadReleaseNotes();
+  }, []);
+
+  const loadReleaseNotes = () => {
+    try {
+      const notes = getReleaseNotes();
+      setReleaseNotes(notes);
+    } catch (error) {
+      console.error('Error loading release notes:', error);
+      setReleaseNotes([]);
+    }
+  };
 
   const handleLogout = () => {
     // TODO: Implement logout logic
@@ -97,14 +118,14 @@ export const TopBar = () => {
             onPress={handleReleaseNotes}
             title="Release Notes"
           >
-            <InformationCircleIcon className="w-5 h-5 text-gray-600" />
-            {notifications > 0 && (
+            <DocumentTextIcon className="w-5 h-5 text-gray-600" />
+            {releaseNotes.length > 0 && (
               <Badge 
-                color="danger" 
+                color="primary" 
                 size="sm"
                 className="absolute -top-1 -right-1"
               >
-                {notifications}
+                {releaseNotes.length}
               </Badge>
             )}
           </Button>
@@ -180,58 +201,103 @@ export const TopBar = () => {
       </div>
 
       {/* Release Notes Modal */}
-      {showReleaseNotes && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Release Notes</h2>
-                <Button
-                  isIconOnly
-                  variant="light"
-                  size="sm"
-                  onPress={() => setShowReleaseNotes(false)}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </Button>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="border-l-4 border-blue-500 pl-4">
-                  <h3 className="font-semibold text-gray-900">v2.1.0 - 2024-01-15</h3>
-                  <ul className="mt-2 space-y-1 text-sm text-gray-600">
-                    <li>• Přidána správa sezón s možností uzavření</li>
-                    <li>• Vylepšená správa kategorií týmů</li>
-                    <li>• Nový design sidebar menu</li>
-                    <li>• Opravy v databázovém schématu</li>
-                  </ul>
-                </div>
-                
-                <div className="border-l-4 border-green-500 pl-4">
-                  <h3 className="font-semibold text-gray-900">v2.0.0 - 2024-01-10</h3>
-                  <ul className="mt-2 space-y-1 text-sm text-gray-600">
-                    <li>• Kompletní redesign administrace</li>
-                    <li>• Nový systém správy zápasů</li>
-                    <li>• Vylepšená správa týmů</li>
-                    <li>• Přidána správa členů</li>
-                  </ul>
-                </div>
-                
-                <div className="border-l-4 border-gray-400 pl-4">
-                  <h3 className="font-semibold text-gray-900">v1.0.0 - 2024-01-01</h3>
-                  <ul className="mt-2 space-y-1 text-sm text-gray-600">
-                    <li>• První verze systému</li>
-                    <li>• Základní správa obsahu</li>
-                    <li>• Autentizace uživatelů</li>
-                  </ul>
-                </div>
-              </div>
+      <Modal 
+        isOpen={showReleaseNotes} 
+        onClose={() => setShowReleaseNotes(false)} 
+        size="4xl"
+        scrollBehavior="inside"
+        classNames={{
+          base: "max-h-[90vh] overflow-hidden",
+          wrapper: "items-center justify-center p-4",
+          body: "max-h-[70vh] overflow-y-auto"
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <div className="flex items-center gap-2">
+              <DocumentTextIcon className="w-5 h-5 text-blue-500" />
+              <span>Release Notes</span>
             </div>
-          </div>
-        </div>
-      )}
+          </ModalHeader>
+          <ModalBody>
+            <div className="space-y-6">
+              {releaseNotes.map((release, index) => (
+                <div key={index} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        Version {release.version}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {release.date}
+                      </p>
+                    </div>
+                    {index === 0 && (
+                      <Badge color="success" variant="flat">
+                        Current
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {release.features.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                          🚀 New Features
+                        </h4>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                          {release.features.map((feature, idx) => (
+                            <li key={idx}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {release.improvements.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                          🔧 Improvements
+                        </h4>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                          {release.improvements.map((improvement, idx) => (
+                            <li key={idx}>{improvement}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {release.bugFixes.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                          🐛 Bug Fixes
+                        </h4>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                          {release.bugFixes.map((bugFix, idx) => (
+                            <li key={idx}>{bugFix}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {release.technicalUpdates.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                          📋 Technical Updates
+                        </h4>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                          {release.technicalUpdates.map((update, idx) => (
+                            <li key={idx}>{update}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };
