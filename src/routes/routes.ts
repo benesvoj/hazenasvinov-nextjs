@@ -19,6 +19,7 @@ export const publicRoutes = {
 	celebration: '/100',
 	blog: '/blog',
 	login: '/login',
+	matches: '/matches',
 	youngestKids: '/categories/youngest-kids',
 	prepKids: '/categories/prep-kids',
 	youngerBoys: '/categories/younger-boys',
@@ -105,6 +106,7 @@ const routes: MenuItem[] = [
 		]
 	},
 	{route: publicRoutes.blog, title: 'Novinky'},
+	{route: publicRoutes.matches, title: 'Zápasy'},
 	{route: publicRoutes.chronicle, title: 'Kronika'},
 	{route: publicRoutes.downloads, title: 'Dokumenty'},
 	{route: publicRoutes.contact, title: 'Kontakt'},

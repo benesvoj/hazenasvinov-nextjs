@@ -31,14 +31,6 @@ function formatTime(time: string): string {
   return time;
 }
 
-// Category configuration
-const categories = {
-  men: { name: "Muži", competition: "1. liga muži" },
-  women: { name: "Ženy", competition: "1. liga ženy" },
-  juniorBoys: { name: "Dorostenci", competition: "Dorostenecká liga" },
-  juniorGirls: { name: "Dorostenky", competition: "Dorostenecká liga žen" }
-};
-
 interface Match {
   id: string;
   category: string;
@@ -55,6 +47,7 @@ interface Match {
   home_score?: number;
   away_score?: number;
   result?: 'win' | 'loss' | 'draw';
+  matchweek?: number;
 }
 
 interface Standing {
@@ -114,14 +107,16 @@ function formatMonth(monthKey: string) {
 }
 
 export default function MatchSchedulePage() {
-  const [selectedCategory, setSelectedCategory] = useState("men");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSubTab, setSelectedSubTab] = useState("overview");
   const [matches, setMatches] = useState<Match[]>([]);
+  const [ownClubMatches, setOwnClubMatches] = useState<Match[]>([]);
   const [standings, setStandings] = useState<Standing[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("all");
   const [categories, setCategories] = useState<any[]>([]);
   const [activeSeason, setActiveSeason] = useState<any>(null);
+  const [ownClubCategories, setOwnClubCategories] = useState<any[]>([]);
 
   const supabase = createClient();
 
@@ -144,21 +139,63 @@ export default function MatchSchedulePage() {
     }
   }, [supabase]);
 
-  // Fetch categories
-  const fetchCategories = useCallback(async () => {
+  // Fetch categories that own club participates in for the active season
+  const fetchOwnClubCategories = useCallback(async () => {
+    if (!activeSeason) return;
+    
     try {
+      // First, get the own club team
+      const { data: ownClubTeam, error: teamError } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('is_own_club', true)
+        .single();
+
+      if (teamError) {
+        console.error('Error fetching own club team:', teamError);
+        return;
+      }
+
+      if (!ownClubTeam) {
+        console.log('No own club team found');
+        setOwnClubCategories([]);
+        return;
+      }
+
+      // Then, get categories assigned to the own club team for the active season
       const { data, error } = await supabase
-        .from('categories')
-        .select('id, code, name')
-        .eq('is_active', true)
-        .order('sort_order');
+        .from('team_categories')
+        .select(`
+          category:categories(id, code, name, sort_order)
+        `)
+        .eq('team_id', ownClubTeam.id)
+        .eq('season_id', activeSeason.id)
+        .eq('is_active', true);
 
       if (error) throw error;
-      setCategories(data || []);
+      
+      console.log('Own club categories data:', data);
+      
+      // Extract categories, remove duplicates, and sort them
+      const categories = (data || [])
+        .map(item => item.category)
+        .filter(category => category) // Remove null values
+        .filter((category, index, self) => 
+          index === self.findIndex(c => (c as any).id === (category as any).id)
+        ) // Remove duplicates based on category ID
+        .sort((a: any, b: any) => a.sort_order - b.sort_order);
+      
+      console.log('Processed own club categories:', categories);
+      setOwnClubCategories(categories);
+      
+      // Set the first category as selected if none is selected
+      if (categories.length > 0 && !selectedCategory) {
+        setSelectedCategory((categories[0] as any).code);
+      }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error fetching own club categories:', error);
     }
-  }, [supabase]);
+  }, [supabase, activeSeason, selectedCategory]);
 
   // Fetch matches and standings for selected category
   const fetchData = useCallback(async () => {
@@ -168,21 +205,22 @@ export default function MatchSchedulePage() {
       console.log('Starting fetchData with:', {
         activeSeason: activeSeason?.id,
         selectedCategory,
-        categoriesCount: categories.length
+        ownClubCategoriesCount: ownClubCategories.length
       });
       
-      // Check if we have active season and categories
-      if (!activeSeason || categories.length === 0) {
-        console.log('Missing active season or categories');
+      // Check if we have active season and own club categories
+      if (!activeSeason || ownClubCategories.length === 0) {
+        console.log('Missing active season or own club categories');
         setMatches([]);
         setStandings([]);
         return;
       }
 
       // Get the category ID for the selected category code
-      const selectedCategoryData = categories.find(cat => cat.code === selectedCategory);
+      const selectedCategoryData = ownClubCategories.find(cat => cat.code === selectedCategory);
       if (!selectedCategoryData) {
         console.log('Category not found for code:', selectedCategory);
+        console.log('Available categories:', ownClubCategories.map(c => ({ code: c.code, name: c.name })));
         setMatches([]);
         setStandings([]);
         return;
@@ -209,12 +247,29 @@ export default function MatchSchedulePage() {
       console.log('Matches query result:', { data: matchesData?.length, error: matchesError });
       if (matchesError) throw matchesError;
 
-      // Filter matches for own club teams
-      const ownClubMatches = (matchesData as any[])?.filter(match => 
-        match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
-      ) || [];
+      // Transform all matches data (no filtering for own club)
+      const transformedMatches = (matchesData as any[])?.map(match => ({
+        ...match,
+        home_team: { name: match.home_team?.name || '', logo_url: match.home_team?.logo_url || '' },
+        away_team: { name: match.away_team?.name || '', logo_url: match.away_team?.logo_url || '' },
+        category_code: match.category?.code || '',
+        matchweek: match.matchweek || undefined
+      })) || [];
       
-      console.log('Own club matches found:', ownClubMatches.length);
+      console.log('All matches found:', transformedMatches.length);
+
+      // Filter for own club matches for the overview tab
+      const ownClubFilteredMatches = (matchesData as any[])?.filter(match => 
+        match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
+      ).map(match => ({
+        ...match,
+        home_team: { name: match.home_team?.name || '', logo_url: match.home_team?.logo_url || '' },
+        away_team: { name: match.away_team?.name || '', logo_url: match.away_team?.logo_url || '' },
+        category_code: match.category?.code || '',
+        matchweek: match.matchweek || undefined
+      })) || [];
+      
+      console.log('Own club matches found:', ownClubFilteredMatches.length);
 
       // Fetch standings
       // Show complete standings table for the category
@@ -233,15 +288,16 @@ export default function MatchSchedulePage() {
       console.log('Standings query result:', { data: standingsData?.length, error: standingsError });
       if (standingsError) throw standingsError;
 
-      setMatches(ownClubMatches || []);
+      setMatches(transformedMatches || []);
+      setOwnClubMatches(ownClubFilteredMatches || []);
       setStandings(standingsData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       console.error('Error details:', {
         activeSeason: activeSeason?.id,
         selectedCategory,
-        categories: categories.map(c => ({ id: c.id, code: c.code })),
-        selectedCategoryData: categories.find(cat => cat.code === selectedCategory)
+        ownClubCategories: ownClubCategories.map(c => ({ id: c.id, code: c.code })),
+        selectedCategoryData: ownClubCategories.find(cat => cat.code === selectedCategory)
       });
     } finally {
       setLoading(false);
@@ -251,15 +307,21 @@ export default function MatchSchedulePage() {
   // Initial data fetch
   useEffect(() => {
     fetchActiveSeason();
-    fetchCategories();
-  }, [fetchActiveSeason, fetchCategories]);
+  }, [fetchActiveSeason]);
+
+  // Fetch own club categories when active season changes
+  useEffect(() => {
+    if (activeSeason) {
+      fetchOwnClubCategories();
+    }
+  }, [fetchOwnClubCategories, activeSeason]);
 
   // Fetch matches when dependencies change
   useEffect(() => {
-    if (activeSeason && categories.length > 0) {
+    if (activeSeason && ownClubCategories.length > 0) {
       fetchData();
     }
-  }, [fetchData, activeSeason, categories]);
+  }, [fetchData, activeSeason, ownClubCategories]);
 
   // Group matches by month
   const groupedMatches = useMemo(() => {
@@ -314,9 +376,10 @@ export default function MatchSchedulePage() {
     return filtered;
   }, [groupedMatches, filterType]);
 
-  const currentCategory = categories.find(cat => cat.code === selectedCategory);
+  const currentCategory = ownClubCategories.find(cat => cat.code === selectedCategory);
   const currentStandings = standings;
   const currentCompetition = matches.length > 0 ? matches[0].competition : 'N/A';
+  const currentSeason = activeSeason?.name;
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -335,9 +398,9 @@ export default function MatchSchedulePage() {
               <div className="space-y-2 text-sm">
                 <div><span className="font-medium">Kategorie:</span> {currentCategory?.name || 'N/A'}</div>
                 <div><span className="font-medium">Soutěž:</span> {currentCompetition}</div>
-                <div><span className="font-medium">Sezóna:</span> 2024/2025</div>
+                <div><span className="font-medium">Sezóna:</span> {currentSeason}</div>
                 <div><span className="font-medium">Trenér:</span> Jan Novák</div>
-                <div><span className="font-medium">Asistent:</span> Petr Svoboda</div>
+                <div><span className="font-medium">Vedoucí:</span> Petr Svoboda</div>
               </div>
             </div>
             <div>
@@ -380,74 +443,114 @@ export default function MatchSchedulePage() {
             <div className="text-center py-8">Načítání...</div>
           ) : (
             <div className="space-y-4">
-              {matches
+              {ownClubMatches
                 .filter(match => match.status === "completed")
                 .slice(0, 3)
                 .map((match) => (
                   <div key={match.id} className="p-4 border rounded-lg">
-                    <div className="space-y-3">
-                      {/* Teams with Logos at Start */}
-                      <div className="flex items-center justify-start gap-4">
-                        {/* Home Team */}
-                        <div className="flex items-center gap-3">
-                          {match.home_team.logo_url && (
-                            <img 
-                              src={match.home_team.logo_url} 
-                              alt={`${match.home_team.name} logo`}
-                              className="w-8 h-8 object-contain"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          )}
-                          <span className={`text-base font-semibold ${match.is_home ? 'text-blue-600 dark:text-blue-400' : ''}`}>
-                            {match.home_team.name}
-                          </span>
+                    <div className="flex items-center justify-between">
+                      {/* Date and Time - Left Side */}
+                      <div className="flex flex-col items-start min-w-[120px]">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(match.date).toLocaleDateString('cs-CZ', { 
+                            weekday: 'long'
+                          })}
                         </div>
-                        
-                        <span className="text-gray-500 font-medium">vs</span>
-                        
-                        {/* Away Team */}
-                        <div className="flex items-center gap-3">
-                          {match.away_team.logo_url && (
-                            <img 
-                              src={match.away_team.logo_url} 
-                              alt={`${match.away_team.name} logo`}
-                              className="w-8 h-8 object-contain"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          )}
-                          <span className={`text-base font-semibold ${!match.is_home ? 'text-blue-600 dark:text-blue-400' : ''}`}>
-                            {match.away_team.name}
-                          </span>
+                        <div className="font-semibold text-gray-900 dark:text-white">
+                          {new Date(match.date).toLocaleDateString('cs-CZ', { 
+                            day: 'numeric',
+                            month: 'numeric'
+                          })}
+                        </div>
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {formatTime(match.time)}
                         </div>
                       </div>
-                      
-                      {/* Date and Result below */}
-                      <div className="flex items-center justify-start gap-4 text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <CalendarIcon className="w-4 h-4" />
-                          <span>{new Date(match.date).toLocaleDateString('cs-CZ', { 
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long'
-                          })}</span>
+
+                      {/* Teams and Info - Center */}
+                      <div className="flex-1 flex flex-col items-center mx-4">
+                        {/* Teams Row */}
+                        <div className="flex items-center gap-4 mb-2">
+                          {/* Home Team */}
+                          <div className="flex items-center gap-3">
+                            {match.home_team.logo_url && (
+                              <img 
+                                src={match.home_team.logo_url} 
+                                alt={`${match.home_team.name} logo`}
+                                className="w-8 h-8 object-contain rounded-full"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            )}
+                            <span className="font-medium text-gray-900 dark:text-white">
+                              {match.home_team.name}
+                            </span>
+                          </div>
+                          
+                          <span className="text-gray-400 text-sm">x</span>
+                          
+                          {/* Away Team */}
+                          <div className="flex items-center gap-3">
+                            <span className="font-medium text-gray-900 dark:text-white">
+                              {match.away_team.name}
+                            </span>
+                            {match.away_team.logo_url && (
+                              <img 
+                                src={match.away_team.logo_url} 
+                                alt={`${match.away_team.name} logo`}
+                                className="w-8 h-8 object-contain rounded-full"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            )}
+                          </div>
                         </div>
-                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                          {match.home_score !== undefined && match.away_score !== undefined 
-                            ? `${match.home_score} : ${match.away_score}` 
-                            : "-:-"}
+                        
+                        {/* Venue and League Info */}
+                        <div className="text-center">
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                            {match.venue}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-500">
+                            {match.competition}
+                          </div>
                         </div>
-                        {getResultBadge(match.result!)}
+                      </div>
+
+                      {/* Score and Action - Right Side */}
+                      <div className="flex flex-col items-end min-w-[100px]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {match.home_score !== undefined && match.away_score !== undefined 
+                              ? `${match.home_score} : ${match.away_score}` 
+                              : "-:-"}
+                          </span>
+                        </div>
+                        
+                        {/* Action Button */}
+                        <Button 
+                          as={Link} 
+                          href={`/matches/${match.id}`}
+                          variant="light" 
+                          size="sm"
+                          color="primary"
+                          isIconOnly
+                          className="mt-2"
+                        >
+                          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
                 ))}
-              {matches.filter(match => match.status === "completed").length === 0 && (
+              {ownClubMatches.filter(match => match.status === "completed").length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                  Žádné výsledky
+                  <div className="mb-2">Žádné výsledky pro náš klub</div>
+                  <div className="text-sm text-gray-400">
+                    Zkontrolujte, zda máte nastavený vlastní klub v administraci
+                  </div>
                 </div>
               )}
             </div>
@@ -480,53 +583,89 @@ export default function MatchSchedulePage() {
             <div className="text-center py-8">Načítání...</div>
           ) : (
             <div className="space-y-4">
-              {matches
+              {ownClubMatches
                 .filter(match => match.status === "upcoming")
                 .slice(0, 3)
                 .map((match) => (
                   <div key={match.id} className="p-4 border rounded-lg">
-                    <div className="space-y-3">
-                      {/* Teams Row */}
-                      <div className="flex items-center justify-center gap-4">
-                        {/* Home Team */}
-                        <div className="flex items-center gap-3">
-                          {match.home_team.logo_url && (
-                            <img 
-                              src={match.home_team.logo_url} 
-                              alt={`${match.home_team.name} logo`}
-                              className="w-8 h-8 object-contain"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          )}
-                          <span className={`text-base font-semibold ${match.is_home ? 'text-blue-600 dark:text-blue-400' : ''}`}>
-                            {match.home_team.name}
-                          </span>
+                    <div className="flex items-center justify-between">
+                      {/* Date and Time - Left Side */}
+                      <div className="flex flex-col items-start min-w-[120px]">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(match.date).toLocaleDateString('cs-CZ', { 
+                            weekday: 'long'
+                          })}
                         </div>
-                        
-                        <span className="text-gray-500 font-medium">vs</span>
-                        
-                        {/* Away Team */}
-                        <div className="flex items-center gap-3">
-                          {match.away_team.logo_url && (
-                            <img 
-                              src={match.away_team.logo_url} 
-                              alt={`${match.away_team.name} logo`}
-                              className="w-8 h-8 object-contain"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          )}
-                          <span className={`text-base font-semibold ${!match.is_home ? 'text-blue-600 dark:text-blue-400' : ''}`}>
-                            {match.away_team.name}
-                          </span>
+                        <div className="font-semibold text-gray-900 dark:text-white">
+                          {new Date(match.date).toLocaleDateString('cs-CZ', { 
+                            day: 'numeric',
+                            month: 'numeric'
+                          })}
+                        </div>
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {formatTime(match.time)}
                         </div>
                       </div>
-                      
-                      {/* Action Button Row - Center */}
-                      <div className="flex justify-center">
+
+                      {/* Teams and Info - Center */}
+                      <div className="flex-1 flex flex-col items-center mx-4">
+                        {/* Teams Row */}
+                        <div className="flex items-center gap-4 mb-2">
+                          {/* Home Team */}
+                          <div className="flex items-center gap-3">
+                            {match.home_team.logo_url && (
+                              <img 
+                                src={match.home_team.logo_url} 
+                                alt={`${match.home_team.name} logo`}
+                                className="w-8 h-8 object-contain rounded-full"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            )}
+                            <span className={`font-medium ${match.is_home ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                              {match.home_team.name}
+                            </span>
+                          </div>
+                          
+                          <span className="text-gray-400 text-sm">x</span>
+                          
+                          {/* Away Team */}
+                          <div className="flex items-center gap-3">
+                            <span className={`font-medium ${!match.is_home ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                              {match.away_team.name}
+                            </span>
+                            {match.away_team.logo_url && (
+                              <img 
+                                src={match.away_team.logo_url} 
+                                alt={`${match.away_team.name} logo`}
+                                className="w-8 h-8 object-contain rounded-full"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Venue and League Info */}
+                        <div className="text-center">
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                            {match.venue}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-500">
+                            {match.competition}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Score and Action - Right Side */}
+                      <div className="flex flex-col items-end min-w-[100px]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl font-bold text-gray-400">-:-</span>
+                        </div>
+                        
+                        {/* Action Button */}
                         <Button 
                           as={Link} 
                           href={`/matches/${match.id}`}
@@ -534,43 +673,25 @@ export default function MatchSchedulePage() {
                           size="sm"
                           color="primary"
                           isIconOnly
+                          className="mt-2"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                          </svg>
+                          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                         </Button>
-                      </div>
-                      
-                      {/* Date, Time and Venue below */}
-                      <div className="flex items-center justify-start gap-4 text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <CalendarIcon className="w-4 h-4" />
-                          <span>{new Date(match.date).toLocaleDateString('cs-CZ', { 
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long'
-                          })}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <ClockIcon className="w-4 h-4" />
-                          <span className="font-semibold">{formatTime(match.time)}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPinIcon className="w-4 h-4" />
-                          <span>{match.venue}</span>
-                        </div>
                       </div>
                     </div>
                   </div>
                 ))}
-              {matches.filter(match => match.status === "upcoming").length === 0 && (
+              {ownClubMatches.filter(match => match.status === "upcoming").length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                  Žádné nadcházející zápasy
+                  <div className="mb-2">Žádné nadcházející zápasy pro náš klub</div>
+                  <div className="text-sm text-gray-400">
+                    Zkontrolujte, zda máte nastavený vlastní klub v administraci
+                  </div>
                 </div>
               )}
               
               {/* Show All Matches Button */}
-              {matches.filter(match => match.status === "upcoming").length > 0 && (
+              {ownClubMatches.filter(match => match.status === "upcoming").length > 0 && (
                 <div className="flex justify-center pt-4">
                   <Button 
                     as={Link} 
@@ -647,49 +768,59 @@ export default function MatchSchedulePage() {
                     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                     .map((match) => (
                       <Card key={match.id} className="hover:shadow-lg transition-shadow">
-                        <CardBody>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            {/* Date and Time */}
-                            <div className="flex items-center gap-2">
-                              <CalendarIcon className="w-5 h-5 text-gray-500" />
-                              <div>
-                                <div className="font-semibold">
-                                  {new Date(match.date).toLocaleDateString('cs-CZ', { 
-                                    weekday: 'long',
-                                    day: 'numeric',
-                                    month: 'long'
-                                  })}
-                                </div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                  {formatTime(match.time)}
-                                </div>
+                        <CardBody className="p-4">
+                          <div className="flex items-center justify-between">
+                            {/* Date and Time - Left Side */}
+                            <div className="flex flex-col items-start min-w-[120px]">
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {new Date(match.date).toLocaleDateString('cs-CZ', { 
+                                  weekday: 'long'
+                                })}
+                              </div>
+                              <div className="font-semibold text-gray-900 dark:text-white">
+                                {new Date(match.date).toLocaleDateString('cs-CZ', { 
+                                  day: 'numeric',
+                                  month: 'numeric'
+                                })}
+                              </div>
+                              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {formatTime(match.time)}
                               </div>
                             </div>
 
-                            {/* Teams */}
-                            <div className="text-center">
-                              <div className="flex items-center justify-center gap-4">
-                                <div className={`text-right flex items-center gap-2 ${match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}>
+                            {/* Teams and Info - Center */}
+                            <div className="flex-1 flex flex-col items-center mx-4">
+                              {/* Teams Row */}
+                              <div className="flex items-center gap-4 mb-2">
+                                {/* Home Team */}
+                                <div className="flex items-center gap-3">
                                   {match.home_team.logo_url && (
                                     <img 
                                       src={match.home_team.logo_url} 
                                       alt={`${match.home_team.name} logo`}
-                                      className="w-6 h-6 object-contain"
+                                      className="w-8 h-8 object-contain rounded-full"
                                       onError={(e) => {
                                         e.currentTarget.style.display = 'none';
                                       }}
                                     />
                                   )}
-                                  {match.home_team.name}
+                                  <span className={`font-medium ${match.is_home ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                                    {match.home_team.name}
+                                  </span>
                                 </div>
-                                <div className="text-gray-500">vs</div>
-                                <div className={`text-left flex items-center gap-2 ${!match.is_home ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}>
-                                  {match.away_team.name}
+                                
+                                <span className="text-gray-400 text-sm">x</span>
+                                
+                                {/* Away Team */}
+                                <div className="flex items-center gap-3">
+                                  <span className={`font-medium ${!match.is_home ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                                    {match.away_team.name}
+                                  </span>
                                   {match.away_team.logo_url && (
                                     <img 
                                       src={match.away_team.logo_url} 
                                       alt={`${match.away_team.name} logo`}
-                                      className="w-6 h-6 object-contain"
+                                      className="w-8 h-8 object-contain rounded-full"
                                       onError={(e) => {
                                         e.currentTarget.style.display = 'none';
                                       }}
@@ -697,31 +828,48 @@ export default function MatchSchedulePage() {
                                   )}
                                 </div>
                               </div>
-                              {match.status === "completed" && (
-                                <div className="flex items-center justify-center gap-2 mt-2">
-                                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                              
+                              {/* Venue and League Info */}
+                              <div className="text-center">
+                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                  {match.venue}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-500">
+                                  {match.competition}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Score and Action - Right Side */}
+                            <div className="flex flex-col items-end min-w-[100px]">
+                              {match.status === "completed" ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {match.home_score !== undefined ? match.home_score : "-"}
                                   </span>
-                                  <span className="text-gray-500">:</span>
-                                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                  <span className="text-gray-400">:</span>
+                                  <span className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {match.away_score !== undefined ? match.away_score : "-"}
                                   </span>
                                 </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-2xl font-bold text-gray-400">-:-</span>
+                                </div>
                               )}
-                            </div>
-
-                            {/* Venue and Status */}
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <MapPinIcon className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
-                                  {match.venue}
-                                </span>
-                              </div>
-                              <div className="flex gap-2">
-                                {match.status === "completed" && getResultBadge(match.result!)}
-                                {getStatusBadge(match.status)}
-                              </div>
+                              
+                              {/* Action Button */}
+                              <Button 
+                                as={Link} 
+                                href={`/matches/${match.id}`}
+                                variant="light" 
+                                size="sm"
+                                color="primary"
+                                isIconOnly
+                                className="mt-2"
+                              >
+                                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
                         </CardBody>
@@ -831,18 +979,26 @@ export default function MatchSchedulePage() {
       </div>
 
       {/* Category Tabs */}
-      <Tabs 
-        selectedKey={selectedCategory} 
-        onSelectionChange={(key) => setSelectedCategory(key as string)}
-        className="w-full"
-        color="primary"
-        variant="underlined"
-      >
-        <Tab key="men" title="Muži" />
-        <Tab key="women" title="Ženy" />
-        <Tab key="juniorBoys" title="Dorostenci" />
-        <Tab key="juniorGirls" title="Dorostenky" />
-      </Tabs>
+      {ownClubCategories.length > 0 ? (
+        <Tabs 
+          selectedKey={selectedCategory} 
+          onSelectionChange={(key) => setSelectedCategory(key as string)}
+          className="w-full"
+          color="primary"
+          variant="underlined"
+        >
+          {ownClubCategories.map((category) => (
+            <Tab key={category.code} title={category.name} />
+          ))}
+        </Tabs>
+      ) : (
+        <div className="text-center py-8 text-gray-500">
+          <div className="mb-2">Žádné kategorie pro náš klub</div>
+          <div className="text-sm text-gray-400">
+            Zkontrolujte, zda máte nastavený vlastní klub a přiřazené kategorie v administraci
+          </div>
+        </div>
+      )}
 
       {/* Sub Tabs */}
       <Tabs 
