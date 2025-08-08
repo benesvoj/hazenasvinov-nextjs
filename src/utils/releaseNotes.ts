@@ -10,6 +10,35 @@ export interface ReleaseNote {
 // Static release notes data
 export const releaseNotesData: ReleaseNote[] = [
   {
+    version: '1.3.0',
+    date: 'December 2024',
+    features: [
+      'Visual Todo Management: Added intuitive icons for priority, status, and category indicators',
+      'Smart Todo Sorting: Automatic sorting by priority (urgent > high > medium > low) and due date',
+      'Enhanced Todo Layout: Stacked label-value design for better readability and information hierarchy',
+      'Responsive Grid System: 12-column grid layout for optimal space distribution'
+    ],
+    improvements: [
+      'Todo List UX: Removed "assigned to" field for cleaner interface',
+      'Date Formatting: Simplified created date to YYYY-MM-DD format for better readability',
+      'Email Field Spacing: Optimized layout to prevent email wrapping with 50-67% width allocation',
+      'Icon-Based Indicators: Replaced text badges with intuitive icons for faster scanning',
+      'Release Notes Modal: Fixed positioning and sizing issues for better viewport display'
+    ],
+    bugFixes: [
+      'Modal Positioning: Resolved release notes modal appearing outside viewport',
+      'Form State Management: Removed assigned_to field from todo forms and database operations',
+      'TypeScript Errors: Fixed interface conflicts after removing assigned_to field',
+      'Grid Layout Issues: Resolved responsive grid behavior for different screen sizes'
+    ],
+    technicalUpdates: [
+      'Release Notes Architecture: Migrated from markdown parsing to TypeScript static data',
+      'Todo Interface Updates: Removed assigned_to from TodoItem interface',
+      'Grid System Implementation: Implemented 12-column CSS Grid for precise layout control',
+      'Icon System Integration: Added comprehensive icon mapping for todo indicators'
+    ]
+  },
+  {
     version: '1.2.0',
     date: 'August 2025',
     features: [
