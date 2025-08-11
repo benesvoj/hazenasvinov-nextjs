@@ -166,7 +166,7 @@ export default function MatchSchedulePage() {
       const { data, error } = await supabase
         .from('team_categories')
         .select(`
-          category:categories(id, code, name, sort_order)
+          category:categories(id, code, name, description, sort_order)
         `)
         .eq('team_id', ownClubTeam.id)
         .eq('season_id', activeSeason.id)
@@ -238,7 +238,7 @@ export default function MatchSchedulePage() {
           *,
           home_team:home_team_id(name, logo_url, is_own_club),
           away_team:away_team_id(name, logo_url, is_own_club),
-          category:categories(code, name)
+          category:categories(code, name, description)
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)

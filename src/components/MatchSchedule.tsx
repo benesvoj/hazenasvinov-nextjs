@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
+import { MatchRow } from "./MatchRow";
 
 // Helper function to format time from HH:MM:SS to HH:MM
 function formatTime(time: string): string {
@@ -192,7 +193,7 @@ export default function MatchSchedule() {
           *,
           home_team:home_team_id(name, logo_url, is_own_club),
           away_team:away_team_id(name, logo_url, is_own_club),
-          category:categories(code, name)
+          category:categories(code, name, description)
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
@@ -283,8 +284,8 @@ export default function MatchSchedule() {
   const recentResults = matches.filter(match => match.status === 'completed').slice(0, 3);
 
   return (
-    <section className="py-16 bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             VÝSLEDKY & AKTUÁLNÍ PROGRAM
@@ -342,99 +343,7 @@ export default function MatchSchedule() {
                 ) : (
                   <div className="space-y-4">
                     {upcomingMatches.map((match) => (
-                      <div key={match.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <div className="flex items-center justify-between">
-                          {/* Date and Time - Left Side */}
-                          <div className="flex flex-col items-start min-w-[120px]">
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {new Date(match.date).toLocaleDateString('cs-CZ', { 
-                                weekday: 'long'
-                              })}
-                            </div>
-                            <div className="font-semibold text-gray-900 dark:text-white">
-                              {new Date(match.date).toLocaleDateString('cs-CZ', { 
-                                day: 'numeric',
-                                month: 'numeric'
-                              })}
-                            </div>
-                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {formatTime(match.time)}
-                            </div>
-                          </div>
-
-                          {/* Teams and Info - Center */}
-                          <div className="flex-1 flex flex-col items-center mx-4">
-                            {/* Teams Row */}
-                            <div className="flex items-center gap-4 mb-2">
-                              {/* Home Team */}
-                              <div className="flex items-center gap-3">
-                                {match.home_team_logo && (
-                                  <img 
-                                    src={match.home_team_logo} 
-                                    alt={`${match.home_team} logo`}
-                                    className="w-8 h-8 object-contain rounded-full"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                )}
-                                <span className={`font-medium ${match.is_home ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                                  {match.home_team}
-                                </span>
-                              </div>
-                              
-                              <span className="text-gray-400 text-sm">x</span>
-                              
-                              {/* Away Team */}
-                              <div className="flex items-center gap-3">
-                                <span className={`font-medium ${!match.is_home ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                                  {match.away_team}
-                                </span>
-                                {match.away_team_logo && (
-                                  <img 
-                                    src={match.away_team_logo} 
-                                    alt={`${match.away_team} logo`}
-                                    className="w-8 h-8 object-contain rounded-full"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            </div>
-                            
-                            {/* Venue and League Info */}
-                            <div className="text-center">
-                              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {match.venue}
-                              </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-500">
-                                {match.competition}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Score and Action - Right Side */}
-                          <div className="flex flex-col items-end min-w-[100px]">
-                            <div className="flex items-center gap-2">
-                              <span className="text-2xl font-bold text-gray-400">-:-</span>
-                            </div>
-                            
-                            {/* Action Button */}
-                            <Button 
-                              as={Link} 
-                              href={`/matches/${match.id}`}
-                              variant="light" 
-                              size="sm"
-                              color="primary"
-                              isIconOnly
-                              className="mt-2"
-                            >
-                              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
+                      <MatchRow key={match.id} match={match} />
                     ))}
                     {upcomingMatches.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
@@ -442,22 +351,6 @@ export default function MatchSchedule() {
                         <div className="text-sm text-gray-400">
                           Zkontrolujte, zda máte nastavený vlastní klub v administraci
                         </div>
-                      </div>
-                    )}
-                    
-                    {/* Show All Matches Button */}
-                    {upcomingMatches.length > 0 && (
-                      <div className="flex justify-center pt-4">
-                        <Button 
-                          as={Link} 
-                          href="/matches" 
-                          variant="bordered" 
-                          size="sm"
-                          color="primary"
-                          endContent={<ArrowRightIcon className="w-4 h-4" />}
-                        >
-                          Zobrazit všechny zápasy
-                        </Button>
                       </div>
                     )}
                   </div>
@@ -489,103 +382,7 @@ export default function MatchSchedule() {
                 ) : (
                   <div className="space-y-4">
                     {recentResults.map((match) => (
-                      <div key={match.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <div className="flex items-center justify-between">
-                          {/* Date and Time - Left Side */}
-                          <div className="flex flex-col items-start min-w-[120px]">
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {new Date(match.date).toLocaleDateString('cs-CZ', { 
-                                weekday: 'long'
-                              })}
-                            </div>
-                            <div className="font-semibold text-gray-900 dark:text-white">
-                              {new Date(match.date).toLocaleDateString('cs-CZ', { 
-                                day: 'numeric',
-                                month: 'numeric'
-                              })}
-                            </div>
-                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {formatTime(match.time)}
-                            </div>
-                          </div>
-
-                          {/* Teams and Info - Center */}
-                          <div className="flex-1 flex flex-col items-center mx-4">
-                            {/* Teams Row */}
-                            <div className="flex items-center gap-4 mb-2">
-                              {/* Home Team */}
-                              <div className="flex items-center gap-3">
-                                {match.home_team_logo && (
-                                  <img 
-                                    src={match.home_team_logo} 
-                                    alt={`${match.home_team} logo`}
-                                    className="w-8 h-8 object-contain rounded-full"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                )}
-                                <span className={`font-medium ${match.is_home ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                                  {match.home_team}
-                                </span>
-                              </div>
-                              
-                              <span className="text-gray-400 text-sm">x</span>
-                              
-                              {/* Away Team */}
-                              <div className="flex items-center gap-3">
-                                <span className={`font-medium ${!match.is_home ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                                  {match.away_team}
-                                </span>
-                                {match.away_team_logo && (
-                                  <img 
-                                    src={match.away_team_logo} 
-                                    alt={`${match.away_team} logo`}
-                                    className="w-8 h-8 object-contain rounded-full"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            </div>
-                            
-                            {/* Venue and League Info */}
-                            <div className="text-center">
-                              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {match.venue}
-                              </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-500">
-                                {match.competition}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Score and Action - Right Side */}
-                          <div className="flex flex-col items-end min-w-[100px]">
-                            <div className="flex items-center gap-2">
-                              <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                                {match.home_score !== undefined && match.away_score !== undefined 
-                                  ? `${match.home_score} : ${match.away_score}` 
-                                  : "-:-"}
-                              </span>
-                            </div>
-                            
-                            {/* Action Button */}
-                            <Button 
-                              as={Link} 
-                              href={`/matches/${match.id}`}
-                              variant="light" 
-                              size="sm"
-                              color="primary"
-                              isIconOnly
-                              className="mt-2"
-                            >
-                              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
+                      <MatchRow key={match.id} match={match} />
                     ))}
                     {recentResults.length === 0 && (
                       <div className="text-center py-8 text-gray-500">

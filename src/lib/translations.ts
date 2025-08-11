@@ -1,4 +1,7 @@
 export const translations = {
+	footer: {
+		copyright: `© 2025 TJ Sokol Svinov. Všechna práva vyhrazena.`,
+	},
 	categories: {
 		title: 'Kategorie',
 		description: 'Správa kategorií, které jsou dostupné v systému.',

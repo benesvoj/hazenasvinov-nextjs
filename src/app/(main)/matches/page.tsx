@@ -149,7 +149,7 @@ export default function MatchesPage() {
           *,
           home_team:home_team_id(name, logo_url, is_own_club),
           away_team:away_team_id(name, logo_url, is_own_club),
-          category:categories(code, name),
+          category:categories(code, name, description),
           season:seasons(name)
         `)
         .order('date', { ascending: true });
