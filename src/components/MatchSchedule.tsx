@@ -17,6 +17,7 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
 import { MatchRow } from "./MatchRow";
+import Image from 'next/image';
 
 // Helper function to format time from HH:MM:SS to HH:MM
 function formatTime(time: string): string {
@@ -430,9 +431,11 @@ export default function MatchSchedule() {
                             <td className="py-2 px-2 font-medium">
                               <div className="flex items-center gap-2">
                                 {team.team_logo && (
-                                  <img 
+                                  <Image 
                                     src={team.team_logo} 
                                     alt={`${team.team} logo`}
+                                    width={24}
+                                    height={24}
                                     className="w-6 h-6 object-contain"
                                     onError={(e) => {
                                       e.currentTarget.style.display = 'none';

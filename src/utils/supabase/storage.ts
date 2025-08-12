@@ -201,7 +201,7 @@ export async function initializeStorageBucket(): Promise<boolean> {
       return false;
     }
 
-    const bucketExists = buckets?.some(bucket => bucket.name === TEAM_LOGOS_BUCKET);
+    const bucketExists = buckets?.some((bucket: any) => bucket.name === TEAM_LOGOS_BUCKET);
     
     if (!bucketExists) {
       // Create bucket

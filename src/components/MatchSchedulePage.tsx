@@ -18,6 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
+import Image from 'next/image';
 
 // Helper function to format time from HH:MM:SS to HH:MM
 function formatTime(time: string): string {
@@ -178,9 +179,9 @@ export default function MatchSchedulePage() {
       
       // Extract categories, remove duplicates, and sort them
       const categories = (data || [])
-        .map(item => item.category)
-        .filter(category => category) // Remove null values
-        .filter((category, index, self) => 
+        .map((item: any) => item.category)
+        .filter((category: any) => category) // Remove null values
+        .filter((category: any, index: number, self: any[]) => 
           index === self.findIndex(c => (c as any).id === (category as any).id)
         ) // Remove duplicates based on category ID
         .sort((a: any, b: any) => a.sort_order - b.sort_order);
@@ -302,7 +303,7 @@ export default function MatchSchedulePage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, supabase, activeSeason, categories]);
+  }, [selectedCategory, supabase, activeSeason, ownClubCategories]);
 
   // Initial data fetch
   useEffect(() => {
@@ -474,9 +475,11 @@ export default function MatchSchedulePage() {
                           {/* Home Team */}
                           <div className="flex items-center gap-3">
                             {match.home_team.logo_url && (
-                              <img 
+                              <Image 
                                 src={match.home_team.logo_url} 
                                 alt={`${match.home_team.name} logo`}
+                                width={32}
+                                height={32}
                                 className="w-8 h-8 object-contain rounded-full"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
@@ -496,9 +499,11 @@ export default function MatchSchedulePage() {
                               {match.away_team.name}
                             </span>
                             {match.away_team.logo_url && (
-                              <img 
+                              <Image 
                                 src={match.away_team.logo_url} 
                                 alt={`${match.away_team.name} logo`}
+                                width={32}
+                                height={32}
                                 className="w-8 h-8 object-contain rounded-full"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
@@ -614,9 +619,11 @@ export default function MatchSchedulePage() {
                           {/* Home Team */}
                           <div className="flex items-center gap-3">
                             {match.home_team.logo_url && (
-                              <img 
+                              <Image 
                                 src={match.home_team.logo_url} 
                                 alt={`${match.home_team.name} logo`}
+                                width={32}
+                                height={32}
                                 className="w-8 h-8 object-contain rounded-full"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
@@ -636,9 +643,11 @@ export default function MatchSchedulePage() {
                               {match.away_team.name}
                             </span>
                             {match.away_team.logo_url && (
-                              <img 
+                              <Image 
                                 src={match.away_team.logo_url} 
                                 alt={`${match.away_team.name} logo`}
+                                width={32}
+                                height={32}
                                 className="w-8 h-8 object-contain rounded-full"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
@@ -795,9 +804,11 @@ export default function MatchSchedulePage() {
                                 {/* Home Team */}
                                 <div className="flex items-center gap-3">
                                   {match.home_team.logo_url && (
-                                    <img 
+                                    <Image 
                                       src={match.home_team.logo_url} 
                                       alt={`${match.home_team.name} logo`}
+                                      width={32}
+                                      height={32}
                                       className="w-8 h-8 object-contain rounded-full"
                                       onError={(e) => {
                                         e.currentTarget.style.display = 'none';
@@ -817,9 +828,11 @@ export default function MatchSchedulePage() {
                                     {match.away_team.name}
                                   </span>
                                   {match.away_team.logo_url && (
-                                    <img 
+                                    <Image 
                                       src={match.away_team.logo_url} 
                                       alt={`${match.away_team.name} logo`}
+                                      width={32}
+                                      height={32}
                                       className="w-8 h-8 object-contain rounded-full"
                                       onError={(e) => {
                                         e.currentTarget.style.display = 'none';
@@ -932,9 +945,11 @@ export default function MatchSchedulePage() {
                       <td className="py-2 px-2 font-medium">
                         <div className="flex items-center gap-2">
                           {team.team?.logo_url && (
-                            <img 
+                            <Image 
                               src={team.team.logo_url} 
                               alt={`${team.team.name} logo`}
+                              width={24}
+                              height={24}
                               className="w-6 h-6 object-contain"
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';

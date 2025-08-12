@@ -21,6 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
+import Image from 'next/image';
 
 interface Team {
   id: string;
@@ -211,7 +212,7 @@ export default function MatchesAdminPage() {
       console.log('Raw team_categories data:', data);
       
       // Extract team data from the nested structure
-      const teamData = data?.map(item => item.teams).filter(Boolean) as unknown as Team[];
+      const teamData = data?.map((item: any) => item.teams).filter(Boolean) as unknown as Team[];
       console.log('Extracted team data:', teamData);
       
       setFilteredTeams(teamData || []);
@@ -272,7 +273,7 @@ export default function MatchesAdminPage() {
       setSeasons(data || []);
       
       // Set active season as default
-      const activeSeason = data?.find(season => season.is_active);
+      const activeSeason = data?.find((season: any) => season.is_active);
       if (activeSeason) {
         setSelectedSeason(activeSeason.id);
       }
@@ -407,7 +408,7 @@ export default function MatchesAdminPage() {
 
       // Initialize standings for all teams
       const standingsMap = new Map();
-      teamCategories.forEach(tc => {
+      teamCategories.forEach((tc: any) => {
         standingsMap.set(tc.team_id, {
           team_id: tc.team_id,
           category_id: selectedCategory,
@@ -424,7 +425,7 @@ export default function MatchesAdminPage() {
       });
 
       // Calculate standings from matches
-      completedMatches.forEach(match => {
+      completedMatches.forEach((match: any) => {
         if (!match.home_score || !match.away_score) return;
 
         const homeStanding = standingsMap.get(match.home_team_id);
@@ -472,7 +473,7 @@ export default function MatchesAdminPage() {
       });
 
       // Update positions
-      standingsArray.forEach((standing, index) => {
+      standingsArray.forEach((standing: any, index) => {
         standing.position = index + 1;
       });
 
@@ -1051,9 +1052,11 @@ export default function MatchesAdminPage() {
                                       <td className="border px-4 py-2">
                                         <div className="flex items-center gap-2">
                                           {standing.team?.logo_url && (
-                                            <img 
+                                            <Image 
                                               src={standing.team.logo_url} 
                                               alt={`${standing.team.name} logo`}
+                                              width={24}
+                                              height={24}
                                               className="w-6 h-6 object-contain"
                                               onError={(e) => {
                                                 e.currentTarget.style.display = 'none';

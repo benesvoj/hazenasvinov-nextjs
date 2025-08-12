@@ -15,6 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
+import Image from 'next/image';
 
 // Helper function to format time from HH:MM:SS to HH:MM
 function formatTime(time: string): string {
@@ -360,9 +361,11 @@ export default function MatchesPage() {
                                 {/* Home Team */}
                                 <div className="flex items-center gap-3">
                                   {match.home_team.logo_url && (
-                                    <img 
+                                    <Image 
                                       src={match.home_team.logo_url} 
                                       alt={`${match.home_team.name} logo`}
+                                      width={32}
+                                      height={32}
                                       className="w-8 h-8 object-contain rounded-full"
                                       onError={(e) => {
                                         e.currentTarget.style.display = 'none';
@@ -382,9 +385,11 @@ export default function MatchesPage() {
                                     {match.away_team.name}
                                   </span>
                                   {match.away_team.logo_url && (
-                                    <img 
+                                    <Image 
                                       src={match.away_team.logo_url} 
                                       alt={`${match.away_team.name} logo`}
+                                      width={32}
+                                      height={32}
                                       className="w-8 h-8 object-contain rounded-full"
                                       onError={(e) => {
                                         e.currentTarget.style.display = 'none';

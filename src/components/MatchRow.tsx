@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "@/components/Link";
 import { MapPinIcon } from "@heroicons/react/24/outline";
+import Image from 'next/image';
 
 // Helper function to format time from HH:MM:SS to HH:MM
 function formatTime(time: string): string {
@@ -71,9 +72,11 @@ export const MatchRow: React.FC<MatchRowProps> = ({
             {/* Home Team */}
             <div className="flex items-center gap-3">
               {match.home_team_logo && (
-                <img 
+                <Image 
                   src={match.home_team_logo} 
                   alt={`${match.home_team} logo`}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 object-contain rounded-full"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
@@ -93,9 +96,11 @@ export const MatchRow: React.FC<MatchRowProps> = ({
                 {match.away_team}
               </span>
               {match.away_team_logo && (
-                <img 
+                <Image 
                   src={match.away_team_logo} 
                   alt={`${match.away_team} logo`}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 object-contain rounded-full"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';

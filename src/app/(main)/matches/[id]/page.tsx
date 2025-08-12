@@ -16,6 +16,7 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
 import { useParams, useRouter } from "next/navigation";
+import Image from 'next/image';
 
 // Helper function to format time from HH:MM:SS to HH:MM
 function formatTime(time: string): string {
@@ -204,9 +205,11 @@ export default function MatchDetailPage() {
               {/* Home Team */}
               <div className="flex flex-col items-center space-y-3">
                 {match.home_team.logo_url && (
-                  <img 
+                  <Image 
                     src={match.home_team.logo_url} 
                     alt={`${match.home_team.name} logo`}
+                    width={80}
+                    height={80}
                     className="w-20 h-20 object-contain rounded-full"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
@@ -241,9 +244,11 @@ export default function MatchDetailPage() {
               {/* Away Team */}
               <div className="flex flex-col items-center space-y-3">
                 {match.away_team.logo_url && (
-                  <img 
+                  <Image 
                     src={match.away_team.logo_url} 
                     alt={`${match.away_team.name} logo`}
+                    width={80}
+                    height={80}
                     className="w-20 h-20 object-contain rounded-full"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';

@@ -26,6 +26,7 @@ import {
 import {createClient} from "@/utils/supabase/client";
 import {deleteTeamLogo, uploadTeamLogo} from "@/utils/supabase/storage";
 import {Chip, Select, SelectItem} from "@heroui/react";
+import Image from 'next/image';
 
 interface Committee {
 	id: string;
@@ -169,7 +170,7 @@ export default function TeamsAdminPage() {
 			if (error) throw error;
 
 			// Sort teams: own club first, then others alphabetically
-			const sortedTeams = (data || []).sort((a, b) => {
+			const sortedTeams = (data || []).sort((a: any, b: any) => {
 				if (a.is_own_club && !b.is_own_club) return -1;
 				if (!a.is_own_club && b.is_own_club) return 1;
 				return a.name.localeCompare(b.name);
@@ -178,7 +179,7 @@ export default function TeamsAdminPage() {
 			setTeams(sortedTeams);
 
 			// Find existing own club
-			const ownClub = data?.find(team => team.is_own_club);
+			const ownClub = data?.find((team: any) => team.is_own_club);
 			setExistingOwnClub(ownClub || null);
 		} catch (error) {
 			setError('Chyba při načítání týmů');
@@ -695,9 +696,11 @@ export default function TeamsAdminPage() {
 										<div className="flex items-start justify-between mb-4">
 											<div className="flex items-center gap-3">
 												{team.logo_url ? (
-													<img
+													<Image
 														src={team.logo_url}
 														alt={`${team.name} logo`}
+														width={32}
+														height={32}
 														className="w-8 h-8 object-contain"
 														onError={(e) => {
 															// Fallback to icon if image fails to load
@@ -902,9 +905,11 @@ export default function TeamsAdminPage() {
 									{/* Current logo preview */}
 									{(logoPreview || formData.logo_url) && (
 										<div className="flex items-center gap-3">
-											<img
+											<Image
 												src={logoPreview || formData.logo_url}
 												alt="Logo preview"
+												width={64}
+												height={64}
 												className="w-16 h-16 object-contain border rounded-lg bg-gray-50"
 											/>
 											<Button
@@ -1055,9 +1060,11 @@ export default function TeamsAdminPage() {
 									{/* Current logo preview */}
 									{(logoPreview || formData.logo_url) && (
 										<div className="flex items-center gap-3">
-											<img
+											<Image
 												src={logoPreview || formData.logo_url}
 												alt="Logo preview"
+												width={64}
+												height={64}
 												className="w-16 h-16 object-contain border rounded-lg bg-gray-50"
 											/>
 											<div className="flex flex-col gap-2">
@@ -1162,9 +1169,11 @@ export default function TeamsAdminPage() {
 									<div className="space-y-6">
 										<div className="text-center">
 											{selectedTeam.logo_url ? (
-												<img
+												<Image
 													src={selectedTeam.logo_url}
 													alt={`${selectedTeam.name} logo`}
+													width={64}
+													height={64}
 													className="w-16 h-16 object-contain mx-auto mb-4"
 													onError={(e) => {
 														// Fallback to icon if image fails to load

@@ -63,7 +63,7 @@ export default function BlogPostsPage() {
   const supabase = createClient();
 
   // Test Supabase connection
-  const testConnection = async () => {
+  const testConnection = useCallback(async () => {
     try {
       console.log('=== SUPABASE CONNECTION TEST ===');
       console.log('Testing Supabase connection...');
@@ -134,7 +134,7 @@ export default function BlogPostsPage() {
       setDbError(`Connection test error: ${errorMessage}`);
       return false;
     }
-  };
+  }, [supabase]);
 
   // Fetch blog posts
   const fetchPosts = useCallback(async () => {
@@ -228,7 +228,7 @@ export default function BlogPostsPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, dbError, testConnection]);
 
   // Fetch users for author selection
   const fetchUsers = useCallback(async () => {
@@ -674,7 +674,7 @@ export default function BlogPostsPage() {
                 Informace o oprávněních
               </h3>
               <p className="text-sm text-blue-600 dark:text-blue-300">
-                Chyba "permission denied for table users" je normální pro nepřihlášené uživatele. 
+                Chyba &quot;permission denied for table users&quot; je normální pro nepřihlášené uživatele. 
                 Aplikace používá fallback uživatele pro správné fungování.
               </p>
               <div className="mt-2 text-xs text-blue-500 dark:text-blue-400">
