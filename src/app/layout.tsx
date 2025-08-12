@@ -4,6 +4,7 @@ import type {Metadata} from "next";
 import {Inter} from "next/font/google";
 import {ThemeProviders} from "@/app/theme-providers";
 import { DatabaseErrorBoundary } from "@/components/DatabaseErrorBoundary";
+import { ChunkErrorBoundary } from "@/components/ChunkErrorBoundary";
 import React from "react";
 
 const inter = Inter({subsets: ["latin"]});
@@ -27,9 +28,11 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning>
 		<body className={inter.className}>
 		<ThemeProviders>
-			<DatabaseErrorBoundary>
-				{children}
-			</DatabaseErrorBoundary>
+			<ChunkErrorBoundary>
+				<DatabaseErrorBoundary>
+					{children}
+				</DatabaseErrorBoundary>
+			</ChunkErrorBoundary>
 		</ThemeProviders>
 		</body>
 		</html>

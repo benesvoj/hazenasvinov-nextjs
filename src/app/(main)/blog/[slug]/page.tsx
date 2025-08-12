@@ -1,7 +1,10 @@
+'use client';
+
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import Link from "@/components/Link";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import { 
   CalendarIcon, 
   UserIcon, 
@@ -69,8 +72,9 @@ const relatedPosts = [
   }
 ];
 
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default function BlogPostPage() {
+  const params = useParams();
+  const slug = params.slug as string;
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Back Button */}

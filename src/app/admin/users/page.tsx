@@ -1,127 +1,68 @@
 'use client';
 
-import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/table";
-import {Input} from "@heroui/input";
-import {Button} from "@heroui/button";
-import {translations} from "@/lib/translations";
-import {PlusIcon} from "@heroicons/react/16/solid";
-import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure} from "@heroui/modal";
-import {useFetchUsers} from "@/hooks/useFetchUsers";
-import React, {useState} from "react";
-import {Skeleton} from "@heroui/skeleton";
-
-type FormData = {
-	email: string;
-	name: string;
-}
-
-const initialFormData: FormData = {
-	email: '',
-	name: ''
-}
+import { Tabs, Tab } from "@heroui/tabs";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { useFetchUsers } from "@/hooks/useFetchUsers";
+import { UsersTab } from "./components/UsersTab";
+import { LoginLogsTab } from "./components/LoginLogsTab";
+import { translations } from "@/lib/translations";
+import { useState } from "react";
 
 export default function Page() {
-	const {table, modal} = translations.users
-	const {button} = translations;
-	const {users, loading, error} = useFetchUsers();
-	const {isOpen, onOpen, onOpenChange} = useDisclosure();
+	const [selectedTab, setSelectedTab] = useState<string>("users");
+	const { users, loginLogs, loading, error } = useFetchUsers(selectedTab === "loginLogs");
 
-
-	const [submitted, setSubmitted] = useState<FormData | null>(initialFormData);
-
-	if (loading) return <Skeleton />
-
-	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-
-		if (submitted?.email || submitted?.name) {
-			// Reset the form if it was previously submitted
-			setSubmitted(initialFormData);
-		}
-
-		const formData = new FormData(e.currentTarget);
-		const data = Object.fromEntries(formData);
-
-		console.log(data);
-
-		if (!data.email || !data.name) {
-			// Handle validation error
-			return;
-		}
-
-
-		setSubmitted(data as FormData);
-
-		console.log('submitted data', submitted)
-
-	};
+	if (error) {
+		return (
+			<Card>
+				<CardBody className="text-center py-12">
+					<div className="text-red-600 mb-4">
+						<svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+							<path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+						</svg>
+					</div>
+					<h3 className="text-lg font-semibold text-gray-900 mb-2">Chyba při načítání</h3>
+					<p className="text-gray-600">{error.message}</p>
+				</CardBody>
+			</Card>
+		);
+	}
 
 	return (
-		<>
-			<div className="flex justify-between items-center min-w-max">
-				<h1>{translations.users.title}</h1>
-				<Button color='primary' size="sm" startContent={<PlusIcon/>} variant={'ghost'}
-						onPress={onOpen}>{button.add}</Button>
-			</div>
-			<div>
-				<Table aria-label="Example static collection table">
-					<TableHeader>
-						<TableColumn>{table.id}</TableColumn>
-						<TableColumn>{table.email}</TableColumn>
-						<TableColumn>{table.createdAt}</TableColumn>
-						<TableColumn>{table.updatedAt}</TableColumn>
-					</TableHeader>
-					<TableBody emptyContent={"No rows to display."}>
-						{users.map((user) => (
-							<TableRow key={user.id}>
-								<TableCell>{user.id}</TableCell>
-								<TableCell>{user.email}</TableCell>
-								<TableCell>{user.created_at}</TableCell>
-								<TableCell>{user.updated_at}</TableCell>
-							</TableRow>
-						))}
-					</TableBody>
-				</Table>
+		<div className="space-y-6">
+			{/* Header */}
+			<div className="flex justify-between items-center">
+				<div>
+					<h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+						{translations.users.title}
+					</h1>
+					<p className="text-gray-600 dark:text-gray-400 mt-2">
+						{translations.users.description}
+					</p>
+				</div>
 			</div>
 
-			<Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} size='sm'>
-				<ModalContent>
-					{(onClose) => (
-						<form onSubmit={onSubmit} className='flex flex-col gap-4 p-4'>
-							<ModalHeader className="flex flex-col gap-1">{modal.title}</ModalHeader>
-							<ModalBody>
-								<Input
-									isRequired
-									errorMessage={translations.enterValidEmail}
-									label={translations.email}
-									labelPlacement="outside"
-									name="email"
-									placeholder={translations.enterYourEmail}
-									type="email"
-								/>
-								<Input
-									isRequired
-									label={translations.name}
-									labelPlacement="outside"
-									name="name"
-									placeholder={translations.enterYourName}
-									type="text"
-								/>
-								<p className={'text-xs'}>{modal.description}</p>
-							</ModalBody>
-							<ModalFooter>
-								<Button color="danger" variant="light" onPress={onClose}>
-									{button.cancel}
-								</Button>
-								<Button color="primary" type='submit'>
-									{button.confirm}
-								</Button>
-							</ModalFooter>
-						</form>
-					)}
-				</ModalContent>
-			</Modal>
+			{/* Tabs */}
+			<Tabs 
+				selectedKey={selectedTab} 
+				onSelectionChange={(key) => setSelectedTab(key as string)}
+				className="w-full"
+				color="primary"
+				variant="underlined"
+				size="lg"
+			>
+				<Tab key="users" title={translations.users.tabs.users} />
+				<Tab key="loginLogs" title={translations.users.tabs.loginLogs} />
+			</Tabs>
 
-		</>
-	)
+			{/* Tab Content */}
+			{selectedTab === "users" && (
+				<UsersTab users={users} loading={loading} />
+			)}
+			
+			{selectedTab === "loginLogs" && (
+				<LoginLogsTab loginLogs={loginLogs} loading={loading} />
+			)}
+		</div>
+	);
 }

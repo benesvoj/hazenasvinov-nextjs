@@ -75,12 +75,28 @@ export const translations = {
 	users: {
 		title: 'Správa uživatelů',
 		description: 'Správa uživatelů, kteří se mohou přihlásit do systému.',
+		tabs: {
+			users: 'Uživatelé',
+			loginLogs: 'Historie přihlášení'
+		},
 		table: {
 			id: 'ID',
 			email: 'Email',
 			createdAt: 'Vytvořeno',
 			updatedAt: 'Aktualizováno',
 			actions: 'Akce',
+		},
+		loginLogs: {
+			title: 'Historie přihlášení',
+			description: 'Přehled přihlášení uživatelů do systému.',
+			table: {
+				user: 'Uživatel',
+				email: 'Email',
+				loginTime: 'Čas přihlášení',
+				ipAddress: 'IP adresa',
+				userAgent: 'Prohlížeč',
+				status: 'Status'
+			}
 		},
 		modal: {
 			title: 'Přidat uživatele',

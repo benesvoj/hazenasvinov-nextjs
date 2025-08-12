@@ -12,6 +12,7 @@
     "@auth/supabase-adapter": "^1.9.1",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
+    "@heroui/badge": "^2.2.15",
     "@heroui/button": "^2.2.19",
     "@heroui/card": "^2.2.18",
     "@heroui/input": "^2.4.19",

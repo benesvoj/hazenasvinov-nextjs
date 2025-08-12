@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { publicRoutes } from "@/routes/routes";
 import { createClient } from "@/utils/supabase/client";
+import { logSuccessfulLogin, logFailedLogin } from "@/utils/loginLogger";
 import { EyeIcon, EyeSlashIcon, LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
 import { Button, Input } from "@heroui/react";
 
@@ -21,30 +22,49 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        // Log failed login attempt
+        let errorMessage = 'Přihlášení se nezdařilo. Zkuste to znovu.';
+        let logReason = 'Unknown error';
+
         switch (error.message) {
           case 'Invalid login credentials':
-            setError('Nesprávný email nebo heslo');
+            errorMessage = 'Nesprávný email nebo heslo';
+            logReason = 'Invalid credentials';
             break;
           case 'Email not confirmed':
-            setError('Email není potvrzen. Zkontrolujte svůj email.');
+            errorMessage = 'Email není potvrzen. Zkontrolujte svůj email.';
+            logReason = 'Email not confirmed';
             break;
           case 'Too many requests':
-            setError('Příliš mnoho pokusů. Zkuste to znovu později.');
+            errorMessage = 'Příliš mnoho pokusů. Zkuste to znovu později.';
+            logReason = 'Too many requests';
             break;
           default:
-            setError('Přihlášení se nezdařilo. Zkuste to znovu.');
+            logReason = error.message;
         }
+
+        setError(errorMessage);
+        
+        // Log the failed attempt
+        await logFailedLogin(email, logReason);
       } else {
+        // Log successful login
+        await logSuccessfulLogin(email);
+        
+        // Redirect to admin panel
         window.location.href = '/admin';
       }
     } catch (err) {
       setError('Došlo k neočekávané chybě. Zkuste to znovu.');
+      
+      // Log the error
+      await logFailedLogin(email, 'Unexpected error');
     } finally {
       setLoading(false);
     }

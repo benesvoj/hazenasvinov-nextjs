@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import routes, { privateRoutes } from "@/routes/routes";
 import { useSidebar } from "./SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
+import { logSuccessfulLogin, logFailedLogin } from "@/utils/loginLogger";
 import { 
   UserIcon,
   ArrowRightOnRectangleIcon,
@@ -119,6 +120,28 @@ export const TopBar = () => {
 
   const handleLogout = async () => {
     try {
+      // Log the logout if we have user information
+      if (user?.email) {
+        try {
+          // Log successful logout (we'll use a custom status for this)
+          await fetch('/api/log-login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: user.email,
+              status: 'success', // We'll use success status but add a note about logout
+              reason: 'User logged out',
+              userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
+            }),
+          });
+        } catch (logError) {
+          console.error('Failed to log logout:', logError);
+          // Don't block logout if logging fails
+        }
+      }
+      
       await signOut();
       // Redirect will be handled by the auth hook
     } catch (error) {

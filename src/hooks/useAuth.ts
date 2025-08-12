@@ -76,6 +76,27 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: any, session: any) => {
         try {
+          // Log successful login when user signs in
+          if (event === 'SIGNED_IN' && session?.user?.email) {
+            try {
+              await fetch('/api/log-login', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  email: session.user.email,
+                  status: 'success',
+                  reason: 'User signed in via auth state change',
+                  userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
+                }),
+              });
+            } catch (logError) {
+              console.error('Failed to log successful login:', logError);
+              // Don't block auth state change if logging fails
+            }
+          }
+
           setAuthState({
             user: session?.user ?? null,
             session: session,
