@@ -10,6 +10,38 @@ export interface ReleaseNote {
 // Static release notes data
 export const releaseNotesData: ReleaseNote[] = [
   {
+    version: '2.1.0',
+    date: 'August 2024',
+    features: [
+      'Supabase Connection Overhaul: Comprehensive fixes for database connection issues',
+      'Authentication System Enhancement: Professional login page with HeroUI components',
+      'User Profile Management: Editable profile dialog with real-time updates',
+      'Protected Route System: Client-side authentication wrapper for admin pages',
+      'Database Error Boundary: Global error handling for database permission issues'
+    ],
+    improvements: [
+      'Login Page Redesign: Professional appearance and mobile-friendly design',
+      'TopBar User Menu: Dynamic user information display with avatar and initials',
+      'Error Handling: User-friendly error messages with actionable solutions',
+      'Connection Testing: Built-in diagnostics and connection status indicators',
+      'Form Validation: Enhanced validation for blog post creation and editing'
+    ],
+    bugFixes: [
+      'Supabase Connection Errors: Fixed "Failed to connect to database" issues',
+      'Permission Denied Errors: Resolved "permission denied for table users" in blog posts',
+      'Empty Error Objects: Fixed empty error objects in addPost/updatePost functions',
+      'Environment Variables: Added proper validation and error handling',
+      'Dropdown Menu Errors: Fixed HeroUI DropdownMenu component integration issues'
+    ],
+    technicalUpdates: [
+      'Safe Client Creation: Added createSafeClient function for graceful fallback',
+      'Error Boundary Architecture: Centralized database error handling system',
+      'RLS Policy Optimization: Simplified policies to prevent user table access issues',
+      'Diagnostic Tools: Added comprehensive connection testing and debugging scripts',
+      'Mock Client Fallback: Prevents application crashes from configuration issues'
+    ]
+  },
+  {
     version: '1.5.0',
     date: 'August 2025',
     features: [
