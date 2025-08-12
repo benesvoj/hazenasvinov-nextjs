@@ -62,14 +62,87 @@ export default function BlogPostsPage() {
 
   const supabase = createClient();
 
+  // Test Supabase connection
+  const testConnection = async () => {
+    try {
+      console.log('=== SUPABASE CONNECTION TEST ===');
+      console.log('Testing Supabase connection...');
+      
+      // Check environment variables
+      console.log('Environment variables check:');
+      console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Set' : '❌ Missing');
+      console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing');
+      
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        const errorMsg = 'Supabase environment variables are not configured. Please check your .env.local file.';
+        console.error(errorMsg);
+        setDbError(errorMsg);
+        return false;
+      }
+
+      // Check if the values look valid
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      console.log('URL format check:', url?.startsWith('https://') ? '✅ Valid format' : '❌ Invalid format');
+      console.log('Key format check:', key?.startsWith('eyJ') ? '✅ Valid format' : '❌ Invalid format');
+      
+      if (!url?.startsWith('https://')) {
+        const errorMsg = 'Invalid Supabase URL format. Should start with https://';
+        console.error(errorMsg);
+        setDbError(errorMsg);
+        return false;
+      }
+      
+      if (!key?.startsWith('eyJ')) {
+        const errorMsg = 'Invalid Supabase key format. Should start with eyJ';
+        console.error(errorMsg);
+        setDbError(errorMsg);
+        return false;
+      }
+
+      // Check if supabase client is properly initialized
+      console.log('Supabase client check:');
+      console.log('Client exists:', !!supabase);
+      console.log('Client type:', typeof supabase);
+      console.log('Client methods:', supabase ? Object.keys(supabase) : 'No client');
+      
+      if (!supabase || typeof supabase.from !== 'function') {
+        const errorMsg = 'Supabase client not properly initialized';
+        console.error(errorMsg);
+        setDbError(errorMsg);
+        return false;
+      }
+
+      // Test basic connection
+      console.log('Testing auth.getSession()...');
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Connection test failed:', error);
+        setDbError(`Connection test failed: ${error.message}`);
+        return false;
+      }
+
+      console.log('✅ Connection test successful');
+      console.log('Session data:', data);
+      setDbError(null);
+      return true;
+    } catch (error) {
+      console.error('Connection test error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setDbError(`Connection test error: ${errorMessage}`);
+      return false;
+    }
+  };
+
   // Fetch blog posts
   const fetchPosts = useCallback(async () => {
     try {
-      // Check if Supabase is properly configured
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        console.warn('Supabase environment variables not configured. Cannot fetch posts.');
+      // First test the connection
+      const isConnected = await testConnection();
+      if (!isConnected) {
         setPosts([]);
-        setDbError(null); // Clear database errors when config is missing
         return;
       }
 
@@ -77,6 +150,7 @@ export default function BlogPostsPage() {
       if (!supabase || typeof supabase.from !== 'function') {
         console.error('Supabase client not properly initialized');
         setPosts([]);
+        setDbError('Supabase client not properly initialized');
         return;
       }
 
@@ -502,27 +576,49 @@ export default function BlogPostsPage() {
         </Button>
       </div>
 
-      {/* Debug Connection Button */}
-      <div className="flex justify-end">
-        <Button 
-          color="secondary" 
-          variant="bordered"
-          size="sm"
-          onPress={() => {
-            console.log('Testing Supabase connection...');
-            console.log('Environment variables:');
-            console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing');
-            console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Missing');
-            console.log('Supabase client:', supabase);
-            
-            // Test the connection
-            fetchPosts();
-            fetchUsers();
-          }}
-        >
-          Test Connection
-        </Button>
-      </div>
+      {/* Connection Status */}
+      <Card className="border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+        <CardBody className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+              <div>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                  Stav připojení
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {dbError ? '❌ Chyba připojení' : '✅ Připojeno k Supabase'}
+                </p>
+              </div>
+            </div>
+            <Button 
+              color="secondary" 
+              variant="bordered"
+              size="sm"
+              onPress={async () => {
+                await testConnection();
+              }}
+            >
+              Test Connection
+            </Button>
+          </div>
+          {dbError && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700 font-medium">Chyba:</p>
+              <p className="text-sm text-red-600 mt-1">{dbError}</p>
+              <div className="mt-2 text-xs text-red-500">
+                <strong>Řešení:</strong>
+                <ul className="mt-1 ml-4 list-disc">
+                  <li>Zkontrolujte soubor .env.local v kořenovém adresáři projektu</li>
+                  <li>Ujistěte se, že NEXT_PUBLIC_SUPABASE_URL a NEXT_PUBLIC_SUPABASE_ANON_KEY jsou správně nastaveny</li>
+                  <li>Restartujte vývojový server (npm run dev)</li>
+                  <li>Zkontrolujte, zda je váš Supabase projekt aktivní</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </CardBody>
+      </Card>
 
       {/* Configuration Error Message */}
       {(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) && (
