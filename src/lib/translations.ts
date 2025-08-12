@@ -57,6 +57,9 @@ export const translations = {
 	signup: 'Registrovat se',
 	logout: 'Odhlásit se',
 	returnBackToHomepage: 'Zpět na úvodní stránku',
+	// Authentication related translations
+	authenticationRequired: 'Vyžadováno přihlášení',
+	loginRequiredForAccess: 'Pro přístup k této stránce se musíte přihlásit.',
 	admin: {
 		title: 'Administrace',
 	},

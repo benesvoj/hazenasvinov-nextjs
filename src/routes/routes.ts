@@ -37,6 +37,7 @@ export const publicRoutes = {
 export const privateRoutes = {
 	dashboard: '/admin',
 	articles: '/admin/articles',
+	posts: '/admin/posts',
 	teams: '/admin/teams',
 	committees: '/admin/committees',
 	players: '/admin/players',
@@ -122,6 +123,7 @@ const routes: MenuItem[] = [
 	{route: privateRoutes.teamCategories, title: 'Kategorie týmů', isPrivate: true, description: 'Správa kategorií týmů pro různé sezóny.', hidden: true},
 	{route: privateRoutes.seasons, title: translations.seasons.title, isPrivate: true, description: translations.seasons.description},
 	{route: privateRoutes.categories, title: 'Kategorie', isPrivate: true, description: 'Správa kategorií pro týmové soutěže a členy klubu.'},
+	{route: privateRoutes.posts, title: 'Blog', isPrivate: true, description: 'Správa blogových článků a novinek.'},
 	{route: privateRoutes.users, title: 'Uživatelé', isPrivate: true, description: 'Správa uživatelů, kteří se mohou přihlásit do systému.'},
 ]
 

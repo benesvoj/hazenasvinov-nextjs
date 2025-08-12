@@ -3,11 +3,10 @@ import "./globals.css";
 import type {Metadata} from "next";
 import {Inter} from "next/font/google";
 import {ThemeProviders} from "@/app/theme-providers";
+import { DatabaseErrorBoundary } from "@/components/DatabaseErrorBoundary";
 import React from "react";
 
 const inter = Inter({subsets: ["latin"]});
-
-
 
 export const metadata: Metadata = {
 	title: 'TJ Sokol Svinov - Národní házená',
@@ -28,7 +27,9 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning>
 		<body className={inter.className}>
 		<ThemeProviders>
-			{children}
+			<DatabaseErrorBoundary>
+				{children}
+			</DatabaseErrorBoundary>
 		</ThemeProviders>
 		</body>
 		</html>

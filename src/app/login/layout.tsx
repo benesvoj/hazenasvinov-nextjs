@@ -1,9 +1,18 @@
-import React from "react";
+import type { Metadata } from 'next'
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-	return (
-		<div className="flex min-h-screen min-w-screen">
-			<main className="flex justify-center items-center flex-1 p-6 bg-gray-100">{children}</main>
-		</div>
-	);
+export const metadata: Metadata = {
+  title: 'Admin Portal - Přihlášení | TJ Sokol Svinov',
+  description: 'Přihlaste se do administračního rozhraní TJ Sokol Svinov',
+}
+
+export default function LoginLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100">
+      {children}
+    </div>
+  )
 }

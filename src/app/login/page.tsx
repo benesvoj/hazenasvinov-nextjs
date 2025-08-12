@@ -1,17 +1,11 @@
 'use client';
 
 import React, { useState } from "react";
-import { Button, Field, Input, Label } from "@headlessui/react";
-import { clsx } from "clsx";
 import Link from "next/link";
 import { publicRoutes } from "@/routes/routes";
-import { translations } from "@/lib/translations";
 import { createClient } from "@/utils/supabase/client";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-
-const inputStyle = clsx('mt-3 block w-full rounded-lg border-2 bg-white/5 px-3 py-1.5 text-sm/6 focus:not-data-focus:outline-hidden data-focus:outline-2 data-focus:-outline-offset-2 data-focus:outline-white/25')
-const buttonStyle = 'rounded bg-sky-600 px-4 py-2 text-sm text-white data-active:bg-sky-700 data-hover:bg-sky-500'
-const labelStyle = 'text-sm/6 font-medium'
+import { EyeIcon, EyeSlashIcon, LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
+import { Button, Input } from "@heroui/react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -33,7 +27,6 @@ export default function LoginPage() {
       });
 
       if (error) {
-        // Handle different error types
         switch (error.message) {
           case 'Invalid login credentials':
             setError('Nesprávný email nebo heslo');
@@ -48,7 +41,6 @@ export default function LoginPage() {
             setError('Přihlášení se nezdařilo. Zkuste to znovu.');
         }
       } else {
-        // Successful login - redirect to dashboard
         window.location.href = '/admin';
       }
     } catch (err) {
@@ -59,67 +51,132 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col gap-2 border-2 items-center rounded-lg p-4 bg-white w-1/4">
-      <form onSubmit={handleSubmit}>
-        <Field className='py-4'>
-          <Label className={labelStyle} htmlFor="email">{translations.email}</Label>
-          <Input 
-            className={inputStyle} 
-            id="email" 
-            name="email" 
-            type="email" 
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
-          />
-        </Field>
-        <Field>
-          <Label className={labelStyle} htmlFor="password">{translations.password}</Label>
-          <div className="relative">
-            <Input 
-              className={inputStyle} 
-              id="password" 
-              name="password" 
-              type={showPassword ? "text" : "password"}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              onClick={() => setShowPassword(!showPassword)}
-              disabled={loading}
-            >
-              {showPassword ? (
-                <EyeSlashIcon className="w-5 h-5" />
-              ) : (
-                <EyeIcon className="w-5 h-5" />
-              )}
-            </button>
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-sm sm:max-w-md">
+        {/* Header */}
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-sky-600 to-blue-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+            <LockClosedIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
           </div>
-        </Field>
-        
-        {/* Error Message */}
-        {error && (
-          <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {error}
-          </div>
-        )}
-        
-        <div className='flex gap-2 py-4'>
-          <Button 
-            type='submit'
-            className={buttonStyle}
-            disabled={loading}
-          >
-            <span>{loading ? 'Přihlašování...' : translations.login}</span>
-          </Button>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+            Admin Portal
+          </h1>
+          <p className="text-gray-600 text-sm">
+            Přihlaste se do administračního rozhraní
+          </p>
         </div>
-      </form>
-      <Link href={publicRoutes.home}>{translations.returnBackToHomepage}</Link>
+
+        {/* Login Form Card */}
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+            {/* Email Field */}
+            <div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                  <UserIcon className="h-5 w-5 text-gray-400" />
+                </div>
+                <Input 
+                  className="pl-10"
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  placeholder="vas@email.cz"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  spellCheck="false"
+                  size="lg"
+                  label="Email"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                  <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                </div>
+                <Input 
+                  className="pl-10 pr-12"
+                  id="password" 
+                  name="password" 
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  autoComplete="current-password"
+                  size="lg"
+                  label="Heslo"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200 min-h-[44px] min-w-[44px] justify-center z-10"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                  aria-label={showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700">{error}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <Button 
+              type='submit'
+              className="w-full"
+              color="primary"
+              size="lg"
+              disabled={loading}
+              isLoading={loading}
+            >
+              {loading ? 'Přihlašování...' : 'Přihlásit se'}
+            </Button>
+          </form>
+
+          {/* Footer Links */}
+          <div className="mt-6 text-center">
+            <Link 
+              href={publicRoutes.home}
+              className="text-sm text-sky-600 hover:text-sky-700 font-medium transition-colors duration-200 inline-flex items-center min-h-[44px] px-2"
+            >
+              ← Zpět na úvodní stránku
+            </Link>
+          </div>
+        </div>
+
+        {/* Additional Info */}
+        <div className="mt-6 text-center px-4">
+          <p className="text-xs text-gray-500 leading-relaxed">
+            Pro přístup k administračnímu rozhraní kontaktujte správce systému
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,931 @@
+'use client';
+
+import React, { useState, useEffect, useCallback } from "react";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
+import { Select, SelectItem } from "@heroui/select";
+import { 
+  PlusIcon, 
+  PencilIcon, 
+  TrashIcon, 
+  EyeIcon,
+  CalendarIcon,
+  UserIcon,
+  TagIcon
+} from "@heroicons/react/24/outline";
+import { createClient } from "@/utils/supabase/client";
+
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  author_id: string;
+  status: 'draft' | 'published' | 'archived';
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+  tags?: string[];
+}
+
+interface User {
+  id: string;
+  email: string;
+}
+
+export default function BlogPostsPage() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dbError, setDbError] = useState<string | null>(null);
+  const [userError, setUserError] = useState<string | null>(null);
+  
+  const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure();
+  const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
+  
+  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    slug: "",
+    content: "",
+    excerpt: "",
+    author_id: "",
+    status: "draft" as 'draft' | 'published' | 'archived',
+    tags: ""
+  });
+
+  const supabase = createClient();
+
+  // Fetch blog posts
+  const fetchPosts = useCallback(async () => {
+    try {
+      // Check if Supabase is properly configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.warn('Supabase environment variables not configured. Cannot fetch posts.');
+        setPosts([]);
+        setDbError(null); // Clear database errors when config is missing
+        return;
+      }
+
+      // Check if supabase client is properly initialized
+      if (!supabase || typeof supabase.from !== 'function') {
+        console.error('Supabase client not properly initialized');
+        setPosts([]);
+        return;
+      }
+
+      setLoading(true);
+      
+      // Test the connection first
+      try {
+        const { data: testData, error: testError } = await supabase
+          .from('blog_posts')
+          .select('id')
+          .limit(1);
+        
+        if (testError) {
+          console.error('Database connection test failed:', testError);
+          
+          // Check if it's a table not found error
+          if (testError.message && testError.message.includes('relation "blog_posts" does not exist')) {
+            const errorMsg = 'The blog_posts table does not exist. Please run the create_blog_posts_table.sql script in your Supabase database.';
+            console.error(errorMsg);
+            setDbError(errorMsg);
+          } else if (testError.code === '42501' && testError.message.includes('permission denied')) {
+            const errorMsg = 'Permission denied for blog_posts table. This is normal for unauthenticated users. Please log in to access admin features.';
+            console.log(errorMsg);
+            setDbError(errorMsg);
+          } else {
+            setDbError(`Database connection failed: ${testError.message || 'Unknown error'}`);
+          }
+          
+          throw testError;
+        }
+        
+        console.log('Database connection successful');
+        setDbError(null); // Clear any previous errors
+      } catch (connectionError) {
+        console.error('Failed to connect to database:', connectionError);
+        if (!dbError) {
+          setDbError('Failed to connect to database. Please check your Supabase configuration.');
+        }
+        throw connectionError;
+      }
+
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Database query error:', error);
+        
+        // Check for specific permission errors
+        if (error.code === '42501' && error.message.includes('permission denied')) {
+          console.log('Permission denied for blog_posts table - this is normal for unauthenticated users');
+          setDbError('Permission denied for blog_posts table. This is normal for unauthenticated users. Please log in to access admin features.');
+        } else {
+          setDbError(`Database query failed: ${error.message || 'Unknown error'}`);
+        }
+        
+        throw error;
+      }
+      
+      console.log('Posts fetched successfully:', data?.length || 0, 'posts');
+      setPosts(data || []);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      
+      // Log more details about the error
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      } else if (error && typeof error === 'object') {
+        console.error('Error object:', JSON.stringify(error, null, 2));
+      }
+      
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase]);
+
+  // Fetch users for author selection
+  const fetchUsers = useCallback(async () => {
+    try {
+      // Check if Supabase is properly configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.warn('Supabase environment variables not configured. Cannot fetch users.');
+        setUsers([{
+          id: 'default-user',
+          email: 'admin@hazenasvinov.cz'
+        }]);
+        return;
+      }
+
+      // Check if supabase client is properly initialized
+      if (!supabase || typeof supabase.from !== 'function') {
+        console.error('Supabase client not properly initialized');
+        setUsers([{
+          id: 'default-user',
+          email: 'admin@hazenasvinov.cz'
+        }]);
+        return;
+      }
+
+      // Try to get the current user from auth (this doesn't require table access)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.log('Session error, using fallback users:', sessionError);
+        setUsers([{
+          id: 'default-user',
+          email: 'admin@hazenasvinov.cz'
+        }]);
+        return;
+      }
+
+      // If we have a session, use the current user
+      if (session?.user) {
+        console.log('Authenticated user found:', session.user.email);
+        setUsers([{
+          id: session.user.id,
+          email: session.user.email || 'unknown@example.com'
+        }]);
+      } else {
+        // No session, use fallback user
+        console.log('No authenticated user found, using fallback users');
+        setUsers([{
+          id: 'default-user',
+          email: 'admin@hazenasvinov.cz'
+        }]);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      
+      // Always fall back to default user on any error
+      setUsers([{
+        id: 'default-user',
+        email: 'admin@hazenasvinov.cz'
+      }]);
+    }
+  }, [supabase]);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchPosts();
+    fetchUsers();
+  }, [fetchPosts, fetchUsers]);
+
+  // Generate slug from title
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  };
+
+  // Handle form input changes
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Auto-generate slug when title changes
+    if (field === 'title') {
+      setFormData(prev => ({ ...prev, slug: generateSlug(value) }));
+    }
+  };
+
+  // Reset form data
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      slug: "",
+      content: "",
+      excerpt: "",
+      author_id: "default-user", // Set default author instead of empty string
+      status: "draft",
+      tags: ""
+    });
+  };
+
+  // Open add post modal
+  const handleAddPost = () => {
+    resetForm();
+    onAddOpen();
+  };
+
+  // Open edit post modal
+  const handleEditPost = (post: BlogPost) => {
+    setSelectedPost(post);
+    setFormData({
+      title: post.title,
+      slug: post.slug,
+      content: post.content,
+      excerpt: post.excerpt,
+      author_id: post.author_id,
+      status: post.status,
+      tags: post.tags?.join(', ') || ""
+    });
+    onEditOpen();
+  };
+
+  // Open delete post modal
+  const handleDeletePost = (post: BlogPost) => {
+    setSelectedPost(post);
+    onDeleteOpen();
+  };
+
+  // Add new post
+  const addPost = async () => {
+    try {
+      // Validate required fields
+      if (!formData.title || !formData.slug || !formData.content || !formData.excerpt) {
+        console.error('Missing required fields:', {
+          title: !!formData.title,
+          slug: !!formData.slug,
+          content: !!formData.content,
+          excerpt: !!formData.excerpt
+        });
+        return;
+      }
+
+      // Ensure author_id is set
+      const authorId = formData.author_id || 'default-user';
+      
+      console.log('Attempting to add post with data:', {
+        title: formData.title,
+        slug: formData.slug,
+        content: formData.content.substring(0, 100) + '...',
+        excerpt: formData.excerpt,
+        author_id: authorId,
+        status: formData.status,
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
+      });
+
+      // First, check if the table exists and what columns it has
+      try {
+        const { data: tableInfo, error: tableError } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .limit(0);
+        
+        if (tableError) {
+          console.error('Table structure error:', tableError);
+          if (tableError.message.includes('relation "blog_posts" does not exist')) {
+            console.error('The blog_posts table does not exist. Please create it first.');
+            return;
+          }
+        } else {
+          console.log('Table structure check passed');
+        }
+      } catch (tableCheckError) {
+        console.error('Error checking table structure:', tableCheckError);
+      }
+
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .insert([{
+          title: formData.title,
+          slug: formData.slug,
+          content: formData.content,
+          excerpt: formData.excerpt,
+          author_id: authorId,
+          status: formData.status,
+          tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
+          published_at: formData.status === 'published' ? new Date().toISOString() : null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
+        .select();
+
+      if (error) {
+        console.error('Supabase error adding post:', error);
+        throw error;
+      }
+      
+      console.log('Post added successfully:', data);
+      onAddClose();
+      resetForm();
+      fetchPosts();
+    } catch (error) {
+      console.error('Error adding post:', error);
+      
+      // Log detailed error information
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      } else if (error && typeof error === 'object') {
+        console.error('Error object:', JSON.stringify(error, null, 2));
+      }
+      
+      // You could add user notification here
+      // setDbError(`Failed to add post: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Update existing post
+  const updatePost = async () => {
+    if (!selectedPost) return;
+
+    try {
+      // Validate required fields
+      if (!formData.title || !formData.slug || !formData.content || !formData.excerpt) {
+        console.error('Missing required fields for update:', {
+          title: !!formData.title,
+          slug: !!formData.slug,
+          content: !!formData.content,
+          excerpt: !!formData.excerpt
+        });
+        return;
+      }
+
+      // Ensure author_id is set
+      const authorId = formData.author_id || 'default-user';
+      
+      console.log('Attempting to update post with data:', {
+        id: selectedPost.id,
+        title: formData.title,
+        slug: formData.slug,
+        content: formData.content.substring(0, 100) + '...',
+        excerpt: formData.excerpt,
+        author_id: authorId,
+        status: formData.status,
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
+      });
+
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .update({
+          title: formData.title,
+          slug: formData.slug,
+          content: formData.content,
+          excerpt: formData.excerpt,
+          author_id: authorId,
+          status: formData.status,
+          tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
+          published_at: formData.status === 'published' ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedPost.id)
+        .select();
+
+      if (error) {
+        console.error('Supabase error updating post:', error);
+        throw error;
+      }
+      
+      console.log('Post updated successfully:', data);
+      onEditClose();
+      setSelectedPost(null);
+      resetForm();
+      fetchPosts();
+    } catch (error) {
+      console.error('Error updating post:', error);
+      
+      // Log detailed error information
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      } else if (error && typeof error === 'object') {
+        console.error('Error object:', JSON.stringify(error, null, 2));
+      }
+    }
+  };
+
+  // Delete post
+  const deletePost = async () => {
+    if (!selectedPost) return;
+
+    try {
+      const { error } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('id', selectedPost.id);
+
+      if (error) throw error;
+      
+      onDeleteClose();
+      setSelectedPost(null);
+      fetchPosts();
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    }
+  };
+
+  // Filter posts based on search and status
+  const filteredPosts = posts.filter(post => {
+    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || post.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  // Get status badge color
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'published':
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Publikováno</span>;
+      case 'draft':
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Koncept</span>;
+      case 'archived':
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">Archivováno</span>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Správa článků</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Spravujte blogové články a novinky
+          </p>
+        </div>
+        <Button 
+          color="primary" 
+          startContent={<PlusIcon className="w-5 h-5" />}
+          onPress={handleAddPost}
+        >
+          Nový článek
+        </Button>
+      </div>
+
+      {/* Debug Connection Button */}
+      <div className="flex justify-end">
+        <Button 
+          color="secondary" 
+          variant="bordered"
+          size="sm"
+          onPress={() => {
+            console.log('Testing Supabase connection...');
+            console.log('Environment variables:');
+            console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing');
+            console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Missing');
+            console.log('Supabase client:', supabase);
+            
+            // Test the connection
+            fetchPosts();
+            fetchUsers();
+          }}
+        >
+          Test Connection
+        </Button>
+      </div>
+
+      {/* Configuration Error Message */}
+      {(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) && (
+        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
+          <CardBody className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <div>
+                <h3 className="font-semibold text-red-800 dark:text-red-200">
+                  Supabase není nakonfigurován
+                </h3>
+                <p className="text-sm text-red-600 dark:text-red-300">
+                  Pro správné fungování aplikace je potřeba nastavit Supabase environment proměnné. 
+                  Vytvořte soubor .env.local s NEXT_PUBLIC_SUPABASE_URL a NEXT_PUBLIC_SUPABASE_ANON_KEY.
+                </p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Database Error Message */}
+      {dbError && (
+        <Card className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20">
+          <CardBody className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              <div>
+                <h3 className="font-semibold text-orange-800 dark:text-orange-200">
+                  Chyba databáze
+                </h3>
+                <p className="text-sm text-orange-600 dark:text-orange-300">
+                  {dbError}
+                </p>
+                {dbError.includes('table does not exist') && (
+                  <div className="mt-2 text-xs text-orange-500 dark:text-orange-400">
+                    <strong>Řešení:</strong> Spusťte SQL skript create_blog_posts_table.sql ve vaší Supabase databázi.
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Permission Info Message */}
+      <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
+        <CardBody className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <div>
+              <h3 className="font-semibold text-blue-800 dark:text-blue-200">
+                Informace o oprávněních
+              </h3>
+              <p className="text-sm text-blue-600 dark:text-blue-300">
+                Chyba "permission denied for table users" je normální pro nepřihlášené uživatele. 
+                Aplikace používá fallback uživatele pro správné fungování.
+              </p>
+              <div className="mt-2 text-xs text-blue-500 dark:text-blue-400">
+                <strong>Poznámka:</strong> Pro plný přístup k databázi se přihlaste pomocí Supabase Auth.
+              </div>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Filters */}
+      <Card>
+        <CardBody className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <Input
+              placeholder="Hledat v článcích..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1"
+              startContent={<TagIcon className="w-4 h-4 text-gray-400" />}
+            />
+            <Select
+              placeholder="Filtr podle stavu"
+              selectedKeys={[statusFilter]}
+              onSelectionChange={(keys) => setStatusFilter(Array.from(keys)[0] as string)}
+              className="w-full md:w-48"
+            >
+              <SelectItem key="all">Všechny stavy</SelectItem>
+              <SelectItem key="draft">Koncept</SelectItem>
+              <SelectItem key="published">Publikováno</SelectItem>
+              <SelectItem key="archived">Archivováno</SelectItem>
+            </Select>
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Posts Table */}
+      <Card>
+        <CardBody className="p-0">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">Načítání článků...</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-3 px-4 font-semibold">Název</th>
+                    <th className="text-left py-3 px-4 font-semibold">Autor</th>
+                    <th className="text-left py-3 px-4 font-semibold">Stav</th>
+                    <th className="text-left py-3 px-4 font-semibold">Vytvořeno</th>
+                    <th className="text-left py-3 px-4 font-semibold">Akce</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPosts.map((post) => (
+                    <tr key={post.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <td className="py-3 px-4">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">{post.title}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{post.slug}</div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <UserIcon className="w-4 h-4 text-gray-400" />
+                          <span className="text-sm">
+                            {post.author_id === 'default-user' ? 'Admin' : `ID: ${post.author_id}`}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        {getStatusBadge(post.status)}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="w-4 h-4 text-gray-400" />
+                          <span className="text-sm">
+                            {new Date(post.created_at).toLocaleDateString('cs-CZ')}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="light"
+                            color="primary"
+                            isIconOnly
+                            onPress={() => handleEditPost(post)}
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="light"
+                            color="danger"
+                            isIconOnly
+                            onPress={() => handleDeletePost(post)}
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              
+              {filteredPosts.length === 0 && (
+                <div className="text-center py-12">
+                  <TagIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                    {dbError ? 'Chyba databáze' : 'Žádné články'}
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-500">
+                    {dbError 
+                      ? "Nelze načíst články kvůli chybě databáze. Zkontrolujte konfiguraci Supabase."
+                      : searchTerm || statusFilter !== "all" 
+                        ? "Pro vybrané filtry nebyly nalezeny žádné články."
+                        : "Zatím nebyly vytvořeny žádné články."
+                    }
+                  </p>
+                  {dbError && (
+                    <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                      <p className="text-sm text-orange-700 dark:text-orange-300">
+                        <strong>Detaily chyby:</strong> {dbError}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* Add Post Modal */}
+      <Modal isOpen={isAddOpen} onClose={onAddClose} size="4xl" scrollBehavior="inside">
+        <ModalContent>
+          <ModalHeader>Nový článek</ModalHeader>
+          <ModalBody>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <Input
+                  label="Název článku"
+                  placeholder="Zadejte název článku"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  isRequired
+                />
+                <Input
+                  label="Slug (URL)"
+                  placeholder="automaticky generováno"
+                  value={formData.slug}
+                  onChange={(e) => handleInputChange('slug', e.target.value)}
+                  isRequired
+                />
+                <Select
+                  label="Autor"
+                  placeholder="Vyberte autora"
+                  selectedKeys={formData.author_id ? [formData.author_id] : []}
+                  onSelectionChange={(keys) => handleInputChange('author_id', Array.from(keys)[0] as string)}
+                  isRequired
+                >
+                  {users.map((user) => (
+                    <SelectItem key={user.id}>
+                      {user.email}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  label="Stav"
+                  placeholder="Vyberte stav"
+                  selectedKeys={[formData.status]}
+                  onSelectionChange={(keys) => handleInputChange('status', Array.from(keys)[0] as string)}
+                  isRequired
+                >
+                  <SelectItem key="draft">Koncept</SelectItem>
+                  <SelectItem key="published">Publikováno</SelectItem>
+                  <SelectItem key="archived">Archivováno</SelectItem>
+                </Select>
+                <Input
+                  label="Tagy"
+                  placeholder="tag1, tag2, tag3"
+                  value={formData.tags}
+                  onChange={(e) => handleInputChange('tags', e.target.value)}
+                  description="Tagy oddělené čárkami"
+                />
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Perex
+                  </label>
+                  <textarea
+                    placeholder="Krátký popis článku"
+                    value={formData.excerpt}
+                    onChange={(e) => handleInputChange('excerpt', e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Obsah článku <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    placeholder="Zde napište obsah článku..."
+                    value={formData.content}
+                    onChange={(e) => handleInputChange('content', e.target.value)}
+                    rows={12}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={onAddClose}>
+              Zrušit
+            </Button>
+            <Button color="primary" onPress={addPost}>
+              Vytvořit článek
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Edit Post Modal */}
+      <Modal isOpen={isEditOpen} onClose={onEditClose} size="4xl" scrollBehavior="inside">
+        <ModalContent>
+          <ModalHeader>Upravit článek</ModalHeader>
+          <ModalBody>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <Input
+                  label="Název článku"
+                  placeholder="Zadejte název článku"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  isRequired
+                />
+                <Input
+                  label="Slug (URL)"
+                  placeholder="automaticky generováno"
+                  value={formData.slug}
+                  onChange={(e) => handleInputChange('slug', e.target.value)}
+                  isRequired
+                />
+                <Select
+                  label="Autor"
+                  placeholder="Vyberte autora"
+                  selectedKeys={formData.author_id ? [formData.author_id] : []}
+                  onSelectionChange={(keys) => handleInputChange('author_id', Array.from(keys)[0] as string)}
+                  isRequired
+                >
+                  {users.map((user) => (
+                    <SelectItem key={user.id}>
+                      {user.email}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  label="Stav"
+                  placeholder="Vyberte stav"
+                  selectedKeys={[formData.status]}
+                  onSelectionChange={(keys) => handleInputChange('status', Array.from(keys)[0] as string)}
+                  isRequired
+                >
+                  <SelectItem key="draft">Koncept</SelectItem>
+                  <SelectItem key="published">Publikováno</SelectItem>
+                  <SelectItem key="archived">Archivováno</SelectItem>
+                </Select>
+                <Input
+                  label="Tagy"
+                  placeholder="tag1, tag2, tag3"
+                  value={formData.tags}
+                  onChange={(e) => handleInputChange('tags', e.target.value)}
+                  description="Tagy oddělené čárkami"
+                />
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Perex
+                  </label>
+                  <textarea
+                    placeholder="Krátký popis článku"
+                    value={formData.excerpt}
+                    onChange={(e) => handleInputChange('excerpt', e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Obsah článku <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    placeholder="Zde napište obsah článku..."
+                    value={formData.content}
+                    onChange={(e) => handleInputChange('content', e.target.value)}
+                    rows={12}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={onEditClose}>
+              Zrušit
+            </Button>
+            <Button color="primary" onPress={updatePost}>
+              Uložit změny
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={isDeleteOpen} onClose={onDeleteClose}>
+        <ModalContent>
+          <ModalHeader>Smazat článek</ModalHeader>
+          <ModalBody>
+            <p>
+              Opravdu chcete smazat článek <strong>&ldquo;{selectedPost?.title}&rdquo;</strong>?
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              Tato akce je nevratná.
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={onDeleteClose}>
+              Zrušit
+            </Button>
+            <Button color="danger" onPress={deletePost}>
+              Smazat
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </div>
+  );
+}
