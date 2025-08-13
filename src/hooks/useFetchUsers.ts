@@ -7,7 +7,7 @@ export interface LoginLog {
 	user_id: string;
 	email: string;
 	login_time: string;
-	ip_address: string;
+	action: string;
 	user_agent: string;
 	status: string;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 
@@ -18,6 +18,9 @@ export function useAuth() {
     error: null,
     isAuthenticated: false,
   })
+  
+  // Track if we've already processed the initial session
+  const hasProcessedInitialSession = useRef(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -51,6 +54,7 @@ export function useAuth() {
           return
         }
 
+        // Set initial state without logging
         setAuthState({
           user: session?.user ?? null,
           session: session,
@@ -58,6 +62,10 @@ export function useAuth() {
           error: null,
           isAuthenticated: !!session?.user,
         })
+        
+        // Mark that we've processed the initial session
+        hasProcessedInitialSession.current = true
+        
       } catch (error) {
         // Handle any unexpected errors
         console.error('Unexpected error in useAuth:', error)
@@ -76,8 +84,8 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: any, session: any) => {
         try {
-          // Log successful login when user signs in
-          if (event === 'SIGNED_IN' && session?.user?.email) {
+          // Only log actual sign-in events, not page refreshes with existing sessions
+          if (event === 'SIGNED_IN' && session?.user?.email && hasProcessedInitialSession.current) {
             try {
               await fetch('/api/log-login', {
                 method: 'POST',
@@ -87,7 +95,7 @@ export function useAuth() {
                 body: JSON.stringify({
                   email: session.user.email,
                   status: 'success',
-                  reason: 'User signed in via auth state change',
+                  action: 'login',
                   userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
                 }),
               });

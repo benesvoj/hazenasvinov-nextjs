@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/client';
+import { createClient } from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, status, reason, userAgent } = body;
+    const { email, status, reason, userAgent, action = 'login' } = body;
 
     // Validate required fields
-    if (!email || !status) {
+    if (!email || !status || !action) {
       return NextResponse.json(
-        { error: 'Email and status are required' },
+        { error: 'Email, status, and action are required' },
         { status: 400 }
       );
     }
@@ -22,22 +22,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get IP address from request headers
-    const forwarded = request.headers.get('x-forwarded-for');
-    const realIp = request.headers.get('x-real-ip');
-    const ip = forwarded ? forwarded.split(',')[0] : realIp || 'Unknown';
+    // Validate action
+    if (!['login', 'logout'].includes(action)) {
+      return NextResponse.json(
+        { error: 'Action must be either "login" or "logout"' },
+        { status: 400 }
+      );
+    }
 
     // Get user agent
     const userAgentHeader = request.headers.get('user-agent') || userAgent || 'Unknown';
 
-    // Log to database
-    const supabase = createClient();
+    // Log to database using server-side client (without IP address for privacy)
+    const supabase = await createClient();
     const { error } = await supabase
       .from('login_logs')
       .insert({
         email,
         status,
-        ip_address: ip,
+        action,
         user_agent: userAgentHeader,
         created_at: new Date().toISOString()
       });
@@ -45,16 +48,16 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Failed to log login attempt:', error);
       return NextResponse.json(
-        { error: 'Failed to log login attempt' },
+        { error: 'Failed to log login attempt', details: error.message },
         { status: 500 }
       );
     }
 
-    console.log(`Login attempt logged: ${email} - ${status} from ${ip}`);
+    console.log(`Login action logged: ${email} - ${action} - ${status}`);
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Login attempt logged successfully' 
+      message: 'Login action logged successfully' 
     });
 
   } catch (error) {

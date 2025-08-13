@@ -1,16 +1,17 @@
 export interface LoginLogData {
   email: string;
   status: 'success' | 'failed';
+  action: 'login' | 'logout';
   reason?: string;
   userAgent?: string;
 }
 
 /**
- * Logs a login attempt via the API endpoint
- * @param data Login attempt data
+ * Logs a login/logout action via the API endpoint
+ * @param data Login/logout action data
  * @returns Promise<boolean> - true if logged successfully, false otherwise
  */
-export async function logLoginAttempt(data: LoginLogData): Promise<boolean> {
+export async function logLoginAction(data: LoginLogData): Promise<boolean> {
   try {
     const userAgent = data.userAgent || (typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown');
     
@@ -22,6 +23,7 @@ export async function logLoginAttempt(data: LoginLogData): Promise<boolean> {
       body: JSON.stringify({
         email: data.email,
         status: data.status,
+        action: data.action,
         reason: data.reason,
         userAgent: userAgent
       }),
@@ -29,14 +31,14 @@ export async function logLoginAttempt(data: LoginLogData): Promise<boolean> {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Failed to log login attempt:', errorData);
+      console.error('Failed to log login action:', errorData);
       return false;
     }
 
-    console.log(`Login attempt logged: ${data.email} - ${data.status}`);
+    console.log(`Login action logged: ${data.email} - ${data.action} - ${data.status}`);
     return true;
   } catch (error) {
-    console.error('Error logging login attempt:', error);
+    console.error('Error logging login action:', error);
     return false;
   }
 }
@@ -48,9 +50,10 @@ export async function logLoginAttempt(data: LoginLogData): Promise<boolean> {
  * @returns Promise<boolean>
  */
 export async function logSuccessfulLogin(email: string, userAgent?: string): Promise<boolean> {
-  return logLoginAttempt({
+  return logLoginAction({
     email,
     status: 'success',
+    action: 'login',
     userAgent
   });
 }
@@ -63,10 +66,26 @@ export async function logSuccessfulLogin(email: string, userAgent?: string): Pro
  * @returns Promise<boolean>
  */
 export async function logFailedLogin(email: string, reason: string, userAgent?: string): Promise<boolean> {
-  return logLoginAttempt({
+  return logLoginAction({
     email,
     status: 'failed',
+    action: 'login',
     reason,
+    userAgent
+  });
+}
+
+/**
+ * Logs a logout action
+ * @param email User's email
+ * @param userAgent User agent string
+ * @returns Promise<boolean>
+ */
+export async function logLogout(email: string, userAgent?: string): Promise<boolean> {
+  return logLoginAction({
+    email,
+    status: 'success',
+    action: 'logout',
     userAgent
   });
 }

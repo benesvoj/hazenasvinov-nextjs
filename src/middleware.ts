@@ -17,6 +17,16 @@ export async function middleware(request: NextRequest) {
 				redirectUrl.searchParams.set('next', request.nextUrl.pathname)
 				return NextResponse.redirect(redirectUrl)
 			}
+
+			// Check if user is blocked
+			if (session.user) {
+				const isBlocked = session.user.user_metadata?.is_blocked;
+				if (isBlocked) {
+					// User is blocked, redirect to blocked page or show message
+					const blockedUrl = new URL('/blocked', request.url)
+					return NextResponse.redirect(blockedUrl)
+				}
+			}
 		}
 
 		// For all other routes, allow access

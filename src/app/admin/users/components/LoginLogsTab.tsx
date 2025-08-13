@@ -5,6 +5,13 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Badge } from "@heroui/badge";
 import { LoginLog } from "@/hooks/useFetchUsers";
 import { translations } from "@/lib/translations";
+import { 
+	ArrowRightOnRectangleIcon, 
+	ArrowLeftOnRectangleIcon,
+	CheckCircleIcon,
+	XCircleIcon,
+	ClockIcon
+} from "@heroicons/react/24/outline";
 
 interface LoginLogsTabProps {
 	loginLogs: LoginLog[];
@@ -23,16 +30,51 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({ loginLogs, loading }
 		});
 	};
 
-	const getStatusBadge = (status: string) => {
+	const getActionIcon = (action: string) => {
+		switch (action.toLowerCase()) {
+			case 'login':
+				return <ArrowRightOnRectangleIcon className="w-4 h-4 text-blue-600" />;
+			case 'logout':
+				return <ArrowLeftOnRectangleIcon className="w-4 h-4 text-gray-600" />;
+			default:
+				return <ArrowRightOnRectangleIcon className="w-4 h-4 text-gray-400" />;
+		}
+	};
+
+	const getActionText = (action: string) => {
+		switch (action.toLowerCase()) {
+			case 'login':
+				return 'Přihlášení';
+			case 'logout':
+				return 'Odhlášení';
+			default:
+				return action;
+		}
+	};
+
+	const getStatusIcon = (status: string) => {
 		switch (status.toLowerCase()) {
 			case 'success':
-				return <Badge color="success" variant="flat">Úspěšné</Badge>;
+				return <CheckCircleIcon className="w-5 h-5 text-green-500" />;
 			case 'failed':
-				return <Badge color="danger" variant="flat">Neúspěšné</Badge>;
+				return <XCircleIcon className="w-5 h-5 text-red-500" />;
 			case 'pending':
-				return <Badge color="warning" variant="flat">Čekající</Badge>;
+				return <ClockIcon className="w-5 h-5 text-yellow-500" />;
 			default:
-				return <Badge color="default" variant="flat">{status}</Badge>;
+				return <ClockIcon className="w-5 h-5 text-gray-400" />;
+		}
+	};
+
+	const getStatusText = (status: string) => {
+		switch (status.toLowerCase()) {
+			case 'success':
+				return 'Úspěšné';
+			case 'failed':
+				return 'Neúspěšné';
+			case 'pending':
+				return 'Čekající';
+			default:
+				return status;
 		}
 	};
 
@@ -57,11 +99,10 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({ loginLogs, loading }
 	return (
 		<Card>
 			<CardHeader>
-				<div className="flex items-center gap-2">
+				<div className="flex flex-col items-start gap-2">
 					<h3 className="text-xl font-semibold">{translations.users.loginLogs.title}</h3>
-					<Badge color="primary" variant="flat">{loginLogs.length}</Badge>
+					<p className="text-sm text-gray-600">{translations.users.loginLogs.description}</p>
 				</div>
-				<p className="text-sm text-gray-600">{translations.users.loginLogs.description}</p>
 			</CardHeader>
 			<CardBody>
 				{loginLogs.length === 0 ? (
@@ -75,43 +116,61 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({ loginLogs, loading }
 					<div className="overflow-x-auto">
 						<Table aria-label="Login logs table">
 							<TableHeader>
-								<TableColumn>{translations.users.loginLogs.table.user}</TableColumn>
-								<TableColumn>{translations.users.loginLogs.table.email}</TableColumn>
-								<TableColumn>{translations.users.loginLogs.table.loginTime}</TableColumn>
-								<TableColumn>{translations.users.loginLogs.table.ipAddress}</TableColumn>
-								<TableColumn>{translations.users.loginLogs.table.userAgent}</TableColumn>
-								<TableColumn>{translations.users.loginLogs.table.status}</TableColumn>
+								<TableColumn>Uživatel</TableColumn>
+								<TableColumn>Akce</TableColumn>
+								<TableColumn>Čas</TableColumn>
+								<TableColumn>Prohlížeč</TableColumn>
+								<TableColumn>Stav</TableColumn>
 							</TableHeader>
 							<TableBody>
 								{loginLogs.map((log) => (
 									<TableRow key={log.id}>
 										<TableCell>
-											<div className="flex items-center gap-2">
-												<div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-													<span className="text-sm font-medium text-blue-600">
+											<div className="flex items-center gap-3">
+												<div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+													<span className="text-sm font-semibold text-white">
 														{log.email.charAt(0).toUpperCase()}
 													</span>
 												</div>
-												<span className="font-medium">{log.email}</span>
+												<div className="flex flex-col">
+													<span className="font-medium text-gray-900">{log.email}</span>
+													<span className="text-xs text-gray-500">
+														{new Date(log.login_time).toLocaleDateString('cs-CZ')}
+													</span>
+												</div>
 											</div>
 										</TableCell>
-										<TableCell className="text-sm text-gray-600">{log.email}</TableCell>
-										<TableCell className="text-sm">
-											<div className="flex flex-col">
-												<span className="font-medium">{formatDate(log.login_time)}</span>
-												<span className="text-xs text-gray-500">
-													{new Date(log.login_time).toLocaleDateString('cs-CZ')}
+										<TableCell>
+											<div className="flex items-center gap-2">
+												{getActionIcon(log.action || 'login')}
+												<span className="text-sm font-medium text-gray-700">
+													{getActionText(log.action || 'login')}
 												</span>
 											</div>
 										</TableCell>
-										<TableCell className="text-sm font-mono text-gray-600">{log.ip_address}</TableCell>
+										<TableCell className="text-sm">
+											<div className="flex flex-col">
+												<span className="font-medium text-gray-900">{formatDate(log.login_time)}</span>
+												<span className="text-xs text-gray-500">
+													{new Date(log.login_time).toLocaleTimeString('cs-CZ', {
+														hour: '2-digit',
+														minute: '2-digit'
+													})}
+												</span>
+											</div>
+										</TableCell>
 										<TableCell className="text-sm text-gray-600 max-w-xs">
 											<div className="truncate" title={log.user_agent}>
 												{truncateUserAgent(log.user_agent)}
 											</div>
 										</TableCell>
 										<TableCell>
-											{getStatusBadge(log.status)}
+											<div className="flex items-center gap-2">
+												{getStatusIcon(log.status)}
+												<span className="text-sm font-medium text-gray-700">
+													{getStatusText(log.status)}
+												</span>
+											</div>
 										</TableCell>
 									</TableRow>
 								))}
