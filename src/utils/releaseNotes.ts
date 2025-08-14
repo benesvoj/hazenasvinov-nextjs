@@ -1,223 +1,181 @@
 export interface ReleaseNote {
   version: string;
   date: string;
+  title: string;
+  description: string;
   features: string[];
   improvements: string[];
   bugFixes: string[];
-  technicalUpdates: string[];
+  technical: string[];
 }
 
-// Static release notes data
-export const releaseNotesData: ReleaseNote[] = [
+export const releaseNotes: ReleaseNote[] = [
   {
-    version: '2.1.0',
-    date: 'August 2024',
+    version: "2.2.0",
+    date: "2025-01-13",
+    title: "Dynamic Blog System & Enhanced Admin Features",
+    description: "Major update introducing a fully dynamic blog system integrated with the landing page, enhanced admin features for blog management, and significant performance improvements.",
     features: [
-      'Supabase Connection Overhaul: Comprehensive fixes for database connection issues',
-      'Authentication System Enhancement: Professional login page with HeroUI components',
-      'User Profile Management: Editable profile dialog with real-time updates',
-      'Protected Route System: Client-side authentication wrapper for admin pages',
-      'Database Error Boundary: Global error handling for database permission issues'
+      "🎉 Dynamic Blog Integration - Blog posts now automatically appear on landing page",
+      "📝 Enhanced Blog Post Management - Image uploads, category selection, and rich content editing",
+      "🖼️ Image Support - Blog posts can now include featured images with Supabase storage",
+      "🏷️ Smart Tagging System - Multiple category selection using HeroUI components",
+      "🔍 Advanced Blog Search - Search and filter functionality on blog listing page",
+      "📱 Responsive Blog Design - Mobile-friendly layouts with proper image handling",
+      "🔄 Related Posts - Automatic suggestions for related content based on tags"
     ],
     improvements: [
-      'Login Page Redesign: Professional appearance and mobile-friendly design',
-      'TopBar User Menu: Dynamic user information display with avatar and initials',
-      'Error Handling: User-friendly error messages with actionable solutions',
-      'Connection Testing: Built-in diagnostics and connection status indicators',
-      'Form Validation: Enhanced validation for blog post creation and editing'
+      "⚡ Performance Optimization - Fixed infinite API call loops in match scheduling",
+      "🎨 UI/UX Enhancements - Professional blog posting dialogs with HeroUI components",
+      "📊 Better Content Organization - Landing page now shows latest news first",
+      "🔄 Real-time Updates - Blog content updates immediately reflect on public pages",
+      "📱 Mobile Experience - Improved responsive design across all blog components",
+      "🎯 Content Prioritization - Latest news section moved to top of landing page"
     ],
     bugFixes: [
-      'Supabase Connection Errors: Fixed "Failed to connect to database" issues',
-      'Permission Denied Errors: Resolved "permission denied for table users" in blog posts',
-      'Empty Error Objects: Fixed empty error objects in addPost/updatePost functions',
-      'Environment Variables: Added proper validation and error handling',
-      'Dropdown Menu Errors: Fixed HeroUI DropdownMenu component integration issues'
+      "🐛 Fixed infinite API call loops in MatchSchedule and MatchSchedulePage components",
+      "🔧 Resolved Supabase client creation issues causing performance problems",
+      "📝 Fixed blog post ordering to show newest posts first",
+      "🖼️ Resolved image hostname configuration issues for external domains",
+      "⚡ Fixed authentication fetch errors with proper error handling and timeouts",
+      "📊 Corrected database schema issues for blog post images"
     ],
-    technicalUpdates: [
-      'Safe Client Creation: Added createSafeClient function for graceful fallback',
-      'Error Boundary Architecture: Centralized database error handling system',
-      'RLS Policy Optimization: Simplified policies to prevent user table access issues',
-      'Diagnostic Tools: Added comprehensive connection testing and debugging scripts',
-      'Mock Client Fallback: Prevents application crashes from configuration issues'
+    technical: [
+      "🏗️ Created useFetchBlogPosts hook for centralized blog data management",
+      "🗄️ Added image_url column support to blog_posts table schema",
+      "🔌 Integrated Supabase storage for blog image uploads",
+      "🎭 Enhanced error boundaries and loading states for better user experience",
+      "📱 Optimized Next.js Image component usage across all blog components",
+      "🔄 Implemented client-side sorting to ensure proper post ordering",
+      "🎨 Migrated to HeroUI components for consistent design language"
     ]
   },
   {
-    version: '1.5.0',
-    date: 'August 2025',
+    version: "2.1.0",
+    date: "2025-01-12",
+    title: "Supabase Integration & Authentication System",
+    description: "Comprehensive update implementing Supabase database integration, authentication system, and robust error handling for the application.",
     features: [
-      'Match Detail System: Complete match detail pages with comprehensive information display',
-      'Matchweek Integration: Added matchweek information throughout the application',
-      'Enhanced Match Layout: New horizontal 3-column layout matching professional sports design',
-      'Advanced Match Filtering: Category and status-based filtering for all matches',
-      'Navigation Integration: Added "Zápasy" to main navigation with proper routing'
+      "🔐 Complete Authentication System - Login, logout, and session management",
+      "👥 User Management - Admin portal for managing users, blocking/unblocking accounts",
+      "📊 Login Logging - Track all login attempts with timestamps and user actions",
+      "🔄 Password Reset - Email-based password reset functionality",
+      "🛡️ Route Protection - Middleware-based admin route security",
+      "👤 User Profiles - Editable user information and metadata management"
     ],
     improvements: [
-      'Match Display Consistency: Unified layout across landing page, schedule page, and detail pages',
-      'Team Logo Presentation: Circular logos with proper fallback handling and consistent sizing',
-      'Date and Time Formatting: Improved time display with HH:MM format and proper localization',
-      'Responsive Design: Enhanced mobile and desktop layouts for all match displays',
-      'Error Handling: Graceful handling of missing matches and loading states'
+      "⚡ Performance Optimization - Fixed infinite API call loops",
+      "🎨 UI/UX Enhancements - Professional login page with HeroUI components",
+      "📱 Mobile Responsiveness - Improved mobile experience across all pages",
+      "🔍 Better Error Handling - Comprehensive error boundaries and user feedback",
+      "📊 Connection Status - Real-time database connection monitoring",
+      "🔄 Automatic Reloads - Smart error recovery for chunk loading issues"
     ],
     bugFixes: [
-      'React Key Conflicts: Fixed duplicate route entries causing React rendering errors',
-      'Navigation Duplication: Resolved duplicate "Zápasy" entries in routes configuration',
-      'TypeScript Interface Updates: Added matchweek property to all match interfaces',
-      'Data Transformation: Ensured matchweek data is properly preserved in all components'
+      "🐛 Fixed infinite API call loops in match scheduling components",
+      "🔧 Resolved Supabase client creation issues",
+      "📝 Fixed blog post management errors",
+      "🖼️ Resolved image loading issues with proper Next.js configuration",
+      "⚡ Fixed authentication fetch errors",
+      "📊 Corrected database permission issues"
     ],
-    technicalUpdates: [
-      'Dynamic Routing: Implemented Next.js dynamic routes for match detail pages',
-      'Database Query Optimization: Enhanced Supabase queries with proper joins and filtering',
-      'Component Architecture: Modular match display components with consistent styling',
-      'Route Management: Updated routing system to support match detail navigation'
+    technical: [
+      "🏗️ Implemented Supabase client architecture with proper error handling",
+      "🗄️ Created comprehensive database schema for users, posts, and logs",
+      "🔌 Built API endpoints for user management and authentication",
+      "🎭 Added custom error boundaries for database and chunk loading errors",
+      "📱 Optimized Next.js configuration for image domains and webpack",
+      "🔄 Implemented automatic login/logout logging system",
+      "🎨 Migrated from Headless UI to HeroUI components"
     ]
   },
   {
-    version: '1.4.0',
-    date: 'August 2024',
+    version: "2.0.0",
+    date: "2025-01-11",
+    title: "Major UI/UX Overhaul & Component System",
+    description: "Complete redesign of the user interface with modern HeroUI components, improved layouts, and enhanced user experience across all pages.",
     features: [
-      'Committee Management System: Complete CRUD operations for regional competition committees',
-      'Own Club Filtering: Landing page now shows only matches and results for your own club',
-      'Team Logo Integration: Display team logos throughout the application with fallback handling',
-      'Enhanced Match Display: Improved layout with team logos, action buttons, and better information hierarchy'
+      "🎨 Modern UI Design - Complete redesign using HeroUI components",
+      "📱 Mobile-First Approach - Responsive design optimized for all devices",
+      "🎭 Component System - Reusable UI components for consistency",
+      "🌙 Dark Mode Support - Full dark/light theme implementation",
+      "📊 Enhanced Tables - Professional data tables with sorting and filtering",
+      "🎯 Improved Navigation - Better user flow and navigation structure"
     ],
     improvements: [
-      'Database Schema Evolution: Migrated from simple region field to structured committees table',
-      'Team Management: Added committee assignment and own club designation for teams',
-      'Match Schedule Filtering: Smart filtering for own club matches while showing complete standings',
-      'Form Auto-fill Prevention: Fixed issue where forms retained data from previously opened dialogs',
-      'Committee Code Immutability: Prevented editing of committee codes after creation for data integrity'
+      "⚡ Performance - Optimized component rendering and data fetching",
+      "🎨 Visual Design - Modern, professional appearance throughout",
+      "📱 Responsiveness - Better mobile experience across all pages",
+      "🔍 User Experience - Improved workflows and interaction patterns",
+      "📊 Data Display - Better organization and presentation of information",
+      "🔄 State Management - Improved React state handling and updates"
     ],
     bugFixes: [
-      'Supabase Query Syntax: Fixed invalid .or() clause syntax that was causing database errors',
-      'TypeScript Interface Updates: Added missing is_own_club properties to team interfaces',
-      'Form State Management: Resolved committee form auto-fill issues with proper reset functions',
-      'Database Schema Issues: Added missing columns and proper foreign key relationships'
+      "🐛 Fixed component rendering issues",
+      "🔧 Resolved layout and styling problems",
+      "📝 Corrected form validation and submission",
+      "🖼️ Fixed image display and loading issues",
+      "⚡ Resolved performance bottlenecks",
+      "📱 Fixed mobile responsiveness issues"
     ],
-    technicalUpdates: [
-      'Committee System Architecture: New committees table with proper RLS policies and triggers',
-      'JavaScript Filtering: Replaced problematic Supabase .or() clauses with client-side filtering',
-      'Enhanced Error Handling: Added detailed logging and diagnostic scripts for better debugging',
-      'Database Migration Scripts: Comprehensive SQL scripts for schema updates and data validation'
+    technical: [
+      "🏗️ Migrated from Headless UI to HeroUI component library",
+      "🎨 Implemented comprehensive design system with consistent components",
+      "📱 Added responsive design patterns and mobile optimizations",
+      "🌙 Built theme switching system with dark/light mode support",
+      "🔌 Integrated modern React patterns and hooks",
+      "📊 Enhanced data table components with advanced functionality",
+      "🎭 Created reusable component library for consistent UI"
     ]
   },
   {
-    version: '1.3.0',
-    date: 'August 2025',
+    version: "1.0.0",
+    date: "2025-01-10",
+    title: "Initial Release - Core Application Foundation",
+    description: "First release of the TJ Sokol Svinov National Handball Club application with basic functionality and core features.",
     features: [
-      'Visual Todo Management: Added intuitive icons for priority, status, and category indicators',
-      'Smart Todo Sorting: Automatic sorting by priority (urgent > high > medium > low) and due date',
-      'Enhanced Todo Layout: Stacked label-value design for better readability and information hierarchy',
-      'Responsive Grid System: 12-column grid layout for optimal space distribution'
+      "🏠 Landing Page - Club introduction and overview",
+      "📊 Match Management - Schedule, results, and standings",
+      "👥 Team Categories - Different age groups and teams",
+      "📝 Basic Blog System - Static news and announcements",
+      "📞 Contact Information - Club contact details and location",
+      "🏛️ About Section - Club history and information"
     ],
     improvements: [
-      'Todo List UX: Removed "assigned to" field for cleaner interface',
-      'Date Formatting: Simplified created date to YYYY-MM-DD format for better readability',
-      'Email Field Spacing: Optimized layout to prevent email wrapping with 50-67% width allocation',
-      'Icon-Based Indicators: Replaced text badges with intuitive icons for faster scanning',
-      'Release Notes Modal: Fixed positioning and sizing issues for better viewport display'
+      "🎯 User Experience - Intuitive navigation and clear information hierarchy",
+      "📱 Responsive Design - Works well on all device sizes",
+      "⚡ Performance - Fast loading and smooth interactions",
+      "🔍 Accessibility - Proper semantic HTML and keyboard navigation",
+      "📊 Data Organization - Clear presentation of club information",
+      "🎨 Visual Design - Professional and attractive appearance"
     ],
     bugFixes: [
-      'Modal Positioning: Resolved release notes modal appearing outside viewport',
-      'Form State Management: Removed assigned_to field from todo forms and database operations',
-      'TypeScript Errors: Fixed interface conflicts after removing assigned_to field',
-      'Grid Layout Issues: Resolved responsive grid behavior for different screen sizes'
+      "🐛 Initial bug fixes and stability improvements",
+      "🔧 Performance optimizations",
+      "📝 Content accuracy and updates",
+      "🖼️ Image loading and display fixes",
+      "⚡ Speed improvements",
+      "📱 Mobile experience enhancements"
     ],
-    technicalUpdates: [
-      'Release Notes Architecture: Migrated from markdown parsing to TypeScript static data',
-      'Todo Interface Updates: Removed assigned_to from TodoItem interface',
-      'Grid System Implementation: Implemented 12-column CSS Grid for precise layout control',
-      'Icon System Integration: Added comprehensive icon mapping for todo indicators'
-    ]
-  },
-  {
-    version: '1.2.0',
-    date: 'August 2025',
-    features: [
-      'Enhanced Categories Management: Added 1:N relationship between categories and seasons',
-      'Season Configuration: Full CRUD operations for season assignments per category',
-      'Editable Season Settings: Competition type, matchweek count, team count, and duplicate team allowances',
-      'Tabbed Interface: Organized category editing with "Basic Info" and "Seasons" tabs',
-      'Icon-Only Actions: Streamlined action buttons throughout the admin interface'
-    ],
-    improvements: [
-      'Dashboard Refactor: Added todo list and release notes sections',
-      'Categories Table: Removed unnecessary columns for cleaner overview',
-      'Form Validation: Enhanced input validation and error handling',
-      'UI/UX Enhancements: Better modal layouts and responsive design'
-    ],
-    bugFixes: [
-      'Category Code Immutability: Prevented editing of category codes after creation',
-      'Data Fetching: Fixed category seasons loading and error handling',
-      'Form State Management: Resolved issues with form data persistence'
-    ],
-    technicalUpdates: [
-      'Database Schema: Updated to support category_seasons junction table',
-      'TypeScript Interfaces: Enhanced type safety for category and season management',
-      'Component Architecture: Improved separation of concerns and reusability'
-    ]
-  },
-  {
-    version: '1.1.0',
-    date: 'August 2025',
-    features: [
-      'Team Logo Management: Upload, preview, and delete team logos using Supabase Storage',
-      'Matchweek System: Added matchweek tracking and grouping for better competition organization',
-      'Bulk Operations: Bulk update matchweeks for multiple matches',
-      'Enhanced Match Editing: Edit completed matches with full score and result management'
-    ],
-    improvements: [
-      'Standings Calculation: Fixed points calculation (2 points for win instead of 3)',
-      'Match Display: Improved upcoming matches and results layout with team logos',
-      'Admin Interface: Better modal layouts and form organization'
-    ],
-    bugFixes: [
-      'Storage Permissions: Resolved RLS policy issues for team logo uploads',
-      'Data Fetching: Fixed various data loading and error handling issues',
-      'UI Rendering: Resolved React key conflicts and component state issues'
-    ],
-    technicalUpdates: [
-      'Supabase Storage Integration: Full CRUD for team logos',
-      'Database Migrations: Added matchweek column and related indexes',
-      'Error Handling: Improved error handling and user feedback'
-    ]
-  },
-  {
-    version: '1.0.0',
-    date: 'June 2025',
-    features: [
-      'Basic Admin Interface: Categories, teams, matches, and users management',
-      'Match Scheduling: Create and manage matches with teams and venues',
-      'Standings System: Automatic calculation and display of team standings',
-      'User Authentication: Secure login and role-based access control',
-      'Responsive Design: Mobile-friendly interface with dark/light theme support'
-    ],
-    improvements: [
-      'CRUD Operations: Full create, read, update, delete functionality for all entities',
-      'Data Validation: Form validation and error handling',
-      'Real-time Updates: Live data updates and state management',
-      'Export Functionality: CSV export for match schedules and results'
-    ],
-    bugFixes: [
-      'Initial Release: Core functionality implementation',
-      'Database Setup: Initial schema and data structure',
-      'UI Components: Basic component library and styling'
-    ],
-    technicalUpdates: [
-      'Next.js 15: Latest framework with App Router',
-      'Supabase Integration: Database and authentication setup',
-      'TypeScript: Full type safety throughout the application',
-      'Tailwind CSS: Utility-first styling approach'
+    technical: [
+      "🏗️ Built on Next.js 15 with React 18",
+      "🎨 Styled with Tailwind CSS for modern design",
+      "📱 Implemented responsive design patterns",
+      "🔌 Set up basic routing and page structure",
+      "📊 Created data management and display components",
+      "🎭 Built component architecture for maintainability",
+      "📱 Optimized for mobile and desktop devices"
     ]
   }
 ];
 
 // Function to get release notes (now just returns the static data)
 export const getReleaseNotes = (): ReleaseNote[] => {
-  return releaseNotesData;
+  return releaseNotes;
 };
 
 // Legacy function for backward compatibility
 export const parseReleaseNotes = (markdown: string): ReleaseNote[] => {
   console.log('parseReleaseNotes called with markdown, returning static data instead');
-  return releaseNotesData;
+  return releaseNotes;
 };
