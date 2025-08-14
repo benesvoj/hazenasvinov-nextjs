@@ -86,23 +86,30 @@ export function useAuth() {
         try {
           // Only log actual sign-in events, not page refreshes with existing sessions
           if (event === 'SIGNED_IN' && session?.user?.email && hasProcessedInitialSession.current) {
-            try {
-              await fetch('/api/log-login', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  email: session.user.email,
-                  status: 'success',
-                  action: 'login',
-                  userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
-                }),
-              });
-            } catch (logError) {
-              console.error('Failed to log successful login:', logError);
-              // Don't block auth state change if logging fails
-            }
+            // Log login attempt in background without blocking auth state change
+            // Use a timeout to prevent hanging requests
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+            
+            fetch('/api/log-login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: session.user.email,
+                status: 'success',
+                action: 'login',
+                userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
+              }),
+              signal: controller.signal,
+            }).then(() => {
+              clearTimeout(timeoutId);
+            }).catch((logError) => {
+              clearTimeout(timeoutId);
+              // Silently fail - don't log to console to avoid spam
+              // console.error('Failed to log successful login:', logError);
+            });
           }
 
           setAuthState({

@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
+import { Input, Textarea } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { Select, SelectItem } from "@heroui/select";
+import { Chip } from "@heroui/chip";
 import { 
   PlusIcon, 
   PencilIcon, 
@@ -13,9 +14,12 @@ import {
   EyeIcon,
   CalendarIcon,
   UserIcon,
-  TagIcon
+  TagIcon,
+  PhotoIcon,
+  XMarkIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
+import Image from 'next/image';
 
 interface BlogPost {
   id: string;
@@ -29,6 +33,7 @@ interface BlogPost {
   created_at: string;
   updated_at: string;
   tags?: string[];
+  image_url?: string;
 }
 
 interface User {
@@ -36,9 +41,17 @@ interface User {
   email: string;
 }
 
+interface Category {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+}
+
 export default function BlogPostsPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -57,8 +70,12 @@ export default function BlogPostsPage() {
     excerpt: "",
     author_id: "",
     status: "draft" as 'draft' | 'published' | 'archived',
-    tags: ""
+    tags: [] as string[],
+    image_url: ""
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const supabase = createClient();
 
@@ -291,11 +308,46 @@ export default function BlogPostsPage() {
     }
   }, [supabase]);
 
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
+    try {
+      // Check if Supabase is properly configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.warn('Supabase environment variables not configured. Cannot fetch categories.');
+        setCategories([{ id: 'default-category', code: 'uncategorized', name: 'Nezaradené' }]);
+        return;
+      }
+
+      // Check if supabase client is properly initialized
+      if (!supabase || typeof supabase.from !== 'function') {
+        console.error('Supabase client not properly initialized');
+        setCategories([{ id: 'default-category', code: 'uncategorized', name: 'Nezaradené' }]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([{ id: 'default-category', code: 'uncategorized', name: 'Nezaradené' }]);
+      } else {
+        setCategories(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories([{ id: 'default-category', code: 'uncategorized', name: 'Nezaradené' }]);
+    }
+  }, [supabase]);
+
   // Initial data fetch
   useEffect(() => {
     fetchPosts();
     fetchUsers();
-  }, [fetchPosts, fetchUsers]);
+    fetchCategories();
+  }, [fetchPosts, fetchUsers, fetchCategories]);
 
   // Generate slug from title
   const generateSlug = (title: string) => {
@@ -317,6 +369,69 @@ export default function BlogPostsPage() {
     }
   };
 
+  // Handle tag input changes
+  const handleTagInputChange = (value: string) => {
+    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    setFormData(prev => ({ ...prev, tags: tags }));
+  };
+
+  // Handle image file selection
+  const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImageFile(null);
+      setImagePreview("");
+    }
+  };
+
+  // Upload image to Supabase storage
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      setUploadingImage(true);
+      
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `blog-images/${fileName}`;
+
+      // Upload to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from('blog-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        return null;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Handle image removal
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview("");
+    setFormData(prev => ({ ...prev, image_url: "" }));
+  };
+
   // Reset form data
   const resetForm = () => {
     setFormData({
@@ -326,8 +441,11 @@ export default function BlogPostsPage() {
       excerpt: "",
       author_id: "default-user", // Set default author instead of empty string
       status: "draft",
-      tags: ""
+      tags: [],
+      image_url: ""
     });
+    setImageFile(null);
+    setImagePreview("");
   };
 
   // Open add post modal
@@ -336,7 +454,7 @@ export default function BlogPostsPage() {
     onAddOpen();
   };
 
-  // Open edit post modal
+  // Handle edit post
   const handleEditPost = (post: BlogPost) => {
     setSelectedPost(post);
     setFormData({
@@ -346,8 +464,17 @@ export default function BlogPostsPage() {
       excerpt: post.excerpt,
       author_id: post.author_id,
       status: post.status,
-      tags: post.tags?.join(', ') || ""
+      tags: post.tags || [],
+      image_url: post.image_url || ""
     });
+    // Set image preview if post has an image
+    if (post.image_url) {
+      setImagePreview(post.image_url);
+      setImageFile(null); // No file selected when editing
+    } else {
+      setImagePreview("");
+      setImageFile(null);
+    }
     onEditOpen();
   };
 
@@ -362,7 +489,7 @@ export default function BlogPostsPage() {
     try {
       // Validate required fields
       if (!formData.title || !formData.slug || !formData.content || !formData.excerpt) {
-        console.error('Missing required fields:', {
+        console.error('Missing required fields for new post:', {
           title: !!formData.title,
           slug: !!formData.slug,
           content: !!formData.content,
@@ -374,6 +501,18 @@ export default function BlogPostsPage() {
       // Ensure author_id is set
       const authorId = formData.author_id || 'default-user';
       
+      // Upload image if selected
+      let imageUrl = formData.image_url;
+      if (imageFile) {
+        const uploadedUrl = await uploadImage(imageFile);
+        if (uploadedUrl) {
+          imageUrl = uploadedUrl;
+        } else {
+          console.error('Failed to upload image');
+          // Continue without image
+        }
+      }
+      
       console.log('Attempting to add post with data:', {
         title: formData.title,
         slug: formData.slug,
@@ -381,20 +520,31 @@ export default function BlogPostsPage() {
         excerpt: formData.excerpt,
         author_id: authorId,
         status: formData.status,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
+        tags: formData.tags,
+        image_url: imageUrl
       });
 
-      // First, check if the table exists and what columns it has
+      // Check if table exists and has proper structure
       try {
-        const { data: tableInfo, error: tableError } = await supabase
+        const { data: tableCheck, error: tableCheckError } = await supabase
           .from('blog_posts')
-          .select('*')
-          .limit(0);
+          .select('id')
+          .limit(1);
         
-        if (tableError) {
-          console.error('Table structure error:', tableError);
-          if (tableError.message.includes('relation "blog_posts" does not exist')) {
-            console.error('The blog_posts table does not exist. Please create it first.');
+        if (tableCheckError) {
+          console.error('Table structure check failed:', tableCheckError);
+          if (tableCheckError.message && tableCheckError.message.includes('relation "blog_posts" does not exist')) {
+            const errorMsg = 'The blog_posts table does not exist. Please run the create_blog_posts_table.sql script in your Supabase database.';
+            console.error(errorMsg);
+            setDbError(errorMsg);
+            return;
+          } else if (tableCheckError.code === '42501' && tableCheckError.message.includes('permission denied')) {
+            const errorMsg = 'Permission denied for blog_posts table. This is normal for unauthenticated users. Please log in to access admin features.';
+            console.log(errorMsg);
+            setDbError(errorMsg);
+            return;
+          } else {
+            setDbError(`Database connection failed: ${tableCheckError.message || 'Unknown error'}`);
             return;
           }
         } else {
@@ -404,28 +554,55 @@ export default function BlogPostsPage() {
         console.error('Error checking table structure:', tableCheckError);
       }
 
+      // Prepare insert data (only include fields that exist)
+      const insertData: any = {
+        title: formData.title,
+        slug: formData.slug,
+        content: formData.content,
+        excerpt: formData.excerpt,
+        author_id: authorId,
+        status: formData.status,
+        tags: formData.tags,
+        published_at: formData.status === 'published' ? new Date().toISOString() : null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      // Only add image_url if the column exists (will be handled by database)
+      if (imageUrl) {
+        insertData.image_url = imageUrl;
+      }
+
       const { data, error } = await supabase
         .from('blog_posts')
-        .insert([{
-          title: formData.title,
-          slug: formData.slug,
-          content: formData.content,
-          excerpt: formData.excerpt,
-          author_id: authorId,
-          status: formData.status,
-          tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
-          published_at: formData.status === 'published' ? new Date().toISOString() : null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }])
+        .insert([insertData])
         .select();
 
       if (error) {
         console.error('Supabase error adding post:', error);
-        throw error;
+        
+        // Check if it's a column not found error
+        if (error.code === 'PGRST204' && error.message.includes('image_url')) {
+          console.error('The image_url column does not exist. Please run the add_image_url_to_blog_posts.sql script first.');
+          // Try inserting without image_url
+          const { image_url, ...insertDataWithoutImage } = insertData;
+          const { data: retryData, error: retryError } = await supabase
+            .from('blog_posts')
+            .insert([insertDataWithoutImage])
+            .select();
+          
+          if (retryError) {
+            throw retryError;
+          }
+          
+          console.log('Post added successfully without image:', retryData);
+        } else {
+          throw error;
+        }
+      } else {
+        console.log('Post added successfully:', data);
       }
       
-      console.log('Post added successfully:', data);
       onAddClose();
       resetForm();
       fetchPosts();
@@ -464,6 +641,18 @@ export default function BlogPostsPage() {
       // Ensure author_id is set
       const authorId = formData.author_id || 'default-user';
       
+      // Upload image if selected
+      let imageUrl = formData.image_url;
+      if (imageFile) {
+        const uploadedUrl = await uploadImage(imageFile);
+        if (uploadedUrl) {
+          imageUrl = uploadedUrl;
+        } else {
+          console.error('Failed to upload image');
+          // Continue without image
+        }
+      }
+      
       console.log('Attempting to update post with data:', {
         id: selectedPost.id,
         title: formData.title,
@@ -472,31 +661,64 @@ export default function BlogPostsPage() {
         excerpt: formData.excerpt,
         author_id: authorId,
         status: formData.status,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
+        tags: formData.tags,
+        image_url: imageUrl
       });
+
+      // Prepare update data (only include fields that exist)
+      const updateData: any = {
+        title: formData.title,
+        slug: formData.slug,
+        content: formData.content,
+        excerpt: formData.excerpt,
+        author_id: authorId,
+        status: formData.status,
+        tags: formData.tags,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only add image_url if the column exists (will be handled by database)
+      if (imageUrl) {
+        updateData.image_url = imageUrl;
+      }
+
+      // Add published_at if status is published
+      if (formData.status === 'published') {
+        updateData.published_at = new Date().toISOString();
+      }
 
       const { data, error } = await supabase
         .from('blog_posts')
-        .update({
-          title: formData.title,
-          slug: formData.slug,
-          content: formData.content,
-          excerpt: formData.excerpt,
-          author_id: authorId,
-          status: formData.status,
-          tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
-          published_at: formData.status === 'published' ? new Date().toISOString() : null,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', selectedPost.id)
         .select();
 
       if (error) {
         console.error('Supabase error updating post:', error);
-        throw error;
+        
+        // Check if it's a column not found error
+        if (error.code === 'PGRST204' && error.message.includes('image_url')) {
+          console.error('The image_url column does not exist. Please run the add_image_url_to_blog_posts.sql script first.');
+          // Try updating without image_url
+          const { image_url, ...updateDataWithoutImage } = updateData;
+          const { data: retryData, error: retryError } = await supabase
+            .from('blog_posts')
+            .update(updateDataWithoutImage)
+            .eq('id', selectedPost.id)
+            .select();
+          
+          if (retryError) {
+            throw retryError;
+          }
+          
+          console.log('Post updated successfully without image:', retryData);
+        } else {
+          throw error;
+        }
+      } else {
+        console.log('Post updated successfully:', data);
       }
       
-      console.log('Post updated successfully:', data);
       onEditClose();
       setSelectedPost(null);
       resetForm();
@@ -724,7 +946,9 @@ export default function BlogPostsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-3 px-4 font-semibold">Obrázek</th>
                     <th className="text-left py-3 px-4 font-semibold">Název</th>
+                    <th className="text-left py-3 px-4 font-semibold">Tagy</th>
                     <th className="text-left py-3 px-4 font-semibold">Autor</th>
                     <th className="text-left py-3 px-4 font-semibold">Stav</th>
                     <th className="text-left py-3 px-4 font-semibold">Vytvořeno</th>
@@ -735,9 +959,49 @@ export default function BlogPostsPage() {
                   {filteredPosts.map((post) => (
                     <tr key={post.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <td className="py-3 px-4">
+                        {post.image_url ? (
+                          <div className="relative w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                            <Image
+                              src={post.image_url}
+                              alt={post.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                            <PhotoIcon className="w-6 h-6 text-gray-400" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
                         <div>
                           <div className="font-medium text-gray-900 dark:text-white">{post.title}</div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">{post.slug}</div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-wrap gap-1">
+                          {post.tags && post.tags.length > 0 ? (
+                            post.tags.slice(0, 3).map((tag, index) => (
+                              <Chip
+                                key={index}
+                                size="sm"
+                                variant="bordered"
+                                color="primary"
+                                className="text-xs"
+                              >
+                                {tag}
+                              </Chip>
+                            ))
+                          ) : (
+                            <span className="text-sm text-gray-400">Žádné tagy</span>
+                          )}
+                          {post.tags && post.tags.length > 3 && (
+                            <Chip size="sm" variant="bordered" color="default" className="text-xs">
+                              +{post.tags.length - 3}
+                            </Chip>
+                          )}
                         </div>
                       </td>
                       <td className="py-3 px-4">
@@ -862,35 +1126,129 @@ export default function BlogPostsPage() {
                 <Input
                   label="Tagy"
                   placeholder="tag1, tag2, tag3"
-                  value={formData.tags}
-                  onChange={(e) => handleInputChange('tags', e.target.value)}
+                  value={formData.tags.join(', ')}
+                  onChange={(e) => handleTagInputChange(e.target.value)}
                   description="Tagy oddělené čárkami"
                 />
+                
+                {/* Category Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Kategorie
+                  </label>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((category) => (
+                        <Chip
+                          key={category.id}
+                          variant={formData.tags.includes(category.name) ? "solid" : "bordered"}
+                          color={formData.tags.includes(category.name) ? "primary" : "default"}
+                          onClose={formData.tags.includes(category.name) ? () => {
+                            setFormData(prev => ({
+                              ...prev,
+                              tags: prev.tags.filter(tag => tag !== category.name)
+                            }));
+                          } : undefined}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            if (!formData.tags.includes(category.name)) {
+                              setFormData(prev => ({
+                                ...prev,
+                                tags: [...prev.tags, category.name]
+                              }));
+                            }
+                          }}
+                        >
+                          {category.name}
+                        </Chip>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Klikněte na kategorii pro přidání/odebrání
+                    </p>
+                  </div>
+                </div>
+
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Obrázek článku
+                  </label>
+                  
+                  {imagePreview ? (
+                    <div className="space-y-3">
+                      <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                        <Image
+                          src={imagePreview}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute top-2 right-2 h-8 w-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                          title="Odstranit obrázek"
+                        >
+                          <XMarkIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Obrázek bude nahrán při uložení článku
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                        <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="mt-2">
+                          <label htmlFor="image-upload" className="cursor-pointer">
+                            <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                              Nahrajte obrázek
+                            </span>
+                            <span className="text-gray-500"> nebo přetáhněte</span>
+                          </label>
+                          <input
+                            id="image-upload"
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleImageFileChange}
+                            disabled={uploadingImage}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          PNG, JPG, GIF do 5MB
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Perex
                   </label>
-                  <textarea
+                  <Textarea
                     placeholder="Krátký popis článku"
                     value={formData.excerpt}
                     onChange={(e) => handleInputChange('excerpt', e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Obsah článku <span className="text-red-500">*</span>
                   </label>
-                  <textarea
+                  <Textarea
                     placeholder="Zde napište obsah článku..."
                     value={formData.content}
                     onChange={(e) => handleInputChange('content', e.target.value)}
                     rows={12}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -955,35 +1313,129 @@ export default function BlogPostsPage() {
                 <Input
                   label="Tagy"
                   placeholder="tag1, tag2, tag3"
-                  value={formData.tags}
-                  onChange={(e) => handleInputChange('tags', e.target.value)}
+                  value={formData.tags.join(', ')}
+                  onChange={(e) => handleTagInputChange(e.target.value)}
                   description="Tagy oddělené čárkami"
                 />
+                
+                {/* Category Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Kategorie
+                  </label>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((category) => (
+                        <Chip
+                          key={category.id}
+                          variant={formData.tags.includes(category.name) ? "solid" : "bordered"}
+                          color={formData.tags.includes(category.name) ? "primary" : "default"}
+                          onClose={formData.tags.includes(category.name) ? () => {
+                            setFormData(prev => ({
+                              ...prev,
+                              tags: prev.tags.filter(tag => tag !== category.name)
+                            }));
+                          } : undefined}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            if (!formData.tags.includes(category.name)) {
+                              setFormData(prev => ({
+                                ...prev,
+                                tags: [...prev.tags, category.name]
+                              }));
+                            }
+                          }}
+                        >
+                          {category.name}
+                        </Chip>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Klikněte na kategorii pro přidání/odebrání
+                    </p>
+                  </div>
+                </div>
+
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Obrázek článku
+                  </label>
+                  
+                  {imagePreview ? (
+                    <div className="space-y-3">
+                      <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                        <Image
+                          src={imagePreview}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute top-2 right-2 h-8 w-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                          title="Odstranit obrázek"
+                        >
+                          <XMarkIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Obrázek bude nahrán při uložení článku
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                        <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="mt-2">
+                          <label htmlFor="image-upload" className="cursor-pointer">
+                            <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                              Nahrajte obrázek
+                            </span>
+                            <span className="text-gray-500"> nebo přetáhněte</span>
+                          </label>
+                          <input
+                            id="image-upload"
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleImageFileChange}
+                            disabled={uploadingImage}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          PNG, JPG, GIF do 5MB
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Perex
                   </label>
-                  <textarea
+                  <Textarea
                     placeholder="Krátký popis článku"
                     value={formData.excerpt}
                     onChange={(e) => handleInputChange('excerpt', e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Obsah článku <span className="text-red-500">*</span>
                   </label>
-                  <textarea
+                  <Textarea
                     placeholder="Zde napište obsah článku..."
                     value={formData.content}
                     onChange={(e) => handleInputChange('content', e.target.value)}
                     rows={12}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full"
                   />
                 </div>
               </div>

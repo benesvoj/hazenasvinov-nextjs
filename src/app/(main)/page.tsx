@@ -18,38 +18,15 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   TagIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  PhotoIcon
 } from "@heroicons/react/24/outline";
-
-// Sample latest blog posts for homepage
-const latestPosts = [
-  {
-    id: 1,
-    title: "Úspěšný start sezóny pro mužský tým",
-    excerpt: "Mužský tým TJ Sokol Svinov zahájil novou sezónu v 1. lize národní házené výbornými výsledky...",
-    date: "2024-09-15",
-    category: "Muži",
-    slug: "uspesny-start-sezony-pro-muzsky-tym"
-  },
-  {
-    id: 2,
-    title: "Dorostenci vyhráli turnaj v Ostravě",
-    excerpt: "Náš dorostenecký tým se zúčastnil mezinárodního turnaje v Ostravě a po skvělých výkonech...",
-    date: "2024-09-10",
-    category: "Dorostenci",
-    slug: "dorostenci-vyhráli-turnaj-v-ostrave"
-  },
-  {
-    id: 3,
-    title: "Přípravka zahájila tréninky pro novou sezónu",
-    excerpt: "Děti z přípravky se vrátily z prázdnin a začaly s pravidelnými tréninky. Noví zájemci jsou vítáni...",
-    date: "2024-09-05",
-    category: "Přípravka",
-    slug: "pripravka-zahajila-treninky-pro-novou-sezonu"
-  }
-];
+import { useFetchBlogPosts } from "@/hooks/useFetchBlogPosts";
 
 export default function Page() {
+  // Fetch latest blog posts
+  const { posts: latestPosts, loading: postsLoading, error: postsError } = useFetchBlogPosts(3);
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -144,39 +121,135 @@ export default function Page() {
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {latestPosts.map((post) => (
-            <Card key={post.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-0 flex flex-col items-start">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-                  {post.title}
-                </h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <TagIcon className="w-4 h-4 text-blue-500" />
-                  <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                    {post.category}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardBody>
-                <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                  {post.excerpt}
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(post.date).toLocaleDateString('cs-CZ')}
-                  </span>
+          {postsLoading ? (
+            // Loading state
+            <>
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader className="pb-0">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                  </CardHeader>
+                  <CardBody>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                    </div>
+                    <div className="flex justify-between items-center mt-4">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                    </div>
+                  </CardBody>
+                </Card>
+              ))}
+            </>
+          ) : postsError ? (
+            // Error state
+            <div className="col-span-full text-center py-8">
+              <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
+                <CardBody className="text-center">
+                  <TagIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
+                    Chyba při načítání novinek
+                  </h3>
+                  <p className="text-red-600 dark:text-red-400 mb-4">
+                    {postsError}
+                  </p>
                   <Button 
-                    as={Link} 
-                    href={`/blog/${post.slug}`}
-                    size="sm" 
-                    color="primary"
+                    color="primary" 
+                    variant="bordered"
+                    onPress={() => window.location.reload()}
                   >
-                    Přečíst
+                    Zkusit znovu
                   </Button>
-                </div>
-              </CardBody>
-            </Card>
-          ))}
+                </CardBody>
+              </Card>
+            </div>
+          ) : latestPosts && latestPosts.length > 0 ? (
+            // Success state - display posts
+            latestPosts.map((post) => (
+              <Card key={post.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-0">
+                  {/* Post Image */}
+                  {post.image_url ? (
+                    <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
+                      <Image
+                        src={post.image_url}
+                        alt={post.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-48 mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                      <PhotoIcon className="w-12 h-12 text-gray-400" />
+                    </div>
+                  )}
+                  
+                  {/* Post Title */}
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2">
+                    {post.title}
+                  </h3>
+                  
+                  {/* Post Tags */}
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {post.tags.slice(0, 2).map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {post.tags.length > 2 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                          +{post.tags.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </CardHeader>
+                
+                <CardBody>
+                  {/* Post Excerpt */}
+                  <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                    {post.excerpt}
+                  </p>
+                  
+                  {/* Post Meta */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(post.published_at || post.created_at).toLocaleDateString('cs-CZ')}
+                    </span>
+                    <Button 
+                      as={Link} 
+                      href={`/blog/${post.slug}`}
+                      size="sm" 
+                      color="primary"
+                    >
+                      Přečíst
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            ))
+          ) : (
+            // No posts state
+            <div className="col-span-full text-center py-8">
+              <Card className="border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                <CardBody className="text-center">
+                  <TagIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                    Zatím žádné novinky
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-500">
+                    První články se objeví, jakmile budou publikovány v administraci.
+                  </p>
+                </CardBody>
+              </Card>
+            </div>
+          )}
         </div>
       </section>
 

@@ -16,6 +16,13 @@ const nextConfig = {
         port: '',
         pathname: '/storage/v1/object/public/**',
       },
+      // Supabase storage for blog images
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/blog-images/**',
+      },
       // Wix static images
       {
         protocol: 'https',

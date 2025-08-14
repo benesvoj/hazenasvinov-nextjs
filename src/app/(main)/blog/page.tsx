@@ -2,90 +2,60 @@
 
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
+import { Chip } from "@heroui/chip";
 import Link from "@/components/Link";
+import Image from "next/image";
 import { 
   CalendarIcon, 
   UserIcon, 
   TagIcon,
-  ArrowRightIcon 
+  ArrowRightIcon,
+  PhotoIcon,
+  MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-
-// Sample blog data - in a real app, this would come from a database
-const blogPosts = [
-  {
-    id: 1,
-    title: "Úspěšný start sezóny pro mužský tým",
-    excerpt: "Mužský tým TJ Sokol Svinov zahájil novou sezónu v 1. lize národní házené výbornými výsledky. V prvních třech zápasech získali maximum bodů a ukázali, že patří mezi favority soutěže.",
-    author: "Trenér Jan Novák",
-    date: "2024-09-15",
-    category: "Muži",
-    slug: "uspesny-start-sezony-pro-muzsky-tym",
-    image: "/logo.png"
-  },
-  {
-    id: 2,
-    title: "Dorostenci vyhráli turnaj v Ostravě",
-    excerpt: "Náš dorostenecký tým se zúčastnil mezinárodního turnaje v Ostravě a po skvělých výkonech získal první místo. Hráči ukázali výbornou techniku a týmového ducha.",
-    author: "Trenérka Marie Svobodová",
-    date: "2024-09-10",
-    category: "Dorostenci",
-    slug: "dorostenci-vyhráli-turnaj-v-ostrave",
-    image: "/logo.png"
-  },
-  {
-    id: 3,
-    title: "Přípravka zahájila tréninky pro novou sezónu",
-    excerpt: "Děti z přípravky se vrátily z prázdnin a začaly s pravidelnými tréninky. Noví zájemci jsou vítáni - přijďte si vyzkoušet národní házenou každé úterý a čtvrtek od 16:00.",
-    author: "Trenér Petr Dvořák",
-    date: "2024-09-05",
-    category: "Přípravka",
-    slug: "pripravka-zahajila-treninky-pro-novou-sezonu",
-    image: "/logo.png"
-  },
-  {
-    id: 4,
-    title: "Ženy se připravují na oblastní ligu",
-    excerpt: "Ženský tým intenzivně trénuje před startem oblastní ligy. Nové posily z mládežnických kategorií přinášejí do týmu čerstvý vítr a ambice na úspěšnou sezónu.",
-    author: "Kapitánka týmu Anna Černá",
-    date: "2024-08-28",
-    category: "Ženy",
-    slug: "zeny-se-pripravuji-na-oblastni-ligu",
-    image: "/logo.png"
-  },
-  {
-    id: 5,
-    title: "Letní soustředění mládeže v Beskydech",
-    excerpt: "Třicet mladých hráčů a hráček se zúčastnilo týdenního soustředění v Beskydech. Kromě intenzivního tréninku si užili i turistiku a týmové aktivity.",
-    author: "Vedoucí mládeže Tomáš Veselý",
-    date: "2024-08-20",
-    category: "Mládež",
-    slug: "letni-soustredeni-mladeze-v-beskydech",
-    image: "/logo.png"
-  },
-  {
-    id: 6,
-    title: "Historický úspěch - 90 let TJ Sokol Svinov",
-    excerpt: "Letos slavíme 90 let od založení oddílu národní házené TJ Sokol Svinov. Připravujeme řadu akcí na oslavu tohoto významného výročí včetně přátelských zápasů a výstavy.",
-    author: "Předseda oddílu Josef Malý",
-    date: "2024-08-15",
-    category: "Historie",
-    slug: "historicky-uspech-90-let-tj-sokol-svinov",
-    image: "/logo.png"
-  }
-];
-
-const categories = [
-  "Všechny",
-  "Muži", 
-  "Ženy",
-  "Dorostenci",
-  "Dorostenky",
-  "Mládež",
-  "Přípravka",
-  "Historie"
-];
+import { useFetchBlogPosts } from "@/hooks/useFetchBlogPosts";
+import { useState, useMemo } from "react";
 
 export default function BlogPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Všechny");
+  
+  // Fetch all published blog posts
+  const { posts: allPosts, loading, error } = useFetchBlogPosts(100); // Get more posts for filtering
+  
+  // Get unique categories from posts
+  const categories = useMemo(() => {
+    if (!allPosts) return ["Všechny"];
+    
+    const uniqueCategories = new Set<string>();
+    allPosts.forEach(post => {
+      if (post.tags) {
+        post.tags.forEach(tag => uniqueCategories.add(tag));
+      }
+    });
+    
+    return ["Všechny", ...Array.from(uniqueCategories).sort()];
+  }, [allPosts]);
+
+  // Filter posts based on search and category
+  const filteredPosts = useMemo(() => {
+    if (!allPosts) return [];
+    
+    return allPosts.filter(post => {
+      const matchesSearch = searchTerm === "" || 
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+      
+      const matchesCategory = selectedCategory === "Všechny" || 
+        (post.tags && post.tags.includes(selectedCategory));
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [allPosts, searchTerm, selectedCategory]);
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -98,64 +68,187 @@ export default function BlogPage() {
         </p>
       </div>
 
-      {/* Categories Filter */}
-      <div className="flex flex-wrap gap-2 justify-center">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            size="sm"
-            variant="bordered"
-            className="text-sm"
+      {/* Search and Filter */}
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <Input
+            placeholder="Hledat v článcích..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
+            className="w-full"
+          />
+        </div>
+        <div className="w-full md:w-48">
+          <Select
+            placeholder="Kategorie"
+            selectedKeys={[selectedCategory]}
+            onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
+            className="w-full"
           >
-            {category}
-          </Button>
-        ))}
+            {categories.map((category) => (
+              <SelectItem key={category}>{category}</SelectItem>
+            ))}
+          </Select>
+        </div>
+      </div>
+
+      {/* Results Count */}
+      <div className="text-center">
+        <p className="text-gray-600 dark:text-gray-400">
+          {loading ? "Načítání..." : `Nalezeno ${filteredPosts.length} článků`}
+        </p>
       </div>
 
       {/* Blog Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {blogPosts.map((post) => (
-          <Card key={post.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-0">
-              <div className="flex items-center gap-2 mb-2">
-                <TagIcon className="w-4 h-4 text-blue-500" />
-                <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                  {post.category}
-                </span>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white line-clamp-2">
-                {post.title}
-              </h2>
-            </CardHeader>
-            <CardBody>
-              <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-                {post.excerpt}
+      {loading ? (
+        // Loading state
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="pb-0">
+                <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-2"></div>
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+              </CardHeader>
+              <CardBody>
+                <div className="space-y-2 mb-4">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                </div>
+                <div className="flex justify-between items-center mb-4">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                </div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
+      ) : error ? (
+        // Error state
+        <div className="text-center py-12">
+          <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
+            <CardBody className="text-center">
+              <TagIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
+                Chyba při načítání článků
+              </h3>
+              <p className="text-red-600 dark:text-red-400 mb-4">
+                {error}
               </p>
-              
-              <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-                <div className="flex items-center gap-1">
-                  <UserIcon className="w-4 h-4" />
-                  <span>{post.author}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <CalendarIcon className="w-4 h-4" />
-                  <span>{new Date(post.date).toLocaleDateString('cs-CZ')}</span>
-                </div>
-              </div>
-
               <Button 
-                as={Link} 
-                href={`/blog/${post.slug}`}
-                size="sm" 
-                color="primary"
-                endContent={<ArrowRightIcon className="w-4 h-4" />}
+                color="primary" 
+                variant="bordered"
+                onPress={() => window.location.reload()}
               >
-                Přečíst více
+                Zkusit znovu
               </Button>
             </CardBody>
           </Card>
-        ))}
-      </div>
+        </div>
+      ) : filteredPosts.length > 0 ? (
+        // Success state - display posts
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPosts.map((post) => (
+            <Card key={post.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-0">
+                {/* Post Image */}
+                {post.image_url ? (
+                  <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
+                    <Image
+                      src={post.image_url}
+                      alt={post.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-48 mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                    <PhotoIcon className="w-12 h-12 text-gray-400" />
+                  </div>
+                )}
+                
+                {/* Post Tags */}
+                {post.tags && post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {post.tags.slice(0, 2).map((tag, index) => (
+                      <Chip
+                        key={index}
+                        size="sm"
+                        variant="bordered"
+                        color="primary"
+                        className="text-xs"
+                      >
+                        {tag}
+                      </Chip>
+                    ))}
+                    {post.tags.length > 2 && (
+                      <Chip size="sm" variant="bordered" color="default" className="text-xs">
+                        +{post.tags.length - 2}
+                      </Chip>
+                    )}
+                  </div>
+                )}
+                
+                {/* Post Title */}
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white line-clamp-2">
+                  {post.title}
+                </h2>
+              </CardHeader>
+              
+              <CardBody>
+                {/* Post Excerpt */}
+                <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                  {post.excerpt}
+                </p>
+                
+                {/* Post Meta */}
+                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  <div className="flex items-center gap-1">
+                    <UserIcon className="w-4 h-4" />
+                    <span>{post.author_id === 'default-user' ? 'Admin' : `ID: ${post.author_id}`}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <CalendarIcon className="w-4 h-4" />
+                    <span>{new Date(post.published_at || post.created_at).toLocaleDateString('cs-CZ')}</span>
+                  </div>
+                </div>
+
+                {/* Read More Button */}
+                <Button 
+                  as={Link} 
+                  href={`/blog/${post.slug}`}
+                  size="sm" 
+                  color="primary"
+                  endContent={<ArrowRightIcon className="w-4 h-4" />}
+                  className="w-full"
+                >
+                  Přečíst více
+                </Button>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        // No posts state
+        <div className="text-center py-12">
+          <Card className="border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+            <CardBody className="text-center">
+              <TagIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                Žádné články nenalezeny
+              </h3>
+              <p className="text-gray-500 dark:text-gray-500">
+                {searchTerm || selectedCategory !== "Všechny" 
+                  ? "Pro vybrané filtry nebyly nalezeny žádné články."
+                  : "Zatím nebyly publikovány žádné články."
+                }
+              </p>
+            </CardBody>
+          </Card>
+        </div>
+      )}
 
       {/* Newsletter Signup */}
       <Card className="bg-linear-to-r from-blue-600 to-blue-700 text-white">
