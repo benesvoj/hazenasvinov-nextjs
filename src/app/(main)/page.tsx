@@ -5,6 +5,7 @@ import { Button } from "@heroui/button";
 import { Spacer } from "@heroui/spacer";
 import { CustomTable } from "@/components/CustomTable";
 import MatchSchedule from "@/components/MatchSchedule";
+import BlogPostCard, { BlogPostCardSkeleton } from "@/components/BlogPostCard";
 import { URL_men } from "@/data/params";
 import { translations } from "@/lib/translations";
 import { texts } from "@/utils/texts";
@@ -107,58 +108,46 @@ export default function Page() {
       {/* Match Schedule & Results */}
       <MatchSchedule />
 
-      {/* Latest News */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Nejnovější novinky</h2>
-          <Button 
-            as={Link} 
-            href="/blog" 
-            variant="bordered" 
-            endContent={<ArrowRightIcon className="w-4 h-4" />}
-          >
-            Všechny novinky
-          </Button>
+      {/* Latest News - Modern Design */}
+      <section className="relative">
+        {/* Section Header with enhanced styling */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+            Nejnovější novinky
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Sledujte nejdůležitější události a informace z našeho klubu
+          </p>
         </div>
+
+        {/* Enhanced Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {postsLoading ? (
-            // Loading state
+            // Enhanced Loading State with background image skeletons
             <>
               {[1, 2, 3].map((i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader className="pb-0">
-                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
-                  </CardHeader>
-                  <CardBody>
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                    </div>
-                    <div className="flex justify-between items-center mt-4">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
-                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
-                    </div>
-                  </CardBody>
-                </Card>
+                <BlogPostCardSkeleton key={i} />
               ))}
             </>
           ) : postsError ? (
-            // Error state
-            <div className="col-span-full text-center py-8">
-              <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
-                <CardBody className="text-center">
-                  <TagIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            // Enhanced Error State
+            <div className="col-span-full">
+              <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20 overflow-hidden">
+                <CardBody className="text-center p-8">
+                  <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <TagIcon className="w-8 h-8 text-red-500" />
+                  </div>
                   <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
                     Chyba při načítání novinek
                   </h3>
-                  <p className="text-red-600 dark:text-red-400 mb-4">
+                  <p className="text-red-600 dark:text-red-400 mb-4 max-w-md mx-auto">
                     {postsError}
                   </p>
                   <Button 
                     color="primary" 
                     variant="bordered"
                     onPress={() => window.location.reload()}
+                    className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
                   >
                     Zkusit znovu
                   </Button>
@@ -166,257 +155,60 @@ export default function Page() {
               </Card>
             </div>
           ) : latestPosts && latestPosts.length > 0 ? (
-            // Success state - display posts
-            latestPosts.map((post) => (
-              <Card key={post.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-0">
-                  {/* Post Image */}
-                  {post.image_url ? (
-                    <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
-                      <Image
-                        src={post.image_url}
-                        alt={post.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-48 mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                      <PhotoIcon className="w-12 h-12 text-gray-400" />
-                    </div>
-                  )}
-                  
-                  {/* Post Title */}
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2">
-                    {post.title}
-                  </h3>
-                  
-                  {/* Post Tags */}
-                  {post.tags && post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {post.tags.slice(0, 2).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {post.tags.length > 2 && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                          +{post.tags.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </CardHeader>
-                
-                <CardBody>
-                  {/* Post Excerpt */}
-                  <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  
-                  {/* Post Meta */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(post.published_at || post.created_at).toLocaleDateString('cs-CZ')}
-                    </span>
-                    <Button 
-                      as={Link} 
-                      href={`/blog/${post.slug}`}
-                      size="sm" 
-                      color="primary"
-                    >
-                      Přečíst
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
+            // Enhanced Success State - Background Image Cards with Overlay Text
+            latestPosts.map((post, index) => (
+              <BlogPostCard 
+                key={post.id} 
+                post={post} 
+                index={index}
+                variant="landing"
+              />
             ))
           ) : (
-            // No posts state
-            <div className="col-span-full text-center py-8">
-              <Card className="border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                <CardBody className="text-center">
-                  <TagIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            // Enhanced No Posts State
+            <div className="col-span-full">
+              <Card className="border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50 overflow-hidden">
+                <CardBody className="text-center p-8">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <TagIcon className="w-8 h-8 text-gray-400" />
+                  </div>
                   <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
                     Zatím žádné novinky
                   </h3>
-                  <p className="text-gray-500 dark:text-gray-500">
+                  <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-lg mx-auto">
                     První články se objeví, jakmile budou publikovány v administraci.
                   </p>
+                  <Button 
+                    as={Link} 
+                    href="/blog" 
+                    color="primary"
+                    variant="bordered"
+                    className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                  >
+                    Procházet blog
+                  </Button>
                 </CardBody>
               </Card>
             </div>
           )}
         </div>
-      </section>
 
-      {/* Team Categories */}
-      <section>
-        <h2 className="text-3xl font-bold mb-6 text-center">Naše týmy</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Youngest Kids */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Kuřátka</h3>
-              <p className="text-gray-600 mb-4">Nejmladší se zájmem o pohyb</p>
-              <Button 
-                as={Link} 
-                href="/categories/youngest-kids" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Prep Kids */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Přípravka</h3>
-              <p className="text-gray-600 mb-4">Děti 5-10 let, turnajové kategorie</p>
-              <Button 
-                as={Link} 
-                href="/categories/prep-kids" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Younger Boys */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Mladší žáci</h3>
-              <p className="text-gray-600 mb-4">Kluci 9-12 let, SM oblast</p>
-              <Button 
-                as={Link} 
-                href="/categories/younger-boys" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Younger Girls */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Mladší žáčky</h3>
-              <p className="text-gray-600 mb-4">Devčata 9-12 let, SM oblast</p>
-              <Button 
-                as={Link} 
-                href="/categories/younger-girls" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Older Boys */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Starší žáci</h3>
-              <p className="text-gray-600 mb-4">Kluci 12-15 let, SM oblast</p>
-              <Button 
-                as={Link} 
-                href="/categories/older-boys" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Older Girls */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Starší žáčky</h3>
-              <p className="text-gray-600 mb-4">Devčata 12-15 let, SM oblast</p>
-              <Button 
-                as={Link} 
-                href="/categories/older-girls" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Junior Boys */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Dorostenci</h3>
-              <p className="text-gray-600 mb-4">Junioři 15-18 let, SM oblast</p>
-              <Button 
-                as={Link} 
-                href="/categories/junior-boys" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Junior Girls */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Dorostenky</h3>
-              <p className="text-gray-600 mb-4">Juniorky 15-18 let, SM oblast</p>
-              <Button 
-                as={Link} 
-                href="/categories/junior-girls" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Men */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Muži</h3>
-              <p className="text-gray-600 mb-4">1.liga mužů, SM oblast</p>
-              <Button 
-                as={Link} 
-                href="/categories/men" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Women */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardBody>
-              <h3 className="text-xl font-semibold mb-2">Ženy</h3>
-              <p className="text-gray-600 mb-4">Oblastní liga žen, SM oblast</p>
-              <Button 
-                as={Link} 
-                href="/categories/women" 
-                size="sm" 
-                color="primary"
-              >
-                Zobrazit tým
-              </Button>
-            </CardBody>
-          </Card>
-        </div>
+        {/* Enhanced View All Button */}
+        {latestPosts && latestPosts.length > 0 && (
+          <div className="text-center mt-8">
+            <Button 
+              as={Link} 
+              href="/blog" 
+              size="md"
+              color="primary"
+              variant="bordered"
+              className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20"
+              endContent={<ArrowRightIcon className="w-4 h-4" />}
+            >
+              Zobrazit všechny novinky
+            </Button>
+          </div>
+        )}
       </section>
 
       {/* Club Highlights */}

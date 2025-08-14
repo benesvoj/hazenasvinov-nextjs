@@ -28,12 +28,11 @@ export const useFetchBlogPosts = (limit: number = 3) => {
 
       const supabase = createClient();
 
-      // Fetch only published posts, ordered by published date (or created date if not published)
+      // Fetch only published posts, ordered by created date (newest first)
       const { data, error: fetchError } = await supabase
         .from('blog_posts')
         .select('*')
         .eq('status', 'published')
-        .order('published_at', { ascending: false, nullsLast: true })
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -62,27 +61,10 @@ export const useFetchBlogPosts = (limit: number = 3) => {
         image_url: post.image_url || null
       }));
 
-      // Additional sorting to ensure newest posts are first
-      transformedPosts.sort((a: any, b: any) => {
-        // First priority: published_at (newest first)
-        const aPublished = a.published_at ? new Date(a.published_at).getTime() : 0;
-        const bPublished = b.published_at ? new Date(b.published_at).getTime() : 0;
-        
-        if (aPublished !== bPublished) {
-          return bPublished - aPublished; // Newest first
-        }
-        
-        // Second priority: created_at (newest first)
-        const aCreated = new Date(a.created_at).getTime();
-        const bCreated = new Date(b.created_at).getTime();
-        return bCreated - aCreated; // Newest first
-      });
-
       // Debug: Log the ordering information
       console.log('Blog posts fetched with ordering:', transformedPosts.map((post: any) => ({
         id: post.id,
         title: post.title,
-        published_at: post.published_at,
         created_at: post.created_at,
         status: post.status
       })));

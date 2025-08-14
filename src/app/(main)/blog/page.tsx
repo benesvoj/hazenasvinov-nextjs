@@ -5,6 +5,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Chip } from "@heroui/chip";
+import BlogPostCard, { BlogPostCardSkeleton } from "@/components/BlogPostCard";
 import Link from "@/components/Link";
 import Image from "next/image";
 import { 
@@ -58,46 +59,57 @@ export default function BlogPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+      {/* Header - Enhanced Modern Design */}
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-full mb-6">
+          <TagIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Blog</span>
+        </div>
+        <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
           Novinky a články
         </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
           Sledujte nejnovější události, výsledky a příběhy z našeho oddílu národní házené
         </p>
       </div>
 
-      {/* Search and Filter */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1">
-          <Input
-            placeholder="Hledat v článcích..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
-            className="w-full"
-          />
-        </div>
-        <div className="w-full md:w-48">
-          <Select
-            placeholder="Kategorie"
-            selectedKeys={[selectedCategory]}
-            onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
-            className="w-full"
-          >
-            {categories.map((category) => (
-              <SelectItem key={category}>{category}</SelectItem>
-            ))}
-          </Select>
+      {/* Search and Filter - Enhanced Design */}
+      <div className="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800/50 dark:to-blue-900/20 rounded-2xl p-6 border border-gray-100 dark:border-gray-700">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <Input
+              placeholder="Hledat v článcích..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
+              className="w-full bg-white dark:bg-gray-800 border-0 shadow-sm focus:ring-2 focus:ring-blue-500"
+              size="lg"
+            />
+          </div>
+          <div className="w-full md:w-48">
+            <Select
+              placeholder="Kategorie"
+              selectedKeys={[selectedCategory]}
+              onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
+              className="w-full"
+              size="lg"
+            >
+              {categories.map((category) => (
+                <SelectItem key={category}>{category}</SelectItem>
+              ))}
+            </Select>
+          </div>
         </div>
       </div>
 
-      {/* Results Count */}
+      {/* Results Count - Enhanced Design */}
       <div className="text-center">
-        <p className="text-gray-600 dark:text-gray-400">
-          {loading ? "Načítání..." : `Nalezeno ${filteredPosts.length} článků`}
-        </p>
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-200 dark:border-gray-700">
+          <TagIcon className="w-4 h-4 text-blue-500" />
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {loading ? "Načítání..." : `Nalezeno ${filteredPosts.length} článků`}
+          </span>
+        </div>
       </div>
 
       {/* Blog Posts Grid */}
@@ -105,24 +117,7 @@ export default function BlogPage() {
         // Loading state
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-0">
-                <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-2"></div>
-                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-              </CardHeader>
-              <CardBody>
-                <div className="space-y-2 mb-4">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                </div>
-                <div className="flex justify-between items-center mb-4">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
-                </div>
-                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              </CardBody>
-            </Card>
+            <BlogPostCardSkeleton key={i} variant="blog" />
           ))}
         </div>
       ) : error ? (
@@ -151,83 +146,7 @@ export default function BlogPage() {
         // Success state - display posts
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPosts.map((post) => (
-            <Card key={post.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-0">
-                {/* Post Image */}
-                {post.image_url ? (
-                  <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
-                    <Image
-                      src={post.image_url}
-                      alt={post.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-48 mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                    <PhotoIcon className="w-12 h-12 text-gray-400" />
-                  </div>
-                )}
-                
-                {/* Post Tags */}
-                {post.tags && post.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {post.tags.slice(0, 2).map((tag, index) => (
-                      <Chip
-                        key={index}
-                        size="sm"
-                        variant="bordered"
-                        color="primary"
-                        className="text-xs"
-                      >
-                        {tag}
-                      </Chip>
-                    ))}
-                    {post.tags.length > 2 && (
-                      <Chip size="sm" variant="bordered" color="default" className="text-xs">
-                        +{post.tags.length - 2}
-                      </Chip>
-                    )}
-                  </div>
-                )}
-                
-                {/* Post Title */}
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white line-clamp-2">
-                  {post.title}
-                </h2>
-              </CardHeader>
-              
-              <CardBody>
-                {/* Post Excerpt */}
-                <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-                  {post.excerpt}
-                </p>
-                
-                {/* Post Meta */}
-                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  <div className="flex items-center gap-1">
-                    <UserIcon className="w-4 h-4" />
-                    <span>{post.author_id === 'default-user' ? 'Admin' : `ID: ${post.author_id}`}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <CalendarIcon className="w-4 h-4" />
-                    <span>{new Date(post.published_at || post.created_at).toLocaleDateString('cs-CZ')}</span>
-                  </div>
-                </div>
-
-                {/* Read More Button */}
-                <Button 
-                  as={Link} 
-                  href={`/blog/${post.slug}`}
-                  size="sm" 
-                  color="primary"
-                  endContent={<ArrowRightIcon className="w-4 h-4" />}
-                  className="w-full"
-                >
-                  Přečíst více
-                </Button>
-              </CardBody>
-            </Card>
+            <BlogPostCard key={post.id} post={post} variant="blog" />
           ))}
         </div>
       ) : (
