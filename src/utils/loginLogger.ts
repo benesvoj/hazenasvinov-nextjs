@@ -13,6 +13,17 @@ export interface LoginLogData {
  */
 export async function logLoginAction(data: LoginLogData): Promise<boolean> {
   try {
+    // Only log in production environments
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isLocalhost = typeof window !== 'undefined' && 
+                       (window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1');
+    
+    if (!isProduction || isLocalhost) {
+      console.log(`[DEV] Login action would be logged: ${data.email} - ${data.action} - ${data.status} (skipped in development)`);
+      return true; // Return success to avoid breaking functionality
+    }
+
     const userAgent = data.userAgent || (typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown');
     
     const response = await fetch('/api/log-login', {

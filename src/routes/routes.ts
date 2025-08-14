@@ -35,21 +35,20 @@ export const publicRoutes = {
 
 
 export const privateRoutes = {
-	dashboard: '/admin',
-	articles: '/admin/articles',
-	posts: '/admin/posts',
-	teams: '/admin/teams',
-	committees: '/admin/committees',
-	players: '/admin/players',
+	admin: '/admin',
 	users: '/admin/users',
-	competitions: '/admin/competitions',
-	matches: '/admin/matches',
-	members: '/admin/members',
-	teamCategories: '/admin/team-categories',
+	posts: '/admin/posts',
 	categories: '/admin/categories',
 	seasons: '/admin/seasons',
+	teams: '/admin/teams',
+	teamCategories: '/admin/team-categories',
+	matches: '/admin/matches',
+	members: '/admin/members',
+	committees: '/admin/committees',
+	competitions: '/admin/competitions',
 	sponsorship: '/admin/sponsorship',
-} as const;
+	clubConfig: '/admin/club-config',
+};
 
 const routes: MenuItem[] = [
 	{route: publicRoutes.home, title: 'Úvod'},
@@ -115,7 +114,7 @@ const routes: MenuItem[] = [
 	{route: publicRoutes.about, title: 'O oddílu'},
 	{route: publicRoutes.celebration, title: '100 let'},
 	{route: publicRoutes.login, title: 'Admin'},
-	{route: privateRoutes.dashboard, title: 'Dashboard', isPrivate: true, description: 'Správa obsahu a nastavení systému.'},
+	{route: privateRoutes.admin, title: 'Dashboard', isPrivate: true, description: 'Správa obsahu a nastavení systému.'},
 	{route: privateRoutes.competitions, title: translations.competitions.title, isPrivate: true, description: translations.competitions.description, hidden: true},
 	{route: privateRoutes.teams, title: 'Týmy', isPrivate: true, description: 'Správa týmů a jejich informací.'},
 	{route: privateRoutes.committees, title: 'Komise', isPrivate: true, description: 'Správa oblastních soutěžních komisí.'},
@@ -127,6 +126,7 @@ const routes: MenuItem[] = [
 	{route: privateRoutes.posts, title: 'Blog', isPrivate: true, description: 'Správa blogových článků a novinek.'},
 	{route: privateRoutes.users, title: 'Uživatelé', isPrivate: true, description: 'Správa uživatelů, kteří se mohou přihlásit do systému.'},
 	{route: privateRoutes.sponsorship, title: 'Sponzorství', isPrivate: true, description: 'Správa sponzorů, partnerů a sponzorských balíčků.'},
+	{route: privateRoutes.clubConfig, title: 'Konfigurace klubu', isPrivate: true, description: 'Správa nastavení a konfigurace klubu.'},
 ]
 
 export default routes

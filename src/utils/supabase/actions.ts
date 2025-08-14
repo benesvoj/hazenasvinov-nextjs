@@ -20,8 +20,8 @@ export async function login(formData: FormData) {
 	if (error) {
 		redirect(publicRoutes.error)
 	}
-	revalidatePath(privateRoutes.dashboard, 'layout')
-	redirect(privateRoutes.dashboard)
+	revalidatePath(privateRoutes.admin, 'layout')
+	redirect(privateRoutes.admin)
 }
 
 export async function signup(formData: FormData) {
@@ -40,8 +40,8 @@ export async function signup(formData: FormData) {
 		redirect(publicRoutes.error)
 	}
 
-	revalidatePath(privateRoutes.dashboard, 'layout')
-	redirect(privateRoutes.dashboard)
+	revalidatePath(privateRoutes.admin, 'layout')
+	redirect(privateRoutes.admin)
 }
 
 export async function logout() {

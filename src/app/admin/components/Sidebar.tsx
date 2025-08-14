@@ -18,34 +18,39 @@ import {
   UserIcon,
   BuildingOfficeIcon,
   DocumentTextIcon,
-  HeartIcon
+  HeartIcon,
+  TagIcon
 } from "@heroicons/react/24/outline";
 
 // Icon mapping for admin routes
 const getRouteIcon = (route: string) => {
   switch (route) {
-    case privateRoutes.dashboard:
+    case privateRoutes.admin:
       return <HomeIcon className="w-5 h-5" />;
-    case privateRoutes.teams:
-      return <BuildingOfficeIcon className="w-5 h-5" />;
-    case privateRoutes.committees:
-      return <BuildingOfficeIcon className="w-5 h-5" />;
-    case privateRoutes.matches:
-      return <CalendarIcon className="w-5 h-5" />;
-    case privateRoutes.members:
+    case privateRoutes.users:
       return <UsersIcon className="w-5 h-5" />;
-    case privateRoutes.seasons:
-      return <CalendarDaysIcon className="w-5 h-5" />;
-    case privateRoutes.categories:
-      return <TrophyIcon className="w-5 h-5" />;
     case privateRoutes.posts:
       return <DocumentTextIcon className="w-5 h-5" />;
-    case privateRoutes.users:
-      return <UserIcon className="w-5 h-5" />;
+    case privateRoutes.categories:
+      return <TagIcon className="w-5 h-5" />;
+    case privateRoutes.seasons:
+      return <CalendarIcon className="w-5 h-5" />;
+    case privateRoutes.teams:
+      return <UserGroupIcon className="w-5 h-5" />;
+    case privateRoutes.teamCategories:
+      return <BuildingOfficeIcon className="w-5 h-5" />;
+    case privateRoutes.matches:
+      return <TrophyIcon className="w-5 h-5" />;
+    case privateRoutes.members:
+      return <UsersIcon className="w-5 h-5" />;
+    case privateRoutes.committees:
+      return <BuildingOfficeIcon className="w-5 h-5" />;
     case privateRoutes.competitions:
-      return <ChartBarIcon className="w-5 h-5" />;
+      return <TrophyIcon className="w-5 h-5" />;
     case privateRoutes.sponsorship:
       return <HeartIcon className="w-5 h-5" />;
+    case privateRoutes.clubConfig:
+      return <Cog6ToothIcon className="w-5 h-5" />;
     default:
       return <Cog6ToothIcon className="w-5 h-5" />;
   }
@@ -100,7 +105,7 @@ export const Sidebar = () => {
             return (
               <Link
                 key={item.route}
-                href={item.route || privateRoutes.dashboard}
+                href={item.route || privateRoutes.admin}
                 className={`group flex items-center px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
                   isActive
                     ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg transform scale-105'

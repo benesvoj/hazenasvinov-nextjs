@@ -5,7 +5,7 @@ import {createClient} from "@/utils/supabase/server";
 export async function middleware(request: NextRequest) {
 	try {
 		// Only check auth for admin routes
-		if (request.nextUrl.pathname.startsWith(privateRoutes.dashboard)) {
+		if (request.nextUrl.pathname.startsWith(privateRoutes.admin)) {
 			const supabase = await createClient()
 			const {data: {user}} = await supabase.auth.getUser()
 
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.next()
 	} catch (error) {
 		// If there's an error accessing admin routes, redirect to login
-		if (request.nextUrl.pathname.startsWith(privateRoutes.dashboard)) {
+		if (request.nextUrl.pathname.startsWith(privateRoutes.admin)) {
 			return NextResponse.redirect(new URL(publicRoutes.login, request.url))
 		}
 		// For other routes, just proceed even with errors

@@ -24,7 +24,7 @@ import {
 	XMarkIcon
 } from "@heroicons/react/24/outline";
 import {createClient} from "@/utils/supabase/client";
-import {deleteTeamLogo, uploadTeamLogo} from "@/utils/supabase/storage";
+import { uploadClubAsset, deleteClubAsset } from "@/utils/supabase/storage";
 import {Chip, Select, SelectItem} from "@heroui/react";
 import Image from 'next/image';
 
@@ -396,22 +396,34 @@ export default function TeamsAdminPage() {
 
 		try {
 			setLogoUploading(true);
-			const result = await uploadTeamLogo(teamId, logoFile);
-
-			if (result.success) {
-				setFormData(prev => ({...prev, logo_url: result.url || ''}));
-				setLogoFile(null);
-				setLogoPreview('');
-				await fetchTeams(); // Refresh teams list
-				return true;
-			} else {
-				setError(result.error || 'Failed to upload logo');
-				return false;
+			const timestamp = Date.now();
+			const extension = logoFile.name.split('.').pop() || 'png';
+			const path = `team-logos/${teamId}-${timestamp}.${extension}`;
+			
+			const result = await uploadClubAsset(logoFile, path);
+			
+			if (result.error) {
+				alert(`Chyba při nahrávání loga: ${result.error}`);
+				return;
 			}
+
+			// Update form data with new logo
+			setFormData(prev => ({...prev, logo_url: result.url}));
+			
+			// Update team in database
+			const { error: updateError } = await supabase
+				.from('teams')
+				.update({ logo_url: result.url })
+				.eq('id', teamId);
+
+			if (updateError) {
+				console.error('Error updating team logo:', updateError);
+				alert('Chyba při aktualizaci týmu');
+			}
+
 		} catch (error) {
-			setError('Error uploading logo');
-			console.error('Logo upload error:', error);
-			return false;
+			console.error('Logo upload failed:', error);
+			alert('Chyba při nahrávání loga');
 		} finally {
 			setLogoUploading(false);
 		}
@@ -420,17 +432,42 @@ export default function TeamsAdminPage() {
 	const handleLogoDelete = async (teamId: string) => {
 		try {
 			setLogoUploading(true);
-			const success = await deleteTeamLogo(teamId);
-
-			if (success) {
-				setFormData(prev => ({...prev, logo_url: ''}));
-				await fetchTeams(); // Refresh teams list
-			} else {
-				setError('Failed to delete logo');
+			
+			// Extract path from logo URL if it exists
+			if (selectedTeam?.logo_url) {
+				const urlParts = selectedTeam.logo_url.split('/');
+				const fileName = urlParts[urlParts.length - 1];
+				const path = `team-logos/${fileName}`;
+				
+				const result = await deleteClubAsset(path);
+				if (result.error) {
+					console.error('Error deleting logo:', result.error);
+				}
 			}
+
+			// Update team to remove logo URL
+			const { error: updateError } = await supabase
+				.from('teams')
+				.update({ logo_url: null })
+				.eq('id', selectedTeam?.id);
+
+			if (updateError) {
+				console.error('Error updating team:', updateError);
+				alert('Chyba při aktualizaci týmu');
+				return false;
+			}
+
+			// Update form data
+			setFormData(prev => ({...prev, logo_url: ''}));
+			setLogoFile(null);
+			setLogoPreview('');
+			await fetchTeams(); // Refresh teams list
+			return true;
+
 		} catch (error) {
-			setError('Error deleting logo');
-			console.error('Logo delete error:', error);
+			console.error('Logo deletion failed:', error);
+			alert('Chyba při mazání loga');
+			return false;
 		} finally {
 			setLogoUploading(false);
 		}

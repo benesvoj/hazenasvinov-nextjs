@@ -1,6 +1,10 @@
-import { useEffect, useState, useRef } from 'react'
-import { User, Session } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/client';
+import { useState, useEffect, useRef } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+
+// Global flag to prevent multiple login logs for the same session
+let globalLoginLogged = false;
+let globalLoginTimeout: NodeJS.Timeout | null = null;
 
 export interface AuthState {
   user: User | null
@@ -88,30 +92,58 @@ export function useAuth() {
           
           // Only log actual sign-in events, not page refreshes with existing sessions
           if (event === 'SIGNED_IN' && user?.email && hasProcessedInitialSession.current) {
-            // Log login attempt in background without blocking auth state change
-            // Use a timeout to prevent hanging requests
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+            // Only log in production environments
+            const isProduction = process.env.NODE_ENV === 'production';
+            const isLocalhost = typeof window !== 'undefined' && 
+                               (window.location.hostname === 'localhost' || 
+                                window.location.hostname === '127.0.0.1');
             
-            fetch('/api/log-login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                email: user.email,
-                status: 'success',
-                action: 'login',
-                userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
-              }),
-              signal: controller.signal,
-            }).then(() => {
-              clearTimeout(timeoutId);
-            }).catch((logError) => {
-              clearTimeout(timeoutId);
-              // Silently fail - don't log to console to avoid spam
-              // console.error('Failed to log successful login:', logError);
-            });
+            if (isProduction && !isLocalhost) {
+              // Use global flag to prevent multiple login logs across hook instances
+              if (globalLoginLogged) {
+                console.log(`[AUTH] Login already logged globally for ${user.email}, skipping`);
+                return;
+              }
+              
+              // Set global flag and clear it after 10 seconds
+              globalLoginLogged = true;
+              if (globalLoginTimeout) {
+                clearTimeout(globalLoginTimeout);
+              }
+              globalLoginTimeout = setTimeout(() => {
+                globalLoginLogged = false;
+              }, 10000);
+              
+              console.log(`[AUTH] Logging login for ${user.email}`);
+              
+              // Log login attempt in background without blocking auth state change
+              // Use a timeout to prevent hanging requests
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+              
+              fetch('/api/log-login', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  email: user.email,
+                  status: 'success',
+                  action: 'login',
+                  userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
+                }),
+                signal: controller.signal,
+              }).then(() => {
+                clearTimeout(timeoutId);
+                console.log(`[AUTH] Login logged successfully for ${user.email}`);
+              }).catch((logError) => {
+                clearTimeout(timeoutId);
+                // Silently fail - don't log to console to avoid spam
+                // console.error('Failed to log successful login:', logError);
+              });
+            } else {
+              console.log(`[DEV] Login would be logged: ${user.email} (skipped in development)`);
+            }
           }
 
           setAuthState({
