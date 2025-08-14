@@ -10,7 +10,17 @@ import { useState } from "react";
 
 export default function Page() {
 	const [selectedTab, setSelectedTab] = useState<string>("users");
-	const { users, loginLogs, loading, error } = useFetchUsers(selectedTab === "loginLogs");
+	const { 
+		users, 
+		loginLogs, 
+		loading, 
+		error,
+		pagination,
+		selectedUser,
+		changePage,
+		changeUserFilter,
+		clearFilters
+	} = useFetchUsers(selectedTab === "loginLogs");
 
 	if (error) {
 		return (
@@ -50,7 +60,16 @@ export default function Page() {
 			)}
 			
 			{selectedTab === "loginLogs" && (
-				<LoginLogsTab loginLogs={loginLogs} loading={loading} />
+				<LoginLogsTab 
+					loginLogs={loginLogs} 
+					loading={loading}
+					users={users}
+					pagination={pagination}
+					selectedUser={selectedUser}
+					onPageChange={changePage}
+					onUserFilterChange={changeUserFilter}
+					onClearFilters={clearFilters}
+				/>
 			)}
 		</div>
 	);
