@@ -48,6 +48,7 @@ export const privateRoutes = {
 	teamCategories: '/admin/team-categories',
 	categories: '/admin/categories',
 	seasons: '/admin/seasons',
+	sponsorship: '/admin/sponsorship',
 } as const;
 
 const routes: MenuItem[] = [
@@ -125,6 +126,7 @@ const routes: MenuItem[] = [
 	{route: privateRoutes.categories, title: 'Kategorie', isPrivate: true, description: 'Správa kategorií pro týmové soutěže a členy klubu.'},
 	{route: privateRoutes.posts, title: 'Blog', isPrivate: true, description: 'Správa blogových článků a novinek.'},
 	{route: privateRoutes.users, title: 'Uživatelé', isPrivate: true, description: 'Správa uživatelů, kteří se mohou přihlásit do systému.'},
+	{route: privateRoutes.sponsorship, title: 'Sponzorství', isPrivate: true, description: 'Správa sponzorů, partnerů a sponzorských balíčků.'},
 ]
 
 export default routes

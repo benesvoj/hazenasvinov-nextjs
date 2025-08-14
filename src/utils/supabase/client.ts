@@ -29,7 +29,6 @@ export function createSafeClient() {
 function createMockClient() {
 	return {
 		auth: {
-			getSession: async () => ({ data: { session: null }, error: null }),
 			getUser: async () => ({ data: { user: null }, error: null }),
 			onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
 			signOut: async () => ({ error: null })

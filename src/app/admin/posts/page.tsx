@@ -132,8 +132,8 @@ export default function BlogPostsPage() {
       }
 
       // Test basic connection
-      console.log('Testing auth.getSession()...');
-      const { data, error } = await supabase.auth.getSession();
+      console.log('Testing auth.getUser()...');
+      const { data, error } = await supabase.auth.getUser();
       
       if (error) {
         console.error('Connection test failed:', error);
@@ -142,7 +142,7 @@ export default function BlogPostsPage() {
       }
 
       console.log('✅ Connection test successful');
-      console.log('Session data:', data);
+      console.log('User data:', data);
       setDbError(null);
       return true;
     } catch (error) {
@@ -271,10 +271,10 @@ export default function BlogPostsPage() {
       }
 
       // Try to get the current user from auth (this doesn't require table access)
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (sessionError) {
-        console.log('Session error, using fallback users:', sessionError);
+      if (userError) {
+        console.log('User error, using fallback users:', userError);
         setUsers([{
           id: 'default-user',
           email: 'admin@hazenasvinov.cz'
@@ -282,15 +282,15 @@ export default function BlogPostsPage() {
         return;
       }
 
-      // If we have a session, use the current user
-      if (session?.user) {
-        console.log('Authenticated user found:', session.user.email);
+      // If we have a user, use the current user
+      if (user) {
+        console.log('Authenticated user found:', user.email);
         setUsers([{
-          id: session.user.id,
-          email: session.user.email || 'unknown@example.com'
+          id: user.id,
+          email: user.email || 'unknown@example.com'
         }]);
       } else {
-        // No session, use fallback user
+        // No user, use fallback user
         console.log('No authenticated user found, using fallback users');
         setUsers([{
           id: 'default-user',

@@ -72,6 +72,51 @@ export const translations = {
 		confirm: 'Potvrdit',
 		decline: 'Zamítnout',
 	},
+	sponsorship: {
+		title: 'Sponzorství',
+		description: 'Správa sponzorů, partnerů a sponzorských balíčků.',
+		sponsors: 'Sponzoři',
+		packages: 'Sponzorské balíčky',
+		partners: 'Partneři',
+		mainPartners: 'Hlavní partneři',
+		mainPartnersDescription: 'Správa hlavních sponzorů a partnerů klubu',
+		businessPartners: 'Obchodní partneři',
+		businessPartnersDescription: 'Správa obchodních partnerů a dodavatelů',
+		mediaPartners: 'Mediální partneři',
+		mediaPartnersDescription: 'Správa mediálních partnerů a propagace',
+		button: {
+			addPartner: 'Přidat partnera',
+			editPartner: 'Upravit partnera',
+			save: 'Uložit',
+			cancel: 'Zrušit',
+			delete: 'Smazat'
+		},
+		table: {
+			id: 'ID',
+			name: 'Název',
+			logo: 'Logo',
+			website: 'Webové stránky',
+			description: 'Popis',
+			level: 'Úroveň sponzorství',
+			startDate: 'Datum začátku',
+			endDate: 'Datum konce',
+			status: 'Status',
+			actions: 'Akce'
+		},
+		levels: {
+			platinum: 'Platinový',
+			gold: 'Zlatý',
+			silver: 'Stříbrný',
+			bronze: 'Bronzový',
+			partner: 'Partner'
+		},
+		status: {
+			active: 'Aktivní',
+			inactive: 'Neaktivní',
+			expired: 'Expirovaný',
+			pending: 'Čekající'
+		}
+	},
 	users: {
 		title: 'Správa uživatelů',
 		description: 'Správa uživatelů, kteří se mohou přihlásit do systému.',

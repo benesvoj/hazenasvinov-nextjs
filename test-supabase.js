@@ -20,15 +20,15 @@ async function testSupabaseConnection() {
   const supabase = createClient(supabaseUrl, supabaseKey);
   
   try {
-    console.log('Testing connection with auth.getSession()...');
-    const { data, error } = await supabase.auth.getSession();
+    console.log('Testing connection with auth.getUser()...');
+    const { data, error } = await supabase.auth.getUser();
     
     if (error) {
       console.log('❌ Connection failed:', error.message);
       console.log('Error details:', error);
     } else {
       console.log('✅ Connection successful!');
-      console.log('Session data:', data);
+      console.log('User data:', data);
     }
     
     // Test a simple database query

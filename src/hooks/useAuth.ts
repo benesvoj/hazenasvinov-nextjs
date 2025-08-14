@@ -28,7 +28,7 @@ export function useAuth() {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
+        const { data: { user }, error } = await supabase.auth.getUser()
         
         if (error) {
           // Check if it's a permission error and handle gracefully
@@ -56,11 +56,11 @@ export function useAuth() {
 
         // Set initial state without logging
         setAuthState({
-          user: session?.user ?? null,
-          session: session,
+          user: user ?? null,
+          session: null, // We don't need session data for security
           loading: false,
           error: null,
-          isAuthenticated: !!session?.user,
+          isAuthenticated: !!user,
         })
         
         // Mark that we've processed the initial session
@@ -72,7 +72,7 @@ export function useAuth() {
         setAuthState(prev => ({
           ...prev,
           loading: false,
-          error: 'Failed to get session',
+          error: 'Failed to get user',
           isAuthenticated: false,
         }))
       }
@@ -84,8 +84,10 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: any, session: any) => {
         try {
+          const user = session?.user;
+          
           // Only log actual sign-in events, not page refreshes with existing sessions
-          if (event === 'SIGNED_IN' && session?.user?.email && hasProcessedInitialSession.current) {
+          if (event === 'SIGNED_IN' && user?.email && hasProcessedInitialSession.current) {
             // Log login attempt in background without blocking auth state change
             // Use a timeout to prevent hanging requests
             const controller = new AbortController();
@@ -97,7 +99,7 @@ export function useAuth() {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                email: session.user.email,
+                email: user.email,
                 status: 'success',
                 action: 'login',
                 userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
@@ -113,11 +115,11 @@ export function useAuth() {
           }
 
           setAuthState({
-            user: session?.user ?? null,
-            session: session,
+            user: user ?? null,
+            session: null, // We don't store session data for security
             loading: false,
             error: null,
-            isAuthenticated: !!session?.user,
+            isAuthenticated: !!user,
           })
         } catch (error) {
           console.error('Error in auth state change:', error)

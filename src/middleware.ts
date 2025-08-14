@@ -7,10 +7,10 @@ export async function middleware(request: NextRequest) {
 		// Only check auth for admin routes
 		if (request.nextUrl.pathname.startsWith(privateRoutes.dashboard)) {
 			const supabase = await createClient()
-			const {data: {session}} = await supabase.auth.getSession()
+			const {data: {user}} = await supabase.auth.getUser()
 
-			// If no session and trying to access admin routes
-			if (!session) {
+			// If no user and trying to access admin routes
+			if (!user) {
 				// Redirect to login page
 				const redirectUrl = new URL(publicRoutes.login, request.url)
 				// Add the original URL as ?next= parameter
@@ -19,8 +19,8 @@ export async function middleware(request: NextRequest) {
 			}
 
 			// Check if user is blocked
-			if (session.user) {
-				const isBlocked = session.user.user_metadata?.is_blocked;
+			if (user) {
+				const isBlocked = user.user_metadata?.is_blocked;
 				if (isBlocked) {
 					// User is blocked, redirect to blocked page or show message
 					const blockedUrl = new URL('/blocked', request.url)

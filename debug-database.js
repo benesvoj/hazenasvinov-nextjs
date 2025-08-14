@@ -20,15 +20,15 @@ async function debugDatabase() {
   
   try {
     console.log('1. Testing basic connection...');
-    const { data: session, error: sessionError } = await supabase.auth.getSession();
+    const { data: user, error: userError } = await supabase.auth.getUser();
     
-    if (sessionError) {
-      console.log('❌ Session error:', sessionError.message);
+    if (userError) {
+      console.log('❌ User error:', userError.message);
       return;
     }
     
     console.log('✅ Basic connection working');
-    console.log('   Session:', session.session ? 'Authenticated' : 'Not authenticated');
+    console.log('   User:', user.user ? 'Authenticated' : 'Not authenticated');
     
     // Try to check what tables exist without triggering RLS
     console.log('\n2. Checking available tables...');

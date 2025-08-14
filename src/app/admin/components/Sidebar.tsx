@@ -17,7 +17,8 @@ import {
   CalendarDaysIcon,
   UserIcon,
   BuildingOfficeIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  HeartIcon
 } from "@heroicons/react/24/outline";
 
 // Icon mapping for admin routes
@@ -43,6 +44,8 @@ const getRouteIcon = (route: string) => {
       return <UserIcon className="w-5 h-5" />;
     case privateRoutes.competitions:
       return <ChartBarIcon className="w-5 h-5" />;
+    case privateRoutes.sponsorship:
+      return <HeartIcon className="w-5 h-5" />;
     default:
       return <Cog6ToothIcon className="w-5 h-5" />;
   }
