@@ -1,16 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Tabs, Tab } from "@heroui/tabs";
 import { Badge } from "@heroui/badge";
+import { Tabs, Tab } from "@heroui/tabs";
 import { 
   CalendarIcon, 
   MapPinIcon, 
   ClockIcon,
   TrophyIcon,
   UserGroupIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   ArrowRightIcon,
   ArrowTopRightOnSquareIcon
 } from "@heroicons/react/24/outline";
@@ -18,6 +20,9 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
 import { MatchRow } from "./MatchRow";
 import Image from 'next/image';
+
+// Create Supabase client OUTSIDE the component to prevent infinite loops
+const supabase = createClient();
 
 // Helper function to format time from HH:MM:SS to HH:MM
 function formatTime(time: string): string {
@@ -119,8 +124,6 @@ export default function MatchSchedule() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<{ id: string; code: string; name: string }[]>([]);
   const [activeSeason, setActiveSeason] = useState<{ id: string; name: string } | null>(null);
-
-  const supabase = createClient();
 
   // Fetch active season first
   const fetchActiveSeason = useCallback(async () => {

@@ -17,7 +17,6 @@ import {
 	KeyIcon,
 	UserIcon,
 	EnvelopeIcon,
-	CalendarIcon,
 	ShieldCheckIcon,
 	ShieldExclamationIcon
 } from "@heroicons/react/24/outline";

@@ -20,6 +20,9 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
 import Image from 'next/image';
 
+// Create Supabase client OUTSIDE the component to prevent infinite loops
+const supabase = createClient();
+
 // Helper function to format time from HH:MM:SS to HH:MM
 function formatTime(time: string): string {
   if (!time) return "";
@@ -119,7 +122,7 @@ export default function MatchSchedulePage() {
   const [activeSeason, setActiveSeason] = useState<any>(null);
   const [ownClubCategories, setOwnClubCategories] = useState<any[]>([]);
 
-  const supabase = createClient();
+  // ❌ REMOVED: const supabase = createClient(); - This was causing the infinite loop!
 
   // Fetch active season
   const fetchActiveSeason = useCallback(async () => {
@@ -190,13 +193,14 @@ export default function MatchSchedulePage() {
       setOwnClubCategories(categories);
       
       // Set the first category as selected if none is selected
-      if (categories.length > 0 && !selectedCategory) {
-        setSelectedCategory((categories[0] as any).code);
-      }
+      // REMOVED: This was causing the infinite loop
+      // if (categories.length > 0 && !selectedCategory) {
+      //   setSelectedCategory((categories[0] as any).code);
+      // }
     } catch (error) {
       console.error('Error fetching own club categories:', error);
     }
-  }, [supabase, activeSeason, selectedCategory]);
+  }, [supabase, activeSeason]); // ❌ REMOVED selectedCategory dependency
 
   // Fetch matches and standings for selected category
   const fetchData = useCallback(async () => {
@@ -317,12 +321,19 @@ export default function MatchSchedulePage() {
     }
   }, [fetchOwnClubCategories, activeSeason]);
 
+  // Set initial selected category when own club categories are loaded
+  useEffect(() => {
+    if (ownClubCategories.length > 0 && !selectedCategory) {
+      setSelectedCategory(ownClubCategories[0].code);
+    }
+  }, [ownClubCategories, selectedCategory]);
+
   // Fetch matches when dependencies change
   useEffect(() => {
-    if (activeSeason && ownClubCategories.length > 0) {
+    if (activeSeason && ownClubCategories.length > 0 && selectedCategory) {
       fetchData();
     }
-  }, [fetchData, activeSeason, ownClubCategories]);
+  }, [fetchData, activeSeason, ownClubCategories, selectedCategory]);
 
   // Group matches by month
   const groupedMatches = useMemo(() => {

@@ -23,6 +23,45 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      // TJ Sokol Ostopovice images
+      {
+        protocol: 'https',
+        hostname: 'www.tjsokolostopovice.cz',
+        port: '',
+        pathname: '/**',
+      },
+      // Common image hosting services
+      {
+        protocol: 'https',
+        hostname: '*.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.imgur.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      // Local development
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/**',
+      },
     ],
   },
 };
