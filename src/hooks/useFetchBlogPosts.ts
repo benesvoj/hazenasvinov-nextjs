@@ -54,7 +54,7 @@ export const useFetchBlogPosts = (limit: number = 3) => {
       }
 
       // Transform the data to match the expected format
-      let transformedPosts = (data || []).map(post => ({
+      let transformedPosts = (data || []).map((post: any) => ({
         ...post,
         // Ensure we have fallback values
         excerpt: post.excerpt || post.content?.substring(0, 150) + '...' || 'Bez popisu',
@@ -63,7 +63,7 @@ export const useFetchBlogPosts = (limit: number = 3) => {
       }));
 
       // Additional sorting to ensure newest posts are first
-      transformedPosts.sort((a, b) => {
+      transformedPosts.sort((a: any, b: any) => {
         // First priority: published_at (newest first)
         const aPublished = a.published_at ? new Date(a.published_at).getTime() : 0;
         const bPublished = b.published_at ? new Date(b.published_at).getTime() : 0;
@@ -79,7 +79,7 @@ export const useFetchBlogPosts = (limit: number = 3) => {
       });
 
       // Debug: Log the ordering information
-      console.log('Blog posts fetched with ordering:', transformedPosts.map(post => ({
+      console.log('Blog posts fetched with ordering:', transformedPosts.map((post: any) => ({
         id: post.id,
         title: post.title,
         published_at: post.published_at,

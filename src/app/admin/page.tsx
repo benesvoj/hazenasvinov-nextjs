@@ -740,13 +740,13 @@ export default function AdminDashboard() {
                         </div>
                       )}
                       
-                      {release.technicalUpdates.length > 0 && (
+                      {release.technical.length > 0 && (
                         <div>
                           <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
                             📋 Technical Updates
                           </h4>
                           <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                            {release.technicalUpdates.map((update, idx) => (
+                            {release.technical.map((update, idx) => (
                               <li key={idx}>{update}</li>
                             ))}
                           </ul>

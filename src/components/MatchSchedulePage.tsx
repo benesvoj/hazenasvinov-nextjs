@@ -141,7 +141,7 @@ export default function MatchSchedulePage() {
     } catch (error) {
       console.error('Error fetching active season:', error);
     }
-  }, [supabase]);
+  }, []);
 
   // Fetch categories that own club participates in for the active season
   const fetchOwnClubCategories = useCallback(async () => {
@@ -200,7 +200,7 @@ export default function MatchSchedulePage() {
     } catch (error) {
       console.error('Error fetching own club categories:', error);
     }
-  }, [supabase, activeSeason]); // ❌ REMOVED selectedCategory dependency
+  }, [activeSeason]); // ❌ REMOVED selectedCategory dependency
 
   // Fetch matches and standings for selected category
   const fetchData = useCallback(async () => {
@@ -307,7 +307,7 @@ export default function MatchSchedulePage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, supabase, activeSeason, ownClubCategories]);
+  }, [selectedCategory, activeSeason, ownClubCategories]);
 
   // Initial data fetch
   useEffect(() => {

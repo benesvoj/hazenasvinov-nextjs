@@ -139,7 +139,7 @@ export default function MatchSchedule() {
     } catch (error) {
       console.error('Error fetching active season:', error);
     }
-  }, [supabase]);
+  }, []);
 
   // Fetch categories
   const fetchCategories = useCallback(async () => {
@@ -155,7 +155,7 @@ export default function MatchSchedule() {
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
-  }, [supabase]);
+  }, []);
 
   // Fetch matches and standings for selected category in active season
   const fetchData = useCallback(async () => {
@@ -268,7 +268,7 @@ export default function MatchSchedule() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, categories, activeSeason, supabase]);
+  }, [selectedCategory, categories, activeSeason]);
 
   // Fetch active season and categories on mount
   useEffect(() => {
