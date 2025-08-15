@@ -32,6 +32,14 @@ export default function Page() {
   // Fetch club configuration
   const { clubConfig, loading: configLoading } = useClubConfig();
 
+  // Debug logging
+  console.log('Landing page debug:', {
+    latestPosts,
+    postsLoading,
+    postsError,
+    postsCount: latestPosts?.length || 0
+  });
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
