@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -17,11 +17,15 @@ import {
   PencilIcon,
   TrashIcon,
   EyeIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  DocumentArrowUpIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
 import Image from 'next/image';
+import LineupManager from './components/LineupManager';
+import ExcelImportModal from './components/ExcelImportModal';
+import { useExcelImport } from '@/hooks/useExcelImport';
 
 interface Team {
   id: string;
@@ -141,13 +145,17 @@ export default function MatchesAdminPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSeason, setSelectedSeason] = useState<string>("");
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [members, setMembers] = useState<any[]>([]);
   
   // Modal states
   const { isOpen: isAddMatchOpen, onOpen: onAddMatchOpen, onClose: onAddMatchClose } = useDisclosure();
   const { isOpen: isAddResultOpen, onOpen: onAddResultOpen, onClose: onAddResultClose } = useDisclosure();
   const { isOpen: isEditMatchOpen, onOpen: onEditMatchOpen, onClose: onEditMatchClose } = useDisclosure();
   const { isOpen: isBulkUpdateOpen, onOpen: onBulkUpdateOpen, onClose: onBulkUpdateClose } = useDisclosure();
-  
+  const { isOpen: isLineupModalOpen, onOpen: onLineupModalOpen, onClose: onLineupModalClose } = useDisclosure();
+  const { isOpen: isExcelImportOpen, onOpen: onExcelImportOpen, onClose: onExcelImportClose } = useDisclosure();
+  const { importMatches } = useExcelImport();
+
   const [formData, setFormData] = useState({
     date: '',
     time: '',
@@ -198,27 +206,37 @@ export default function MatchesAdminPage() {
         .from('team_categories')
         .select(`
           team_id,
-          teams!inner(*)
+          team:teams(*)
         `)
         .eq('category_id', categoryId)
         .eq('season_id', seasonId)
         .eq('is_active', true);
 
-      if (error) {
-        console.error('Error fetching filtered teams:', error);
-        throw error;
-      }
-      
-      console.log('Raw team_categories data:', data);
-      
-      // Extract team data from the nested structure
-      const teamData = data?.map((item: any) => item.teams).filter(Boolean) as unknown as Team[];
-      console.log('Extracted team data:', teamData);
-      
-      setFilteredTeams(teamData || []);
+      if (error) throw error;
+
+      const teamsData = data?.map((item: any) => item.team).filter(Boolean) || [];
+      setFilteredTeams(teamsData);
+      console.log('Filtered teams:', teamsData);
     } catch (error) {
       console.error('Error fetching filtered teams:', error);
       setFilteredTeams([]);
+    }
+  }, [supabase]);
+
+  // Fetch members for lineup management
+  const fetchMembers = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('members')
+        .select('*')
+        .order('surname', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setMembers(data || []);
+    } catch (error) {
+      console.error('Error fetching members:', error);
+      setMembers([]);
     }
   }, [supabase]);
 
@@ -357,10 +375,11 @@ export default function MatchesAdminPage() {
 
   // Initial data fetch
   useEffect(() => {
-    fetchTeams();
     fetchCategories();
     fetchSeasons();
-  }, [fetchTeams, fetchCategories, fetchSeasons]);
+    fetchTeams();
+    fetchMembers();
+  }, [fetchCategories, fetchSeasons, fetchTeams, fetchMembers]);
 
   // Fetch matches and standings when filters change
   useEffect(() => {
@@ -833,6 +852,48 @@ export default function MatchesAdminPage() {
     }
   };
 
+  const lineupManagerProps = useMemo(() => {
+    if (!selectedMatch) return null;
+    
+    return {
+      matchId: selectedMatch.id,
+      homeTeamId: selectedMatch.home_team_id,
+      awayTeamId: selectedMatch.away_team_id,
+      homeTeamName: selectedMatch.home_team?.name || 'Neznámý tým',
+      awayTeamName: selectedMatch.away_team?.name || 'Neznámý tým',
+      members: members,
+    };
+  }, [selectedMatch, members]);
+
+  const handleExcelImport = useCallback(async (matches: any[]) => {
+    if (!selectedSeason) {
+      setError('Vyberte prosím sezónu před importem.');
+      return;
+    }
+
+    try {
+      const result = await importMatches(matches, selectedSeason);
+      
+      if (result.success > 0) {
+        // Refresh data
+        await fetchMatches();
+        await fetchStandings();
+        setError('');
+        
+        // Show success message
+        alert(`Import dokončen! Úspěšně importováno ${result.success} zápasů.${result.failed > 0 ? ` ${result.failed} zápasů selhalo.` : ''}`);
+      }
+      
+      if (result.errors.length > 0) {
+        console.error('Import errors:', result.errors);
+        setError(`Import dokončen s chybami. Úspěšně: ${result.success}, Selhalo: ${result.failed}. Zkontrolujte konzoli pro detaily.`);
+      }
+    } catch (error) {
+      console.error('Excel import error:', error);
+      setError(`Import selhal: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
+    }
+  }, [selectedSeason, importMatches, fetchMatches, fetchStandings]);
+
   return (
     <div className="p-6">
       {/* Season closed warning */}
@@ -898,6 +959,13 @@ export default function MatchesAdminPage() {
                   isDisabled={isSeasonClosed()}
                 >
                   Přepočítat tabulku
+                </Button>
+                <Button 
+                  color="secondary" 
+                  startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
+                  onPress={onExcelImportOpen}
+                >
+                  Import z Excelu
                 </Button>
               </div>
             </CardHeader>
@@ -976,7 +1044,7 @@ export default function MatchesAdminPage() {
                                             ) : (
                                               <div className="text-sm text-gray-500">Skóre zatím není k dispozici</div>
                                             )}
-                                            {getStatusBadge(match.status)}
+                                            {/* {getStatusBadge(match.status)} */}
                                             {match.status === 'completed' && getResultBadge(match.result || '')}
                                           </div>
                                         </div>
@@ -991,9 +1059,7 @@ export default function MatchesAdminPage() {
                                                 onAddResultOpen();
                                               }}
                                               isDisabled={isSeasonClosed()}
-                                            >
-                                              Výsledek
-                                            </Button>
+                                            />
                                           )}
                                           <Button
                                             size="sm"
@@ -1001,18 +1067,24 @@ export default function MatchesAdminPage() {
                                             startContent={<PencilIcon className="w-4 h-4" />}
                                             onPress={() => handleEditMatch(match)}
                                             isDisabled={isSeasonClosed()}
-                                          >
-                                            Upravit
-                                          </Button>
+                                          />
+                                          <Button
+                                            size="sm"
+                                            color="secondary"
+                                            startContent={<UserGroupIcon className="w-4 h-4" />}
+                                            onPress={() => {
+                                              setSelectedMatch(match);
+                                              onLineupModalOpen();
+                                            }}
+                                            isDisabled={isSeasonClosed()}
+                                          />
                                           <Button
                                             size="sm"
                                             color="danger"
                                             startContent={<TrashIcon className="w-4 h-4" />}
                                             onPress={() => handleDeleteMatch(match.id)}
                                             isDisabled={isSeasonClosed()}
-                                          >
-                                            Smazat
-                                          </Button>
+                                          />
                                         </div>
                                       </div>
                                     ))}
@@ -1441,6 +1513,38 @@ export default function MatchesAdminPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      {/* Lineup Management Modal */}
+      <Modal isOpen={isLineupModalOpen} onClose={onLineupModalClose} size="5xl">
+        <ModalContent>
+          <ModalHeader>
+            Správa sestav - {selectedMatch?.home_team?.name} vs {selectedMatch?.away_team?.name}
+          </ModalHeader>
+          <ModalBody>
+            {selectedMatch && lineupManagerProps && (
+              <LineupManager 
+                key={selectedMatch.id} 
+                {...lineupManagerProps} 
+              />
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="flat" onPress={onLineupModalClose}>
+              Zavřít
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Excel Import Modal */}
+      <ExcelImportModal 
+        isOpen={isExcelImportOpen} 
+        onClose={onExcelImportClose} 
+        onImport={handleExcelImport}
+        categories={categories}
+        teams={teams}
+        selectedSeason={selectedSeason}
+      />
     </div>
   );
 }
