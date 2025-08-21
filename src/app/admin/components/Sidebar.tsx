@@ -13,6 +13,7 @@ import {
   TrophyIcon,
   UsersIcon,
   Cog6ToothIcon,
+  CogIcon,
   ChartBarIcon,
   CalendarDaysIcon,
   UserIcon,
@@ -43,6 +44,8 @@ const getRouteIcon = (route: string) => {
       return <TrophyIcon className="w-5 h-5" />;
     case privateRoutes.members:
       return <UsersIcon className="w-5 h-5" />;
+    case privateRoutes.memberFunctions:
+      return <CogIcon className="w-5 h-5" />;
     case privateRoutes.committees:
       return <BuildingOfficeIcon className="w-5 h-5" />;
     case privateRoutes.competitions:

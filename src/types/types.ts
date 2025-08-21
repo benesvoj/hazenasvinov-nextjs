@@ -65,6 +65,8 @@ export interface ClubConfig {
 
 export type { CategoryProps, SeasonProps, SupabaseUser, ColumnType }
 
+
+
 // Member interface for lineup management
 export interface Member {
   id: string;
@@ -257,4 +259,15 @@ export interface Standing {
   category_id?: string;
   season_id?: string;
   team_id?: string;
+}
+
+export interface MemberFunction {
+	id: string; // Can be either UUID or simple text ID like 'func_player'
+	name: string;
+	display_name: string;
+	description?: string;
+	is_active: boolean;
+	sort_order: number;
+	created_at: string;
+	updated_at: string;
 }

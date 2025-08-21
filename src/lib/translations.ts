@@ -1,3 +1,5 @@
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+
 export const translations = {
 	footer: {
 		copyright: `© 2025 TJ Sokol Svinov. Všechna práva vyhrazena.`,
@@ -186,5 +188,36 @@ export const translations = {
 		matchStart: 'Začátek zápasu',
 		matchVenue: 'Místo konání',
 	},
-	import: 'Import dat'
+	import: 'Import dat',
+	DeleteConfirmationModal: {
+		confirmButtonText: 'Smazat',
+		cancelButtonText: 'Zrušit',
+	},
+	members: {
+		deleteMember: 'Smazat člena',
+		deleteMemberMessage: 'Opravdu chcete smazat člena <strong>{name} {surname}</strong> (Reg. číslo: {registration_number})? Tato akce je nevratná.',
+		members: 'Členové',
+		membersDescription: 'Správa členů, které jsou dostupné v systému.',
+		membersTable: {
+			id: 'ID',
+			name: 'Jméno',
+			surname: 'Příjmení',
+			searchPlaceholder: 'Hledat podle jména, příjmení nebo registračního čísla...',
+			registrationNumber: 'Reg. číslo',
+			dateOfBirth: 'Datum narození',
+			category: 'Kategorie',
+			sex: 'Pohlaví',
+			functions: 'Funkce',
+			actions: 'Akce',
+			
+		},
+		membersList: 'Seznam členů',
+		buttonAddMember: 'Přidat člena',
+		buttonEditMember: 'Upravit člena',
+		buttonDeleteMember: 'Smazat člena',
+		buttonAddMemberModal: {
+			title: 'Přidat člena',
+			description: 'Přidejte nového člena, který se může přihlásit do systému. Na uvedený email bude odeslán odkaz pro nastavení hesla.',
+		},
+	}
 } as const;
