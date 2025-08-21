@@ -204,6 +204,8 @@ export interface Category {
   allow_team_duplicates?: boolean;
   is_active: boolean;
   sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Team {
@@ -270,4 +272,17 @@ export interface MemberFunction {
 	sort_order: number;
 	created_at: string;
 	updated_at: string;
+}
+
+export interface MembersListTabProps {
+  members: Member[];
+  categoriesData: Category[] | null;
+  functionOptions: Record<string, string>;
+  sexOptions: Record<string, string>;
+}
+
+export interface MembersStatisticTabProps {
+  members: Member[];  
+  categoriesData: Category[] | null;
+  functionOptions: Record<string, string>;
 }
