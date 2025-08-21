@@ -73,7 +73,7 @@ export const useExcelImport = () => {
     for (const match of matches) {
       try {
         // Find category ID
-        const category = categories.find(cat => 
+        const category = categories.find((cat: any) => 
           cat.name.toLowerCase() === match.category.toLowerCase() ||
           cat.code.toLowerCase() === match.category.toLowerCase()
         );
@@ -91,7 +91,7 @@ export const useExcelImport = () => {
         // Debug: Log what we're looking for
         console.log('Looking for home team:', {
           searchTerm: cleanHomeTeam,
-          availableTeams: teams.map(t => ({
+          availableTeams: teams.map((t: any) => ({
             name: t.name,
             short_name: t.short_name,
             nameLower: t.name.toLowerCase(),
@@ -99,7 +99,7 @@ export const useExcelImport = () => {
           }))
         });
 
-        const homeTeam = teams.find(team => {
+        const homeTeam = teams.find((team: any) => {
           const teamNameLower = team.name.trim().toLowerCase();
           const teamShortNameLower = team.short_name?.trim().toLowerCase();
           
@@ -110,7 +110,7 @@ export const useExcelImport = () => {
                  (teamShortNameLower && (teamShortNameLower.includes(cleanHomeTeam) || cleanHomeTeam.includes(teamShortNameLower)));
         });
 
-        const awayTeam = teams.find(team => {
+        const awayTeam = teams.find((team: any) => {
           const teamNameLower = team.name.trim().toLowerCase();
           const teamShortNameLower = team.short_name?.trim().toLowerCase();
           
@@ -123,14 +123,14 @@ export const useExcelImport = () => {
 
         if (!homeTeam) {
           result.failed++;
-          const availableTeamNames = teams.map(t => `"${t.name}"${t.short_name ? ` (${t.short_name})` : ''}`).join(', ');
+          const availableTeamNames = teams.map((t: any) => `"${t.name}"${t.short_name ? ` (${t.short_name})` : ''}`).join(', ');
           result.errors.push(`Domácí tým "${match.homeTeam}" nebyl nalezen. Dostupné týmy: ${availableTeamNames}`);
           continue;
         }
 
         if (!awayTeam) {
           result.failed++;
-          const availableTeamNames = teams.map(t => `"${t.name}"${t.short_name ? ` (${t.short_name})` : ''}`).join(', ');
+          const availableTeamNames = teams.map((t: any) => `"${t.name}"${t.short_name ? ` (${t.short_name})` : ''}`).join(', ');
           result.errors.push(`Hostující tým "${match.awayTeam}" nebyl nalezen. Dostupné týmy: ${availableTeamNames}`);
           continue;
         }

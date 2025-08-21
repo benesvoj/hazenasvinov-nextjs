@@ -836,7 +836,7 @@ export default function MatchesAdminPage() {
       away_score: match.away_score?.toString() || '',
       status: match.status,
       matchweek: match.matchweek ? match.matchweek.toString() : '',
-      match_number: match.match_number || '',
+      match_number: match.match_number ? match.match_number.toString() : '',
       category_id: match.category_id
     });
     onEditMatchOpen();
@@ -1200,13 +1200,9 @@ export default function MatchesAdminPage() {
                               weekMatches.sort((a, b) => {
                                 // If both have match numbers, sort numerically
                                 if (a.match_number && b.match_number) {
-                                  const aNum = parseInt(a.match_number);
-                                  const bNum = parseInt(b.match_number);
-                                  if (!isNaN(aNum) && !isNaN(bNum)) {
-                                    return aNum - bNum;
-                                  }
-                                  // If numeric parsing fails, sort alphabetically
-                                  return a.match_number.localeCompare(b.match_number);
+                                  const aNum = a.match_number;
+                                  const bNum = b.match_number;
+                                  return aNum - bNum;
                                 }
                                 // If only one has match number, prioritize the one with number
                                 if (a.match_number && !b.match_number) return -1;
