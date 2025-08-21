@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Badge } from "@heroui/badge";
@@ -19,7 +20,6 @@ import {
   EyeIcon,
   ArrowPathIcon,
   DocumentArrowUpIcon,
-  ExclamationTriangleIcon,
   ChevronDownIcon,
   ChevronUpIcon
 } from "@heroicons/react/24/outline";
@@ -28,6 +28,11 @@ import { translations } from "@/lib/translations";
 import Image from 'next/image';
 import LineupManager from './components/LineupManager';
 import ExcelImportModal from './components/ExcelImportModal';
+import AddResultModal from './components/AddResultModal';
+import EditMatchModal from './components/EditMatchModal';
+import BulkUpdateMatchweekModal from './components/BulkUpdateMatchweekModal';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import AddMatchModal from './components/AddMatchModal';
 import { useExcelImport } from '@/hooks/useExcelImport';
 import { Match, Category, Team, Season, Standing } from "@/types/types";
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
@@ -1010,20 +1015,6 @@ export default function MatchesAdminPage() {
     return options;
   };
 
-  // Helper functions for badges
-  const getResultBadge = (result: string) => {
-    switch (result) {
-      case 'win':
-        return <Badge color="success">Výhra</Badge>;
-      case 'loss':
-        return <Badge color="danger">Prohra</Badge>;
-      case 'draw':
-        return <Badge color="warning">Remíza</Badge>;
-      default:
-        return <Badge color="default">N/A</Badge>;
-    }
-  };
-
   const lineupManagerProps = useMemo(() => {
     if (!selectedMatch) return null;
     
@@ -1086,18 +1077,21 @@ export default function MatchesAdminPage() {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Vyberte sezónu:
         </label>
-        <select
-          className="w-full md:w-64 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={selectedSeason}
-          onChange={(e) => setSelectedSeason(e.target.value)}
+        <Select
+          placeholder="Vyberte sezónu"
+          selectedKeys={selectedSeason ? [selectedSeason] : []}
+          onSelectionChange={(keys) => {
+            const selectedKey = Array.from(keys)[0] as string;
+            setSelectedSeason(selectedKey || "");
+          }}
+          className="w-full md:w-64"
         >
-          <option value="">Vyberte sezónu</option>
           {seasons.map((season) => (
-            <option key={season.id} value={season.id}>
+            <SelectItem key={season.id}>
               {season.name} {season.is_closed ? '(Uzavřená)' : ''}
-            </option>
+            </SelectItem>
           ))}
-        </select>
+        </Select>
       </div>
 
       {selectedSeason && (
@@ -1445,370 +1439,54 @@ export default function MatchesAdminPage() {
       )}
 
       {/* Add Match Modal */}
-      <Modal isOpen={isAddMatchOpen} onClose={onAddMatchClose}>
-        <ModalContent>
-          <ModalHeader>Přidat nový zápas</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Datum"
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
-              />
-              <Input
-                label="Čas"
-                type="time"
-                value={formData.time}
-                onChange={(e) => setFormData({...formData, time: e.target.value})}
-              />
-                              <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Domácí tým (přiřazené k vybrané kategorii a sezóně)
-                  </label>
-                  <div className="text-xs text-gray-500 mb-2">
-                    Debug: Category: {selectedCategory}, Season: {selectedSeason}, Teams: {filteredTeams.length}
-                  </div>
-                  <select
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={formData.home_team_id}
-                    onChange={(e) => {
-                      const selectedTeamId = e.target.value;
-                      const selectedTeam = filteredTeams.find(team => team.id === selectedTeamId);
-                      setFormData({
-                        ...formData, 
-                        home_team_id: selectedTeamId,
-                        venue: selectedTeam?.home_venue || formData.venue
-                      });
-                    }}
-                  >
-                    <option value="">Vyberte domácí tým</option>
-                    {filteredTeams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.name}
-                      </option>
-                    ))}
-                  </select>
-                  {filteredTeams.length === 0 && selectedCategory && selectedSeason && (
-                    <p className="text-sm text-red-600 mt-1">
-                      Žádné týmy nejsou přiřazeny k této kategorii a sezóně
-                    </p>
-                  )}
-                </div>
-                              <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hostující tým (přiřazené k vybrané kategorii a sezóně)
-                  </label>
-                  <div className="text-xs text-gray-500 mb-2">
-                    Debug: Category: {selectedCategory}, Season: {selectedSeason}, Teams: {filteredTeams.length}
-                  </div>
-                  <select
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={formData.away_team_id}
-                    onChange={(e) => setFormData({...formData, away_team_id: e.target.value})}
-                  >
-                    <option value="">Vyberte hostující tým</option>
-                    {filteredTeams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.name}
-                      </option>
-                    ))}
-                  </select>
-                  {filteredTeams.length === 0 && selectedCategory && selectedSeason && (
-                    <p className="text-sm text-red-600 mt-1">
-                      Žádné týmy nejsou přiřazeny k této kategorii a sezóně
-                    </p>
-                  )}
-                </div>
-              <Input
-                label="Místo konání"
-                value={formData.venue}
-                onChange={(e) => setFormData({...formData, venue: e.target.value})}
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Kolo
-                </label>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  value={formData.matchweek}
-                  onChange={(e) => setFormData({...formData, matchweek: e.target.value})}
-                >
-                  {getMatchweekOptions(formData.category_id).map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <Input
-                label="Číslo zápasu"
-                placeholder="např. 1, 2, Finále, Semifinále"
-                value={formData.match_number}
-                onChange={(e) => setFormData({...formData, match_number: e.target.value})}
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onAddMatchClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={handleAddMatch}>
-              Přidat zápas
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <AddMatchModal
+        isOpen={isAddMatchOpen}
+        onClose={onAddMatchClose}
+        onAddMatch={handleAddMatch}
+        formData={formData}
+        setFormData={setFormData}
+        filteredTeams={filteredTeams}
+        selectedCategory={selectedCategory}
+        selectedSeason={selectedSeason}
+        getMatchweekOptions={getMatchweekOptions}
+      />
 
       {/* Add Result Modal */}
-      <Modal isOpen={isAddResultOpen} onClose={onAddResultClose}>
-        <ModalContent>
-          <ModalHeader>Přidat výsledek</ModalHeader>
-          <ModalBody>
-            {selectedMatch && (
-              <div className="space-y-4">
-                <div className="text-center">
-                  <h3 className="font-semibold mb-2">{selectedMatch.home_team?.name || 'Neznámý tým'} vs {selectedMatch.away_team?.name || 'Neznámý tým'}</h3>
-                  <p className="text-sm text-gray-600">{new Date(selectedMatch.date).toLocaleDateString('cs-CZ')}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Input
-                    label={`Skóre ${selectedMatch.home_team?.name || 'Domácí tým'}`}
-                    type="number"
-                    value={resultData.home_score}
-                    onChange={(e) => setResultData({...resultData, home_score: e.target.value})}
-                  />
-                  <span className="text-2xl font-bold">:</span>
-                  <Input
-                    label={`Skóre ${selectedMatch.away_team?.name || 'Hostující tým'}`}
-                    type="number"
-                    value={resultData.away_score}
-                    onChange={(e) => setResultData({...resultData, away_score: e.target.value})}
-                  />
-                </div>
-              </div>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onAddResultClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={handleUpdateResult}>
-              Uložit výsledek
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <AddResultModal
+        isOpen={isAddResultOpen}
+        onClose={onAddResultClose}
+        selectedMatch={selectedMatch}
+        resultData={resultData}
+        onResultDataChange={setResultData}
+        onUpdateResult={handleUpdateResult}
+        isSeasonClosed={isSeasonClosed()}
+      />
 
       {/* Edit Match Modal */}
-      <Modal isOpen={isEditMatchOpen} onClose={onEditMatchClose} size="3xl">
-        <ModalContent>
-          <ModalHeader>Upravit zápas</ModalHeader>
-          <ModalBody>
-            {selectedMatch && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Left Column - Basic Info */}
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Základní údaje</h4>
-                  <Input
-                    label="Datum"
-                    type="date"
-                    value={editData.date}
-                    onChange={(e) => setEditData({...editData, date: e.target.value})}
-                  />
-                  <Input
-                    label="Čas"
-                    type="time"
-                    value={editData.time}
-                    onChange={(e) => setEditData({...editData, time: e.target.value})}
-                  />
-                  <Input
-                    label="Místo konání"
-                    value={editData.venue}
-                    onChange={(e) => setEditData({...editData, venue: e.target.value})}
-                  />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Kolo
-                    </label>
-                    <select
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                      value={editData.matchweek}
-                      onChange={(e) => setEditData({...editData, matchweek: e.target.value})}
-                    >
-                                        {getMatchweekOptions(editData.category_id).map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                    </select>
-                  </div>
-                  <Input
-                    label="Číslo zápasu"
-                    placeholder="např. 1, 2, Finále, Semifinále"
-                    value={editData.match_number}
-                    onChange={(e) => setEditData({...editData, match_number: e.target.value})}
-                  />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Status
-                    </label>
-                    <select
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={editData.status}
-                      onChange={(e) => setEditData({...editData, status: e.target.value as 'upcoming' | 'completed'})}
-                    >
-                      <option value="upcoming">Nadcházející</option>
-                      <option value="completed">Ukončený</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Right Column - Teams & Scores */}
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Týmy & Skóre</h4>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Domácí tým
-                    </label>
-                    <select
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={editData.home_team_id}
-                      onChange={(e) => setEditData({...editData, home_team_id: e.target.value})}
-                    >
-                      <option value="">Vyberte domácí tým</option>
-                      {teams.map((team) => (
-                        <option key={team.id} value={team.id}>
-                          {team.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Hostující tým
-                    </label>
-                    <select
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={editData.away_team_id}
-                      onChange={(e) => setEditData({...editData, away_team_id: e.target.value})}
-                    >
-                      <option value="">Vyberte hostující tým</option>
-                      {teams.map((team) => (
-                        <option key={team.id} value={team.id}>
-                          {team.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  {/* Scores - only show if match is completed */}
-                  {editData.status === 'completed' && (
-                    <div className="space-y-4 pt-4 border-t">
-                      <h5 className="font-medium text-gray-900 dark:text-gray-100">Skóre</h5>
-                      <div className="flex items-center space-x-4">
-                        <Input
-                          label="Domácí skóre"
-                          type="number"
-                          value={editData.home_score}
-                          onChange={(e) => setEditData({...editData, home_score: e.target.value})}
-                        />
-                        <span className="text-2xl font-bold">:</span>
-                        <Input
-                          label="Hostující skóre"
-                          type="number"
-                          value={editData.away_score}
-                          onChange={(e) => setEditData({...editData, away_score: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onEditMatchClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={handleUpdateMatch}>
-              Uložit změny
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <EditMatchModal
+        isOpen={isEditMatchOpen}
+        onClose={onEditMatchClose}
+        selectedMatch={selectedMatch}
+        editData={editData}
+        onEditDataChange={setEditData}
+        onUpdateMatch={handleUpdateMatch}
+        teams={teams}
+        getMatchweekOptions={getMatchweekOptions}
+        isSeasonClosed={isSeasonClosed()}
+      />
 
       {/* Bulk Update Matchweek Modal */}
-      <Modal isOpen={isBulkUpdateOpen} onClose={onBulkUpdateClose} size="lg">
-        <ModalContent>
-          <ModalHeader>Hromadná úprava kol</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Tato funkce umožní nastavit stejné kolo pro všechny zápasy bez kola v dané kategorii.
-              </p>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Kategorie
-                </label>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  value={bulkUpdateData.categoryId}
-                  onChange={(e) => setBulkUpdateData({...bulkUpdateData, categoryId: e.target.value})}
-                >
-                  <option value="">Vyberte kategorii</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Kolo
-                </label>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  value={bulkUpdateData.matchweek}
-                  onChange={(e) => setBulkUpdateData({...bulkUpdateData, matchweek: e.target.value})}
-                >
-                  <option value="">Vyberte kolo</option>
-                  {getMatchweekOptions().slice(1).map((option) => ( // Skip the "Bez kola" option
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {bulkUpdateData.categoryId && (
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    Nalezeno {matches.filter(match => 
-                      match.category_id === bulkUpdateData.categoryId && !match.matchweek
-                    ).length} zápasů bez kola v kategorii &quot;{categories.find(c => c.id === bulkUpdateData.categoryId)?.name}&quot;
-                  </p>
-                </div>
-              )}
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onBulkUpdateClose}>
-              Zrušit
-            </Button>
-            <Button 
-              color="primary" 
-              onPress={handleBulkUpdateMatchweek}
-              isDisabled={!bulkUpdateData.categoryId || !bulkUpdateData.matchweek}
-            >
-              Hromadně upravit
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <BulkUpdateMatchweekModal
+        isOpen={isBulkUpdateOpen}
+        onClose={onBulkUpdateClose}
+        bulkUpdateData={bulkUpdateData}
+        onBulkUpdateDataChange={setBulkUpdateData}
+        onBulkUpdate={handleBulkUpdateMatchweek}
+        categories={categories}
+        matches={matches}
+        getMatchweekOptions={getMatchweekOptions}
+        isSeasonClosed={isSeasonClosed()}
+      />
 
       {/* Lineup Management Modal */}
       <Modal isOpen={isLineupModalOpen} onClose={onLineupModalClose} size="5xl">
@@ -1843,84 +1521,54 @@ export default function MatchesAdminPage() {
       />
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={isDeleteConfirmOpen} onClose={handleDeleteConfirmClose}>
-        <ModalContent>
-          <ModalHeader>Potvrdit smazání zápasu</ModalHeader>
-          <ModalBody>
-            <p>
-              Opravdu chcete smazat zápas{' '}
-              <strong>
-                {matchToDelete?.home_team?.name || 'Domácí tým'} vs {matchToDelete?.away_team?.name || 'Hostující tým'}
-              </strong>
-              {' '}ze dne {matchToDelete?.date}?
-            </p>
-            <p className="text-sm text-gray-600 mt-2">
-              Tato akce je nevratná a smaže všechny související údaje o zápasu.
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="default" variant="flat" onPress={handleDeleteConfirmClose}>
-              Zrušit
-            </Button>
-            <Button 
-              color="danger" 
-              onPress={handleDeleteMatch}
-            >
-              Smazat zápas
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <DeleteConfirmationModal
+        isOpen={isDeleteConfirmOpen}
+        onClose={handleDeleteConfirmClose}
+        onConfirm={handleDeleteMatch}
+        title="Potvrdit smazání zápasu"
+        message={`
+          Opravdu chcete smazat zápas <strong>${matchToDelete?.home_team?.name || 'Domácí tým'} vs ${matchToDelete?.away_team?.name || 'Hostující tým'}</strong> ze dne ${matchToDelete?.date}?<br><br>
+          <span class="text-sm text-gray-600">Tato akce je nevratná a smaže všechny související údaje o zápasu.</span>
+        `}
+      />
 
       {/* Delete All Matches Confirmation Modal */}
-      <Modal isOpen={isDeleteAllConfirmOpen} onClose={onDeleteAllConfirmClose}>
-        <ModalContent>
-          <ModalHeader>Potvrdit smazání všech zápasů</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
-                  <span className="font-semibold text-red-800">Varování!</span>
-                </div>
-                <p className="text-red-700 mt-2">
-                  Tato akce smaže <strong>VŠECHNY</strong> zápasy pro vybranou sezónu.
-                </p>
+      <DeleteConfirmationModal
+        isOpen={isDeleteAllConfirmOpen}
+        onClose={onDeleteAllConfirmClose}
+        onConfirm={handleDeleteAllMatches}
+        title="Potvrdit smazání všech zápasů"
+        message={`
+          <div class="space-y-4">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div class="flex items-center space-x-2">
+                <span class="font-semibold text-red-800">⚠️ Varování!</span>
               </div>
-              
-              <div className="space-y-2">
-                <p>
-                  Opravdu chcete smazat všechny zápasy pro sezónu{' '}
-                  <strong>{seasons.find(s => s.id === selectedSeason)?.name || 'Neznámá sezóna'}</strong>?
-                </p>
-                <p className="text-sm text-gray-600">
-                  Tato akce je <strong>nevratná</strong> a smaže:
-                </p>
-                <ul className="text-sm text-gray-600 list-disc list-inside ml-4 space-y-1">
-                  <li>Všechny zápasy v této sezóně</li>
-                  <li>Všechny výsledky a skóre</li>
-                  <li>Všechny sestavy a lineupy</li>
-                  <li>Všechny související údaje</li>
-                </ul>
-                <p className="text-sm text-gray-600 mt-2">
-                  <strong>Počet zápasů k smazání:</strong> {matches.length}
-                </p>
-              </div>
+              <p class="text-red-700 mt-2">
+                Tato akce smaže <strong>VŠECHNY</strong> zápasy pro vybranou sezónu.
+              </p>
             </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="default" variant="flat" onPress={onDeleteAllConfirmClose}>
-              Zrušit
-            </Button>
-            <Button 
-              color="danger" 
-              onPress={handleDeleteAllMatches}
-            >
-              Smazat všechny zápasy ({matches.length})
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            
+            <div class="space-y-2">
+              <p>
+                Opravdu chcete smazat všechny zápasy pro sezónu <strong>${seasons.find(s => s.id === selectedSeason)?.name || 'Neznámá sezóna'}</strong>?
+              </p>
+              <p class="text-sm text-gray-600">
+                Tato akce je <strong>nevratná</strong> a smaže:
+              </p>
+              <ul class="text-sm text-gray-600 list-disc list-inside ml-4 space-y-1">
+                <li>Všechny zápasy v této sezóně</li>
+                <li>Všechny výsledky a skóre</li>
+                <li>Všechny sestavy a lineupy</li>
+                <li>Všechny související údaje</li>
+              </ul>
+              <p class="text-sm text-gray-600 mt-2">
+                <strong>Počet zápasů k smazání:</strong> ${matches.length}
+              </p>
+            </div>
+          </div>
+        `}
+      />
       
       {/* Debug info */}
       {isExcelImportOpen && (
