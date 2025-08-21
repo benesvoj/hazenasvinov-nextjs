@@ -84,31 +84,74 @@ export const useExcelImport = () => {
           continue;
         }
 
-        // Find team IDs
-        const homeTeam = teams.find(team => 
-          team.name.toLowerCase() === match.homeTeam.toLowerCase() ||
-          team.short_name?.toLowerCase() === match.homeTeam.toLowerCase()
-        );
+        // Find team IDs with better matching and debugging
+        const cleanHomeTeam = match.homeTeam.trim().toLowerCase();
+        const cleanAwayTeam = match.awayTeam.trim().toLowerCase();
+        
+        // Debug: Log what we're looking for
+        console.log('Looking for home team:', {
+          searchTerm: cleanHomeTeam,
+          availableTeams: teams.map(t => ({
+            name: t.name,
+            short_name: t.short_name,
+            nameLower: t.name.toLowerCase(),
+            shortNameLower: t.short_name?.toLowerCase()
+          }))
+        });
 
-        const awayTeam = teams.find(team => 
-          team.name.toLowerCase() === match.awayTeam.toLowerCase() ||
-          team.short_name?.toLowerCase() === match.awayTeam.toLowerCase()
-        );
+        const homeTeam = teams.find(team => {
+          const teamNameLower = team.name.trim().toLowerCase();
+          const teamShortNameLower = team.short_name?.trim().toLowerCase();
+          
+          return teamNameLower === cleanHomeTeam || 
+                 teamShortNameLower === cleanHomeTeam ||
+                 teamNameLower.includes(cleanHomeTeam) ||
+                 cleanHomeTeam.includes(teamNameLower) ||
+                 (teamShortNameLower && (teamShortNameLower.includes(cleanHomeTeam) || cleanHomeTeam.includes(teamShortNameLower)));
+        });
+
+        const awayTeam = teams.find(team => {
+          const teamNameLower = team.name.trim().toLowerCase();
+          const teamShortNameLower = team.short_name?.trim().toLowerCase();
+          
+          return teamNameLower === cleanAwayTeam || 
+                 teamShortNameLower === cleanAwayTeam ||
+                 teamNameLower.includes(cleanAwayTeam) ||
+                 cleanAwayTeam.includes(teamNameLower) ||
+                 (teamShortNameLower && (teamShortNameLower.includes(cleanAwayTeam) || cleanAwayTeam.includes(teamShortNameLower)));
+        });
 
         if (!homeTeam) {
           result.failed++;
-          result.errors.push(`Domácí tým "${match.homeTeam}" nebyl nalezen pro zápas ${match.matchNumber}`);
+          const availableTeamNames = teams.map(t => `"${t.name}"${t.short_name ? ` (${t.short_name})` : ''}`).join(', ');
+          result.errors.push(`Domácí tým "${match.homeTeam}" nebyl nalezen. Dostupné týmy: ${availableTeamNames}`);
           continue;
         }
 
         if (!awayTeam) {
           result.failed++;
-          result.errors.push(`Hostující tým "${match.awayTeam}" nebyl nalezen pro zápas ${match.matchNumber}`);
+          const availableTeamNames = teams.map(t => `"${t.name}"${t.short_name ? ` (${t.short_name})` : ''}`).join(', ');
+          result.errors.push(`Hostující tým "${match.awayTeam}" nebyl nalezen. Dostupné týmy: ${availableTeamNames}`);
           continue;
         }
 
-        // Parse date and time
-        const dateObj = new Date(match.date);
+        // Debug: Log what we found
+        console.log('Teams found:', {
+          homeTeam: { id: homeTeam.id, name: homeTeam.name, short_name: homeTeam.short_name },
+          awayTeam: { id: awayTeam.id, name: awayTeam.name, short_name: awayTeam.short_name }
+        });
+
+        // Parse date and time - handle European date format (DD.MM.YYYY)
+        let dateObj: Date;
+        if (match.date.includes('.')) {
+          // European format: DD.MM.YYYY
+          const [day, month, year] = match.date.split('.');
+          dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        } else {
+          // Standard format
+          dateObj = new Date(match.date);
+        }
+        
         if (isNaN(dateObj.getTime())) {
           result.failed++;
           result.errors.push(`Neplatné datum "${match.date}" pro zápas ${match.matchNumber}`);

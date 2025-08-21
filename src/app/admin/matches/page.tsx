@@ -154,7 +154,14 @@ export default function MatchesAdminPage() {
   const { isOpen: isBulkUpdateOpen, onOpen: onBulkUpdateOpen, onClose: onBulkUpdateClose } = useDisclosure();
   const { isOpen: isLineupModalOpen, onOpen: onLineupModalOpen, onClose: onLineupModalClose } = useDisclosure();
   const { isOpen: isExcelImportOpen, onOpen: onExcelImportOpen, onClose: onExcelImportClose } = useDisclosure();
+  const { isOpen: isDeleteConfirmOpen, onOpen: onDeleteConfirmOpen, onClose: onDeleteConfirmClose } = useDisclosure();
   const { importMatches } = useExcelImport();
+
+  // Reset matchToDelete when confirmation modal closes
+  const handleDeleteConfirmClose = () => {
+    onDeleteConfirmClose();
+    setMatchToDelete(null);
+  };
 
   const [formData, setFormData] = useState({
     date: '',
@@ -189,6 +196,8 @@ export default function MatchesAdminPage() {
     categoryId: '',
     matchweek: ''
   });
+
+  const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
 
   const supabase = createClient();
 
@@ -243,6 +252,7 @@ export default function MatchesAdminPage() {
   // Fetch all teams
   const fetchTeams = useCallback(async () => {
     try {
+      console.log('🔍 Fetching teams...');
       const { data, error } = await supabase
         .from('teams')
         .select('*')
@@ -250,6 +260,7 @@ export default function MatchesAdminPage() {
         .order('name');
 
       if (error) throw error;
+      console.log('✅ Teams fetched:', data?.length || 0, 'teams');
       setTeams(data || []);
     } catch (error) {
       setError('Chyba při načítání týmů');
@@ -260,6 +271,7 @@ export default function MatchesAdminPage() {
   // Fetch categories
   const fetchCategories = useCallback(async () => {
     try {
+      console.log('🔍 Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
@@ -267,6 +279,7 @@ export default function MatchesAdminPage() {
         .order('sort_order');
 
       if (error) throw error;
+      console.log('✅ Categories fetched:', data?.length || 0, 'categories');
       setCategories(data || []);
       
       // Set first category as default if categories are loaded and no category is selected
@@ -626,8 +639,16 @@ export default function MatchesAdminPage() {
     }
   };
 
-  // Delete match
-  const handleDeleteMatch = async (matchId: string) => {
+  // Open delete confirmation modal
+  const handleDeleteClick = (match: Match) => {
+    setMatchToDelete(match);
+    onDeleteConfirmOpen();
+  };
+
+  // Delete match (after confirmation)
+  const handleDeleteMatch = async () => {
+    if (!matchToDelete) return;
+    
     if (isSeasonClosed()) {
       setError('Nelze smazat zápas z uzavřené sezóny');
       return;
@@ -637,12 +658,13 @@ export default function MatchesAdminPage() {
       const { error } = await supabase
         .from('matches')
         .delete()
-        .eq('id', matchId);
+        .eq('id', matchToDelete.id);
 
       if (error) throw error;
       
       fetchMatches();
       setError('');
+      handleDeleteConfirmClose();
     } catch (error) {
       setError('Chyba při mazání zápasu');
       console.error('Error deleting match:', error);
@@ -1082,7 +1104,7 @@ export default function MatchesAdminPage() {
                                             size="sm"
                                             color="danger"
                                             startContent={<TrashIcon className="w-4 h-4" />}
-                                            onPress={() => handleDeleteMatch(match.id)}
+                                            onPress={() => handleDeleteClick(match)}
                                             isDisabled={isSeasonClosed()}
                                           />
                                         </div>
@@ -1545,6 +1567,58 @@ export default function MatchesAdminPage() {
         teams={teams}
         selectedSeason={selectedSeason}
       />
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={isDeleteConfirmOpen} onClose={handleDeleteConfirmClose}>
+        <ModalContent>
+          <ModalHeader>Potvrdit smazání zápasu</ModalHeader>
+          <ModalBody>
+            <p>
+              Opravdu chcete smazat zápas{' '}
+              <strong>
+                {matchToDelete?.home_team?.name || 'Domácí tým'} vs {matchToDelete?.away_team?.name || 'Hostující tým'}
+              </strong>
+              {' '}ze dne {matchToDelete?.date}?
+            </p>
+            <p className="text-sm text-gray-600 mt-2">
+              Tato akce je nevratná a smaže všechny související údaje o zápasu.
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="default" variant="flat" onPress={handleDeleteConfirmClose}>
+              Zrušit
+            </Button>
+            <Button 
+              color="danger" 
+              onPress={handleDeleteMatch}
+            >
+              Smazat zápas
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      
+      {/* Debug info */}
+      {isExcelImportOpen && (
+        <div style={{ display: 'none' }}>
+          Debug: categories={categories.length}, teams={teams.length}, season={selectedSeason}
+        </div>
+      )}
+      
+      {/* Console debug for modal props */}
+      {isExcelImportOpen && (
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            console.log('🔍 Modal Props Debug:', {
+              categoriesCount: ${categories.length},
+              teamsCount: ${teams.length},
+              selectedSeason: '${selectedSeason}',
+              categories: ${JSON.stringify(categories)},
+              teams: ${JSON.stringify(teams)}
+            });
+          `
+        }} />
+      )}
     </div>
   );
 }

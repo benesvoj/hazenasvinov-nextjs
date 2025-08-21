@@ -1,18 +1,22 @@
-# Excel Import pro Zápasy - Návod k použití
+# Excel/CSV Import pro Zápasy - Návod k použití
 
 ## 📋 Přehled
-Funkce Excel import umožňuje hromadně importovat zápasy z Excel souboru do systému. Tato funkce je ideální pro import rozvrhů zápasů z externích systémů nebo pro hromadné vytváření zápasů.
+Funkce Excel/CSV import umožňuje hromadně importovat zápasy z Excel (.xlsx, .xls) nebo CSV souborů do systému. Tato funkce je ideální pro import rozvrhů zápasů z externích systémů nebo pro hromadné vytváření zápasů.
 
 ## 🎯 Kde najít
-Excel import je dostupný v administraci zápasů:
+Excel/CSV import je dostupný v administraci zápasů:
 1. Přejděte do **Admin → Zápasy**
 2. Vyberte sezónu
 3. Klikněte na tlačítko **"Import z Excelu"**
 
-## 📊 Požadovaný formát Excel souboru
+## 📊 Požadovaný formát souboru
+
+### Podporované formáty
+- **Excel**: `.xlsx`, `.xls`
+- **CSV**: `.csv` (doporučeno pro lepší spolehlivost)
 
 ### Struktura sloupců
-Excel soubor musí obsahovat následující sloupce v tomto pořadí:
+Soubor musí obsahovat následující sloupce v tomto pořadí:
 
 | Sloupec | Název | Popis | Příklad | Povinné |
 |---------|-------|-------|---------|---------|
@@ -22,6 +26,99 @@ Excel soubor musí obsahovat následující sloupce v tomto pořadí:
 | D | **Domácí tým** | Název domácího týmu | "Baník Most" | ✅ |
 | E | **Hostující tým** | Název hostujícího týmu | "Sparta Praha" | ✅ |
 | F | **Kategorie** | Kategorie zápasu | "Muži", "U16" | ✅ |
+
+## 🆚 CSV vs Excel - Kdy použít co?
+
+### **CSV (Doporučeno) ✅**
+- **Výhody**:
+  - Lepší formátování data a času
+  - Žádné skryté znaky nebo formátovací problémy
+  - Snadnější úprava v textových editorech
+  - Spolehlivější pro import dat
+  - Menší velikost souborů
+  - Univerzální kompatibilita
+
+- **Kdy použít**:
+  - Nové importy dat
+  - Když máte problémy s Excel formátováním
+  - Pro jednoduché tabulky
+  - Když chcete maximální spolehlivost
+
+### **Excel (.xlsx, .xls)**
+- **Výhody**:
+  - Známý formát pro většinu uživatelů
+  - Pokročilé formátování
+  - Více listů v jednom souboru
+
+- **Nevýhody**:
+  - Časté problémy s formátováním data/času
+  - Skryté znaky a formátování
+  - Větší velikost souborů
+  - Méně spolehlivý pro import
+
+- **Kdy použít**:
+  - Když máte existující Excel soubory
+  - Pro složité formátování
+  - Když potřebujete více listů
+
+## 📝 Vytvoření CSV souboru
+
+### **Metoda 1: Použití šablon (Doporučeno)**
+1. **Spusťte generátor šablon**:
+   ```bash
+   python scripts/create_csv_template.py
+   ```
+2. **Najděte vygenerované soubory** v `public/templates/`:
+   - `matches_template.csv` - Základní šablona
+   - `matches_template_with_instructions.csv` - Šablona s instrukcemi
+   - `matches_properly_formatted.csv` - Správně formátovaný příklad
+
+### **Metoda 2: Ruční vytvoření v textovém editoru**
+1. **Otevřete textový editor** (Notepad, TextEdit, VS Code)
+2. **Vytvořte první řádek** s hlavičkami:
+   ```csv
+   date,time,matchNumber,homeTeam,awayTeam,category
+   ```
+3. **Přidejte data** (jedna hodnota na sloupec, oddělené čárkami):
+   ```csv
+   15.03.2024,14:30,1,TJ Sokol Svinov (Svinov),TJ Sokol Podlázky (Podlázky),Muži (men)
+   15.03.2024,16:00,2,TJ Sokol Krčín (Krčín),TJ Sokol Tymákov (Tymákov),Muži (men)
+   ```
+4. **Uložte jako** `.csv` soubor
+
+### **Metoda 3: Export z Excelu**
+1. **Vytvořte data v Excelu**
+2. **Formátujte sloupce**:
+   - **Datum**: Formát "DD.MM.YYYY"
+   - **Čas**: Formát "HH:MM"
+3. **Uložte jako CSV**:
+   - Soubor → Uložit jako
+   - Typ: CSV UTF-8 (Comma delimited)
+   - Název: `zapasy.csv`
+
+### **Pravidla pro CSV**
+- **Oddělovač**: Čárka (,) nebo středník (;) - systém automaticky detekuje
+- **Kódování**: UTF-8
+- **Uvozovky**: Použijte pro hodnoty obsahující čárky nebo středníky
+- **Řádky**: Jeden záznam na řádek
+- **Hlavička**: První řádek musí obsahovat názvy sloupců
+
+### **Automatická detekce oddělovače**
+Systém automaticky rozpozná, který oddělovač používáte:
+- **Čárka (,)** - Standardní anglický formát
+- **Středník (;)** - Evropský standard (když se čárka používá jako desetinná tečka)
+
+**Příklad s čárkou:**
+```csv
+date,time,matchNumber,homeTeam,awayTeam,category
+15.03.2024,14:30,1,TJ Sokol Svinov (Svinov),TJ Sokol Podlázky (Podlázky),Muži (men)
+```
+
+**Příklad se středníkem:**
+```csv
+date;time;matchNumber;homeTeam;awayTeam;category
+15.03.2024;14:30;1;TJ Sokol Svinov (Svinov);TJ Sokol Podlázky (Podlázky);Muži (men)
+```
 
 ### Důležité rozlišení: Matchweek vs. Match Number
 
