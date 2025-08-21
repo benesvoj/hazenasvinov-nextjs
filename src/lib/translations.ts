@@ -176,5 +176,8 @@ export const translations = {
 		matchResult: 'Výsledek',
 		noMatches: 'Žádné odehrané zápasy',
 	},
+	matchDetail: {
+		loading: 'Načítání zápasu...',
+	},
 	import: 'Import dat'
 } as const;

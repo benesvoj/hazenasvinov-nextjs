@@ -164,3 +164,96 @@ export interface LineupValidation {
   errors: string[];
   warnings: string[];
 }
+
+export interface Match {
+  id: string;
+  category_id: string;
+  season_id: string;
+  date: string;
+  time: string;
+  home_team_id: string;
+  away_team_id: string;
+  home_team: { name: string; logo_url?: string; is_own_club?: boolean };
+  away_team: { name: string; logo_url?: string; is_own_club?: boolean };
+  venue: string;
+  competition: string;
+  is_home: boolean;
+  status: 'upcoming' | 'completed';
+  home_score?: number;
+  away_score?: number;
+  result?: 'win' | 'loss' | 'draw';
+  matchweek?: number;
+  category: { code: string; name: string; description?: string };
+  season: { name: string };
+}
+
+export interface Category {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  age_group?: string;
+  gender?: string;
+  season_id?: string;
+  matchweek_count?: number;
+  competition_type?: 'league' | 'league_playoff' | 'tournament';
+  team_count?: number;
+  allow_team_duplicates?: boolean;
+  is_active: boolean;
+  sort_order: number;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  short_name?: string;
+  city?: string;
+  region?: string;
+  logo_url?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  contact_person?: string;
+  founded_year?: number;
+  home_venue?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Season {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  is_closed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TeamCategory {
+  id: string;
+  team_id: string;
+  season_id: string;
+  category_id: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  team?: Team;
+}
+
+export interface Standing {
+  position: number;
+  team: { name: string; logo_url?: string };
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  points: number;
+  category_id?: string;
+  season_id?: string;
+  team_id?: string;
+}
