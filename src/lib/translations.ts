@@ -178,6 +178,13 @@ export const translations = {
 	},
 	matchDetail: {
 		loading: 'Načítání zápasu...',
+		noMatchFound: 'Zápas nebyl nalezen',
+		noMatchFoundDescription: 'Požadovaný zápas neexistuje nebo byl odstraněn.',
+		backToMatches: 'Zpět na zápasy',
+		matchNotStarted: 'Zápas ještě nezačal',
+		matchDateTime: 'Datum a čas',
+		matchStart: 'Začátek zápasu',
+		matchVenue: 'Místo konání',
 	},
 	import: 'Import dat'
 } as const;
