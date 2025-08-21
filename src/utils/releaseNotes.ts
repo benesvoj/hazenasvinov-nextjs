@@ -11,6 +11,42 @@ export interface ReleaseNote {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: "2.3.0",
+    date: "2025-08-21",
+    title: "Component Refactoring & UI Consistency Improvements",
+    description: "Significant refactoring of admin components for better maintainability, improved UI consistency with HeroUI components, and enhanced user experience in the matches management system.",
+    features: [
+      "🔧 Component Refactoring - Extracted AddMatchModal into separate reusable component",
+      "🎨 UI Consistency - Replaced custom delete confirmation modals with standardized DeleteConfirmationModal",
+      "📝 Enhanced Form Management - Improved season and category selection in match creation",
+      "🔄 Better State Management - Cleaner separation of concerns between components",
+      "🎯 Improved User Experience - More intuitive and consistent modal interactions"
+    ],
+    improvements: [
+      "⚡ Code Maintainability - Reduced duplication and improved component organization",
+      "🎨 Design Consistency - Unified delete confirmation dialogs across the application",
+      "📱 Better Component Structure - Cleaner, more maintainable component architecture",
+      "🔍 Enhanced Debugging - Added debug information for season selection troubleshooting",
+      "📊 Improved Form Validation - Better handling of season and category dependencies"
+    ],
+    bugFixes: [
+      "🐛 Fixed season selection dropdown visibility issues in admin matches page",
+      "🔧 Resolved component prop passing issues between parent and child components",
+      "📝 Fixed form data synchronization in AddMatchModal component",
+      "🖼️ Corrected component import paths and dependency management",
+      "⚡ Fixed component re-rendering issues with proper prop handling"
+    ],
+    technical: [
+      "🏗️ Created AddMatchModal component for better code organization",
+      "🗄️ Implemented DeleteConfirmationModal integration across admin pages",
+      "🔌 Enhanced component props interfaces with proper TypeScript typing",
+      "🎭 Improved error handling and user feedback in modal components",
+      "📱 Optimized component rendering and state management",
+      "🔄 Refactored modal state management for better performance",
+      "🎨 Standardized UI components using HeroUI design system"
+    ]
+  },
+  {
     version: "2.2.0",
     date: "2025-01-13",
     title: "Dynamic Blog System & Enhanced Admin Features",

@@ -161,6 +161,9 @@ export const translations = {
 	season: {
 		title: 'Sezóna',
 		description: 'Správa sezón, které jsou dostupné v systému.',
+		selectSeason: 'Vyberte sezónu',
+		noSeasons: 'Žádné sezóny nebyly načteny',
+		closed: 'Uzavřená',
 	},
 	error:{
 		fetchCategories: 'Chyba při načítání kategorií',

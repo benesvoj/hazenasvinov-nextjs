@@ -1074,24 +1074,28 @@ export default function MatchesAdminPage() {
 
       {/* Season selector */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Vyberte sezónu:
-        </label>
         <Select
-          placeholder="Vyberte sezónu"
+          label={translations.season.title}
+          placeholder={translations.season.selectSeason}
           selectedKeys={selectedSeason ? [selectedSeason] : []}
           onSelectionChange={(keys) => {
             const selectedKey = Array.from(keys)[0] as string;
+            console.log('Season selection changed:', { keys, selectedKey });
             setSelectedSeason(selectedKey || "");
           }}
-          className="w-full md:w-64"
+          className="w-full md:w-64 border border-gray-300 rounded-md"
         >
           {seasons.map((season) => (
-            <SelectItem key={season.id}>
-              {season.name} {season.is_closed ? '(Uzavřená)' : ''}
+            <SelectItem key={season.id} textValue={season.name}>
+              {season.name} {season.is_closed ? `(${translations.season.closed})` : ''}
             </SelectItem>
           ))}
         </Select>
+        {seasons.length === 0 && (
+          <p className="text-sm text-red-600 mt-1">
+            {translations.season.noSeasons}
+          </p>
+        )}
       </div>
 
       {selectedSeason && (
