@@ -20,6 +20,7 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
 import { MatchRow } from "./MatchRow";
 import Image from 'next/image';
+import { translations } from "@/lib/translations";
 
 // Create Supabase client OUTSIDE the component to prevent infinite loops
 const supabase = createClient();
@@ -381,10 +382,7 @@ export default function MatchSchedule() {
                     ))}
                     {upcomingMatches.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
-                        <div className="mb-2">Žádné nadcházející zápasy pro náš klub</div>
-                        <div className="text-sm text-gray-400">
-                          Zkontrolujte, zda máte nastavený vlastní klub v administraci
-                        </div>
+                        <div className="mb-2">{translations.matches.noMatches}</div>
                       </div>
                     )}
                   </div>
@@ -420,10 +418,7 @@ export default function MatchSchedule() {
                     ))}
                     {recentResults.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
-                        <div className="mb-2">Žádné nedávné výsledky pro náš klub</div>
-                        <div className="text-sm text-gray-400">
-                          Zkontrolujte, zda máte nastavený vlastní klub v administraci
-                        </div>
+                        <div className="mb-2">{translations.matches.noMatches}</div>
                       </div>
                     )}
                   </div>

@@ -174,6 +174,7 @@ export const translations = {
 		matchLocation: 'Zápas a místo',
 		matchScore: 'Skóre',
 		matchResult: 'Výsledek',
+		noMatches: 'Žádné odehrané zápasy',
 	},
 	import: 'Import dat'
 } as const;
