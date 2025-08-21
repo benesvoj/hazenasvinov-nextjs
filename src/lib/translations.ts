@@ -219,5 +219,24 @@ export const translations = {
 			title: 'Přidat člena',
 			description: 'Přidejte nového člena, který se může přihlásit do systému. Na uvedený email bude odeslán odkaz pro nastavení hesla.',
 		},
+	},
+	memberFunctions: {
+		title: 'Správa funkcí členů',
+		description: 'Správa funkcí členů, které jsou dostupné v systému.',
+		list: 'Seznam funkcí',
+		table: {
+			header: {
+				name: 'Název',
+				displayName: 'Zobrazovaný název',
+				description: 'Popis',
+				sorting: 'Řazení',
+				status: 'Stav',
+				actions: 'Akce',
+			},
+			ariaLabel: 'Tabulka funkcí členů',
+		}
+	},
+	table: {
+		emptyContent: 'Žádné záznamy nebyly nalezeny',
 	}
 } as const;

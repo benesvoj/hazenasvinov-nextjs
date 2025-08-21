@@ -24,6 +24,7 @@ import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { MemberFunction } from "@/types/types";
 import FunctionFormModal from "./components/FunctionFormModal";
 import { showToast } from "@/components/Toast";
+import { translations } from "@/lib/translations";
 
 export default function MemberFunctionsAdminPage() {
   const [functions, setFunctions] = useState<MemberFunction[]>([]);
@@ -235,7 +236,7 @@ export default function MemberFunctionsAdminPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">
-          Správa funkcí členů
+          {translations.memberFunctions.title}
         </h1>
       </div>
 
@@ -246,31 +247,31 @@ export default function MemberFunctionsAdminPage() {
         <CardHeader className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <CogIcon className="w-5 h-5 text-blue-500" />
-            <h2 className="text-xl font-semibold">Seznam funkcí</h2>
+            <h2 className="text-xl font-semibold">{translations.memberFunctions.list}</h2>
           </div>
           <Button
             color="primary"
             startContent={<PlusIcon className="w-4 h-4" />}
             onPress={openAddModal}
           >
-            Přidat funkci
+            {translations.button.add}
           </Button>
         </CardHeader>
         <CardBody>
-          <Table aria-label="Tabulka funkcí členů">
+          <Table aria-label={translations.memberFunctions.table.ariaLabel}>
             <TableHeader>
-              <TableColumn>NÁZEV</TableColumn>
-              <TableColumn>ZOBRAZOVANÝ NÁZEV</TableColumn>
-              <TableColumn>POPIS</TableColumn>
-              <TableColumn>ŘAZENÍ</TableColumn>
-              <TableColumn>STAV</TableColumn>
-              <TableColumn>AKCE</TableColumn>
+              <TableColumn>{translations.memberFunctions.table.header.name}</TableColumn>
+              <TableColumn>{translations.memberFunctions.table.header.displayName}</TableColumn>
+              <TableColumn>{translations.memberFunctions.table.header.description}</TableColumn>
+              <TableColumn>{translations.memberFunctions.table.header.sorting}</TableColumn>
+              <TableColumn>{translations.memberFunctions.table.header.status}</TableColumn>
+              <TableColumn>{translations.memberFunctions.table.header.actions}</TableColumn>
             </TableHeader>
             <TableBody
               items={functions}
-              loadingContent={functionsLoading ? "Načítání..." : undefined}
+              loadingContent={functionsLoading ? translations.loading : undefined}
               loadingState={functionsLoading ? "loading" : "idle"}
-              emptyContent="Žádné funkce nebyly nalezeny"
+              emptyContent={translations.table.emptyContent}
             >
               {(functionItem) => (
                 <TableRow key={functionItem.id}>
