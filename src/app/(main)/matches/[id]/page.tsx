@@ -151,7 +151,7 @@ export default function MatchDetailPage() {
           </p>
           <Button 
             as={Link} 
-            href="/matches" 
+            href={`/matches${match?.category?.code ? `?category=${match.category.code}` : ''}`}
             color="primary"
             startContent={<ArrowLeftIcon className="w-4 h-4" />}
           >
@@ -168,7 +168,7 @@ export default function MatchDetailPage() {
       <div className="flex items-center justify-between">
         <Button 
           as={Link} 
-          href="/matches" 
+          href={`/matches${match?.category?.code ? `?category=${match.category.code}` : ''}`}
           variant="light" 
           color="primary"
           startContent={<ArrowLeftIcon className="w-4 h-4" />}

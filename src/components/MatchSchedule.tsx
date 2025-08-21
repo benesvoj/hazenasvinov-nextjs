@@ -363,7 +363,7 @@ export default function MatchSchedule() {
                 </div>
                 <Button 
                   as={Link} 
-                  href="/matches" 
+                  href={`/matches${selectedCategory && selectedCategory !== 'all' ? `?category=${selectedCategory}` : ''}`}
                   variant="light" 
                   size="sm"
                   color="primary"
@@ -399,7 +399,7 @@ export default function MatchSchedule() {
                 </div>
                 <Button 
                   as={Link} 
-                  href="/matches" 
+                  href={`/matches${selectedCategory && selectedCategory !== 'all' ? `?category=${selectedCategory}` : ''}`}
                   variant="light" 
                   size="sm"
                   color="primary"

@@ -441,7 +441,7 @@ export default function MatchSchedulePage() {
             </div>
             <Button 
               as={Link} 
-              href="/matches" 
+              href={`/matches${selectedCategory && selectedCategory !== 'all' ? `?category=${selectedCategory}` : ''}`}
               variant="light" 
               size="sm"
               color="primary"
@@ -582,7 +582,7 @@ export default function MatchSchedulePage() {
             </div>
             <Button 
               as={Link} 
-              href="/matches" 
+              href={`/matches${selectedCategory && selectedCategory !== 'all' ? `?category=${selectedCategory}` : ''}`}
               variant="light" 
               size="sm"
               color="primary"
@@ -710,7 +710,7 @@ export default function MatchSchedulePage() {
                 <div className="flex justify-center pt-4">
                   <Button 
                     as={Link} 
-                    href="/matches" 
+                    href={`/matches${selectedCategory && selectedCategory !== 'all' ? `?category=${selectedCategory}` : ''}`}
                     variant="bordered" 
                     size="sm"
                     color="primary"
