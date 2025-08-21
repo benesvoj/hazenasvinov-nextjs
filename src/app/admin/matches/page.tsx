@@ -18,7 +18,10 @@ import {
   TrashIcon,
   EyeIcon,
   ArrowPathIcon,
-  DocumentArrowUpIcon
+  DocumentArrowUpIcon,
+  ExclamationTriangleIcon,
+  ChevronDownIcon,
+  ChevronUpIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
@@ -99,6 +102,7 @@ interface Match {
   away_score?: number;
   result?: 'win' | 'loss' | 'draw';
   matchweek?: number;
+  match_number?: string;
   created_at: string;
   updated_at: string;
   home_team?: Team;
@@ -155,12 +159,33 @@ export default function MatchesAdminPage() {
   const { isOpen: isLineupModalOpen, onOpen: onLineupModalOpen, onClose: onLineupModalClose } = useDisclosure();
   const { isOpen: isExcelImportOpen, onOpen: onExcelImportOpen, onClose: onExcelImportClose } = useDisclosure();
   const { isOpen: isDeleteConfirmOpen, onOpen: onDeleteConfirmOpen, onClose: onDeleteConfirmClose } = useDisclosure();
+  const { isOpen: isDeleteAllConfirmOpen, onOpen: onDeleteAllConfirmOpen, onClose: onDeleteAllConfirmClose } = useDisclosure();
   const { importMatches } = useExcelImport();
 
   // Reset matchToDelete when confirmation modal closes
   const handleDeleteConfirmClose = () => {
     onDeleteConfirmClose();
     setMatchToDelete(null);
+  };
+
+  // Toggle matchweek expansion
+  const toggleMatchweek = (categoryId: string, matchweek: number) => {
+    const key = `${categoryId}-${matchweek}`;
+    setExpandedMatchweeks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+
+  // Check if matchweek is expanded
+  const isMatchweekExpanded = (categoryId: string, matchweek: number) => {
+    const key = `${categoryId}-${matchweek}`;
+    return expandedMatchweeks.has(key);
   };
 
   const [formData, setFormData] = useState({
@@ -171,7 +196,8 @@ export default function MatchesAdminPage() {
     venue: '',
     category_id: '',
     season_id: '',
-    matchweek: ''
+    matchweek: '',
+    match_number: ''
   });
 
   const [resultData, setResultData] = useState({
@@ -189,6 +215,7 @@ export default function MatchesAdminPage() {
     away_score: '',
     status: 'completed' as 'upcoming' | 'completed',
     matchweek: '',
+    match_number: '',
     category_id: ''
   });
 
@@ -198,6 +225,7 @@ export default function MatchesAdminPage() {
   });
 
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
+  const [expandedMatchweeks, setExpandedMatchweeks] = useState<Set<string>>(new Set());
 
   const supabase = createClient();
 
@@ -351,6 +379,11 @@ export default function MatchesAdminPage() {
   // Fetch standings
   const fetchStandings = useCallback(async () => {
     try {
+      console.log('🔍 Fetching standings...', {
+        selectedCategory,
+        selectedSeason
+      });
+
       let query = supabase
         .from('standings')
         .select(`
@@ -368,7 +401,16 @@ export default function MatchesAdminPage() {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching standings:', error);
+        throw error;
+      }
+
+      console.log('🔍 Standings fetched:', {
+        standingsCount: data?.length || 0,
+        standings: data
+      });
+
       setStandings(data || []);
     } catch (error) {
       setError('Chyba při načítání tabulky');
@@ -409,7 +451,7 @@ export default function MatchesAdminPage() {
 
     try {
       // Get completed matches for the selected category and season
-      const { data: completedMatches, error: matchesError } = await supabase
+      let { data: completedMatches, error: matchesError } = await supabase
         .from('matches')
         .select('*')
         .eq('category_id', selectedCategory)
@@ -418,9 +460,9 @@ export default function MatchesAdminPage() {
 
       if (matchesError) throw matchesError;
 
-      if (!completedMatches || completedMatches.length === 0) {
-        setError('Žádné dokončené zápasy k výpočtu tabulky');
-        return;
+      // Note: We can generate standings even without completed matches
+      if (!completedMatches) {
+        completedMatches = [];
       }
 
       // Get teams for this category and season
@@ -527,6 +569,188 @@ export default function MatchesAdminPage() {
     }
   };
 
+  // Smart standings function - generates or recalculates based on current state
+  const handleStandingsAction = async () => {
+    if (isSeasonClosed()) {
+      setError('Nelze upravovat tabulku pro uzavřenou sezónu');
+      return;
+    }
+
+    try {
+      // Check if standings already exist for this category/season
+      const existingStandings = standings.filter(s => 
+        s.category_id === selectedCategory && s.season_id === selectedSeason
+      );
+      
+      if (existingStandings.length === 0) {
+        // No standings exist - generate initial ones
+        await generateInitialStandings();
+      } else {
+        // Standings exist - recalculate them
+        await calculateStandings();
+      }
+    } catch (error) {
+      console.error('Error in standings action:', error);
+    }
+  };
+
+  // Generate initial standings for teams without any matches
+  const generateInitialStandings = async () => {
+    if (isSeasonClosed()) {
+      setError('Nelze generovat tabulku pro uzavřenou sezónu');
+      return;
+    }
+
+    try {
+      console.log('🔍 Starting initial standings generation...', {
+        selectedCategory,
+        selectedSeason
+      });
+
+      // Get teams for this category and season
+      const { data: teamCategories, error: teamsError } = await supabase
+        .from('team_categories')
+        .select(`
+          team_id,
+          team:team_id(id, name, short_name)
+        `)
+        .eq('category_id', selectedCategory)
+        .eq('season_id', selectedSeason)
+        .eq('is_active', true);
+
+      if (teamsError) throw teamsError;
+
+      console.log('🔍 Team categories found:', {
+        teamCategoriesCount: teamCategories?.length || 0,
+        teamCategories: teamCategories
+      });
+
+      if (!teamCategories || teamCategories.length === 0) {
+        setError('Žádné týmy v této kategorii a sezóně');
+        return;
+      }
+
+      // Check if standings already exist
+      const { data: existingStandings, error: standingsError } = await supabase
+        .from('standings')
+        .select('id')
+        .eq('category_id', selectedCategory)
+        .eq('season_id', selectedSeason);
+
+      if (standingsError) throw standingsError;
+
+      console.log('🔍 Existing standings check:', {
+        existingStandingsCount: existingStandings?.length || 0,
+        existingStandings: existingStandings
+      });
+
+      // If standings already exist, don't overwrite them
+      if (existingStandings && existingStandings.length > 0) {
+        setError('Tabulka již existuje. Použijte "Přepočítat tabulku" pro aktualizaci.');
+        return;
+      }
+
+      // Generate initial standings for all teams
+      const initialStandings = teamCategories.map((tc: any, index: number) => ({
+        team_id: tc.team_id,
+        category_id: selectedCategory,
+        season_id: selectedSeason,
+        position: index + 1,
+        matches: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goals_for: 0,
+        goals_against: 0,
+        points: 0
+      }));
+
+      console.log('🔍 Generated initial standings:', {
+        initialStandingsCount: initialStandings.length,
+        initialStandings: initialStandings
+      });
+
+      // Insert initial standings
+      console.log('🔍 Attempting to insert standings...');
+      
+      // Try bulk insert first
+      let { data: insertResult, error: insertError } = await supabase
+        .from('standings')
+        .insert(initialStandings)
+        .select();
+
+      if (insertError) {
+        console.error('❌ Bulk insert failed, trying individual inserts...', insertError);
+        
+        // Fallback: Insert teams one by one
+        const successfulInserts = [];
+        const failedInserts = [];
+        
+        for (const standing of initialStandings) {
+          try {
+            const { data: singleResult, error: singleError } = await supabase
+              .from('standings')
+              .insert(standing)
+              .select();
+            
+            if (singleError) {
+              console.error(`❌ Failed to insert team ${standing.team_id}:`, singleError);
+              failedInserts.push({ standing, error: singleError });
+            } else {
+              console.log(`✅ Successfully inserted team ${standing.team_id}:`, singleResult);
+              successfulInserts.push(singleResult[0]);
+            }
+          } catch (singleError) {
+            console.error(`❌ Exception inserting team ${standing.team_id}:`, singleError);
+            failedInserts.push({ standing, error: singleError });
+          }
+        }
+        
+        console.log('🔍 Individual insert results:', {
+          successfulInserts: successfulInserts.length,
+          failedInserts: failedInserts.length,
+          failedInsertDetails: failedInserts
+        });
+        
+        if (successfulInserts.length === 0) {
+          throw new Error(`Failed to insert any standings. ${failedInserts.length} failures.`);
+        }
+        
+        // Use successful inserts as result
+        insertResult = successfulInserts;
+      }
+
+      console.log('🔍 Final insert result:', {
+        insertResultCount: insertResult?.length || 0,
+        insertResultData: insertResult
+      });
+
+      // Refresh standings
+      await fetchStandings();
+      
+      // Verify the standings were actually created
+      const { data: verifyStandings, error: verifyError } = await supabase
+        .from('standings')
+        .select('*')
+        .eq('category_id', selectedCategory)
+        .eq('season_id', selectedSeason);
+
+      if (verifyError) {
+        console.error('❌ Verification error:', verifyError);
+      } else {
+        console.log('🔍 Verification result:', {
+          verifyStandingsCount: verifyStandings?.length || 0,
+          verifyStandings: verifyStandings
+        });
+      }
+
+      setError('');
+    } catch (error) {
+      console.error('❌ Error in generateInitialStandings:', error);
+      setError(`Chyba při generování počáteční tabulky: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
+    }
+  };
+
   // Check if selected season is closed
   const isSeasonClosed = () => {
     const season = seasons.find(s => s.id === selectedSeason);
@@ -566,6 +790,11 @@ export default function MatchesAdminPage() {
         insertData.matchweek = parseInt(formData.matchweek);
       }
 
+      // Handle match_number - only add if provided
+      if (formData.match_number && formData.match_number.trim()) {
+        insertData.match_number = formData.match_number.trim();
+      }
+
       const { error } = await supabase
         .from('matches')
         .insert(insertData);
@@ -581,7 +810,8 @@ export default function MatchesAdminPage() {
         venue: '',
         category_id: '',
         season_id: '',
-        matchweek: ''
+        matchweek: '',
+        match_number: ''
       });
       fetchMatches();
       setError('');
@@ -671,6 +901,32 @@ export default function MatchesAdminPage() {
     }
   };
 
+  // Delete all matches (after confirmation)
+  const handleDeleteAllMatches = async () => {
+    if (isSeasonClosed()) {
+      setError('Nelze smazat zápasy z uzavřené sezóny');
+      return;
+    }
+
+    try {
+      // Delete all matches for the selected season
+      const { error } = await supabase
+        .from('matches')
+        .delete()
+        .eq('season_id', selectedSeason);
+
+      if (error) throw error;
+      
+      fetchMatches();
+      setError('');
+      onDeleteAllConfirmClose();
+      setSelectedCategory('');
+    } catch (error) {
+      setError('Chyba při mazání všech zápasů');
+      console.error('Error deleting all matches:', error);
+    }
+  };
+
   // Open edit match modal
   const handleEditMatch = (match: Match) => {
     setSelectedMatch(match);
@@ -684,6 +940,7 @@ export default function MatchesAdminPage() {
       away_score: match.away_score?.toString() || '',
       status: match.status,
       matchweek: match.matchweek ? match.matchweek.toString() : '',
+      match_number: match.match_number || '',
       category_id: match.category_id
     });
     onEditMatchOpen();
@@ -742,6 +999,13 @@ export default function MatchesAdminPage() {
         updateData.matchweek = parseInt(editData.matchweek);
       }
 
+      // Handle match_number - only add if provided
+      if (editData.match_number && editData.match_number.trim()) {
+        updateData.match_number = editData.match_number.trim();
+      } else {
+        updateData.match_number = null;
+      }
+
       // Only update scores if they are provided
       if (editData.home_score && editData.away_score) {
         updateData.home_score = parseInt(editData.home_score);
@@ -770,6 +1034,7 @@ export default function MatchesAdminPage() {
         away_score: '',
         status: 'completed',
         matchweek: '',
+        match_number: '',
         category_id: ''
       });
       setSelectedMatch(null);
@@ -844,7 +1109,7 @@ export default function MatchesAdminPage() {
     
     // Add matchweek numbers based on category setting
     for (let i = 1; i <= maxMatchweeks; i++) {
-      options.push({ value: i.toString(), label: `Kolo ${i}` });
+      options.push({ value: i.toString(), label: `${i}. kolo` });
     }
     return options;
   };
@@ -860,17 +1125,6 @@ export default function MatchesAdminPage() {
         return <Badge color="warning">Remíza</Badge>;
       default:
         return <Badge color="default">N/A</Badge>;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'upcoming':
-        return <Badge color="primary">Připravuje se</Badge>;
-      case 'completed':
-        return <Badge color="success">Dokončeno</Badge>;
-      default:
-        return <Badge color="default">Neznámý</Badge>;
     }
   };
 
@@ -976,24 +1230,35 @@ export default function MatchesAdminPage() {
                   Hromadná úprava kol
                 </Button>
                 <Button 
-                  color="secondary" 
-                  onPress={calculateStandings}
+                  color="success" 
+                  onPress={handleStandingsAction}
                   isDisabled={isSeasonClosed()}
                 >
-                  Přepočítat tabulku
+                  {standings.filter(s => s.category_id === selectedCategory && s.season_id === selectedSeason).length === 0 
+                    ? 'Generovat tabulku' 
+                    : 'Přepočítat tabulku'
+                  }
                 </Button>
                 <Button 
                   color="secondary" 
                   startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
                   onPress={onExcelImportOpen}
                 >
-                  Import z Excelu
+                  {translations.import}
+                </Button>
+                <Button 
+                  color="danger" 
+                  startContent={<TrashIcon className="w-4 h-4" />}
+                  onPress={onDeleteAllConfirmOpen}
+                  isDisabled={isSeasonClosed() || !selectedSeason}
+                >
+                  Smazat všechny zápasy
                 </Button>
               </div>
             </CardHeader>
             <CardBody>
               {loading ? (
-                <div className="text-center py-8">Načítání...</div>
+                <div className="text-center py-8">{translations.loading}</div>
               ) : (
                 <Tabs 
                   aria-label="Categories"
@@ -1033,44 +1298,126 @@ export default function MatchesAdminPage() {
                               return a - b;
                             });
                             
+                            // Sort matches within each matchweek by match_number
+                            sortedMatchweeks.forEach(matchweek => {
+                              const weekMatches = groupedMatches.get(matchweek)!;
+                              weekMatches.sort((a, b) => {
+                                // If both have match numbers, sort numerically
+                                if (a.match_number && b.match_number) {
+                                  const aNum = parseInt(a.match_number);
+                                  const bNum = parseInt(b.match_number);
+                                  if (!isNaN(aNum) && !isNaN(bNum)) {
+                                    return aNum - bNum;
+                                  }
+                                  // If numeric parsing fails, sort alphabetically
+                                  return a.match_number.localeCompare(b.match_number);
+                                }
+                                // If only one has match number, prioritize the one with number
+                                if (a.match_number && !b.match_number) return -1;
+                                if (!a.match_number && b.match_number) return 1;
+                                // If neither has match number, maintain original order
+                                return 0;
+                              });
+                            });
+                            
                             return sortedMatchweeks.map(matchweek => {
                               const weekMatches = groupedMatches.get(matchweek)!;
-                              const weekTitle = matchweek === 0 ? 'Bez kola' : `Kolo ${matchweek}`;
+                              const weekTitle = matchweek === 0 ? 'Bez kola' : `${matchweek}. kolo`;
                               
                               return (
                                 <div key={matchweek} className="border rounded-lg p-4 bg-gray-50">
-                                  <h4 className="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">
-                                    {weekTitle} ({weekMatches.length} zápas{weekMatches.length !== 1 ? 'ů' : ''})
-                                  </h4>
-                                  <div className="space-y-3">
-                                    {weekMatches.map((match) => (
+                                  <div className="flex items-center justify-between mb-4 border-b pb-2">
+                                    <h4 className="text-lg font-semibold text-gray-800">
+                                      {weekTitle} ({weekMatches.length} zápas{weekMatches.length !== 1 ? 'ů' : ''})
+                                    </h4>
+                                    <Button
+                                      size="sm"
+                                      variant="light"
+                                      startContent={isMatchweekExpanded(category.id, matchweek) ? 
+                                        <ChevronUpIcon className="w-4 h-4" /> : 
+                                        <ChevronDownIcon className="w-4 h-4" />
+                                      }
+                                      onPress={() => toggleMatchweek(category.id, matchweek)}
+                                    >
+                                      {isMatchweekExpanded(category.id, matchweek) ? 'Skrýt' : 'Zobrazit'}
+                                    </Button>
+                                  </div>
+                                  
+                                  {/* Collapsible Content */}
+                                  {isMatchweekExpanded(category.id, matchweek) && (
+                                    <>
+                                      {/* Column Headers */}
+                                      <div className="grid grid-cols-11 gap-4 mb-3 px-2 items-center">
+                                        <div className="col-span-1 text-center text-sm font-medium text-gray-600">{translations.matches.matchNumber}</div>
+                                        <div className="col-span-2 text-center text-sm font-medium text-gray-600">{translations.matches.matchDateTime}</div>
+                                        <div className="col-span-6 text-start text-sm font-medium text-gray-600">{translations.matches.matchLocation}</div>
+                                        <div className="col-span-2 text-center text-sm font-medium text-gray-600">{translations.matches.matchScore}</div>
+                                      </div>
+                                      
+                                      <div className="space-y-3">
+                                                                        {weekMatches.map((match) => (
                                       <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm">
-                                        <div className="flex items-center justify-between">
-                                          <div className="flex items-center space-x-4">
-                                            <div className="text-sm text-gray-500">
-                                              {new Date(match.date).toLocaleDateString('cs-CZ')} {match.time}
-                                            </div>
-                                            <div className="font-medium">
-                                              {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                              <MapPinIcon className="w-4 h-4 text-gray-400" />
-                                              <span className="text-sm text-gray-600">{match.venue}</span>
-                                            </div>
-                                          </div>
-                                          <div className="flex items-center space-x-2">
-                                            {match.status === 'completed' ? (
-                                              <div className="text-lg font-bold">
-                                                {match.home_score} : {match.away_score}
+                                        <div className="grid grid-cols-11 gap-4 items-center">
+                                          {/* Match Number - First Column */}
+                                          <div className="col-span-1">
+                                            {match.match_number ? (
+                                              <div className="text-center">
+                                                <div className="text-lg font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+                                                  #{match.match_number}
+                                                </div>
                                               </div>
                                             ) : (
-                                              <div className="text-sm text-gray-500">Skóre zatím není k dispozici</div>
+                                              <div className="text-center">
+                                                <div className="text-sm text-gray-400 bg-gray-50 px-3 py-2 rounded-lg">
+                                                  -
+                                                </div>
+                                              </div>
                                             )}
-                                            {/* {getStatusBadge(match.status)} */}
-                                            {match.status === 'completed' && getResultBadge(match.result || '')}
+                                          </div>
+
+                                          {/* Date and Time - Second Column */}
+                                          <div className="col-span-2">
+                                            <div className="text-center">
+                                              <div className="text-sm text-gray-600 mb-1">
+                                                {new Date(match.date).toLocaleDateString('cs-CZ')}
+                                              </div>
+                                              <div className="text-lg font-semibold text-gray-800">
+                                                {match.time}
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          {/* Teams and Venue - Third Column */}
+                                          <div className="col-span-6">
+                                            <div className="text-start">
+                                              <div className="text-lg font-semibold text-gray-800 mb-2">
+                                                {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
+                                              </div>
+                                              <div className="flex items-start space-x-2 text-sm text-gray-600">
+                                                <MapPinIcon className="w-4 h-4 text-gray-400" />
+                                                <span>{match.venue}</span>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          {/* Score - Fourth Column */}
+                                          <div className="col-span-2">
+                                            <div className="text-center">
+                                              {match.status === 'completed' ? (
+                                                <div className="text-2xl font-bold text-gray-800">
+                                                  {match.home_score} : {match.away_score}
+                                                </div>
+                                              ) : (
+                                                <div className="text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
+                                                  Skóre zatím není k dispozici
+                                                </div>
+                                              )}
+                                            </div>
                                           </div>
                                         </div>
-                                        <div className="mt-3 flex justify-end space-x-2">
+
+                                        {/* Action Buttons - Below the main content */}
+                                        <div className="mt-4 flex justify-end space-x-2 border-t pt-3">
                                           {match.status === 'upcoming' && (
                                             <Button
                                               size="sm"
@@ -1095,8 +1442,8 @@ export default function MatchesAdminPage() {
                                             color="secondary"
                                             startContent={<UserGroupIcon className="w-4 h-4" />}
                                             onPress={() => {
-                                              setSelectedMatch(match);
-                                              onLineupModalOpen();
+                                                setSelectedMatch(match);
+                                                onLineupModalOpen();
                                             }}
                                             isDisabled={isSeasonClosed()}
                                           />
@@ -1110,7 +1457,9 @@ export default function MatchesAdminPage() {
                                         </div>
                                       </div>
                                     ))}
-                                  </div>
+                                      </div>
+                                    </>
+                                  )}
                                 </div>
                               );
                             });
@@ -1120,57 +1469,78 @@ export default function MatchesAdminPage() {
                         {/* Standings for this category */}
                         <div className="mt-8">
                           <h4 className="text-lg font-semibold mb-4">Tabulka - {category.name}</h4>
-                          <div className="overflow-x-auto">
-                            <table className="w-full border-collapse">
-                              <thead>
-                                <tr className="bg-gray-50">
-                                  <th className="border px-4 py-2 text-left">Pozice</th>
-                                  <th className="border px-4 py-2 text-left">Tým</th>
-                                  <th className="border px-4 py-2 text-center">Z</th>
-                                  <th className="border px-4 py-2 text-center">V</th>
-                                  <th className="border px-4 py-2 text-center">R</th>
-                                  <th className="border px-4 py-2 text-center">P</th>
-                                  <th className="border px-4 py-2 text-center">Skóre</th>
-                                  <th className="border px-4 py-2 text-center">Body</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {standings
-                                  .filter(standing => {
-                                    const match = matches.find(m => m.category_id === category.id);
-                                    return match && standing.category_id === category.id;
-                                  })
-                                  .map((standing, index) => (
-                                    <tr key={index} className="hover:bg-gray-50">
-                                      <td className="border px-4 py-2 font-medium">{standing.position}</td>
-                                      <td className="border px-4 py-2">
-                                        <div className="flex items-center gap-2">
-                                          {standing.team?.logo_url && (
-                                            <Image 
-                                              src={standing.team.logo_url} 
-                                              alt={`${standing.team.name} logo`}
-                                              width={24}
-                                              height={24}
-                                              className="w-6 h-6 object-contain"
-                                              onError={(e) => {
-                                                e.currentTarget.style.display = 'none';
-                                              }}
-                                            />
-                                          )}
-                                          <span>{standing.team?.name || 'N/A'}</span>
-                                        </div>
-                                      </td>
-                                      <td className="border px-4 py-2 text-center">{standing.matches}</td>
-                                      <td className="border px-4 py-2 text-center">{standing.wins}</td>
-                                      <td className="border px-4 py-2 text-center">{standing.draws}</td>
-                                      <td className="border px-4 py-2 text-center">{standing.losses}</td>
-                                      <td className="border px-4 py-2 text-center">{standing.goals_for}:{standing.goals_against}</td>
-                                      <td className="border px-4 py-2 text-center font-bold">{standing.points}</td>
-                                    </tr>
-                                  ))}
-                              </tbody>
-                            </table>
-                          </div>
+                          
+                          {standings.filter(standing => standing.category_id === category.id).length === 0 ? (
+                            <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                              <div className="text-gray-500 mb-4">
+                                <TrophyIcon className="w-12 h-12 mx-auto text-gray-400" />
+                              </div>
+                              <h5 className="text-lg font-medium text-gray-700 mb-2">Žádná tabulka</h5>
+                              <p className="text-gray-500 mb-4">
+                                Pro tuto kategorii ještě nebyla vygenerována tabulka.
+                              </p>
+                              <Button
+                                color="secondary"
+                                size="sm"
+                                onPress={handleStandingsAction}
+                                isDisabled={isSeasonClosed()}
+                              >
+                                {standings.filter(s => s.category_id === selectedCategory && s.season_id === selectedSeason).length === 0 
+                                  ? 'Generovat tabulku' 
+                                  : 'Přepočítat tabulku'
+                                }
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="overflow-x-auto">
+                              <table className="w-full border-collapse">
+                                <thead>
+                                  <tr className="bg-gray-50">
+                                    <th className="border px-4 py-2 text-left">Pozice</th>
+                                    <th className="border px-4 py-2 text-left">Tým</th>
+                                    <th className="border px-4 py-2 text-center">Z</th>
+                                    <th className="border px-4 py-2 text-center">V</th>
+                                    <th className="border px-4 py-2 text-center">R</th>
+                                    <th className="border px-4 py-2 text-center">P</th>
+                                    <th className="border px-4 py-2 text-center">Skóre</th>
+                                    <th className="border px-4 py-2 text-center">Body</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {standings
+                                    .filter(standing => standing.category_id === category.id)
+                                    .map((standing, index) => (
+                                      <tr key={index} className="hover:bg-gray-50">
+                                        <td className="border px-4 py-2 font-medium">{standing.position}</td>
+                                        <td className="border px-4 py-2">
+                                          <div className="flex items-center gap-2">
+                                            {standing.team?.logo_url && (
+                                              <Image 
+                                                src={standing.team.logo_url} 
+                                                alt={`${standing.team.name} logo`}
+                                                width={24}
+                                                height={24}
+                                                className="w-6 h-6 object-contain"
+                                                onError={(e) => {
+                                                  e.currentTarget.style.display = 'none';
+                                                }}
+                                              />
+                                            )}
+                                            <span>{standing.team?.name || 'N/A'}</span>
+                                          </div>
+                                        </td>
+                                        <td className="border px-4 py-2 text-center">{standing.matches}</td>
+                                        <td className="border px-4 py-2 text-center">{standing.wins}</td>
+                                        <td className="border px-4 py-2 text-center">{standing.draws}</td>
+                                        <td className="border px-4 py-2 text-center">{standing.losses}</td>
+                                        <td className="border px-4 py-2 text-center">{standing.goals_for}:{standing.goals_against}</td>
+                                        <td className="border px-4 py-2 text-center font-bold">{standing.points}</td>
+                                      </tr>
+                                    ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Tab>
@@ -1279,6 +1649,12 @@ export default function MatchesAdminPage() {
                   ))}
                 </select>
               </div>
+              <Input
+                label="Číslo zápasu"
+                placeholder="např. 1, 2, Finále, Semifinále"
+                value={formData.match_number}
+                onChange={(e) => setFormData({...formData, match_number: e.target.value})}
+              />
             </div>
           </ModalBody>
           <ModalFooter>
@@ -1375,6 +1751,12 @@ export default function MatchesAdminPage() {
                   ))}
                     </select>
                   </div>
+                  <Input
+                    label="Číslo zápasu"
+                    placeholder="např. 1, 2, Finále, Semifinále"
+                    value={editData.match_number}
+                    onChange={(e) => setEditData({...editData, match_number: e.target.value})}
+                  />
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Status
@@ -1593,6 +1975,56 @@ export default function MatchesAdminPage() {
               onPress={handleDeleteMatch}
             >
               Smazat zápas
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Delete All Matches Confirmation Modal */}
+      <Modal isOpen={isDeleteAllConfirmOpen} onClose={onDeleteAllConfirmClose}>
+        <ModalContent>
+          <ModalHeader>Potvrdit smazání všech zápasů</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center space-x-2">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
+                  <span className="font-semibold text-red-800">Varování!</span>
+                </div>
+                <p className="text-red-700 mt-2">
+                  Tato akce smaže <strong>VŠECHNY</strong> zápasy pro vybranou sezónu.
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <p>
+                  Opravdu chcete smazat všechny zápasy pro sezónu{' '}
+                  <strong>{seasons.find(s => s.id === selectedSeason)?.name || 'Neznámá sezóna'}</strong>?
+                </p>
+                <p className="text-sm text-gray-600">
+                  Tato akce je <strong>nevratná</strong> a smaže:
+                </p>
+                <ul className="text-sm text-gray-600 list-disc list-inside ml-4 space-y-1">
+                  <li>Všechny zápasy v této sezóně</li>
+                  <li>Všechny výsledky a skóre</li>
+                  <li>Všechny sestavy a lineupy</li>
+                  <li>Všechny související údaje</li>
+                </ul>
+                <p className="text-sm text-gray-600 mt-2">
+                  <strong>Počet zápasů k smazání:</strong> {matches.length}
+                </p>
+              </div>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="default" variant="flat" onPress={onDeleteAllConfirmClose}>
+              Zrušit
+            </Button>
+            <Button 
+              color="danger" 
+              onPress={handleDeleteAllMatches}
+            >
+              Smazat všechny zápasy ({matches.length})
             </Button>
           </ModalFooter>
         </ModalContent>

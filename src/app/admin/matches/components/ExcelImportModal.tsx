@@ -142,7 +142,9 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       if (match.date.includes('.')) {
         // European format: DD.MM.YYYY
         const [day, month, year] = match.date.split('.');
-        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        // Create date string in YYYY-MM-DD format to avoid timezone issues
+        const dateString = `${parseInt(year)}-${String(parseInt(month)).padStart(2, '0')}-${String(parseInt(day)).padStart(2, '0')}`;
+        date = new Date(dateString + 'T00:00:00');
       } else {
         // Standard format
         date = new Date(match.date);

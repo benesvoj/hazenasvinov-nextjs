@@ -146,7 +146,22 @@ export const useExcelImport = () => {
         if (match.date.includes('.')) {
           // European format: DD.MM.YYYY
           const [day, month, year] = match.date.split('.');
-          dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          // Create date string in YYYY-MM-DD format to avoid timezone issues
+          const dateString = `${parseInt(year)}-${String(parseInt(month)).padStart(2, '0')}-${String(parseInt(day)).padStart(2, '0')}`;
+          dateObj = new Date(dateString + 'T00:00:00');
+          
+          // Debug: Log date parsing details
+          console.log('🔍 Date parsing debug:', {
+            originalDate: match.date,
+            parsedComponents: { day, month, year },
+            dateString: dateString,
+            dateObj: dateObj,
+            dateObjLocal: dateObj.toLocaleDateString('cs-CZ'),
+            dateObjISO: dateObj.toISOString(),
+            getFullYear: dateObj.getFullYear(),
+            getMonth: dateObj.getMonth() + 1,
+            getDate: dateObj.getDate()
+          });
         } else {
           // Standard format
           dateObj = new Date(match.date);
@@ -158,8 +173,16 @@ export const useExcelImport = () => {
           continue;
         }
 
-        // Format date for database (YYYY-MM-DD)
-        const formattedDate = dateObj.toISOString().split('T')[0];
+        // Format date for database (YYYY-MM-DD) - avoid timezone conversion
+        const formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+        
+        // Debug: Log final formatted date
+        console.log('🔍 Final date debug:', {
+          originalDate: match.date,
+          formattedDate: formattedDate,
+          dateObj: dateObj,
+          dateObjLocal: dateObj.toLocaleDateString('cs-CZ')
+        });
 
         // Validate time format
         const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;

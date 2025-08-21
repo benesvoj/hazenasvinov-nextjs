@@ -162,5 +162,18 @@ export const translations = {
 	},
 	error:{
 		fetchCategories: 'Chyba při načítání kategorií',
-	}
+	},
+	loading: 'Načítání...',
+	matches: {
+		matchNumber: 'Číslo zápasu',
+		matchNumberPlaceholder: 'např. 1, 2, Finále, Semifinále',
+		matchNumberError: 'Zadejte číslo zápasu',
+		matchNumberRequired: 'Číslo zápasu je povinné',
+		matchNumberInvalid: 'Číslo zápasu je neplatné',
+		matchDateTime: 'Datum a čas',
+		matchLocation: 'Zápas a místo',
+		matchScore: 'Skóre',
+		matchResult: 'Výsledek',
+	},
+	import: 'Import dat'
 } as const;
