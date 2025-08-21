@@ -200,6 +200,7 @@ export const translations = {
 		membersDescription: 'Správa členů, které jsou dostupné v systému.',
 		membersTable: {
 			id: 'ID',
+			status: 'Status',
 			name: 'Jméno',
 			surname: 'Příjmení',
 			searchPlaceholder: 'Hledat podle jména, příjmení nebo registračního čísla...',

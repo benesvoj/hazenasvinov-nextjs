@@ -1,9 +1,21 @@
 import {useEffect, useState} from "react";
 import {Api} from "@/app/api/api";
-import {CategoryProps} from "@/types/types";
+
+interface Category {
+	id: string;
+	code: string;
+	name: string;
+	description?: string;
+	age_group?: string;
+	gender?: string;
+	is_active: boolean;
+	sort_order: number;
+	created_at: string;
+	updated_at: string;
+}
 
 export function useFetchCategories() {
-	const [data, setData] = useState<CategoryProps[]>([]);
+	const [data, setData] = useState<Category[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 
