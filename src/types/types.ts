@@ -183,6 +183,7 @@ export interface Match {
   away_score?: number;
   result?: 'win' | 'loss' | 'draw';
   matchweek?: number;
+  match_number?: number;
   category: { code: string; name: string; description?: string };
   season: { name: string };
 }
