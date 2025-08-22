@@ -22,10 +22,10 @@ export function useFetchMatches(categorySlug: string) {
         setError(null);
         const supabase = createClient();
         
-        console.log('🔍 Fetching matches for category:', categorySlug);
+        // console.log('🔍 Fetching matches for category:', categorySlug);
         
         // First, get the category ID
-        console.log('📋 Step 1: Fetching category data...');
+        // console.log('📋 Step 1: Fetching category data...');
         const { data: categoryData, error: categoryError } = await supabase
           .from('categories')
           .select('id, code, name')
@@ -33,14 +33,14 @@ export function useFetchMatches(categorySlug: string) {
           .single();
         
         if (categoryError) {
-          console.error('❌ Category error:', categoryError);
+        //   console.error('❌ Category error:', categoryError);
           throw new Error(`Category not found: ${categoryError.message}`);
         }
         
-        console.log('✅ Category found:', categoryData);
+        // console.log('✅ Category found:', categoryData);
         
         // Get the active season
-        console.log('📅 Step 2: Fetching active season...');
+        // console.log('📅 Step 2: Fetching active season...');
         const { data: seasonData, error: seasonError } = await supabase
           .from('seasons')
           .select('id, name')
@@ -48,31 +48,31 @@ export function useFetchMatches(categorySlug: string) {
           .single();
         
         if (seasonError) {
-          console.error('❌ Season error:', seasonError);
+        //   console.error('❌ Season error:', seasonError);
           throw new Error(`Active season not found: ${seasonError.message}`);
         }
         
-        console.log('✅ Active season found:', seasonData);
+        // console.log('✅ Active season found:', seasonData);
         
         // Check if matches table exists by trying a simple query
-        console.log('⚽ Step 3: Checking matches table...');
+        // console.log('⚽ Step 3: Checking matches table...');
         const { data: tableCheck, error: tableError } = await supabase
           .from('matches')
           .select('count')
           .limit(1);
         
         if (tableError) {
-          console.error('❌ Matches table error:', tableError);
+        //   console.error('❌ Matches table error:', tableError);
           if (tableError.code === '42P01') {
             throw new Error('Matches table does not exist. Please create it first.');
           }
           throw new Error(`Matches table error: ${tableError.message}`);
         }
         
-        console.log('✅ Matches table accessible');
+        // console.log('✅ Matches table accessible');
         
         // Fetch matches for this category and season with team information
-        console.log('🏆 Step 4: Fetching matches with team data...');
+        // console.log('🏆 Step 4: Fetching matches with team data...');
         const { data: matchesData, error: matchesError } = await supabase
           .from('matches')
           .select(`
@@ -98,18 +98,18 @@ export function useFetchMatches(categorySlug: string) {
           .order('date', { ascending: true });
         
         if (matchesError) {
-          console.error('❌ Matches fetch error:', matchesError);
+        //   console.error('❌ Matches fetch error:', matchesError);
           throw new Error(`Failed to fetch matches: ${matchesError.message}`);
         }
         
-        console.log('✅ Matches fetched:', matchesData?.length || 0, 'matches');
+        // console.log('✅ Matches fetched:', matchesData?.length || 0, 'matches');
         
         // Filter matches to only show those where our club is playing
         const ownClubMatches = matchesData?.filter((match: any) => 
           match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
         ) || [];
         
-        console.log('🏆 Own club matches found:', ownClubMatches.length);
+        // console.log('🏆 Own club matches found:', ownClubMatches.length);
         
         // Group matches by season (autumn/spring)
         const autumnMatches: Match[] = [];
@@ -121,15 +121,15 @@ export function useFetchMatches(categorySlug: string) {
           
           // Autumn: September (9), October (10), November (11)
           // Spring: March (3), April (4), May (5)
-          if (month >= 9 || month <= 2) {
+          if (month >= 8 || month <= 12) {
             autumnMatches.push(match as Match);
-          } else if (month >= 3 && month <= 5) {
+          } else if (month >= 3 && month <= 6) {
             springMatches.push(match as Match);
           }
         });
         
-        console.log('🍂 Autumn matches:', autumnMatches.length);
-        console.log('🌸 Spring matches:', springMatches.length);
+        // console.log('🍂 Autumn matches:', autumnMatches.length);
+        // console.log('🌸 Spring matches:', springMatches.length);
         
         setMatches({
           autumn: autumnMatches,
@@ -148,7 +148,7 @@ export function useFetchMatches(categorySlug: string) {
         });
         
       } catch (err) {
-        console.error('💥 Failed to fetch matches:', err);
+        // console.error('💥 Failed to fetch matches:', err);
         const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
         setError(new Error(errorMessage));
         setDebugInfo({ error: errorMessage, categorySlug });

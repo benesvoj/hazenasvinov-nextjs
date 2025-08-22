@@ -30,3 +30,11 @@ export function formatTimeString(timeString: string): string {
   // Remove seconds if present and return HH:MM format
   return timeString.split(':').slice(0, 2).join(':');
 }
+
+export const formatDateString = (dateString: string) => {
+  try {
+    return formatDate(new Date(dateString));
+  } catch {
+    return dateString;
+  }
+};

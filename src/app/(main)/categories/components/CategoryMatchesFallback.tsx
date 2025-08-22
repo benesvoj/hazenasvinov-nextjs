@@ -2,11 +2,11 @@
 
 import { Card, CardHeader, CardBody } from '@heroui/react';
 
-interface SeasonalMatchesFallbackProps {
+interface CategoryMatchesFallbackProps {
   categoryName: string;
 }
 
-export function SeasonalMatchesFallback({ categoryName }: SeasonalMatchesFallbackProps) {
+export function CategoryMatchesFallback({ categoryName }: CategoryMatchesFallbackProps) {
   return (
     <Card>
       <CardHeader>

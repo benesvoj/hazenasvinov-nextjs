@@ -4,7 +4,8 @@ import { useParams } from 'next/navigation';
 import { useFetchCategories } from '@/hooks/useFetchCategories';
 import { useFetchMatches } from '@/hooks/useFetchMatches';
 import { CategoryStandings } from '@/app/(main)/categories/components/CategoryStandings';
-import { SeasonalMatches } from '@/app/(main)/categories/components/SeasonalMatches';
+import { CategoryMatches } from '@/app/(main)/categories/components/CategoryMatches';
+import { CategoryPosts } from '@/app/(main)/categories/components/CategoryPosts';
 import { Spinner } from '@heroui/react';
 
 export default function CategoryPage() {
@@ -43,35 +44,41 @@ export default function CategoryPage() {
   }
   
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Category Header */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {currentCategory.name}
+          {currentCategory.name}{currentCategory.description && ` - ${currentCategory.description}`}
         </h1>
-        {currentCategory.description && (
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            {currentCategory.description}
-          </p>
-        )}
       </div>
       
-      {/* Standings Table */}
-      <div className="mb-8">
-        <CategoryStandings 
-          categoryId={currentCategory.id} 
-          categoryName={currentCategory.name}
-        />
-      </div>
-      
-      {/* Seasonal Matches */}
-      <div>
-        <SeasonalMatches 
-          categoryId={currentCategory.id}
-          categoryName={currentCategory.name}
-          matches={matches}
-          loading={matchesLoading}
-        />
+      {/* Responsive Grid Layout with Different Ordering */}
+      <div className="grid grid-cols-1 gap-8">
+        {/* Posts - Desktop: 1st, Mobile: 3rd */}
+        <div className="order-3 md:order-1">
+          <CategoryPosts 
+            categoryName={currentCategory.name}
+            categorySlug={categorySlug}
+          />
+        </div>
+        
+        {/* Standings - Desktop: 2nd, Mobile: 1st */}
+        <div className="order-1 md:order-2">
+          <CategoryStandings 
+            categoryId={currentCategory.id} 
+            categoryName={currentCategory.name}
+          />
+        </div>
+        
+        {/* Matches - Desktop: 3rd, Mobile: 2nd */}
+        <div className="order-2 md:order-3">
+          <CategoryMatches 
+            categoryId={currentCategory.id}
+            categoryName={currentCategory.name}
+            matches={matches}
+            loading={matchesLoading}
+            matchweeks={currentCategory.matchweek_count || 0}
+          />
+        </div>
       </div>
     </div>
   );

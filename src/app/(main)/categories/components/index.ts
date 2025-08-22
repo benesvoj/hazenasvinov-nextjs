@@ -1,4 +1,4 @@
 export { CategoryStandings } from './CategoryStandings';
 export { CategoryStandingsFallback } from './CategoryStandingsFallback';
-export { SeasonalMatches } from './SeasonalMatches';
-export { SeasonalMatchesFallback } from './SeasonalMatchesFallback';
+export { CategoryMatches } from './CategoryMatches';
+export { CategoryMatchesFallback } from './CategoryMatchesFallback';

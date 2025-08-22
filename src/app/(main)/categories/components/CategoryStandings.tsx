@@ -2,30 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Card, CardHeader, CardBody, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Spinner } from '@heroui/react';
+import { Card, CardHeader, CardBody, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Spinner, Image } from '@heroui/react';
 import { CategoryStandingsFallback } from './CategoryStandingsFallback';
-
-interface TeamStanding {
-  id: string;
-  team_id: string;
-  team?: { name: string; logo_url?: string; is_own_club?: boolean };
-  matches: number;
-  wins: number;
-  draws: number;
-  losses: number;
-  goals_for: number;
-  goals_against: number;
-  points: number;
-  position: number;
-}
+import { translations } from '@/lib/translations';
+import { Standing } from '@/types/types';
 
 interface CategoryStandingsProps {
   categoryId: string;
   categoryName: string;
 }
 
+
 export function CategoryStandings({ categoryId, categoryName }: CategoryStandingsProps) {
-  const [standings, setStandings] = useState<TeamStanding[]>([]);
+  const [standings, setStandings] = useState<Standing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,7 +72,7 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
         setLoading(false);
       }
     };
-
+    
     fetchStandings();
   }, [categoryId]);
 
@@ -91,7 +80,7 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
     return (
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">Tabulka - {categoryName}</h2>
+          <h2 className="text-xl font-semibold">{translations.table.title}</h2>
         </CardHeader>
         <CardBody className="flex justify-center py-8">
           <Spinner size="lg" />
@@ -108,7 +97,7 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
     return (
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">Tabulka - {categoryName}</h2>
+          <h2 className="text-xl font-semibold">{translations.table.title}</h2>
         </CardHeader>
         <CardBody>
           <div className="text-center text-red-500 py-8">
@@ -126,7 +115,7 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
     return (
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">Tabulka - {categoryName}</h2>
+          <h2 className="text-xl font-semibold">{translations.table.title}</h2>
         </CardHeader>
         <CardBody>
           <div className="text-center text-gray-500 py-8">
@@ -143,31 +132,45 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-xl font-semibold">Tabulka - {categoryName}</h2>
+        <h2 className="text-xl font-semibold">{translations.table.title}</h2>
       </CardHeader>
       <CardBody>
         <Table aria-label={`Tabulka pro kategorii ${categoryName}`}>
           <TableHeader>
-            <TableColumn>Pořadí</TableColumn>
+            <TableColumn className="text-center">Pořadí</TableColumn>
             <TableColumn>Tým</TableColumn>
-            <TableColumn>Z</TableColumn>
-            <TableColumn>V</TableColumn>
-            <TableColumn>R</TableColumn>
-            <TableColumn>P</TableColumn>
-            <TableColumn>Skóre</TableColumn>
-            <TableColumn>Body</TableColumn>
+            <TableColumn className="hidden md:table-cell text-center">Z</TableColumn>
+            <TableColumn className="hidden md:table-cell text-center">V</TableColumn>
+            <TableColumn className="hidden md:table-cell text-center">R</TableColumn>
+            <TableColumn className="hidden md:table-cell text-center">P</TableColumn>
+            <TableColumn className="text-center">Skóre</TableColumn>
+            <TableColumn className="text-center">Body</TableColumn>
           </TableHeader>
           <TableBody>
             {standings.map((team) => (
               <TableRow key={team.id}>
                 <TableCell className="font-medium text-center">{team.position}</TableCell>
                 <TableCell className="font-medium">
-                  {team.team?.name || 'Neznámý tým'}
+                  <div className="flex items-center gap-2">
+                    <Image 
+                      src={team.team?.logo_url} 
+                      alt={team.team?.name} 
+                      width={20} 
+                      height={20} 
+                      className="hidden md:block"
+                    />
+                    <span className="md:hidden">
+                      {team.team?.short_name || team.team?.name || 'Neznámý tým'}
+                    </span>
+                    <span className="hidden md:inline">
+                      {team.team?.name || 'Neznámý tým'}
+                    </span>
+                  </div>
                 </TableCell>
-                <TableCell className="text-center">{team.matches}</TableCell>
-                <TableCell className="text-center text-green-600">{team.wins}</TableCell>
-                <TableCell className="text-center text-yellow-600">{team.draws}</TableCell>
-                <TableCell className="text-center text-red-600">{team.losses}</TableCell>
+                <TableCell className="text-center hidden md:table-cell">{team.matches}</TableCell>
+                <TableCell className="text-center text-green-600 hidden md:table-cell">{team.wins}</TableCell>
+                <TableCell className="text-center text-yellow-600 hidden md:table-cell">{team.draws}</TableCell>
+                <TableCell className="text-center text-red-600 hidden md:table-cell">{team.losses}</TableCell>
                 <TableCell className="text-center">
                   {team.goals_for}:{team.goals_against}
                 </TableCell>

@@ -34,6 +34,7 @@ interface BlogPost {
   updated_at: string;
   tags?: string[];
   image_url?: string;
+  category_id?: string;
 }
 
 interface User {
@@ -71,7 +72,8 @@ export default function BlogPostsPage() {
     author_id: "",
     status: "draft" as 'draft' | 'published' | 'archived',
     tags: [] as string[],
-    image_url: ""
+    image_url: "",
+    category_id: ""
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
@@ -442,7 +444,8 @@ export default function BlogPostsPage() {
       author_id: "default-user", // Set default author instead of empty string
       status: "draft",
       tags: [],
-      image_url: ""
+      image_url: "",
+      category_id: ""
     });
     setImageFile(null);
     setImagePreview("");
@@ -465,7 +468,8 @@ export default function BlogPostsPage() {
       author_id: post.author_id,
       status: post.status,
       tags: post.tags || [],
-      image_url: post.image_url || ""
+      image_url: post.image_url || "",
+      category_id: post.category_id || ""
     });
     // Set image preview if post has an image
     if (post.image_url) {
@@ -1123,6 +1127,21 @@ export default function BlogPostsPage() {
                   <SelectItem key="published">Publikováno</SelectItem>
                   <SelectItem key="archived">Archivováno</SelectItem>
                 </Select>
+                
+                {/* Category Selection */}
+                <Select
+                  label="Kategorie"
+                  placeholder="Vyberte kategorii"
+                  selectedKeys={formData.category_id ? [formData.category_id] : []}
+                  onSelectionChange={(keys) => handleInputChange('category_id', Array.from(keys)[0] as string)}
+                >
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+                
                 <Input
                   label="Tagy"
                   placeholder="tag1, tag2, tag3"
@@ -1130,44 +1149,6 @@ export default function BlogPostsPage() {
                   onChange={(e) => handleTagInputChange(e.target.value)}
                   description="Tagy oddělené čárkami"
                 />
-                
-                {/* Category Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Kategorie
-                  </label>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap gap-2">
-                      {categories.map((category) => (
-                        <Chip
-                          key={category.id}
-                          variant={formData.tags.includes(category.name) ? "solid" : "bordered"}
-                          color={formData.tags.includes(category.name) ? "primary" : "default"}
-                          onClose={formData.tags.includes(category.name) ? () => {
-                            setFormData(prev => ({
-                              ...prev,
-                              tags: prev.tags.filter(tag => tag !== category.name)
-                            }));
-                          } : undefined}
-                          className="cursor-pointer"
-                          onClick={() => {
-                            if (!formData.tags.includes(category.name)) {
-                              setFormData(prev => ({
-                                ...prev,
-                                tags: [...prev.tags, category.name]
-                              }));
-                            }
-                          }}
-                        >
-                          {category.name}
-                        </Chip>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      Klikněte na kategorii pro přidání/odebrání
-                    </p>
-                  </div>
-                </div>
 
                 {/* Image Upload */}
                 <div>
@@ -1310,6 +1291,21 @@ export default function BlogPostsPage() {
                   <SelectItem key="published">Publikováno</SelectItem>
                   <SelectItem key="archived">Archivováno</SelectItem>
                 </Select>
+                
+                {/* Category Selection */}
+                <Select
+                  label="Kategorie"
+                  placeholder="Vyberte kategorii"
+                  selectedKeys={formData.category_id ? [formData.category_id] : []}
+                  onSelectionChange={(keys) => handleInputChange('category_id', Array.from(keys)[0] as string)}
+                >
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+                
                 <Input
                   label="Tagy"
                   placeholder="tag1, tag2, tag3"
@@ -1317,44 +1313,6 @@ export default function BlogPostsPage() {
                   onChange={(e) => handleTagInputChange(e.target.value)}
                   description="Tagy oddělené čárkami"
                 />
-                
-                {/* Category Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Kategorie
-                  </label>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap gap-2">
-                      {categories.map((category) => (
-                        <Chip
-                          key={category.id}
-                          variant={formData.tags.includes(category.name) ? "solid" : "bordered"}
-                          color={formData.tags.includes(category.name) ? "primary" : "default"}
-                          onClose={formData.tags.includes(category.name) ? () => {
-                            setFormData(prev => ({
-                              ...prev,
-                              tags: prev.tags.filter(tag => tag !== category.name)
-                            }));
-                          } : undefined}
-                          className="cursor-pointer"
-                          onClick={() => {
-                            if (!formData.tags.includes(category.name)) {
-                              setFormData(prev => ({
-                                ...prev,
-                                tags: [...prev.tags, category.name]
-                              }));
-                            }
-                          }}
-                        >
-                          {category.name}
-                        </Chip>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      Klikněte na kategorii pro přidání/odebrání
-                    </p>
-                  </div>
-                </div>
 
                 {/* Image Upload */}
                 <div>

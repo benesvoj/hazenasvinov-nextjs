@@ -241,6 +241,7 @@ export const translations = {
 		}
 	},
 	table: {
+		title: 'Tabulka',
 		emptyContent: 'Žádné záznamy nebyly nalezeny',
 	},
 	heroSection: {

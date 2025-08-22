@@ -1,18 +1,6 @@
 import {useEffect, useState} from "react";
 import {Api} from "@/app/api/api";
-
-interface Category {
-	id: string;
-	code: string;
-	name: string;
-	description?: string;
-	age_group?: string;
-	gender?: string;
-	is_active: boolean;
-	sort_order: number;
-	created_at: string;
-	updated_at: string;
-}
+import { Category } from "@/types/types";
 
 export function useFetchCategories() {
 	const [data, setData] = useState<Category[]>([]);

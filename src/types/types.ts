@@ -189,8 +189,8 @@ export interface Match {
   time: string;
   home_team_id: string;
   away_team_id: string;
-  home_team: { name: string; logo_url?: string; is_own_club?: boolean };
-  away_team: { name: string; logo_url?: string; is_own_club?: boolean };
+  home_team: { name: string; logo_url?: string; is_own_club?: boolean; short_name?: string };
+  away_team: { name: string; logo_url?: string; is_own_club?: boolean; short_name?: string };
   venue: string;
   competition: string;
   is_home: boolean;
@@ -263,8 +263,9 @@ export interface TeamCategory {
 }
 
 export interface Standing {
+  id: string;
   position: number;
-  team: { name: string; logo_url?: string };
+  team: { name: string; logo_url?: string; is_own_club?: boolean; short_name?: string };
   matches: number;
   wins: number;
   draws: number;
@@ -299,4 +300,20 @@ export interface MembersStatisticTabProps {
   members: Member[];  
   categoriesData: Category[] | null;
   functionOptions: Record<string, string>;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  author_id: string;
+  status: 'draft' | 'published' | 'archived';
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+  tags?: string[];
+  image_url?: string;
+  category_id?: string;
 }
