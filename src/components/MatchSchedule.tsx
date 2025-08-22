@@ -7,14 +7,8 @@ import { Badge } from "@heroui/badge";
 import { Tabs, Tab } from "@heroui/tabs";
 import { 
   CalendarIcon, 
-  MapPinIcon, 
-  ClockIcon,
   TrophyIcon,
-  UserGroupIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   ArrowRightIcon,
-  ArrowTopRightOnSquareIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
@@ -24,18 +18,6 @@ import { translations } from "@/lib/translations";
 
 // Create Supabase client OUTSIDE the component to prevent infinite loops
 const supabase = createClient();
-
-// Helper function to format time from HH:MM:SS to HH:MM
-function formatTime(time: string): string {
-  if (!time) return "";
-  // If time is already in HH:MM format, return as is
-  if (time.match(/^\d{2}:\d{2}$/)) return time;
-  // If time is in HH:MM:SS format, extract HH:MM
-  if (time.match(/^\d{2}:\d{2}:\d{2}$/)) {
-    return time.substring(0, 5);
-  }
-  return time;
-}
 
 // Helper function to get short name for clubs
 function getShortName(fullName: string): string {
@@ -119,30 +101,6 @@ interface Standing {
   goals_for: number;
   goals_against: number;
   points: number;
-}
-
-function getResultBadge(result: string) {
-  switch (result) {
-    case 'win':
-      return <Badge color="success" variant="flat">Výhra</Badge>;
-    case 'loss':
-      return <Badge color="danger" variant="flat">Prohra</Badge>;
-    case 'draw':
-      return <Badge color="warning" variant="flat">Remíza</Badge>;
-    default:
-      return null;
-  }
-}
-
-function getStatusBadge(status: string) {
-  switch (status) {
-    case 'upcoming':
-      return <Badge color="primary" variant="flat">Nadcházející</Badge>;
-    case 'completed':
-      return <Badge color="default" variant="flat">Dokončeno</Badge>;
-    default:
-      return null;
-  }
 }
 
 export default function MatchSchedule() {
@@ -323,18 +281,11 @@ export default function MatchSchedule() {
       <div className="max-w-7xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            VÝSLEDKY & AKTUÁLNÍ PROGRAM
+            {translations.matchSchedule.title}
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            Sledujte aktuální výsledky a program zápasů našeho klubu
+            {translations.matchSchedule.description}
           </p>
-          {activeSeason && (
-            <div className="mt-4">
-              <Badge color="primary" variant="flat" className="text-sm">
-                Sezóna: {activeSeason.name}
-              </Badge>
-            </div>
-          )}
         </div>
 
         {/* Category Tabs */}

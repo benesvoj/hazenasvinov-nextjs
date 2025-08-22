@@ -246,4 +246,10 @@ export const translations = {
 	heroSection: {
 		fallbackSubtitle: 'V TJ Sokol Svinov žijeme národní házenou – sportem s ryze českými kořeny a bohatou historií. Už přes 90 let jsme součástí českého sportovního prostředí a během této doby jsme nasbírali řadu úspěchů v soutěžích dospělých i mládeže.',
 	},
+	matchSchedule: {
+		title: 'Výsledky & Aktuální program',
+		description: 'Sledujte aktuální výsledky a program zápasů našeho klubu',
+		noMatches: 'Žádné odehrané zápasy',
+		noMatchesDescription: 'První články se objeví, jakmile budou publikovány v administraci.',
+	},
 } as const;
