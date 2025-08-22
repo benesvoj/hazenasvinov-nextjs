@@ -113,7 +113,7 @@ export default function AlbumFormModal({
               <Input
                 type="number"
                 placeholder="0"
-                value={formData.sort_order}
+                value={formData.sort_order?.toString() || '0'}
                 onChange={(e) => handleInputChange('sort_order', parseInt(e.target.value) || 0)}
                 min={0}
               />

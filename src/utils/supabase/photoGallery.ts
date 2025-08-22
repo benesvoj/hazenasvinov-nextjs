@@ -27,7 +27,7 @@ export async function getPhotoAlbums(): Promise<PhotoAlbum[]> {
       return [];
     }
 
-    return data.map(album => ({
+    return data.map((album: PhotoAlbum & { photos?: { count: number }[] }) => ({
       ...album,
       photo_count: album.photos?.[0]?.count || 0
     }));
