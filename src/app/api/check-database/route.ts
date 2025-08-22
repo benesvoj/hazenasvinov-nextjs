@@ -9,13 +9,13 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       supabase: {
         connected: false,
-        error: null
+        error: null as string | null
       },
       tables: {
-        categories: { exists: false, count: 0, error: null },
-        seasons: { exists: false, count: 0, error: null },
-        matches: { exists: false, count: 0, error: null },
-        team_standings: { exists: false, count: 0, error: null }
+        categories: { exists: false, count: 0, error: null as string | null },
+        seasons: { exists: false, count: 0, error: null as string | null, active_season: null as string | null, warning: null as string | null },
+        matches: { exists: false, count: 0, error: null as string | null },
+        standings: { exists: false, count: 0, error: null as string | null }
       }
     };
 
@@ -29,7 +29,7 @@ export async function GET() {
       if (!testError) {
         checks.supabase.connected = true;
       } else {
-        checks.supabase.error = testError.message;
+        checks.supabase.error = testError?.message || 'Unknown error';
       }
     } catch (err) {
       checks.supabase.error = err instanceof Error ? err.message : 'Unknown error';
@@ -94,21 +94,21 @@ export async function GET() {
       checks.tables.matches.error = err instanceof Error ? err.message : 'Unknown error';
     }
 
-    // Check team_standings table
+    // Check standings table
     try {
       const { data: standingsData, error: standingsError } = await supabase
-        .from('team_standings')
+        .from('standings')
         .select('count')
         .limit(1);
       
       if (!standingsError) {
-        checks.tables.team_standings.exists = true;
-        checks.tables.team_standings.count = standingsData?.[0]?.count || 0;
+        checks.tables.standings.exists = true;
+        checks.tables.standings.count = standingsData?.[0]?.count || 0;
       } else {
-        checks.tables.team_standings.error = standingsError.message;
+        checks.tables.standings.error = standingsError.message;
       }
     } catch (err) {
-      checks.tables.team_standings.error = err instanceof Error ? err.message : 'Unknown error';
+      checks.tables.standings.error = err instanceof Error ? err.message : 'Unknown error';
     }
 
     return NextResponse.json(checks);

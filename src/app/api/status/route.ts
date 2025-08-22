@@ -17,7 +17,7 @@ export async function GET() {
       .select('count')
       .limit(1);
     
-    const status = {
+    const status: any = {
       timestamp: new Date().toISOString(),
       supabase: {
         connected: !configError,
