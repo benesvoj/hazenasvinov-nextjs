@@ -5,7 +5,6 @@ import { useFetchCategories } from '@/hooks/useFetchCategories';
 import { useFetchMatches } from '@/hooks/useFetchMatches';
 import { CategoryStandings } from '@/app/(main)/categories/components/CategoryStandings';
 import { SeasonalMatches } from '@/app/(main)/categories/components/SeasonalMatches';
-import { DebugInfo } from '@/app/(main)/categories/components/DebugInfo';
 import { Spinner } from '@heroui/react';
 
 export default function CategoryPage() {
@@ -74,13 +73,6 @@ export default function CategoryPage() {
           loading={matchesLoading}
         />
       </div>
-      
-      {/* Debug Information */}
-      {/* <DebugInfo 
-        categorySlug={categorySlug}
-        debugInfo={debugInfo}
-        error={matchesError}
-      /> */}
     </div>
   );
 }
