@@ -68,11 +68,6 @@ export default function BlogPostCard({
             {post.title}
           </h3>
           
-          {/* Excerpt - Always Visible */}
-          <p className="text-gray-200 mb-4 line-clamp-2 leading-relaxed text-sm">
-            {post.excerpt}
-          </p>
-          
           {/* Bottom Row - Category and Date */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
