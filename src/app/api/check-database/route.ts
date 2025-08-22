@@ -15,7 +15,8 @@ export async function GET() {
         categories: { exists: false, count: 0, error: null as string | null },
         seasons: { exists: false, count: 0, error: null as string | null, active_season: null as string | null, warning: null as string | null },
         matches: { exists: false, count: 0, error: null as string | null },
-        standings: { exists: false, count: 0, error: null as string | null }
+        standings: { exists: false, count: 0, error: null as string | null },
+        blog_posts: { exists: false, count: 0, error: null as string | null }
       }
     };
 
@@ -98,17 +99,32 @@ export async function GET() {
     try {
       const { data: standingsData, error: standingsError } = await supabase
         .from('standings')
-        .select('count')
-        .limit(1);
-      
-      if (!standingsError) {
-        checks.tables.standings.exists = true;
-        checks.tables.standings.count = standingsData?.[0]?.count || 0;
-      } else {
+        .select('*', { count: 'exact' });
+
+      if (standingsError) {
         checks.tables.standings.error = standingsError.message;
+      } else {
+        checks.tables.standings.exists = true;
+        checks.tables.standings.count = standingsData?.length || 0;
       }
     } catch (err) {
       checks.tables.standings.error = err instanceof Error ? err.message : 'Unknown error';
+    }
+
+    // Check blog_posts table
+    try {
+      const { data: blogPostsData, error: blogPostsError } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact' });
+
+      if (blogPostsError) {
+        checks.tables.blog_posts.error = blogPostsError.message;
+      } else {
+        checks.tables.blog_posts.exists = true;
+        checks.tables.blog_posts.count = blogPostsData?.length || 0;
+      }
+    } catch (err) {
+      checks.tables.blog_posts.error = err instanceof Error ? err.message : 'Unknown error';
     }
 
     return NextResponse.json(checks);
