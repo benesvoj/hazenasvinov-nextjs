@@ -6,6 +6,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { Badge } from "@heroui/badge";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/react";
 import { 
   TagIcon,
   PlusIcon,
@@ -14,6 +15,12 @@ import {
 } from "@heroicons/react/24/outline";
 import { Tabs, Tab } from "@heroui/tabs";
 import { createClient } from "@/utils/supabase/client";
+import { translations } from "@/lib/translations";
+import AddCategoryModal from './components/AddCategoryModal';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import AddSeasonModal from './components/AddSeasonModal';
+import EditCategoryModal from './components/EditCategoryModal';
+import EditSeasonModal from './components/EditSeasonModal';
 
 interface CategorySeason {
   id: string;
@@ -435,590 +442,141 @@ export default function CategoriesAdminPage() {
         </CardHeader>
         <CardBody>
           {loading ? (
-            <div className="text-center py-8">Načítání...</div>
+            <div className="text-center py-8">{translations.loading}</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-3 px-4">Kód</th>
-                    <th className="text-left py-3 px-4">Název</th>
-                    <th className="text-left py-3 px-4">Popis</th>
-                    <th className="text-left py-3 px-4">Věková skupina</th>
-                    <th className="text-left py-3 px-4">Pohlaví</th>
-                    <th className="text-left py-3 px-4">Status</th>
-                    <th className="text-left py-3 px-4">Pořadí</th>
-                    <th className="text-center py-3 px-4">Akce</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map((category) => (
-                    <tr key={category.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="py-3 px-4 font-mono text-sm">{category.code}</td>
-                      <td className="py-3 px-4 font-medium">{category.name}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                        {category.description || '-'}
-                      </td>
-                      <td className="py-3 px-4">
-                        {category.age_group ? (
-                          <Badge color={getAgeGroupBadgeColor(category.age_group)} variant="flat" size="sm">
-                            {ageGroups[category.age_group as keyof typeof ageGroups]}
-                          </Badge>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        {category.gender ? (
-                          <Badge color={getGenderBadgeColor(category.gender)} variant="flat" size="sm">
-                            {genders[category.gender as keyof typeof genders]}
-                          </Badge>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge color={category.is_active ? 'success' : 'default'} variant="flat" size="sm">
-                          {category.is_active ? 'Aktivní' : 'Neaktivní'}
+            <Table aria-label="Categories table">
+              <TableHeader>
+                <TableColumn>KÓD</TableColumn>
+                <TableColumn>NÁZEV</TableColumn>
+                <TableColumn>POPIS</TableColumn>
+                <TableColumn>VĚKOVÁ SKUPINA</TableColumn>
+                <TableColumn>POHLAVÍ</TableColumn>
+                <TableColumn>STATUS</TableColumn>
+                <TableColumn>POŘADÍ</TableColumn>
+                <TableColumn>AKCE</TableColumn>
+              </TableHeader>
+              <TableBody emptyContent="Žádné kategorie nebyly nalezeny">
+                {categories.map((category) => (
+                  <TableRow key={category.id}>
+                    <TableCell className="font-mono text-sm">{category.code}</TableCell>
+                    <TableCell className="font-medium">{category.name}</TableCell>
+                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                      {category.description || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {category.age_group ? (
+                        <Badge color={getAgeGroupBadgeColor(category.age_group)} variant="flat" size="sm">
+                          {ageGroups[category.age_group as keyof typeof ageGroups]}
                         </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-sm">{category.sort_order}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex justify-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="light"
-                            color="primary"
-                            isIconOnly
-                            onPress={() => openEditModal(category)}
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="light"
-                            color="danger"
-                            isIconOnly
-                            onPress={() => openDeleteModal(category)}
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {categories.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  Žádné kategorie nebyly nalezeny
-                </div>
-              )}
-            </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {category.gender ? (
+                        <Badge color={getGenderBadgeColor(category.gender)} variant="flat" size="sm">
+                          {genders[category.gender as keyof typeof genders]}
+                        </Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge color={category.is_active ? 'success' : 'default'} variant="flat" size="sm">
+                        {category.is_active ? 'Aktivní' : 'Neaktivní'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">{category.sort_order}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="light"
+                          color="primary"
+                          isIconOnly
+                          onPress={() => openEditModal(category)}
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="light"
+                          color="danger"
+                          isIconOnly
+                          onPress={() => openDeleteModal(category)}
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                              </TableBody>
+              </Table>
           )}
         </CardBody>
       </Card>
 
       {/* Add Category Modal */}
-      <Modal isOpen={isAddCategoryOpen} onClose={onAddCategoryClose} size="3xl">
-        <ModalContent>
-          <ModalHeader>Přidat kategorii</ModalHeader>
-          <ModalBody>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Basic Information */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Základní údaje</h4>
-                <Input
-                  label="Kód"
-                  value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  isRequired
-                  placeholder="např. men, women, juniorBoys"
-                />
-                <Input
-                  label="Název"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  isRequired
-                  placeholder="např. Muži, Ženy, Dorostenci"
-                />
-                <Input
-                  label="Popis"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Volitelný popis kategorie"
-                />
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={formData.age_group}
-                  onChange={(e) => setFormData({ ...formData, age_group: e.target.value })}
-                >
-                  <option value="">Vyberte věkovou skupinu</option>
-                  {Object.entries(ageGroups).map(([key, value]) => (
-                    <option key={key} value={key}>{value}</option>
-                  ))}
-                </select>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={formData.gender}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                >
-                  <option value="">Vyberte pohlaví</option>
-                  {Object.entries(genders).map(([key, value]) => (
-                    <option key={key} value={key}>{value}</option>
-                  ))}
-                </select>
-                <Input
-                  label="Pořadí"
-                  type="number"
-                  value={formData.sort_order.toString()}
-                  onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                  placeholder="0"
-                />
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                  />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
-                </label>
-              </div>
+      <AddCategoryModal
+        isOpen={isAddCategoryOpen}
+        onClose={onAddCategoryClose}
+        onAddCategory={handleAddCategory}
+        formData={formData}
+        setFormData={setFormData}
+        ageGroups={ageGroups}
+        genders={genders}
+      />
 
-              {/* Right Column - Competition Settings */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Nastavení soutěže</h4>
-                
-                              <div className="p-4 bg-yellow-50 rounded-lg">
-                <p className="text-sm text-yellow-800">
-                  ⚠️ Funkce pro správu sezón bude implementována v další verzi.
-                </p>
-              </div>
-              </div>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onAddCategoryClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={handleAddCategory}>
-              Přidat
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      {/* Edit Category Modal */}
-      <Modal isOpen={isEditCategoryOpen} onClose={onEditCategoryClose} size="3xl">
-        <ModalContent>
-          <ModalHeader>Upravit kategorii</ModalHeader>
-          <ModalBody>
-            <Tabs aria-label="Category edit tabs" className="w-full">
-              <Tab key="basic" title="Základní údaje">
-                <div className="space-y-4 pt-4">
-                  <Input
-                    label="Kód"
-                    value={formData.code}
-                    isDisabled
-                    placeholder="Kód nelze upravit"
-                    description="Kód kategorie nelze změnit po vytvoření"
-                  />
-                  <Input
-                    label="Název"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    isRequired
-                    placeholder="např. Muži, Ženy, Dorostenci"
-                  />
-                  <Input
-                    label="Popis"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Volitelný popis kategorie"
-                  />
-                  <select
-                    className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                    value={formData.age_group}
-                    onChange={(e) => setFormData({ ...formData, age_group: e.target.value })}
-                  >
-                    <option value="">Vyberte věkovou skupinu</option>
-                    {Object.entries(ageGroups).map(([key, value]) => (
-                      <option key={key} value={key}>{value}</option>
-                    ))}
-                  </select>
-                  <select
-                    className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                    value={formData.gender}
-                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                  >
-                    <option value="">Vyberte pohlaví</option>
-                    {Object.entries(genders).map(([key, value]) => (
-                      <option key={key} value={key}>{value}</option>
-                    ))}
-                  </select>
-                  <Input
-                    label="Pořadí"
-                    type="number"
-                    value={formData.sort_order.toString()}
-                    onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                    placeholder="0"
-                  />
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      checked={formData.is_active}
-                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                    />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
-                  </label>
-                </div>
-              </Tab>
-              
-              <Tab key="seasons" title="Sezóny">
-                <div className="space-y-4 pt-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      Zde můžete spravovat sezóny pro tuto kategorii. 
-                      Každá kategorie může být použita v několika sezónách s různými nastaveními.
-                    </p>
-                  </div>
-                  
-                  {/* Add Season Button */}
-                  <div className="flex justify-between items-center">
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                      Přiřazené sezóny ({categorySeasons.length})
-                    </h4>
-                    <Button
-                      color="primary"
-                      size="sm"
-                      onPress={onAddSeasonOpen}
-                      startContent={<PlusIcon className="w-4 h-4" />}
-                    >
-                      Přidat sezónu
-                    </Button>
-                  </div>
-
-                  {/* Seasons Table */}
-                  {categorySeasons.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
-                        <thead>
-                          <tr className="bg-gray-50 dark:bg-gray-800">
-                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Sezóna
-                            </th>
-                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Typ soutěže
-                            </th>
-                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Počet kol
-                            </th>
-                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Počet týmů
-                            </th>
-                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
-                              A/B týmy
-                            </th>
-                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Stav
-                            </th>
-                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Akce
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {categorySeasons.map((categorySeason) => (
-                            <tr key={categorySeason.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
-                                {categorySeason.season?.name || 'N/A'}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
-                                <Badge color="primary" variant="flat" size="sm">
-                                  {competitionTypes[categorySeason.competition_type]}
-                                </Badge>
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
-                                {categorySeason.matchweek_count}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
-                                {categorySeason.team_count}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
-                                {categorySeason.allow_team_duplicates ? 'Ano' : 'Ne'}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
-                                <Badge 
-                                  color={categorySeason.is_active ? "success" : "danger"} 
-                                  variant="flat" 
-                                  size="sm"
-                                >
-                                  {categorySeason.is_active ? 'Aktivní' : 'Neaktivní'}
-                                </Badge>
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
-                                <div className="flex gap-2">
-                                  <Button
-                                    color="primary"
-                                    size="sm"
-                                    variant="light"
-                                    isIconOnly
-                                    onPress={() => handleEditSeason(categorySeason)}
-                                  >
-                                    <PencilIcon className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    color="danger"
-                                    size="sm"
-                                    variant="light"
-                                    isIconOnly
-                                    onPress={() => handleRemoveSeason(categorySeason.id)}
-                                  >
-                                    <TrashIcon className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                      <p>Žádné sezóny nejsou přiřazeny k této kategorii.</p>
-                      <p className="text-sm mt-2">Klikněte na &quot;Přidat sezónu&quot; pro přiřazení první sezóny.</p>
-                    </div>
-                  )}
-                </div>
-              </Tab>
-            </Tabs>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onEditCategoryClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={handleUpdateCategory}>
-              Uložit
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            {/* Edit Category Modal */}
+      <EditCategoryModal
+        isOpen={isEditCategoryOpen}
+        onClose={onEditCategoryClose}
+        onUpdateCategory={handleUpdateCategory}
+        onAddSeason={onAddSeasonOpen}
+        onEditSeason={handleEditSeason}
+        onRemoveSeason={handleRemoveSeason}
+        formData={formData}
+        setFormData={setFormData}
+        categorySeasons={categorySeasons}
+        ageGroups={ageGroups}
+        genders={genders}
+        competitionTypes={competitionTypes}
+      />
 
       {/* Delete Category Modal */}
-      <Modal isOpen={isDeleteCategoryOpen} onClose={onDeleteCategoryClose}>
-        <ModalContent>
-          <ModalHeader>Smazat kategorii</ModalHeader>
-          <ModalBody>
-            <p>
-              Opravdu chcete smazat kategorii <strong>{selectedCategory?.name}</strong>?
-              Tato akce je nevratná a může ovlivnit data v celém systému.
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onDeleteCategoryClose}>
-              Zrušit
-            </Button>
-            <Button color="danger" onPress={handleDeleteCategory}>
-              Smazat
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <DeleteConfirmationModal
+        isOpen={isDeleteCategoryOpen}
+        onClose={onDeleteCategoryClose}
+        onConfirm={handleDeleteCategory}
+        title="Smazat kategorii"
+        message={`
+          Opravdu chcete smazat kategorii <strong>${selectedCategory?.name}</strong>?<br><br>
+          <span class="text-sm text-gray-600">Tato akce je nevratná a může ovlivnit data v celém systému.</span>
+        `}
+      />
 
       {/* Add Season Modal */}
-      <Modal isOpen={isAddSeasonOpen} onClose={onAddSeasonClose} size="2xl">
-        <ModalContent>
-          <ModalHeader>Přidat sezónu ke kategorii</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              {/* Season Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Sezóna *
-                </label>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={seasonFormData.season_id}
-                  onChange={(e) => setSeasonFormData({ ...seasonFormData, season_id: e.target.value })}
-                >
-                  <option value="">Vyberte sezónu</option>
-                  {seasons.map((season) => (
-                    <option key={season.id} value={season.id}>
-                      {season.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Competition Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Typ soutěže
-                </label>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={seasonFormData.competition_type}
-                  onChange={(e) => setSeasonFormData({ ...seasonFormData, competition_type: e.target.value as 'league' | 'league_playoff' | 'tournament' })}
-                >
-                  {Object.entries(competitionTypes).map(([key, value]) => (
-                    <option key={key} value={key}>{value}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Matchweek Count */}
-              <Input
-                label="Počet kol"
-                type="number"
-                value={seasonFormData.matchweek_count.toString()}
-                onChange={(e) => setSeasonFormData({ ...seasonFormData, matchweek_count: parseInt(e.target.value) || 0 })}
-                placeholder="Např. 10 pro 10 kol"
-                min="0"
-              />
-
-              {/* Team Count */}
-              <Input
-                label="Počet týmů"
-                type="number"
-                value={seasonFormData.team_count.toString()}
-                onChange={(e) => setSeasonFormData({ ...seasonFormData, team_count: parseInt(e.target.value) || 0 })}
-                placeholder="Očekávaný počet týmů"
-                min="0"
-              />
-
-              {/* Allow Team Duplicates */}
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="add_allow_team_duplicates"
-                  checked={seasonFormData.allow_team_duplicates}
-                  onChange={(e) => setSeasonFormData({ ...seasonFormData, allow_team_duplicates: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="add_allow_team_duplicates" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Povolit A/B týmy stejného klubu
-                </label>
-              </div>
-
-              {/* Active Status */}
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="add_season_active"
-                  checked={seasonFormData.is_active}
-                  onChange={(e) => setSeasonFormData({ ...seasonFormData, is_active: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="add_season_active" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Aktivní
-                </label>
-              </div>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="light" onPress={onAddSeasonClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={handleAddSeason}>
-              Přidat sezónu
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <AddSeasonModal
+        isOpen={isAddSeasonOpen}
+        onClose={onAddSeasonClose}
+        onAddSeason={handleAddSeason}
+        seasonFormData={seasonFormData}
+        setSeasonFormData={setSeasonFormData}
+        seasons={seasons}
+        competitionTypes={competitionTypes}
+      />
 
       {/* Edit Season Modal */}
-      <Modal isOpen={isEditSeasonOpen} onClose={onEditSeasonClose} size="2xl">
-        <ModalContent>
-          <ModalHeader>Upravit konfiguraci sezóny</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              {/* Season Name (Read-only) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Sezóna
-                </label>
-                <div className="p-3 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                  {selectedSeason?.season?.name || 'N/A'}
-                </div>
-              </div>
-
-              {/* Competition Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Typ soutěže
-                </label>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={editSeasonFormData.competition_type}
-                  onChange={(e) => setEditSeasonFormData({ ...editSeasonFormData, competition_type: e.target.value as 'league' | 'league_playoff' | 'tournament' })}
-                >
-                  {Object.entries(competitionTypes).map(([key, value]) => (
-                    <option key={key} value={key}>{value}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Matchweek Count */}
-              <Input
-                label="Počet kol"
-                type="number"
-                value={editSeasonFormData.matchweek_count.toString()}
-                onChange={(e) => setEditSeasonFormData({ ...editSeasonFormData, matchweek_count: parseInt(e.target.value) || 0 })}
-                placeholder="Např. 10 pro 10 kol"
-                min="0"
-              />
-
-              {/* Team Count */}
-              <Input
-                label="Počet týmů"
-                type="number"
-                value={editSeasonFormData.team_count.toString()}
-                onChange={(e) => setEditSeasonFormData({ ...editSeasonFormData, team_count: parseInt(e.target.value) || 0 })}
-                placeholder="Očekávaný počet týmů"
-                min="0"
-              />
-
-              {/* Allow Team Duplicates */}
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="edit_allow_team_duplicates"
-                  checked={editSeasonFormData.allow_team_duplicates}
-                  onChange={(e) => setEditSeasonFormData({ ...editSeasonFormData, allow_team_duplicates: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="edit_allow_team_duplicates" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Povolit A/B týmy stejného klubu
-                </label>
-              </div>
-
-              {/* Active Status */}
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="edit_season_active"
-                  checked={editSeasonFormData.is_active}
-                  onChange={(e) => setEditSeasonFormData({ ...editSeasonFormData, is_active: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="edit_season_active" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Aktivní
-                </label>
-              </div>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="light" onPress={onEditSeasonClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={handleUpdateSeason}>
-              Uložit změny
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <EditSeasonModal
+        isOpen={isEditSeasonOpen}
+        onClose={onEditSeasonClose}
+        onUpdateSeason={handleUpdateSeason}
+        selectedSeason={selectedSeason}
+        editSeasonFormData={editSeasonFormData}
+        setEditSeasonFormData={setEditSeasonFormData}
+        competitionTypes={competitionTypes}
+      />
     </div>
   );
 }
