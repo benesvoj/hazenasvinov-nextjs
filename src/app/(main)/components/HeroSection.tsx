@@ -4,23 +4,20 @@ import { useClubConfig } from "@/hooks/useClubConfig";
 import { Button } from "@heroui/button";
 import Link from "@/components/Link";
 import { Image } from "@heroui/image";
-import { TrophyIcon } from "@heroicons/react/24/outline";
+import { translations } from "@/lib/translations";
 
 export default function HeroSection() {
     const { clubConfig, loading: configLoading } = useClubConfig();
 
     return (
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white rounded-2xl overflow-hidden">
-      <div className="p-8 lg:p-16">
+      <div className="p-8 lg:p-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Side - Text Content */}
           <div className="space-y-6 animate-fade-in-up">
             <div className="space-y-4">
-              <h1 className="text-3xl lg:text-5xl font-bold leading-tight animate-slide-in-left">
-                {clubConfig?.hero_title || 'Tradice národní házené už více než 90 let'}
-              </h1>
               <p className="text-lg lg:text-xl text-blue-100 leading-relaxed max-w-2xl animate-slide-in-left animation-delay-200">
-                {clubConfig?.hero_subtitle || 'V TJ Sokol Svinov žijeme národní házenou – sportem s ryze českými kořeny a bohatou historií. Už přes 90 let jsme součástí českého sportovního prostředí a během této doby jsme nasbírali řadu úspěchů v soutěžích dospělých i mládeže.'}
+                {clubConfig?.hero_subtitle || translations.heroSection.fallbackSubtitle}
               </p>
             </div>
             
@@ -73,7 +70,7 @@ export default function HeroSection() {
                 {/* Image Container */}
                 <div className="relative bg-white/10 rounded-2xl p-4 border border-white/20 transition-all duration-500 ease-out group-hover:bg-white/15 group-hover:border-white/30 group-hover:shadow-2xl">
                   <Image 
-                    src={clubConfig?.hero_image_url || ""} 
+                    src={clubConfig?.hero_image_url || undefined} 
                     alt="TJ Sokol Svinov - Házená" 
                     width={600} 
                     height={400}
