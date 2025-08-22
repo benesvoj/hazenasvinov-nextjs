@@ -1,0 +1,174 @@
+'use client';
+import { Card, CardHeader, CardBody, Switch, Button, Spinner } from "@heroui/react";
+import { usePageVisibility } from "@/hooks/usePageVisibility";
+import { useState } from "react";
+
+export default function ClubPagesCard() {
+    const { pages, loading, error, fetchPages, togglePageVisibility, updatePageOrder } = usePageVisibility();
+    const [updating, setUpdating] = useState<string | null>(null);
+
+    const handleToggleVisibility = async (id: string) => {
+        setUpdating(id);
+        try {
+            await togglePageVisibility(id);
+        } finally {
+            setUpdating(null);
+        }
+    };
+
+    const handleOrderChange = async (id: string, newOrder: number) => {
+        setUpdating(id);
+        try {
+            await updatePageOrder(id, newOrder);
+        } finally {
+            setUpdating(null);
+        }
+    };
+
+    const groupedPages = pages.reduce((acc, page) => {
+        const category = page.category || 'other';
+        if (!acc[category]) {
+            acc[category] = [];
+        }
+        acc[category].push(page);
+        return acc;
+    }, {} as Record<string, typeof pages>);
+
+    const categoryLabels: Record<string, string> = {
+        'main': 'Hlavní stránky',
+        'categories': 'Kategorie týmů',
+        'info': 'Informační stránky',
+        'admin': 'Administrace',
+        'other': 'Ostatní'
+    };
+
+    if (loading) {
+        return (
+            <Card>
+                <CardHeader>Stránky klubu</CardHeader>
+                <CardBody className="flex justify-center py-8">
+                    <Spinner size="lg" />
+                </CardBody>
+            </Card>
+        );
+    }
+
+    if (error) {
+        return (
+            <Card>
+                <CardHeader>Stránky klubu</CardHeader>
+                <CardBody>
+                    <div className="space-y-4">
+                        <div className="text-red-500 font-medium">Chyba při načítání stránek: {error}</div>
+                        
+                        {error.includes('Failed to fetch') && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <h4 className="font-medium text-yellow-800 mb-2">Tabulka stránek není nastavena</h4>
+                                <p className="text-yellow-700 text-sm mb-3">
+                                    Pro použití systému správy viditelnosti stránek je potřeba nejprve vytvořit databázovou tabulku.
+                                </p>
+                                <div className="space-y-2 text-sm">
+                                    <p className="text-yellow-600"><strong>Možnost 1:</strong> Spusťte automatický setup:</p>
+                                    <code className="bg-yellow-100 px-2 py-1 rounded text-xs">npm run setup:page-visibility</code>
+                                    
+                                    <p className="text-yellow-600 mt-3"><strong>Možnost 2:</strong> Spusťte SQL skript ručně v Supabase dashboardu:</p>
+                                    <code className="bg-yellow-100 px-2 py-1 rounded text-xs">scripts/setup_page_visibility_manual.sql</code>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="text-sm text-gray-600">
+                            <p>Pokud problém přetrvává, zkontrolujte:</p>
+                            <ul className="list-disc list-inside mt-2 space-y-1">
+                                <li>Připojení k Supabase databázi</li>
+                                <li>Environment proměnné (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)</li>
+                                <li>Row Level Security nastavení</li>
+                            </ul>
+                        </div>
+                        
+                        <div className="pt-4">
+                            <Button 
+                                color="primary" 
+                                variant="bordered" 
+                                onPress={fetchPages}
+                                className="w-full sm:w-auto"
+                            >
+                                Zkusit znovu
+                            </Button>
+                        </div>
+                    </div>
+                </CardBody>
+            </Card>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <h3 className="text-lg font-semibold">Správa viditelnosti stránek</h3>
+                    <p className="text-sm text-gray-600">
+                        Zde můžete nastavit, které stránky budou viditelné pro návštěvníky webu.
+                        Skryté stránky nebudou zobrazeny v navigaci ani nebudou přístupné.
+                    </p>
+                </CardHeader>
+                <CardBody>
+                    {Object.entries(groupedPages).map(([category, categoryPages]) => (
+                        <div key={category} className="mb-6">
+                            <h4 className="text-md font-medium text-gray-700 mb-3 border-b pb-2">
+                                {categoryLabels[category] || category}
+                            </h4>
+                            <div className="space-y-3">
+                                {categoryPages
+                                    .sort((a, b) => a.sort_order - b.sort_order)
+                                    .map((page) => (
+                                        <div key={page.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div className="flex-1">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-sm text-gray-500">#{page.sort_order}</span>
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            max="100"
+                                                            value={page.sort_order}
+                                                            onChange={(e) => {
+                                                                const newOrder = parseInt(e.target.value);
+                                                                if (!isNaN(newOrder) && newOrder > 0) {
+                                                                    handleOrderChange(page.id, newOrder);
+                                                                }
+                                                            }}
+                                                            className="w-16 px-2 py-1 text-sm border rounded"
+                                                            disabled={updating === page.id}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <h5 className="font-medium text-gray-900">{page.page_title}</h5>
+                                                        <p className="text-sm text-gray-600">{page.page_route}</p>
+                                                        {page.page_description && (
+                                                            <p className="text-xs text-gray-500 mt-1">{page.page_description}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center space-x-3">
+                                                <Switch
+                                                    isSelected={page.is_visible}
+                                                    onValueChange={() => handleToggleVisibility(page.id)}
+                                                    isDisabled={updating === page.id}
+                                                    color="success"
+                                                >
+                                                    {page.is_visible ? 'Viditelné' : 'Skryté'}
+                                                </Switch>
+                                                {updating === page.id && <Spinner size="sm" />}
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    ))}
+                </CardBody>
+            </Card>
+        </div>
+    );
+}

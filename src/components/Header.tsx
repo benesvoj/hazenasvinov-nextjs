@@ -4,27 +4,32 @@ import Image from "next/image";
 import { texts } from "@/utils/texts";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import Link from "@/components/Link";
-import routes, { publicRoutes } from "../routes/routes";
+import { useVisiblePages } from "@/hooks/useVisiblePages";
+import { buildMenuFromPages, fallbackRoutes } from "../routes/dynamicRoutes";
+import { MenuItem } from "../routes/dynamicRoutes";
 import DropdownMenu from "@/components/DropdownMenu";
+import Logo from "@/components/Logo";
 import { useState } from "react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { visiblePages, loading } = useVisiblePages();
+  
+  // Build menu items from visible pages, with fallback to static routes
+  const menuItems: MenuItem[] = loading ? [] : buildMenuFromPages(visiblePages);
 
   return (
     <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo and Title */}
-          <Link href={publicRoutes.home}>
+          <Link href={fallbackRoutes.home}>
             <div className="flex items-center space-x-3 lg:space-x-4">
-              <Image
-                src="/logo.png"
+              <Logo 
+                size="md" 
+                className="lg:w-12 lg:h-12" 
                 alt={texts.club.title}
-                width={48}
-                height={48}
-                className="lg:w-12 lg:h-12"
               />
               <div className="hidden sm:block">
                 <h1 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-white">
@@ -39,24 +44,19 @@ export const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-6">
-            {routes
-              .filter(
-                (item) =>
-                  item.isPrivate === false || item.isPrivate === undefined
-              )
-              .map((item) => {
-                return item.hasOwnProperty("children") ? (
-                  <DropdownMenu key={item.title} item={item} />
-                ) : (
-                  <Link
-                    key={item.route}
-                    href={item.route || ""}
-                    className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
-                  >
-                    {item.title}
-                  </Link>
-                );
-              })}
+            {menuItems.map((item: MenuItem) => {
+              return item.children ? (
+                <DropdownMenu key={item.title} item={item} />
+              ) : (
+                <Link
+                  key={item.route}
+                  href={item.route || ""}
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
+                >
+                  {item.title}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Right side - Theme switch and mobile menu button */}
@@ -81,41 +81,36 @@ export const Header = () => {
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-200 dark:border-gray-700">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {routes
-                .filter(
-                  (item) =>
-                    item.isPrivate === false || item.isPrivate === undefined
-                )
-                .map((item) => {
-                  return item.hasOwnProperty("children") ? (
-                    <div key={item.title} className="space-y-1">
-                      <div className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {item.title}
-                      </div>
-                      <div className="pl-4 space-y-1">
-                        {item.children?.map((child) => (
-                          <Link
-                            key={child.route}
-                            href={child.route || ""}
-                            className="block px-3 py-2 text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            {child.title}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <Link
-                      key={item.route}
-                      href={item.route || ""}
-                      className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
+              {menuItems.map((item: MenuItem) => {
+                return item.children ? (
+                  <div key={item.title} className="space-y-1">
+                    <div className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                       {item.title}
-                    </Link>
-                  );
-                })}
+                    </div>
+                    <div className="pl-4 space-y-1">
+                      {item.children?.map((child: MenuItem) => (
+                        <Link
+                          key={child.route}
+                          href={child.route || ""}
+                          className="block px-3 py-2 text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          {child.title}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    key={item.route}
+                    href={item.route || ""}
+                    className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.title}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}

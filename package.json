@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup:page-visibility": "node scripts/setup-page-visibility.js"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",
