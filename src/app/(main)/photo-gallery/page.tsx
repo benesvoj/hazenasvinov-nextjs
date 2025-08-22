@@ -13,8 +13,6 @@ import { getPhotoAlbums, getPhotosByAlbum } from "@/utils/supabase/photoGallery"
 import PhotoViewerModal from "./components/PhotoViewerModal";
 import PhotoGrid from "./components/PhotoGrid";
 import AlbumCard from "./components/AlbumCard";
-import { Header } from "@/components/Header";
-import Link from "next/link";
 
 export default function PhotoGalleryPage() {
   const [albums, setAlbums] = useState<PhotoAlbum[]>([]);
@@ -71,7 +69,6 @@ export default function PhotoGalleryPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -87,7 +84,6 @@ export default function PhotoGalleryPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-20">
             <div className="text-red-600 dark:text-red-400 mb-4">{error}</div>
@@ -102,7 +98,6 @@ export default function PhotoGalleryPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <Header />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
