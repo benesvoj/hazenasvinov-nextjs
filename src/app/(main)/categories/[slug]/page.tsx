@@ -76,11 +76,11 @@ export default function CategoryPage() {
       </div>
       
       {/* Debug Information */}
-      <DebugInfo 
+      {/* <DebugInfo 
         categorySlug={categorySlug}
         debugInfo={debugInfo}
         error={matchesError}
-      />
+      /> */}
     </div>
   );
 }

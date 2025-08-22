@@ -1,11 +1,13 @@
 'use client';
-import { Card, CardHeader, CardBody, Switch, Button, Spinner } from "@heroui/react";
+import { Card, CardHeader, CardBody, Switch, Button, Spinner, Input } from "@heroui/react";
 import { usePageVisibility } from "@/hooks/usePageVisibility";
 import { useState } from "react";
 
 export default function ClubPagesCard() {
-    const { pages, loading, error, fetchPages, togglePageVisibility, updatePageOrder } = usePageVisibility();
+    const { pages, loading, error, fetchPages, togglePageVisibility, updatePageOrder, updatePageRoute } = usePageVisibility();
     const [updating, setUpdating] = useState<string | null>(null);
+    const [editingRoute, setEditingRoute] = useState<string | null>(null);
+    const [routeValue, setRouteValue] = useState<string>('');
 
     const handleToggleVisibility = async (id: string) => {
         setUpdating(id);
@@ -23,6 +25,27 @@ export default function ClubPagesCard() {
         } finally {
             setUpdating(null);
         }
+    };
+
+    const handleRouteEdit = (page: any) => {
+        setEditingRoute(page.id);
+        setRouteValue(page.page_route);
+    };
+
+    const handleRouteSave = async (id: string) => {
+        setUpdating(id);
+        try {
+            await updatePageRoute(id, routeValue);
+            setEditingRoute(null);
+            setRouteValue('');
+        } finally {
+            setUpdating(null);
+        }
+    };
+
+    const handleRouteCancel = () => {
+        setEditingRoute(null);
+        setRouteValue('');
     };
 
     const groupedPages = pages.reduce((acc, page) => {
@@ -144,7 +167,46 @@ export default function ClubPagesCard() {
                                                     </div>
                                                     <div>
                                                         <h5 className="font-medium text-gray-900">{page.page_title}</h5>
-                                                        <p className="text-sm text-gray-600">{page.page_route}</p>
+                                                        {editingRoute === page.id ? (
+                                                            <div className="flex items-center space-x-2 mt-1">
+                                                                <Input
+                                                                    size="sm"
+                                                                    value={routeValue}
+                                                                    onChange={(e) => setRouteValue(e.target.value)}
+                                                                    placeholder="Zadejte novou URL"
+                                                                    className="w-48"
+                                                                />
+                                                                <Button
+                                                                    size="sm"
+                                                                    color="success"
+                                                                    variant="flat"
+                                                                    onPress={() => handleRouteSave(page.id)}
+                                                                    isDisabled={updating === page.id}
+                                                                >
+                                                                    Uložit
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    color="default"
+                                                                    variant="light"
+                                                                    onPress={handleRouteCancel}
+                                                                >
+                                                                    Zrušit
+                                                                </Button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center space-x-2 mt-1">
+                                                                <p className="text-sm text-gray-600">{page.page_route}</p>
+                                                                <Button
+                                                                    size="sm"
+                                                                    color="primary"
+                                                                    variant="light"
+                                                                    onPress={() => handleRouteEdit(page)}
+                                                                >
+                                                                    Upravit URL
+                                                                </Button>
+                                                            </div>
+                                                        )}
                                                         {page.page_description && (
                                                             <p className="text-xs text-gray-500 mt-1">{page.page_description}</p>
                                                         )}

@@ -26,15 +26,17 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { id, is_visible, sort_order } = await request.json();
+    const { id, is_visible, sort_order, page_route } = await request.json();
+
+    // Build update object with only provided fields
+    const updateData: any = { updated_at: new Date().toISOString() };
+    if (is_visible !== undefined) updateData.is_visible = is_visible;
+    if (sort_order !== undefined) updateData.sort_order = sort_order;
+    if (page_route !== undefined) updateData.page_route = page_route;
 
     const { data, error } = await supabase
       .from('page_visibility')
-      .update({ 
-        is_visible, 
-        sort_order,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();

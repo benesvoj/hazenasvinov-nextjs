@@ -66,6 +66,34 @@ export const usePageVisibility = () => {
     await updatePageVisibility(id, page.is_visible, newSortOrder);
   };
 
+  const updatePageRoute = async (id: string, newRoute: string) => {
+    try {
+      const response = await fetch('/api/page-visibility', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, page_route: newRoute }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update page route');
+      }
+
+      const updatedPage = await response.json();
+      setPages(prevPages => 
+        prevPages.map(page => 
+          page.id === id ? updatedPage : page
+        )
+      );
+
+      return updatedPage;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchPages();
   }, []);
@@ -78,5 +106,6 @@ export const usePageVisibility = () => {
     updatePageVisibility,
     togglePageVisibility,
     updatePageOrder,
+    updatePageRoute,
   };
 };
