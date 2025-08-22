@@ -20,7 +20,8 @@ import {
   BuildingOfficeIcon,
   DocumentTextIcon,
   HeartIcon,
-  TagIcon
+  TagIcon,
+  PhotoIcon
 } from "@heroicons/react/24/outline";
 
 // Icon mapping for admin routes
@@ -54,6 +55,8 @@ const getRouteIcon = (route: string) => {
       return <HeartIcon className="w-5 h-5" />;
     case privateRoutes.clubConfig:
       return <Cog6ToothIcon className="w-5 h-5" />;
+    case privateRoutes.photoGallery:
+      return <PhotoIcon className="w-5 h-5" />;
     default:
       return <Cog6ToothIcon className="w-5 h-5" />;
   }

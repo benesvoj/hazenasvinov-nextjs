@@ -20,6 +20,7 @@ export const publicRoutes = {
 	blog: '/blog',
 	login: '/login',
 	matches: '/matches',
+	photoGallery: '/photo-gallery',
 	youngestKids: '/categories/youngest-kids',
 	prepKids: '/categories/prep-kids',
 	youngerBoys: '/categories/younger-boys',
@@ -49,6 +50,7 @@ export const privateRoutes = {
 	competitions: '/admin/competitions',
 	sponsorship: '/admin/sponsorship',
 	clubConfig: '/admin/club-config',
+	photoGallery: '/admin/photo-gallery',
 };
 
 const routes: MenuItem[] = [
@@ -109,6 +111,7 @@ const routes: MenuItem[] = [
 	},
 	{route: publicRoutes.blog, title: 'Novinky'},
 	{route: publicRoutes.matches, title: 'Zápasy'},
+	{route: publicRoutes.photoGallery, title: 'Fotogalerie'},
 	{route: publicRoutes.chronicle, title: 'Kronika'},
 	{route: publicRoutes.downloads, title: 'Dokumenty'},
 	{route: publicRoutes.contact, title: 'Kontakt'},
@@ -129,6 +132,7 @@ const routes: MenuItem[] = [
 	{route: privateRoutes.users, title: 'Uživatelé', isPrivate: true, description: 'Správa uživatelů, kteří se mohou přihlásit do systému.'},
 	{route: privateRoutes.sponsorship, title: 'Sponzorství', isPrivate: true, description: 'Správa sponzorů, partnerů a sponzorských balíčků.'},
 	{route: privateRoutes.clubConfig, title: 'Konfigurace klubu', isPrivate: true, description: 'Správa nastavení a konfigurace klubu.'},
+	{route: privateRoutes.photoGallery, title: 'Fotogalerie', isPrivate: true, description: 'Správa fotoalb a fotografií.'},
 ]
 
 export default routes

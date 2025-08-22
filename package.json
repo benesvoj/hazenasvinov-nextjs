@@ -15,6 +15,7 @@
     "@heroui/badge": "^2.2.15",
     "@heroui/button": "^2.2.19",
     "@heroui/card": "^2.2.18",
+    "@heroui/image": "^2.2.15",
     "@heroui/input": "^2.4.19",
     "@heroui/listbox": "^2.3.18",
     "@heroui/modal": "^2.2.16",
