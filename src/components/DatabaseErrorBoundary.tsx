@@ -14,7 +14,7 @@ interface State {
   errorType: 'users' | 'general' | 'other'
 }
 
-export class DatabaseErrorBoundary extends Component<Props, State> {
+export default class DatabaseErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = { hasError: false, error: null, errorType: 'other' }

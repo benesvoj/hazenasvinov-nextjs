@@ -14,7 +14,7 @@ export type ModalBodyProps = {
 }
 
 
-export const ModalWithForm = (props: ModalBodyProps) => {
+const ModalWithForm = (props: ModalBodyProps) => {
 	const {isOpen, onOpen, onOpenChange} = useDisclosure();
 	const {button} =translations
 
@@ -43,3 +43,5 @@ export const ModalWithForm = (props: ModalBodyProps) => {
 		</Modal>
 	)
 }
+
+export default ModalWithForm;

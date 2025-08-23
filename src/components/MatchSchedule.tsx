@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Badge } from "@heroui/badge";
 import { Tabs, Tab } from "@heroui/tabs";
 import { 
   CalendarIcon, 
@@ -12,7 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import Link from "@/components/Link";
-import { MatchRow } from "./MatchRow";
+import { MatchRow } from "@/components";
 import Image from 'next/image';
 import { translations } from "@/lib/translations";
 

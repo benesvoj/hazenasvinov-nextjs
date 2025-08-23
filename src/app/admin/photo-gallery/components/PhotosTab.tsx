@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
@@ -46,7 +46,7 @@ export default function PhotosTab() {
   const [deletingPhoto, setDeletingPhoto] = useState<Photo | null>(null);
 
   // Load albums and photos
-  const loadAlbums = async () => {
+  const loadAlbums = useCallback(async () => {
     try {
       const data = await getPhotoAlbums();
       setAlbums(data);
@@ -57,7 +57,7 @@ export default function PhotosTab() {
       setError("Chyba při načítání alb");
       console.error(err);
     }
-  };
+  }, [selectedAlbumId]);
 
   const loadPhotos = async (albumId: string) => {
     if (!albumId) return;
@@ -77,7 +77,7 @@ export default function PhotosTab() {
 
   useEffect(() => {
     loadAlbums();
-  }, []);
+  }, [loadAlbums]);
 
   useEffect(() => {
     if (selectedAlbumId) {

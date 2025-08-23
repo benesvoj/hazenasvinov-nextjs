@@ -12,7 +12,7 @@ import Logo from "@/components/Logo";
 import { useState } from "react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
-export const Header = () => {
+const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { visiblePages, loading } = useVisiblePages();
   
@@ -118,3 +118,6 @@ export const Header = () => {
     </header>
   );
 };
+
+
+export default Header;

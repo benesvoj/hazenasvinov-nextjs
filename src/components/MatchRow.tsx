@@ -3,6 +3,7 @@ import Link from "@/components/Link";
 import { MapPinIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
 
+// TODO: move into utils.ts or helpers.ts
 // Helper function to format time from HH:MM:SS to HH:MM
 function formatTime(time: string): string {
   if (!time) return "";
@@ -15,6 +16,7 @@ function formatTime(time: string): string {
   return time;
 }
 
+// TODO: move into utils.ts or helpers.ts
 // Helper function to get short name for clubs
 function getShortName(fullName: string): string {
   // Common patterns for Czech club names
@@ -41,6 +43,7 @@ function getShortName(fullName: string): string {
   return fullName;
 }
 
+// TODO: move into types.ts
 interface Match {
   id: string;
   date: string;
@@ -67,7 +70,7 @@ interface MatchRowProps {
   compact?: boolean;
 }
 
-export const MatchRow: React.FC<MatchRowProps> = ({ 
+const MatchRow: React.FC<MatchRowProps> = ({ 
   match, 
   compact = true 
 }) => {
@@ -185,3 +188,5 @@ export const MatchRow: React.FC<MatchRowProps> = ({
     </Link>
   );
 };
+
+export default MatchRow;

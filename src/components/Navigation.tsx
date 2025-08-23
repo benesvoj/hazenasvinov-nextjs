@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from "react";
 import Link from "@/components/Link";
 import { Button } from "@heroui/button";
@@ -13,6 +15,7 @@ interface NavigationItem {
   href?: string;
   children?: NavigationItem[];
   external?: boolean;
+  onClick?: () => void;
   badge?: {
     text: string;
     color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
@@ -386,7 +389,7 @@ export function Pagination({
       {showPrevNext && (
         <Button
           size="sm"
-          variant="outline"
+          variant="bordered"
           isDisabled={currentPage === 1}
           onPress={() => onPageChange(currentPage - 1)}
         >
@@ -403,7 +406,7 @@ export function Pagination({
               ) : (
                 <Button
                   size="sm"
-                  variant={page === currentPage ? "solid" : "outline"}
+                  variant={page === currentPage ? "solid" : "bordered"}
                   color={page === currentPage ? "primary" : "default"}
                   onPress={() => onPageChange(page as number)}
                 >
@@ -418,7 +421,7 @@ export function Pagination({
       {showPrevNext && (
         <Button
           size="sm"
-          variant="outline"
+          variant="bordered"
           isDisabled={currentPage === totalPages}
           onPress={() => onPageChange(currentPage + 1)}
         >

@@ -17,6 +17,7 @@ import {
 	HeartIcon
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import { Image } from "@heroui/image";
 
 export const MainPartnersTab = () => {
 	const { 
@@ -178,10 +179,12 @@ export const MainPartnersTab = () => {
 											<TableCell>
 												<div className="flex items-center gap-3">
 													{partner.logo_url ? (
-														<img 
+														<Image 
 															src={partner.logo_url} 
 															alt={partner.name}
-															className="w-10 h-10 rounded-lg object-cover"
+															className="rounded-lg object-cover"
+															width={40}
+															height={40}
 														/>
 													) : (
 														<div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">

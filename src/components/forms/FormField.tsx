@@ -1,12 +1,10 @@
-import { Input } from "@heroui/input";
-import { Textarea } from "@heroui/textarea";
-import { Select, SelectItem } from "@heroui/select";
+'use client';
+
+import { Input, Textarea } from "@heroui/input";
 import { Switch } from "@heroui/switch";
 import { Checkbox } from "@heroui/checkbox";
-import { RadioGroup, Radio } from "@heroui/radio-group";
 import { Chip } from "@heroui/chip";
 import { useState } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface BaseFormFieldProps {
   label: string;
@@ -142,17 +140,18 @@ export function TextareaField({
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       
-      <Textarea
+      <textarea
         id={name}
         name={name}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
         placeholder={placeholder}
-        isDisabled={disabled}
-        isInvalid={!!error}
+        disabled={disabled}
         rows={rows}
         maxLength={maxLength}
-        className="w-full"
+        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          error ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
+        } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
       />
       
       {helpText && (
@@ -187,25 +186,23 @@ export function SelectField({
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       
-      <Select
+      <select
         id={name}
         name={name}
-        selectedKeys={value ? [value] : []}
-        onSelectionChange={(keys) => {
-          const selectedKey = Array.from(keys)[0] as string;
-          onChange(selectedKey || "");
-        }}
-        placeholder={placeholder}
-        isDisabled={disabled}
-        isInvalid={!!error}
-        className="w-full"
+        value={value}
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
+        disabled={disabled}
+        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          error ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
+        } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
       >
+        {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (
-          <SelectItem key={option.value} value={option.value} isDisabled={option.disabled}>
+          <option key={option.value} value={option.value} disabled={option.disabled}>
             {option.label}
-          </SelectItem>
+          </option>
         ))}
-      </Select>
+      </select>
       
       {helpText && (
         <p className="text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
@@ -322,19 +319,22 @@ export function RadioField({
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       
-      <RadioGroup
-        name={name}
-        value={value}
-        onValueChange={onChange}
-        isDisabled={disabled}
-        orientation="vertical"
-      >
+      <div className="space-y-2">
         {options.map((option) => (
-          <Radio key={option.value} value={option.value} isDisabled={option.disabled}>
-            {option.label}
-          </Radio>
+          <label key={option.value} className="flex items-center space-x-2">
+            <input
+              type="radio"
+              name={name}
+              value={option.value}
+              checked={value === option.value}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+              disabled={disabled || option.disabled}
+              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
+          </label>
         ))}
-      </RadioGroup>
+      </div>
       
       {helpText && (
         <p className="text-sm text-gray-500 dark:text-gray-400">{helpText}</p>

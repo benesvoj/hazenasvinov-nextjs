@@ -6,16 +6,13 @@ import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
 import { Select, SelectItem } from '@heroui/select';
-import { Checkbox } from '@heroui/checkbox';
 import { Badge } from '@heroui/badge';
-import { Tabs, Tab } from '@heroui/tabs';
 import { 
   UserGroupIcon, 
   PlusIcon, 
   TrashIcon, 
   PencilIcon,
   UserIcon,
-  GlobeAltIcon
 } from '@heroicons/react/24/outline';
 import { useLineupData } from '@/hooks/useLineupData';
 import { LineupFormData, LineupPlayerFormData, LineupCoachFormData, Member, ExternalPlayer } from '@/types/types';
@@ -78,7 +75,7 @@ export default function LineupManager({
     // Alternative configurations (uncomment one):
     // return selectedTeam === 'home'; // Home team is your club
     // return homeTeamName.includes('Baník Most') || awayTeamName.includes('Baník Most'); // Based on team name
-  }, [selectedTeam, homeTeamName, awayTeamName]);
+  }, [selectedTeam]);
 
   // Get the current form data based on selected team
   const currentFormData = useMemo(() => {

@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
   redirectTo?: string
 }
 
-export function ProtectedRoute({ 
+export default function ProtectedRoute({ 
   children, 
   fallback, 
   requireAuth = true,

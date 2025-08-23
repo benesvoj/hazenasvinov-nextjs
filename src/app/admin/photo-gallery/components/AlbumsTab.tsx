@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Switch } from "@heroui/switch";
 import { Badge } from "@heroui/badge";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Image } from "@heroui/react";
 import { 
   PlusIcon,
   PencilIcon,
@@ -37,7 +37,7 @@ export default function AlbumsTab() {
   const [deletingAlbum, setDeletingAlbum] = useState<PhotoAlbum | null>(null);
 
   // Load albums
-  const loadAlbums = async () => {
+  const loadAlbums = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getPhotoAlbums();
@@ -48,11 +48,11 @@ export default function AlbumsTab() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadAlbums();
-  }, []);
+  }, [loadAlbums]);
 
   // Handle album creation/editing
   const handleAlbumSubmit = async (albumData: CreateAlbumData | UpdateAlbumData) => {
@@ -164,10 +164,12 @@ export default function AlbumsTab() {
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       {album.cover_photo_url ? (
-                        <img
+                        <Image
                           src={album.cover_photo_url}
                           alt={album.title}
-                          className="w-12 h-12 object-cover rounded-lg"
+                          className="object-cover rounded-lg"
+                          width={48}
+                          height={48}
                         />
                       ) : (
                         <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">

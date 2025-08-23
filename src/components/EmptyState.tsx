@@ -15,7 +15,7 @@ interface EmptyStateProps {
   action?: {
     label: string;
     onClick: () => void;
-    variant?: "primary" | "secondary" | "outline";
+    variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "ghost";
   };
   className?: string;
 }
@@ -67,7 +67,7 @@ export default function EmptyState({
       {action && (
         <Button
           onClick={action.onClick}
-          variant={action.variant || "primary"}
+          variant={action.variant || "solid"}
           color="primary"
         >
           {action.label}

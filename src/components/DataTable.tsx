@@ -1,4 +1,5 @@
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/table";
+'use client';
+
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { 
@@ -17,7 +18,7 @@ interface Column<T> {
   width?: string;
 }
 
-interface DataTableProps<T> {
+interface DataTableProps<T extends { id?: string | number }> {
   data: T[];
   columns: Column<T>[];
   searchable?: boolean;
@@ -28,7 +29,7 @@ interface DataTableProps<T> {
   actions?: {
     label: string;
     onClick: (item: T) => void;
-    variant?: "primary" | "secondary" | "outline";
+    variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "ghost";
     color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
     size?: "sm" | "md" | "lg";
   }[];
@@ -36,7 +37,7 @@ interface DataTableProps<T> {
   className?: string;
 }
 
-export default function DataTable<T>({
+export default function DataTable<T extends { id?: string | number }>({
   data,
   columns,
   searchable = false,
@@ -140,54 +141,72 @@ export default function DataTable<T>({
       )}
 
       {/* Table */}
-      <Table aria-label="Data table">
-        <TableHeader>
-          {columns.map((column) => (
-            <TableColumn
-              key={column.key}
-              allowsSorting={sortable && column.sortable !== false}
-              onPress={() => handleSort(column.key)}
-              style={{ width: column.width }}
-            >
-              {column.label}
-            </TableColumn>
-          ))}
-          {actions.length > 0 && (
-            <TableColumn>Akce</TableColumn>
-          )}
-        </TableHeader>
-        <TableBody
-          emptyContent={emptyMessage}
-          items={paginatedData}
-        >
-          {(item) => (
-            <TableRow key={String(item.id || item[columns[0]?.key])}>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-800">
+            <tr>
               {columns.map((column) => (
-                <TableCell key={column.key}>
-                  {column.render ? column.render(item) : String(item[column.key as keyof T] || "")}
-                </TableCell>
+                <th
+                  key={column.key}
+                  className={`px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider ${
+                    sortable && column.sortable !== false ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700' : ''
+                  }`}
+                  onClick={() => sortable && column.sortable !== false ? handleSort(column.key) : undefined}
+                  style={{ width: column.width }}
+                >
+                  {column.label}
+                  {sortable && column.sortable !== false && sortColumn === column.key && (
+                    <span className="ml-2">
+                      {sortDirection === "asc" ? "↑" : "↓"}
+                    </span>
+                  )}
+                </th>
               ))}
               {actions.length > 0 && (
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {actions.map((action, index) => (
-                      <Button
-                        key={index}
-                        size={action.size || "sm"}
-                        variant={action.variant || "outline"}
-                        color={action.color || "primary"}
-                        onClick={() => action.onClick(item)}
-                      >
-                        {action.label}
-                      </Button>
-                    ))}
-                  </div>
-                </TableCell>
+                <th key="actions" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Akce
+                </th>
               )}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            </tr>
+          </thead>
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+            {paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length + (actions.length > 0 ? 1 : 0)} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                  {emptyMessage}
+                </td>
+              </tr>
+            ) : (
+              paginatedData.map((item, index) => (
+                <tr key={String(item.id || index)} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  {columns.map((column) => (
+                    <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                      {column.render ? column.render(item) : String(item[column.key as keyof T] || "")}
+                    </td>
+                  ))}
+                  {actions.length > 0 && (
+                    <td key="actions" className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                      <div className="flex items-center gap-2">
+                        {actions.map((action, index) => (
+                          <Button
+                            key={index}
+                            size={action.size || "sm"}
+                            variant={action.variant || "bordered"}
+                            color={action.color || "primary"}
+                            onClick={() => action.onClick(item)}
+                          >
+                            {action.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination */}
       {pagination && totalPages > 1 && (
@@ -199,7 +218,7 @@ export default function DataTable<T>({
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              variant="outline"
+              variant="bordered"
               isDisabled={currentPage === 1}
               onClick={() => handlePageChange(currentPage - 1)}
             >
@@ -212,7 +231,7 @@ export default function DataTable<T>({
                 <Button
                   key={page}
                   size="sm"
-                  variant={page === currentPage ? "solid" : "outline"}
+                  variant={page === currentPage ? "solid" : "bordered"}
                   color={page === currentPage ? "primary" : "default"}
                   onClick={() => handlePageChange(page)}
                 >
@@ -223,7 +242,7 @@ export default function DataTable<T>({
             
             <Button
               size="sm"
-              variant="outline"
+              variant="bordered"
               isDisabled={currentPage === totalPages}
               onClick={() => handlePageChange(currentPage + 1)}
             >

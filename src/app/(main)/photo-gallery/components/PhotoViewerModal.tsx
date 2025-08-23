@@ -13,6 +13,7 @@ import {
   PhotoIcon
 } from "@heroicons/react/24/outline";
 import { Photo, PhotoAlbum } from "@/types/photoGallery";
+import { Image } from "@heroui/image";
 
 interface PhotoViewerModalProps {
   isOpen: boolean;
@@ -116,13 +117,15 @@ export default function PhotoViewerModal({
                 </div>
               )}
               
-              <img
+              <Image
                 src={currentPhoto.file_url}
                 alt={currentPhoto.title || `Fotografie ${currentPhotoIndex + 1}`}
-                className={`max-w-full max-h-[70vh] object-contain transition-opacity duration-200 ${
+                  className={`max-w-full max-h-[70vh] object-contain transition-opacity duration-200 ${
                   isLoading ? 'opacity-0' : 'opacity-100'
                 }`}
                 onLoad={handleImageLoad}
+                width={100}
+                height={100}
               />
             </div>
 

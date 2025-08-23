@@ -9,6 +9,7 @@ import {
   PlusIcon,
   ArrowRightIcon
 } from "@heroicons/react/24/outline";
+import { Image } from "@heroui/image";
 
 interface BaseCardProps {
   children: React.ReactNode;
@@ -30,7 +31,7 @@ interface SimpleCardProps extends BaseCardProps {
   actions?: {
     label: string;
     onClick: () => void;
-    variant?: "primary" | "secondary" | "outline";
+    variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "ghost";
     color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
     size?: "sm" | "md" | "lg";
     icon?: React.ReactNode;
@@ -39,7 +40,7 @@ interface SimpleCardProps extends BaseCardProps {
   badges?: {
     text: string;
     color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
-    variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "shadow";
+    variant?: "solid" | "flat" | "faded";
   }[];
 }
 
@@ -65,7 +66,7 @@ interface FeatureCardProps extends BaseCardProps {
   };
 }
 
-interface ActionCardProps extends BaseCardProps {
+interface ActionCardProps {
   title: string;
   description: string;
   action: {
@@ -73,6 +74,8 @@ interface ActionCardProps extends BaseCardProps {
     onClick: () => void;
     icon?: React.ReactNode;
   };
+  className?: string;
+  shadow?: "none" | "sm" | "md" | "lg" | "xl";
 }
 
 // Simple Card with header, body, and optional footer
@@ -112,7 +115,7 @@ export function SimpleCard({
                 <Badge
                   key={index}
                   color={badge.color || "default"}
-                  variant={badge.variant || "light"}
+                  variant={badge.variant || "flat"}
                   size="sm"
                 >
                   {badge.text}
@@ -137,10 +140,12 @@ export function SimpleCard({
 
       {image && (
         <div className="px-6">
-          <img
+          <Image
             src={image.src}
             alt={image.alt}
-            className={`w-full object-cover rounded-lg ${image.height || 'h-48'}`}
+            className={'w-full object-cover rounded-lg'}
+            width={100}
+            height={100}
           />
         </div>
       )}
@@ -162,7 +167,7 @@ export function SimpleCard({
                 <Button
                   key={index}
                   size={action.size || "sm"}
-                  variant={action.variant || "outline"}
+                  variant={action.variant || "bordered"}
                   color={action.color || "primary"}
                   onClick={action.onClick}
                   startContent={action.icon}
@@ -365,7 +370,9 @@ export function QuickActionCard({
       action={action}
       className={className}
       shadow={shadow}
-    />
+    >
+      {/* Quick action cards don't need additional content */}
+    </ActionCard>
   );
 }
 

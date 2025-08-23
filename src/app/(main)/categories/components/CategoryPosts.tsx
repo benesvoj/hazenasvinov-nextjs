@@ -35,7 +35,7 @@ export function CategoryPosts({ categoryName, categorySlug }: CategoryPostsProps
               <ul className="list-disc list-inside">
                 {latestPosts.map(post => (
                   <li key={post.id}>
-                    "{post.title}" - Tags: {post.tags?.join(', ') || 'none'}
+                    &ldquo;{post.title}&rdquo; - Tags: {post.tags?.join(', ') || 'none'}
                   </li>
                 ))}
               </ul>

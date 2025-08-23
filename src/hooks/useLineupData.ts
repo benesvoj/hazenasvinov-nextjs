@@ -56,7 +56,7 @@ export const useLineupData = () => {
       console.error('Error getting/creating external player:', error);
       throw error;
     }
-  }, [supabase]);
+  }, []);
 
   // Fetch lineup data
   const fetchLineup = useCallback(async (matchId: string, teamId: string) => {
@@ -156,7 +156,7 @@ export const useLineupData = () => {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, []);
 
   // Fetch lineup data by lineup ID
   const fetchLineupById = useCallback(async (lineupId: string) => {
@@ -255,7 +255,7 @@ export const useLineupData = () => {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, []);
 
   // Delete lineup
   const deleteLineup = useCallback(async (lineupId: string): Promise<void> => {
@@ -293,7 +293,7 @@ export const useLineupData = () => {
       }
       throw error;
     }
-  }, [supabase]);
+  }, []);
 
   // Save lineup
   const saveLineup = useCallback(async (lineupId: string, formData: LineupFormData): Promise<void> => {
@@ -423,7 +423,7 @@ export const useLineupData = () => {
       }
       throw error;
     }
-  }, [supabase, deleteLineup, fetchLineupById, getOrCreateExternalPlayer]);
+  }, [deleteLineup, fetchLineupById, getOrCreateExternalPlayer]);
 
   // Get lineup summary
   const getLineupSummary = useCallback(async (matchId: string, teamId: string): Promise<LineupSummary | null> => {
@@ -452,10 +452,10 @@ export const useLineupData = () => {
       // Fallback to local calculation
       return calculateLineupSummaryFromData(matchId, teamId);
     }
-  }, [supabase]);
+  }, []);
 
   // Fallback function to calculate lineup summary from local data
-  const calculateLineupSummaryFromData = useCallback(async (matchId: string, teamId: string): Promise<LineupSummary | null> => {
+  const calculateLineupSummaryFromData = async (matchId: string, teamId: string): Promise<LineupSummary | null> => {
     try {
       // Get lineup data from the tables directly
       const { data: lineupData, error: lineupError } = await supabase
@@ -515,7 +515,7 @@ export const useLineupData = () => {
       console.error('Error calculating lineup summary from data:', error);
       return null;
     }
-  }, [supabase]);
+  };
 
   // Validate lineup data
   const validateLineupData = (formData: LineupFormData): LineupValidation => {

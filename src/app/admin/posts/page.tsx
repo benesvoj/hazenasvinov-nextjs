@@ -1136,7 +1136,7 @@ export default function BlogPostsPage() {
                   onSelectionChange={(keys) => handleInputChange('category_id', Array.from(keys)[0] as string)}
                 >
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
+                    <SelectItem key={category.id}>
                       {category.name}
                     </SelectItem>
                   ))}
@@ -1300,7 +1300,7 @@ export default function BlogPostsPage() {
                   onSelectionChange={(keys) => handleInputChange('category_id', Array.from(keys)[0] as string)}
                 >
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
+                    <SelectItem key={category.id}>
                       {category.name}
                     </SelectItem>
                   ))}

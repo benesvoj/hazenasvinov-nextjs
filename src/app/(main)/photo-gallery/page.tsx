@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { 
@@ -24,8 +24,19 @@ export default function PhotoGalleryPage() {
   const [isPhotoViewerOpen, setIsPhotoViewerOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
+  // Load photos for a specific album
+  const loadPhotosForAlbum = useCallback(async (album: PhotoAlbum) => {
+    try {
+      setSelectedAlbum(album);
+      const albumPhotos = await getPhotosByAlbum(album.id);
+      setPhotos(albumPhotos);
+    } catch (err) {
+      console.error('Error loading photos:', err);
+    }
+  }, []);
+
   // Load albums
-  const loadAlbums = async () => {
+  const loadAlbums = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getPhotoAlbums();
@@ -43,22 +54,11 @@ export default function PhotoGalleryPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Load photos for a specific album
-  const loadPhotosForAlbum = async (album: PhotoAlbum) => {
-    try {
-      setSelectedAlbum(album);
-      const albumPhotos = await getPhotosByAlbum(album.id);
-      setPhotos(albumPhotos);
-    } catch (err) {
-      console.error('Error loading photos:', err);
-    }
-  };
+  }, [loadPhotosForAlbum]);
 
   useEffect(() => {
     loadAlbums();
-  }, []);
+  }, [loadAlbums]);
 
   // Filter albums based on search term
   const filteredAlbums = albums.filter(album =>

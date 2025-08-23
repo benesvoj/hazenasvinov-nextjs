@@ -4,7 +4,7 @@ import React from "react";
 import { Sidebar } from "@/app/admin/components/Sidebar";
 import { TopBar } from "@/app/admin/components/TopBar";
 import { SidebarProvider } from "@/app/admin/components/SidebarContext";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute } from "@/components";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -2,7 +2,7 @@ import { Badge } from "@heroui/badge";
 
 interface StatusBadgeProps {
   status: string;
-  variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "shadow";
+  variant?: "solid" | "flat" | "faded" | "shadow";
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -12,32 +12,32 @@ const getStatusConfig = (status: string) => {
   const statusMap: Record<string, { 
     label: string; 
     color: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
-    variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "shadow";
+    variant?: "solid" | "flat" | "faded" | "shadow";
   }> = {
     // Blog post statuses
-    'draft': { label: 'Koncept', color: 'warning', variant: 'light' },
-    'published': { label: 'Publikováno', color: 'success', variant: 'light' },
-    'archived': { label: 'Archivováno', color: 'secondary', variant: 'light' },
+    'draft': { label: 'Koncept', color: 'warning', variant: 'flat' },
+    'published': { label: 'Publikováno', color: 'success', variant: 'flat' },
+    'archived': { label: 'Archivováno', color: 'secondary', variant: 'flat' },
     
     // Match statuses
-    'scheduled': { label: 'Naplánováno', color: 'primary', variant: 'light' },
-    'in_progress': { label: 'Probíhá', color: 'warning', variant: 'light' },
-    'completed': { label: 'Dokončeno', color: 'success', variant: 'light' },
-    'cancelled': { label: 'Zrušeno', color: 'danger', variant: 'light' },
-    'postponed': { label: 'Odloženo', color: 'secondary', variant: 'light' },
+    'scheduled': { label: 'Naplánováno', color: 'primary', variant: 'flat' },
+    'in_progress': { label: 'Probíhá', color: 'warning', variant: 'flat' },
+    'completed': { label: 'Dokončeno', color: 'success', variant: 'flat' },
+    'cancelled': { label: 'Zrušeno', color: 'danger', variant: 'flat' },
+    'postponed': { label: 'Odloženo', color: 'secondary', variant: 'flat' },
     
     // User statuses
-    'active': { label: 'Aktivní', color: 'success', variant: 'light' },
-    'inactive': { label: 'Neaktivní', color: 'secondary', variant: 'light' },
-    'suspended': { label: 'Pozastaveno', color: 'danger', variant: 'light' },
+    'active': { label: 'Aktivní', color: 'success', variant: 'flat' },
+    'inactive': { label: 'Neaktivní', color: 'secondary', variant: 'flat' },
+    'suspended': { label: 'Pozastaveno', color: 'danger', variant: 'flat' },
     
     // Member function statuses
-    'current': { label: 'Aktuální', color: 'success', variant: 'light' },
-    'past': { label: 'Minulá', color: 'secondary', variant: 'light' },
-    'future': { label: 'Budoucí', color: 'primary', variant: 'light' },
+    'current': { label: 'Aktuální', color: 'success', variant: 'flat' },
+    'past': { label: 'Minulá', color: 'secondary', variant: 'flat' },
+    'future': { label: 'Budoucí', color: 'primary', variant: 'flat' },
     
     // Default
-    'default': { label: status, color: 'default', variant: 'light' }
+    'default': { label: status, color: 'default', variant: 'flat' }
   };
   
   return statusMap[status.toLowerCase()] || statusMap['default'];
