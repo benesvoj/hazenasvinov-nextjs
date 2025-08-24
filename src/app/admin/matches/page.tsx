@@ -58,6 +58,17 @@ export default function MatchesAdminPage() {
   const { isOpen: isMatchProcessOpen, onOpen: onMatchProcessOpen, onClose: onMatchProcessClose } = useDisclosure();
   const { importMatches } = useExcelImport();
 
+  // Custom handlers for match process modal
+  const handleMatchProcessOpen = () => {
+    setMatchProcessStep(1); // Reset to first step
+    onMatchProcessOpen();
+  };
+
+  const handleMatchProcessClose = () => {
+    onMatchProcessClose();
+    setMatchProcessStep(1); // Reset step when closing
+  };
+
   // Reset matchToDelete when confirmation modal closes
   const handleDeleteConfirmClose = () => {
     onDeleteConfirmClose();
@@ -122,6 +133,7 @@ export default function MatchesAdminPage() {
 
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
   const [expandedMatchweeks, setExpandedMatchweeks] = useState<Set<string>>(new Set());
+  const [matchProcessStep, setMatchProcessStep] = useState<number>(1);
 
   const supabase = createClient();
 
@@ -1804,7 +1816,7 @@ export default function MatchesAdminPage() {
                 startContent={<DocumentIcon className="w-4 h-4" />}
                 onPress={() => {
                   onMatchActionsClose();
-                  onMatchProcessOpen();
+                  handleMatchProcessOpen();
                 }}
                 className="w-full justify-start h-auto py-3 px-4"
               >
@@ -1828,8 +1840,8 @@ export default function MatchesAdminPage() {
         </ModalContent>
       </Modal>
 
-      {/* Match Process Modal */}
-      <Modal isOpen={isMatchProcessOpen} onClose={onMatchProcessClose} size="2xl">
+      {/* Match Process Wizard Modal */}
+      <Modal isOpen={isMatchProcessOpen} onClose={handleMatchProcessClose} size="2xl">
         <ModalContent>
           <ModalHeader>
             <div className="flex items-center gap-2">
@@ -1838,29 +1850,43 @@ export default function MatchesAdminPage() {
             </div>
           </ModalHeader>
           <ModalBody className="px-4 py-4">
-            <div className="space-y-6">
-              {/* Step 1: Match Result */}
-              <div className="border rounded-lg p-4 bg-blue-50">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
-                  <h4 className="text-lg font-semibold text-blue-800">Výsledek zápasu</h4>
+            {/* Progress Bar */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Krok {matchProcessStep} z 5</span>
+                <span className="text-sm text-gray-500">{Math.round((matchProcessStep / 5) * 100)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                  style={{ width: `${(matchProcessStep / 5) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Step Content */}
+            {matchProcessStep === 1 && (
+              <div className="border rounded-lg p-6 bg-blue-50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center text-lg font-bold">1</div>
+                  <h4 className="text-xl font-semibold text-blue-800">Výsledek zápasu</h4>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-6 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Domácí tým</label>
-                    <div className="text-lg font-bold text-gray-900">{selectedMatch?.home_team?.name}</div>
+                    <div className="text-xl font-bold text-gray-900">{selectedMatch?.home_team?.name}</div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Hostující tým</label>
-                    <div className="text-lg font-bold text-gray-900">{selectedMatch?.away_team?.name}</div>
+                    <div className="text-xl font-bold text-gray-900">{selectedMatch?.away_team?.name}</div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Skóre domácího</label>
                     <input 
                       type="number" 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                       placeholder="0"
                       min="0"
                     />
@@ -1869,102 +1895,177 @@ export default function MatchesAdminPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Skóre hostujícího</label>
                     <input 
                       type="number" 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                       placeholder="0"
                       min="0"
                     />
                   </div>
                 </div>
               </div>
+            )}
 
-              {/* Step 2: Match Document Photo */}
-              <div className="border rounded-lg p-4 bg-yellow-50">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
-                  <h4 className="text-lg font-semibold text-yellow-800">Fotka dokumentu zápasu</h4>
+            {matchProcessStep === 2 && (
+              <div className="border rounded-lg p-6 bg-yellow-50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-yellow-500 text-white rounded-full flex items-center justify-center text-lg font-bold">2</div>
+                  <h4 className="text-xl font-semibold text-yellow-800">Fotka dokumentu zápasu</h4>
                 </div>
                 <div className="text-center">
-                  <div className="border-2 border-dashed border-yellow-300 rounded-lg p-8 bg-yellow-100">
-                    <div className="text-yellow-600 mb-2">
-                      <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="border-2 border-dashed border-yellow-300 rounded-lg p-12 bg-yellow-100">
+                    <div className="text-yellow-600 mb-3">
+                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
                     </div>
-                    <p className="text-yellow-700 font-medium">Klikněte pro pořízení fotky</p>
-                    <p className="text-yellow-600 text-sm mt-1">nebo přetáhněte soubor</p>
+                    <p className="text-yellow-700 font-medium text-lg mb-2">Klikněte pro pořízení fotky</p>
+                    <p className="text-yellow-600">nebo přetáhněte soubor</p>
                   </div>
                 </div>
               </div>
+            )}
 
-              {/* Step 3: Match Photos */}
-              <div className="border rounded-lg p-4 bg-green-50">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                  <h4 className="text-lg font-semibold text-green-800">Fotky ze zápasu</h4>
+            {matchProcessStep === 3 && (
+              <div className="border rounded-lg p-6 bg-green-50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center text-lg font-bold">3</div>
+                  <h4 className="text-xl font-semibold text-green-800">Fotky ze zápasu</h4>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-4">
                   {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-100 text-center">
-                      <div className="text-green-600 mb-1">
-                        <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div key={i} className="border-2 border-dashed border-green-300 rounded-lg p-6 bg-green-100 text-center hover:bg-green-200 transition-colors cursor-pointer">
+                      <div className="text-green-600 mb-2">
+                        <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
                       </div>
-                      <p className="text-green-700 text-xs">Fotka {i}</p>
+                      <p className="text-green-700 font-medium">Fotka {i}</p>
                     </div>
                   ))}
                 </div>
               </div>
+            )}
 
-              {/* Step 4: Blog Post */}
-              <div className="border rounded-lg p-4 bg-purple-50">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
-                  <h4 className="text-lg font-semibold text-purple-800">Článek o zápasu</h4>
+            {matchProcessStep === 4 && (
+              <div className="border rounded-lg p-6 bg-purple-50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center text-lg font-bold">4</div>
+                  <h4 className="text-xl font-semibold text-purple-800">Článek o zápasu</h4>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Nadpis článku</label>
                     <input 
                       type="text" 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
                       placeholder="Nadpis článku o zápasu..."
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Obsah článku</label>
                     <textarea 
-                      rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      rows={5}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
                       placeholder="Popis zápasu, zajímavé momenty, výsledek..."
                     />
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {matchProcessStep === 5 && (
+              <div className="border rounded-lg p-6 bg-orange-50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center text-lg font-bold">5</div>
+                  <h4 className="text-xl font-semibold text-orange-800">Distribuce příspěvku</h4>
+                </div>
+                <div className="space-y-4">
+                  <p className="text-gray-600 mb-4">Vyberte, kde chcete zveřejnit obsah o zápasu:</p>
+                  
+                  <div className="space-y-3">
+                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
+                      <input type="checkbox" className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500" />
+                      <div className="ml-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-blue-600 rounded"></div>
+                          <span className="font-medium text-gray-900">Web stránka</span>
+                        </div>
+                        <p className="text-sm text-gray-500">Publikovat článek na hlavní web stránce</p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
+                      <input type="checkbox" className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500" />
+                      <div className="ml-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded"></div>
+                          <span className="font-medium text-gray-900">Instagram</span>
+                        </div>
+                        <p className="text-sm text-gray-500">Sdílet na Instagram s fotkami ze zápasu</p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
+                      <input type="checkbox" className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500" />
+                      <div className="ml-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-blue-600 rounded"></div>
+                          <span className="font-medium text-gray-900">Facebook</span>
+                        </div>
+                        <p className="text-sm text-gray-500">Publikovat na Facebook stránce klubu</p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
+                      <input type="checkbox" className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500" />
+                      <div className="ml-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-green-600 rounded"></div>
+                          <span className="font-medium text-gray-900">WhatsApp skupina</span>
+                        </div>
+                        <p className="text-sm text-gray-500">Poslat do WhatsApp skupiny členů</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
           </ModalBody>
           <ModalFooter className="px-4 py-4">
-            <div className="flex gap-2 w-full">
-              <Button
-                color="default"
-                variant="light"
-                onPress={onMatchProcessClose}
-                className="flex-1"
-              >
-                Zrušit
-              </Button>
-              <Button
-                color="success"
-                variant="solid"
-                onPress={() => {
-                  // Mock: Show success message
-                  alert('Proces dokončen! (Mock implementace)');
-                  onMatchProcessClose();
-                }}
-                className="flex-1"
-              >
-                Dokončit proces
-              </Button>
+            <div className="flex gap-3 w-full">
+              {matchProcessStep > 1 && (
+                <Button
+                  color="default"
+                  variant="light"
+                  onPress={() => setMatchProcessStep(prev => prev - 1)}
+                  className="flex-1"
+                >
+                  ← Zpět
+                </Button>
+              )}
+              
+              {matchProcessStep < 5 ? (
+                <Button
+                  color="primary"
+                  variant="solid"
+                  onPress={() => setMatchProcessStep(prev => prev + 1)}
+                  className="flex-1"
+                >
+                  Další →
+                </Button>
+              ) : (
+                <Button
+                  color="success"
+                  variant="solid"
+                  onPress={() => {
+                    // Mock: Show success message
+                    alert('Proces dokončen! (Mock implementace)');
+                    handleMatchProcessClose();
+                  }}
+                  className="flex-1"
+                >
+                  Dokončit proces
+                </Button>
+              )}
             </div>
           </ModalFooter>
         </ModalContent>
