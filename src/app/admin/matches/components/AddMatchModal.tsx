@@ -14,11 +14,11 @@ interface AddMatchModalProps {
     time: string;
     home_team_id: string;
     away_team_id: string;
-    venue: string;
+    venue?: string;
     category_id: string;
     season_id: string;
-    matchweek: string;
-    match_number: string;
+    matchweek?: string;
+    match_number?: string;
   };
   setFormData: (data: any) => void;
   filteredTeams: Team[];

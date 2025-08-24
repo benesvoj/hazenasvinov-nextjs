@@ -5,3 +5,6 @@ export { default as EditMatchModal } from './EditMatchModal';
 export { default as BulkUpdateMatchweekModal } from './BulkUpdateMatchweekModal';
 export { default as ExcelImportModal } from './ExcelImportModal';
 export { default as MatchActionsMenu } from './MatchActionsMenu';
+export { default as MatchActionsModal } from './MatchActionsModal';
+export { default as MatchProcessWizardModal } from './MatchProcessWizardModal';
+export { default as LineupManagerModal } from './LineupManagerModal';

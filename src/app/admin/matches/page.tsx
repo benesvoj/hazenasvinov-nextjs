@@ -23,7 +23,7 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
 import Image from 'next/image';
-import { LineupManager, AddMatchModal, AddResultModal, EditMatchModal, BulkUpdateMatchweekModal, ExcelImportModal, MatchActionsMenu } from './components';
+import { AddMatchModal, AddResultModal, EditMatchModal, BulkUpdateMatchweekModal, ExcelImportModal, MatchActionsMenu, MatchActionsModal, MatchProcessWizardModal, LineupManagerModal } from './components';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import MobileActionsMenu from '@/components/MobileActionsMenu';
 import { useExcelImport } from '@/hooks/useExcelImport';
@@ -58,16 +58,7 @@ export default function MatchesAdminPage() {
   const { isOpen: isMatchProcessOpen, onOpen: onMatchProcessOpen, onClose: onMatchProcessClose } = useDisclosure();
   const { importMatches } = useExcelImport();
 
-  // Custom handlers for match process modal
-  const handleMatchProcessOpen = () => {
-    setMatchProcessStep(1); // Reset to first step
-    onMatchProcessOpen();
-  };
 
-  const handleMatchProcessClose = () => {
-    onMatchProcessClose();
-    setMatchProcessStep(1); // Reset step when closing
-  };
 
   // Reset matchToDelete when confirmation modal closes
   const handleDeleteConfirmClose = () => {
@@ -133,7 +124,7 @@ export default function MatchesAdminPage() {
 
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
   const [expandedMatchweeks, setExpandedMatchweeks] = useState<Set<string>>(new Set());
-  const [matchProcessStep, setMatchProcessStep] = useState<number>(1);
+
 
   const supabase = createClient();
 
@@ -1022,18 +1013,7 @@ export default function MatchesAdminPage() {
     return options;
   };
 
-  const lineupManagerProps = useMemo(() => {
-    if (!selectedMatch) return null;
-    
-    return {
-      matchId: selectedMatch.id,
-      homeTeamId: selectedMatch.home_team_id,
-      awayTeamId: selectedMatch.away_team_id,
-      homeTeamName: selectedMatch.home_team?.name || 'Neznámý tým',
-      awayTeamName: selectedMatch.away_team?.name || 'Neznámý tým',
-      members: members,
-    };
-  }, [selectedMatch, members]);
+
 
   const handleExcelImport = useCallback(async (matches: any[]) => {
     if (!selectedSeason) {
@@ -1332,9 +1312,12 @@ export default function MatchesAdminPage() {
                                       
                                       <div className="space-y-3">
                                                                         {weekMatches.map((match) => (
-                                      <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => {
-                                        setSelectedMatch(match);
-                                        onMatchActionsOpen();
+                                      <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow lg:cursor-default cursor-pointer" onClick={() => {
+                                        // Only handle click on mobile
+                                        if (window.innerWidth < 1024) { // lg breakpoint
+                                          setSelectedMatch(match);
+                                          onMatchActionsOpen();
+                                        }
                                       }}>
                                         {/* Desktop: Grid layout */}
                                         <div className="hidden lg:grid grid-cols-11 gap-4 items-center">
@@ -1461,8 +1444,62 @@ export default function MatchesAdminPage() {
                                           </div>
                                         </div>
 
-                                        {/* Action indicator - Show that card is clickable */}
-                                        <div className="mt-4 pt-3 border-t border-gray-100">
+                                        {/* Desktop: Show all actions directly */}
+                                        <div className="hidden lg:block mt-4 pt-3 border-t border-gray-100">
+                                          <div className="flex flex-wrap gap-2 justify-end">
+                                            {match.status === 'upcoming' && (
+                                              <Button
+                                                size="sm"
+                                                color="primary"
+                                                variant="light"
+                                                startContent={<EyeIcon className="w-4 h-4" />}
+                                                onPress={() => {
+                                                  setSelectedMatch(match);
+                                                  onAddResultOpen();
+                                                }}
+                                                isDisabled={isSeasonClosed()}
+                                              >
+                                                Výsledek
+                                              </Button>
+                                            )}
+                                            <Button
+                                              size="sm"
+                                              color="warning"
+                                              variant="light"
+                                              startContent={<PencilIcon className="w-4 h-4" />}
+                                              onPress={() => handleEditMatch(match)}
+                                              isDisabled={isSeasonClosed()}
+                                            >
+                                              Upravit
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              color="secondary"
+                                              variant="light"
+                                              startContent={<UserGroupIcon className="w-4 h-4" />}
+                                              onPress={() => {
+                                                setSelectedMatch(match);
+                                                onLineupModalOpen();
+                                              }}
+                                              isDisabled={isSeasonClosed()}
+                                            >
+                                              Sestavy
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              color="danger"
+                                              variant="light"
+                                              startContent={<TrashIcon className="w-4 h-4" />}
+                                              onPress={() => handleDeleteClick(match)}
+                                              isDisabled={isSeasonClosed()}
+                                            >
+                                              Smazat
+                                            </Button>
+                                          </div>
+                                        </div>
+
+                                        {/* Mobile: Show action indicator */}
+                                        <div className="lg:hidden mt-4 pt-3 border-t border-gray-100">
                                           <div className="text-center">
                                             <div className="inline-flex items-center gap-2 text-sm text-gray-500">
                                               <span>Klikněte pro akce</span>
@@ -1507,6 +1544,8 @@ export default function MatchesAdminPage() {
                               </Button>
                             </div>
                           ) : (
+
+                            // TODO: refactor for mobile
                             <div className="overflow-x-auto -mx-4 sm:mx-0">
                               <div className="min-w-full inline-block align-middle">
                                 <div className="overflow-hidden">
@@ -1622,26 +1661,12 @@ export default function MatchesAdminPage() {
       />
 
       {/* Lineup Management Modal */}
-      <Modal isOpen={isLineupModalOpen} onClose={onLineupModalClose} size="5xl">
-        <ModalContent>
-          <ModalHeader>
-            Správa sestav - {selectedMatch?.home_team?.name} vs {selectedMatch?.away_team?.name}
-          </ModalHeader>
-          <ModalBody>
-            {selectedMatch && lineupManagerProps && (
-              <LineupManager 
-                key={selectedMatch.id} 
-                {...lineupManagerProps} 
-              />
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onLineupModalClose}>
-              Zavřít
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <LineupManagerModal
+        isOpen={isLineupModalOpen}
+        onClose={onLineupModalClose}
+        selectedMatch={selectedMatch}
+        members={members}
+      />
 
       {/* Excel Import Modal */}
       <ExcelImportModal 
@@ -1666,368 +1691,26 @@ export default function MatchesAdminPage() {
       />
 
       {/* Match Actions Modal */}
-      <Modal isOpen={isMatchActionsOpen} onClose={onMatchActionsClose} size="sm">
-        <ModalContent>
-          <ModalHeader>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <h3 className="text-lg font-semibold">Akce pro zápas</h3>
-            </div>
-          </ModalHeader>
-          <ModalBody className="px-4 py-4">
-            <div className="space-y-2">
-              {selectedMatch?.status === 'upcoming' && (
-                <Button
-                  color="primary"
-                  variant="light"
-                  size="lg"
-                  startContent={<EyeIcon className="w-4 h-4" />}
-                  onPress={() => {
-                    onMatchActionsClose();
-                    onAddResultOpen();
-                  }}
-                  className="w-full justify-start h-auto py-3 px-4"
-                  isDisabled={isSeasonClosed()}
-                >
-                  <div className="flex flex-col items-start text-left">
-                    <span className="font-medium">Přidat výsledek</span>
-                    <span className="text-xs text-gray-500 mt-1">Zadat výsledek zápasu</span>
-                  </div>
-                </Button>
-              )}
-              
-              <Button
-                color="warning"
-                variant="light"
-                size="lg"
-                startContent={<PencilIcon className="w-4 h-4" />}
-                onPress={() => {
-                  onMatchActionsClose();
-                  handleEditMatch(selectedMatch!);
-                }}
-                className="w-full justify-start h-auto py-3 px-4"
-                isDisabled={isSeasonClosed()}
-              >
-                <div className="flex flex-col items-start text-left">
-                  <span className="font-medium">Upravit zápas</span>
-                  <span className="text-xs text-gray-500 mt-1">Upravit informace o zápasu</span>
-                </div>
-              </Button>
-              
-              <Button
-                color="secondary"
-                variant="light"
-                size="lg"
-                startContent={<UserGroupIcon className="w-4 h-4" />}
-                onPress={() => {
-                  onMatchActionsClose();
-                  onLineupModalOpen();
-                }}
-                className="w-full justify-start h-auto py-3 px-4"
-                isDisabled={isSeasonClosed()}
-              >
-                <div className="flex flex-col items-start text-left">
-                  <span className="font-medium">Správa sestav</span>
-                  <span className="text-xs text-gray-500 mt-1">Spravovat sestavy týmů</span>
-                </div>
-              </Button>
-              
-              <Button
-                color="danger"
-                variant="light"
-                size="lg"
-                startContent={<TrashIcon className="w-4 h-4" />}
-                onPress={() => {
-                  onMatchActionsClose();
-                  handleDeleteClick(selectedMatch!);
-                }}
-                className="w-full justify-start h-auto py-3 px-4"
-                isDisabled={isSeasonClosed()}
-              >
-                <div className="flex flex-col items-start text-left">
-                  <span className="text-left">
-                    <span className="font-medium">Smazat zápas</span>
-                    <span className="text-xs text-gray-500 mt-1 block">Trvale smazat zápas</span>
-                  </span>
-                </div>
-              </Button>
-              
-              <Button
-                color="success"
-                variant="light"
-                size="lg"
-                startContent={<DocumentIcon className="w-4 h-4" />}
-                onPress={() => {
-                  onMatchActionsClose();
-                  handleMatchProcessOpen();
-                }}
-                className="w-full justify-start h-auto py-3 px-4"
-              >
-                <div className="flex flex-col items-start text-left">
-                  <span className="font-medium">Kompletní proces</span>
-                  <span className="text-xs text-gray-500 mt-1">Výsledek, fotky, článek</span>
-                </div>
-              </Button>
-            </div>
-          </ModalBody>
-          <ModalFooter className="px-4 py-4">
-            <Button
-              color="default"
-              variant="light"
-              onPress={onMatchActionsClose}
-              className="w-full"
-            >
-              Zavřít
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <MatchActionsModal
+        isOpen={isMatchActionsOpen}
+        onClose={onMatchActionsClose}
+        match={selectedMatch}
+        onAddResult={onAddResultOpen}
+        onEditMatch={handleEditMatch}
+        onLineupModalOpen={onLineupModalOpen}
+        onDeleteClick={handleDeleteClick}
+        onMatchProcessOpen={onMatchProcessOpen}
+        isSeasonClosed={isSeasonClosed}
+        
+      />
 
-      {/* Match Process Wizard Wizard Modal */}
-      <Modal 
-        isOpen={isMatchProcessOpen} 
-        onClose={handleMatchProcessClose} 
-        size="2xl"
-        classNames={{
-          base: "max-w-[95vw] mx-2",
-          wrapper: "items-start justify-center p-2 sm:p-4 pt-20", // pt-20 pushes modal down from top
-          backdrop: "bg-black/50"
-        }}
-      >
-        <ModalContent>
-          <ModalHeader>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <h3 className="text-lg font-semibold">Kompletní proces zápasu</h3>
-            </div>
-          </ModalHeader>
-          <ModalBody className="px-4 py-4">
-            {/* Progress Bar */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">Krok {matchProcessStep} z 5</span>
-                <span className="text-sm text-gray-500">{Math.round((matchProcessStep / 5) * 100)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-green-500 h-2 rounded-full transition-all duration-300" 
-                  style={{ width: `${(matchProcessStep / 5) * 100}%` }}
-                ></div>
-              </div>
-            </div>
+      {/* Match Process Wizard Modal */}
+      <MatchProcessWizardModal
+        isOpen={isMatchProcessOpen}
+        onClose={onMatchProcessClose}
+        match={selectedMatch}
+      />
 
-            {/* Step Content */}
-            {matchProcessStep === 1 && (
-              <div className="border rounded-lg p-6 bg-blue-50">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center text-lg font-bold">1</div>
-                  <h4 className="text-xl font-semibold text-blue-800">Výsledek zápasu</h4>
-                </div>
-                <div className="grid grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Domácí tým</label>
-                    <div className="text-xl font-bold text-gray-900">{selectedMatch?.home_team?.name}</div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Hostující tým</label>
-                    <div className="text-xl font-bold text-gray-900">{selectedMatch?.away_team?.name}</div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Skóre domácího</label>
-                    <input 
-                      type="number" 
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-                      placeholder="0"
-                      min="0"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Skóre hostujícího</label>
-                    <input 
-                      type="number" 
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-                      placeholder="0"
-                      min="0"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {matchProcessStep === 2 && (
-              <div className="border rounded-lg p-6 bg-yellow-50">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-yellow-500 text-white rounded-full flex items-center justify-center text-lg font-bold">2</div>
-                  <h4 className="text-xl font-semibold text-yellow-800">Fotka dokumentu zápasu</h4>
-                </div>
-                <div className="text-center">
-                  <div className="border-2 border-dashed border-yellow-300 rounded-lg p-12 bg-yellow-100">
-                    <div className="text-yellow-600 mb-3">
-                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                    <p className="text-yellow-700 font-medium text-lg mb-2">Klikněte pro pořízení fotky</p>
-                    <p className="text-yellow-600">nebo přetáhněte soubor</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {matchProcessStep === 3 && (
-              <div className="border rounded-lg p-6 bg-green-50">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center text-lg font-bold">3</div>
-                  <h4 className="text-xl font-semibold text-green-800">Fotky ze zápasu</h4>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="border-2 border-dashed border-green-300 rounded-lg p-6 bg-green-100 text-center hover:bg-green-200 transition-colors cursor-pointer">
-                      <div className="text-green-600 mb-2">
-                        <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                      </div>
-                      <p className="text-green-700 font-medium">Fotka {i}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {matchProcessStep === 4 && (
-              <div className="border rounded-lg p-6 bg-purple-50">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center text-lg font-bold">4</div>
-                  <h4 className="text-xl font-semibold text-purple-800">Článek o zápasu</h4>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Nadpis článku</label>
-                    <input 
-                      type="text" 
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
-                      placeholder="Nadpis článku o zápasu..."
-                      autoComplete="off"
-                      autoCorrect="off"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Obsah článku</label>
-                    <textarea 
-                      rows={5}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
-                      placeholder="Popis zápasu, zajímavé momenty, výsledek..."
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {matchProcessStep === 5 && (
-              <div className="border rounded-lg p-6 bg-orange-50">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center text-lg font-bold">5</div>
-                  <h4 className="text-xl font-semibold text-orange-800">Distribuce příspěvku</h4>
-                </div>
-                <div className="space-y-4">
-                  <p className="text-gray-600 mb-4">Vyberte, kde chcete zveřejnit obsah o zápasu:</p>
-                  
-                  <div className="space-y-3">
-                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
-                      <input type="checkbox" className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500" />
-                      <div className="ml-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-blue-600 rounded"></div>
-                          <span className="font-medium text-gray-900">Web stránka</span>
-                        </div>
-                        <p className="text-sm text-gray-500">Publikovat článek na hlavní web stránce</p>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
-                      <input type="checkbox" className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500" />
-                      <div className="ml-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded"></div>
-                          <span className="font-medium text-gray-900">Instagram</span>
-                        </div>
-                        <p className="text-sm text-gray-500">Sdílet na Instagram s fotkami ze zápasu</p>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
-                      <input type="checkbox" className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500" />
-                      <div className="ml-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-blue-600 rounded"></div>
-                          <span className="font-medium text-gray-900">Facebook</span>
-                        </div>
-                        <p className="text-sm text-gray-500">Publikovat na Facebook stránce klubu</p>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
-                      <input type="checkbox" className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500" />
-                      <div className="ml-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-green-600 rounded"></div>
-                          <span className="font-medium text-gray-900">WhatsApp skupina</span>
-                        </div>
-                        <p className="text-sm text-gray-500">Poslat do WhatsApp skupiny členů</p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            )}
-          </ModalBody>
-          <ModalFooter className="px-4 py-4">
-            <div className="flex gap-3 w-full">
-              {matchProcessStep > 1 && (
-                <Button
-                  color="default"
-                  variant="light"
-                  onPress={() => setMatchProcessStep(prev => prev - 1)}
-                  className="flex-1"
-                >
-                  ← Zpět
-                </Button>
-              )}
-              
-              {matchProcessStep < 5 ? (
-                <Button
-                  color="primary"
-                  variant="solid"
-                  onPress={() => setMatchProcessStep(prev => prev + 1)}
-                  className="flex-1"
-                >
-                  Další →
-                </Button>
-              ) : (
-                <Button
-                  color="success"
-                  variant="solid"
-                  onPress={() => {
-                    // Mock: Show success message
-                    alert('Proces dokončen! (Mock implementace)');
-                    handleMatchProcessClose();
-                  }}
-                  className="flex-1"
-                >
-                  Dokončit proces
-                </Button>
-              )}
-            </div>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
 
       {/* Delete All Matches Confirmation Modal */}
       <DeleteConfirmationModal

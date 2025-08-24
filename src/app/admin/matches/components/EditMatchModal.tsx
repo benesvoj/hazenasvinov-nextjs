@@ -20,8 +20,8 @@ interface EditMatchModalProps {
     home_score: string;
     away_score: string;
     status: 'upcoming' | 'completed';
-    matchweek: string;
-    match_number: string;
+    matchweek?: string;
+    match_number?: string;
     category_id: string;
   };
   onEditDataChange: (data: any) => void;
