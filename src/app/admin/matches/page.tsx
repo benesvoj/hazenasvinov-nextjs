@@ -17,7 +17,8 @@ import {
   TrashIcon,
   EyeIcon,
   PencilIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  DocumentIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
@@ -54,6 +55,7 @@ export default function MatchesAdminPage() {
   const { isOpen: isDeleteConfirmOpen, onOpen: onDeleteConfirmOpen, onClose: onDeleteConfirmClose } = useDisclosure();
   const { isOpen: isDeleteAllConfirmOpen, onOpen: onDeleteAllConfirmOpen, onClose: onDeleteAllConfirmClose } = useDisclosure();
   const { isOpen: isMatchActionsOpen, onOpen: onMatchActionsOpen, onClose: onMatchActionsClose } = useDisclosure();
+  const { isOpen: isMatchProcessOpen, onOpen: onMatchProcessOpen, onClose: onMatchProcessClose } = useDisclosure();
   const { importMatches } = useExcelImport();
 
   // Reset matchToDelete when confirmation modal closes
@@ -1794,6 +1796,23 @@ export default function MatchesAdminPage() {
                   </span>
                 </div>
               </Button>
+              
+              <Button
+                color="success"
+                variant="light"
+                size="lg"
+                startContent={<DocumentIcon className="w-4 h-4" />}
+                onPress={() => {
+                  onMatchActionsClose();
+                  onMatchProcessOpen();
+                }}
+                className="w-full justify-start h-auto py-3 px-4"
+              >
+                <div className="flex flex-col items-start text-left">
+                  <span className="font-medium">Kompletní proces</span>
+                  <span className="text-xs text-gray-500 mt-1">Výsledek, fotky, článek</span>
+                </div>
+              </Button>
             </div>
           </ModalBody>
           <ModalFooter className="px-4 py-4">
@@ -1805,6 +1824,148 @@ export default function MatchesAdminPage() {
             >
               Zavřít
             </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Match Process Modal */}
+      <Modal isOpen={isMatchProcessOpen} onClose={onMatchProcessClose} size="2xl">
+        <ModalContent>
+          <ModalHeader>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <h3 className="text-lg font-semibold">Kompletní proces zápasu</h3>
+            </div>
+          </ModalHeader>
+          <ModalBody className="px-4 py-4">
+            <div className="space-y-6">
+              {/* Step 1: Match Result */}
+              <div className="border rounded-lg p-4 bg-blue-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                  <h4 className="text-lg font-semibold text-blue-800">Výsledek zápasu</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Domácí tým</label>
+                    <div className="text-lg font-bold text-gray-900">{selectedMatch?.home_team?.name}</div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Hostující tým</label>
+                    <div className="text-lg font-bold text-gray-900">{selectedMatch?.away_team?.name}</div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Skóre domácího</label>
+                    <input 
+                      type="number" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Skóre hostujícího</label>
+                    <input 
+                      type="number" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2: Match Document Photo */}
+              <div className="border rounded-lg p-4 bg-yellow-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                  <h4 className="text-lg font-semibold text-yellow-800">Fotka dokumentu zápasu</h4>
+                </div>
+                <div className="text-center">
+                  <div className="border-2 border-dashed border-yellow-300 rounded-lg p-8 bg-yellow-100">
+                    <div className="text-yellow-600 mb-2">
+                      <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <p className="text-yellow-700 font-medium">Klikněte pro pořízení fotky</p>
+                    <p className="text-yellow-600 text-sm mt-1">nebo přetáhněte soubor</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3: Match Photos */}
+              <div className="border rounded-lg p-4 bg-green-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                  <h4 className="text-lg font-semibold text-green-800">Fotky ze zápasu</h4>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-100 text-center">
+                      <div className="text-green-600 mb-1">
+                        <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </div>
+                      <p className="text-green-700 text-xs">Fotka {i}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Step 4: Blog Post */}
+              <div className="border rounded-lg p-4 bg-purple-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                  <h4 className="text-lg font-semibold text-purple-800">Článek o zápasu</h4>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Nadpis článku</label>
+                    <input 
+                      type="text" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="Nadpis článku o zápasu..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Obsah článku</label>
+                    <textarea 
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="Popis zápasu, zajímavé momenty, výsledek..."
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ModalBody>
+          <ModalFooter className="px-4 py-4">
+            <div className="flex gap-2 w-full">
+              <Button
+                color="default"
+                variant="light"
+                onPress={onMatchProcessClose}
+                className="flex-1"
+              >
+                Zrušit
+              </Button>
+              <Button
+                color="success"
+                variant="solid"
+                onPress={() => {
+                  // Mock: Show success message
+                  alert('Proces dokončen! (Mock implementace)');
+                  onMatchProcessClose();
+                }}
+                className="flex-1"
+              >
+                Dokončit proces
+              </Button>
+            </div>
           </ModalFooter>
         </ModalContent>
       </Modal>
