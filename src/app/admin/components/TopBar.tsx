@@ -15,7 +15,8 @@ import {
   DocumentTextIcon,
   PencilIcon,
   CheckIcon,
-  XMarkIcon
+  XMarkIcon,
+  Bars3Icon
 } from "@heroicons/react/24/outline";
 import { 
   Dropdown, 
@@ -74,7 +75,7 @@ const getCurrentSection = (pathname: string) => {
 
 export const TopBar = () => {
   const pathname = usePathname();
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed, isMobileOpen, setIsMobileOpen, isMobile } = useSidebar();
   const { user, signOut } = useAuth();
   const [notifications, setNotifications] = useState(3); // Mock notification count
   const [showReleaseNotes, setShowReleaseNotes] = useState(false);
@@ -231,27 +232,46 @@ export const TopBar = () => {
 
   return (
     <div className={`fixed top-0 right-0 h-16 bg-white border-b border-gray-200 shadow-sm z-40 transition-all duration-300 ease-in-out ${
-      isCollapsed ? 'left-16' : 'left-64'
+      isMobile ? 'left-0' : isCollapsed ? 'left-16' : 'left-64'
     }`}>
-      <div className="flex items-center justify-between h-full px-6">
-        {/* Left side - Section info */}
-        <div className="flex items-center space-x-4">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">{currentSection.title}</h1>
+      <div className="flex items-center justify-between h-full px-4 sm:px-6">
+        {/* Left side - Mobile menu button and Section info */}
+        <div className="flex items-center space-x-3 sm:space-x-4">
+          {/* Mobile menu button */}
+          {isMobile && (
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              className="lg:hidden"
+              onPress={() => setIsMobileOpen(true)}
+              title="Otevřít menu"
+            >
+              <Bars3Icon className="w-5 h-5 text-gray-600" />
+            </Button>
+          )}
+          
+          {/* Section info */}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+              {currentSection.title}
+            </h1>
             {currentSection.description && (
-              <p className="text-sm text-gray-600 mt-1">{currentSection.description}</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1 hidden sm:block">
+                {currentSection.description}
+              </p>
             )}
           </div>
         </div>
 
         {/* Right side - User actions */}
-        <div className="flex items-center space-x-4">
-          {/* Release Notes Button */}
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Release Notes Button - Hidden on very small screens */}
           <Button
             isIconOnly
             variant="light"
             size="sm"
-            className="relative"
+            className="relative hidden sm:flex"
             onPress={handleReleaseNotes}
             title="Release Notes"
           >
@@ -267,12 +287,12 @@ export const TopBar = () => {
             )}
           </Button>
 
-          {/* Notifications */}
+          {/* Notifications - Hidden on very small screens */}
           <Button
             isIconOnly
             variant="light"
             size="sm"
-            className="relative"
+            className="relative hidden sm:flex"
             title="Notifikace"
           >
             <BellIcon className="w-5 h-5 text-gray-600" />
@@ -287,11 +307,12 @@ export const TopBar = () => {
             )}
           </Button>
 
-          {/* Settings */}
+          {/* Settings - Hidden on very small screens */}
           <Button
             isIconOnly
             variant="light"
             size="sm"
+            className="hidden sm:flex"
             title="Nastavení"
           >
             <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
@@ -302,7 +323,7 @@ export const TopBar = () => {
             <DropdownTrigger>
               <Button
                 variant="light"
-                className="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 transition-colors duration-200"
+                className="flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 hover:bg-gray-100 transition-colors duration-200"
               >
                 <Avatar
                   name={getUserInitials()}
@@ -353,6 +374,10 @@ export const TopBar = () => {
         onClose={() => setShowProfileDialog(false)} 
         size="2xl"
         scrollBehavior="inside"
+        classNames={{
+          base: "max-w-[95vw] mx-2",
+          wrapper: "items-center justify-center p-2 sm:p-4"
+        }}
       >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
@@ -448,14 +473,15 @@ export const TopBar = () => {
               )}
             </div>
           </ModalBody>
-          <ModalFooter className="flex justify-between">
-            <div className="flex gap-2">
+          <ModalFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between">
+            <div className="flex gap-2 w-full sm:w-auto">
               {!isEditing ? (
                 <Button
                   color="primary"
                   variant="flat"
                   startContent={<PencilIcon className="w-4 h-4" />}
                   onPress={handleProfileEdit}
+                  className="flex-1 sm:flex-none"
                 >
                   Upravit profil
                 </Button>
@@ -467,6 +493,7 @@ export const TopBar = () => {
                     startContent={<CheckIcon className="w-4 h-4" />}
                     onPress={handleProfileSave}
                     isLoading={isSaving}
+                    className="flex-1 sm:flex-none"
                   >
                     Uložit změny
                   </Button>
@@ -475,6 +502,7 @@ export const TopBar = () => {
                     variant="flat"
                     startContent={<XMarkIcon className="w-4 h-4" />}
                     onPress={handleProfileCancel}
+                    className="flex-1 sm:flex-none"
                   >
                     Zrušit
                   </Button>
@@ -485,6 +513,7 @@ export const TopBar = () => {
               color="default"
               variant="light"
               onPress={() => setShowProfileDialog(false)}
+              className="w-full sm:w-auto"
             >
               Zavřít
             </Button>
@@ -499,8 +528,8 @@ export const TopBar = () => {
         size="4xl"
         scrollBehavior="inside"
         classNames={{
-          base: "max-h-[90vh] overflow-hidden",
-          wrapper: "items-center justify-center p-4",
+          base: "max-h-[90vh] overflow-hidden max-w-[95vw] mx-2",
+          wrapper: "items-center justify-center p-2 sm:p-4",
           body: "max-h-[70vh] overflow-y-auto"
         }}
       >

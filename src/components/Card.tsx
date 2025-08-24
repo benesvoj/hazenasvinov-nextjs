@@ -1,395 +1,191 @@
-import { Card as HeroCard, CardHeader, CardBody, CardFooter } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Badge } from "@heroui/badge";
-import { Divider } from "@heroui/divider";
-import { 
-  EyeIcon, 
-  PencilIcon, 
-  TrashIcon,
-  PlusIcon,
-  ArrowRightIcon
-} from "@heroicons/react/24/outline";
-import { Image } from "@heroui/image";
+import React from "react";
+import { Card as HeroCard, CardBody as HeroCardBody, CardHeader as HeroCardHeader, CardFooter as HeroCardFooter } from "@heroui/react";
 
-interface BaseCardProps {
+interface CardProps {
   children: React.ReactNode;
   className?: string;
-  shadow?: "none" | "sm" | "md" | "lg" | "xl";
   isPressable?: boolean;
   onPress?: () => void;
+  radius?: "none" | "sm" | "md" | "lg";
+  shadow?: "none" | "sm" | "md" | "lg";
 }
 
-interface SimpleCardProps extends BaseCardProps {
-  title?: string;
-  subtitle?: string;
-  description?: string;
-  image?: {
-    src: string;
-    alt: string;
-    height?: string;
-  };
-  actions?: {
-    label: string;
-    onClick: () => void;
-    variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "ghost";
-    color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
-    size?: "sm" | "md" | "lg";
-    icon?: React.ReactNode;
-  }[];
-  footer?: React.ReactNode;
-  badges?: {
-    text: string;
-    color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
-    variant?: "solid" | "flat" | "faded";
-  }[];
-}
-
-interface StatsCardProps extends BaseCardProps {
-  title: string;
-  value: string | number;
-  change?: {
-    value: number;
-    isPositive: boolean;
-    period: string;
-  };
-  icon?: React.ReactNode;
-  trend?: "up" | "down" | "stable";
-}
-
-interface FeatureCardProps extends BaseCardProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  link?: {
-    href: string;
-    label: string;
-  };
-}
-
-interface ActionCardProps {
-  title: string;
-  description: string;
-  action: {
-    label: string;
-    onClick: () => void;
-    icon?: React.ReactNode;
-  };
+interface CardHeaderProps {
+  children: React.ReactNode;
   className?: string;
-  shadow?: "none" | "sm" | "md" | "lg" | "xl";
 }
 
-// Simple Card with header, body, and optional footer
-export function SimpleCard({
-  title,
-  subtitle,
-  description,
-  image,
-  actions,
-  footer,
-  badges,
-  children,
-  className = "",
-  shadow = "md",
-  isPressable = false,
-  onPress
-}: SimpleCardProps) {
-  const shadowClasses = {
-    none: "",
-    sm: "shadow-sm",
-    md: "shadow-md",
-    lg: "shadow-lg",
-    xl: "shadow-xl"
-  };
+interface CardBodyProps {
+  children: React.ReactNode;
+  className?: string;
+  padding?: "none" | "sm" | "md" | "lg";
+}
 
+interface CardFooterProps {
+  children: React.ReactNode;
+  className?: string;
+  justify?: "start" | "center" | "end" | "between" | "around" | "evenly";
+}
+
+export function Card({ 
+  children, 
+  className = "", 
+  isPressable = false,
+  onPress,
+  radius = "lg",
+  shadow = "sm"
+}: CardProps) {
   return (
-    <HeroCard 
-      className={`${shadowClasses[shadow]} ${className}`}
+    <HeroCard
       isPressable={isPressable}
       onPress={onPress}
-    >
-      {(title || subtitle || badges) && (
-        <CardHeader className="pb-3">
-          {badges && badges.length > 0 && (
-            <div className="flex gap-2 mb-2">
-              {badges.map((badge, index) => (
-                <Badge
-                  key={index}
-                  color={badge.color || "default"}
-                  variant={badge.variant || "flat"}
-                  size="sm"
-                >
-                  {badge.text}
-                </Badge>
-              ))}
-            </div>
-          )}
-          
-          {title && (
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {title}
-            </h3>
-          )}
-          
-          {subtitle && (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {subtitle}
-            </p>
-          )}
-        </CardHeader>
-      )}
-
-      {image && (
-        <div className="px-6">
-          <Image
-            src={image.src}
-            alt={image.alt}
-            className={'w-full object-cover rounded-lg'}
-            width={100}
-            height={100}
-          />
-        </div>
-      )}
-
-      <CardBody className="pt-0">
-        {description && (
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {description}
-          </p>
-        )}
-        {children}
-      </CardBody>
-
-      {(actions || footer) && (
-        <CardFooter className="pt-0">
-          {actions && actions.length > 0 && (
-            <div className="flex gap-2 w-full">
-              {actions.map((action, index) => (
-                <Button
-                  key={index}
-                  size={action.size || "sm"}
-                  variant={action.variant || "bordered"}
-                  color={action.color || "primary"}
-                  onClick={action.onClick}
-                  startContent={action.icon}
-                  className="flex-1"
-                >
-                  {action.label}
-                </Button>
-              ))}
-            </div>
-          )}
-          
-          {footer && (
-            <div className="w-full">
-              {actions && actions.length > 0 && <Divider className="my-3" />}
-              {footer}
-            </div>
-          )}
-        </CardFooter>
-      )}
-    </HeroCard>
-  );
-}
-
-// Stats Card for displaying metrics
-export function StatsCard({
-  title,
-  value,
-  change,
-  icon,
-  trend,
-  className = "",
-  shadow = "md"
-}: StatsCardProps) {
-  const shadowClasses = {
-    none: "",
-    sm: "shadow-sm",
-    md: "shadow-md",
-    lg: "shadow-lg",
-    xl: "shadow-xl"
-  };
-
-  const getTrendColor = (trend?: "up" | "down" | "stable") => {
-    switch (trend) {
-      case "up":
-        return "text-green-600 dark:text-green-400";
-      case "down":
-        return "text-red-600 dark:text-red-400";
-      default:
-        return "text-gray-600 dark:text-gray-400";
-    }
-  };
-
-  return (
-    <HeroCard className={`${shadowClasses[shadow]} ${className}`}>
-      <CardBody className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              {title}
-            </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-              {value}
-            </p>
-            
-            {change && (
-              <div className="flex items-center mt-2">
-                <span className={`text-sm font-medium ${getTrendColor(change.isPositive ? "up" : "down")}`}>
-                  {change.isPositive ? "+" : "-"}{Math.abs(change.value)}%
-                </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">
-                  {change.period}
-                </span>
-              </div>
-            )}
-          </div>
-          
-          {icon && (
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                <div className="w-6 h-6 text-blue-600 dark:text-blue-400">
-                  {icon}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </CardBody>
-    </HeroCard>
-  );
-}
-
-// Feature Card for highlighting features
-export function FeatureCard({
-  title,
-  description,
-  icon,
-  link,
-  className = "",
-  shadow = "md"
-}: FeatureCardProps) {
-  const shadowClasses = {
-    none: "",
-    sm: "shadow-sm",
-    md: "shadow-md",
-    lg: "shadow-lg",
-    xl: "shadow-xl"
-  };
-
-  return (
-    <HeroCard className={`${shadowClasses[shadow]} ${className}`}>
-      <CardBody className="p-6">
-        <div className="text-center">
-          <div className="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mb-4">
-            <div className="w-6 h-6 text-blue-600 dark:text-blue-400">
-              {icon}
-            </div>
-          </div>
-          
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            {title}
-          </h3>
-          
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {description}
-          </p>
-          
-          {link && (
-            <Button
-              as="a"
-              href={link.href}
-              variant="light"
-              color="primary"
-              endContent={<ArrowRightIcon className="w-4 h-4" />}
-              className="mx-auto"
-            >
-              {link.label}
-            </Button>
-          )}
-        </div>
-      </CardBody>
-    </HeroCard>
-  );
-}
-
-// Action Card for call-to-action items
-export function ActionCard({
-  title,
-  description,
-  action,
-  className = "",
-  shadow = "md"
-}: ActionCardProps) {
-  const shadowClasses = {
-    none: "",
-    sm: "shadow-sm",
-    md: "shadow-md",
-    lg: "shadow-lg",
-    xl: "shadow-xl"
-  };
-
-  return (
-    <HeroCard className={`${shadowClasses[shadow]} ${className}`}>
-      <CardBody className="p-6">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            {title}
-          </h3>
-          
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {description}
-          </p>
-          
-          <Button
-            onClick={action.onClick}
-            color="primary"
-            variant="solid"
-            startContent={action.icon}
-            className="mx-auto"
-          >
-            {action.label}
-          </Button>
-        </div>
-      </CardBody>
-    </HeroCard>
-  );
-}
-
-// Quick Action Card for common actions
-export function QuickActionCard({
-  title,
-  description,
-  action,
-  className = "",
-  shadow = "sm"
-}: ActionCardProps) {
-  return (
-    <ActionCard
-      title={title}
-      description={description}
-      action={action}
-      className={className}
+      radius={radius}
       shadow={shadow}
-    >
-      {/* Quick action cards don't need additional content */}
-    </ActionCard>
-  );
-}
-
-// Info Card for displaying information
-export function InfoCard({
-  title,
-  children,
-  className = "",
-  shadow = "sm"
-}: BaseCardProps & { title: string }) {
-  return (
-    <SimpleCard
-      title={title}
-      className={className}
-      shadow={shadow}
+      className={`w-full transition-all duration-200 hover:shadow-md ${className}`}
     >
       {children}
-    </SimpleCard>
+    </HeroCard>
+  );
+}
+
+export function CardHeader({ children, className = "" }: CardHeaderProps) {
+  return (
+    <HeroCardHeader className={`px-4 sm:px-6 py-4 ${className}`}>
+      {children}
+    </HeroCardHeader>
+  );
+}
+
+export function CardBody({ children, className = "", padding = "md" }: CardBodyProps) {
+  const paddingClasses = {
+    none: "",
+    sm: "px-3 py-3",
+    md: "px-4 sm:px-6 py-4",
+    lg: "px-6 sm:px-8 py-6"
+  };
+
+  return (
+    <HeroCardBody className={`${paddingClasses[padding]} ${className}`}>
+      {children}
+    </HeroCardBody>
+  );
+}
+
+export function CardFooter({ children, className = "", justify = "between" }: CardFooterProps) {
+  const justifyClasses = {
+    start: "justify-start",
+    center: "justify-center",
+    end: "justify-end",
+    between: "justify-between",
+    around: "justify-around",
+    evenly: "justify-evenly"
+  };
+
+  return (
+    <HeroCardFooter className={`px-4 sm:px-6 py-4 ${justifyClasses[justify]} ${className}`}>
+      {children}
+    </HeroCardFooter>
+  );
+}
+
+// Responsive card grid component
+interface CardGridProps {
+  children: React.ReactNode;
+  columns?: 1 | 2 | 3 | 4 | 5 | 6;
+  gap?: "sm" | "md" | "lg" | "xl";
+  className?: string;
+}
+
+export function CardGrid({ children, columns = 3, gap = "md", className = "" }: CardGridProps) {
+  const gridCols = {
+    1: "grid-cols-1",
+    2: "grid-cols-1 sm:grid-cols-2",
+    3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+    5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+    6: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+  };
+
+  const gridGaps = {
+    sm: "gap-3",
+    md: "gap-4",
+    lg: "gap-6",
+    xl: "gap-8"
+  };
+
+  return (
+    <div className={`grid ${gridCols[columns]} ${gridGaps[gap]} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+// Responsive card list component
+interface CardListProps {
+  children: React.ReactNode;
+  gap?: "sm" | "md" | "lg";
+  className?: string;
+}
+
+export function CardList({ children, gap = "md", className = "" }: CardListProps) {
+  const listGaps = {
+    sm: "space-y-3",
+    md: "space-y-4",
+    lg: "space-y-6"
+  };
+
+  return (
+    <div className={`${listGaps[gap]} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+// Responsive card with actions
+interface ActionCardProps extends CardProps {
+  title: string;
+  subtitle?: string;
+  actions?: React.ReactNode;
+  content: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
+export function ActionCard({ 
+  title, 
+  subtitle, 
+  actions, 
+  content, 
+  footer, 
+  className = "",
+  ...cardProps 
+}: ActionCardProps) {
+  return (
+    <Card className={className} {...cardProps}>
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 truncate">{title}</h3>
+            {subtitle && (
+              <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+            )}
+          </div>
+          {actions && (
+            <div className="flex-shrink-0 flex items-center gap-2">
+              {actions}
+            </div>
+          )}
+        </div>
+      </CardHeader>
+      
+      <CardBody>
+        {content}
+      </CardBody>
+      
+      {footer && (
+        <CardFooter>
+          {footer}
+        </CardFooter>
+      )}
+    </Card>
   );
 }

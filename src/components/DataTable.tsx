@@ -1,105 +1,93 @@
 'use client';
 
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { 
-  ChevronLeftIcon, 
-  ChevronRightIcon, 
-  MagnifyingGlassIcon,
-  FunnelIcon
-} from "@heroicons/react/24/outline";
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Pagination,
+  Button,
+  Input,
+  Chip,
+  Card,
+  CardBody
+} from "@heroui/react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface Column<T> {
   key: string;
   label: string;
   sortable?: boolean;
-  render?: (item: T) => React.ReactNode;
-  width?: string;
+  render?: (value: any, item: T) => React.ReactNode;
+  mobilePriority?: number; // Higher number = higher priority on mobile
 }
 
-interface DataTableProps<T extends { id?: string | number }> {
+interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
-  searchable?: boolean;
-  searchFields?: (keyof T)[];
-  sortable?: boolean;
-  pagination?: boolean;
   itemsPerPage?: number;
-  actions?: {
-    label: string;
-    onClick: (item: T) => void;
-    variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "ghost";
-    color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
-    size?: "sm" | "md" | "lg";
-  }[];
+  searchable?: boolean;
+  sortable?: boolean;
+  onRowClick?: (item: T) => void;
   emptyMessage?: string;
   className?: string;
 }
 
-export default function DataTable<T extends { id?: string | number }>({
+export default function DataTable<T extends Record<string, any>>({
   data,
   columns,
-  searchable = false,
-  searchFields = [],
-  sortable = false,
-  pagination = false,
   itemsPerPage = 10,
-  actions = [],
+  searchable = true,
+  sortable = true,
+  onRowClick,
   emptyMessage = "Žádná data k zobrazení",
   className = ""
 }: DataTableProps<T>) {
+  const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Filter data based on search term
   const filteredData = useMemo(() => {
-    if (!searchable || !searchTerm.trim()) return data;
+    if (!searchTerm) return data;
     
-    return data.filter(item => {
-      return searchFields.some(field => {
-        const value = item[field];
-        if (value === null || value === undefined) return false;
-        return String(value).toLowerCase().includes(searchTerm.toLowerCase());
-      });
-    });
-  }, [data, searchable, searchTerm, searchFields]);
+    return data.filter((item) =>
+      Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [data, searchTerm]);
 
   // Sort data
   const sortedData = useMemo(() => {
-    if (!sortable || !sortColumn) return filteredData;
+    if (!sortColumn) return filteredData;
     
     return [...filteredData].sort((a, b) => {
-      const aValue = a[sortColumn as keyof T];
-      const bValue = b[sortColumn as keyof T];
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
       
-      if (aValue === null || aValue === undefined) return 1;
-      if (bValue === null || bValue === undefined) return -1;
-      
-      let comparison = 0;
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        comparison = aValue.localeCompare(bValue, "cs");
-      } else if (typeof aValue === "number" && typeof bValue === "number") {
-        comparison = aValue - bValue;
-      } else {
-        comparison = String(aValue).localeCompare(String(bValue), "cs");
+      if (aValue < bValue) {
+        return sortDirection === "asc" ? -1 : 1;
       }
-      
-      return sortDirection === "asc" ? comparison : -comparison;
+      if (aValue > bValue) {
+        return sortDirection === "asc" ? 1 : -1;
+      }
+      return 0;
     });
-  }, [filteredData, sortable, sortColumn, sortDirection]);
+  }, [filteredData, sortColumn, sortDirection]);
 
   // Paginate data
   const paginatedData = useMemo(() => {
-    if (!pagination) return sortedData;
-    
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedData.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedData, pagination, currentPage, itemsPerPage]);
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return sortedData.slice(start, end);
+  }, [sortedData, page, itemsPerPage]);
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const pages = Math.ceil(sortedData.length / itemsPerPage);
 
   const handleSort = (columnKey: string) => {
     if (!sortable) return;
@@ -112,144 +100,156 @@ export default function DataTable<T extends { id?: string | number }>({
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  const renderCell = (item: T, column: Column<T>) => {
+    const value = item[column.key];
+    
+    if (column.render) {
+      return column.render(value, item);
+    }
+    
+    return value;
   };
+
+  // Sort columns by mobile priority for mobile view
+  const sortedColumns = useMemo(() => {
+    return [...columns].sort((a, b) => (b.mobilePriority || 0) - (a.mobilePriority || 0));
+  }, [columns]);
+
+  // Mobile card view
+  const renderMobileCard = (item: T) => (
+    <Card 
+      key={JSON.stringify(item)} 
+      className="w-full cursor-pointer hover:shadow-md transition-shadow"
+      isPressable={!!onRowClick}
+      onPress={() => onRowClick?.(item)}
+    >
+      <CardBody className="p-4">
+        <div className="space-y-3">
+          {sortedColumns.slice(0, 3).map((column) => (
+            <div key={column.key} className="flex justify-between items-start">
+              <span className="text-sm font-medium text-gray-600 min-w-0 flex-1">
+                {column.label}:
+              </span>
+              <div className="text-sm text-gray-900 text-right min-w-0 flex-1 ml-2">
+                {renderCell(item, column)}
+              </div>
+            </div>
+          ))}
+          {sortedColumns.length > 3 && (
+            <div className="pt-2 border-t border-gray-100">
+              <Chip size="sm" variant="flat" color="primary">
+                +{sortedColumns.length - 3} dalších polí
+              </Chip>
+            </div>
+          )}
+        </div>
+      </CardBody>
+    </Card>
+  );
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Search Bar */}
-      {searchable && (
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+      {/* Search and Controls */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+        {searchable && (
+          <div className="w-full sm:w-80">
             <Input
               placeholder="Hledat..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
               size="sm"
             />
           </div>
-          {searchFields.length > 0 && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <FunnelIcon className="w-4 h-4" />
-              <span>Hledat v: {searchFields.join(", ")}</span>
-            </div>
-          )}
+        )}
+        
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">
+            {filteredData.length} záznamů
+          </span>
         </div>
-      )}
+      </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-800">
-            <tr>
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  className={`px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider ${
-                    sortable && column.sortable !== false ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700' : ''
-                  }`}
-                  onClick={() => sortable && column.sortable !== false ? handleSort(column.key) : undefined}
-                  style={{ width: column.width }}
+      {/* Mobile View */}
+      <div className="block lg:hidden">
+        {paginatedData.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            {emptyMessage}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {paginatedData.map(renderMobileCard)}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden lg:block">
+        <Table
+          aria-label="Data table"
+          selectionMode="none"
+          onRowAction={(key) => {
+            const item = paginatedData.find((_, index) => index === Number(key));
+            if (item) onRowClick?.(item);
+          }}
+        >
+          <TableHeader columns={columns}>
+            {(column) => (
+              <TableColumn
+                key={column.key}
+                allowsSorting={sortable && column.sortable !== false}
+                className="cursor-pointer"
+              >
+                <div 
+                  className="flex items-center gap-2"
+                  onClick={() => handleSort(column.key)}
                 >
                   {column.label}
-                  {sortable && column.sortable !== false && sortColumn === column.key && (
-                    <span className="ml-2">
+                  {sortColumn === column.key && (
+                    <span className="text-blue-500">
                       {sortDirection === "asc" ? "↑" : "↓"}
                     </span>
                   )}
-                </th>
-              ))}
-              {actions.length > 0 && (
-                <th key="actions" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Akce
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-            {paginatedData.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length + (actions.length > 0 ? 1 : 0)} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                  {emptyMessage}
-                </td>
-              </tr>
-            ) : (
-              paginatedData.map((item, index) => (
-                <tr key={String(item.id || index)} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  {columns.map((column) => (
-                    <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                      {column.render ? column.render(item) : String(item[column.key as keyof T] || "")}
-                    </td>
-                  ))}
-                  {actions.length > 0 && (
-                    <td key="actions" className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                      <div className="flex items-center gap-2">
-                        {actions.map((action, index) => (
-                          <Button
-                            key={index}
-                            size={action.size || "sm"}
-                            variant={action.variant || "bordered"}
-                            color={action.color || "primary"}
-                            onClick={() => action.onClick(item)}
-                          >
-                            {action.label}
-                          </Button>
-                        ))}
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))
+                </div>
+              </TableColumn>
             )}
-          </tbody>
-        </table>
+          </TableHeader>
+          <TableBody
+            items={paginatedData}
+            emptyContent={emptyMessage}
+          >
+            {(item) => (
+              <TableRow
+                key={JSON.stringify(item)}
+                className={onRowClick ? "cursor-pointer hover:bg-gray-50" : ""}
+              >
+                {(columnKey) => {
+                  const column = columns.find((col) => col.key === columnKey);
+                  if (!column) return <TableCell key={String(columnKey)}>-</TableCell>;
+                  
+                  return (
+                    <TableCell key={String(columnKey)}>
+                      {renderCell(item, column)}
+                    </TableCell>
+                  );
+                }}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination */}
-      {pagination && totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            Zobrazeno {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredData.length)} z {filteredData.length} položek
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="bordered"
-              isDisabled={currentPage === 1}
-              onClick={() => handlePageChange(currentPage - 1)}
-            >
-              <ChevronLeftIcon className="w-4 h-4" />
-              Předchozí
-            </Button>
-            
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  size="sm"
-                  variant={page === currentPage ? "solid" : "bordered"}
-                  color={page === currentPage ? "primary" : "default"}
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </Button>
-              ))}
-            </div>
-            
-            <Button
-              size="sm"
-              variant="bordered"
-              isDisabled={currentPage === totalPages}
-              onClick={() => handlePageChange(currentPage + 1)}
-            >
-              Další
-              <ChevronRightIcon className="w-4 h-4" />
-            </Button>
-          </div>
+      {pages > 1 && (
+        <div className="flex justify-center">
+          <Pagination
+            total={pages}
+            page={page}
+            onChange={setPage}
+            showControls
+            size="sm"
+            className="gap-2"
+          />
         </div>
       )}
     </div>

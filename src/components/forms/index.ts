@@ -1,10 +1,2 @@
-export {
-  InputField,
-  TextareaField,
-  SelectField,
-  SwitchField,
-  CheckboxField,
-  RadioField,
-  TagsField,
-  DateField
-} from './FormField';
+export { default as FormField } from './FormField';
+export { FormGrid, FormSection } from './FormField';

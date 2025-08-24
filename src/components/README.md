@@ -81,14 +81,11 @@ import { StatusBadge, PostStatusBadge } from '@/components';
 
 ### Form Components
 ```tsx
-import { 
-  InputField, 
-  SelectField, 
-  TextareaField,
-  TagsField 
-} from '@/components/forms';
+import { FormField, FormGrid, FormSection } from '@/components/forms';
 
-<InputField
+// Text input field
+<FormField
+  type="text"
   label="Název"
   name="title"
   value={title}
@@ -97,7 +94,9 @@ import {
   placeholder="Zadejte název..."
 />
 
-<SelectField
+// Select field
+<FormField
+  type="select"
   label="Kategorie"
   name="category"
   value={category}
@@ -108,13 +107,27 @@ import {
   ]}
 />
 
-<TagsField
-  label="Tagy"
-  name="tags"
-  value={tags}
-  onChange={setTags}
-  maxTags={5}
+// Textarea field
+<FormField
+  type="textarea"
+  label="Popis"
+  name="description"
+  value={description}
+  onChange={setDescription}
+  rows={4}
 />
+
+// Form layout
+<FormGrid columns={2}>
+  <FormSection title="Základní informace">
+    <FormField type="text" label="Název" name="name" />
+    <FormField type="email" label="Email" name="email" />
+  </FormSection>
+  <FormSection title="Nastavení">
+    <FormField type="checkbox" label="Aktivní" name="active" />
+    <FormField type="switch" label="Oznámení" name="notifications" />
+  </FormSection>
+</FormGrid>
 ```
 
 ### Card Components

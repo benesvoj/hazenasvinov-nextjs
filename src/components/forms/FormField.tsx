@@ -1,31 +1,29 @@
 'use client';
 
-import { Input, Textarea } from "@heroui/input";
-import { Switch } from "@heroui/switch";
-import { Checkbox } from "@heroui/checkbox";
-import { Chip } from "@heroui/chip";
-import { useState } from "react";
+import React from "react";
+import { Input, Textarea, Select, SelectItem, Checkbox, Switch, RadioGroup, Radio } from "@heroui/react";
 
-interface BaseFormFieldProps {
+interface BaseFieldProps {
   label: string;
-  name: string;
-  error?: string;
   required?: boolean;
-  disabled?: boolean;
-  className?: string;
+  error?: string;
   helpText?: string;
+  className?: string;
+  disabled?: boolean;
 }
 
-interface InputFieldProps extends BaseFormFieldProps {
-  type: "text" | "email" | "password" | "number" | "tel" | "url";
-  placeholder?: string;
+interface InputFieldProps extends BaseFieldProps {
+  type: "text" | "email" | "password" | "number" | "tel" | "url" | "date" | "time";
   value: string;
   onChange: (value: string) => void;
-  maxLength?: number;
-  minLength?: number;
+  placeholder?: string;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
-interface TextareaFieldProps extends BaseFormFieldProps {
+interface TextareaFieldProps extends BaseFieldProps {
+  type: "textarea";
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -33,457 +31,243 @@ interface TextareaFieldProps extends BaseFormFieldProps {
   maxLength?: number;
 }
 
-interface SelectFieldProps extends BaseFormFieldProps {
+interface SelectFieldProps extends BaseFieldProps {
+  type: "select";
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string; disabled?: boolean }[];
   placeholder?: string;
 }
 
-interface SwitchFieldProps extends BaseFormFieldProps {
+interface CheckboxFieldProps extends BaseFieldProps {
+  type: "checkbox";
   checked: boolean;
   onChange: (checked: boolean) => void;
 }
 
-interface CheckboxFieldProps extends BaseFormFieldProps {
+interface SwitchFieldProps extends BaseFieldProps {
+  type: "switch";
   checked: boolean;
   onChange: (checked: boolean) => void;
 }
 
-interface RadioFieldProps extends BaseFormFieldProps {
+interface RadioFieldProps extends BaseFieldProps {
+  type: "radio";
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string; disabled?: boolean }[];
 }
 
-interface TagsFieldProps extends BaseFormFieldProps {
-  value: string[];
-  onChange: (value: string[]) => void;
-  placeholder?: string;
-  maxTags?: number;
-}
+type FormFieldProps = 
+  | InputFieldProps 
+  | TextareaFieldProps 
+  | SelectFieldProps 
+  | CheckboxFieldProps 
+  | SwitchFieldProps 
+  | RadioFieldProps;
 
-interface DateFieldProps extends BaseFormFieldProps {
-  value: string;
-  onChange: (value: string) => void;
-  min?: string;
-  max?: string;
-}
+export default function FormField(props: FormFieldProps) {
+  const { label, required, error, helpText, className = "", disabled } = props;
 
-// Input Field
-export function InputField({
-  label,
-  name,
-  type,
-  value,
-  onChange,
-  placeholder,
-  error,
-  required = false,
-  disabled = false,
-  className = "",
-  helpText,
-  maxLength,
-  minLength
-}: InputFieldProps) {
-  return (
-    <div className={`space-y-2 ${className}`}>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      
-      <Input
-        id={name}
-        name={name}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        isDisabled={disabled}
-        isInvalid={!!error}
-        maxLength={maxLength}
-        minLength={minLength}
-        className="w-full"
-      />
-      
-      {helpText && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
-      )}
-      
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
-    </div>
-  );
-}
+  const renderField = () => {
+    switch (props.type) {
+      case "textarea":
+        return (
+          <Textarea
+            value={props.value}
+            onChange={(e) => props.onChange(e.target.value)}
+            placeholder={props.placeholder}
+            rows={props.rows || 3}
+            maxLength={props.maxLength}
+            isDisabled={disabled}
+            variant={error ? "bordered" : "bordered"}
+            color={error ? "danger" : "default"}
+            className="w-full"
+          />
+        );
 
-// Textarea Field
-export function TextareaField({
-  label,
-  name,
-  value,
-  onChange,
-  placeholder,
-  error,
-  required = false,
-  disabled = false,
-  className = "",
-  helpText,
-  rows = 4,
-  maxLength
-}: TextareaFieldProps) {
-  return (
-    <div className={`space-y-2 ${className}`}>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      
-      <textarea
-        id={name}
-        name={name}
-        value={value}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
-        placeholder={placeholder}
-        disabled={disabled}
-        rows={rows}
-        maxLength={maxLength}
-        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-          error ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
-        } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
-      />
-      
-      {helpText && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
-      )}
-      
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
-    </div>
-  );
-}
-
-// Select Field
-export function SelectField({
-  label,
-  name,
-  value,
-  onChange,
-  options,
-  placeholder,
-  error,
-  required = false,
-  disabled = false,
-  className = "",
-  helpText
-}: SelectFieldProps) {
-  return (
-    <div className={`space-y-2 ${className}`}>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      
-      <select
-        id={name}
-        name={name}
-        value={value}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
-        disabled={disabled}
-        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-          error ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
-        } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
-      >
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map((option) => (
-          <option key={option.value} value={option.value} disabled={option.disabled}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      
-      {helpText && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
-      )}
-      
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
-    </div>
-  );
-}
-
-// Switch Field
-export function SwitchField({
-  label,
-  name,
-  checked,
-  onChange,
-  error,
-  required = false,
-  disabled = false,
-  className = "",
-  helpText
-}: SwitchFieldProps) {
-  return (
-    <div className={`space-y-2 ${className}`}>
-      <div className="flex items-center justify-between">
-        <label htmlFor={name} className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-        
-        <Switch
-          id={name}
-          name={name}
-          isSelected={checked}
-          onValueChange={onChange}
-          isDisabled={disabled}
-          size="sm"
-        />
-      </div>
-      
-      {helpText && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
-      )}
-      
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
-    </div>
-  );
-}
-
-// Checkbox Field
-export function CheckboxField({
-  label,
-  name,
-  checked,
-  onChange,
-  error,
-  required = false,
-  disabled = false,
-  className = "",
-  helpText
-}: CheckboxFieldProps) {
-  return (
-    <div className={`space-y-2 ${className}`}>
-      <div className="flex items-start space-x-3">
-        <Checkbox
-          id={name}
-          name={name}
-          isSelected={checked}
-          onValueChange={onChange}
-          isDisabled={disabled}
-          isInvalid={!!error}
-        />
-        
-        <div className="flex-1">
-          <label htmlFor={name} className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-          
-          {helpText && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{helpText}</p>
-          )}
-        </div>
-      </div>
-      
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400 ml-6">{error}</p>
-      )}
-    </div>
-  );
-}
-
-// Radio Field
-export function RadioField({
-  label,
-  name,
-  value,
-  onChange,
-  options,
-  error,
-  required = false,
-  disabled = false,
-  className = "",
-  helpText
-}: RadioFieldProps) {
-  return (
-    <div className={`space-y-2 ${className}`}>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      
-      <div className="space-y-2">
-        {options.map((option) => (
-          <label key={option.value} className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name={name}
-              value={option.value}
-              checked={value === option.value}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
-              disabled={disabled || option.disabled}
-              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
-          </label>
-        ))}
-      </div>
-      
-      {helpText && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
-      )}
-      
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
-    </div>
-  );
-}
-
-// Tags Field
-export function TagsField({
-  label,
-  name,
-  value,
-  onChange,
-  placeholder,
-  error,
-  required = false,
-  disabled = false,
-  className = "",
-  helpText,
-  maxTags
-}: TagsFieldProps) {
-  const [inputValue, setInputValue] = useState("");
-
-  const handleAddTag = () => {
-    if (inputValue.trim() && !value.includes(inputValue.trim())) {
-      if (!maxTags || value.length < maxTags) {
-        onChange([...value, inputValue.trim()]);
-        setInputValue("");
-      }
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    onChange(value.filter(tag => tag !== tagToRemove));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-
-  return (
-    <div className={`space-y-2 ${className}`}>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      
-      <div className="space-y-3">
-        {/* Tags Display */}
-        {value.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {value.map((tag, index) => (
-              <Chip
-                key={index}
-                onClose={() => handleRemoveTag(tag)}
-                variant="bordered"
-                color="primary"
-                size="sm"
-              >
-                {tag}
-              </Chip>
+      case "select":
+        return (
+          <Select
+            selectedKeys={[props.value]}
+            onSelectionChange={(keys) => {
+              const selectedKey = Array.from(keys)[0];
+              if (selectedKey) props.onChange(String(selectedKey));
+            }}
+            placeholder={props.placeholder}
+            isDisabled={disabled}
+            variant={error ? "bordered" : "bordered"}
+            color={error ? "danger" : "default"}
+            className="w-full"
+          >
+            {props.options.map((option) => (
+              <SelectItem key={option.value} isDisabled={option.disabled}>
+                {option.label}
+              </SelectItem>
             ))}
-          </div>
+          </Select>
+        );
+
+      case "checkbox":
+        return (
+          <Checkbox
+            isSelected={props.checked}
+            onValueChange={props.onChange}
+            isDisabled={disabled}
+            color={error ? "danger" : "primary"}
+          >
+            {label}
+          </Checkbox>
+        );
+
+      case "switch":
+        return (
+          <Switch
+            isSelected={props.checked}
+            onValueChange={props.onChange}
+            isDisabled={disabled}
+            color={error ? "danger" : "primary"}
+          >
+            {label}
+          </Switch>
+        );
+
+      case "radio":
+        return (
+          <RadioGroup
+            value={props.value}
+            onValueChange={props.onChange}
+            isDisabled={disabled}
+            color={error ? "danger" : "primary"}
+            orientation="vertical"
+          >
+            {props.options.map((option) => (
+              <Radio key={option.value} value={option.value} isDisabled={option.disabled}>
+                {option.label}
+              </Radio>
+            ))}
+          </RadioGroup>
+        );
+
+      default:
+        return (
+          <Input
+            type={props.type}
+            value={props.value}
+            onChange={(e) => props.onChange(e.target.value)}
+            placeholder={props.placeholder}
+            min={props.min}
+            max={props.max}
+            step={props.step}
+            isDisabled={disabled}
+            variant={error ? "bordered" : "bordered"}
+            color={error ? "danger" : "default"}
+            className="w-full"
+          />
+        );
+    }
+  };
+
+  // For checkbox and switch, we don't need a separate label
+  if (props.type === "checkbox" || props.type === "switch") {
+    return (
+      <div className={`space-y-2 ${className}`}>
+        {renderField()}
+        {error && (
+          <p className="text-sm text-danger">{error}</p>
         )}
-        
-        {/* Input for new tags */}
-        {(!maxTags || value.length < maxTags) && (
-          <div className="flex gap-2">
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder={placeholder || "Přidat tag..."}
-              onKeyPress={handleKeyPress}
-              isDisabled={disabled}
-              size="sm"
-              className="flex-1"
-            />
-            <button
-              type="button"
-              onClick={handleAddTag}
-              disabled={!inputValue.trim() || disabled}
-              className="px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Přidat
-            </button>
-          </div>
+        {helpText && !error && (
+          <p className="text-sm text-gray-500">{helpText}</p>
         )}
       </div>
-      
-      {helpText && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
-      )}
-      
+    );
+  }
+
+  // For radio, we don't need a separate label
+  if (props.type === "radio") {
+    return (
+      <div className={`space-y-2 ${className}`}>
+        <label className="text-sm font-medium text-gray-700">
+          {label}
+          {required && <span className="text-danger ml-1">*</span>}
+        </label>
+        {renderField()}
+        {error && (
+          <p className="text-sm text-danger">{error}</p>
+        )}
+        {helpText && !error && (
+          <p className="text-sm text-gray-500">{helpText}</p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`space-y-2 ${className}`}>
+      <label className="text-sm font-medium text-gray-700">
+        {label}
+        {required && <span className="text-danger ml-1">*</span>}
+      </label>
+      {renderField()}
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-sm text-danger">{error}</p>
+      )}
+      {helpText && !error && (
+        <p className="text-sm text-gray-500">{helpText}</p>
       )}
     </div>
   );
 }
 
-// Date Field
-export function DateField({
-  label,
-  name,
-  value,
-  onChange,
-  error,
-  required = false,
-  disabled = false,
-  className = "",
-  helpText,
-  min,
-  max
-}: DateFieldProps) {
+// Responsive form grid component
+interface FormGridProps {
+  children: React.ReactNode;
+  columns?: 1 | 2 | 3 | 4;
+  gap?: "sm" | "md" | "lg";
+  className?: string;
+}
+
+export function FormGrid({ children, columns = 2, gap = "md", className = "" }: FormGridProps) {
+  const gridCols = {
+    1: "grid-cols-1",
+    2: "grid-cols-1 sm:grid-cols-2",
+    3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+  };
+
+  const gridGaps = {
+    sm: "gap-3",
+    md: "gap-4",
+    lg: "gap-6"
+  };
+
   return (
-    <div className={`space-y-2 ${className}`}>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      
-      <Input
-        id={name}
-        name={name}
-        type="date"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        min={min}
-        max={max}
-        isDisabled={disabled}
-        isInvalid={!!error}
-        className="w-full"
-      />
-      
-      {helpText && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
-      )}
-      
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
+    <div className={`grid ${gridCols[columns]} ${gridGaps[gap]} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+// Responsive form section component
+interface FormSectionProps {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function FormSection({ title, description, children, className = "" }: FormSectionProps) {
+  return (
+    <div className={`space-y-4 ${className}`}>
+      <div>
+        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+        {description && (
+          <p className="text-sm text-gray-600 mt-1">{description}</p>
+        )}
+      </div>
+      <div className="space-y-4">
+        {children}
+      </div>
     </div>
   );
 }

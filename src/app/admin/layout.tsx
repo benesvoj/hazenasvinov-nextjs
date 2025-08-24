@@ -12,9 +12,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <SidebarProvider>
         <div className="flex min-h-screen bg-gray-50">
           <Sidebar />
-          <div className="flex-1 ml-64 transition-all duration-300 ease-in-out">
+          <div className="flex-1 transition-all duration-300 ease-in-out w-full lg:ml-64">
             <TopBar />
-            <main className="pt-16 p-6">
+            <main className="pt-16 p-3 sm:p-4 lg:p-6">
               <div className="max-w-7xl mx-auto">
                 {children}
               </div>

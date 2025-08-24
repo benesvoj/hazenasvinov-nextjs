@@ -17,6 +17,7 @@ export { default as MatchRow } from './MatchRow';
 export { default as DeleteConfirmationModal } from './DeleteConfirmationModal';
 export { default as DropdownMenu } from './DropdownMenu';
 export { default as ModalWithForm } from './ModalWithForm';
+export { default as MobileActionsMenu } from './MobileActionsMenu';
 
 // Error Boundaries
 export { default as ChunkErrorBoundary } from './ChunkErrorBoundary';
@@ -36,12 +37,13 @@ export * from './forms';
 
 // Card Components
 export { 
-  SimpleCard, 
-  StatsCard, 
-  FeatureCard, 
-  ActionCard, 
-  QuickActionCard, 
-  InfoCard 
+  Card, 
+  CardHeader, 
+  CardBody, 
+  CardFooter,
+  CardGrid,
+  CardList,
+  ActionCard
 } from './Card';
 
 // Navigation Components

@@ -3,36 +3,25 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Badge } from "@heroui/badge";
 import { 
-  CalendarIcon, 
   MapPinIcon, 
-  ClockIcon,
   TrophyIcon,
-  UserGroupIcon,
   PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  EyeIcon,
   ArrowPathIcon,
   DocumentArrowUpIcon,
   ChevronDownIcon,
-  ChevronUpIcon
+  ChevronUpIcon,
+  TrashIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
 import Image from 'next/image';
-import LineupManager from './components/LineupManager';
-import ExcelImportModal from './components/ExcelImportModal';
-import AddResultModal from './components/AddResultModal';
-import EditMatchModal from './components/EditMatchModal';
-import BulkUpdateMatchweekModal from './components/BulkUpdateMatchweekModal';
+import { LineupManager, AddMatchModal, AddResultModal, EditMatchModal, BulkUpdateMatchweekModal, ExcelImportModal, MatchActionsMenu } from './components';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
-import AddMatchModal from './components/AddMatchModal';
+import MobileActionsMenu from '@/components/MobileActionsMenu';
 import { useExcelImport } from '@/hooks/useExcelImport';
 import { Match, Category, Team, Season, Standing } from "@/types/types";
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
@@ -1058,7 +1047,7 @@ export default function MatchesAdminPage() {
   }, [selectedSeason, importMatches, fetchMatches, fetchStandings]);
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-4 lg:p-6">
       {/* Season closed warning */}
       {selectedSeason && isSeasonClosed() && (
         <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
@@ -1074,44 +1063,117 @@ export default function MatchesAdminPage() {
 
       {/* Season selector */}
       <div className="mb-6">
-        <Select
-          label={translations.season.title}
-          placeholder={translations.season.selectSeason}
-          selectedKeys={selectedSeason ? [selectedSeason] : []}
-          onSelectionChange={(keys) => {
-            const selectedKey = Array.from(keys)[0] as string;
-            console.log('Season selection changed:', { keys, selectedKey });
-            setSelectedSeason(selectedKey || "");
-          }}
-          className="w-full md:w-64 border border-gray-300 rounded-md"
-        >
-          {seasons.map((season) => (
-            <SelectItem key={season.id} textValue={season.name}>
-              {season.name} {season.is_closed ? `(${translations.season.closed})` : ''}
-            </SelectItem>
-          ))}
-        </Select>
-        {seasons.length === 0 && (
-          <p className="text-sm text-red-600 mt-1">
-            {translations.season.noSeasons}
-          </p>
-        )}
+        <div className="w-full max-w-md">
+          <Select
+            label={translations.season.title}
+            placeholder={translations.season.selectSeason}
+            selectedKeys={selectedSeason ? [selectedSeason] : []}
+            onSelectionChange={(keys) => {
+              const selectedKey = Array.from(keys)[0] as string;
+              console.log('Season selection changed:', { keys, selectedKey });
+              setSelectedSeason(selectedKey || "");
+            }}
+            className="w-full"
+          >
+            {seasons.map((season) => (
+              <SelectItem key={season.id} textValue={season.name}>
+                {season.name} {season.is_closed ? `(${translations.season.closed})` : ''}
+              </SelectItem>
+            ))}
+          </Select>
+          {seasons.length === 0 && (
+            <p className="text-sm text-red-600 mt-1">
+              {translations.season.noSeasons}
+            </p>
+          )}
+        </div>
       </div>
 
       {selectedSeason && (
         <>
+
+
           <Card>
-            <CardHeader className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <TrophyIcon className="w-5 h-5 text-blue-500" />
-                <h2 className="text-xl font-semibold">Zápasy</h2>
+            <CardHeader className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+              <div className="flex items-center justify-between w-full lg:w-auto">
+                <div className="flex items-center gap-2">
+                  <TrophyIcon className="w-5 h-5 text-blue-500" />
+                  <h2 className="text-xl font-semibold">Zápasy</h2>
+                </div>
+                
+                {/* Mobile: Show actions menu on same row as title */}
+                <div className="lg:hidden">
+                  <MobileActionsMenu
+                    actions={[
+                      {
+                        key: 'add-match',
+                        label: 'Přidat zápas',
+                        description: 'Přidat nový zápas do vybrané sezóny',
+                        color: 'primary',
+                        variant: 'flat',
+                        icon: <PlusIcon className="w-4 h-4" />,
+                        onClick: onAddMatchOpen,
+                        isDisabled: isSeasonClosed()
+                      },
+                      {
+                        key: 'bulk-update',
+                        label: 'Hromadná úprava kol',
+                        description: 'Hromadně upravit kola pro všechny zápasy',
+                        color: 'warning',
+                        variant: 'flat',
+                        icon: <ArrowPathIcon className="w-4 h-4" />,
+                        onClick: onBulkUpdateOpen,
+                        isDisabled: isSeasonClosed()
+                      },
+                      {
+                        key: 'generate-standings',
+                        label: standings.filter(s => s.season_id === selectedSeason).length === 0 
+                          ? 'Generovat tabulky' 
+                          : 'Přepočítat tabulky',
+                        description: standings.filter(s => s.season_id === selectedSeason).length === 0 
+                          ? 'Vytvořit nové tabulky pro všechny kategorie'
+                          : 'Aktualizovat existující tabulky',
+                        color: 'success',
+                        variant: 'flat',
+                        onClick: handleStandingsAction,
+                        isDisabled: isSeasonClosed()
+                      },
+                      {
+                        key: 'excel-import',
+                        label: 'Import z Excelu',
+                        description: 'Importovat zápasy z Excel souboru',
+                        color: 'secondary',
+                        variant: 'flat',
+                        icon: <DocumentArrowUpIcon className="w-4 h-4" />,
+                        onClick: onExcelImportOpen
+                      },
+                      {
+                        key: 'delete-all-matches',
+                        label: 'Smazat všechny zápasy',
+                        description: 'Smazat všechny zápasy z vybrané sezóny',
+                        color: 'danger',
+                        variant: 'flat',
+                        icon: <TrashIcon className="w-4 h-4" />,
+                        onClick: onDeleteAllConfirmOpen,
+                        isDisabled: isSeasonClosed() || !selectedSeason
+                      }
+                    ]}
+                    description="Vyberte akci, kterou chcete provést se zápasy"
+                    triggerColor="primary"
+                    triggerVariant="light"
+                    className="w-auto"
+                  />
+                </div>
               </div>
-              <div className="flex gap-2">
+              
+              {/* Desktop: Show all buttons horizontally */}
+              <div className="hidden lg:flex flex-wrap gap-2">
                 <Button 
                   color="primary" 
                   startContent={<PlusIcon className="w-4 h-4" />}
                   onPress={onAddMatchOpen}
                   isDisabled={isSeasonClosed()}
+                  size="sm"
                 >
                   Přidat zápas
                 </Button>
@@ -1120,6 +1182,7 @@ export default function MatchesAdminPage() {
                   startContent={<ArrowPathIcon className="w-4 h-4" />}
                   onPress={onBulkUpdateOpen}
                   isDisabled={isSeasonClosed()}
+                  size="sm"
                 >
                   Hromadná úprava kol
                 </Button>
@@ -1127,6 +1190,7 @@ export default function MatchesAdminPage() {
                   color="success" 
                   onPress={handleStandingsAction}
                   isDisabled={isSeasonClosed()}
+                  size="sm"
                 >
                   {standings.filter(s => s.category_id === selectedCategory && s.season_id === selectedSeason).length === 0 
                     ? 'Generovat tabulku' 
@@ -1137,6 +1201,7 @@ export default function MatchesAdminPage() {
                   color="secondary" 
                   startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
                   onPress={onExcelImportOpen}
+                  size="sm"
                 >
                   {translations.import}
                 </Button>
@@ -1145,10 +1210,13 @@ export default function MatchesAdminPage() {
                   startContent={<TrashIcon className="w-4 h-4" />}
                   onPress={onDeleteAllConfirmOpen}
                   isDisabled={isSeasonClosed() || !selectedSeason}
+                  size="sm"
                 >
                   Smazat všechny zápasy
                 </Button>
               </div>
+              
+
             </CardHeader>
             <CardBody>
               {loading ? (
@@ -1168,6 +1236,8 @@ export default function MatchesAdminPage() {
                         <h3 className="text-lg font-semibold mb-4">
                           {category.name} - {getCategoryInfo(category.id, categories).competition}
                         </h3>
+                        
+
                         
                         {/* Matches for this category grouped by matchweek */}
                         <div className="space-y-6">
@@ -1216,7 +1286,7 @@ export default function MatchesAdminPage() {
                               
                               return (
                                 <div key={matchweek} className="border rounded-lg p-4 bg-gray-50">
-                                  <div className="flex items-center justify-between mb-4 border-b pb-2">
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 border-b pb-2">
                                     <h4 className="text-lg font-semibold text-gray-800">
                                       {weekTitle} ({weekMatches.length} zápas{weekMatches.length !== 1 ? 'ů' : ''})
                                     </h4>
@@ -1228,6 +1298,7 @@ export default function MatchesAdminPage() {
                                         <ChevronDownIcon className="w-4 h-4" />
                                       }
                                       onPress={() => toggleMatchweek(category.id, matchweek)}
+                                      className="w-full sm:w-auto"
                                     >
                                       {isMatchweekExpanded(category.id, matchweek) ? 'Skrýt' : 'Zobrazit'}
                                     </Button>
@@ -1236,8 +1307,8 @@ export default function MatchesAdminPage() {
                                   {/* Collapsible Content */}
                                   {isMatchweekExpanded(category.id, matchweek) && (
                                     <>
-                                      {/* Column Headers */}
-                                      <div className="grid grid-cols-11 gap-4 mb-3 px-2 items-center">
+                                      {/* Column Headers - Desktop only */}
+                                      <div className="hidden lg:grid grid-cols-11 gap-4 mb-3 px-2 items-center">
                                         <div className="col-span-1 text-center text-sm font-medium text-gray-600">{translations.matches.matchNumber}</div>
                                         <div className="col-span-2 text-center text-sm font-medium text-gray-600">{translations.matches.matchDateTime}</div>
                                         <div className="col-span-6 text-start text-sm font-medium text-gray-600">{translations.matches.matchLocation}</div>
@@ -1247,7 +1318,8 @@ export default function MatchesAdminPage() {
                                       <div className="space-y-3">
                                                                         {weekMatches.map((match) => (
                                       <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm">
-                                        <div className="grid grid-cols-11 gap-4 items-center">
+                                        {/* Desktop: Grid layout */}
+                                        <div className="hidden lg:grid grid-cols-11 gap-4 items-center">
                                           {/* Match Number - First Column */}
                                           <div className="col-span-1">
                                             {match.match_number ? (
@@ -1306,43 +1378,86 @@ export default function MatchesAdminPage() {
                                           </div>
                                         </div>
 
+                                        {/* Mobile: Stacked layout */}
+                                        <div className="lg:hidden space-y-3">
+                                          {/* Match Number */}
+                                          <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-gray-600">Číslo zápasu:</span>
+                                            {match.match_number ? (
+                                              <div className="text-lg font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+                                                #{match.match_number}
+                                              </div>
+                                            ) : (
+                                              <div className="text-sm text-gray-400 bg-gray-50 px-3 py-2 rounded-lg">
+                                                -
+                                              </div>
+                                            )}
+                                          </div>
+
+                                          {/* Date and Time */}
+                                          <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-gray-600">Datum a čas:</span>
+                                            <div className="text-right">
+                                              <div className="text-sm text-gray-600">
+                                                {new Date(match.date).toLocaleDateString('cs-CZ')}
+                                              </div>
+                                              <div className="text-lg font-semibold text-gray-800">
+                                                {match.time}
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          {/* Teams */}
+                                          <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-gray-600">Týmy:</span>
+                                            <div className="text-right">
+                                              <div className="text-lg font-semibold text-gray-800">
+                                                {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          {/* Venue */}
+                                          <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-gray-600">Místo:</span>
+                                            <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                              <MapPinIcon className="w-4 h-4 text-gray-400" />
+                                              <span>{match.venue}</span>
+                                            </div>
+                                          </div>
+
+                                          {/* Score */}
+                                          <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-gray-600">Skóre:</span>
+                                            <div className="text-right">
+                                              {match.status === 'completed' ? (
+                                                <div className="text-xl font-bold text-gray-800">
+                                                  {match.home_score} : {match.away_score}
+                                                </div>
+                                              ) : (
+                                                <div className="text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
+                                                  Skóre zatím není k dispozici
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+
                                         {/* Action Buttons - Below the main content */}
-                                        <div className="mt-4 flex justify-end space-x-2 border-t pt-3">
-                                          {match.status === 'upcoming' && (
-                                            <Button
-                                              size="sm"
-                                              color="primary"
-                                              startContent={<EyeIcon className="w-4 h-4" />}
-                                              onPress={() => {
-                                                setSelectedMatch(match);
-                                                onAddResultOpen();
-                                              }}
-                                              isDisabled={isSeasonClosed()}
-                                            />
-                                          )}
-                                          <Button
-                                            size="sm"
-                                            color="warning"
-                                            startContent={<PencilIcon className="w-4 h-4" />}
-                                            onPress={() => handleEditMatch(match)}
-                                            isDisabled={isSeasonClosed()}
-                                          />
-                                          <Button
-                                            size="sm"
-                                            color="secondary"
-                                            startContent={<UserGroupIcon className="w-4 h-4" />}
-                                            onPress={() => {
-                                                setSelectedMatch(match);
-                                                onLineupModalOpen();
+                                        <div className="mt-4 flex justify-end border-t pt-3">
+                                          <MatchActionsMenu
+                                            match={match}
+                                            onAddResult={(match) => {
+                                              setSelectedMatch(match);
+                                              onAddResultOpen();
                                             }}
-                                            isDisabled={isSeasonClosed()}
-                                          />
-                                          <Button
-                                            size="sm"
-                                            color="danger"
-                                            startContent={<TrashIcon className="w-4 h-4" />}
-                                            onPress={() => handleDeleteClick(match)}
-                                            isDisabled={isSeasonClosed()}
+                                            onEditMatch={handleEditMatch}
+                                            onLineupManager={(match) => {
+                                              setSelectedMatch(match);
+                                              onLineupModalOpen();
+                                            }}
+                                            onDeleteMatch={handleDeleteClick}
+                                            isSeasonClosed={isSeasonClosed()}
                                           />
                                         </div>
                                       </div>
@@ -1382,27 +1497,29 @@ export default function MatchesAdminPage() {
                               </Button>
                             </div>
                           ) : (
-                            <div className="overflow-x-auto">
-                              <table className="w-full border-collapse">
-                                <thead>
-                                  <tr className="bg-gray-50">
-                                    <th className="border px-4 py-2 text-left">Pozice</th>
-                                    <th className="border px-4 py-2 text-left">Tým</th>
-                                    <th className="border px-4 py-2 text-center">Z</th>
-                                    <th className="border px-4 py-2 text-center">V</th>
-                                    <th className="border px-4 py-2 text-center">R</th>
-                                    <th className="border px-4 py-2 text-center">P</th>
-                                    <th className="border px-4 py-2 text-center">Skóre</th>
-                                    <th className="border px-4 py-2 text-center">Body</th>
+                            <div className="overflow-x-auto -mx-4 sm:mx-0">
+                              <div className="min-w-full inline-block align-middle">
+                                <div className="overflow-hidden">
+                                  <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                  <tr>
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pozice</th>
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tým</th>
+                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Z</th>
+                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">V</th>
+                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">R</th>
+                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P</th>
+                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Skóre</th>
+                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Body</th>
                                   </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="bg-white divide-y divide-gray-200">
                                   {standings
                                     .filter(standing => standing.category_id === category.id)
                                     .map((standing, index) => (
                                       <tr key={index} className="hover:bg-gray-50">
-                                        <td className="border px-4 py-2 font-medium">{standing.position}</td>
-                                        <td className="border px-4 py-2">
+                                        <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{standing.position}</td>
+                                        <td className="px-3 py-4 whitespace-nowrap">
                                           <div className="flex items-center gap-2">
                                             {standing.team?.logo_url && (
                                               <Image 
@@ -1416,19 +1533,21 @@ export default function MatchesAdminPage() {
                                                 }}
                                               />
                                             )}
-                                            <span>{standing.team?.name || 'N/A'}</span>
+                                            <span className="text-sm text-gray-900">{standing.team?.name || 'N/A'}</span>
                                           </div>
                                         </td>
-                                        <td className="border px-4 py-2 text-center">{standing.matches}</td>
-                                        <td className="border px-4 py-2 text-center">{standing.wins}</td>
-                                        <td className="border px-4 py-2 text-center">{standing.draws}</td>
-                                        <td className="border px-4 py-2 text-center">{standing.losses}</td>
-                                        <td className="border px-4 py-2 text-center">{standing.goals_for}:{standing.goals_against}</td>
-                                        <td className="border px-4 py-2 text-center font-bold">{standing.points}</td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.matches}</td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.wins}</td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.draws}</td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.losses}</td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.goals_for}:{standing.goals_against}</td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-center">{standing.points}</td>
                                       </tr>
                                     ))}
                                 </tbody>
                               </table>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
