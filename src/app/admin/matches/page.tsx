@@ -1840,8 +1840,17 @@ export default function MatchesAdminPage() {
         </ModalContent>
       </Modal>
 
-      {/* Match Process Wizard Modal */}
-      <Modal isOpen={isMatchProcessOpen} onClose={handleMatchProcessClose} size="2xl">
+      {/* Match Process Wizard Wizard Modal */}
+      <Modal 
+        isOpen={isMatchProcessOpen} 
+        onClose={handleMatchProcessClose} 
+        size="2xl"
+        classNames={{
+          base: "max-w-[95vw] mx-2",
+          wrapper: "items-start justify-center p-2 sm:p-4 pt-20", // pt-20 pushes modal down from top
+          backdrop: "bg-black/50"
+        }}
+      >
         <ModalContent>
           <ModalHeader>
             <div className="flex items-center gap-2">
@@ -1889,6 +1898,8 @@ export default function MatchesAdminPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                       placeholder="0"
                       min="0"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                     />
                   </div>
                   <div>
@@ -1898,6 +1909,8 @@ export default function MatchesAdminPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                       placeholder="0"
                       min="0"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                     />
                   </div>
                 </div>
@@ -1958,6 +1971,8 @@ export default function MatchesAdminPage() {
                       type="text" 
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
                       placeholder="Nadpis článku o zápasu..."
+                      autoComplete="off"
+                      autoCorrect="off"
                     />
                   </div>
                   <div>
