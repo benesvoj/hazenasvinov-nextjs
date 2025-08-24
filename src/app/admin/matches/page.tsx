@@ -1473,63 +1473,6 @@ export default function MatchesAdminPage() {
                                       </div>
                                     ))}
                                       </div>
-                                      
-                                      {/* Zone Actions - Below the matches list */}
-                                      <div className="mt-6 pt-4 border-t border-gray-200">
-                                        <div className="flex flex-wrap gap-2 justify-center">
-                                          <Button
-                                            size="sm"
-                                            color="primary"
-                                            variant="flat"
-                                            startContent={<PlusIcon className="w-4 h-4" />}
-                                            onPress={onAddMatchOpen}
-                                            isDisabled={isSeasonClosed()}
-                                          >
-                                            Přidat zápas
-                                          </Button>
-                                          <Button
-                                            size="sm"
-                                            color="warning"
-                                            variant="flat"
-                                            startContent={<ArrowPathIcon className="w-4 h-4" />}
-                                            onPress={onBulkUpdateOpen}
-                                            isDisabled={isSeasonClosed()}
-                                          >
-                                            Úprava kol
-                                          </Button>
-                                          <Button
-                                            size="sm"
-                                            color="success"
-                                            variant="flat"
-                                            onPress={handleStandingsAction}
-                                            isDisabled={isSeasonClosed()}
-                                          >
-                                            {standings.filter(s => s.category_id === category.id && s.season_id === selectedSeason).length === 0 
-                                              ? 'Generovat tabulku' 
-                                              : 'Přepočítat tabulku'
-                                            }
-                                          </Button>
-                                          <Button
-                                            size="sm"
-                                            color="secondary"
-                                            variant="flat"
-                                            startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
-                                            onPress={onExcelImportOpen}
-                                          >
-                                            Import
-                                          </Button>
-                                          <Button
-                                            size="sm"
-                                            color="danger"
-                                            variant="flat"
-                                            startContent={<TrashIcon className="w-4 h-4" />}
-                                            onPress={onDeleteAllConfirmOpen}
-                                            isDisabled={isSeasonClosed() || !selectedSeason}
-                                          >
-                                            Smazat vše
-                                          </Button>
-                                        </div>
-                                      </div>
                                     </>
                                   )}
                                 </div>
