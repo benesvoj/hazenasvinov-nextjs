@@ -180,6 +180,20 @@ export const translations = {
 		matchScore: 'Skóre',
 		matchResult: 'Výsledek',
 		noMatches: 'Žádné odehrané zápasy',
+		actions: {
+			addMatch: 'Přidat zápas',
+			addMatchDescription: 'Přidat nový zápas do vybrané sezóny',
+			bulkUpdateMatchweek: 'Hromadná úprava kol',
+			bulkUpdateMatchweekDescription: 'Hromadně upravit kola pro všechny zápasy',	
+			generateStandings: 'Generovat tabulky',
+			generateStandingsDescription: 'Vytvořit nové tabulky pro všechny kategorie',
+			recalculateStandings: 'Přepočítat tabulky',
+			recalculateStandingsDescription: 'Aktualizovat existující tabulky',
+			import: 'Import dat',
+			importDescription: 'Importovat zápasy z Excel souboru',
+			deleteAllMatches: 'Smazat všechny zápasy',
+			deleteAllMatchesDescription: 'Smazat všechny zápasy z vybrané sezóny',
+		}
 	},
 	matchDetail: {
 		loading: 'Načítání zápasu...',

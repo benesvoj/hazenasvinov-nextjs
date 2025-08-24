@@ -14,7 +14,10 @@ import {
   DocumentArrowUpIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  TrashIcon
+  TrashIcon,
+  EyeIcon,
+  PencilIcon,
+  UserGroupIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
@@ -50,6 +53,7 @@ export default function MatchesAdminPage() {
   const { isOpen: isExcelImportOpen, onOpen: onExcelImportOpen, onClose: onExcelImportClose } = useDisclosure();
   const { isOpen: isDeleteConfirmOpen, onOpen: onDeleteConfirmOpen, onClose: onDeleteConfirmClose } = useDisclosure();
   const { isOpen: isDeleteAllConfirmOpen, onOpen: onDeleteAllConfirmOpen, onClose: onDeleteAllConfirmClose } = useDisclosure();
+  const { isOpen: isMatchActionsOpen, onOpen: onMatchActionsOpen, onClose: onMatchActionsClose } = useDisclosure();
   const { importMatches } = useExcelImport();
 
   // Reset matchToDelete when confirmation modal closes
@@ -1107,8 +1111,8 @@ export default function MatchesAdminPage() {
                     actions={[
                       {
                         key: 'add-match',
-                        label: 'Přidat zápas',
-                        description: 'Přidat nový zápas do vybrané sezóny',
+                        label: translations.matches.actions.addMatch,
+                        description: translations.matches.actions.addMatchDescription,
                         color: 'primary',
                         variant: 'flat',
                         icon: <PlusIcon className="w-4 h-4" />,
@@ -1117,8 +1121,8 @@ export default function MatchesAdminPage() {
                       },
                       {
                         key: 'bulk-update',
-                        label: 'Hromadná úprava kol',
-                        description: 'Hromadně upravit kola pro všechny zápasy',
+                        label: translations.matches.actions.bulkUpdateMatchweek,
+                        description: translations.matches.actions.bulkUpdateMatchweekDescription,
                         color: 'warning',
                         variant: 'flat',
                         icon: <ArrowPathIcon className="w-4 h-4" />,
@@ -1128,11 +1132,11 @@ export default function MatchesAdminPage() {
                       {
                         key: 'generate-standings',
                         label: standings.filter(s => s.season_id === selectedSeason).length === 0 
-                          ? 'Generovat tabulky' 
-                          : 'Přepočítat tabulky',
+                          ? translations.matches.actions.generateStandings 
+                          : translations.matches.actions.recalculateStandings,
                         description: standings.filter(s => s.season_id === selectedSeason).length === 0 
-                          ? 'Vytvořit nové tabulky pro všechny kategorie'
-                          : 'Aktualizovat existující tabulky',
+                          ? translations.matches.actions.generateStandingsDescription
+                          : translations.matches.actions.recalculateStandingsDescription,
                         color: 'success',
                         variant: 'flat',
                         onClick: handleStandingsAction,
@@ -1140,8 +1144,8 @@ export default function MatchesAdminPage() {
                       },
                       {
                         key: 'excel-import',
-                        label: 'Import z Excelu',
-                        description: 'Importovat zápasy z Excel souboru',
+                        label: translations.matches.actions.import,
+                        description: translations.matches.actions.importDescription,
                         color: 'secondary',
                         variant: 'flat',
                         icon: <DocumentArrowUpIcon className="w-4 h-4" />,
@@ -1149,8 +1153,8 @@ export default function MatchesAdminPage() {
                       },
                       {
                         key: 'delete-all-matches',
-                        label: 'Smazat všechny zápasy',
-                        description: 'Smazat všechny zápasy z vybrané sezóny',
+                        label: translations.matches.actions.deleteAllMatches,
+                        description: translations.matches.actions.deleteAllMatchesDescription,
                         color: 'danger',
                         variant: 'flat',
                         icon: <TrashIcon className="w-4 h-4" />,
@@ -1175,7 +1179,7 @@ export default function MatchesAdminPage() {
                   isDisabled={isSeasonClosed()}
                   size="sm"
                 >
-                  Přidat zápas
+                  {translations.matches.actions.addMatch}
                 </Button>
                 <Button 
                   color="warning" 
@@ -1184,7 +1188,7 @@ export default function MatchesAdminPage() {
                   isDisabled={isSeasonClosed()}
                   size="sm"
                 >
-                  Hromadná úprava kol
+                  {translations.matches.actions.bulkUpdateMatchweek}
                 </Button>
                 <Button 
                   color="success" 
@@ -1193,8 +1197,8 @@ export default function MatchesAdminPage() {
                   size="sm"
                 >
                   {standings.filter(s => s.category_id === selectedCategory && s.season_id === selectedSeason).length === 0 
-                    ? 'Generovat tabulku' 
-                    : 'Přepočítat tabulku'
+                    ? translations.matches.actions.generateStandings 
+                    : translations.matches.actions.recalculateStandings
                   }
                 </Button>
                 <Button 
@@ -1203,7 +1207,7 @@ export default function MatchesAdminPage() {
                   onPress={onExcelImportOpen}
                   size="sm"
                 >
-                  {translations.import}
+                  {translations.matches.actions.import}
                 </Button>
                 <Button 
                   color="danger" 
@@ -1212,7 +1216,7 @@ export default function MatchesAdminPage() {
                   isDisabled={isSeasonClosed() || !selectedSeason}
                   size="sm"
                 >
-                  Smazat všechny zápasy
+                  {translations.matches.actions.deleteAllMatches}
                 </Button>
               </div>
               
@@ -1286,22 +1290,19 @@ export default function MatchesAdminPage() {
                               
                               return (
                                 <div key={matchweek} className="border rounded-lg p-4 bg-gray-50">
-                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 border-b pb-2">
+                                  <div 
+                                    className="flex items-center justify-between mb-4 border-b pb-2 cursor-pointer hover:bg-gray-100 transition-colors rounded p-2" 
+                                    onClick={() => toggleMatchweek(category.id, matchweek)}
+                                  >
                                     <h4 className="text-lg font-semibold text-gray-800">
                                       {weekTitle} ({weekMatches.length} zápas{weekMatches.length !== 1 ? 'ů' : ''})
                                     </h4>
-                                    <Button
-                                      size="sm"
-                                      variant="light"
-                                      startContent={isMatchweekExpanded(category.id, matchweek) ? 
-                                        <ChevronUpIcon className="w-4 h-4" /> : 
-                                        <ChevronDownIcon className="w-4 h-4" />
+                                    <div className="text-gray-600">
+                                      {isMatchweekExpanded(category.id, matchweek) ? 
+                                        <ChevronDownIcon className="w-4 h-4" /> : 
+                                        <ChevronUpIcon className="w-4 h-4" />
                                       }
-                                      onPress={() => toggleMatchweek(category.id, matchweek)}
-                                      className="w-full sm:w-auto"
-                                    >
-                                      {isMatchweekExpanded(category.id, matchweek) ? 'Skrýt' : 'Zobrazit'}
-                                    </Button>
+                                    </div>
                                   </div>
                                   
                                   {/* Collapsible Content */}
@@ -1317,7 +1318,10 @@ export default function MatchesAdminPage() {
                                       
                                       <div className="space-y-3">
                                                                         {weekMatches.map((match) => (
-                                      <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm">
+                                      <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => {
+                                        setSelectedMatch(match);
+                                        onMatchActionsOpen();
+                                      }}>
                                         {/* Desktop: Grid layout */}
                                         <div className="hidden lg:grid grid-cols-11 gap-4 items-center">
                                           {/* Match Number - First Column */}
@@ -1443,25 +1447,74 @@ export default function MatchesAdminPage() {
                                           </div>
                                         </div>
 
-                                        {/* Action Buttons - Below the main content */}
-                                        <div className="mt-4 flex justify-end border-t pt-3">
-                                          <MatchActionsMenu
-                                            match={match}
-                                            onAddResult={(match) => {
-                                              setSelectedMatch(match);
-                                              onAddResultOpen();
-                                            }}
-                                            onEditMatch={handleEditMatch}
-                                            onLineupManager={(match) => {
-                                              setSelectedMatch(match);
-                                              onLineupModalOpen();
-                                            }}
-                                            onDeleteMatch={handleDeleteClick}
-                                            isSeasonClosed={isSeasonClosed()}
-                                          />
+                                        {/* Action indicator - Show that card is clickable */}
+                                        <div className="mt-4 pt-3 border-t border-gray-100">
+                                          <div className="text-center">
+                                            <div className="inline-flex items-center gap-2 text-sm text-gray-500">
+                                              <span>Klikněte pro akce</span>
+                                              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
                                     ))}
+                                      </div>
+                                      
+                                      {/* Zone Actions - Below the matches list */}
+                                      <div className="mt-6 pt-4 border-t border-gray-200">
+                                        <div className="flex flex-wrap gap-2 justify-center">
+                                          <Button
+                                            size="sm"
+                                            color="primary"
+                                            variant="flat"
+                                            startContent={<PlusIcon className="w-4 h-4" />}
+                                            onPress={onAddMatchOpen}
+                                            isDisabled={isSeasonClosed()}
+                                          >
+                                            Přidat zápas
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            color="warning"
+                                            variant="flat"
+                                            startContent={<ArrowPathIcon className="w-4 h-4" />}
+                                            onPress={onBulkUpdateOpen}
+                                            isDisabled={isSeasonClosed()}
+                                          >
+                                            Úprava kol
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            color="success"
+                                            variant="flat"
+                                            onPress={handleStandingsAction}
+                                            isDisabled={isSeasonClosed()}
+                                          >
+                                            {standings.filter(s => s.category_id === category.id && s.season_id === selectedSeason).length === 0 
+                                              ? 'Generovat tabulku' 
+                                              : 'Přepočítat tabulku'
+                                            }
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            color="secondary"
+                                            variant="flat"
+                                            startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
+                                            onPress={onExcelImportOpen}
+                                          >
+                                            Import
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            color="danger"
+                                            variant="flat"
+                                            startContent={<TrashIcon className="w-4 h-4" />}
+                                            onPress={onDeleteAllConfirmOpen}
+                                            isDisabled={isSeasonClosed() || !selectedSeason}
+                                          >
+                                            Smazat vše
+                                          </Button>
+                                        </div>
                                       </div>
                                     </>
                                   )}
@@ -1655,6 +1708,107 @@ export default function MatchesAdminPage() {
         `}
       />
 
+      {/* Match Actions Modal */}
+      <Modal isOpen={isMatchActionsOpen} onClose={onMatchActionsClose} size="sm">
+        <ModalContent>
+          <ModalHeader>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <h3 className="text-lg font-semibold">Akce pro zápas</h3>
+            </div>
+          </ModalHeader>
+          <ModalBody className="px-4 py-4">
+            <div className="space-y-2">
+              {selectedMatch?.status === 'upcoming' && (
+                <Button
+                  color="primary"
+                  variant="light"
+                  size="lg"
+                  startContent={<EyeIcon className="w-4 h-4" />}
+                  onPress={() => {
+                    onMatchActionsClose();
+                    onAddResultOpen();
+                  }}
+                  className="w-full justify-start h-auto py-3 px-4"
+                  isDisabled={isSeasonClosed()}
+                >
+                  <div className="flex flex-col items-start text-left">
+                    <span className="font-medium">Přidat výsledek</span>
+                    <span className="text-xs text-gray-500 mt-1">Zadat výsledek zápasu</span>
+                  </div>
+                </Button>
+              )}
+              
+              <Button
+                color="warning"
+                variant="light"
+                size="lg"
+                startContent={<PencilIcon className="w-4 h-4" />}
+                onPress={() => {
+                  onMatchActionsClose();
+                  handleEditMatch(selectedMatch!);
+                }}
+                className="w-full justify-start h-auto py-3 px-4"
+                isDisabled={isSeasonClosed()}
+              >
+                <div className="flex flex-col items-start text-left">
+                  <span className="font-medium">Upravit zápas</span>
+                  <span className="text-xs text-gray-500 mt-1">Upravit informace o zápasu</span>
+                </div>
+              </Button>
+              
+              <Button
+                color="secondary"
+                variant="light"
+                size="lg"
+                startContent={<UserGroupIcon className="w-4 h-4" />}
+                onPress={() => {
+                  onMatchActionsClose();
+                  onLineupModalOpen();
+                }}
+                className="w-full justify-start h-auto py-3 px-4"
+                isDisabled={isSeasonClosed()}
+              >
+                <div className="flex flex-col items-start text-left">
+                  <span className="font-medium">Správa sestav</span>
+                  <span className="text-xs text-gray-500 mt-1">Spravovat sestavy týmů</span>
+                </div>
+              </Button>
+              
+              <Button
+                color="danger"
+                variant="light"
+                size="lg"
+                startContent={<TrashIcon className="w-4 h-4" />}
+                onPress={() => {
+                  onMatchActionsClose();
+                  handleDeleteClick(selectedMatch!);
+                }}
+                className="w-full justify-start h-auto py-3 px-4"
+                isDisabled={isSeasonClosed()}
+              >
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-left">
+                    <span className="font-medium">Smazat zápas</span>
+                    <span className="text-xs text-gray-500 mt-1 block">Trvale smazat zápas</span>
+                  </span>
+                </div>
+              </Button>
+            </div>
+          </ModalBody>
+          <ModalFooter className="px-4 py-4">
+            <Button
+              color="default"
+              variant="light"
+              onPress={onMatchActionsClose}
+              className="w-full"
+            >
+              Zavřít
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       {/* Delete All Matches Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={isDeleteAllConfirmOpen}
@@ -1669,8 +1823,7 @@ export default function MatchesAdminPage() {
               </div>
               <p class="text-red-700 mt-2">
                 Tato akce smaže <strong>VŠECHNY</strong> zápasy pro vybranou sezónu.
-              </p>
-            </div>
+              </div>
             
             <div class="space-y-2">
               <p>
