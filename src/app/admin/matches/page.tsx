@@ -1,29 +1,21 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
+import { useDisclosure } from "@heroui/modal";
 import { Tabs, Tab } from "@heroui/tabs";
 import { 
-  MapPinIcon, 
   TrophyIcon,
   PlusIcon,
   ArrowPathIcon,
   DocumentArrowUpIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
   TrashIcon,
-  EyeIcon,
-  PencilIcon,
-  UserGroupIcon,
-  DocumentIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
-import Image from 'next/image';
-import { AddMatchModal, AddResultModal, EditMatchModal, BulkUpdateMatchweekModal, ExcelImportModal, MatchActionsMenu, MatchActionsModal, MatchProcessWizardModal, LineupManagerModal } from './components';
+import { AddMatchModal, AddResultModal, EditMatchModal, BulkUpdateMatchweekModal, ExcelImportModal, MatchActionsModal, MatchProcessWizardModal, LineupManagerModal, StandingsTable, CategoryMatches } from './components';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import MobileActionsMenu from '@/components/MobileActionsMenu';
 import { useExcelImport } from '@/hooks/useExcelImport';
@@ -1238,368 +1230,35 @@ export default function MatchesAdminPage() {
 
                         
                         {/* Matches for this category grouped by matchweek */}
-                        <div className="space-y-6">
-                          {(() => {
-                            // Group matches by matchweek
-                            const matchesForCategory = matches.filter(match => match.category_id === category.id);
-                            const groupedMatches = new Map<number, Match[]>();
-                            
-                            // Group by matchweek, put matches without matchweek at the end
-                            matchesForCategory.forEach(match => {
-                              const matchweek = match.matchweek || 0;
-                              if (!groupedMatches.has(matchweek)) {
-                                groupedMatches.set(matchweek, []);
-                              }
-                              groupedMatches.get(matchweek)!.push(match);
-                            });
-                            
-                            // Sort matchweeks and convert to array
-                            const sortedMatchweeks = Array.from(groupedMatches.keys()).sort((a, b) => {
-                              if (a === 0) return 1; // No matchweek goes last
-                              if (b === 0) return -1;
-                              return a - b;
-                            });
-                            
-                            // Sort matches within each matchweek by match_number
-                            sortedMatchweeks.forEach(matchweek => {
-                              const weekMatches = groupedMatches.get(matchweek)!;
-                              weekMatches.sort((a, b) => {
-                                // If both have match numbers, sort numerically
-                                if (a.match_number && b.match_number) {
-                                  const aNum = a.match_number;
-                                  const bNum = b.match_number;
-                                  return aNum - bNum;
-                                }
-                                // If only one has match number, prioritize the one with number
-                                if (a.match_number && !b.match_number) return -1;
-                                if (!a.match_number && b.match_number) return 1;
-                                // If neither has match number, maintain original order
-                                return 0;
-                              });
-                            });
-                            
-                            return sortedMatchweeks.map(matchweek => {
-                              const weekMatches = groupedMatches.get(matchweek)!;
-                              const weekTitle = matchweek === 0 ? 'Bez kola' : `${matchweek}. kolo`;
-                              
-                              return (
-                                <div key={matchweek} className="border rounded-lg p-4 bg-gray-50">
-                                  <div 
-                                    className="flex items-center justify-between mb-4 border-b pb-2 cursor-pointer hover:bg-gray-100 transition-colors rounded p-2" 
-                                    onClick={() => toggleMatchweek(category.id, matchweek)}
-                                  >
-                                    <h4 className="text-lg font-semibold text-gray-800">
-                                      {weekTitle} ({weekMatches.length} zápas{weekMatches.length !== 1 ? 'ů' : ''})
-                                    </h4>
-                                    <div className="text-gray-600">
-                                      {isMatchweekExpanded(category.id, matchweek) ? 
-                                        <ChevronDownIcon className="w-4 h-4" /> : 
-                                        <ChevronUpIcon className="w-4 h-4" />
-                                      }
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Collapsible Content */}
-                                  {isMatchweekExpanded(category.id, matchweek) && (
-                                    <>
-                                      {/* Column Headers - Desktop only */}
-                                      <div className="hidden lg:grid grid-cols-11 gap-4 mb-3 px-2 items-center">
-                                        <div className="col-span-1 text-center text-sm font-medium text-gray-600">{translations.matches.matchNumber}</div>
-                                        <div className="col-span-2 text-center text-sm font-medium text-gray-600">{translations.matches.matchDateTime}</div>
-                                        <div className="col-span-6 text-start text-sm font-medium text-gray-600">{translations.matches.matchLocation}</div>
-                                        <div className="col-span-2 text-center text-sm font-medium text-gray-600">{translations.matches.matchScore}</div>
-                                      </div>
-                                      
-                                      <div className="space-y-3">
-                                                                        {weekMatches.map((match) => (
-                                      <div key={match.id} className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow lg:cursor-default cursor-pointer" onClick={() => {
-                                        // Only handle click on mobile
-                                        if (window.innerWidth < 1024) { // lg breakpoint
-                                          setSelectedMatch(match);
-                                          onMatchActionsOpen();
-                                        }
-                                      }}>
-                                        {/* Desktop: Grid layout */}
-                                        <div className="hidden lg:grid grid-cols-11 gap-4 items-center">
-                                          {/* Match Number - First Column */}
-                                          <div className="col-span-1">
-                                            {match.match_number ? (
-                                              <div className="text-center">
-                                                <div className="text-lg font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
-                                                  #{match.match_number}
-                                                </div>
-                                              </div>
-                                            ) : (
-                                              <div className="text-center">
-                                                <div className="text-sm text-gray-400 bg-gray-50 px-3 py-2 rounded-lg">
-                                                  -
-                                                </div>
-                                              </div>
-                                            )}
-                                          </div>
+                        <CategoryMatches
+                          matches={matches}
+                          category={category}
+                          expandedMatchweeks={expandedMatchweeks}
+                          toggleMatchweek={toggleMatchweek}
+                          isMatchweekExpanded={isMatchweekExpanded}
+                          onAddResult={(match) => {
+                            setSelectedMatch(match);
+                            onAddResultOpen();
+                          }}
+                          onEditMatch={handleEditMatch}
+                          onLineupModalOpen={(match) => {
+                            setSelectedMatch(match);
+                            onLineupModalOpen();
+                          }}
+                          onDeleteClick={handleDeleteClick}
+                          isSeasonClosed={isSeasonClosed()}
+                        />
 
-                                          {/* Date and Time - Second Column */}
-                                          <div className="col-span-2">
-                                            <div className="text-center">
-                                              <div className="text-sm text-gray-600 mb-1">
-                                                {new Date(match.date).toLocaleDateString('cs-CZ')}
-                                              </div>
-                                              <div className="text-lg font-semibold text-gray-800">
-                                                {match.time}
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          {/* Teams and Venue - Third Column */}
-                                          <div className="col-span-6">
-                                            <div className="text-start">
-                                              <div className="text-lg font-semibold text-gray-800 mb-2">
-                                                {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
-                                              </div>
-                                              <div className="flex items-start space-x-2 text-sm text-gray-600">
-                                                <MapPinIcon className="w-4 h-4 text-gray-400" />
-                                                <span>{match.venue}</span>
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          {/* Score - Fourth Column */}
-                                          <div className="col-span-2">
-                                            <div className="text-center">
-                                              {match.status === 'completed' ? (
-                                                <div className="text-2xl font-bold text-gray-800">
-                                                  {match.home_score} : {match.away_score}
-                                                </div>
-                                              ) : (
-                                                <div className="text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
-                                                  Skóre zatím není k dispozici
-                                                </div>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* Mobile: Stacked layout */}
-                                        <div className="lg:hidden space-y-3">
-                                          {/* Match Number */}
-                                          <div className="flex justify-between items-center">
-                                            <span className="text-sm font-medium text-gray-600">Číslo zápasu:</span>
-                                            {match.match_number ? (
-                                              <div className="text-lg font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
-                                                #{match.match_number}
-                                              </div>
-                                            ) : (
-                                              <div className="text-sm text-gray-400 bg-gray-50 px-3 py-2 rounded-lg">
-                                                -
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* Date and Time */}
-                                          <div className="flex justify-between items-center">
-                                            <span className="text-sm font-medium text-gray-600">Datum a čas:</span>
-                                            <div className="text-right">
-                                              <div className="text-sm text-gray-600">
-                                                {new Date(match.date).toLocaleDateString('cs-CZ')}
-                                              </div>
-                                              <div className="text-lg font-semibold text-gray-800">
-                                                {match.time}
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          {/* Teams */}
-                                          <div className="flex justify-between items-center">
-                                            <span className="text-sm font-medium text-gray-600">Týmy:</span>
-                                            <div className="text-right">
-                                              <div className="text-lg font-semibold text-gray-800">
-                                                {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          {/* Venue */}
-                                          <div className="flex justify-between items-center">
-                                            <span className="text-sm font-medium text-gray-600">Místo:</span>
-                                            <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                              <MapPinIcon className="w-4 h-4 text-gray-400" />
-                                              <span>{match.venue}</span>
-                                            </div>
-                                          </div>
-
-                                          {/* Score */}
-                                          <div className="flex justify-between items-center">
-                                            <span className="text-sm font-medium text-gray-600">Skóre:</span>
-                                            <div className="text-right">
-                                              {match.status === 'completed' ? (
-                                                <div className="text-xl font-bold text-gray-800">
-                                                  {match.home_score} : {match.away_score}
-                                                </div>
-                                              ) : (
-                                                <div className="text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
-                                                  Skóre zatím není k dispozici
-                                                </div>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* Desktop: Show all actions directly */}
-                                        <div className="hidden lg:block mt-4 pt-3 border-t border-gray-100">
-                                          <div className="flex flex-wrap gap-2 justify-end">
-                                            {match.status === 'upcoming' && (
-                                              <Button
-                                                size="sm"
-                                                color="primary"
-                                                variant="light"
-                                                startContent={<EyeIcon className="w-4 h-4" />}
-                                                onPress={() => {
-                                                  setSelectedMatch(match);
-                                                  onAddResultOpen();
-                                                }}
-                                                isDisabled={isSeasonClosed()}
-                                              >
-                                                Výsledek
-                                              </Button>
-                                            )}
-                                            <Button
-                                              size="sm"
-                                              color="warning"
-                                              variant="light"
-                                              startContent={<PencilIcon className="w-4 h-4" />}
-                                              onPress={() => handleEditMatch(match)}
-                                              isDisabled={isSeasonClosed()}
-                                            >
-                                              Upravit
-                                            </Button>
-                                            <Button
-                                              size="sm"
-                                              color="secondary"
-                                              variant="light"
-                                              startContent={<UserGroupIcon className="w-4 h-4" />}
-                                              onPress={() => {
-                                                setSelectedMatch(match);
-                                                onLineupModalOpen();
-                                              }}
-                                              isDisabled={isSeasonClosed()}
-                                            >
-                                              Sestavy
-                                            </Button>
-                                            <Button
-                                              size="sm"
-                                              color="danger"
-                                              variant="light"
-                                              startContent={<TrashIcon className="w-4 h-4" />}
-                                              onPress={() => handleDeleteClick(match)}
-                                              isDisabled={isSeasonClosed()}
-                                            >
-                                              Smazat
-                                            </Button>
-                                          </div>
-                                        </div>
-
-                                        {/* Mobile: Show action indicator */}
-                                        <div className="lg:hidden mt-4 pt-3 border-t border-gray-100">
-                                          <div className="text-center">
-                                            <div className="inline-flex items-center gap-2 text-sm text-gray-500">
-                                              <span>Klikněte pro akce</span>
-                                              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                      </div>
-                                    </>
-                                  )}
-                                </div>
-                              );
-                            });
-                          })()}
-                        </div>
 
                         {/* Standings for this category */}
-                        <div className="mt-8">
-                          <h4 className="text-lg font-semibold mb-4">Tabulka - {category.name}</h4>
-                          
-                          {standings.filter(standing => standing.category_id === category.id).length === 0 ? (
-                            <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                              <div className="text-gray-500 mb-4">
-                                <TrophyIcon className="w-12 h-12 mx-auto text-gray-400" />
-                              </div>
-                              <h5 className="text-lg font-medium text-gray-700 mb-2">Žádná tabulka</h5>
-                              <p className="text-gray-500 mb-4">
-                                Pro tuto kategorii ještě nebyla vygenerována tabulka.
-                              </p>
-                              <Button
-                                color="secondary"
-                                size="sm"
-                                onPress={handleStandingsAction}
-                                isDisabled={isSeasonClosed()}
-                              >
-                                {standings.filter(s => s.category_id === selectedCategory && s.season_id === selectedSeason).length === 0 
-                                  ? 'Generovat tabulku' 
-                                  : 'Přepočítat tabulku'
-                                }
-                              </Button>
-                            </div>
-                          ) : (
-
-                            // TODO: refactor for mobile
-                            <div className="overflow-x-auto -mx-4 sm:mx-0">
-                              <div className="min-w-full inline-block align-middle">
-                                <div className="overflow-hidden">
-                                  <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                  <tr>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pozice</th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tým</th>
-                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Z</th>
-                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">V</th>
-                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">R</th>
-                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P</th>
-                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Skóre</th>
-                                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Body</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                  {standings
-                                    .filter(standing => standing.category_id === category.id)
-                                    .map((standing, index) => (
-                                      <tr key={index} className="hover:bg-gray-50">
-                                        <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{standing.position}</td>
-                                        <td className="px-3 py-4 whitespace-nowrap">
-                                          <div className="flex items-center gap-2">
-                                            {standing.team?.logo_url && (
-                                              <Image 
-                                                src={standing.team.logo_url} 
-                                                alt={`${standing.team.name} logo`}
-                                                width={24}
-                                                height={24}
-                                                className="w-6 h-6 object-contain"
-                                                onError={(e) => {
-                                                  e.currentTarget.style.display = 'none';
-                                                }}
-                                              />
-                                            )}
-                                            <span className="text-sm text-gray-900">{standing.team?.name || 'N/A'}</span>
-                                          </div>
-                                        </td>
-                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.matches}</td>
-                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.wins}</td>
-                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.draws}</td>
-                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.losses}</td>
-                                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.goals_for}:{standing.goals_against}</td>
-                                        <td className="px-3 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-center">{standing.points}</td>
-                                      </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                        <StandingsTable
+                          standings={standings}
+                          categoryId={category.id}
+                          categoryName={category.name}
+                          isSeasonClosed={isSeasonClosed()}
+                          onGenerateStandings={handleStandingsAction}
+                          hasStandings={standings.filter(standing => standing.category_id === category.id).length > 0}
+                        />
                       </div>
                     </Tab>
                   ))}
