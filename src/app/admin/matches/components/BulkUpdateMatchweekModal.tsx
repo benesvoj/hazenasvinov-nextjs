@@ -12,8 +12,9 @@ interface BulkUpdateMatchweekModalProps {
   bulkUpdateData: {
     categoryId: string;
     matchweek: string;
+    action: 'set' | 'remove';
   };
-  onBulkUpdateDataChange: (data: { categoryId: string; matchweek: string }) => void;
+  onBulkUpdateDataChange: (data: { categoryId: string; matchweek: string; action: 'set' | 'remove' }) => void;
   onBulkUpdate: () => void;
   categories: Category[];
   matches: Match[];
@@ -48,10 +49,32 @@ export default function BulkUpdateMatchweekModal({
     });
   };
 
-  const matchesWithoutMatchweek = matches.filter(match => 
-    match.category_id === bulkUpdateData.categoryId && !match.matchweek
-  );
+  const handleActionChange = (keys: any) => {
+    const selectedAction = Array.from(keys)[0] as 'set' | 'remove';
+    onBulkUpdateDataChange({
+      ...bulkUpdateData,
+      action: selectedAction || 'set'
+    });
+  };
 
+  // Get matches based on the selected action
+  const getMatchesToUpdate = () => {
+    if (bulkUpdateData.action === 'remove') {
+      // For remove action, get matches WITH matchweek
+      return matches.filter(match => 
+        match.category_id === bulkUpdateData.categoryId && 
+        match.matchweek !== null && match.matchweek !== undefined
+      );
+    } else {
+      // For set action, get matches WITHOUT matchweek
+      return matches.filter(match => 
+        match.category_id === bulkUpdateData.categoryId && 
+        !match.matchweek
+      );
+    }
+  };
+
+  const matchesToUpdate = getMatchesToUpdate();
   const selectedCategoryName = categories.find(c => c.id === bulkUpdateData.categoryId)?.name;
 
   return (
@@ -61,7 +84,7 @@ export default function BulkUpdateMatchweekModal({
         <ModalBody>
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              Tato funkce umožní nastavit stejné kolo pro všechny zápasy bez kola v dané kategorii.
+              Tato funkce umožní nastavit nebo odebrat kolo pro zápasy v dané kategorii.
             </p>
             
             <div>
@@ -85,27 +108,48 @@ export default function BulkUpdateMatchweekModal({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Kolo
+                Akce
               </label>
               <Select
-                placeholder="Vyberte kolo"
-                selectedKeys={bulkUpdateData.matchweek ? [bulkUpdateData.matchweek] : []}
-                onSelectionChange={handleMatchweekChange}
+                placeholder="Vyberte akci"
+                selectedKeys={[bulkUpdateData.action]}
+                onSelectionChange={handleActionChange}
                 className="w-full"
                 isDisabled={isSeasonClosed}
               >
-                {getMatchweekOptions().slice(1).map((option) => ( // Skip the "Bez kola" option
-                  <SelectItem key={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                <SelectItem key="set">Nastavit kolo</SelectItem>
+                <SelectItem key="remove">Odebrat kolo</SelectItem>
               </Select>
             </div>
+
+            {bulkUpdateData.action === 'set' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Kolo
+                </label>
+                <Select
+                  placeholder="Vyberte kolo"
+                  selectedKeys={bulkUpdateData.matchweek ? [bulkUpdateData.matchweek] : []}
+                  onSelectionChange={handleMatchweekChange}
+                  className="w-full"
+                  isDisabled={isSeasonClosed}
+                >
+                  {getMatchweekOptions().slice(1).map((option) => ( // Skip the "Bez kola" option
+                    <SelectItem key={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+            )}
 
             {bulkUpdateData.categoryId && (
               <div className="p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  Nalezeno {matchesWithoutMatchweek.length} zápasů bez kola v kategorii &quot;{selectedCategoryName}&quot;
+                  {bulkUpdateData.action === 'set' 
+                    ? `Nalezeno ${matchesToUpdate.length} zápasů bez kola v kategorii "${selectedCategoryName}"`
+                    : `Nalezeno ${matchesToUpdate.length} zápasů s kolem v kategorii "${selectedCategoryName}"`
+                  }
                 </p>
               </div>
             )}
@@ -118,7 +162,11 @@ export default function BulkUpdateMatchweekModal({
           <Button 
             color="primary" 
             onPress={onBulkUpdate}
-            isDisabled={!bulkUpdateData.categoryId || !bulkUpdateData.matchweek || isSeasonClosed}
+            isDisabled={
+              !bulkUpdateData.categoryId || 
+              (bulkUpdateData.action === 'set' && !bulkUpdateData.matchweek) ||
+              isSeasonClosed
+            }
           >
             Hromadně upravit
           </Button>

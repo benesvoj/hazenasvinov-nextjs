@@ -111,7 +111,8 @@ export default function MatchesAdminPage() {
 
   const [bulkUpdateData, setBulkUpdateData] = useState({
     categoryId: '',
-    matchweek: ''
+    matchweek: '',
+    action: 'set' as 'set' | 'remove'
   });
 
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
@@ -941,31 +942,55 @@ export default function MatchesAdminPage() {
     }
   };
 
-  // Bulk update matchweek for matches without matchweek
+  // Bulk update matchweek for matches
   const handleBulkUpdateMatchweek = async () => {
-    if (!bulkUpdateData.categoryId || !bulkUpdateData.matchweek) {
-      setError('Prosím vyberte kategorii a kolo');
+    if (!bulkUpdateData.categoryId) {
+      setError('Prosím vyberte kategorii');
+      return;
+    }
+
+    if (bulkUpdateData.action === 'set' && !bulkUpdateData.matchweek) {
+      setError('Prosím vyberte kolo pro nastavení');
       return;
     }
 
     try {
-      // Find matches without matchweek for the selected category
-      const matchesToUpdate = matches.filter(match => 
-        match.category_id === bulkUpdateData.categoryId && 
-        !match.matchweek
-      );
+      let matchesToUpdate: Match[];
+      let updateData: any;
 
-      if (matchesToUpdate.length === 0) {
-        setError('Nebyly nalezeny žádné zápasy bez kola pro vybranou kategorii');
-        return;
+      if (bulkUpdateData.action === 'set') {
+        // Find matches without matchweek for the selected category
+        matchesToUpdate = matches.filter(match => 
+          match.category_id === bulkUpdateData.categoryId && 
+          !match.matchweek
+        );
+
+        if (matchesToUpdate.length === 0) {
+          setError('Nebyly nalezeny žádné zápasy bez kola pro vybranou kategorii');
+          return;
+        }
+
+        const matchweekNumber = parseInt(bulkUpdateData.matchweek);
+        updateData = { matchweek: matchweekNumber };
+      } else {
+        // Find matches with matchweek for the selected category
+        matchesToUpdate = matches.filter(match => 
+          match.category_id === bulkUpdateData.categoryId && 
+          match.matchweek !== null && match.matchweek !== undefined
+        );
+
+        if (matchesToUpdate.length === 0) {
+          setError('Nebyly nalezeny žádné zápasy s kolem pro vybranou kategorii');
+          return;
+        }
+
+        updateData = { matchweek: null };
       }
 
-      const matchweekNumber = parseInt(bulkUpdateData.matchweek);
-      
       // Update all matches in bulk
       const { error } = await supabase
         .from('matches')
-        .update({ matchweek: matchweekNumber })
+        .update(updateData)
         .in('id', matchesToUpdate.map(match => match.id));
 
       if (error) {
@@ -973,9 +998,10 @@ export default function MatchesAdminPage() {
         throw error;
       }
 
+      const actionText = bulkUpdateData.action === 'set' ? 'nastaveno' : 'odebráno';
       setError('');
       onBulkUpdateClose();
-      setBulkUpdateData({ categoryId: '', matchweek: '' });
+      setBulkUpdateData({ categoryId: '', matchweek: '', action: 'set' });
       fetchMatches(); // Refresh the matches list
       
     } catch (error) {

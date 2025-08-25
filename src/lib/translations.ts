@@ -183,8 +183,8 @@ export const translations = {
 		actions: {
 			addMatch: 'Přidat zápas',
 			addMatchDescription: 'Přidat nový zápas do vybrané sezóny',
-			bulkUpdateMatchweek: 'Hromadná úprava kol',
-			bulkUpdateMatchweekDescription: 'Hromadně upravit kola pro všechny zápasy',	
+			    bulkUpdateMatchweek: 'Hromadná úprava kol',
+    bulkUpdateMatchweekDescription: 'Hromadně nastavit nebo odebrat kola pro zápasy',	
 			generateStandings: 'Generovat tabulky',
 			generateStandingsDescription: 'Vytvořit nové tabulky pro všechny kategorie',
 			recalculateStandings: 'Přepočítat tabulky',
