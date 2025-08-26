@@ -7,6 +7,7 @@ import {
   TrophyIcon,
   FunnelIcon
 } from "@heroicons/react/24/outline";
+import { useFetchMatches } from "@/hooks/useFetchMatches";
 import { createClient } from "@/utils/supabase/client";
 import { Select, SelectItem } from "@heroui/react";
 import MatchCard from "@/app/(main)/matches/components/MatchCard";
@@ -15,14 +16,15 @@ import { formatMonth } from "@/helpers/formatMonth";
 import { Match } from "@/types/types";
 
 export default function MatchesPage() {
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTeam, setSelectedTeam] = useState<string>("all");
   const [categories, setCategories] = useState<any[]>([]);
-  const [teams, setTeams] = useState<any[]>([]);
+  // Teams are now extracted from matches data
   const [activeSeason, setActiveSeason] = useState<any>(null);
+  
+  // Use the updated hook for fetching matches
+  const { matches, loading, error } = useFetchMatches(selectedCategory);
 
   // Check for category parameter in URL
   useEffect(() => {
@@ -35,11 +37,12 @@ export default function MatchesPage() {
     }
   }, []);
 
-  const supabase = createClient();
+  // Supabase client no longer needed - useFetchMatches handles data fetching
 
   // Fetch active season
   const fetchActiveSeason = useCallback(async () => {
     try {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('seasons')
         .select('*')
@@ -54,11 +57,12 @@ export default function MatchesPage() {
     } catch (error) {
       console.error('Error fetching active season:', error);
     }
-  }, [supabase]);
+  }, []);
 
   // Fetch categories
   const fetchCategories = useCallback(async () => {
     try {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('categories')
         .select('id, code, name')
@@ -70,59 +74,34 @@ export default function MatchesPage() {
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
-  }, [supabase]);
+  }, []);
 
 
 
-  // Fetch matches
-  const fetchMatches = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      let query = supabase
-        .from('matches')
-        .select(`
-          *,
-          home_team:home_team_id(name, logo_url, is_own_club),
-          away_team:away_team_id(name, logo_url, is_own_club),
-          category:categories(code, name, description),
-          season:seasons(name)
-        `)
-        .order('date', { ascending: true });
-
-      // Filter by active season if available
-      if (activeSeason) {
-        query = query.eq('season_id', activeSeason.id);
-      }
-
-      // Filter by category if selected
-      if (selectedCategory !== "all") {
-        const category = categories.find(cat => cat.code === selectedCategory);
-        if (category) {
-          query = query.eq('category_id', category.id);
+  // Extract teams from matches for filtering
+  const allTeams = useMemo(() => {
+    const teamsSet = new Set();
+    const teamsArray: any[] = [];
+    
+    matches.autumn.concat(matches.spring).forEach(match => {
+      if (match.home_team) {
+        const teamKey = `${match.home_team.id}-${match.home_team.name}`;
+        if (!teamsSet.has(teamKey)) {
+          teamsSet.add(teamKey);
+          teamsArray.push(match.home_team);
         }
       }
-
-      // Filter by team if selected
-      if (selectedTeam && selectedTeam !== "all") {
-        console.log('🔍 Filtering by team:', selectedTeam);
-        console.log('🔍 Current query filters:', { selectedCategory, selectedTeam, activeSeason: activeSeason?.id });
-        query = query.or(`home_team_id.eq.${selectedTeam},away_team_id.eq.${selectedTeam}`);
+      if (match.away_team) {
+        const teamKey = `${match.away_team.id}-${match.away_team.name}`;
+        if (!teamsSet.has(teamKey)) {
+          teamsSet.add(teamKey);
+          teamsArray.push(match.away_team);
+        }
       }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Supabase error details:', error);
-        throw error;
-      }
-      setMatches(data || []);
-    } catch (error) {
-      console.error('Error fetching matches:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [supabase, activeSeason, selectedCategory, selectedTeam, categories]);
+    });
+    
+    return teamsArray;
+  }, [matches]);
 
   // Initial data fetch
   useEffect(() => {
@@ -130,80 +109,19 @@ export default function MatchesPage() {
     fetchCategories();
   }, [fetchActiveSeason, fetchCategories]);
 
-  // Fetch matches when dependencies change
-  useEffect(() => {
-    if (activeSeason) {
-      fetchMatches();
-    }
-  }, [fetchMatches, activeSeason]);
+  // No need to fetch matches separately - useFetchMatches handles it
 
-  // Refetch teams when category changes
-  useEffect(() => {
-    if (activeSeason && categories.length > 0) {
-      const fetchTeamsForCategory = async () => {
-        try {
-          if (selectedCategory === "all") {
-            // If no category selected, show all teams
-            const { data, error } = await supabase
-              .from('teams')
-              .select('id, name, short_name, logo_url, is_own_club')
-              .eq('is_active', true)
-              .order('is_own_club', { ascending: false })
-              .order('name');
-
-            if (error) throw error;
-            
-            // Remove duplicates based on team ID
-            const uniqueTeams = data?.filter((team: any, index: number, self: any[]) => 
-              index === self.findIndex((t: any) => t.id === team.id)
-            ) || [];
-            
-            setTeams(uniqueTeams);
-          } else {
-            // If category selected, show only teams in that category
-            const category = categories.find(cat => cat.code === selectedCategory);
-            if (category) {
-              const { data, error } = await supabase
-                .from('team_categories')
-                .select(`
-                  team:teams(id, name, short_name, logo_url, is_own_club)
-                `)
-                .eq('category_id', category.id)
-                .eq('is_active', true);
-
-              if (error) throw error;
-              
-              // Extract team data, remove duplicates, and sort (own club first)
-              const teamData = data?.map((tc: any) => tc.team).filter(Boolean) || [];
-              
-              // Remove duplicates based on team ID
-              const uniqueTeams = teamData.filter((team: any, index: number, self: any[]) => 
-                index === self.findIndex((t: any) => t.id === team.id)
-              );
-              
-              uniqueTeams.sort((a: any, b: any) => {
-                if (a.is_own_club && !b.is_own_club) return -1;
-                if (!a.is_own_club && b.is_own_club) return 1;
-                return a.name.localeCompare(b.name);
-              });
-              
-              setTeams(uniqueTeams);
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching teams:', error);
-        }
-      };
-
-      fetchTeamsForCategory();
-    }
-  }, [activeSeason, selectedCategory, categories, supabase]);
+  // Teams are automatically updated when matches change
+  // No need for separate teams fetching
 
   // Group matches by month
   const groupedMatches = useMemo(() => {
     const grouped: { [key: string]: Match[] } = {};
     
-    matches.forEach(match => {
+    // Combine autumn and spring matches
+    const allMatches = [...matches.autumn, ...matches.spring];
+    
+    allMatches.forEach(match => {
       const date = new Date(match.date);
       const monthKey = `${date.toLocaleDateString('cs-CZ', { month: 'long' }).toLowerCase()} ${date.getFullYear()}`;
       
@@ -218,13 +136,15 @@ export default function MatchesPage() {
 
   // Filter matches based on filter type
   const filteredMatches = useMemo(() => {
+    const allMatches = [...matches.autumn, ...matches.spring];
+    
     switch (filterType) {
       case "past":
-        return matches.filter(match => match.status === "completed");
+        return allMatches.filter(match => match.status === "completed");
       case "future":
-        return matches.filter(match => match.status === "upcoming");
+        return allMatches.filter(match => match.status === "upcoming");
       default:
-        return matches;
+        return allMatches;
     }
   }, [matches, filterType]);
 
@@ -322,7 +242,7 @@ export default function MatchesPage() {
       </div>
 
       {/* Team Filter Buttons */}
-      {teams.length > 0 && (
+      {allTeams.length > 0 && (
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-2">
             <TrophyIcon className="w-5 h-5 text-gray-500" />
@@ -339,9 +259,9 @@ export default function MatchesPage() {
               </span>
             )}
           </div>
-          <div className={`grid gap-3 ${teams.length > 6 ? 'grid-cols-6' : 'grid-cols-1'} justify-items-center`}>
+                      <div className={`grid gap-3 ${allTeams.length > 6 ? 'grid-cols-6' : 'grid-cols-1'} justify-items-center`}>
             {/* Individual Team Buttons */}
-            {teams.map((team) => (
+            {allTeams.map((team) => (
               <button
                 key={team.id}
                 onClick={() => {

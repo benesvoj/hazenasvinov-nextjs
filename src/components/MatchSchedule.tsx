@@ -172,16 +172,27 @@ export default function MatchSchedule() {
       
       console.log('Selected category data:', selectedCategoryData);
 
-      // Fetch matches with team names, logos and category info for active season
-      // We'll filter for own club matches in JavaScript after fetching
+      // Fetch matches for the selected category and active season
       console.log('Fetching matches for category:', selectedCategoryData.id, 'season:', activeSeason.id);
       
       const { data: matchesData, error: matchesError } = await supabase
         .from('matches')
         .select(`
           *,
-          home_team:home_team_id(name, logo_url, is_own_club),
-          away_team:away_team_id(name, logo_url, is_own_club),
+          home_team:home_team_id(
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url)
+            )
+          ),
+          away_team:away_team_id(
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url)
+            )
+          ),
           category:categories(code, name, description)
         `)
         .eq('category_id', selectedCategoryData.id)
@@ -191,10 +202,40 @@ export default function MatchSchedule() {
       console.log('Matches query result:', { data: matchesData?.length, error: matchesError });
       if (matchesError) throw matchesError;
 
-      // Filter matches for own club teams and transform the data
-      const ownClubMatches = (matchesData as RawMatch[])?.filter(match => 
+      // Transform matches to include team names and club information
+      const transformedMatchesData = (matchesData as any[])?.map(match => {
+        // Create team names from club + suffix
+        const homeTeamName = match.home_team?.club_category?.club 
+          ? `${match.home_team.club_category.club.name} ${match.home_team.team_suffix}`
+          : 'Neznámý tým';
+        
+        const awayTeamName = match.away_team?.club_category?.club 
+          ? `${match.away_team.club_category.club.name} ${match.away_team.team_suffix}`
+          : 'Neznámý tým';
+        
+        // Check if this is our club using the is_own_club field
+        const isOwnClub = match.home_team?.club_category?.club?.is_own_club === true || 
+                         match.away_team?.club_category?.club?.is_own_club === true;
+        
+        return {
+          ...match,
+          home_team: {
+            name: homeTeamName,
+            logo_url: match.home_team?.club_category?.club?.logo_url,
+            is_own_club: isOwnClub
+          },
+          away_team: {
+            name: awayTeamName,
+            logo_url: match.away_team?.club_category?.club?.logo_url,
+            is_own_club: isOwnClub
+          }
+        };
+      }) || [];
+
+      // Filter matches for own club teams
+      const ownClubMatches = transformedMatchesData.filter(match => 
         match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
-      ) || [];
+      );
       
       console.log('Own club matches found:', ownClubMatches.length);
 
@@ -219,7 +260,13 @@ export default function MatchSchedule() {
         .from('standings')
         .select(`
           *,
-          team:team_id(name, logo_url, is_own_club)
+          team:team_id(
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url)
+            )
+          )
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
@@ -228,13 +275,25 @@ export default function MatchSchedule() {
       console.log('Standings query result:', { data: standingsData?.length, error: standingsError });
       if (standingsError) throw standingsError;
 
-      // Transform standings data to flatten team names and logos (no filtering)
-      const transformedStandings = (standingsData as any[])?.map(standing => ({
-        ...standing,
-        team: standing.team?.name || '',
-        team_logo: standing.team?.logo_url || '',
-        is_own_club: standing.team?.is_own_club || false
-      })) || [];
+      // Transform standings data to flatten team names and logos
+      const transformedStandings = (standingsData as any[])?.map(standing => {
+        const team = standing.team;
+        
+        // Create team name from club + suffix
+        const teamName = team?.club_category?.club 
+          ? `${team.club_category.club.name} ${team.team_suffix}`
+          : 'Neznámý tým';
+        
+        // Check if this is our club using the is_own_club field
+        const isOwnClub = team?.club_category?.club?.is_own_club === true;
+        
+        return {
+          ...standing,
+          team: teamName,
+          team_logo: team?.club_category?.club?.logo_url || '',
+          is_own_club: isOwnClub || false
+        };
+      }) || [];
 
       setMatches(transformedMatches);
       setStandings(transformedStandings);

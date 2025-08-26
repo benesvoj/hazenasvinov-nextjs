@@ -365,6 +365,7 @@ interface Club {
   address?: string;
   description?: string;
   contact_person?: string;
+  is_own_club?: boolean;
   is_active: boolean;
   created_at: string;
   updated_at: string;

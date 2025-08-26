@@ -242,8 +242,20 @@ export default function MatchSchedulePage() {
         .from('matches')
         .select(`
           *,
-          home_team:home_team_id(name, logo_url, is_own_club),
-          away_team:away_team_id(name, logo_url, is_own_club),
+          home_team:home_team_id(
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url)
+            )
+          ),
+          away_team:away_team_id(
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url)
+            )
+          ),
           category:categories(code, name, description)
         `)
         .eq('category_id', selectedCategoryData.id)
@@ -253,27 +265,64 @@ export default function MatchSchedulePage() {
       console.log('Matches query result:', { data: matchesData?.length, error: matchesError });
       if (matchesError) throw matchesError;
 
-      // Transform all matches data (no filtering for own club)
-      const transformedMatches = (matchesData as any[])?.map(match => ({
-        ...match,
-        home_team: { name: match.home_team?.name || '', logo_url: match.home_team?.logo_url || '' },
-        away_team: { name: match.away_team?.name || '', logo_url: match.away_team?.logo_url || '' },
-        category_code: match.category?.code || '',
-        matchweek: match.matchweek || undefined
-      })) || [];
+      // Transform all matches data with new structure
+      const transformedMatches = (matchesData as any[])?.map(match => {
+        // Create team names from club + suffix
+        const homeTeamName = match.home_team?.club_category?.club 
+          ? `${match.home_team.club_category.club.name} ${match.home_team.team_suffix}`
+          : 'Neznámý tým';
+        
+        const awayTeamName = match.away_team?.club_category?.club 
+          ? `${match.away_team.club_category.club.name} ${match.away_team.team_suffix}`
+          : 'Neznámý tým';
+        
+        return {
+          ...match,
+          home_team: { 
+            name: homeTeamName, 
+            logo_url: match.home_team?.club_category?.club?.logo_url || '' 
+          },
+          away_team: { 
+            name: awayTeamName, 
+            logo_url: match.away_team?.club_category?.club?.logo_url || '' 
+          },
+          category_code: match.category?.code || '',
+          matchweek: match.matchweek || undefined
+        };
+      }) || [];
       
       console.log('All matches found:', transformedMatches.length);
 
       // Filter for own club matches for the overview tab
-      const ownClubFilteredMatches = (matchesData as any[])?.filter(match => 
-        match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
-      ).map(match => ({
-        ...match,
-        home_team: { name: match.home_team?.name || '', logo_url: match.home_team?.logo_url || '' },
-        away_team: { name: match.away_team?.name || '', logo_url: match.away_team?.logo_url || '' },
-        category_code: match.category?.code || '',
-        matchweek: match.matchweek || undefined
-      })) || [];
+      const ownClubFilteredMatches = (matchesData as any[])?.filter(match => {
+        // Check if this is our club using the is_own_club field
+        const isOwnClub = match.home_team?.club_category?.club?.is_own_club === true || 
+                         match.away_team?.club_category?.club?.is_own_club === true;
+        return isOwnClub;
+      }).map(match => {
+        // Create team names from club + suffix
+        const homeTeamName = match.home_team?.club_category?.club 
+          ? `${match.home_team.club_category.club.name} ${match.home_team.team_suffix}`
+          : 'Neznámý tým';
+        
+        const awayTeamName = match.away_team?.club_category?.club 
+          ? `${match.away_team.club_category.club.name} ${match.away_team.team_suffix}`
+          : 'Neznámý tým';
+        
+        return {
+          ...match,
+          home_team: { 
+            name: homeTeamName, 
+            logo_url: match.home_team?.club_category?.club?.logo_url || '' 
+          },
+          away_team: { 
+            name: awayTeamName, 
+            logo_url: match.away_team?.club_category?.club?.logo_url || '' 
+          },
+          category_code: match.category?.code || '',
+          matchweek: match.matchweek || undefined
+        };
+      }) || [];
       
       console.log('Own club matches found:', ownClubFilteredMatches.length);
 
@@ -285,7 +334,13 @@ export default function MatchSchedulePage() {
         .from('standings')
         .select(`
           *,
-          team:team_id(name, logo_url, is_own_club)
+          team:team_id(
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url)
+            )
+          )
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
@@ -294,9 +349,28 @@ export default function MatchSchedulePage() {
       console.log('Standings query result:', { data: standingsData?.length, error: standingsError });
       if (standingsError) throw standingsError;
 
+      // Transform standings data to include team names
+      const transformedStandings = (standingsData as any[])?.map(standing => {
+        const team = standing.team;
+        
+        // Create team name from club + suffix
+        const teamName = team?.club_category?.club 
+          ? `${team.club_category.club.name} ${team.team_suffix}`
+          : 'Neznámý tým';
+        
+        return {
+          ...standing,
+          team: {
+            ...team,
+            name: teamName,
+            logo_url: team?.club_category?.club?.logo_url
+          }
+        };
+      }) || [];
+
       setMatches(transformedMatches || []);
       setOwnClubMatches(ownClubFilteredMatches || []);
-      setStandings(standingsData || []);
+      setStandings(transformedStandings || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       console.error('Error details:', {

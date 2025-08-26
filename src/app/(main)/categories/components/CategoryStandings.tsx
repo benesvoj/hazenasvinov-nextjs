@@ -12,11 +12,40 @@ interface CategoryStandingsProps {
   categoryName: string;
 }
 
-
 export function CategoryStandings({ categoryId, categoryName }: CategoryStandingsProps) {
-  const [standings, setStandings] = useState<Standing[]>([]);
+  const [standings, setStandings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Helper function to check if suffixes are needed
+  const checkIfSuffixesNeeded = (standings: any[]) => {
+    const clubTeams = new Map<string, string[]>(); // club name -> array of team suffixes
+    
+    standings.forEach(standing => {
+      const team = standing.team;
+      if (team?.name && team.name !== 'Neznámý tým') {
+        const parts = team.name.split(' ');
+        if (parts.length > 1) {
+          const suffix = parts[parts.length - 1]; // Last part is the suffix
+          const clubName = parts.slice(0, -1).join(' '); // Everything except suffix
+          
+          if (!clubTeams.has(clubName)) {
+            clubTeams.set(clubName, []);
+          }
+          clubTeams.get(clubName)!.push(suffix);
+        }
+      }
+    });
+    
+    // Check if any club has multiple teams
+    for (const [clubName, suffixes] of clubTeams) {
+      if (suffixes.length > 1) {
+        return true; // Need suffixes
+      }
+    }
+    
+    return false; // No suffixes needed
+  };
 
   useEffect(() => {
     const fetchStandings = async () => {
@@ -47,22 +76,75 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
             goals_against,
             points,
             position,
-            team:team_id(id, name, short_name, logo_url, is_own_club)
+            team:team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url)
+              )
+            )
           `)
           .eq('category_id', categoryId)
           .eq('season_id', seasonData.id)
           .order('position', { ascending: true });
         
         if (standingsError) {
-                  // Check if it's a table not found error
-        if (standingsError.code === '42P01') {
-          setError('TABLE_NOT_FOUND');
+          // Check if it's a table not found error
+          if (standingsError.code === '42P01') {
+            setError('TABLE_NOT_FOUND');
+          } else {
+            console.error('Standings error:', standingsError);
+            throw standingsError;
+          }
         } else {
-          console.error('Standings error:', standingsError);
-          throw standingsError;
-        }
-        } else {
-          setStandings(standingsData || []);
+          // Transform standings to include team names and club information
+          const transformedStandings = (standingsData || []).map((standing: any) => {
+            const team = standing.team;
+            
+            // Create team name from club + suffix
+            const teamName = team?.club_category?.club 
+              ? `${team.club_category.club.name} ${team.team_suffix}`
+              : 'Neznámý tým';
+            
+            return {
+              ...standing,
+              team: {
+                id: team?.id,
+                name: teamName,
+                logo_url: team?.club_category?.club?.logo_url
+              }
+            };
+          });
+          
+          // Check if we need to show suffixes (multiple teams from same club in same category)
+          const needsSuffixes = checkIfSuffixesNeeded(transformedStandings);
+          
+          // Update team names based on suffix needs
+          const finalStandings = transformedStandings.map((standing: any) => {
+            const team = standing.team;
+            if (!team?.name || team.name === 'Neznámý tým') return standing;
+            
+            let displayName = team.name;
+            
+            if (needsSuffixes) {
+              // Keep the full name with suffix
+              displayName = team.name;
+            } else {
+              // Show only club name without suffix
+              const clubName = team.name.split(' ').slice(0, -1).join(' ');
+              displayName = clubName || team.name;
+            }
+            
+            return {
+              ...standing,
+              team: {
+                ...team,
+                displayName: displayName
+              }
+            };
+          });
+          
+          setStandings(finalStandings);
         }
         
       } catch (err) {
@@ -80,31 +162,30 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
     return (
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">{translations.table.title}</h2>
+          <h3 className="text-lg font-semibold">Tabulka</h3>
         </CardHeader>
-        <CardBody className="flex justify-center py-8">
-          <Spinner size="lg" />
+        <CardBody>
+          <div className="flex justify-center items-center py-8">
+            <Spinner size="lg" />
+          </div>
         </CardBody>
       </Card>
     );
   }
 
+  if (error === 'TABLE_NOT_FOUND') {
+    return <CategoryStandingsFallback categoryName={categoryName} />;
+  }
+
   if (error) {
-    if (error === 'TABLE_NOT_FOUND') {
-      return <CategoryStandingsFallback categoryName={categoryName} />;
-    }
-    
     return (
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">{translations.table.title}</h2>
+          <h3 className="text-lg font-semibold">Tabulka</h3>
         </CardHeader>
         <CardBody>
-          <div className="text-center text-red-500 py-8">
+          <div className="text-center py-8 text-red-600">
             <p>Chyba při načítání tabulky: {error}</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Tabulka může být prázdná nebo se načítá...
-            </p>
           </div>
         </CardBody>
       </Card>
@@ -115,14 +196,11 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
     return (
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">{translations.table.title}</h2>
+          <h3 className="text-lg font-semibold">Tabulka</h3>
         </CardHeader>
         <CardBody>
-          <div className="text-center text-gray-500 py-8">
-            <p>Pro tuto kategorii zatím nejsou k dispozici žádné výsledky.</p>
-            <p className="text-sm mt-2">
-              Tabulka se zobrazí po odehrání prvních zápasů.
-            </p>
+          <div className="text-center py-8 text-gray-500">
+            <p>Pro tuto kategorii zatím nejsou k dispozici žádná data v tabulce.</p>
           </div>
         </CardBody>
       </Card>
@@ -132,19 +210,19 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-xl font-semibold">{translations.table.title}</h2>
+        <h3 className="text-lg font-semibold">Tabulka</h3>
       </CardHeader>
       <CardBody>
-        <Table aria-label={`Tabulka pro kategorii ${categoryName}`}>
+        <Table aria-label="Standings table">
           <TableHeader>
-            <TableColumn className="text-center">Pořadí</TableColumn>
+            <TableColumn>Poz.</TableColumn>
             <TableColumn>Tým</TableColumn>
-            <TableColumn className="hidden md:table-cell text-center">Z</TableColumn>
-            <TableColumn className="hidden md:table-cell text-center">V</TableColumn>
-            <TableColumn className="hidden md:table-cell text-center">R</TableColumn>
-            <TableColumn className="hidden md:table-cell text-center">P</TableColumn>
-            <TableColumn className="text-center">Skóre</TableColumn>
-            <TableColumn className="text-center">Body</TableColumn>
+            <TableColumn className="hidden md:table-cell">Z</TableColumn>
+            <TableColumn className="hidden md:table-cell">V</TableColumn>
+            <TableColumn className="hidden md:table-cell">R</TableColumn>
+            <TableColumn className="hidden md:table-cell">P</TableColumn>
+            <TableColumn>Skóre</TableColumn>
+            <TableColumn>Body</TableColumn>
           </TableHeader>
           <TableBody>
             {standings.map((team) => (
@@ -160,10 +238,10 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
                       className="hidden md:block"
                     />
                     <span className="md:hidden">
-                      {team.team?.short_name || team.team?.name || 'Neznámý tým'}
+                      {team.team?.displayName || team.team?.name || 'Neznámý tým'}
                     </span>
                     <span className="hidden md:inline">
-                      {team.team?.name || 'Neznámý tým'}
+                      {team.team?.displayName || team.team?.name || 'Neznámý tým'}
                     </span>
                   </div>
                 </TableCell>

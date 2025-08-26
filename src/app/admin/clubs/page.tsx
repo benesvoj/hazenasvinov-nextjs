@@ -56,7 +56,8 @@ export default function ClubsAdminPage() {
     phone: '',
     address: '',
     description: '',
-    contact_person: ''
+    contact_person: '',
+    is_own_club: false
   });
   
   const [editForm, setEditForm] = useState({
@@ -72,7 +73,8 @@ export default function ClubsAdminPage() {
     phone: '',
     address: '',
     description: '',
-    contact_person: ''
+    contact_person: '',
+    is_own_club: false
   });
   
   const [clubToDelete, setClubToDelete] = useState<Club | null>(null);
@@ -120,13 +122,14 @@ export default function ClubsAdminPage() {
           phone: createForm.phone.trim() || null,
           address: createForm.address.trim() || null,
           description: createForm.description.trim() || null,
-          contact_person: createForm.contact_person.trim() || null
+          contact_person: createForm.contact_person.trim() || null,
+          is_own_club: createForm.is_own_club
         });
 
       if (error) throw error;
 
       onCreateClose();
-      setCreateForm({ name: '', short_name: '', city: '', founded_year: '', logo_url: '', venue: '', web: '', email: '', phone: '', address: '', description: '', contact_person: '' });
+      setCreateForm({ name: '', short_name: '', city: '', founded_year: '', logo_url: '', venue: '', web: '', email: '', phone: '', address: '', description: '', contact_person: '', is_own_club: false });
       fetchClubs();
       setError('');
     } catch (error) {
@@ -157,14 +160,15 @@ export default function ClubsAdminPage() {
           phone: editForm.phone.trim() || null,
           address: editForm.address.trim() || null,
           description: editForm.description.trim() || null,
-          contact_person: editForm.contact_person.trim() || null
+          contact_person: editForm.contact_person.trim() || null,
+          is_own_club: editForm.is_own_club
         })
         .eq('id', editForm.id);
 
       if (error) throw error;
 
       onEditClose();
-      setEditForm({ id: '', name: '', short_name: '', city: '', founded_year: '', logo_url: '', venue: '', web: '', email: '', phone: '', address: '', description: '', contact_person: '' });
+      setEditForm({ id: '', name: '', short_name: '', city: '', founded_year: '', logo_url: '', venue: '', web: '', email: '', phone: '', address: '', description: '', contact_person: '', is_own_club: false });
       fetchClubs();
       setError('');
     } catch (error) {
@@ -210,7 +214,8 @@ export default function ClubsAdminPage() {
       phone: club.phone || '',
       address: club.address || '',
       description: club.description || '',
-      contact_person: club.contact_person || ''
+      contact_person: club.contact_person || '',
+      is_own_club: club.is_own_club || false
     });
     onEditOpen();
   };
@@ -292,7 +297,14 @@ export default function ClubsAdminPage() {
                         />
                       )}
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-800">{club.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold text-gray-800">{club.name}</h3>
+                          {club.is_own_club && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Domácí klub
+                            </span>
+                          )}
+                        </div>
                         <div className="text-sm text-gray-600 space-y-1">
                           {club.short_name && club.short_name !== club.name && (
                             <p>Krátký název: {club.short_name}</p>
@@ -444,6 +456,18 @@ export default function ClubsAdminPage() {
                 value={createForm.contact_person}
                 onChange={(e) => setCreateForm({...createForm, contact_person: e.target.value})}
               />
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="create-is-own-club"
+                  checked={createForm.is_own_club}
+                  onChange={(e) => setCreateForm({...createForm, is_own_club: e.target.checked})}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label htmlFor="create-is-own-club" className="text-sm font-medium text-gray-700">
+                  Tento klub je náš domácí klub (pro filtrování zápasů a tabulek)
+                </label>
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
@@ -537,6 +561,18 @@ export default function ClubsAdminPage() {
                 value={editForm.contact_person}
                 onChange={(e) => setEditForm({...editForm, contact_person: e.target.value})}
               />
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="edit-is-own-club"
+                  checked={editForm.is_own_club}
+                  onChange={(e) => setEditForm({...editForm, is_own_club: e.target.checked})}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label htmlFor="edit-is-own-club" className="text-sm font-medium text-gray-700">
+                  Tento klub je náš domácí klub (pro filtrování zápasů a tabulek)
+                </label>
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>

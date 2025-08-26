@@ -90,8 +90,20 @@ export function useFetchMatches(categorySlug: string) {
             season_id,
             created_at,
             updated_at,
-            home_team:home_team_id(id, name, short_name, is_own_club, logo_url),
-            away_team:away_team_id(id, name, short_name, is_own_club, logo_url)
+            home_team:home_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url)
+              )
+            ),
+            away_team:away_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url)
+              )
+            )
           `)
           .eq('category_id', categoryData.id)
           .eq('season_id', seasonData.id)
@@ -104,10 +116,44 @@ export function useFetchMatches(categorySlug: string) {
         
         // console.log('✅ Matches fetched:', matchesData?.length || 0, 'matches');
         
+        // Transform matches to include team names and club information
+        const transformedMatches = matchesData?.map((match: any) => {
+          // Create team names from club + suffix
+          const homeTeamName = match.home_team?.club_category?.club 
+            ? `${match.home_team.club_category.club.name} ${match.home_team.team_suffix}`
+            : 'Neznámý tým';
+          
+          const awayTeamName = match.away_team?.club_category?.club 
+            ? `${match.away_team.club_category.club.name} ${match.away_team.team_suffix}`
+            : 'Neznámý tým';
+          
+          // Check if this is our club using the is_own_club field
+          const isOwnClub = match.home_team?.club_category?.club?.is_own_club === true || 
+                           match.away_team?.club_category?.club?.is_own_club === true;
+          
+          return {
+            ...match,
+            home_team: {
+              id: match.home_team?.id,
+              name: homeTeamName,
+              short_name: match.home_team?.club_category?.club?.short_name,
+              is_own_club: isOwnClub,
+              logo_url: match.home_team?.club_category?.club?.logo_url
+            },
+            away_team: {
+              id: match.away_team?.id,
+              name: awayTeamName,
+              short_name: match.away_team?.club_category?.club?.short_name,
+              is_own_club: isOwnClub,
+              logo_url: match.away_team?.club_category?.club?.logo_url
+            }
+          };
+        }) || [];
+        
         // Filter matches to only show those where our club is playing
-        const ownClubMatches = matchesData?.filter((match: any) => 
+        const ownClubMatches = transformedMatches.filter((match: any) => 
           match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
-        ) || [];
+        );
         
         // console.log('🏆 Own club matches found:', ownClubMatches.length);
         
