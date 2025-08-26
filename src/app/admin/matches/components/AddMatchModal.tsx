@@ -72,14 +72,14 @@ export default function AddMatchModal({
                   setFormData({
                     ...formData, 
                     home_team_id: selectedTeamId || "",
-                    venue: selectedTeam?.home_venue || formData.venue
+                    venue: formData.venue
                   });
                 }}
                 className="w-full"
               >
                 {filteredTeams.map((team) => (
                   <SelectItem key={team.id}>
-                    {team.name}
+                    {team.display_name || team.name}
                   </SelectItem>
                 ))}
               </Select>
@@ -107,7 +107,7 @@ export default function AddMatchModal({
               >
                 {filteredTeams.map((team) => (
                   <SelectItem key={team.id}>
-                    {team.name}
+                    {team.display_name || team.name}
                   </SelectItem>
                 ))}
               </Select>

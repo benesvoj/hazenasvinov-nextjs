@@ -121,7 +121,7 @@ export default function MatchesAdminPage() {
 
   const supabase = createClient();
 
-  // Fetch teams assigned to selected category and season
+    // Fetch teams assigned to selected category and season
   const fetchFilteredTeams = useCallback(async (categoryId: string, seasonId: string) => {
     if (!categoryId || !seasonId) {
       setFilteredTeams([]);
@@ -129,25 +129,52 @@ export default function MatchesAdminPage() {
     }
 
     try {
-      console.log('Fetching teams for category:', categoryId, 'season:', seasonId);
+      console.log('🔍 Fetching teams for category:', categoryId, 'season:', seasonId);
       
       const { data, error } = await supabase
-        .from('team_categories')
+        .from('club_categories')
         .select(`
-          team_id,
-          team:teams(*)
+          club_id,
+          club:clubs(
+            id,
+            name,
+            short_name,
+            logo_url
+          ),
+          club_category_teams(
+            id,
+            team_suffix,
+            is_active
+          )
         `)
         .eq('category_id', categoryId)
         .eq('season_id', seasonId)
         .eq('is_active', true);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching club categories:', error);
+        setFilteredTeams([]);
+        return;
+      }
 
-      const teamsData = data?.map((item: any) => item.team).filter(Boolean) || [];
+      console.log('✅ Club categories data:', data);
+      
+      const teamsData = data?.flatMap((item: any) => 
+        item.club_category_teams?.map((ct: any) => ({
+          id: ct.id,
+          name: `${item.club.name} ${ct.team_suffix}`,
+          club_id: item.club.id,
+          club_name: item.club.name,
+          team_suffix: ct.team_suffix,
+          display_name: `${item.club.name} ${ct.team_suffix}`,
+          is_active: ct.is_active
+        })) || []
+      ) || [];
+
+      console.log('🔄 Transformed teams data:', teamsData);
       setFilteredTeams(teamsData);
-      console.log('Filtered teams:', teamsData);
     } catch (error) {
-      console.error('Error fetching filtered teams:', error);
+      console.error('❌ Error fetching filtered teams:', error);
       setFilteredTeams([]);
     }
   }, [supabase]);
@@ -238,14 +265,26 @@ export default function MatchesAdminPage() {
   const fetchMatches = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('🔍 Fetching matches...', { selectedCategory, selectedSeason });
+      
       let query = supabase
         .from('matches')
         .select(`
           *,
-          home_team:teams!home_team_id(*),
-          away_team:teams!away_team_id(*),
-          category:categories(*),
-          season:seasons(*)
+          home_team:club_category_teams!home_team_id(
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url)
+            )
+          ),
+          away_team:club_category_teams!away_team_id(
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url)
+            )
+          ),
+          category:categories(name),
+          season:seasons(name)
         `)
         .order('date', { ascending: false });
 
@@ -258,8 +297,44 @@ export default function MatchesAdminPage() {
 
       const { data, error } = await query;
 
-      if (error) throw error;
-      setMatches(data || []);
+      if (error) {
+        console.error('❌ Supabase error in fetchMatches:', error);
+        throw error;
+      }
+      
+      console.log('✅ Raw matches data:', data);
+
+      // Enhance matches with club information
+      const enhancedMatches = (data || []).map((match: any) => {
+        const homeTeam = match.home_team;
+        const awayTeam = match.away_team;
+
+        return {
+          ...match,
+          home_team: {
+            ...homeTeam,
+            club_id: homeTeam?.club_category?.club?.id || null,
+            club_name: homeTeam?.club_category?.club?.name || 'Neznámý klub',
+            team_suffix: homeTeam?.team_suffix || 'A',
+            display_name: homeTeam?.club_category?.club ? 
+              `${homeTeam.club_category.club.name} ${homeTeam.team_suffix}` : 
+              (homeTeam?.id || 'Neznámý tým')
+          },
+          away_team: {
+            ...awayTeam,
+            club_id: awayTeam?.club_category?.club?.id || null,
+            club_name: awayTeam?.club_category?.club?.name || 'Neznámý klub',
+            team_suffix: awayTeam?.team_suffix || 'A',
+            display_name: awayTeam?.club_category?.club ? 
+              `${awayTeam.club_category.club.name} ${awayTeam.team_suffix}` : 
+              (awayTeam?.id || 'Neznámý tým')
+          }
+        };
+      });
+      
+      console.log('🔄 Enhanced matches:', enhancedMatches);
+
+      setMatches(enhancedMatches);
     } catch (error) {
       setError('Chyba při načítání zápasů');
       console.error('Error fetching matches:', error);
@@ -268,6 +343,8 @@ export default function MatchesAdminPage() {
     }
   }, [supabase, selectedCategory, selectedSeason]);
 
+
+  // TODO: extract to separate file
   // Fetch standings
   const fetchStandings = useCallback(async () => {
     try {
@@ -280,7 +357,13 @@ export default function MatchesAdminPage() {
         .from('standings')
         .select(`
           *,
-          team:team_id(name, logo_url)
+          team:club_category_teams(
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url)
+            )
+          )
         `)
         .order('position');
 
@@ -298,12 +381,27 @@ export default function MatchesAdminPage() {
         throw error;
       }
 
-      console.log('🔍 Standings fetched:', {
-        standingsCount: data?.length || 0,
-        standings: data
+      // Enhance standings with club information
+      const enhancedStandings = (data || []).map((standing: any) => {
+        const team = standing.team;
+        
+        return {
+          ...standing,
+          team: team ? {
+            ...team,
+            team_suffix: team.team_suffix || 'A',
+            club_name: team.club_category?.club?.name || 'Neznámý klub',
+            club_id: team.club_category?.club?.id || null
+          } : null
+        };
       });
 
-      setStandings(data || []);
+      console.log('🔍 Standings fetched:', {
+        standingsCount: enhancedStandings.length,
+        standings: enhancedStandings
+      });
+
+      setStandings(enhancedStandings);
     } catch (error) {
       setError('Chyba při načítání tabulky');
       console.error('Error fetching standings:', error);
@@ -334,6 +432,8 @@ export default function MatchesAdminPage() {
     fetchStandings();
   }, [fetchMatches, fetchStandings]);
 
+
+  // TODO: extract to utils/supabase/calculateStandings.ts
   // Calculate standings
   const calculateStandings = async () => {
     if (isSeasonClosed()) {
@@ -358,12 +458,51 @@ export default function MatchesAdminPage() {
       }
 
       // Get teams for this category and season
-      const { data: teamCategories, error: teamsError } = await supabase
-        .from('team_categories')
-        .select('team_id')
-        .eq('category_id', selectedCategory)
-        .eq('season_id', selectedSeason)
-        .eq('is_active', true);
+      let teamCategories;
+      let teamsError;
+
+      // Try club_categories first, fallback to team_categories
+      try {
+        const clubResult = await supabase
+          .from('club_categories')
+          .select(`
+            club_id,
+            club:clubs(
+              id,
+              name
+            ),
+            club_category_teams(
+              id,
+              team_suffix
+            )
+          `)
+          .eq('category_id', selectedCategory)
+          .eq('season_id', selectedSeason)
+          .eq('is_active', true);
+
+        if (clubResult.data && clubResult.data.length > 0) {
+          // New club-based system
+          teamCategories = clubResult.data.flatMap((cc: any) => 
+            cc.club_category_teams?.map((ct: any) => ({
+              team_id: ct.id,
+              club_id: cc.club_id
+            })) || []
+          );
+        } else {
+          // Fallback to old system
+          const fallbackResult = await supabase
+            .from('team_categories')
+            .select('team_id')
+            .eq('category_id', selectedCategory)
+            .eq('season_id', selectedSeason)
+            .eq('is_active', true);
+          
+          if (fallbackResult.error) throw fallbackResult.error;
+          teamCategories = fallbackResult.data;
+        }
+      } catch (error) {
+        teamsError = error;
+      }
 
       if (teamsError) throw teamsError;
 
@@ -377,6 +516,7 @@ export default function MatchesAdminPage() {
       teamCategories.forEach((tc: any) => {
         standingsMap.set(tc.team_id, {
           team_id: tc.team_id,
+          club_id: tc.club_id,
           category_id: selectedCategory,
           season_id: selectedSeason,
           position: 0,
@@ -486,6 +626,7 @@ export default function MatchesAdminPage() {
     }
   };
 
+  // TODO: extract to utils/supabase/generateInitialStandings.ts
   // Generate initial standings for teams without any matches
   const generateInitialStandings = async () => {
     if (isSeasonClosed()) {
@@ -500,15 +641,55 @@ export default function MatchesAdminPage() {
       });
 
       // Get teams for this category and season
-      const { data: teamCategories, error: teamsError } = await supabase
-        .from('team_categories')
-        .select(`
-          team_id,
-          team:team_id(id, name, short_name)
-        `)
-        .eq('category_id', selectedCategory)
-        .eq('season_id', selectedSeason)
-        .eq('is_active', true);
+      let teamCategories;
+      let teamsError;
+
+      // Try club_categories first, fallback to team_categories
+      try {
+        const clubResult = await supabase
+          .from('club_categories')
+          .select(`
+            club_id,
+            club:clubs(
+              id,
+              name
+            ),
+            club_category_teams(
+              id,
+              team_suffix
+            )
+          `)
+          .eq('category_id', selectedCategory)
+          .eq('season_id', selectedSeason)
+          .eq('is_active', true);
+
+        if (clubResult.data && clubResult.data.length > 0) {
+          // New club-based system
+          teamCategories = clubResult.data.flatMap((cc: any) => 
+            cc.club_category_teams?.map((ct: any) => ({
+              team_id: ct.id,
+              club_id: cc.club_id,
+              team: { id: ct.id, name: `${cc.club.name} ${ct.team_suffix}` }
+            })) || []
+          );
+        } else {
+          // Fallback to old system
+          const fallbackResult = await supabase
+            .from('team_categories')
+            .select(`
+              team_id,
+              team:team_id(id, name, short_name)
+            `)
+            .eq('category_id', selectedCategory)
+            .eq('season_id', selectedSeason)
+            .eq('is_active', true);
+          
+          if (fallbackResult.error) throw fallbackResult.error;
+          teamCategories = fallbackResult.data;
+        }
+      } catch (error) {
+        teamsError = error;
+      }
 
       if (teamsError) throw teamsError;
 
@@ -545,6 +726,7 @@ export default function MatchesAdminPage() {
       // Generate initial standings for all teams
       const initialStandings = teamCategories.map((tc: any, index: number) => ({
         team_id: tc.team_id,
+        club_id: tc.club_id,
         category_id: selectedCategory,
         season_id: selectedSeason,
         position: index + 1,

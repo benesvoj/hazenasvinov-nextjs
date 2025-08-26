@@ -319,3 +319,29 @@ html {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
+
+/* Admin sidebar scrolling */
+.admin-sidebar-nav {
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: #4B5563 transparent;
+  min-height: 0; /* Allow shrinking */
+  height: 100%;
+}
+
+.admin-sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar-nav::-webkit-scrollbar-thumb {
+  background: #4B5563;
+  border-radius: 3px;
+}
+
+.admin-sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
+}

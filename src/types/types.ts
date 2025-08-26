@@ -189,8 +189,28 @@ export interface Match {
   time: string;
   home_team_id: string;
   away_team_id: string;
-  home_team: { name: string; logo_url?: string; is_own_club?: boolean; short_name?: string };
-  away_team: { name: string; logo_url?: string; is_own_club?: boolean; short_name?: string };
+  home_team: { 
+    id: string;
+    name: string; 
+    logo_url?: string; 
+    is_own_club?: boolean; 
+    short_name?: string;
+    club_id?: string;
+    club_name?: string;
+    team_suffix?: string;
+    display_name?: string;
+  };
+  away_team: { 
+    id: string;
+    name: string; 
+    logo_url?: string; 
+    is_own_club?: boolean; 
+    short_name?: string;
+    club_id?: string;
+    club_name?: string;
+    team_suffix?: string;
+    display_name?: string;
+  };
   venue: string;
   competition: string;
   is_home: boolean;
@@ -222,23 +242,20 @@ export interface Category {
   updated_at: string;
 }
 
-export interface Team {
+interface Team {
   id: string;
   name: string;
   short_name?: string;
-  city?: string;
-  region?: string;
   logo_url?: string;
-  website?: string;
-  email?: string;
-  phone?: string;
-  contact_person?: string;
-  founded_year?: number;
-  home_venue?: string;
+  club_id?: string;
+  club_name?: string;
+  team_suffix?: string;
+  display_name?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
 }
+
 
 export interface Season {
   id: string;
@@ -264,8 +281,11 @@ export interface TeamCategory {
 
 export interface Standing {
   id: string;
+  team_id?: string;
+  club_id?: string;
+  category_id: string;
+  season_id: string;
   position: number;
-  team: { name: string; logo_url?: string; is_own_club?: boolean; short_name?: string };
   matches: number;
   wins: number;
   draws: number;
@@ -273,9 +293,20 @@ export interface Standing {
   goals_for: number;
   goals_against: number;
   points: number;
-  category_id?: string;
-  season_id?: string;
-  team_id?: string;
+  // Club information for display
+  club?: {
+    id: string;
+    name: string;
+    short_name?: string;
+    logo_url?: string;
+  };
+  team?: {
+    id: string;
+    name: string;
+    short_name?: string;
+    logo_url?: string;
+    team_suffix?: string;
+  };
 }
 
 export interface MemberFunction {
@@ -317,3 +348,43 @@ export interface BlogPost {
   image_url?: string;
   category_id?: string;
 }
+
+// Club interfaces
+interface Club {
+  id: string;
+  name: string;
+  short_name?: string;
+  logo_url?: string;
+  city?: string;
+  founded_year?: number;
+  venue?: string;
+  web?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  description?: string;
+  contact_person?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ClubTeam {
+  id: string;
+  club_id: string;
+  team_id: string;
+  team_suffix: string;
+  is_primary: boolean;
+  created_at: string;
+}
+
+interface ClubCategory {
+  id: string;
+  club_id: string;
+  category_id: string;
+  season_id: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type { Team, Club, ClubTeam, ClubCategory }

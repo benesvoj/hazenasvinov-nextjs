@@ -152,9 +152,9 @@ export default function CategoryMatches({
                         {/* Teams and Venue - Third Column */}
                         <div className="col-span-6">
                           <div className="text-start">
-                            <div className="text-lg font-semibold text-gray-800 mb-2">
-                              {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
-                            </div>
+                                                                          <div className="text-lg font-semibold text-gray-800 mb-2">
+                                                {match.home_team?.display_name || match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.display_name || match.away_team?.name || 'Neznámý tým'}
+                                              </div>
                             <div className="flex items-start space-x-2 text-sm text-gray-600">
                               <MapPinIcon className="w-4 h-4 text-gray-400" />
                               <span>{match.venue}</span>
@@ -210,11 +210,11 @@ export default function CategoryMatches({
                         {/* Teams */}
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium text-gray-600">Týmy:</span>
-                          <div className="text-right">
-                            <div className="text-lg font-semibold text-gray-800">
-                              {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
-                            </div>
-                          </div>
+                                                                      <div className="text-right">
+                                              <div className="text-lg font-semibold text-gray-800">
+                                                {match.home_team?.display_name || match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.display_name || match.away_team?.name || 'Neznámý tým'}
+                                              </div>
+                                            </div>
                         </div>
 
                         {/* Venue */}

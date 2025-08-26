@@ -73,6 +73,9 @@ export const translations = {
 		cancel: 'Zrušit',
 		confirm: 'Potvrdit',
 		decline: 'Zamítnout',
+		generate: 'Generovat',
+		unassign: 'Odebrat',
+		assign: 'Přiřadit',
 	},
 	sponsorship: {
 		title: 'Sponzorství',

@@ -58,6 +58,10 @@ const getRouteIcon = (route: string) => {
       return <Cog6ToothIcon className="w-5 h-5" />;
     case privateRoutes.photoGallery:
       return <PhotoIcon className="w-5 h-5" />;
+    case privateRoutes.clubs:
+      return <BuildingOfficeIcon className="w-5 h-5" />;
+    case privateRoutes.clubCategories:
+      return <BuildingOfficeIcon className="w-5 h-5" />;
     default:
       return <Cog6ToothIcon className="w-5 h-5" />;
   }
@@ -86,7 +90,7 @@ export const Sidebar = () => {
         />
         
         {/* Mobile sidebar */}
-        <aside className="fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white w-80 max-w-[85vw] z-50 shadow-xl transform transition-transform duration-300 ease-in-out">
+        <aside className="fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white w-80 max-w-[85vw] z-50 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col">
           {/* Mobile Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800/50 backdrop-blur-sm">
             <div className="flex items-center space-x-3">
@@ -108,7 +112,7 @@ export const Sidebar = () => {
           </div>
 
           {/* Mobile Navigation */}
-          <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+          <nav className="flex-1 admin-sidebar-nav py-4" style={{ minHeight: 0, maxHeight: 'calc(100vh - 200px)' }}>
             <div className="space-y-2 px-3">
               {items.map((item) => {
                 const isActive = pathname === item.route;
@@ -165,7 +169,7 @@ export const Sidebar = () => {
 
   // Desktop sidebar
   return (
-    <aside className={`fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white transition-all duration-300 ease-in-out z-50 shadow-xl hidden lg:block ${
+    <aside className={`fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white transition-all duration-300 ease-in-out z-50 shadow-xl hidden lg:block flex flex-col ${
       isCollapsed ? 'w-16' : 'w-64'
     }`}>
       {/* Header */}
@@ -198,7 +202,7 @@ export const Sidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+      <nav className="flex-1 admin-sidebar-nav py-4" style={{ minHeight: 0, maxHeight: 'calc(100vh - 200px)' }}>
         <div className="space-y-2 px-3">
           {items.map((item) => {
             const isActive = pathname === item.route;

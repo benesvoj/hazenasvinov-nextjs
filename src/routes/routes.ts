@@ -51,6 +51,8 @@ export const privateRoutes = {
 	sponsorship: '/admin/sponsorship',
 	clubConfig: '/admin/club-config',
 	photoGallery: '/admin/photo-gallery',
+	clubs: '/admin/clubs',
+	clubCategories: '/admin/club-categories',
 };
 
 const routes: MenuItem[] = [
@@ -133,6 +135,8 @@ const routes: MenuItem[] = [
 	{route: privateRoutes.sponsorship, title: 'Sponzorství', isPrivate: true, description: 'Správa sponzorů, partnerů a sponzorských balíčků.'},
 	{route: privateRoutes.clubConfig, title: 'Konfigurace klubu', isPrivate: true, description: 'Správa nastavení a konfigurace klubu.'},
 	{route: privateRoutes.photoGallery, title: 'Fotogalerie', isPrivate: true, description: 'Správa fotoalb a fotografií.'},
+	{route: privateRoutes.clubs, title: 'Kluby', isPrivate: true, description: 'Správa klubů a jejich týmů.'},
+	{route: privateRoutes.clubCategories, title: 'Přiřazení klubů', isPrivate: true, description: 'Správa přiřazení klubů ke kategoriím pro různé sezóny.'},
 ]
 
 export default routes

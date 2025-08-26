@@ -14,7 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Sidebar />
           <div className="flex-1 transition-all duration-300 ease-in-out w-full lg:ml-64">
             <TopBar />
-            <main className="pt-16 p-3 sm:p-4 lg:p-6">
+            <main className="pt-16 p-3 sm:p-4 lg:p-6 mt-8">
               <div className="max-w-7xl mx-auto">
                 {children}
               </div>

@@ -73,23 +73,28 @@ export default function StandingsTable({
                 {categoryStandings.map((standing, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{standing.position}</td>
-                    <td className="px-3 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        {standing.team?.logo_url && (
-                          <Image 
-                            src={standing.team.logo_url} 
-                            alt={`${standing.team.name} logo`}
-                            width={24}
-                            height={24}
-                            className="w-6 h-6 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        )}
-                        <span className="text-sm text-gray-900">{standing.team?.name || 'N/A'}</span>
-                      </div>
-                    </td>
+                                                            <td className="px-3 py-4 whitespace-nowrap">
+                                          <div className="flex items-center gap-2">
+                                            {(standing.club?.logo_url || standing.team?.logo_url) && (
+                                              <Image 
+                                                src={standing.club?.logo_url || standing.team?.logo_url || ''} 
+                                                alt={`${standing.club?.name || standing.team?.name} logo`}
+                                                width={24}
+                                                height={24}
+                                                className="w-6 h-6 object-contain"
+                                                onError={(e) => {
+                                                  e.currentTarget.style.display = 'none';
+                                                }}
+                                              />
+                                            )}
+                                            <span className="text-sm text-gray-900">
+                                              {standing.club ? 
+                                                `${standing.club.name} ${standing.team?.team_suffix || 'A'}` : 
+                                                standing.team?.name || 'N/A'
+                                              }
+                                            </span>
+                                          </div>
+                                        </td>
                     <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.matches}</td>
                     <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.wins}</td>
                     <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{standing.draws}</td>
