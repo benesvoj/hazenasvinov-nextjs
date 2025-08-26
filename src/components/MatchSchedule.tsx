@@ -147,15 +147,8 @@ export default function MatchSchedule() {
     try {
       setLoading(true);
       
-      console.log('Starting fetchData with:', {
-        activeSeason: activeSeason?.id,
-        selectedCategory,
-        categoriesCount: categories.length
-      });
-      
       // Check if we have active season and categories
       if (!activeSeason || categories.length === 0) {
-        console.log('Missing active season or categories');
         setMatches([]);
         setStandings([]);
         return;
@@ -164,43 +157,41 @@ export default function MatchSchedule() {
       // Get the category ID for the selected category code
       const selectedCategoryData = categories.find(cat => cat.code === selectedCategory);
       if (!selectedCategoryData) {
-        console.log('Category not found for code:', selectedCategory);
         setMatches([]);
         setStandings([]);
         return;
       }
       
-      console.log('Selected category data:', selectedCategoryData);
 
       // Fetch matches for the selected category and active season
-      console.log('Fetching matches for category:', selectedCategoryData.id, 'season:', activeSeason.id);
       
       const { data: matchesData, error: matchesError } = await supabase
         .from('matches')
         .select(`
           *,
-          home_team:home_team_id(
-            id,
-            team_suffix,
-            club_category:club_categories(
-              club:clubs(id, name, short_name, logo_url)
-            )
-          ),
-          away_team:away_team_id(
-            id,
-            team_suffix,
-            club_category:club_categories(
-              club:clubs(id, name, short_name, logo_url)
-            )
-          ),
+                      home_team:home_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url, is_own_club)
+              )
+            ),
+            away_team:away_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url, is_own_club)
+              )
+            ),
           category:categories(code, name, description)
         `)
         .eq('category_id', selectedCategoryData.id)
         .eq('season_id', activeSeason.id)
         .order('date', { ascending: true });
-
-      console.log('Matches query result:', { data: matchesData?.length, error: matchesError });
+      
       if (matchesError) throw matchesError;
+      
+
 
       // Transform matches to include team names and club information
       const transformedMatchesData = (matchesData as any[])?.map(match => {
@@ -213,21 +204,21 @@ export default function MatchSchedule() {
           ? `${match.away_team.club_category.club.name} ${match.away_team.team_suffix}`
           : 'Neznámý tým';
         
-        // Check if this is our club using the is_own_club field
-        const isOwnClub = match.home_team?.club_category?.club?.is_own_club === true || 
-                         match.away_team?.club_category?.club?.is_own_club === true;
+        // Check if each team belongs to our club using the is_own_club field
+        const homeTeamIsOwnClub = match.home_team?.club_category?.club?.is_own_club === true;
+        const awayTeamIsOwnClub = match.away_team?.club_category?.club?.is_own_club === true;
         
         return {
           ...match,
           home_team: {
             name: homeTeamName,
             logo_url: match.home_team?.club_category?.club?.logo_url,
-            is_own_club: isOwnClub
+            is_own_club: homeTeamIsOwnClub
           },
           away_team: {
             name: awayTeamName,
             logo_url: match.away_team?.club_category?.club?.logo_url,
-            is_own_club: isOwnClub
+            is_own_club: awayTeamIsOwnClub
           }
         };
       }) || [];
@@ -238,9 +229,19 @@ export default function MatchSchedule() {
       );
       
       console.log('Own club matches found:', ownClubMatches.length);
+      
+
+      
+      // Always show only own club matches for the landing page
+      let matchesToShow = ownClubMatches;
+      if (ownClubMatches.length === 0) {
+        console.log('No own club matches found - landing page will be empty');
+        console.log('To see matches, mark a club as "own club" in admin/clubs');
+        console.log('Debug: Check if the is_own_club field is properly set in the clubs table');
+      }
 
       // Transform the data to flatten team names and include logos
-      const transformedMatches = ownClubMatches.map(match => ({
+      const transformedMatches = matchesToShow.map(match => ({
         ...match,
         home_team: match.home_team?.name || '',
         away_team: match.away_team?.name || '',
@@ -249,7 +250,8 @@ export default function MatchSchedule() {
         home_team_is_own_club: match.home_team?.is_own_club || false,
         away_team_is_own_club: match.away_team?.is_own_club || false,
         category_code: match.category?.code || '',
-        matchweek: match.matchweek || undefined
+        matchweek: match.matchweek || undefined,
+        status: match.status || 'unknown' // Preserve the status field for filtering
       })) || [];
 
       // Fetch standings with team names for active season
@@ -298,11 +300,19 @@ export default function MatchSchedule() {
       setMatches(transformedMatches);
       setStandings(transformedStandings);
       
-      // Log if no own club matches found
+      // Debug: Log status values for filtering
+      console.log('Match statuses found:', transformedMatches.map(m => ({ id: m.id, status: m.status, date: m.date })));
+      
+      // Log if no matches found
       if (transformedMatches.length === 0) {
-        console.log('No matches found for own club. Make sure you have:');
-        console.log('1. At least one team marked as "own club" (is_own_club = true)');
-        console.log('2. Matches for that team in the selected category and season');
+        console.log('No matches found. This could be because:');
+        console.log('1. No matches exist for the selected category and season');
+        console.log('2. No teams are marked as "own club" (is_own_club = true)');
+        console.log('3. The club management system needs to be set up');
+        console.log('4. The database needs the is_own_club field added to clubs table');
+      } else if (ownClubMatches.length === 0) {
+        console.log('Showing all matches (no own club matches found)');
+        console.log('To show only own club matches, mark a club as "own club" in admin/clubs');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -330,9 +340,40 @@ export default function MatchSchedule() {
     }
   }, [fetchData, activeSeason, categories.length]);
 
-  // Filter upcoming and completed matches
-  const upcomingMatches = matches.filter(match => match.status === 'upcoming').slice(0, 3);
-  const recentResults = matches.filter(match => match.status === 'completed').slice(0, 3);
+  // Filter upcoming and completed matches (only from own club matches)
+  const now = new Date();
+  
+  const upcomingMatches = matches.filter(match => {
+    if (!match.date) return false;
+    const matchDate = new Date(match.date);
+    return matchDate > now;
+  }).slice(0, 3);
+  
+  const recentResults = matches.filter(match => {
+    if (!match.date) return false;
+    const matchDate = new Date(match.date);
+    return matchDate <= now;
+  }).slice(0, 3);
+  
+  // Ensure we only show own club matches
+  const ownClubUpcomingMatches = upcomingMatches.filter((match: any) => 
+    match.home_team_is_own_club || match.away_team_is_own_club
+  );
+  
+  const ownClubRecentResults = recentResults.filter((match: any) => 
+    match.home_team_is_own_club || match.away_team_is_own_club
+  );
+  
+  console.log('Filtering results:', {
+    totalMatches: matches.length,
+    upcomingCount: upcomingMatches.length,
+    recentCount: recentResults.length,
+    ownClubUpcomingCount: ownClubUpcomingMatches.length,
+    ownClubRecentCount: ownClubRecentResults.length,
+    now: now.toISOString(),
+    upcomingDates: upcomingMatches.map(m => m.date),
+    recentDates: recentResults.map(m => m.date)
+  });
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
@@ -344,6 +385,18 @@ export default function MatchSchedule() {
           <p className="text-lg text-gray-600 dark:text-gray-400">
             {translations.matchSchedule.description}
           </p>
+          {matches.length === 0 && (
+            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                Žádné zápasy nebyly nalezeny. Zkontrolujte:
+              </p>
+              <ul className="text-xs text-yellow-600 dark:text-yellow-400 mt-1 list-disc list-inside">
+                <li>Vybranou kategorii a sezónu</li>
+                <li>Zda existují zápasy v databázi</li>
+                <li>Zda je klub označen jako domácí v admin/kluby</li>
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Category Tabs */}
@@ -386,12 +439,17 @@ export default function MatchSchedule() {
                   <div className="text-center py-8">Načítání...</div>
                 ) : (
                   <div className="space-y-4">
-                    {upcomingMatches.map((match) => (
+                    {ownClubUpcomingMatches.map((match) => (
                       <MatchRow key={match.id} match={match} />
                     ))}
-                    {upcomingMatches.length === 0 && (
+                    {ownClubUpcomingMatches.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
-                        <div className="mb-2">{translations.matches.noMatches}</div>
+                        <div className="mb-2">
+                          {matches.length === 0 
+                            ? translations.matches.noMatches 
+                            : "Žádné nadcházející zápasy domácího klubu"
+                          }
+                        </div>
                       </div>
                     )}
                   </div>
@@ -422,12 +480,17 @@ export default function MatchSchedule() {
                   <div className="text-center py-8">Načítání...</div>
                 ) : (
                   <div className="space-y-4">
-                    {recentResults.map((match) => (
+                    {ownClubRecentResults.map((match) => (
                       <MatchRow key={match.id} match={match} />
                     ))}
-                    {recentResults.length === 0 && (
+                    {ownClubRecentResults.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
-                        <div className="mb-2">{translations.matches.noMatches}</div>
+                        <div className="mb-2">
+                          {matches.length === 0 
+                            ? translations.matches.noMatches 
+                            : "Žádné výsledky domácího klubu"
+                          }
+                        </div>
                       </div>
                     )}
                   </div>

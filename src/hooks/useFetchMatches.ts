@@ -94,14 +94,14 @@ export function useFetchMatches(categorySlug: string) {
               id,
               team_suffix,
               club_category:club_categories(
-                club:clubs(id, name, short_name, logo_url)
+                club:clubs(id, name, short_name, logo_url, is_own_club)
               )
             ),
             away_team:away_team_id(
               id,
               team_suffix,
               club_category:club_categories(
-                club:clubs(id, name, short_name, logo_url)
+                club:clubs(id, name, short_name, logo_url, is_own_club)
               )
             )
           `)

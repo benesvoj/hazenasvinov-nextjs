@@ -222,6 +222,12 @@ export interface Match {
   match_number?: number;
   category: { code: string; name: string; description?: string };
   season: { name: string };
+  // Additional properties for transformed data
+  home_team_is_own_club?: boolean;
+  away_team_is_own_club?: boolean;
+  home_team_logo?: string;
+  away_team_logo?: string;
+  category_code?: string;
 }
 
 export interface Category {

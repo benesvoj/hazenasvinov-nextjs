@@ -242,20 +242,20 @@ export default function MatchSchedulePage() {
         .from('matches')
         .select(`
           *,
-          home_team:home_team_id(
-            id,
-            team_suffix,
-            club_category:club_categories(
-              club:clubs(id, name, short_name, logo_url)
-            )
-          ),
-          away_team:away_team_id(
-            id,
-            team_suffix,
-            club_category:club_categories(
-              club:clubs(id, name, short_name, logo_url)
-            )
-          ),
+                      home_team:home_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url, is_own_club)
+              )
+            ),
+            away_team:away_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url, is_own_club)
+              )
+            ),
           category:categories(code, name, description)
         `)
         .eq('category_id', selectedCategoryData.id)

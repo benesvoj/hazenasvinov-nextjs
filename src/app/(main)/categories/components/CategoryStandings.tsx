@@ -80,7 +80,7 @@ export function CategoryStandings({ categoryId, categoryName }: CategoryStanding
               id,
               team_suffix,
               club_category:club_categories(
-                club:clubs(id, name, short_name, logo_url)
+                club:clubs(id, name, short_name, logo_url, is_own_club)
               )
             )
           `)
