@@ -4,6 +4,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
 import { Team } from "@/types/types";
+import { translations } from "@/lib/translations";
 
 interface AddMatchModalProps {
   isOpen: boolean;
@@ -57,13 +58,11 @@ export default function AddMatchModal({
               onChange={(e) => setFormData({...formData, time: e.target.value})}
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Domácí tým (přiřazené k vybrané kategorii a sezóně)
-              </label>
               <div className="text-xs text-gray-500 mb-2">
                 Debug: Category: {selectedCategory}, Season: {selectedSeason}, Teams: {filteredTeams.length}
               </div>
               <Select
+                label="Domácí tým"
                 placeholder="Vyberte domácí tým"
                 selectedKeys={formData.home_team_id ? [formData.home_team_id] : []}
                 onSelectionChange={(keys) => {
@@ -76,6 +75,7 @@ export default function AddMatchModal({
                   });
                 }}
                 className="w-full"
+                isRequired
               >
                 {filteredTeams.map((team) => (
                   <SelectItem key={team.id}>
@@ -90,13 +90,11 @@ export default function AddMatchModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hostující tým (přiřazené k vybrané kategorii a sezóně)
-              </label>
               <div className="text-xs text-gray-500 mb-2">
                 Debug: Category: {selectedCategory}, Season: {selectedSeason}, Teams: {filteredTeams.length}
               </div>
               <Select
+                label="Hostující tým"
                 placeholder="Vyberte hostující tým"
                 selectedKeys={formData.away_team_id ? [formData.away_team_id] : []}
                 onSelectionChange={(keys) => {
@@ -104,6 +102,7 @@ export default function AddMatchModal({
                   setFormData({...formData, away_team_id: selectedTeamId || ""});
                 }}
                 className="w-full"
+                isRequired
               >
                 {filteredTeams.map((team) => (
                   <SelectItem key={team.id}>
@@ -121,12 +120,11 @@ export default function AddMatchModal({
               label="Místo konání"
               value={formData.venue}
               onChange={(e) => setFormData({...formData, venue: e.target.value})}
+              placeholder="Místo konání se automaticky vyplní podle domácího týmu"
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Kolo
-              </label>
               <Select
+                label="Kolo"
                 placeholder="Vyberte kolo"
                 selectedKeys={formData.matchweek ? [formData.matchweek] : []}
                 onSelectionChange={(keys) => {
@@ -152,10 +150,10 @@ export default function AddMatchModal({
         </ModalBody>
         <ModalFooter>
           <Button color="danger" variant="flat" onPress={onClose}>
-            Zrušit
+            {translations.button.cancel}
           </Button>
           <Button color="primary" onPress={onAddMatch}>
-            Přidat zápas
+            {translations.button.add}
           </Button>
         </ModalFooter>
       </ModalContent>

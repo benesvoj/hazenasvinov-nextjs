@@ -251,6 +251,7 @@ interface Team {
   club_name?: string;
   team_suffix?: string;
   display_name?: string;
+  venue?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;

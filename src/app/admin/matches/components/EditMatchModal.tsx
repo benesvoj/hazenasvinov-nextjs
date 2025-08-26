@@ -16,7 +16,7 @@ interface EditMatchModalProps {
     time: string;
     home_team_id: string;
     away_team_id: string;
-    venue: string;
+    venue?: string;
     home_score: string;
     away_score: string;
     status: 'upcoming' | 'completed';
@@ -42,6 +42,21 @@ export default function EditMatchModal({
   getMatchweekOptions,
   isSeasonClosed
 }: EditMatchModalProps) {
+  
+  // Debug: Log teams data when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      console.log('🔍 EditMatchModal opened with teams:', {
+        teamsCount: teams.length,
+        teams: teams.map(t => ({ id: t.id, name: t.name, display_name: t.display_name })),
+        selectedMatch: selectedMatch?.id,
+        editData: {
+          home_team_id: editData.home_team_id,
+          away_team_id: editData.away_team_id
+        }
+      });
+    }
+  }, [isOpen, teams, selectedMatch, editData]);
   const handleInputChange = (field: string, value: string) => {
     onEditDataChange({
       ...editData,
@@ -51,6 +66,20 @@ export default function EditMatchModal({
 
   const handleSelectChange = (field: string, keys: any) => {
     const selectedValue = Array.from(keys)[0] as string;
+    
+    // Auto-populate venue when home team is selected
+    if (field === 'home_team_id' && selectedValue) {
+      const selectedTeam = teams.find(team => team.id === selectedValue);
+      if (selectedTeam?.venue) {
+        onEditDataChange({
+          ...editData,
+          [field]: selectedValue || "",
+          venue: selectedTeam.venue
+        });
+        return;
+      }
+    }
+    
     onEditDataChange({
       ...editData,
       [field]: selectedValue || ""
@@ -63,6 +92,13 @@ export default function EditMatchModal({
         <ModalHeader>Upravit zápas</ModalHeader>
         <ModalBody>
           {selectedMatch && (
+            <>
+              {/* Debug info */}
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+                <strong>Debug Info:</strong> Teams loaded: {teams.length} | 
+                Home team: {editData.home_team_id} | 
+                Away team: {editData.away_team_id}
+              </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Basic Info */}
               <div className="space-y-4">
@@ -73,6 +109,7 @@ export default function EditMatchModal({
                   value={editData.date}
                   onChange={(e) => handleInputChange('date', e.target.value)}
                   isDisabled={isSeasonClosed}
+                  isRequired
                 />
                 <Input
                   label="Čas"
@@ -80,18 +117,18 @@ export default function EditMatchModal({
                   value={editData.time}
                   onChange={(e) => handleInputChange('time', e.target.value)}
                   isDisabled={isSeasonClosed}
+                  isRequired
                 />
                 <Input
                   label="Místo konání"
-                  value={editData.venue}
+                  value={editData.venue || ""}
                   onChange={(e) => handleInputChange('venue', e.target.value)}
                   isDisabled={isSeasonClosed}
+                  placeholder="Místo konání se automaticky vyplní podle domácího týmu"
                 />
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Kolo
-                  </label>
                   <Select
+                    label="Kolo"
                     placeholder="Vyberte kolo"
                     selectedKeys={editData.matchweek ? [editData.matchweek] : []}
                     onSelectionChange={(keys) => handleSelectChange('matchweek', keys)}
@@ -113,10 +150,8 @@ export default function EditMatchModal({
                   isDisabled={isSeasonClosed}
                 />
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Status
-                  </label>
                   <Select
+                    label="Status"
                     placeholder="Vyberte status"
                     selectedKeys={editData.status ? [editData.status] : []}
                     onSelectionChange={(keys) => handleSelectChange('status', keys)}
@@ -133,37 +168,35 @@ export default function EditMatchModal({
               <div className="space-y-4">
                 <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">Týmy & Skóre</h4>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Domácí tým
-                  </label>
                   <Select
+                    label="Domácí tým"
                     placeholder="Vyberte domácí tým"
                     selectedKeys={editData.home_team_id ? [editData.home_team_id] : []}
                     onSelectionChange={(keys) => handleSelectChange('home_team_id', keys)}
                     className="w-full"
                     isDisabled={isSeasonClosed}
+                    isRequired
                   >
                     {teams.map((team) => (
                       <SelectItem key={team.id}>
-                        {team.name}
+                        {team.display_name || team.name}
                       </SelectItem>
                     ))}
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Hostující tým
-                  </label>
                   <Select
+                    label="Hostující tým"
                     placeholder="Vyberte hostující tým"
                     selectedKeys={editData.away_team_id ? [editData.away_team_id] : []}
                     onSelectionChange={(keys) => handleSelectChange('away_team_id', keys)}
                     className="w-full"
                     isDisabled={isSeasonClosed}
+                    isRequired
                   >
                     {teams.map((team) => (
                       <SelectItem key={team.id}>
-                        {team.name}
+                        {team.display_name || team.name}
                       </SelectItem>
                     ))}
                   </Select>
@@ -194,19 +227,21 @@ export default function EditMatchModal({
                 )}
               </div>
             </div>
+            </>
           )}
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="flat" onPress={onClose}>
-            Zrušit
-          </Button>
-          <Button 
-            color="primary" 
-            onPress={onUpdateMatch}
-            isDisabled={isSeasonClosed}
-          >
-            Uložit změny
-          </Button>
+                <Button color="danger" variant="flat" onPress={onClose} aria-label="Zrušit úpravu zápasu">
+                  Zrušit
+                </Button>
+                <Button 
+                  color="primary" 
+                  onPress={onUpdateMatch}
+                  isDisabled={isSeasonClosed}
+                  aria-label="Uložit změny zápasu"
+                >
+                  Uložit změny
+                </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

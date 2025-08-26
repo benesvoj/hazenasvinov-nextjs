@@ -354,13 +354,13 @@ export const TopBar = () => {
               <DropdownItem key="divider-1" className="h-px bg-gray-200 my-2" isReadOnly>
                 <div className="h-px bg-gray-200"></div>
               </DropdownItem>
-              <DropdownItem key="profile-action" startContent={<UserIcon className="w-4 h-4" />} onPress={handleProfileOpen}>
+              <DropdownItem key="profile-action" startContent={<UserIcon className="w-4 h-4" />} onPress={handleProfileOpen} aria-label="Otevřít profil">
                 <span>Profil</span>
               </DropdownItem>
-              <DropdownItem key="settings" startContent={<Cog6ToothIcon className="w-4 h-4" />}>
+              <DropdownItem key="settings" startContent={<Cog6ToothIcon className="w-4 h-4" />} aria-label="Nastavení">
                 <span>Nastavení</span>
               </DropdownItem>
-              <DropdownItem key="logout" color="danger" startContent={<ArrowRightOnRectangleIcon className="w-4 h-4" />} onPress={handleLogout}>
+              <DropdownItem key="logout" color="danger" startContent={<ArrowRightOnRectangleIcon className="w-4 h-4" />} onPress={handleLogout} aria-label="Odhlásit se">
                 <span>Odhlásit</span>
               </DropdownItem>
             </DropdownMenu>
@@ -482,6 +482,7 @@ export const TopBar = () => {
                   startContent={<PencilIcon className="w-4 h-4" />}
                   onPress={handleProfileEdit}
                   className="flex-1 sm:flex-none"
+                  aria-label="Upravit profil"
                 >
                   Upravit profil
                 </Button>
@@ -494,6 +495,7 @@ export const TopBar = () => {
                     onPress={handleProfileSave}
                     isLoading={isSaving}
                     className="flex-1 sm:flex-none"
+                    aria-label="Uložit změny profilu"
                   >
                     Uložit změny
                   </Button>

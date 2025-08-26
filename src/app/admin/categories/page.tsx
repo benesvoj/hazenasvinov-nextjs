@@ -436,6 +436,7 @@ export default function CategoriesAdminPage() {
             color="primary" 
             startContent={<PlusIcon className="w-4 h-4" />}
             onPress={onAddCategoryOpen}
+            aria-label="Přidat novou kategorii"
           >
             Přidat kategorii
           </Button>
@@ -495,6 +496,7 @@ export default function CategoriesAdminPage() {
                           color="primary"
                           isIconOnly
                           onPress={() => openEditModal(category)}
+                          aria-label={`Upravit kategorii ${category.name}`}
                         >
                           <PencilIcon className="w-4 h-4" />
                         </Button>
@@ -504,6 +506,7 @@ export default function CategoriesAdminPage() {
                           color="danger"
                           isIconOnly
                           onPress={() => openDeleteModal(category)}
+                          aria-label={`Smazat kategorii ${category.name}`}
                         >
                           <TrashIcon className="w-4 h-4" />
                         </Button>

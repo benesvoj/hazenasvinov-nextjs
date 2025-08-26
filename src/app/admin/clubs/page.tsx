@@ -15,12 +15,28 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import { Club } from "@/types/types";
 import Link from "next/link";
+import { Image } from "@heroui/image";
 
 export default function ClubsAdminPage() {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Memoize filtered clubs to prevent unnecessary re-renders
+  const filteredClubs = React.useMemo(() => {
+    if (!searchTerm.trim()) return clubs;
+    return clubs.filter(club => 
+      club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (club.short_name && club.short_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (club.city && club.city.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [clubs, searchTerm]);
+  
+  // Memoize search handler to prevent unnecessary re-renders
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
   
   // Modal states
   const { isOpen: isCreateOpen, onOpen: onCreateOpen, onClose: onCreateClose } = useDisclosure();
@@ -206,14 +222,19 @@ export default function ClubsAdminPage() {
   };
 
   // Filtered clubs
-  const filteredClubs = clubs.filter(club =>
-    club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (club.city && club.city.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+
 
   // Initial fetch
   useEffect(() => {
-    fetchClubs();
+    const loadClubs = async () => {
+      try {
+        await fetchClubs();
+      } catch (error) {
+        console.error('Error loading clubs:', error);
+      }
+    };
+    
+    loadClubs();
   }, [fetchClubs]);
 
   return (
@@ -231,14 +252,15 @@ export default function ClubsAdminPage() {
             <h2 className="text-xl font-semibold">Správa klubů</h2>
           </div>
           
-          <Button 
-            color="primary" 
-            startContent={<PlusIcon className="w-4 h-4" />}
-            onPress={onCreateOpen}
-            size="sm"
-          >
-            Přidat klub
-          </Button>
+                <Button 
+                  color="primary" 
+                  startContent={<PlusIcon className="w-4 h-4" />}
+                  onPress={onCreateOpen}
+                  size="sm"
+                  aria-label="Přidat nový klub"
+                >
+                  Přidat klub
+                </Button>
         </CardHeader>
         
         <CardBody>
@@ -247,7 +269,7 @@ export default function ClubsAdminPage() {
             <Input
               placeholder="Hledat kluby..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
               className="max-w-md"
             />
           </div>
@@ -261,10 +283,12 @@ export default function ClubsAdminPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       {club.logo_url && (
-                        <img 
+                        <Image 
                           src={club.logo_url} 
                           alt={`${club.name} logo`}
-                          className="w-12 h-12 object-contain rounded"
+                          className="object-contain rounded"
+                          width={48}
+                          height={48}
                         />
                       )}
                       <div>
@@ -283,12 +307,18 @@ export default function ClubsAdminPage() {
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <Link href={`/admin/clubs/${club.id}`}>
+                      <Link 
+                        href={`/admin/clubs/${club.id}`} 
+                        prefetch={true} 
+                        scroll={false}
+                        replace={false}
+                      >
                         <Button
                           size="sm"
                           color="primary"
                           variant="light"
                           startContent={<EyeIcon className="w-4 h-4" />}
+                          aria-label={`Zobrazit detail klubu ${club.name}`}
                         >
                           Detail
                         </Button>
@@ -299,6 +329,7 @@ export default function ClubsAdminPage() {
                         variant="light"
                         startContent={<PencilIcon className="w-4 h-4" />}
                         onPress={() => openEditModal(club)}
+                        aria-label={`Upravit klub ${club.name}`}
                       >
                         Upravit
                       </Button>
@@ -308,6 +339,7 @@ export default function ClubsAdminPage() {
                         variant="light"
                         startContent={<TrashIcon className="w-4 h-4" />}
                         onPress={() => openDeleteModal(club)}
+                        aria-label={`Smazat klub ${club.name}`}
                       >
                         Smazat
                       </Button>

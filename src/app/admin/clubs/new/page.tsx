@@ -68,7 +68,7 @@ export default function NewClubPage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
-            <Link href="/admin/clubs">
+            <Link href="/admin/clubs" prefetch={true}>
               <Button variant="light" size="sm">
                 <ArrowLeftIcon className="w-4 h-4 mr-2" />
                 Zpět na kluby
@@ -136,7 +136,7 @@ export default function NewClubPage() {
               />
               
               <div className="flex gap-3 pt-4">
-                <Link href="/admin/clubs">
+                <Link href="/admin/clubs" prefetch={true}>
                   <Button variant="flat" color="danger">
                     Zrušit
                   </Button>

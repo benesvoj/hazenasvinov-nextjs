@@ -60,7 +60,7 @@ export default function AssignCategoryModal({
           .from("categories")
           .select("*")
           .eq("is_active", true)
-          .order("name"),
+          .order("sort_order"),
         supabase
           .from("seasons")
           .select("*")
@@ -190,13 +190,14 @@ export default function AssignCategoryModal({
           )}
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="flat" onPress={handleClose}>
+          <Button color="danger" variant="flat" onPress={handleClose} aria-label="Zrušit přiřazení kategorie">
             {loading ? "Načítání..." : "Zrušit"}
           </Button>
           <Button
             color="primary"
             onPress={handleSubmit}
             isDisabled={!formData.category_id || !formData.season_id || loading}
+            aria-label="Přiřadit klub ke kategorii"
           >
             {loading ? "Přiřazuji..." : "Přiřadit"}
           </Button>
