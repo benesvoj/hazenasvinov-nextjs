@@ -21,6 +21,8 @@ import MobileActionsMenu from '@/components/MobileActionsMenu';
 import { useExcelImport } from '@/hooks/useExcelImport';
 import { Match, Category, Team, Season, Standing } from "@/types/types";
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
+import { getMatchesWithTeamsQuery, transformMatchData } from '@/utils';
+import { useTeamDisplayLogic } from '@/hooks/useTeamDisplayLogic';
 
 
 export default function MatchesAdminPage() {
@@ -49,6 +51,9 @@ export default function MatchesAdminPage() {
   const { isOpen: isMatchActionsOpen, onOpen: onMatchActionsOpen, onClose: onMatchActionsClose } = useDisclosure();
   const { isOpen: isMatchProcessOpen, onOpen: onMatchProcessOpen, onClose: onMatchProcessClose } = useDisclosure();
   const { importMatches } = useExcelImport();
+
+  // Use the team display logic hook
+  const { teamCounts, loading: teamCountsLoading, fetchTeamCounts } = useTeamDisplayLogic(selectedCategory);
 
 
 
@@ -282,23 +287,7 @@ export default function MatchesAdminPage() {
       
       let query = supabase
         .from('matches')
-        .select(`
-          *,
-          home_team:club_category_teams!home_team_id(
-            team_suffix,
-            club_category:club_categories(
-              club:clubs(id, name, short_name, logo_url)
-            )
-          ),
-          away_team:club_category_teams!away_team_id(
-            team_suffix,
-            club_category:club_categories(
-              club:clubs(id, name, short_name, logo_url)
-            )
-          ),
-          category:categories(name),
-          season:seasons(name)
-        `)
+        .select(getMatchesWithTeamsQuery())
         .order('date', { ascending: false });
 
       if (selectedCategory) {
@@ -317,86 +306,8 @@ export default function MatchesAdminPage() {
       
       console.log('✅ Raw matches data:', data);
 
-      // First, get team counts for all clubs in this category to avoid async calls in map
-      const getTeamCountsForCategory = async () => {
-        if (!selectedCategory) return new Map();
-        
-        try {
-          const { data: clubCategoryData, error } = await supabase
-            .from('club_categories')
-            .select(`
-              club_id,
-              club_category_teams(id)
-            `)
-            .eq('category_id', selectedCategory)
-            .eq('is_active', true);
-          
-          if (error) {
-            console.error('Error fetching club category teams:', error);
-            return new Map();
-          }
-          
-          const teamCounts = new Map<string, number>();
-          clubCategoryData?.forEach((cc: any) => {
-            teamCounts.set(cc.club_id, cc.club_category_teams?.length || 0);
-          });
-          
-          return teamCounts;
-        } catch (error) {
-          console.error('Error fetching team counts:', error);
-          return new Map();
-        }
-      };
-
-      // Get team counts first
-      const teamCounts = await getTeamCountsForCategory();
-      
-      // Enhance matches with club information and apply smart suffix logic
-      const enhancedMatches = (data || []).map((match: any) => {
-        const homeTeam = match.home_team;
-        const awayTeam = match.away_team;
-
-        // Get club information for smart suffix logic
-        const homeClubId = homeTeam?.club_category?.club?.id;
-        const awayClubId = awayTeam?.club_category?.club?.id;
-
-        // Get team counts from the pre-fetched data
-        const homeClubTeamCount = homeClubId ? (teamCounts.get(homeClubId) || 0) : 0;
-        const awayClubTeamCount = awayClubId ? (teamCounts.get(awayClubId) || 0) : 0;
-
-        // Apply smart suffix logic
-        const getDisplayName = (team: any, clubTeamCount: number) => {
-          if (!team?.club_category?.club) return 'Neznámý tým';
-          
-          const clubName = team.club_category.club.name;
-          const teamSuffix = team.team_suffix || 'A';
-          
-          // Only show suffix if club has multiple teams in this category
-          const displayName = clubTeamCount > 1 ? `${clubName} ${teamSuffix}` : clubName;
-          
-          console.log(`Team ${team.id}: Club "${clubName}" has ${clubTeamCount} teams in category ${selectedCategory} -> Display: "${displayName}"`);
-          
-          return displayName;
-        };
-
-        return {
-          ...match,
-          home_team: {
-            ...homeTeam,
-            club_id: homeClubId || null,
-            club_name: homeTeam?.club_category?.club?.name || 'Neznámý klub',
-            team_suffix: homeTeam?.team_suffix || 'A',
-            display_name: getDisplayName(homeTeam, homeClubTeamCount)
-          },
-          away_team: {
-            ...awayTeam,
-            club_id: awayClubId || null,
-            club_name: awayTeam?.club_category?.club?.name || 'Neznámý klub',
-            team_suffix: awayTeam?.team_suffix || 'A',
-            display_name: getDisplayName(awayTeam, awayClubTeamCount)
-          }
-        };
-      });
+      // Transform matches using the utility function
+      const enhancedMatches = transformMatchData(data || [], teamCounts);
       
       console.log('🔄 Enhanced matches:', enhancedMatches);
 
@@ -407,7 +318,7 @@ export default function MatchesAdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, selectedCategory, selectedSeason]);
+  }, [supabase, selectedCategory, selectedSeason, teamCounts]);
 
 
   // TODO: extract to separate file
@@ -512,11 +423,20 @@ export default function MatchesAdminPage() {
     fetchMembers();
   }, [fetchCategories, fetchSeasons, fetchTeams, fetchMembers]);
 
+  // Fetch team counts when category changes
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchTeamCounts();
+    }
+  }, [selectedCategory, fetchTeamCounts]);
+
   // Fetch matches and standings when filters change
   useEffect(() => {
     fetchMatches();
     fetchStandings();
   }, [fetchMatches, fetchStandings]);
+
+
 
 
 

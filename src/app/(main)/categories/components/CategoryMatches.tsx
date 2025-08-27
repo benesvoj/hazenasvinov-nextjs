@@ -70,7 +70,7 @@ export function CategoryMatches({
               <div className="text-sm text-gray-600 mb-3">
                 {formatDateString(match.date)}
                 {match.time && (
-                  <span className="ml-2">{formatTimeString(match.time)}</span>
+                  <span className="ml-2">{formatTime(match.time)}</span>
                 )}
               </div>
               <div className="flex justify-between mb-3">
