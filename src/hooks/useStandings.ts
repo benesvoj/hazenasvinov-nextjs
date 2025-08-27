@@ -63,10 +63,10 @@ export function useStandings() {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Fetching standings...', {
-        categoryId,
-        seasonId
-      });
+      // console.log('🔍 Fetching standings...', {
+      //   categoryId,
+      //   seasonId
+      // });
 
       const supabase = createClient();
       let query = supabase
@@ -119,23 +119,23 @@ export function useStandings() {
         };
       });
 
-      console.log('🔍 Standings fetched:', {
-        standingsCount: enhancedStandings.length,
-        standings: enhancedStandings,
-        rawData: data
-      });
+      // console.log('🔍 Standings fetched:', {
+      //   standingsCount: enhancedStandings.length,
+      //   standings: enhancedStandings,
+      //   rawData: data
+      // });
       
       // Debug: Check if standings have team data
-      enhancedStandings.forEach((standing: any, index: number) => {
-        console.log(`🔍 Standing ${index}:`, {
-          id: standing.id,
-          team_id: standing.team_id,
-          team: standing.team,
-          club: standing.club,
-          category_id: standing.category_id,
-          season_id: standing.season_id
-        });
-      });
+      // enhancedStandings.forEach((standing: any, index: number) => {
+      //   console.log(`🔍 Standing ${index}:`, {
+      //     id: standing.id,
+      //     team_id: standing.team_id,
+      //     team: standing.team,
+      //     club: standing.club,
+      //     category_id: standing.category_id,
+      //     season_id: standing.season_id
+      //   });
+      // });
 
       setStandings(enhancedStandings);
       setError(null);

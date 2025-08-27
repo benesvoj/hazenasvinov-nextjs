@@ -33,7 +33,6 @@ export default function MatchesAdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
 
 
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
@@ -55,12 +54,6 @@ export default function MatchesAdminPage() {
 
   // Use the team display logic hook
   const { teamCounts, loading: teamCountsLoading, fetchTeamCounts } = useTeamDisplayLogic(selectedCategory);
-
-  // Use the matches hook
-  const { matches: seasonalMatches, loading: matchesLoading, error: matchesError } = useFetchMatches(selectedCategory);
-  
-  // Create a flat array of all matches for components that expect Match[]
-  const matches = [...(seasonalMatches.autumn || []), ...(seasonalMatches.spring || [])];
 
   // Reset matchToDelete when confirmation modal closes
   const handleDeleteConfirmClose = () => {
@@ -130,9 +123,7 @@ export default function MatchesAdminPage() {
 
 
   const supabase = createClient();
-
   
-
   // Fetch members for lineup management
   const fetchMembers = useCallback(async () => {
     try {
@@ -153,7 +144,7 @@ export default function MatchesAdminPage() {
   // Fetch all teams
   const fetchTeams = useCallback(async () => {
     try {
-      console.log('🔍 Fetching teams...');
+      // console.log('🔍 Fetching teams...');
       const { data, error } = await supabase
         .from('teams')
         .select('*')
@@ -161,7 +152,7 @@ export default function MatchesAdminPage() {
         .order('name');
 
       if (error) throw error;
-      console.log('✅ Teams fetched:', data?.length || 0, 'teams');
+      // console.log('✅ Teams fetched:', data?.length || 0, 'teams');
       setTeams(data || []);
     } catch (error) {
       setError('Chyba při načítání týmů');
@@ -172,7 +163,7 @@ export default function MatchesAdminPage() {
   // Fetch categories
   const fetchCategories = useCallback(async () => {
     try {
-      console.log('🔍 Fetching categories...');
+      // console.log('🔍 Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
@@ -180,28 +171,56 @@ export default function MatchesAdminPage() {
         .order('sort_order');
 
       if (error) throw error;
-      console.log('✅ Categories fetched:', data?.length || 0, 'categories');
+      // console.log('✅ Categories fetched:', data?.length || 0, 'categories');
+      // console.log('🔍 Categories data:', data);
       setCategories(data || []);
       
       // Set first category as default if categories are loaded and no category is selected
       if (data && data.length > 0 && !selectedCategory) {
+        // console.log('🔍 Setting first category as default:', data[0]);
         setSelectedCategory(data[0].id);
       }
     } catch (error) {
       setError('Chyba při načítání kategorií');
-      console.error('Error fetching categories:', error);
+      // console.error('Error fetching categories:', error);
     }
   }, [supabase, selectedCategory]);
 
   // Use the enhanced seasons hook
   const { sortedSeasons, activeSeason, loading: seasonsLoading, error: seasonsError, fetchSeasonsWithActive } = useSeasons();
   const [selectedSeason, setSelectedSeason] = useState<string>("");
+  
+  // Use the matches hook - pass category code instead of ID, and show ALL matches (admin mode)
+  const selectedCategoryCode = categories.find(cat => cat.id === selectedCategory)?.code || '';
+  const { matches: seasonalMatches, loading: matchesLoading, error: matchesError } = useFetchMatches(
+    selectedCategoryCode, 
+    selectedSeason, // Pass the selected season ID
+    { ownClubOnly: false } // Show all matches, not just own club
+  );
+  
+  // Create a flat array of all matches for components that expect Match[]
+  const matches = selectedCategoryCode ? [...(seasonalMatches.autumn || []), ...(seasonalMatches.spring || [])] : [];
 
   // Use the filtered teams hook
   const { filteredTeams, loading: teamsLoading, error: teamsError, fetchFilteredTeams, clearTeams } = useFilteredTeams();
 
   // Use the standings hook
   const { standings, loading: standingsLoading, error: standingsError, fetchStandings, clearStandings } = useStandings();
+  
+  // Derive loading state from all async operations
+  const loading = categories.length === 0 || seasonsLoading || teamsLoading || members.length === 0;
+  
+  // Debug loading state
+  // console.log('🔍 Loading state debug:', {
+  //   categoriesLength: categories.length,
+  //   seasonsLoading,
+  //   teamsLoading,
+  //   membersLength: members.length,
+  //   loading,
+  //   selectedCategory,
+  //   selectedCategoryCode,
+  //   categories: categories.map(c => ({ id: c.id, code: c.code, name: c.name }))
+  // });
 
   // Set active season as default when seasons are loaded
   useEffect(() => {
@@ -225,6 +244,7 @@ export default function MatchesAdminPage() {
 
   // Initial data fetch
   useEffect(() => {
+    console.log('🔍 Initial data fetch started');
     fetchCategories();
     fetchSeasonsWithActive();
     fetchTeams();
@@ -1026,7 +1046,6 @@ export default function MatchesAdminPage() {
         throw error;
       }
 
-      const actionText = bulkUpdateData.action === 'set' ? 'nastaveno' : 'odebráno';
       setError('');
       onBulkUpdateClose();
       setBulkUpdateData({ categoryId: '', matchweek: '', action: 'set' });
@@ -1114,7 +1133,7 @@ export default function MatchesAdminPage() {
             selectedKeys={selectedSeason ? [selectedSeason] : []}
             onSelectionChange={(keys) => {
               const selectedKey = Array.from(keys)[0] as string;
-              console.log('Season selection changed:', { keys, selectedKey });
+              // console.log('Season selection changed:', { keys, selectedKey });
               setSelectedSeason(selectedKey || "");
             }}
             className="w-full"
@@ -1275,7 +1294,7 @@ export default function MatchesAdminPage() {
                   aria-label="Categories"
                   selectedKey={selectedCategory}
                   onSelectionChange={(key) => {
-                    console.log('Category selected:', key);
+                    // console.log('Category selected:', key);
                     setSelectedCategory(key as string);
                   }}
                 >
@@ -1286,27 +1305,41 @@ export default function MatchesAdminPage() {
                           {category.name} - {getCategoryInfo(category.id, categories).competition}
                         </h3>
                         
-
+                        {/* Show loading or no category message */}
+                        {!selectedCategoryCode && (
+                          <div className="text-center py-8 text-gray-500">
+                            {categories.length === 0 ? 'Načítání kategorií...' : 'Vyberte kategorii pro zobrazení zápasů'}
+                          </div>
+                        )}
+                        
+                        {/* Show error if matches hook failed */}
+                        {selectedCategoryCode && matchesError && (
+                          <div className="text-center py-8 text-red-500">
+                            Chyba při načítání zápasů: {matchesError.message}
+                          </div>
+                        )}
                         
                         {/* Matches for this category grouped by matchweek */}
-                        <CategoryMatches
-                          matches={matches}
-                          category={category}
-                          expandedMatchweeks={expandedMatchweeks}
-                          toggleMatchweek={toggleMatchweek}
-                          isMatchweekExpanded={isMatchweekExpanded}
-                          onAddResult={(match) => {
-                            setSelectedMatch(match);
-                            onAddResultOpen();
-                          }}
-                          onEditMatch={handleEditMatch}
-                          onLineupModalOpen={(match) => {
-                            setSelectedMatch(match);
-                            onLineupModalOpen();
-                          }}
-                          onDeleteClick={handleDeleteClick}
-                          isSeasonClosed={isSeasonClosed()}
-                        />
+                        {selectedCategoryCode && !matchesError && (
+                          <CategoryMatches
+                            matches={matches}
+                            category={category}
+                            expandedMatchweeks={expandedMatchweeks}
+                            toggleMatchweek={toggleMatchweek}
+                            isMatchweekExpanded={isMatchweekExpanded}
+                            onAddResult={(match) => {
+                              setSelectedMatch(match);
+                              onAddResultOpen();
+                            }}
+                            onEditMatch={handleEditMatch}
+                            onLineupModalOpen={(match) => {
+                              setSelectedMatch(match);
+                              onLineupModalOpen();
+                            }}
+                            onDeleteClick={handleDeleteClick}
+                            isSeasonClosed={isSeasonClosed()}
+                          />
+                        )}
 
 
                         {/* Standings for this category */}

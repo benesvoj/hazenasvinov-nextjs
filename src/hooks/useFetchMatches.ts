@@ -9,7 +9,60 @@ export interface SeasonalMatches {
   spring: Match[];
 }
 
-export function useFetchMatches(categorySlug: string) {
+export interface UseFetchMatchesOptions {
+  /**
+   * Whether to filter matches to only show those where the user's club is playing
+   * - `true` (default): Show only own club matches (public pages)
+   * - `false`: Show all matches (admin pages)
+   */
+  ownClubOnly?: boolean;
+  
+  /**
+   * Whether to include detailed team information
+   * - `true` (default): Include team names, logos, club info
+   * - `false`: Basic team info only
+   */
+  includeTeamDetails?: boolean;
+  
+  /**
+   * Whether to include standings data
+   * - `false` (default): No standings data
+   * - `true`: Include standings (future feature)
+   */
+  includeStandings?: boolean;
+}
+
+/**
+ * Hook to fetch matches for a specific category and season
+ * 
+ * @param categorySlug - The category code (e.g., 'men', 'women')
+ * @param seasonId - Optional season ID. If not provided, uses active season
+ * @param options - Configuration options for filtering and data inclusion
+ * 
+ * @example
+ * // Public page - show only own club matches for active season
+ * const { matches, loading, error } = useFetchMatches('men');
+ * 
+ * // Admin page - show all matches for specific season
+ * const { matches, loading, error } = useFetchMatches('men', 'season-id', { ownClubOnly: false });
+ * 
+ * // Custom filtering
+ * const { matches, loading, error } = useFetchMatches('men', 'season-id', { 
+ *   ownClubOnly: true,
+ *   includeTeamDetails: true 
+ * });
+ */
+export function useFetchMatches(
+  categorySlug: string, 
+  seasonId?: string, 
+  options: UseFetchMatchesOptions = {}
+) {
+  const { 
+    ownClubOnly = true, // Default to own club only for backward compatibility
+    includeTeamDetails = true,
+    includeStandings = false 
+  } = options;
+
   const [matches, setMatches] = useState<SeasonalMatches>({ autumn: [], spring: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -17,14 +70,18 @@ export function useFetchMatches(categorySlug: string) {
 
   useEffect(() => {
     const fetchMatches = async () => {
-      if (!categorySlug) return;
+      if (!categorySlug) {
+        setLoading(false);
+        setError(null);
+        return;
+      }
       
       try {
         setLoading(true);
         setError(null);
         const supabase = createClient();
         
-        // console.log('🔍 Fetching matches for category:', categorySlug);
+        // console.log('🔍 Fetching matches for category:', categorySlug, 'season:', seasonId, 'ownClubOnly:', ownClubOnly);
         
         // First, get the category ID
         // console.log('📋 Step 1: Fetching category data...');
@@ -41,20 +98,35 @@ export function useFetchMatches(categorySlug: string) {
         
         // console.log('✅ Category found:', categoryData);
         
-        // Get the active season
-        // console.log('📅 Step 2: Fetching active season...');
-        const { data: seasonData, error: seasonError } = await supabase
-          .from('seasons')
-          .select('id, name')
-          .eq('is_active', true)
-          .single();
-        
-        if (seasonError) {
-        //   console.error('❌ Season error:', seasonError);
-          throw new Error(`Active season not found: ${seasonError.message}`);
+        // Get the season (either provided seasonId or active season)
+        let seasonData;
+        if (seasonId) {
+          // Use provided seasonId
+          const { data, error: seasonError } = await supabase
+            .from('seasons')
+            .select('id, name')
+            .eq('id', seasonId)
+            .single();
+          
+          if (seasonError) {
+            throw new Error(`Season not found: ${seasonError.message}`);
+          }
+          seasonData = data;
+        } else {
+          // Get the active season (backward compatibility)
+          const { data, error: seasonError } = await supabase
+            .from('seasons')
+            .select('id, name')
+            .eq('is_active', true)
+            .single();
+          
+          if (seasonError) {
+            throw new Error(`Active season not found: ${seasonError.message}`);
+          }
+          seasonData = data;
         }
         
-        // console.log('✅ Active season found:', seasonData);
+        // console.log('✅ Season found:', seasonData);
         
         // Check if matches table exists by trying a simple query
         // console.log('⚽ Step 3: Checking matches table...');
@@ -119,26 +191,45 @@ export function useFetchMatches(categorySlug: string) {
         // console.log('✅ Matches fetched:', matchesData?.length || 0, 'matches');
         
         // Transform matches to include team names and club information
+        // Use the same centralized logic that standings tables use
         const transformedMatches = matchesData?.map((match: any) => {
           // Check if each team belongs to our club individually
           const homeTeamIsOwnClub = match.home_team?.club_category?.club?.is_own_club === true;
           const awayTeamIsOwnClub = match.away_team?.club_category?.club?.is_own_club === true;
           
-          // Smart suffix logic: only show suffix if club has multiple teams in this category
+          // Use centralized team display logic for consistency
           const getTeamDisplayName = (team: any) => {
             if (!team?.club_category?.club) return translations.team.unknownTeam;
             
             const clubName = team.club_category.club.name;
             const teamSuffix = team.team_suffix || 'A';
-            
-            // Check if this club has multiple teams in this category
             const clubId = team.club_category.club.id;
-            const teamCount = matchesData?.filter((m: any) => 
-              (m.home_team?.club_category?.club?.id === clubId || 
-               m.away_team?.club_category?.club?.id === clubId)
-            ).length || 0;
             
-            // Use the utility function for consistent logic
+            // Calculate UNIQUE TEAMS per club in this category (not matches!)
+            // This is the same logic used in standings tables
+            const uniqueTeams = new Set();
+            matchesData?.forEach((m: any) => {
+              const homeClubId = m.home_team?.club_category?.club?.id;
+              const awayClubId = m.away_team?.club_category?.club?.id;
+              
+              if (homeClubId === clubId) {
+                // Add unique team ID for this club
+                const homeTeamId = m.home_team?.id;
+                if (homeTeamId) uniqueTeams.add(homeTeamId);
+              }
+              if (awayClubId === clubId) {
+                // Add unique team ID for this club
+                const awayTeamId = m.away_team?.id;
+                if (awayTeamId) uniqueTeams.add(awayTeamId);
+              }
+            });
+            
+            const teamCount = uniqueTeams.size;
+            
+            // Debug: Log team count calculation for verification
+            console.log(`🔍 Team display debug: ${clubName} - Team count: ${teamCount}, Will show suffix: ${teamCount > 1}`);
+            
+            // Use the centralized utility function for consistent logic
             return getTeamDisplayNameSafe(clubName, teamSuffix, teamCount, translations.team.unknownTeam);
           };
           
@@ -164,18 +255,24 @@ export function useFetchMatches(categorySlug: string) {
           };
         }) || [];
         
-        // Filter matches to only show those where our club is playing
-        const ownClubMatches = transformedMatches.filter((match: any) => 
-          match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
-        );
-        
-        // console.log('🏆 Own club matches found:', ownClubMatches.length);
+        // Apply filtering based on options
+        let filteredMatches = transformedMatches;
+        if (ownClubOnly) {
+          // Filter matches to only show those where our club is playing
+          filteredMatches = transformedMatches.filter((match: any) => 
+            match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
+          );
+          // console.log('🏆 Own club matches found:', filteredMatches.length);
+        } else {
+          // Show all matches (admin mode)
+          // console.log('🏆 All matches found:', filteredMatches.length);
+        }
         
         // Group matches by season (autumn/spring)
         const autumnMatches: Match[] = [];
         const springMatches: Match[] = [];
         
-        ownClubMatches.forEach((match: any) => {
+        filteredMatches.forEach((match: any) => {
           const matchDate = new Date(match.date);
           const month = matchDate.getMonth() + 1; // January is 0
           
@@ -200,25 +297,28 @@ export function useFetchMatches(categorySlug: string) {
           category: categoryData,
           season: seasonData,
           totalMatches: matchesData?.length || 0,
-          ownClubMatches: ownClubMatches.length,
+          filteredMatches: filteredMatches.length,
+          ownClubOnly,
           autumnCount: autumnMatches.length,
           springCount: springMatches.length,
-          seasonQuery: `Found active season: ${seasonData.name} (ID: ${seasonData.id})`,
-          filtering: `Filtered ${matchesData?.length || 0} total matches to ${ownClubMatches.length} own club matches`
+          seasonQuery: `Found season: ${seasonData.name} (ID: ${seasonData.id})`,
+          filtering: ownClubOnly 
+            ? `Filtered ${matchesData?.length || 0} total matches to ${filteredMatches.length} own club matches`
+            : `Showing all ${filteredMatches.length} matches for category`
         });
         
       } catch (err) {
         // console.error('💥 Failed to fetch matches:', err);
         const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
         setError(new Error(errorMessage));
-        setDebugInfo({ error: errorMessage, categorySlug });
+        setDebugInfo({ error: errorMessage, categorySlug, seasonId, ownClubOnly });
       } finally {
         setLoading(false);
       }
     };
 
     fetchMatches();
-  }, [categorySlug]);
+  }, [categorySlug, seasonId, ownClubOnly]);
 
   return { matches, loading, error, debugInfo };
 }
