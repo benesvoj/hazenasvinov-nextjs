@@ -16,7 +16,7 @@ import {
   Image,
 } from "@heroui/react";
 import { Match } from "@/types/types";
-import { formatTimeString, formatDateString } from "@/helpers";
+import { formatDateString, formatTime } from "@/helpers";
 import { CategoryMatchesFallback } from "./CategoryMatchesFallback";
 import { getMatchStatusText } from "@/app/constants";
 import { useRouter } from "next/navigation";
@@ -129,7 +129,7 @@ export function CategoryMatches({
                       <div>{formatDateString(match.date)}</div>
                       {match.time && (
                         <div className="text-sm text-gray-600">
-                          {formatTimeString(match.time)}
+                          {formatTime(match.time)}
                         </div>
                       )}
                     </div>

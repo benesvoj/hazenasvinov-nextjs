@@ -2,68 +2,8 @@ import React from "react";
 import Link from "@/components/Link";
 import { MapPinIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
-
-// TODO: move into utils.ts or helpers.ts
-// Helper function to format time from HH:MM:SS to HH:MM
-function formatTime(time: string): string {
-  if (!time) return "";
-  // If time is already in HH:MM format, return as is
-  if (time.match(/^\d{2}:\d{2}$/)) return time;
-  // If time is in HH:MM:SS format, extract HH:MM
-  if (time.match(/^\d{2}:\d{2}:\d{2}$/)) {
-    return time.substring(0, 5);
-  }
-  return time;
-}
-
-// TODO: move into utils.ts or helpers.ts
-// Helper function to get short name for clubs
-function getShortName(fullName: string): string {
-  // Common patterns for Czech club names
-  if (fullName.includes('TJ Sokol')) {
-    return fullName.replace('TJ Sokol ', '');
-  }
-  if (fullName.includes('TJ ')) {
-    return fullName.replace('TJ ', '');
-  }
-  if (fullName.includes('SK ')) {
-    return fullName.replace('SK ', '');
-  }
-  if (fullName.includes('HC ')) {
-    return fullName.replace('HC ', '');
-  }
-  if (fullName.includes('FK ')) {
-    return fullName.replace('FK ', '');
-  }
-  // If no pattern matches, return first two words or full name if short
-  const words = fullName.split(' ');
-  if (words.length > 2) {
-    return words.slice(0, 2).join(' ');
-  }
-  return fullName;
-}
-
-// TODO: move into types.ts
-interface Match {
-  id: string;
-  date: string;
-  time: string;
-  home_team: string;
-  away_team: string;
-  home_team_logo?: string;
-  away_team_logo?: string;
-  home_team_is_own_club?: boolean;
-  away_team_is_own_club?: boolean;
-  venue: string;
-  competition: string;
-  is_home: boolean;
-  status: 'upcoming' | 'completed';
-  home_score?: number;
-  away_score?: number;
-  result?: 'win' | 'loss' | 'draw';
-  category?: { name: string; description?: string };
-  matchweek?: number;
-}
+import { formatDateToDayAndMonth, formatDateToWeekday, formatTime } from "@/helpers";
+import { Match } from "@/types";
 
 interface MatchRowProps {
   match: Match;
@@ -81,15 +21,10 @@ const MatchRow: React.FC<MatchRowProps> = ({
         {/* Date and Time - Left Side */}
         <div className={`flex flex-col items-start ${compact ? 'min-w-[50px] lg:min-w-[60px]' : 'min-w-[100px] lg:min-w-[120px]'}`}>
           <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400">
-            {new Date(match.date).toLocaleDateString('cs-CZ', { 
-              weekday: 'long'
-            })}
+          {formatDateToWeekday(match.date)}
           </div>
           <div className="font-semibold text-gray-900 dark:text-white text-sm lg:text-base">
-            {new Date(match.date).toLocaleDateString('cs-CZ', { 
-              day: 'numeric',
-              month: 'numeric'
-            })}
+            {formatDateToDayAndMonth(match.date)}
           </div>
           <div className="text-xs lg:text-sm font-medium text-gray-700 dark:text-gray-300">
             {formatTime(match.time)}
@@ -119,7 +54,7 @@ const MatchRow: React.FC<MatchRowProps> = ({
               )}
               <span className={`font-medium text-sm lg:text-sm ${match.home_team_is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
                 {/* Mobile: Short name, Desktop: Full name */}
-                <span className="lg:hidden">{getShortName(match.home_team)}</span>
+                <span className="lg:hidden">{match.home_team_short_name}</span>
                 <span className="hidden lg:inline">{match.home_team}</span>
               </span>
             </div>
@@ -130,7 +65,7 @@ const MatchRow: React.FC<MatchRowProps> = ({
             <div className="flex items-center gap-2 lg:gap-3">
               <span className={`font-medium text-sm lg:text-sm ${match.away_team_is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
                 {/* Mobile: Short name, Desktop: Full name */}
-                <span className="lg:hidden">{getShortName(match.away_team)}</span>
+                <span className="lg:hidden">{match.away_team_short_name}</span>
                 <span className="hidden lg:inline">{match.away_team}</span>
               </span>
               {/* Logo - Hidden on mobile */}

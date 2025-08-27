@@ -351,9 +351,6 @@ export default function MatchesAdminPage() {
       // Get team counts first
       const teamCounts = await getTeamCountsForCategory();
       
-      console.log('🔍 Team counts for category:', selectedCategory);
-      console.log('Team counts map:', Object.fromEntries(teamCounts));
-      
       // Enhance matches with club information and apply smart suffix logic
       const enhancedMatches = (data || []).map((match: any) => {
         const homeTeam = match.home_team;

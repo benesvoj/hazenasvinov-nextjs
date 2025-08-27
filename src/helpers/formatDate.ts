@@ -16,21 +16,6 @@ export function formatDateTime(date: Date): string {
   }).format(date);
 }
 
-export function formatTime(date: Date): string {
-  return new Intl.DateTimeFormat('cs-CZ', {
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
-}
-
-export function formatTimeString(timeString: string): string {
-  // Handle time strings like "16:00:00" or "16:00"
-  if (!timeString) return '';
-  
-  // Remove seconds if present and return HH:MM format
-  return timeString.split(':').slice(0, 2).join(':');
-}
-
 export const formatDateString = (dateString: string) => {
   try {
     return formatDate(new Date(dateString));
@@ -38,3 +23,24 @@ export const formatDateString = (dateString: string) => {
     return dateString;
   }
 };
+
+export const formatDateToWeekday = (dateString: string) => {
+  try {
+    return new Intl.DateTimeFormat('cs-CZ', {
+      weekday: 'long'
+    }).format(new Date(dateString));
+  } catch {
+    return dateString;
+  }
+};
+
+export const formatDateToDayAndMonth = (dateString: string) => {
+  try {
+    return new Date(dateString).toLocaleDateString('cs-CZ', { 
+      day: 'numeric',
+      month: 'numeric'
+    });
+  } catch {
+    return dateString;
+  }
+}
