@@ -25,10 +25,9 @@ import { getCategoryInfo } from "@/helpers/getCategoryInfo";
 import { getMatchesWithTeamsQuery, transformMatchData } from '@/utils';
 import { useTeamDisplayLogic } from '@/hooks/useTeamDisplayLogic';
 import { Match, Category } from "@/types";
-import { useSeasons, useFilteredTeams, useStandings } from "@/hooks";
+import { useSeasons, useFilteredTeams, useStandings, useFetchMatches } from "@/hooks";
 
 export default function MatchesAdminPage() {
-  const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -56,6 +55,12 @@ export default function MatchesAdminPage() {
 
   // Use the team display logic hook
   const { teamCounts, loading: teamCountsLoading, fetchTeamCounts } = useTeamDisplayLogic(selectedCategory);
+
+  // Use the matches hook
+  const { matches: seasonalMatches, loading: matchesLoading, error: matchesError } = useFetchMatches(selectedCategory);
+  
+  // Create a flat array of all matches for components that expect Match[]
+  const matches = [...(seasonalMatches.autumn || []), ...(seasonalMatches.spring || [])];
 
   // Reset matchToDelete when confirmation modal closes
   const handleDeleteConfirmClose = () => {
@@ -205,49 +210,7 @@ export default function MatchesAdminPage() {
     }
   }, [sortedSeasons, selectedSeason, activeSeason]);
 
-  // Fetch matches
-  const fetchMatches = useCallback(async () => {
-    try {
-      setLoading(true);
-      console.log('🔍 Fetching matches...', { selectedCategory, selectedSeason });
-      
-      let query = supabase
-        .from('matches')
-        .select(getMatchesWithTeamsQuery())
-        .order('date', { ascending: false });
 
-      if (selectedCategory) {
-        query = query.eq('category_id', selectedCategory);
-      }
-      if (selectedSeason) {
-        query = query.eq('season_id', selectedSeason);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('❌ Supabase error in fetchMatches:', error);
-        throw error;
-      }
-      
-      console.log('✅ Raw matches data:', data);
-
-      // Transform matches using the utility function
-      const enhancedMatches = transformMatchData(data || [], teamCounts);
-      
-      console.log('🔄 Enhanced matches:', enhancedMatches);
-
-      setMatches(enhancedMatches);
-    } catch (error) {
-      setError('Chyba při načítání zápasů');
-      console.error('Error fetching matches:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [supabase, selectedCategory, selectedSeason, teamCounts]);
-
-
-  // TODO: extract to separate file
 
 
   // Update filtered teams when category or season changes
@@ -275,13 +238,12 @@ export default function MatchesAdminPage() {
     }
   }, [selectedCategory, fetchTeamCounts]);
 
-  // Fetch matches and standings when filters change
+  // Fetch standings when filters change (matches are automatically fetched by useFetchMatches hook)
   useEffect(() => {
     if (selectedCategory && selectedSeason) {
-      fetchMatches();
       fetchStandings(selectedCategory, selectedSeason);
     }
-  }, [fetchMatches, fetchStandings, selectedCategory, selectedSeason]);
+  }, [fetchStandings, selectedCategory, selectedSeason]);
 
 
 
@@ -753,7 +715,7 @@ export default function MatchesAdminPage() {
         matchweek: '',
         match_number: ''
       });
-      fetchMatches();
+      // Matches are automatically refreshed by useFetchMatches hook
       setError('');
     } catch (error) {
       setError('Chyba při přidávání zápasu');
@@ -801,7 +763,7 @@ export default function MatchesAdminPage() {
       onAddResultClose();
       setResultData({ home_score: '', away_score: '' });
       setSelectedMatch(null);
-      fetchMatches();
+      // Matches are automatically refreshed by useFetchMatches hook
       setError('');
     } catch (error) {
       setError('Chyba při aktualizaci výsledku');
@@ -832,7 +794,7 @@ export default function MatchesAdminPage() {
 
       if (error) throw error;
       
-      fetchMatches();
+      // Matches are automatically refreshed by useFetchMatches hook
       setError('');
       handleDeleteConfirmClose();
     } catch (error) {
@@ -857,7 +819,7 @@ export default function MatchesAdminPage() {
 
       if (error) throw error;
       
-      fetchMatches();
+      // Matches are automatically refreshed by useFetchMatches hook
       setError('');
       onDeleteAllConfirmClose();
       setSelectedCategory('');
@@ -993,7 +955,7 @@ export default function MatchesAdminPage() {
         category_id: ''
       });
       setSelectedMatch(null);
-      fetchMatches();
+      // Matches are automatically refreshed by useFetchMatches hook
       setError('');
     } catch (error) {
       console.error('Full error details:', error);
@@ -1020,10 +982,13 @@ export default function MatchesAdminPage() {
     try {
       let matchesToUpdate: Match[];
       let updateData: any;
+      
+      // Get all matches from the hook
+      const allMatches = [...(seasonalMatches.autumn || []), ...(seasonalMatches.spring || [])];
 
       if (bulkUpdateData.action === 'set') {
         // Find matches without matchweek for the selected category
-        matchesToUpdate = matches.filter(match => 
+        matchesToUpdate = allMatches.filter(match => 
           match.category_id === bulkUpdateData.categoryId && 
           !match.matchweek
         );
@@ -1037,7 +1002,7 @@ export default function MatchesAdminPage() {
         updateData = { matchweek: matchweekNumber };
       } else {
         // Find matches with matchweek for the selected category
-        matchesToUpdate = matches.filter(match => 
+        matchesToUpdate = allMatches.filter(match => 
           match.category_id === bulkUpdateData.categoryId && 
           match.matchweek !== null && match.matchweek !== undefined
         );
@@ -1065,7 +1030,7 @@ export default function MatchesAdminPage() {
       setError('');
       onBulkUpdateClose();
       setBulkUpdateData({ categoryId: '', matchweek: '', action: 'set' });
-      fetchMatches(); // Refresh the matches list
+      // Matches are automatically refreshed by useFetchMatches hook
       
     } catch (error) {
       console.error('Full error details:', error);
@@ -1106,9 +1071,9 @@ export default function MatchesAdminPage() {
       const result = await importMatches(matches, selectedSeason);
       
       if (result.success > 0) {
-        // Refresh data
-        await fetchMatches();
-        await fetchStandings(selectedCategory, selectedSeason);
+              // Refresh data
+      // Matches are automatically refreshed by useFetchMatches hook
+      await fetchStandings(selectedCategory, selectedSeason);
         setError('');
         
         // Show success message
@@ -1123,7 +1088,7 @@ export default function MatchesAdminPage() {
       console.error('Excel import error:', error);
       setError(`Import selhal: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
     }
-  }, [selectedSeason, importMatches, fetchMatches, fetchStandings]);
+  }, [selectedSeason, importMatches, fetchStandings]);
 
   return (
     <div className="p-3 sm:p-4 lg:p-6">
@@ -1495,7 +1460,7 @@ export default function MatchesAdminPage() {
                 <li>Všechny související údaje</li>
               </ul>
               <p class="text-sm text-gray-600 mt-2">
-                <strong>Počet zápasů k smazání:</strong> ${matches.length}
+                <strong>Počet zápasů k smazání:</strong> ${[...(seasonalMatches.autumn || []), ...(seasonalMatches.spring || [])].length}
               </p>
             </div>
           </div>
