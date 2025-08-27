@@ -3,3 +3,7 @@ export { default as CallTheActionSection } from "./CallTheActionSection";
 export { default as SponsorsSection } from "./SponsorsSection";
 export { default as ClubHighlightSection } from "./ClubHighlightSection";
 export { default as PostSection } from "./PostSection";
+export { default as CategoryMatchesAndResults } from "./CategoryMatchesAndResults";
+export { default as CategoryStandingsTable } from "./CategoryStandingsTable";
+export { default as MatchRow } from "./MatchRow";
+export { default as MatchSchedule } from "./MatchSchedule";

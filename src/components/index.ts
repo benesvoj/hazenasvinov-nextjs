@@ -8,11 +8,6 @@ export { default as Toast } from './Toast';
 // Blog Components
 export { default as BlogPostCard, BlogPostCardSkeleton } from './BlogPostCard';
 
-// Match Components
-export { default as MatchSchedule } from './MatchSchedule';
-export { default as MatchSchedulePage } from './MatchSchedulePage';
-export { default as MatchRow } from './MatchRow';
-
 // UI Components
 export { default as DeleteConfirmationModal } from './DeleteConfirmationModal';
 export { default as DropdownMenu } from './DropdownMenu';

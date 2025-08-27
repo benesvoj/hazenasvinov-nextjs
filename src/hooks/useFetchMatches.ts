@@ -127,9 +127,9 @@ export function useFetchMatches(categorySlug: string) {
             ? `${match.away_team.club_category.club.name} ${match.away_team.team_suffix}`
             : 'Neznámý tým';
           
-          // Check if this is our club using the is_own_club field
-          const isOwnClub = match.home_team?.club_category?.club?.is_own_club === true || 
-                           match.away_team?.club_category?.club?.is_own_club === true;
+          // Check if each team belongs to our club individually
+          const homeTeamIsOwnClub = match.home_team?.club_category?.club?.is_own_club === true;
+          const awayTeamIsOwnClub = match.away_team?.club_category?.club?.is_own_club === true;
           
           return {
             ...match,
@@ -137,14 +137,14 @@ export function useFetchMatches(categorySlug: string) {
               id: match.home_team?.id,
               name: homeTeamName,
               short_name: match.home_team?.club_category?.club?.short_name,
-              is_own_club: isOwnClub,
+              is_own_club: homeTeamIsOwnClub,
               logo_url: match.home_team?.club_category?.club?.logo_url
             },
             away_team: {
               id: match.away_team?.id,
               name: awayTeamName,
               short_name: match.away_team?.club_category?.club?.short_name,
-              is_own_club: isOwnClub,
+              is_own_club: awayTeamIsOwnClub,
               logo_url: match.away_team?.club_category?.club?.logo_url
             }
           };

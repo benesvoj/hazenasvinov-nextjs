@@ -1,3 +1,5 @@
+import { Category } from "./category";
+
 type CategoryProps = {
 	id: string;
 	name: string;
@@ -181,72 +183,72 @@ export interface LineupValidation {
   warnings: string[];
 }
 
-export interface Match {
-  id: string;
-  category_id: string;
-  season_id: string;
-  date: string;
-  time: string;
-  home_team_id: string;
-  away_team_id: string;
-  home_team: { 
-    id: string;
-    name: string; 
-    logo_url?: string; 
-    is_own_club?: boolean; 
-    short_name?: string;
-    club_id?: string;
-    club_name?: string;
-    team_suffix?: string;
-    display_name?: string;
-  };
-  away_team: { 
-    id: string;
-    name: string; 
-    logo_url?: string; 
-    is_own_club?: boolean; 
-    short_name?: string;
-    club_id?: string;
-    club_name?: string;
-    team_suffix?: string;
-    display_name?: string;
-  };
-  venue: string;
-  competition: string;
-  is_home: boolean;
-  status: 'upcoming' | 'completed';
-  home_score?: number;
-  away_score?: number;
-  result?: 'win' | 'loss' | 'draw';
-  matchweek?: number;
-  match_number?: number;
-  category: { code: string; name: string; description?: string };
-  season: { name: string };
-  // Additional properties for transformed data
-  home_team_is_own_club?: boolean;
-  away_team_is_own_club?: boolean;
-  home_team_logo?: string;
-  away_team_logo?: string;
-  category_code?: string;
-}
+// export interface Match {
+//   id: string;
+//   category_id: string;
+//   season_id: string;
+//   date: string;
+//   time: string;
+//   home_team_id: string;
+//   away_team_id: string;
+//   home_team: { 
+//     id: string;
+//     name: string; 
+//     logo_url?: string; 
+//     is_own_club?: boolean; 
+//     short_name?: string;
+//     club_id?: string;
+//     club_name?: string;
+//     team_suffix?: string;
+//     display_name?: string;
+//   };
+//   away_team: { 
+//     id: string;
+//     name: string; 
+//     logo_url?: string; 
+//     is_own_club?: boolean; 
+//     short_name?: string;
+//     club_id?: string;
+//     club_name?: string;
+//     team_suffix?: string;
+//     display_name?: string;
+//   };
+//   venue: string;
+//   competition: string;
+//   is_home: boolean;
+//   status: 'upcoming' | 'completed';
+//   home_score?: number;
+//   away_score?: number;
+//   result?: 'win' | 'loss' | 'draw';
+//   matchweek?: number;
+//   match_number?: number;
+//   category: { code: string; name: string; description?: string };
+//   season: { name: string };
+//   // Additional properties for transformed data
+//   home_team_is_own_club?: boolean;
+//   away_team_is_own_club?: boolean;
+//   home_team_logo?: string;
+//   away_team_logo?: string;
+//   category_code?: string;
+// }
 
-export interface Category {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  age_group?: string;
-  gender?: string;
-  season_id?: string;
-  matchweek_count?: number;
-  competition_type?: 'league' | 'league_playoff' | 'tournament';
-  team_count?: number;
-  allow_team_duplicates?: boolean;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
+// export interface Category {
+//   id: string;
+//   code: string;
+//   name: string;
+//   description?: string;
+//   age_group?: string;
+//   gender?: string;
+//   season_id?: string;
+//   matchweek_count?: number;
+//   competition_type?: 'league' | 'league_playoff' | 'tournament';
+//   team_count?: number;
+//   allow_team_duplicates?: boolean;
+//   is_active: boolean;
+//   sort_order: number;
+//   created_at: string;
+//   updated_at: string;
+// }
 
 interface Team {
   id: string;

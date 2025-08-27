@@ -1,6 +1,6 @@
 'use client';
 
-import MatchSchedule from "@/components/MatchSchedule";
+import MatchSchedule from "@/app/(main)/components/MatchSchedule";
 import { CallTheActionSection, SponsorsSection, ClubHighlightSection, PostSection} from "./components";
 
 export default function Page() {
