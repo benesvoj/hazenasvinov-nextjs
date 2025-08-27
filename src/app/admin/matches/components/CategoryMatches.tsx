@@ -10,6 +10,7 @@ import {
   TrashIcon
 } from "@heroicons/react/24/outline";
 import { Match, Category } from "@/types/types";
+import { formatTime, formatDateString } from '@/helpers';
 
 interface CategoryMatchesProps {
   matches: Match[];
@@ -103,7 +104,7 @@ export default function CategoryMatches({
                 {/* Column Headers - Desktop only */}
                 <div className="hidden lg:grid grid-cols-11 gap-4 mb-3 px-2 items-center">
                   <div className="col-span-1 text-center text-sm font-medium text-gray-600">Číslo zápasu</div>
-                  <div className="col-span-2 text-center text-sm font-medium text-gray-600">Datum a čas</div>
+                  <div className="col-span-2 text-start text-sm font-medium text-gray-600">Datum a čas</div>
                   <div className="col-span-6 text-start text-sm font-medium text-gray-600">Místo</div>
                   <div className="col-span-2 text-center text-sm font-medium text-gray-600">Skóre</div>
                 </div>
@@ -139,12 +140,12 @@ export default function CategoryMatches({
 
                         {/* Date and Time - Second Column */}
                         <div className="col-span-2">
-                          <div className="text-center">
+                          <div className="text-start ">
                             <div className="text-sm text-gray-600 mb-1">
-                              {new Date(match.date).toLocaleDateString('cs-CZ')}
+                              {formatDateString(match.date)}
                             </div>
                             <div className="text-lg font-semibold text-gray-800">
-                              {match.time}
+                              {formatTime(match.time)}
                             </div>
                           </div>
                         </div>

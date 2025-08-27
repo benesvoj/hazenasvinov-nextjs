@@ -55,8 +55,6 @@ export default function MatchesAdminPage() {
   // Use the team display logic hook
   const { teamCounts, loading: teamCountsLoading, fetchTeamCounts } = useTeamDisplayLogic(selectedCategory);
 
-
-
   // Reset matchToDelete when confirmation modal closes
   const handleDeleteConfirmClose = () => {
     onDeleteConfirmClose();
