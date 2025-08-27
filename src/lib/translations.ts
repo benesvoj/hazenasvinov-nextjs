@@ -1,5 +1,3 @@
-import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
-
 export const translations = {
 	footer: {
 		copyright: `© 2025 TJ Sokol Svinov. Všechna práva vyhrazena.`,
@@ -279,5 +277,8 @@ export const translations = {
 		upcomingMatchesDescription: 'Sledujte nadcházející zápasy našeho klubu',
 		recentResults: 'Nedávno odehrané zápasy',
 		recentResultsDescription: 'Sledujte nedávno odehrané zápasy našeho klubu',
+	},
+	team: {
+		unknownTeam: 'Neznámý tým',
 	},
 } as const;

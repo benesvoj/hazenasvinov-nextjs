@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Match } from '@/types/types';
+import { Match } from '@/types';
+import { translations } from '@/lib/translations';
 
 export interface SeasonalMatches {
   autumn: Match[];
@@ -118,18 +119,30 @@ export function useFetchMatches(categorySlug: string) {
         
         // Transform matches to include team names and club information
         const transformedMatches = matchesData?.map((match: any) => {
-          // Create team names from club + suffix
-          const homeTeamName = match.home_team?.club_category?.club 
-            ? `${match.home_team.club_category.club.name} ${match.home_team.team_suffix}`
-            : 'Neznámý tým';
-          
-          const awayTeamName = match.away_team?.club_category?.club 
-            ? `${match.away_team.club_category.club.name} ${match.away_team.team_suffix}`
-            : 'Neznámý tým';
-          
           // Check if each team belongs to our club individually
           const homeTeamIsOwnClub = match.home_team?.club_category?.club?.is_own_club === true;
           const awayTeamIsOwnClub = match.away_team?.club_category?.club?.is_own_club === true;
+          
+          // Smart suffix logic: only show suffix if club has multiple teams in this category
+          const getTeamDisplayName = (team: any) => {
+            if (!team?.club_category?.club) return translations.team.unknownTeam;
+            
+            const clubName = team.club_category.club.name;
+            const teamSuffix = team.team_suffix || 'A';
+            
+            // Check if this club has multiple teams in this category
+            const clubId = team.club_category.club.id;
+            const teamCount = matchesData?.filter((m: any) => 
+              (m.home_team?.club_category?.club?.id === clubId || 
+               m.away_team?.club_category?.club?.id === clubId)
+            ).length || 0;
+            
+            // Only show suffix if club has multiple teams in this category
+            return teamCount > 1 ? `${clubName} ${teamSuffix}` : clubName;
+          };
+          
+          const homeTeamName = getTeamDisplayName(match.home_team);
+          const awayTeamName = getTeamDisplayName(match.away_team);
           
           return {
             ...match,

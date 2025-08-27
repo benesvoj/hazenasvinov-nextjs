@@ -23,7 +23,7 @@ const MatchRow: React.FC<MatchRowProps> = ({ match, compact = true }) => {
           <div
             className={`flex flex-col items-start ${
               compact
-                ? "min-w-[50px] lg:min-w-[60px]"
+                ? "min-w-[40px] lg:min-w-[40px]"
                 : "min-w-[100px] lg:min-w-[120px]"
             }`}
           >
@@ -135,8 +135,8 @@ const MatchRow: React.FC<MatchRowProps> = ({ match, compact = true }) => {
           <div
             className={`flex flex-col items-end ${
               compact
-                ? "min-w-[60px] lg:min-w-[80px]"
-                : "min-w-[80px] lg:min-w-[100px]"
+                ? "min-w-[40px] lg:min-w-[60px]"
+                : "min-w-[60px] lg:min-w-[80px]"
             }`}
           >
             {match.status === "completed" ? (

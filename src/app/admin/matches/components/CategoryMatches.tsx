@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Match, Category } from "@/types";
 import { formatTime, formatDateString } from "@/helpers";
+import { translations } from "@/lib/translations";
 
 interface CategoryMatchesProps {
   matches: Match[];
@@ -173,11 +174,11 @@ export default function CategoryMatches({
                             <div className="text-lg font-semibold text-gray-800 mb-2">
                               {match.home_team?.display_name ||
                                 match.home_team?.name ||
-                                "Neznámý tým"}{" "}
+                                translations.team.unknownTeam}{" "}
                               vs{" "}
                               {match.away_team?.display_name ||
                                 match.away_team?.name ||
-                                "Neznámý tým"}
+                                translations.team.unknownTeam}
                             </div>
                             <div className="flex items-start space-x-2 text-sm text-gray-600">
                               <MapPinIcon className="w-4 h-4 text-gray-400" />

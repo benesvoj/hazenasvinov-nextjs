@@ -1,29 +1,40 @@
-import {translations} from "@/lib/translations";
-import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/table";
-import {useFetchSeasons} from "@/hooks/useFetchSeasons";
+import { translations } from "@/lib/translations";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from "@heroui/table";
+import { useFetchSeasons } from "@/hooks/useFetchSeasons";
+import { formatDateString } from "@/helpers/formatDate";
 
 export const SeasonsTable = () => {
+  const { data, loading, error } = useFetchSeasons();
 
-	const {data, loading, error} = useFetchSeasons()
-
-	return(
-		<Table aria-label={translations.season.title}>
-			<TableHeader>
-				<TableColumn>Id</TableColumn>
-				<TableColumn>Name</TableColumn>
-				<TableColumn>Start Date</TableColumn>
-				<TableColumn>End Date</TableColumn>
-			</TableHeader>
-			<TableBody items={data}>
-				{(item) => (
-					<TableRow key={item.id}>
-						<TableCell>{item.id}</TableCell>
-						<TableCell>{item.name}</TableCell>
-						<TableCell>{new Date(item.valid_from).toLocaleDateString()}</TableCell>
-						<TableCell>{new Date(item.valid_to).toLocaleDateString()}</TableCell>
-					</TableRow>
-				)}
-			</TableBody>
-		</Table>
-	)
-}
+  return (
+    <>
+      {loading && <TableCell>Loading...</TableCell>}
+      {error && <TableCell>Error: {error.message}</TableCell>}
+      <Table aria-label={translations.season.title}>
+        <TableHeader>
+          <TableColumn>Id</TableColumn>
+          <TableColumn>Name</TableColumn>
+          <TableColumn>Start Date</TableColumn>
+          <TableColumn>End Date</TableColumn>
+        </TableHeader>
+        <TableBody items={data}>
+          {(item) => (
+            <TableRow key={item.id}>
+              <TableCell>{item.id}</TableCell>
+              <TableCell>{item.name}</TableCell>
+              <TableCell>{formatDateString(item.start_date)}</TableCell>
+              <TableCell>{formatDateString(item.end_date)}</TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </>
+  );
+};

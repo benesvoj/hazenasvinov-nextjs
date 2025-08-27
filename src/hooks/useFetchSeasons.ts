@@ -1,10 +1,10 @@
 import {useEffect, useState} from "react";
 import {Api} from "@/app/api/api";
-import {SeasonProps} from "@/types/types";
+import {Season} from "@/types";
 
 
 export function useFetchSeasons () {
-	const [data, setData] = useState<SeasonProps[]>([]);
+	const [data, setData] = useState<Season[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 
