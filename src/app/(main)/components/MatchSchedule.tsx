@@ -3,15 +3,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Tabs, Tab } from "@heroui/tabs";
 import { translations } from "@/lib/translations";
-import { useSeasons, useCategories, useFetchMatches } from "@/hooks";
-import { Standing } from "@/types";
+import { useSeasons, useCategories, useFetchMatches, useStandings } from "@/hooks";
 import CategoryStandingsTable from "@/app/(main)/components/CategoryStandingsTable";
 import CategoryMatchesAndResults from "@/app/(main)/components/CategoryMatchesAndResults";
 
 export default function MatchSchedule() {
   const [selectedCategory, setSelectedCategory] = useState<string>("men");
-  const [standings, setStandings] = useState<Standing[]>([]);
-  const [standingsLoading, setStandingsLoading] = useState(true);
 
   const { activeSeason, fetchActiveSeason } = useSeasons();
   const { categories, fetchCategories } = useCategories();
@@ -20,81 +17,11 @@ export default function MatchSchedule() {
     loading: matchesLoading,
     error: matchesError,
   } = useFetchMatches(selectedCategory);
+  
+  // Use the standings hook
+  const { standings, loading: standingsLoading, error: standingsError, fetchStandings } = useStandings();
 
-  // Fetch standings for selected category in active season
-  const fetchStandings = async () => {
-    try {
-      setStandingsLoading(true);
 
-      // Check if we have active season and categories
-      if (!activeSeason || categories.length === 0) {
-        setStandings([]);
-        return;
-      }
-
-      // Get the category ID for the selected category code
-      const selectedCategoryData = categories.find(
-        (cat) => cat.code === selectedCategory
-      );
-      if (!selectedCategoryData) {
-        setStandings([]);
-        return;
-      }
-
-      // Create a simple Supabase client for standings
-      const { createClient } = await import("@/utils/supabase/client");
-      const supabase = createClient();
-
-      // Fetch standings with team names for active season
-
-      const { data: standingsData, error: standingsError } = await supabase
-        .from("standings")
-        .select(
-          `
-          *,
-          team:team_id(
-            id,
-            team_suffix,
-            club_category:club_categories(
-              club:clubs(id, name, short_name, logo_url)
-            )
-          )
-        `
-        )
-        .eq("category_id", selectedCategoryData.id)
-        .eq("season_id", activeSeason.id)
-        .order("position", { ascending: true });
-
-      if (standingsError) throw standingsError;
-
-      // Transform standings data to flatten team names and logos
-      const transformedStandings =
-        (standingsData as any[])?.map((standing) => {
-          const team = standing.team;
-
-          // Create team name from club + suffix
-          const teamName = team?.club_category?.club
-            ? `${team.club_category.club.name} ${team.team_suffix}`
-            : "Neznámý tým";
-
-          // Check if this is our club using the is_own_club field
-          const isOwnClub = team?.club_category?.club?.is_own_club === true;
-
-          return {
-            ...standing,
-            team: teamName,
-            team_logo: team?.club_category?.club?.logo_url || "",
-            is_own_club: isOwnClub || false,
-          };
-        }) || [];
-
-      setStandings(transformedStandings);
-    } catch (error) {
-      console.error("Error fetching standings:", error);
-    } finally {
-      setStandingsLoading(false);
-    }
-  };
 
   // Fetch active season and categories on mount
   useEffect(() => {
@@ -105,9 +32,17 @@ export default function MatchSchedule() {
   // Fetch standings when category or active season changes
   useEffect(() => {
     if (categories.length > 0 && activeSeason) {
-      fetchStandings();
+      // Get the category ID for the selected category code
+      const selectedCategoryData = categories.find(
+        (cat) => cat.code === selectedCategory
+      );
+      if (selectedCategoryData) {
+        fetchStandings(selectedCategoryData.id, activeSeason.id);
+      }
     }
-  }, [selectedCategory, activeSeason, categories.length]);
+  }, [selectedCategory, activeSeason, categories, fetchStandings]);
+
+
 
   // Combine autumn and spring matches and transform them for display
   const allMatches = useMemo(() => {
@@ -188,6 +123,13 @@ export default function MatchSchedule() {
             <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
               <p className="text-sm text-red-700 dark:text-red-300">
                 Chyba při načítání zápasů: {matchesError.message}
+              </p>
+            </div>
+          )}
+          {standingsError && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+              <p className="text-sm text-red-700 dark:text-red-300">
+                Chyba při načítání tabulky: {standingsError}
               </p>
             </div>
           )}

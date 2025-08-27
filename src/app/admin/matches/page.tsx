@@ -24,16 +24,16 @@ import { Team } from "@/types/types";
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
 import { getMatchesWithTeamsQuery, transformMatchData } from '@/utils';
 import { useTeamDisplayLogic } from '@/hooks/useTeamDisplayLogic';
-import { Match, Category, Standing } from "@/types";
-import { useSeasons } from "@/hooks/useSeasons";
+import { Match, Category } from "@/types";
+import { useSeasons, useFilteredTeams, useStandings } from "@/hooks";
 
 export default function MatchesAdminPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [filteredTeams, setFilteredTeams] = useState<Team[]>([]);
+
   const [categories, setCategories] = useState<Category[]>([]);
 
-  const [standings, setStandings] = useState<Standing[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -126,76 +126,7 @@ export default function MatchesAdminPage() {
 
   const supabase = createClient();
 
-    // Fetch teams assigned to selected category and season
-  const fetchFilteredTeams = useCallback(async (categoryId: string, seasonId: string) => {
-    if (!categoryId || !seasonId) {
-      setFilteredTeams([]);
-      return;
-    }
-
-    try {
-      console.log('🔍 Fetching teams for category:', categoryId, 'season:', seasonId);
-      
-      const { data, error } = await supabase
-        .from('club_categories')
-        .select(`
-          club_id,
-          club:clubs(
-            id,
-            name,
-            short_name,
-            logo_url,
-            venue
-          ),
-          club_category_teams(
-            id,
-            team_suffix,
-            is_active
-          )
-        `)
-        .eq('category_id', categoryId)
-        .eq('season_id', seasonId)
-        .eq('is_active', true);
-
-      if (error) {
-        console.error('❌ Error fetching club categories:', error);
-        setFilteredTeams([]);
-        return;
-      }
-
-      console.log('✅ Club categories data:', data);
-      
-      const teamsData = data?.flatMap((item: any) => {
-        // Check if this club has multiple teams in this category
-        const teamCount = item.club_category_teams?.length || 0;
-        
-        return item.club_category_teams?.map((ct: any) => {
-          // Only show suffix if club has multiple teams in this category
-          const shouldShowSuffix = teamCount > 1;
-          const displayName = shouldShowSuffix 
-            ? `${item.club.name} ${ct.team_suffix}`
-            : item.club.name;
-          
-          return {
-            id: ct.id,
-            name: displayName,
-            club_id: item.club.id,
-            club_name: item.club.name,
-            team_suffix: ct.team_suffix,
-            display_name: displayName,
-            is_active: ct.is_active,
-            venue: item.club.venue
-          };
-        }) || [];
-      }) || [];
-
-      console.log('🔄 Transformed teams data:', teamsData);
-      setFilteredTeams(teamsData);
-    } catch (error) {
-      console.error('❌ Error fetching filtered teams:', error);
-      setFilteredTeams([]);
-    }
-  }, [supabase]);
+  
 
   // Fetch members for lineup management
   const fetchMembers = useCallback(async () => {
@@ -261,6 +192,12 @@ export default function MatchesAdminPage() {
   const { sortedSeasons, activeSeason, loading: seasonsLoading, error: seasonsError, fetchSeasonsWithActive } = useSeasons();
   const [selectedSeason, setSelectedSeason] = useState<string>("");
 
+  // Use the filtered teams hook
+  const { filteredTeams, loading: teamsLoading, error: teamsError, fetchFilteredTeams, clearTeams } = useFilteredTeams();
+
+  // Use the standings hook
+  const { standings, loading: standingsLoading, error: standingsError, fetchStandings, clearStandings } = useStandings();
+
   // Set active season as default when seasons are loaded
   useEffect(() => {
     if (sortedSeasons.length > 0 && !selectedSeason && activeSeason) {
@@ -311,88 +248,7 @@ export default function MatchesAdminPage() {
 
 
   // TODO: extract to separate file
-  // Fetch standings
-  const fetchStandings = useCallback(async () => {
-    try {
-      console.log('🔍 Fetching standings...', {
-        selectedCategory,
-        selectedSeason
-      });
 
-      let query = supabase
-        .from('standings')
-        .select(`
-          *,
-          team:club_category_teams(
-            id,
-            team_suffix,
-            club_category:club_categories(
-              club:clubs(id, name, short_name, logo_url)
-            )
-          )
-        `)
-        .order('position');
-
-      if (selectedCategory) {
-        query = query.eq('category_id', selectedCategory);
-      }
-      if (selectedSeason) {
-        query = query.eq('season_id', selectedSeason);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('❌ Error fetching standings:', error);
-        throw error;
-      }
-
-      // Enhance standings with club information
-      const enhancedStandings = (data || []).map((standing: any) => {
-        const team = standing.team;
-        
-        return {
-          ...standing,
-          team: team ? {
-            ...team,
-            team_suffix: team.team_suffix || 'A',
-            club_name: team.club_category?.club?.name || 'Neznámý klub',
-            club_id: team.club_category?.club?.id || null
-          } : null,
-          // Add club information for backward compatibility
-          club: team?.club_category?.club ? {
-            id: team.club_category.club.id,
-            name: team.club_category.club.name,
-            short_name: team.club_category.club.short_name,
-            logo_url: team.club_category.club.logo_url
-          } : null
-        };
-      });
-
-      console.log('🔍 Standings fetched:', {
-        standingsCount: enhancedStandings.length,
-        standings: enhancedStandings,
-        rawData: data
-      });
-      
-      // Debug: Check if standings have team data
-      enhancedStandings.forEach((standing: any, index: number) => {
-        console.log(`🔍 Standing ${index}:`, {
-          id: standing.id,
-          team_id: standing.team_id,
-          team: standing.team,
-          club: standing.club,
-          category_id: standing.category_id,
-          season_id: standing.season_id
-        });
-      });
-
-      setStandings(enhancedStandings);
-    } catch (error) {
-      setError('Chyba při načítání tabulky');
-      console.error('Error fetching standings:', error);
-    }
-  }, [supabase, selectedCategory, selectedSeason]);
 
   // Update filtered teams when category or season changes
   useEffect(() => {
@@ -400,7 +256,7 @@ export default function MatchesAdminPage() {
     if (selectedCategory && selectedSeason) {
       fetchFilteredTeams(selectedCategory, selectedSeason);
     } else {
-      setFilteredTeams([]);
+      clearTeams();
     }
   }, [selectedCategory, selectedSeason, fetchFilteredTeams]);
 
@@ -421,9 +277,11 @@ export default function MatchesAdminPage() {
 
   // Fetch matches and standings when filters change
   useEffect(() => {
-    fetchMatches();
-    fetchStandings();
-  }, [fetchMatches, fetchStandings]);
+    if (selectedCategory && selectedSeason) {
+      fetchMatches();
+      fetchStandings(selectedCategory, selectedSeason);
+    }
+  }, [fetchMatches, fetchStandings, selectedCategory, selectedSeason]);
 
 
 
@@ -590,7 +448,7 @@ export default function MatchesAdminPage() {
       if (upsertError) throw upsertError;
 
       // Refresh standings
-      fetchStandings();
+      fetchStandings(selectedCategory, selectedSeason);
       setError('');
     } catch (error) {
       setError('Chyba při výpočtu tabulky');
@@ -808,7 +666,7 @@ export default function MatchesAdminPage() {
       });
 
       // Refresh standings
-      await fetchStandings();
+              await fetchStandings(selectedCategory, selectedSeason);
       
       // Verify the standings were actually created
       const { data: verifyStandings, error: verifyError } = await supabase
@@ -832,217 +690,6 @@ export default function MatchesAdminPage() {
       setError(`Chyba při generování počáteční tabulky: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
     }
   };
-
-  // Check and fix standings data integrity
-  const checkStandingsIntegrity = useCallback(async () => {
-    try {
-      console.log('🔍 Checking standings data integrity...');
-      
-      const { data: standingsData, error: standingsError } = await supabase
-        .from('standings')
-        .select('*')
-        .eq('category_id', selectedCategory)
-        .eq('season_id', selectedSeason);
-
-      if (standingsError) throw standingsError;
-
-      if (!standingsData || standingsData.length === 0) {
-        console.log('ℹ️ No standings found for this category/season');
-        return;
-      }
-
-      console.log('🔍 Found standings:', standingsData.length);
-      
-      // Check if standings have valid team relationships
-      const { data: validTeams, error: teamsError } = await supabase
-        .from('club_category_teams')
-        .select('id')
-        .in('id', standingsData.map((s: any) => s.team_id).filter(Boolean));
-
-      if (teamsError) throw teamsError;
-
-      const validTeamIds = new Set(validTeams?.map((t: any) => t.id) || []);
-      const invalidStandings = standingsData.filter((s: any) => !validTeamIds.has(s.team_id));
-
-      if (invalidStandings.length > 0) {
-        console.log('⚠️ Found invalid standings:', invalidStandings.length);
-        console.log('⚠️ Invalid team IDs:', invalidStandings.map((s: any) => s.team_id));
-        
-        // Delete invalid standings
-        const { error: deleteError } = await supabase
-          .from('standings')
-          .delete()
-          .in('id', invalidStandings.map((s: any) => s.id));
-        
-        if (deleteError) {
-          console.error('❌ Error deleting invalid standings:', deleteError);
-        } else {
-          console.log('✅ Deleted invalid standings, regenerating...');
-          // Regenerate standings
-          await generateInitialStandings();
-        }
-      } else {
-        console.log('✅ All standings have valid team relationships');
-      }
-    } catch (error) {
-      console.error('❌ Error checking standings integrity:', error);
-    }
-  }, [supabase, selectedCategory, selectedSeason, generateInitialStandings]);
-
-  // Check and fix matches data integrity
-  const checkMatchesIntegrity = useCallback(async () => {
-    try {
-      console.log('🔍 Checking matches data integrity...');
-      
-      if (!selectedCategory || !selectedSeason) {
-        console.log('⚠️ No category or season selected');
-        return;
-      }
-
-      // Check if filteredTeams is properly loaded
-      console.log('🔍 Current filteredTeams state:', {
-        count: filteredTeams.length,
-        teams: filteredTeams.map(t => ({ id: t.id, name: t.name, club_id: t.club_id }))
-      });
-
-      // Check if matches have valid team references
-      const categoryMatches = matches.filter(m => m.category_id === selectedCategory);
-      console.log('🔍 Matches for category:', {
-        categoryId: selectedCategory,
-        matchCount: categoryMatches.length,
-        matches: categoryMatches.map(m => ({
-          id: m.id,
-          home_team_id: m.home_team_id,
-          away_team_id: m.away_team_id,
-          home_team_name: m.home_team?.display_name || 'N/A',
-          away_team_name: m.away_team?.display_name || 'N/A'
-        }))
-      });
-
-      // Check if team IDs in matches exist in filteredTeams
-      const validTeamIds = new Set(filteredTeams.map(t => t.id));
-      const invalidMatches = categoryMatches.filter(m => 
-        !validTeamIds.has(m.home_team_id) || !validTeamIds.has(m.away_team_id)
-      );
-
-      if (invalidMatches.length > 0) {
-        console.log('⚠️ Found matches with invalid team references:', invalidMatches.length);
-        console.log('⚠️ Invalid matches:', invalidMatches);
-        
-        // Check if these are old team IDs that need migration
-        console.log('🔍 Checking if these are old team IDs that need migration...');
-        
-        // Get all old team IDs from the matches
-        const oldTeamIds = new Set([
-          ...invalidMatches.map(m => m.home_team_id),
-          ...invalidMatches.map(m => m.away_team_id)
-        ].filter(Boolean));
-        
-        console.log('🔍 Old team IDs found:', Array.from(oldTeamIds));
-        
-        // Check if these IDs exist in the old teams table
-        const { data: oldTeams, error: oldTeamsError } = await supabase
-          .from('teams')
-          .select('id, name')
-          .in('id', Array.from(oldTeamIds));
-        
-        if (oldTeamsError) {
-          console.error('❌ Error checking old teams:', oldTeamsError);
-        } else if (oldTeams && oldTeams.length > 0) {
-          console.log('✅ Found old teams that need migration:', oldTeams);
-          
-          // This confirms we have old team IDs that need to be migrated
-          console.log('⚠️ Database inconsistency detected: matches still reference old team IDs');
-          console.log('⚠️ You need to run the team ID migration script to fix this');
-          
-          // Show user-friendly error
-          setError('Nalezena nekonzistence v databázi: zápasy stále odkazují na staré ID týmů. Spusťte skript pro migraci týmů.');
-        } else {
-          console.log('ℹ️ No old teams found, these might be completely invalid IDs');
-        }
-        
-        // Force refresh of filtered teams
-        console.log('🔄 Forcing refresh of filtered teams...');
-        await fetchFilteredTeams(selectedCategory, selectedSeason);
-        
-        // Also refresh matches
-        console.log('🔄 Refreshing matches...');
-        await fetchMatches();
-      } else {
-        console.log('✅ All matches have valid team references');
-      }
-
-      // Check if filteredTeams is now properly loaded
-      console.log('🔍 After integrity check - filteredTeams:', {
-        count: filteredTeams.length,
-        teams: filteredTeams.map(t => ({ id: t.id, name: t.name, club_id: t.club_id }))
-      });
-
-    } catch (error) {
-      console.error('❌ Error checking matches integrity:', error);
-    }
-  }, [supabase, selectedCategory, selectedSeason, matches, filteredTeams, fetchFilteredTeams, fetchMatches]);
-
-  // Comprehensive database migration check
-  const checkDatabaseMigration = useCallback(async () => {
-    try {
-      console.log('🔍 Checking database migration status...');
-      
-      // Check if old teams table still has data
-      const { data: oldTeams, error: oldTeamsError } = await supabase
-        .from('teams')
-        .select('id, name')
-        .limit(10);
-      
-      if (oldTeamsError) {
-        console.error('❌ Error checking old teams table:', oldTeamsError);
-      } else {
-        console.log('🔍 Old teams table status:', {
-          hasData: oldTeams && oldTeams.length > 0,
-          count: oldTeams?.length || 0,
-          sample: oldTeams?.slice(0, 3) || []
-        });
-      }
-
-      // Check if new club_category_teams table has data
-      const { data: newTeams, error: newTeamsError } = await supabase
-        .from('club_category_teams')
-        .select('id, team_suffix, club_category:club_categories(club:clubs(name))')
-        .limit(10);
-      
-      if (newTeamsError) {
-        console.error('❌ Error checking new teams table:', newTeamsError);
-      } else {
-        console.log('🔍 New teams table status:', {
-          hasData: newTeams && newTeams.length > 0,
-          count: newTeams?.length || 0,
-          sample: newTeams?.slice(0, 3) || []
-        });
-      }
-
-      // Check matches table for old team references
-      const { data: matchesWithOldTeams, error: matchesError } = await supabase
-        .from('matches')
-        .select('id, home_team_id, away_team_id, category:categories(name)')
-        .limit(20);
-      
-      if (matchesError) {
-        console.error('❌ Error checking matches:', matchesError);
-      } else {
-        console.log('🔍 Matches table status:', {
-          count: matchesWithOldTeams?.length || 0,
-          sample: matchesWithOldTeams?.slice(0, 5) || []
-        });
-      }
-
-      // Check foreign key constraints
-      console.log('🔍 Foreign key constraints should reference club_category_teams.id');
-      console.log('🔍 If matches still have old team IDs, migration is incomplete');
-      
-    } catch (error) {
-      console.error('❌ Error checking database migration:', error);
-    }
-  }, [supabase]);
 
   // Check if selected season is closed
   const isSeasonClosed = () => {
@@ -1461,7 +1108,7 @@ export default function MatchesAdminPage() {
       if (result.success > 0) {
         // Refresh data
         await fetchMatches();
-        await fetchStandings();
+        await fetchStandings(selectedCategory, selectedSeason);
         setError('');
         
         // Show success message
@@ -1634,26 +1281,6 @@ export default function MatchesAdminPage() {
                 </Button>
                 <Button 
                   color="secondary" 
-                  startContent={<ArrowPathIcon className="w-4 h-4" />}
-                  onPress={checkMatchesIntegrity}
-                  isDisabled={isSeasonClosed()}
-                  size="sm"
-                  aria-label="Zkontrolovat integritu zápasů"
-                >
-                  Zkontrolovat integritu zápasů
-                </Button>
-                <Button 
-                  color="warning" 
-                  startContent={<ArrowPathIcon className="w-4 h-4" />}
-                  onPress={checkDatabaseMigration}
-                  isDisabled={isSeasonClosed()}
-                  size="sm"
-                  aria-label="Zkontrolovat migraci databáze"
-                >
-                  Zkontrolovat migraci DB
-                </Button>
-                <Button 
-                  color="secondary" 
                   startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
                   onPress={onExcelImportOpen}
                   size="sm"
@@ -1724,7 +1351,6 @@ export default function MatchesAdminPage() {
                           categoryName={category.name}
                           isSeasonClosed={isSeasonClosed()}
                           onGenerateStandings={handleStandingsAction}
-                          onCheckIntegrity={checkStandingsIntegrity}
                           hasStandings={standings.filter(standing => standing.category_id === category.id).length > 0}
                         />
                       </div>

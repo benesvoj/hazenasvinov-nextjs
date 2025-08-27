@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Match } from '@/types';
 import { translations } from '@/lib/translations';
+import { getTeamDisplayNameSafe } from '@/utils/teamDisplay';
 
 export interface SeasonalMatches {
   autumn: Match[];
@@ -137,8 +138,8 @@ export function useFetchMatches(categorySlug: string) {
                m.away_team?.club_category?.club?.id === clubId)
             ).length || 0;
             
-            // Only show suffix if club has multiple teams in this category
-            return teamCount > 1 ? `${clubName} ${teamSuffix}` : clubName;
+            // Use the utility function for consistent logic
+            return getTeamDisplayNameSafe(clubName, teamSuffix, teamCount, translations.team.unknownTeam);
           };
           
           const homeTeamName = getTeamDisplayName(match.home_team);

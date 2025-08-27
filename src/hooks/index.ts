@@ -16,3 +16,5 @@ export * from './useVisiblePages';
 export * from './useTeamDisplayLogic';
 export * from './useSeasons';
 export * from './useCategories';
+export * from './useFilteredTeams';
+export * from './useStandings';

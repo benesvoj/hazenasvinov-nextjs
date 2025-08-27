@@ -5,7 +5,8 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Match, Team } from "@/types/types";
+import { Match } from "@/types/types";
+import { FilteredTeam } from "@/hooks/useFilteredTeams";
 
 interface EditMatchModalProps {
   isOpen: boolean;
@@ -26,7 +27,7 @@ interface EditMatchModalProps {
   };
   onEditDataChange: (data: any) => void;
   onUpdateMatch: () => void;
-  teams: Team[];
+  teams: FilteredTeam[];
   getMatchweekOptions: (categoryId?: string) => Array<{ value: string; label: string }>;
   isSeasonClosed: boolean;
 }

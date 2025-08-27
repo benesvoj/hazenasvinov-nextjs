@@ -1,34 +1,12 @@
 import { Card, CardHeader, CardBody } from '@heroui/react';
 import { TrophyIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { EnhancedStanding } from "@/hooks/useStandings";
+import { getTeamDisplayNameSafe, createClubTeamCountsMap } from "@/utils";
 
-// Helper function to get short name for clubs
-function getShortName(fullName: string): string {
-    // Common patterns for Czech club names
-    if (fullName.includes('TJ Sokol')) {
-      return fullName.replace('TJ Sokol ', '');
-    }
-    if (fullName.includes('TJ ')) {
-      return fullName.replace('TJ ', '');
-    }
-    if (fullName.includes('SK ')) {
-      return fullName.replace('SK ', '');
-    }
-    if (fullName.includes('HC ')) {
-      return fullName.replace('HC ', '');
-    }
-    if (fullName.includes('FK ')) {
-      return fullName.replace('FK ', '');
-    }
-    // If no pattern matches, return first two words or full name if short
-    const words = fullName.split(' ');
-    if (words.length > 2) {
-      return words.slice(0, 2).join(' ');
-    }
-    return fullName;
-  }
-
-export default function CategoryStandingsTable({standings, standingsLoading}: {standings: any[], standingsLoading: boolean}) {
+export default function CategoryStandingsTable({standings, standingsLoading}: {standings: EnhancedStanding[], standingsLoading: boolean}) {
+  // Smart suffix logic: determine team counts per club in this category
+  const clubTeamCounts = createClubTeamCountsMap(standings);
     return (
         <div>
             <Card>
@@ -59,45 +37,88 @@ export default function CategoryStandingsTable({standings, standingsLoading}: {s
                         </tr>
                       </thead>
                       <tbody>
-                        {standings.map((team, index) => (
-                          <tr key={index} className={`border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                            team.is_own_club 
-                              ? 'bg-blue-50 dark:bg-blue-900/20' 
-                              : ''
-                          }`}>
-                            <td className="py-2 px-1 lg:px-2 font-semibold text-xs lg:text-sm">{team.position}.</td>
-                            <td className="py-2 px-1 lg:px-2 font-medium">
-                              <div className="flex items-center gap-1 lg:gap-2">
-                                {/* Logo - Hidden on mobile */}
-                                {team.team_logo && (
-                                  <div className="hidden lg:block">
-                                    <Image 
-                                      src={team.team_logo} 
-                                      alt={`${team.team} logo`}
-                                      width={24}
-                                      height={24}
-                                      className="w-6 h-6 object-contain"
-                                      onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
-                                      }}
-                                    />
-                                  </div>
-                                )}
-                                <span className={`text-xs lg:text-base ${team.is_own_club ? 'font-bold text-blue-700 dark:text-blue-300' : ''}`}>
-                                  {/* Mobile: Short name, Desktop: Full name */}
-                                  <span className="lg:hidden">{getShortName(team.team)}</span>
-                                  <span className="hidden lg:inline">{team.team}</span>
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-2 px-1 lg:px-2 text-center text-xs lg:text-sm">{team.matches}</td>
-                            <td className="py-2 px-1 lg:px-2 text-center text-green-600 text-xs lg:text-sm">{team.wins}</td>
-                            <td className="py-2 px-1 lg:px-2 text-center text-yellow-600 text-xs lg:text-sm">{team.draws}</td>
-                            <td className="py-2 px-1 lg:px-2 text-center text-red-600 text-xs lg:text-sm">{team.losses}</td>
-                            <td className="py-2 px-1 lg:px-2 text-center text-xs lg:text-sm">{team.goals_for}:{team.goals_against}</td>
-                            <td className={`py-2 px-1 lg:px-2 text-center font-bold text-xs lg:text-sm ${team.is_own_club ? 'text-blue-700 dark:text-blue-300' : ''}`}>{team.points}</td>
-                          </tr>
-                        ))}
+                        {standings.map((standing, index) => {
+                          // Use the utility function for consistent team name logic
+                          const teamName = (() => {
+                            if (standing.club) {
+                              // Smart suffix logic: only show suffix if club has multiple teams in this category
+                              const teamCount = clubTeamCounts.get(standing.club.id) || 0;
+                              return getTeamDisplayNameSafe(
+                                standing.club.name,
+                                standing.team?.team_suffix || "A",
+                                teamCount,
+                                "N/A"
+                              );
+                            } else if (standing.team?.name) {
+                              // Fallback to team name if club data is missing
+                              return standing.team.name;
+                            } else {
+                              return "N/A";
+                            }
+                          })()
+
+                          const teamNameShort = (() => {
+                            if (standing.club) {
+                              // Smart suffix logic: only show suffix if club has multiple teams in this category
+                              const teamCount = clubTeamCounts.get(standing.club.id) || 0;
+                              return getTeamDisplayNameSafe(
+                                standing.club.short_name,
+                                standing.team?.team_suffix || "A",
+                                teamCount,
+                                "N/A"
+                              );
+                            } else if (standing.team?.name) {
+                              // Fallback to team name if club data is missing
+                              return standing.team.name;
+                            } else {
+                              return "N/A";
+                            }
+                          })()
+
+                          // Check if this is our club - for now, we'll set it to false since the data structure may not include this field
+                          const isOwnClub = false;
+                          const teamLogo = standing.club?.logo_url || "";
+
+                          return (
+                            <tr key={index} className={`border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                              isOwnClub 
+                                ? 'bg-blue-50 dark:bg-blue-900/20' 
+                                : ''
+                            }`}>
+                              <td className="py-2 px-1 lg:px-2 font-semibold text-xs lg:text-sm">{standing.position}.</td>
+                              <td className="py-2 px-1 lg:px-2 font-medium">
+                                <div className="flex items-center gap-1 lg:gap-2">
+                                  {/* Logo - Hidden on mobile */}
+                                  {teamLogo && (
+                                    <div className="hidden lg:block">
+                                      <Image 
+                                        src={teamLogo} 
+                                        alt={`${teamName} logo`}
+                                        width={24}
+                                        height={24}
+                                        className="w-6 h-6 object-contain"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+                                  <span className={`text-xs lg:text-base ${isOwnClub ? 'font-bold text-blue-700 dark:text-blue-300' : ''}`}>
+                                    {/* Mobile: Short name, Desktop: Full name */}
+                                    <span className="lg:hidden">{teamNameShort}</span>
+                                    <span className="hidden lg:inline">{teamName}</span>
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-2 px-1 lg:px-2 text-center text-xs lg:text-sm">{standing.matches}</td>
+                              <td className="py-2 px-1 lg:px-2 text-center text-green-600 text-xs lg:text-sm">{standing.wins}</td>
+                              <td className="py-2 px-1 lg:px-2 text-center text-yellow-600 text-xs lg:text-sm">{standing.draws}</td>
+                              <td className="py-2 px-1 lg:px-2 text-center text-red-600 text-xs lg:text-sm">{standing.losses}</td>
+                              <td className="py-2 px-1 lg:px-2 text-center text-xs lg:text-sm">{standing.goals_for}:{standing.goals_against}</td>
+                              <td className={`py-2 px-1 lg:px-2 text-center font-bold text-xs lg:text-sm ${isOwnClub ? 'text-blue-700 dark:text-blue-300' : ''}`}>{standing.points}</td>
+                            </tr>
+                          );
+                        })}
                         {standings.length === 0 && (
                           <tr>
                             <td colSpan={8} className="text-center py-8 text-gray-500">

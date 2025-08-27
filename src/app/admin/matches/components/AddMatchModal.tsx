@@ -3,7 +3,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@herou
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
-import { Team } from "@/types/types";
+import { FilteredTeam } from "@/hooks/useFilteredTeams";
 import { translations } from "@/lib/translations";
 
 interface AddMatchModalProps {
@@ -22,7 +22,7 @@ interface AddMatchModalProps {
     match_number?: string;
   };
   setFormData: (data: any) => void;
-  filteredTeams: Team[];
+  filteredTeams: FilteredTeam[];
   selectedCategory: string;
   selectedSeason: string;
   getMatchweekOptions: (categoryId: string) => Array<{ value: string; label: string }>;
