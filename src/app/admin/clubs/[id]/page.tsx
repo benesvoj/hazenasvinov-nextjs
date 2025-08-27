@@ -1,29 +1,25 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { Tabs, Tab } from "@heroui/tabs";
 import { 
   PencilIcon, 
-  TrashIcon,
-  BuildingOfficeIcon,
   UserGroupIcon,
   TrophyIcon,
-  PlusIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
-import { Club, Team, Category, Season } from "@/types/types";
-import { useParams, useRouter, usePathname } from "next/navigation";
+import { Club, Team } from "@/types/types";
+import { Category, Season } from "@/types";
+import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation } from './components';
 import { Image } from "@heroui/image";
 
 export default function ClubDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const pathname = usePathname();
   const clubId = params.id as string;
   

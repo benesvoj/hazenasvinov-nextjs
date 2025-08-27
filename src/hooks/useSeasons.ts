@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Season } from '@/types';
 
@@ -7,6 +7,13 @@ export function useSeasons() {
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Sort seasons from newest to oldest
+  const sortedSeasons = useMemo(() => {
+    return seasons?.sort((a, b) => {
+      return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+    }) || [];
+  }, [seasons]);
 
   // Fetch active season only
   const fetchActiveSeason = useCallback(async () => {
@@ -108,6 +115,7 @@ export function useSeasons() {
   return {
     activeSeason,
     seasons,
+    sortedSeasons, // New: seasons sorted from newest to oldest
     loading,
     error,
     fetchActiveSeason,

@@ -171,6 +171,7 @@ export const translations = {
 	},
 	loading: 'Načítání...',
 	matches: {
+		title: 'Zápasy',
 		matchNumber: 'Číslo zápasu',
 		matchNumberPlaceholder: 'např. 1, 2, Finále, Semifinále',
 		matchNumberError: 'Zadejte číslo zápasu',

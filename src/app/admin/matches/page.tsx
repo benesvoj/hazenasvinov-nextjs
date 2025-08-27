@@ -19,23 +19,25 @@ import { AddMatchModal, AddResultModal, EditMatchModal, BulkUpdateMatchweekModal
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import MobileActionsMenu from '@/components/MobileActionsMenu';
 import { useExcelImport } from '@/hooks/useExcelImport';
-import { Team, Season, Standing } from "@/types/types";
+// TODO: use proper types
+import { Team } from "@/types/types";
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
 import { getMatchesWithTeamsQuery, transformMatchData } from '@/utils';
 import { useTeamDisplayLogic } from '@/hooks/useTeamDisplayLogic';
-import { Match, Category } from "@/types";
+import { Match, Category, Standing } from "@/types";
+import { useSeasons } from "@/hooks/useSeasons";
 
 export default function MatchesAdminPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [filteredTeams, setFilteredTeams] = useState<Team[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [seasons, setSeasons] = useState<Season[]>([]);
+
   const [standings, setStandings] = useState<Standing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedSeason, setSelectedSeason] = useState<string>("");
+
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [members, setMembers] = useState<any[]>([]);
   
@@ -255,27 +257,16 @@ export default function MatchesAdminPage() {
     }
   }, [supabase, selectedCategory]);
 
-  // Fetch seasons
-  const fetchSeasons = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('seasons')
-        .select('*')
-        .order('name', { ascending: false });
+  // Use the enhanced seasons hook
+  const { sortedSeasons, activeSeason, loading: seasonsLoading, error: seasonsError, fetchSeasonsWithActive } = useSeasons();
+  const [selectedSeason, setSelectedSeason] = useState<string>("");
 
-      if (error) throw error;
-      setSeasons(data || []);
-      
-      // Set active season as default
-      const activeSeason = data?.find((season: any) => season.is_active);
-      if (activeSeason) {
-        setSelectedSeason(activeSeason.id);
-      }
-    } catch (error) {
-      setError('Chyba při načítání sezón');
-      console.error('Error fetching seasons:', error);
+  // Set active season as default when seasons are loaded
+  useEffect(() => {
+    if (sortedSeasons.length > 0 && !selectedSeason && activeSeason) {
+      setSelectedSeason(activeSeason.id);
     }
-  }, [supabase]);
+  }, [sortedSeasons, selectedSeason, activeSeason]);
 
   // Fetch matches
   const fetchMatches = useCallback(async () => {
@@ -416,10 +407,10 @@ export default function MatchesAdminPage() {
   // Initial data fetch
   useEffect(() => {
     fetchCategories();
-    fetchSeasons();
+    fetchSeasonsWithActive();
     fetchTeams();
     fetchMembers();
-  }, [fetchCategories, fetchSeasons, fetchTeams, fetchMembers]);
+  }, [fetchCategories, fetchSeasonsWithActive, fetchTeams, fetchMembers]);
 
   // Fetch team counts when category changes
   useEffect(() => {
@@ -1055,7 +1046,7 @@ export default function MatchesAdminPage() {
 
   // Check if selected season is closed
   const isSeasonClosed = () => {
-    const season = seasons.find(s => s.id === selectedSeason);
+          const season = sortedSeasons.find(s => s.id === selectedSeason);
     return season?.is_closed || false;
   };
 
@@ -1516,13 +1507,13 @@ export default function MatchesAdminPage() {
             }}
             className="w-full"
           >
-            {seasons.map((season) => (
+            {sortedSeasons.map((season) => (
               <SelectItem key={season.id} textValue={season.name}>
                 {season.name} {season.is_closed ? `(${translations.season.closed})` : ''}
               </SelectItem>
             ))}
           </Select>
-          {seasons.length === 0 && (
+          {sortedSeasons.length === 0 && (
             <p className="text-sm text-red-600 mt-1">
               {translations.season.noSeasons}
             </p>
@@ -1539,7 +1530,7 @@ export default function MatchesAdminPage() {
               <div className="flex items-center justify-between w-full lg:w-auto">
                 <div className="flex items-center gap-2">
                   <TrophyIcon className="w-5 h-5 text-blue-500" />
-                  <h2 className="text-xl font-semibold">Zápasy</h2>
+                  <h2 className="text-xl font-semibold">{translations.matches.title}</h2>
                 </div>
                 
                 {/* Mobile: Show actions menu on same row as title */}
@@ -1866,7 +1857,7 @@ export default function MatchesAdminPage() {
             
             <div class="space-y-2">
               <p>
-                Opravdu chcete smazat všechny zápasy pro sezónu <strong>${seasons.find(s => s.id === selectedSeason)?.name || 'Neznámá sezóna'}</strong>?
+                Opravdu chcete smazat všechny zápasy pro sezónu <strong>${sortedSeasons.find(s => s.id === selectedSeason)?.name || 'Neznámá sezóna'}</strong>?
               </p>
               <p class="text-sm text-gray-600">
                 Tato akce je <strong>nevratná</strong> a smaže:

@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from "@heroui/button";
 import { TrophyIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
-import { Standing } from "@/types/types";
+import { Standing } from "@/types";
 
 interface StandingsTableProps {
   standings: Standing[];

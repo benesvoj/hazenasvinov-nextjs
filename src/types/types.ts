@@ -265,18 +265,6 @@ interface Team {
   updated_at: string;
 }
 
-
-export interface Season {
-  id: string;
-  name: string;
-  start_date: string;
-  end_date: string;
-  is_active: boolean;
-  is_closed: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface TeamCategory {
   id: string;
   team_id: string;
@@ -286,36 +274,6 @@ export interface TeamCategory {
   created_at: string;
   updated_at: string;
   team?: Team;
-}
-
-export interface Standing {
-  id: string;
-  team_id?: string;
-  club_id?: string;
-  category_id: string;
-  season_id: string;
-  position: number;
-  matches: number;
-  wins: number;
-  draws: number;
-  losses: number;
-  goals_for: number;
-  goals_against: number;
-  points: number;
-  // Club information for display
-  club?: {
-    id: string;
-    name: string;
-    short_name?: string;
-    logo_url?: string;
-  };
-  team?: {
-    id: string;
-    name: string;
-    short_name?: string;
-    logo_url?: string;
-    team_suffix?: string;
-  };
 }
 
 export interface MemberFunction {

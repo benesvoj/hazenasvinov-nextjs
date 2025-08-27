@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Card, CardHeader, CardBody, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Spinner, Image } from '@heroui/react';
 import { CategoryStandingsFallback } from './CategoryStandingsFallback';
-import { translations } from '@/lib/translations';
-import { Standing } from '@/types/types';
 
 interface CategoryStandingsProps {
   categoryId: string;
