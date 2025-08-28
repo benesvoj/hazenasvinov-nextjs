@@ -67,6 +67,7 @@ export function useFetchMatches(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -81,10 +82,7 @@ export function useFetchMatches(
         setError(null);
         const supabase = createClient();
         
-        // console.log('🔍 Fetching matches for category:', categorySlug, 'season:', seasonId, 'ownClubOnly:', ownClubOnly);
-        
         // First, get the category ID
-        // console.log('📋 Step 1: Fetching category data...');
         const { data: categoryData, error: categoryError } = await supabase
           .from('categories')
           .select('id, code, name')
@@ -92,61 +90,29 @@ export function useFetchMatches(
           .single();
         
         if (categoryError) {
-        //   console.error('❌ Category error:', categoryError);
           throw new Error(`Category not found: ${categoryError.message}`);
         }
         
-        // console.log('✅ Category found:', categoryData);
-        
-        // Get the season (either provided seasonId or active season)
+        // Second, get the season ID (either provided or active season)
         let seasonData;
         if (seasonId) {
-          // Use provided seasonId
-          const { data, error: seasonError } = await supabase
-            .from('seasons')
-            .select('id, name')
-            .eq('id', seasonId)
-            .single();
-          
-          if (seasonError) {
-            throw new Error(`Season not found: ${seasonError.message}`);
-          }
-          seasonData = data;
+          seasonData = { id: seasonId };
         } else {
-          // Get the active season (backward compatibility)
-          const { data, error: seasonError } = await supabase
+          // Get active season
+          const { data: activeSeason, error: seasonError } = await supabase
             .from('seasons')
-            .select('id, name')
+            .select('id, name, is_active')
             .eq('is_active', true)
             .single();
           
           if (seasonError) {
             throw new Error(`Active season not found: ${seasonError.message}`);
           }
-          seasonData = data;
+          
+          seasonData = activeSeason;
         }
         
-        // console.log('✅ Season found:', seasonData);
-        
-        // Check if matches table exists by trying a simple query
-        // console.log('⚽ Step 3: Checking matches table...');
-        const { data: tableCheck, error: tableError } = await supabase
-          .from('matches')
-          .select('count')
-          .limit(1);
-        
-        if (tableError) {
-        //   console.error('❌ Matches table error:', tableError);
-          if (tableError.code === '42P01') {
-            throw new Error('Matches table does not exist. Please create it first.');
-          }
-          throw new Error(`Matches table error: ${tableError.message}`);
-        }
-        
-        // console.log('✅ Matches table accessible');
-        
-        // Fetch matches for this category and season with team information
-        // console.log('🏆 Step 4: Fetching matches with team data...');
+        // Third, fetch matches with basic team IDs first
         const { data: matchesData, error: matchesError } = await supabase
           .from('matches')
           .select(`
@@ -164,93 +130,103 @@ export function useFetchMatches(
             season_id,
             created_at,
             updated_at,
-            home_team:home_team_id(
-              id,
-              team_suffix,
-              club_category:club_categories(
-                club:clubs(id, name, short_name, logo_url, is_own_club)
-              )
-            ),
-            away_team:away_team_id(
-              id,
-              team_suffix,
-              club_category:club_categories(
-                club:clubs(id, name, short_name, logo_url, is_own_club)
-              )
-            )
+            home_team_id,
+            away_team_id
           `)
           .eq('category_id', categoryData.id)
           .eq('season_id', seasonData.id)
           .order('date', { ascending: true });
         
         if (matchesError) {
-        //   console.error('❌ Matches fetch error:', matchesError);
           throw new Error(`Failed to fetch matches: ${matchesError.message}`);
         }
         
-        // console.log('✅ Matches fetched:', matchesData?.length || 0, 'matches');
+        // Fourth, fetch team details from club_category_teams table
+        const teamIds = new Set<string>();
+        matchesData?.forEach((match: any) => {
+          if (match.home_team_id) teamIds.add(match.home_team_id);
+          if (match.away_team_id) teamIds.add(match.away_team_id);
+        });
+        
+        // Fetch team details with club information
+        const { data: teamDetails, error: teamError } = await supabase
+          .from('club_category_teams')
+          .select(`
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(
+                id,
+                name,
+                short_name,
+                logo_url,
+                is_own_club
+              )
+            )
+          `)
+          .in('id', Array.from(teamIds));
+        
+        if (teamError) {
+          throw new Error(`Failed to fetch team details: ${teamError.message}`);
+        }
+        
+        // Create a map for quick team lookup
+        const teamMap = new Map();
+        teamDetails?.forEach((team: any) => {
+          teamMap.set(team.id, team);
+        });
         
         // Transform matches to include team names and club information
-        // Use the same centralized logic that standings tables use
         const transformedMatches = matchesData?.map((match: any) => {
+          const homeTeamDetails = teamMap.get(match.home_team_id);
+          const awayTeamDetails = teamMap.get(match.away_team_id);
+          
           // Check if each team belongs to our club individually
-          const homeTeamIsOwnClub = match.home_team?.club_category?.club?.is_own_club === true;
-          const awayTeamIsOwnClub = match.away_team?.club_category?.club?.is_own_club === true;
+          const homeTeamIsOwnClub = homeTeamDetails?.club_category?.club?.is_own_club === true;
+          const awayTeamIsOwnClub = awayTeamDetails?.club_category?.club?.is_own_club === true;
           
-          // Use centralized team display logic for consistency
-          const getTeamDisplayName = (team: any) => {
-            if (!team?.club_category?.club) return translations.team.unknownTeam;
-            
-            const clubName = team.club_category.club.name;
-            const teamSuffix = team.team_suffix || 'A';
-            const clubId = team.club_category.club.id;
-            
-            // Calculate UNIQUE TEAMS per club in this category (not matches!)
-            // This is the same logic used in standings tables
-            const uniqueTeams = new Set();
-            matchesData?.forEach((m: any) => {
-              const homeClubId = m.home_team?.club_category?.club?.id;
-              const awayClubId = m.away_team?.club_category?.club?.id;
-              
-              if (homeClubId === clubId) {
-                // Add unique team ID for this club
-                const homeTeamId = m.home_team?.id;
-                if (homeTeamId) uniqueTeams.add(homeTeamId);
-              }
-              if (awayClubId === clubId) {
-                // Add unique team ID for this club
-                const awayTeamId = m.away_team?.id;
-                if (awayTeamId) uniqueTeams.add(awayTeamId);
-              }
-            });
-            
-            const teamCount = uniqueTeams.size;
-            
-            // Debug: Log team count calculation for verification
-            console.log(`🔍 Team display debug: ${clubName} - Team count: ${teamCount}, Will show suffix: ${teamCount > 1}`);
-            
-            // Use the centralized utility function for consistent logic
-            return getTeamDisplayNameSafe(clubName, teamSuffix, teamCount, translations.team.unknownTeam);
-          };
+          // Calculate team counts for smart suffix logic
+          const homeClubId = homeTeamDetails?.club_category?.club?.id;
+          const awayClubId = awayTeamDetails?.club_category?.club?.id;
           
-          const homeTeamName = getTeamDisplayName(match.home_team);
-          const awayTeamName = getTeamDisplayName(match.away_team);
+          // Count teams per club in this category
+          const clubTeamCounts = new Map<string, number>();
+          teamDetails?.forEach((team: any) => {
+            const clubId = team.club_category?.club?.id;
+            if (clubId) {
+              clubTeamCounts.set(clubId, (clubTeamCounts.get(clubId) || 0) + 1);
+            }
+          });
+          
+          // Use centralized team display utility with smart suffix logic
+          const homeTeamName = getTeamDisplayNameSafe(
+            homeTeamDetails?.club_category?.club?.name,
+            homeTeamDetails?.team_suffix || 'A',
+            clubTeamCounts.get(homeClubId || '') || 1,
+            'Home team'
+          );
+          const awayTeamName = getTeamDisplayNameSafe(
+            awayTeamDetails?.club_category?.club?.name,
+            awayTeamDetails?.team_suffix || 'A',
+            clubTeamCounts.get(awayClubId || '') || 1,
+            'Away team'
+          );
           
           return {
             ...match,
             home_team: {
-              id: match.home_team?.id,
+              id: match.home_team_id,
               name: homeTeamName,
-              short_name: match.home_team?.club_category?.club?.short_name,
+              short_name: homeTeamDetails?.club_category?.club?.short_name,
               is_own_club: homeTeamIsOwnClub,
-              logo_url: match.home_team?.club_category?.club?.logo_url
+              logo_url: homeTeamDetails.club_category.club?.logo_url
             },
             away_team: {
-              id: match.away_team?.id,
+              id: match.away_team_id,
               name: awayTeamName,
-              short_name: match.away_team?.club_category?.club?.short_name,
+              short_name: awayTeamDetails?.club_category?.club?.short_name,
               is_own_club: awayTeamIsOwnClub,
-              logo_url: match.away_team?.club_category?.club?.logo_url
+              logo_url: awayTeamDetails.club_category.club?.logo_url
             }
           };
         }) || [];
@@ -262,10 +238,8 @@ export function useFetchMatches(
           filteredMatches = transformedMatches.filter((match: any) => 
             match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
           );
-          // console.log('🏆 Own club matches found:', filteredMatches.length);
         } else {
           // Show all matches (admin mode)
-          // console.log('🏆 All matches found:', filteredMatches.length);
         }
         
         // Group matches by season (autumn/spring)
@@ -274,51 +248,62 @@ export function useFetchMatches(
         
         filteredMatches.forEach((match: any) => {
           const matchDate = new Date(match.date);
-          const month = matchDate.getMonth() + 1; // January is 0
+          const month = matchDate.getMonth() + 1; // getMonth() returns 0-11
           
-          // Autumn: September (9), October (10), November (11)
-          // Spring: March (3), April (4), May (5)
-          if (month >= 8 || month <= 12) {
-            autumnMatches.push(match as Match);
-          } else if (month >= 3 && month <= 6) {
-            springMatches.push(match as Match);
+          if (month >= 8 || month <= 1) {
+            // August to January = Autumn season
+            autumnMatches.push(match);
+          } else {
+            // February to July = Spring season
+            springMatches.push(match);
           }
         });
         
-        // console.log('🍂 Autumn matches:', autumnMatches.length);
-        // console.log('🌸 Spring matches:', springMatches.length);
+        // Sort matches within each season by date
+        autumnMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         
         setMatches({
           autumn: autumnMatches,
           spring: springMatches
         });
         
+        setError(null);
+        
+        // Store debug info for troubleshooting
         setDebugInfo({
-          category: categoryData,
-          season: seasonData,
-          totalMatches: matchesData?.length || 0,
-          filteredMatches: filteredMatches.length,
-          ownClubOnly,
+          categorySlug,
+          categoryId: categoryData.id,
+          seasonId: seasonData.id,
+          totalMatches: filteredMatches.length,
           autumnCount: autumnMatches.length,
           springCount: springMatches.length,
-          seasonQuery: `Found season: ${seasonData.name} (ID: ${seasonData.id})`,
-          filtering: ownClubOnly 
-            ? `Filtered ${matchesData?.length || 0} total matches to ${filteredMatches.length} own club matches`
-            : `Showing all ${filteredMatches.length} matches for category`
+          ownClubOnly,
+          timestamp: new Date().toISOString()
         });
         
-      } catch (err) {
-        // console.error('💥 Failed to fetch matches:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-        setError(new Error(errorMessage));
-        setDebugInfo({ error: errorMessage, categorySlug, seasonId, ownClubOnly });
+      } catch (error) {
+        setError(error instanceof Error ? error : new Error('Unknown error occurred'));
+        setMatches({ autumn: [], spring: [] });
+        setDebugInfo(null);
       } finally {
         setLoading(false);
       }
     };
-
+    
     fetchMatches();
-  }, [categorySlug, seasonId, ownClubOnly]);
-
-  return { matches, loading, error, debugInfo };
+  }, [categorySlug, seasonId, ownClubOnly, includeTeamDetails, includeStandings, refreshTrigger]);
+  
+  // Function to manually refresh matches
+  const refreshMatches = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+  
+  return {
+    matches,
+    loading,
+    error,
+    debugInfo,
+    refreshMatches
+  };
 }

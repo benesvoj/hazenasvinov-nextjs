@@ -192,7 +192,7 @@ export default function MatchesAdminPage() {
   
   // Use the matches hook - pass category code instead of ID, and show ALL matches (admin mode)
   const selectedCategoryCode = categories.find(cat => cat.id === selectedCategory)?.code || '';
-  const { matches: seasonalMatches, loading: matchesLoading, error: matchesError } = useFetchMatches(
+  const { matches: seasonalMatches, loading: matchesLoading, error: matchesError, refreshMatches } = useFetchMatches(
     selectedCategoryCode, 
     selectedSeason, // Pass the selected season ID
     { ownClubOnly: false } // Show all matches, not just own club
@@ -783,7 +783,8 @@ export default function MatchesAdminPage() {
       onAddResultClose();
       setResultData({ home_score: '', away_score: '' });
       setSelectedMatch(null);
-      // Matches are automatically refreshed by useFetchMatches hook
+      // Refresh matches to show updated data
+      refreshMatches();
       setError('');
     } catch (error) {
       setError('Chyba při aktualizaci výsledku');
@@ -814,7 +815,8 @@ export default function MatchesAdminPage() {
 
       if (error) throw error;
       
-      // Matches are automatically refreshed by useFetchMatches hook
+      // Refresh matches to show updated data
+      refreshMatches();
       setError('');
       handleDeleteConfirmClose();
     } catch (error) {
@@ -975,7 +977,8 @@ export default function MatchesAdminPage() {
         category_id: ''
       });
       setSelectedMatch(null);
-      // Matches are automatically refreshed by useFetchMatches hook
+      // Refresh matches to show updated data
+      refreshMatches();
       setError('');
     } catch (error) {
       console.error('Full error details:', error);

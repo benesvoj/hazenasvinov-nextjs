@@ -18,3 +18,5 @@ export * from './useSeasons';
 export * from './useCategories';
 export * from './useFilteredTeams';
 export * from './useStandings';
+export * from './usePublicMatches';
+export * from './useOwnClubMatches';

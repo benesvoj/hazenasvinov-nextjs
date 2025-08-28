@@ -1,4 +1,5 @@
 import { Spinner } from "@heroui/spinner";
+import { translations } from "@/lib/translations";
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
@@ -11,7 +12,7 @@ export default function LoadingSpinner({
   size = "md", 
   color = "primary", 
   className = "",
-  label = "Načítání..."
+  label = translations.loading
 }: LoadingSpinnerProps) {
   return (
     <div className={`flex flex-col items-center justify-center p-4 ${className}`}>

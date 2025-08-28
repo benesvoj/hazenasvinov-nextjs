@@ -1,20 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
-
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  author_id: string;
-  status: 'draft' | 'published' | 'archived';
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-  image_url?: string;
-}
+import { BlogPost } from '@/types';
 
 export const useFetchBlogPosts = (limit: number = 3) => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -62,12 +48,12 @@ export const useFetchBlogPosts = (limit: number = 3) => {
       }));
 
       // Debug: Log the ordering information
-      console.log('Blog posts fetched with ordering:', transformedPosts.map((post: any) => ({
-        id: post.id,
-        title: post.title,
-        created_at: post.created_at,
-        status: post.status
-      })));
+      // console.log('Blog posts fetched with ordering:', transformedPosts.map((post: any) => ({
+      //   id: post.id,
+      //   title: post.title,
+      //   created_at: post.created_at,
+      //   status: post.status
+      // })));
 
       setPosts(transformedPosts);
       

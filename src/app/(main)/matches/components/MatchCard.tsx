@@ -4,15 +4,20 @@ import React from "react";
 import { Card, CardBody } from "@heroui/card";
 import Link from "@/components/Link";
 import Image from 'next/image';
-import { formatTime } from "@/helpers/formatTime";
-import { Match } from "@/types/types";
+import { Match } from "@/types";
 import { MapPinIcon } from "@heroicons/react/24/outline";
+import { formatDateToDayAndMonth, formatDateToWeekday, formatTime } from "@/helpers";
 
 interface MatchCardProps {
   match: Match;
 }
 
 export default function MatchCard({ match }: MatchCardProps) {
+  // // Debug: Log the match data to see what we're receiving
+  // console.log('🔍 MatchCard received match:', match);
+  // console.log('🔍 Home team:', match.home_team);
+  // console.log('🔍 Away team:', match.away_team);
+  
   return (
     <Link href={`/matches/${match.id}`} className="block">
       <Card className="hover:shadow-lg transition-shadow cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -21,15 +26,10 @@ export default function MatchCard({ match }: MatchCardProps) {
             {/* Date and Time - Left Side */}
             <div className="flex flex-col items-start min-w-[120px]">
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {new Date(match.date).toLocaleDateString('cs-CZ', { 
-                  weekday: 'long'
-                })}
+                {formatDateToWeekday(match.date)}
               </div>
               <div className="font-semibold text-gray-900 dark:text-white">
-                {new Date(match.date).toLocaleDateString('cs-CZ', { 
-                  day: 'numeric',
-                  month: 'numeric'
-                })}
+                {formatDateToDayAndMonth(match.date)}
               </div>
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {formatTime(match.time)}
@@ -42,10 +42,10 @@ export default function MatchCard({ match }: MatchCardProps) {
               <div className="flex items-center gap-4 mb-2">
                 {/* Home Team */}
                 <div className="flex items-center gap-3">
-                  {match.home_team.logo_url && (
+                  {match.home_team?.logo_url && (
                     <Image 
                       src={match.home_team.logo_url} 
-                      alt={`${match.home_team.name} logo`}
+                      alt={`${match.home_team?.name || 'Home team'} logo`}
                       width={32}
                       height={32}
                       className="w-8 h-8 object-contain rounded-full"
@@ -54,8 +54,8 @@ export default function MatchCard({ match }: MatchCardProps) {
                       }}
                     />
                   )}
-                  <span className={`font-medium ${match.home_team.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                    {match.home_team.name}
+                  <span className={`font-medium ${match.home_team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                    {match.home_team?.name || 'Home team'}
                   </span>
                 </div>
                 
@@ -63,13 +63,13 @@ export default function MatchCard({ match }: MatchCardProps) {
                 
                 {/* Away Team */}
                 <div className="flex items-center gap-3">
-                  <span className={`font-medium ${match.away_team.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                    {match.away_team.name}
+                  <span className={`font-medium ${match.away_team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                    {match.away_team?.name || 'Away team'}
                   </span>
-                  {match.away_team.logo_url && (
+                  {match.away_team?.logo_url && (
                     <Image 
                       src={match.away_team.logo_url} 
-                      alt={`${match.away_team.name} logo`}
+                      alt={`${match.away_team?.name || 'Away team'} logo`}
                       width={32}
                       height={32}
                       className="w-8 h-8 object-contain rounded-full"
@@ -84,8 +84,8 @@ export default function MatchCard({ match }: MatchCardProps) {
                           {/* Venue and League Info */}
               <div className="text-center">
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {match.category.name} {match.category.description} {match.matchweek && (`- ${match.matchweek}. kolo`)} 
-                  <MapPinIcon className="w-3 h-3 inline ml-1" /> {match.venue}
+                  {match.category?.name || 'Category'} {match.category?.description} {match.matchweek && (`- ${match.matchweek}. kolo`)} 
+                  <MapPinIcon className="w-3 h-3 inline ml-1" /> {match.venue || 'Venue'}
                 </div>
               </div>
             </div>

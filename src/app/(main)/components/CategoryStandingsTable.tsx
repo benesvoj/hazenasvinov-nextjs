@@ -3,6 +3,7 @@ import { TrophyIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { EnhancedStanding } from "@/hooks/useStandings";
 import { getTeamDisplayNameSafe, createClubTeamCountsMap } from "@/utils";
+import { LoadingSpinner } from '@/components';
 
 export default function CategoryStandingsTable({standings, standingsLoading}: {standings: EnhancedStanding[], standingsLoading: boolean}) {
   // Smart suffix logic: determine team counts per club in this category
@@ -20,7 +21,7 @@ export default function CategoryStandingsTable({standings, standingsLoading}: {s
               </CardHeader>
               <CardBody>
                 {standingsLoading ? (
-                  <div className="text-center py-8">Načítání...</div>
+                  <LoadingSpinner />
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">

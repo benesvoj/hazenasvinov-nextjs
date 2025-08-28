@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Tabs, Tab } from "@heroui/tabs";
 import { translations } from "@/lib/translations";
-import { useSeasons, useCategories, useFetchMatches, useStandings } from "@/hooks";
+import { useSeasons, useCategories, useOwnClubMatches, useStandings } from "@/hooks";
 import CategoryStandingsTable from "@/app/(main)/components/CategoryStandingsTable";
 import CategoryMatchesAndResults from "@/app/(main)/components/CategoryMatchesAndResults";
 
@@ -16,7 +16,7 @@ export default function MatchSchedule() {
     matches,
     loading: matchesLoading,
     error: matchesError,
-  } = useFetchMatches(selectedCategory);
+  } = useOwnClubMatches();
   
   // Use the standings hook
   const { standings, loading: standingsLoading, error: standingsError, fetchStandings } = useStandings();
@@ -42,69 +42,12 @@ export default function MatchSchedule() {
     }
   }, [selectedCategory, activeSeason, categories, fetchStandings]);
 
-
-
-  // Combine autumn and spring matches and transform them for display
-  const allMatches = useMemo(() => {
-    const combined = [...(matches.autumn || []), ...(matches.spring || [])];
-
-    // Transform the data to match the expected format for MatchRow
-    return combined.map((match) => ({
-      ...match,
-      // Preserve the team structure that MatchRow expects
-      home_team: {
-        ...match.home_team,
-        name: match.home_team?.name || "",
-        short_name: match.home_team?.short_name || match.home_team?.name || "",
-        logo_url: match.home_team?.logo_url || "",
-      },
-      away_team: {
-        ...match.away_team,
-        name: match.away_team?.name || "",
-        short_name: match.away_team?.short_name || match.away_team?.name || "",
-        logo_url: match.away_team?.logo_url || "",
-      },
-      // Add the flattened properties for backward compatibility
-      home_team_logo: match.home_team?.logo_url || "",
-      away_team_logo: match.away_team?.logo_url || "",
-      home_team_is_own_club: match.home_team?.is_own_club || false,
-      away_team_is_own_club: match.away_team?.is_own_club || false,
-      // Ensure category information is available
-      category: {
-        code: selectedCategory,
-        name:
-          categories.find((cat) => cat.code === selectedCategory)?.name || "",
-        description:
-          categories.find((cat) => cat.code === selectedCategory)
-            ?.description || "",
-      },
-      category_code: selectedCategory,
-      matchweek: match.matchweek || undefined,
-      status: match.status || "unknown",
-      // Ensure other required properties are set
-      is_home: match.is_home || false,
-      venue: match.venue || "Neznámé místo",
-      competition: match.competition || "Liga",
-    }));
-  }, [matches, selectedCategory, categories]);
-
-  // Filter upcoming and completed matches
-  const now = new Date();
-
-  const upcomingMatches = allMatches
-    .filter((match) => {
-      if (!match.date) return false;
-      const matchDate = new Date(match.date);
-      return matchDate > now;
-    })
+  const upcomingMatches = matches
+    .filter((match) => match.status === "upcoming")
     .slice(0, 3);
 
-  const recentResults = allMatches
-    .filter((match) => {
-      if (!match.date) return false;
-      const matchDate = new Date(match.date);
-      return matchDate <= now;
-    })
+  const recentResults = matches
+    .filter((match) => match.status === 'completed')
     .slice(0, 3);
 
   const loading = matchesLoading || standingsLoading;
@@ -122,7 +65,7 @@ export default function MatchSchedule() {
           {matchesError && (
             <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
               <p className="text-sm text-red-700 dark:text-red-300">
-                Chyba při načítání zápasů: {matchesError.message}
+                Chyba při načítání zápasů: {matchesError instanceof Error ? matchesError.message : matchesError}
               </p>
             </div>
           )}
@@ -133,7 +76,7 @@ export default function MatchSchedule() {
               </p>
             </div>
           )}
-          {allMatches.length === 0 && !loading && !matchesError && (
+          {matches.length === 0 && !loading && !matchesError && (
             <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
               <p className="text-sm text-yellow-700 dark:text-yellow-300">
                 Žádné zápasy nebyly nalezeny. Zkontrolujte:
@@ -166,7 +109,7 @@ export default function MatchSchedule() {
           <CategoryMatchesAndResults
             loading={matchesLoading}
             selectedCategory={selectedCategory}
-            allMatches={allMatches}
+            allMatches={matches}
             upcomingMatches={upcomingMatches}
             recentResults={recentResults}
           />

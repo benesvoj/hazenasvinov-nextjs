@@ -19,10 +19,11 @@ import Link from "@/components/Link";
 import { useParams } from "next/navigation";
 
 import { formatTime } from "@/helpers/formatTime";
-import { Match } from "@/types/types";
+import { Match } from "@/types";
 import { translations } from "@/lib/translations";
 import { useLineupData } from "@/hooks/useLineupData";
 import TeamDisplay from "./components/TeamDisplay";
+import { getTeamDisplayNameSafe } from "@/utils/teamDisplay";
 
 function getResultBadge(result: string) {
   switch (result) {
@@ -93,8 +94,20 @@ export default function MatchDetailPage() {
           .select(
             `
             *,
-            home_team:home_team_id(name, logo_url, is_own_club),
-            away_team:away_team_id(name, logo_url, is_own_club),
+            home_team:home_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url, is_own_club)
+              )
+            ),
+            away_team:away_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url, is_own_club)
+              )
+            ),
             category:categories(code, name, description),
             season:seasons(name)
           `
@@ -108,7 +121,72 @@ export default function MatchDetailPage() {
           return;
         }
 
-        setMatch(data);
+        // Get team counts for both clubs to determine if suffixes should be shown
+        let homeTeamCount = 1;
+        let awayTeamCount = 1;
+        
+        if (data.category?.code) {
+          try {
+            // Fetch team counts for the clubs in this category
+            const { data: teamCountsData } = await supabase
+              .from('club_categories')
+              .select(`
+                club_id,
+                club_category_teams(id)
+              `)
+              .eq('category_id', data.category.code)
+              .eq('is_active', true);
+            
+            if (teamCountsData) {
+              const clubTeamCounts = new Map<string, number>();
+              teamCountsData.forEach((cc: any) => {
+                clubTeamCounts.set(cc.club_id, cc.club_category_teams?.length || 0);
+              });
+              
+              // Get team counts for home and away clubs
+              const homeClubId = data.home_team?.club_category?.club?.id;
+              const awayClubId = data.away_team?.club_category?.club?.id;
+              
+              if (homeClubId) {
+                homeTeamCount = clubTeamCounts.get(homeClubId) || 1;
+              }
+              if (awayClubId) {
+                awayTeamCount = clubTeamCounts.get(awayClubId) || 1;
+              }
+            }
+          } catch (countError) {
+            console.warn('Could not fetch team counts, using default values:', countError);
+          }
+        }
+        
+        // Transform match data to use centralized team display logic
+        const transformedMatch = {
+          ...data,
+          home_team: {
+            id: data.home_team?.id,
+            name: getTeamDisplayNameSafe(
+              data.home_team?.club_category?.club?.name,
+              data.home_team?.team_suffix || 'A',
+              homeTeamCount,
+              translations.team.unknownTeam
+            ),
+            logo_url: data.home_team?.club_category?.club?.logo_url,
+            is_own_club: data.home_team?.club_category?.club?.is_own_club || false
+          },
+          away_team: {
+            id: data.away_team?.id,
+            name: getTeamDisplayNameSafe(
+              data.away_team?.club_category?.club?.name,
+              data.away_team?.team_suffix || 'A',
+              awayTeamCount,
+              translations.team.unknownTeam
+            ),
+            logo_url: data.away_team?.club_category?.club?.logo_url,
+            is_own_club: data.away_team?.club_category?.club?.is_own_club || false
+          }
+        };
+
+        setMatch(transformedMatch);
       } catch (error) {
         console.error("Error fetching match:", error);
         setError("Chyba při načítání zápasu");

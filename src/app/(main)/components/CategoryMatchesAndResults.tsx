@@ -8,6 +8,7 @@ import { Button } from "@heroui/react";
 import Link from "next/link";
 import { translations } from "@/lib/translations";
 import MatchRow from "@/app/(main)/components/MatchRow";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function CategoryMatchesAndResults({
   loading,
@@ -48,7 +49,7 @@ export default function CategoryMatchesAndResults({
         </CardHeader>
         <CardBody>
           {loading ? (
-            <div className="text-center py-8">{translations.loading}</div>
+            <LoadingSpinner />
           ) : (
             <div className="space-y-4">
               {upcomingMatches.map((match) => (
@@ -92,7 +93,7 @@ export default function CategoryMatchesAndResults({
         </CardHeader>
         <CardBody>
           {loading ? (
-            <div className="text-center py-8">{translations.loading}</div>
+            <LoadingSpinner />
           ) : (
             <div className="space-y-4">
               {recentResults.map((match) => (
