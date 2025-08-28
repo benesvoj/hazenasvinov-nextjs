@@ -12,11 +12,16 @@ export default function MatchSchedule() {
 
   const { activeSeason, fetchActiveSeason } = useSeasons();
   const { categories, fetchCategories } = useCategories();
+  // Get the selected category data
+  const selectedCategoryData = categories.find(
+    (cat) => cat.code === selectedCategory
+  );
+  
   const {
     matches,
     loading: matchesLoading,
     error: matchesError,
-  } = useOwnClubMatches();
+  } = useOwnClubMatches(selectedCategoryData?.id);
   
   // Use the standings hook
   const { standings, loading: standingsLoading, error: standingsError, fetchStandings } = useStandings();
@@ -31,16 +36,10 @@ export default function MatchSchedule() {
 
   // Fetch standings when category or active season changes
   useEffect(() => {
-    if (categories.length > 0 && activeSeason) {
-      // Get the category ID for the selected category code
-      const selectedCategoryData = categories.find(
-        (cat) => cat.code === selectedCategory
-      );
-      if (selectedCategoryData) {
-        fetchStandings(selectedCategoryData.id, activeSeason.id);
-      }
+    if (categories.length > 0 && activeSeason && selectedCategoryData) {
+      fetchStandings(selectedCategoryData.id, activeSeason.id);
     }
-  }, [selectedCategory, activeSeason, categories, fetchStandings]);
+  }, [selectedCategory, activeSeason, categories, fetchStandings, selectedCategoryData]);
 
   const upcomingMatches = matches
     .filter((match) => match.status === "upcoming")

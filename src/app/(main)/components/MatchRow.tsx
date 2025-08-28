@@ -122,8 +122,7 @@ const MatchRow: React.FC<MatchRowProps> = ({ match, compact = true }) => {
                   <MapPinIcon className="w-3 h-3 inline ml-1" /> {match.venue}
                 </span>
                 <span className="hidden lg:inline">
-                  {match.category?.description ||
-                    match.category?.name}
+                  {`${match.category?.name} - ${match.category?.description}`}
                     {match.venue && (
                       <>
                         {" "}

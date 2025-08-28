@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Match } from '@/types';
 import { translations } from '@/lib/translations';
-import { getTeamDisplayNameSafe } from '@/utils/teamDisplay';
+import { transformMatchWithTeamNames } from '@/utils/teamDisplay';
 
 export interface SeasonalMatches {
   autumn: Match[];
@@ -178,55 +178,29 @@ export function useFetchMatches(
         
         // Transform matches to include team names and club information
         const transformedMatches = matchesData?.map((match: any) => {
+          // Check if each team belongs to our club individually
           const homeTeamDetails = teamMap.get(match.home_team_id);
           const awayTeamDetails = teamMap.get(match.away_team_id);
-          
-          // Check if each team belongs to our club individually
           const homeTeamIsOwnClub = homeTeamDetails?.club_category?.club?.is_own_club === true;
           const awayTeamIsOwnClub = awayTeamDetails?.club_category?.club?.is_own_club === true;
           
-          // Calculate team counts for smart suffix logic
-          const homeClubId = homeTeamDetails?.club_category?.club?.id;
-          const awayClubId = awayTeamDetails?.club_category?.club?.id;
-          
-          // Count teams per club in this category
-          const clubTeamCounts = new Map<string, number>();
-          teamDetails?.forEach((team: any) => {
-            const clubId = team.club_category?.club?.id;
-            if (clubId) {
-              clubTeamCounts.set(clubId, (clubTeamCounts.get(clubId) || 0) + 1);
-            }
+          // Use centralized team display utility with smart suffix logic
+          const transformedMatch = transformMatchWithTeamNames(match, [], {
+            useTeamMap: true,
+            teamMap,
+            teamDetails
           });
           
-          // Use centralized team display utility with smart suffix logic
-          const homeTeamName = getTeamDisplayNameSafe(
-            homeTeamDetails?.club_category?.club?.name,
-            homeTeamDetails?.team_suffix || 'A',
-            clubTeamCounts.get(homeClubId || '') || 1,
-            'Home team'
-          );
-          const awayTeamName = getTeamDisplayNameSafe(
-            awayTeamDetails?.club_category?.club?.name,
-            awayTeamDetails?.team_suffix || 'A',
-            clubTeamCounts.get(awayClubId || '') || 1,
-            'Away team'
-          );
-          
+          // Add the is_own_club flags that are specific to this hook
           return {
-            ...match,
+            ...transformedMatch,
             home_team: {
-              id: match.home_team_id,
-              name: homeTeamName,
-              short_name: homeTeamDetails?.club_category?.club?.short_name,
-              is_own_club: homeTeamIsOwnClub,
-              logo_url: homeTeamDetails.club_category.club?.logo_url
+              ...transformedMatch.home_team,
+              is_own_club: homeTeamIsOwnClub
             },
             away_team: {
-              id: match.away_team_id,
-              name: awayTeamName,
-              short_name: awayTeamDetails?.club_category?.club?.short_name,
-              is_own_club: awayTeamIsOwnClub,
-              logo_url: awayTeamDetails.club_category.club?.logo_url
+              ...transformedMatch.away_team,
+              is_own_club: awayTeamIsOwnClub
             }
           };
         }) || [];

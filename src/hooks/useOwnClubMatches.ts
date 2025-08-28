@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Match } from '@/types';
+import { getTeamDisplayNameSafe } from '@/utils/teamDisplay';
 
 /**
- * Hook to fetch all matches from the user's own club across all categories
- * This is a simplified approach that focuses on getting matches working
+ * Hook to fetch matches from the user's own club
  * 
+ * @param categoryId - Optional category ID to filter matches by specific category
  * @returns {Object} Object containing:
- *   - matches: Array of all matches
+ *   - matches: Array of matches (filtered by category if provided)
  *   - loading: Loading state
  *   - error: Error state
  *   - debugInfo: Debug information for troubleshooting
  */
-export function useOwnClubMatches() {
+export function useOwnClubMatches(categoryId?: string) {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -26,7 +27,6 @@ export function useOwnClubMatches() {
     const fetchOwnClubMatches = async () => {
       // Fetch active season if we don't have it
       if (!activeSeason?.id) {
-        console.log('⏳ [useOwnClubMatches] Fetching active season...');
         try {
           const supabase = createClient();
           const { data: seasonData, error: seasonErr } = await supabase
@@ -36,19 +36,16 @@ export function useOwnClubMatches() {
             .single();
           
           if (seasonErr) {
-            console.error('❌ [useOwnClubMatches] Season error:', seasonErr);
             setSeasonError(new Error(`Active season not found: ${seasonErr.message}`));
             return;
           }
-          
-          console.log('✅ [useOwnClubMatches] Active season fetched:', seasonData.name);
+      
           setActiveSeason(seasonData);
           
           // After setting season, fetch matches immediately
           await fetchMatches(seasonData);
           return;
         } catch (err) {
-          console.error('❌ [useOwnClubMatches] Season fetch error:', err);
           setSeasonError(err instanceof Error ? err : new Error('Unknown season error'));
           return;
         }
@@ -62,15 +59,14 @@ export function useOwnClubMatches() {
     
     // Separate function to fetch matches
     const fetchMatches = async (season: any) => {
-      console.log('🏆 [useOwnClubMatches] Fetching matches for season:', season.name);
       
       try {
         setLoading(true);
         setError(null);
         const supabase = createClient();
         
-        // Fetch all matches for the season with team and category information
-        const { data: matchesData, error: matchesError } = await supabase
+        // Build the query for matches
+        let query = supabase
           .from('matches')
           .select(`
             id,
@@ -108,15 +104,18 @@ export function useOwnClubMatches() {
               )
             )
           `)
-          .eq('season_id', season.id)
-          .order('date', { ascending: true });
+          .eq('season_id', season.id);
         
-        if (matchesError) {
-          console.error('❌ [useOwnClubMatches] Matches error:', matchesError);
-          throw new Error(`Failed to fetch matches: ${matchesError.message}`);
+        // Filter by category if provided
+        if (categoryId) {
+          query = query.eq('category_id', categoryId);
         }
         
-        console.log('✅ [useOwnClubMatches] Total matches fetched:', matchesData?.length || 0);
+        const { data: matchesData, error: matchesError } = await query.order('date', { ascending: true });
+        
+        if (matchesError) {
+          throw new Error(`Failed to fetch matches: ${matchesError.message}`);
+        }
         
         // Filter matches to only include those where our club is playing
         const ownClubMatches = matchesData?.filter((match: any) => {
@@ -125,17 +124,87 @@ export function useOwnClubMatches() {
           return homeTeamIsOwnClub || awayTeamIsOwnClub;
         }) || [];
         
-        console.log('🏆 [useOwnClubMatches] Own club matches found:', ownClubMatches.length);
+        // To get accurate team counts per club in categories, we need standings data
+        // This is the same approach used by the working standings tables
+        const { data: standingsData, error: standingsError } = await supabase
+          .from('standings')
+          .select(`
+            id,
+            team_id,
+            category_id,
+            team:club_category_teams(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url)
+              )
+            )
+          `)
+          .eq('season_id', season.id);
         
-        // Transform matches to the expected format
+        if (standingsError) {
+          console.error('❌ [useOwnClubMatches] Standings error:', standingsError);
+          // Continue without standings, but smart suffixes won't work properly
+        }
+        
+        // Create club team counts map from standings (same logic as working solutions)
+        const clubTeamCountsByCategory = new Map<string, Map<string, number>>();
+        standingsData?.forEach((standing: any) => {
+          const categoryId = standing.category_id;
+          const clubId = standing.team?.club_category?.club?.id;
+          
+          if (!clubTeamCountsByCategory.has(categoryId)) {
+            clubTeamCountsByCategory.set(categoryId, new Map<string, number>());
+          }
+          
+          const categoryTeamCounts = clubTeamCountsByCategory.get(categoryId)!;
+          
+          if (clubId) {
+            categoryTeamCounts.set(clubId, (categoryTeamCounts.get(clubId) || 0) + 1);
+          }
+        });
+        
+        // Debug: Log the team counts to see what we're getting
+        console.log('🔍 [useOwnClubMatches] Standings data:', standingsData);
+        console.log('🔍 [useOwnClubMatches] Club team counts by category:', 
+          Object.fromEntries(
+            Array.from(clubTeamCountsByCategory.entries()).map(([categoryId, counts]) => [
+              categoryId,
+              Object.fromEntries(counts)
+            ])
+          )
+        );
+        
+        // Transform matches to the expected format with smart suffix logic
+        // Use the same approach as the working CategoryStandingsTable
         const transformedMatches = ownClubMatches.map((match: any) => {
-          // Build team names using club name + team suffix
-          const homeTeamName = match.home_team?.club_category?.club?.name 
-            ? `${match.home_team.club_category.club.name} ${match.home_team.team_suffix || 'A'}`
-            : 'Home team';
-          const awayTeamName = match.away_team?.club_category?.club?.name 
-            ? `${match.away_team.club_category.club.name} ${match.away_team.team_suffix || 'A'}`
-            : 'Away team';
+          const categoryId = match.category_id;
+          const categoryTeamCounts = clubTeamCountsByCategory.get(categoryId) || new Map<string, number>();
+          
+          // Debug: Log what we're working with for each match
+          console.log('🔍 [useOwnClubMatches] Processing match:', {
+            categoryId,
+            homeTeam: match.home_team?.club_category?.club?.name,
+            awayTeam: match.away_team?.club_category?.club?.name,
+            categoryTeamCounts: Object.fromEntries(categoryTeamCounts)
+          });
+          
+          // Use the same logic as the working standings tables
+          const homeClubId = match.home_team?.club_category?.club?.id;
+          const awayClubId = match.away_team?.club_category?.club?.id;
+          
+          const homeTeamName = getTeamDisplayNameSafe(
+            match.home_team?.club_category?.club?.name,
+            match.home_team?.team_suffix || 'A',
+            categoryTeamCounts.get(homeClubId || '') || 1,
+            'Home team'
+          );
+          const awayTeamName = getTeamDisplayNameSafe(
+            match.away_team?.club_category?.club?.name,
+            match.away_team?.team_suffix || 'A',
+            categoryTeamCounts.get(awayClubId || '') || 1,
+            'Away team'
+          );
           
           return {
             ...match,
@@ -156,23 +225,10 @@ export function useOwnClubMatches() {
           };
         });
         
-        console.log('✅ [useOwnClubMatches] Matches transformed:', transformedMatches.length);
-        
         setMatches(transformedMatches);
         setError(null);
-        
-        // Store debug info
-        setDebugInfo({
-          activeSeason: season.name,
-          seasonId: season.id,
-          totalMatches: matchesData?.length || 0,
-          ownClubMatches: ownClubMatches.length,
-          transformedMatches: transformedMatches.length,
-          timestamp: new Date().toISOString()
-        });
-        
+    
       } catch (error) {
-        console.error('❌ [useOwnClubMatches] Error:', error);
         setError(error instanceof Error ? error : new Error('Unknown error occurred'));
         setMatches([]);
         setDebugInfo(null);
@@ -182,7 +238,7 @@ export function useOwnClubMatches() {
     };
     
     fetchOwnClubMatches();
-  }, []); // Only run once on mount - no dependencies to avoid infinite loops
+  }, [categoryId]); // Refetch when categoryId changes
   
   // If there's a season error, return it as the main error
   const finalError = seasonError || error;
