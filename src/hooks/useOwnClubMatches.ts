@@ -25,36 +25,22 @@ export function useOwnClubMatches(categoryId?: string) {
 
   useEffect(() => {
     const fetchOwnClubMatches = async () => {
-      // Fetch active season if we don't have it
+      // Don't fetch matches if we don't have a category ID
+      if (!categoryId) {
+        setMatches([]);
+        setLoading(false);
+        return;
+      }
+      
+      // Don't fetch matches if we don't have an active season
       if (!activeSeason?.id) {
-        try {
-          const supabase = createClient();
-          const { data: seasonData, error: seasonErr } = await supabase
-            .from('seasons')
-            .select('id, name')
-            .eq('is_active', true)
-            .single();
-          
-          if (seasonErr) {
-            setSeasonError(new Error(`Active season not found: ${seasonErr.message}`));
-            return;
-          }
-      
-          setActiveSeason(seasonData);
-          
-          // After setting season, fetch matches immediately
-          await fetchMatches(seasonData);
-          return;
-        } catch (err) {
-          setSeasonError(err instanceof Error ? err : new Error('Unknown season error'));
-          return;
-        }
+        setMatches([]);
+        setLoading(false);
+        return;
       }
       
-      // If we already have a season, fetch matches
-      if (activeSeason?.id) {
-        await fetchMatches(activeSeason);
-      }
+      // If we have both category ID and active season, fetch matches
+      await fetchMatches(activeSeason);
     };
     
     // Separate function to fetch matches
@@ -164,30 +150,13 @@ export function useOwnClubMatches(categoryId?: string) {
           }
         });
         
-        // Debug: Log the team counts to see what we're getting
-        console.log('🔍 [useOwnClubMatches] Standings data:', standingsData);
-        console.log('🔍 [useOwnClubMatches] Club team counts by category:', 
-          Object.fromEntries(
-            Array.from(clubTeamCountsByCategory.entries()).map(([categoryId, counts]) => [
-              categoryId,
-              Object.fromEntries(counts)
-            ])
-          )
-        );
+
         
         // Transform matches to the expected format with smart suffix logic
         // Use the same approach as the working CategoryStandingsTable
         const transformedMatches = ownClubMatches.map((match: any) => {
           const categoryId = match.category_id;
           const categoryTeamCounts = clubTeamCountsByCategory.get(categoryId) || new Map<string, number>();
-          
-          // Debug: Log what we're working with for each match
-          console.log('🔍 [useOwnClubMatches] Processing match:', {
-            categoryId,
-            homeTeam: match.home_team?.club_category?.club?.name,
-            awayTeam: match.away_team?.club_category?.club?.name,
-            categoryTeamCounts: Object.fromEntries(categoryTeamCounts)
-          });
           
           // Use the same logic as the working standings tables
           const homeClubId = match.home_team?.club_category?.club?.id;
@@ -238,7 +207,32 @@ export function useOwnClubMatches(categoryId?: string) {
     };
     
     fetchOwnClubMatches();
-  }, [categoryId]); // Refetch when categoryId changes
+  }, [categoryId, activeSeason]); // Refetch when categoryId or activeSeason changes
+  
+  // Fetch active season on mount
+  useEffect(() => {
+    const fetchActiveSeason = async () => {
+      try {
+        const supabase = createClient();
+        const { data: seasonData, error: seasonErr } = await supabase
+          .from('seasons')
+          .select('id, name')
+          .eq('is_active', true)
+          .single();
+        
+        if (seasonErr) {
+          setSeasonError(new Error(`Active season not found: ${seasonErr.message}`));
+          return;
+      }
+    
+        setActiveSeason(seasonData);
+      } catch (err) {
+        setSeasonError(err instanceof Error ? err : new Error('Unknown season error'));
+      }
+    };
+    
+    fetchActiveSeason();
+  }, []); // Only run on mount
   
   // If there's a season error, return it as the main error
   const finalError = seasonError || error;

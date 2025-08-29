@@ -21,7 +21,7 @@ export default function MatchSchedule() {
     matches,
     loading: matchesLoading,
     error: matchesError,
-  } = useOwnClubMatches(selectedCategoryData?.id);
+  } = useOwnClubMatches(selectedCategoryData?.id || undefined);
   
   // Use the standings hook
   const { standings, loading: standingsLoading, error: standingsError, fetchStandings } = useStandings();
