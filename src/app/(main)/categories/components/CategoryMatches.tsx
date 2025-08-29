@@ -15,7 +15,7 @@ import {
   Spinner,
   Image,
 } from "@heroui/react";
-import { Match } from "@/types/types";
+import { Match } from "@/types";
 import { formatDateString, formatTime } from "@/helpers";
 import { CategoryMatchesFallback } from "./CategoryMatchesFallback";
 import { getMatchStatusText } from "@/app/constants";

@@ -13,11 +13,7 @@ interface MatchCardProps {
 }
 
 export default function MatchCard({ match }: MatchCardProps) {
-  // // Debug: Log the match data to see what we're receiving
-  // console.log('🔍 MatchCard received match:', match);
-  // console.log('🔍 Home team:', match.home_team);
-  // console.log('🔍 Away team:', match.away_team);
-  
+
   return (
     <Link href={`/matches/${match.id}`} className="block">
       <Card className="hover:shadow-lg transition-shadow cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -84,7 +80,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                           {/* Venue and League Info */}
               <div className="text-center">
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {match.category?.name || 'Category'} {match.category?.description} {match.matchweek && (`- ${match.matchweek}. kolo`)} 
+                  {match.category?.name} {match.matchweek && (`- ${match.matchweek}. kolo`)} 
                   <MapPinIcon className="w-3 h-3 inline ml-1" /> {match.venue || 'Venue'}
                 </div>
               </div>

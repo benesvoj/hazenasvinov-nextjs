@@ -4,3 +4,6 @@ export * from './season';
 export * from './standing';
 export * from './team';
 export * from './blogPost';
+export * from './clubs';
+export * from './member';
+export * from './lineup';

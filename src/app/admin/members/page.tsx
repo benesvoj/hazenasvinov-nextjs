@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { translations } from "@/lib/translations";
 import { Member } from "@/types/types";
 import { useFetchCategories } from "@/hooks/useFetchCategories";
 import { useFetchMemberFunctions } from "@/hooks/useFetchMemberFunctions";
@@ -89,24 +88,6 @@ export default function MembersAdminPage() {
     loading: categoriesLoading,
     error: categoriesError,
   } = useFetchCategories();
-
-  // Convert categories array to Record format for compatibility
-  const categories = useMemo(() => {
-    if (!categoriesData) return {};
-    return categoriesData.reduce((acc, category) => {
-      acc[category.code] = category.name;
-      return acc;
-    }, {} as Record<string, string>);
-  }, [categoriesData]);
-
-  // Create reverse mapping from name to code for form submission
-  const categoryNameToCode = useMemo(() => {
-    if (!categoriesData) return {};
-    return categoriesData.reduce((acc, category) => {
-      acc[category.name] = category.code;
-      return acc;
-    }, {} as Record<string, string>);
-  }, [categoriesData]);
 
   return (
     <div className="p-6">

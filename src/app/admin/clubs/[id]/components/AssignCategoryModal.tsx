@@ -12,7 +12,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
 import { createClient } from "@/utils/supabase/client";
-import { Category } from "@/types/types";
+import { Category } from "@/types";
 import { Season } from "@/types";
 
 interface AssignCategoryModalProps {

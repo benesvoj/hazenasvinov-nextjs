@@ -3,7 +3,7 @@
 import React from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react';
 import { EyeIcon, PencilIcon, UserGroupIcon, TrashIcon, DocumentIcon } from '@heroicons/react/24/outline';
-import { Match } from '@/types/types';
+import { Match } from '@/types';
 
 interface MatchActionsModalProps {
   isOpen: boolean;

@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Match } from "@/types/types";
+import { Match } from "@/types";
 
 interface AddResultModalProps {
   isOpen: boolean;

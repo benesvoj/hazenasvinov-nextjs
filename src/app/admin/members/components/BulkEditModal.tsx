@@ -9,20 +9,7 @@ import {
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { Checkbox } from "@heroui/checkbox";
-
-interface Category {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  age_group?: string;
-  gender?: string;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
+import { Category } from "@/types";
 interface BulkEditFormData {
   sex: "" | "male" | "female";
   category: string;

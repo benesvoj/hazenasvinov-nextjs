@@ -3,7 +3,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@herou
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
-import { FilteredTeam } from "@/hooks/useFilteredTeams";
+import { FilteredTeam } from "@/types";
 import { translations } from "@/lib/translations";
 
 interface AddMatchModalProps {

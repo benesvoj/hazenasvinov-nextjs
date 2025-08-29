@@ -2,7 +2,7 @@
 
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react';
 import LineupManager from './LineupManager';
-import { Match, Member } from '@/types/types';
+import { Match, Member } from '@/types';
 
 interface LineupManagerModalProps {
     isOpen: boolean;

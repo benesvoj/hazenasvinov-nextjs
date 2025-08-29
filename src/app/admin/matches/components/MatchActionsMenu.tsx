@@ -9,7 +9,7 @@ import {
   UserGroupIcon,
   TrashIcon
 } from "@heroicons/react/24/outline";
-import { Match } from "@/types/types";
+import { Match } from "@/types";
 import MobileActionsMenu, { ActionItem } from "@/components/MobileActionsMenu";
 
 interface MatchActionsMenuProps {

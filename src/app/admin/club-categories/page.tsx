@@ -15,7 +15,7 @@ import {
   CalendarIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
-import { Club, Category } from "@/types/types";
+import { Club, Category } from "@/types";
 import { Season } from "@/types";
 
 interface ClubCategory {

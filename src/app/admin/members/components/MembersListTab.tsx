@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
@@ -9,14 +9,13 @@ import { useDisclosure } from "@heroui/use-disclosure";
 import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
-import { Member, Category } from "@/types/types";
+import { Member, Category } from "@/types";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import MemberFormModal from "./MemberFormModal";
 import MembersCsvImport from "./MembersCsvImport";
 import BulkEditModal from "./BulkEditModal";
 import { showToast } from "@/components/Toast";
 import { Pagination } from "@heroui/react";
-import { GENDER_OPTIONS } from "@/constants";
 
 interface MembersListTabProps {
   categoriesData: Category[] | null;
@@ -38,7 +37,6 @@ export default function MembersListTab({
     category: "",
     function: "",
   });
-  const [activeTab, setActiveTab] = useState("members");
 
   // Modal states
   const {
@@ -134,15 +132,6 @@ export default function MembersListTab({
     if (!categoriesData) return {};
     return categoriesData.reduce((acc, category) => {
       acc[category.code] = category.name;
-      return acc;
-    }, {} as Record<string, string>);
-  }, [categoriesData]);
-
-  // Create reverse mapping from name to code for form submission
-  const categoryNameToCode = useMemo(() => {
-    if (!categoriesData) return {};
-    return categoriesData.reduce((acc, category) => {
-      acc[category.name] = category.code;
       return acc;
     }, {} as Record<string, string>);
   }, [categoriesData]);

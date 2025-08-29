@@ -20,7 +20,7 @@ import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import MobileActionsMenu from '@/components/MobileActionsMenu';
 import { useExcelImport } from '@/hooks/useExcelImport';
 // TODO: use proper types
-import { Team } from "@/types/types";
+import { Team } from "@/types";
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
 import { getMatchesWithTeamsQuery, transformMatchData } from '@/utils';
 import { useTeamDisplayLogic } from '@/hooks/useTeamDisplayLogic';

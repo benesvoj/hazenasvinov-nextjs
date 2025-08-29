@@ -11,6 +11,7 @@ import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Chip } from "@heroui/chip";
 import { translations } from "@/lib/translations";
+import { Category } from "@/types";
 
 interface MemberFormData {
   registration_number: string;
@@ -20,19 +21,6 @@ interface MemberFormData {
   category: string;
   sex: 'male' | 'female';
   functions: string[];
-}
-
-interface Category {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  age_group?: string;
-  gender?: string;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
 }
 
 interface MemberFormModalProps {

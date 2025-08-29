@@ -15,7 +15,7 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 import { useLineupData } from '@/hooks/useLineupData';
-import { LineupFormData, LineupPlayerFormData, LineupCoachFormData, Member, ExternalPlayer } from '@/types/types';
+import { LineupFormData, LineupPlayerFormData, LineupCoachFormData, Member, ExternalPlayer } from '@/types';
 import { createClient } from '@/utils/supabase/client';
 
 interface LineupManagerProps {
@@ -25,14 +25,6 @@ interface LineupManagerProps {
   homeTeamName: string;
   awayTeamName: string;
   members: Member[];
-}
-
-interface Team {
-  id: string;
-  name: string;
-  short_name?: string;
-  city?: string;
-  region?: string;
 }
 
 export default function LineupManager({ 

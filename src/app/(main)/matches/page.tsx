@@ -1,19 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback, SyntheticEvent } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { 
   TrophyIcon,
   FunnelIcon
 } from "@heroicons/react/24/outline";
-import { usePublicMatches } from "@/hooks/usePublicMatches";
-import { useSeasons } from "@/hooks/useSeasons";
-import { useCategories } from "@/hooks/useCategories";
+import { usePublicMatches, useSeasons, useCategories } from "@/hooks";
 import { Select, SelectItem } from "@heroui/react";
 import MatchCard from "@/app/(main)/matches/components/MatchCard";
 import ClubSelector from "@/app/(main)/matches/components/ClubSelector";
-import Image from 'next/image';
 import { formatMonth } from "@/helpers/formatMonth";
 import { Match } from "@/types/match";
 
@@ -21,6 +18,7 @@ export default function MatchesPage() {
   const [filterType, setFilterType] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedClub, setSelectedClub] = useState<string | undefined>(undefined);
+  const [clubTeamMap, setClubTeamMap] = useState<{ [clubId: string]: string[] }>({});
   
   // Use the new public matches hook
   const { matches, loading, error } = usePublicMatches(selectedCategory);
@@ -38,30 +36,6 @@ export default function MatchesPage() {
     }
   }, []);
 
-  // Extract teams from matches for filtering
-  const allTeams = useMemo(() => {
-    const teamsSet = new Set();
-    const teamsArray: any[] = [];
-    
-    matches.autumn.concat(matches.spring).forEach(match => {
-      if (match.home_team) {
-        const teamKey = `${match.home_team.id}-${match.home_team.name}`;
-        if (!teamsSet.has(teamKey)) {
-          teamsSet.add(teamKey);
-          teamsArray.push(match.home_team);
-        }
-      }
-      if (match.away_team) {
-        const teamKey = `${match.away_team.id}-${match.away_team.name}`;
-        if (!teamsSet.has(teamKey)) {
-          teamsSet.add(teamKey);
-          teamsArray.push(match.away_team);
-        }
-      }
-    });
-    
-    return teamsArray;
-  }, [matches]);
 
   // Initial data fetch
   useEffect(() => {
@@ -69,19 +43,49 @@ export default function MatchesPage() {
     fetchCategories();
   }, [fetchActiveSeason, fetchCategories]);
 
-  // No need to fetch matches separately - useFetchMatches handles it
+  // Reset club selection when category changes
+  useEffect(() => {
+    setSelectedClub(undefined);
+  }, [selectedCategory]);
 
-  // Teams are automatically updated when matches change
-  // No need for separate teams fetching
+  // Helper function to get all teams from a club in a specific category
+  const getClubTeamsInCategory = (clubId: string, categoryCode: string, allCategories: any[]) => {
+    // The ClubSelector now properly handles both "all" and specific category cases
+    // Just return the teams for the selected club
+    return clubTeamMap[clubId] || [];
+  };
 
-  // Group matches by month
+  // Group matches by month and enrich with category information
   const groupedMatches = useMemo(() => {
     const grouped: { [key: string]: Match[] } = {};
     
     // Combine autumn and spring matches
     const allMatches = [...matches.autumn, ...matches.spring];
     
-    allMatches.forEach(match => {
+    // Create a map for quick category lookup
+    const categoryMap = new Map();
+    categories.forEach(category => {
+      categoryMap.set(category.id, category);
+    });
+    
+    // Enrich matches with category information
+    const enrichedMatches = allMatches.map(match => {
+      const categoryInfo = categoryMap.get(match.category_id);
+      return {
+        ...match,
+        category: categoryInfo ? {
+          code: categoryInfo.code,
+          name: categoryInfo.name,
+          description: categoryInfo.description
+        } : {
+          code: 'unknown',
+          name: 'Neznámá kategorie',
+          description: undefined
+        }
+      };
+    });
+    
+    enrichedMatches.forEach(match => {
       const date = new Date(match.date);
       const monthKey = `${date.toLocaleDateString('cs-CZ', { month: 'long' }).toLowerCase()} ${date.getFullYear()}`;
       
@@ -92,28 +96,15 @@ export default function MatchesPage() {
     });
 
     return grouped;
-  }, [matches]);
+  }, [matches, categories]);
 
-  // Filter matches based on filter type
-  const filteredMatches = useMemo(() => {
-    const allMatches = [...matches.autumn, ...matches.spring];
-    
-    switch (filterType) {
-      case "past":
-        return allMatches.filter(match => match.status === "completed");
-      case "future":
-        return allMatches.filter(match => match.status === "upcoming");
-      default:
-        return allMatches;
-    }
-  }, [matches, filterType]);
 
   // Filter grouped matches
   const filteredGroupedMatches = useMemo(() => {
     const filtered: { [key: string]: Match[] } = {};
     
     Object.entries(groupedMatches).forEach(([month, monthMatches]) => {
-      const filteredMonthMatches = monthMatches.filter(match => {
+      let filteredMonthMatches = monthMatches.filter(match => {
         switch (filterType) {
           case "past":
             return match.status === "completed";
@@ -123,6 +114,19 @@ export default function MatchesPage() {
             return true;
         }
       });
+
+      // Filter by selected club if one is selected
+      if (selectedClub) {
+        // Get all teams from the selected club in the selected category
+        const clubTeams = getClubTeamsInCategory(selectedClub, selectedCategory, categories);
+        
+        filteredMonthMatches = filteredMonthMatches.filter(match => {
+          // Check if the match involves any team from the selected club
+          return clubTeams.some(teamId => 
+            match.home_team_id === teamId || match.away_team_id === teamId
+          );
+        });
+      }
       
       if (filteredMonthMatches.length > 0) {
         filtered[month] = filteredMonthMatches;
@@ -130,7 +134,7 @@ export default function MatchesPage() {
     });
 
     return filtered;
-  }, [groupedMatches, filterType]);
+  }, [groupedMatches, filterType, selectedClub, selectedCategory, categories, clubTeamMap]);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -207,23 +211,12 @@ export default function MatchesPage() {
         </div>
       </div>
 
-      {/* Environment Diagnostic */}
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
-        <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
-          🔍 Environment Diagnostic
-        </h3>
-        <div className="text-xs text-yellow-700 dark:text-yellow-300 space-y-1">
-          <div>NODE_ENV: {process.env.NODE_ENV || 'undefined'}</div>
-          <div>SUPABASE_URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Set' : '❌ Missing'}</div>
-          <div>SUPABASE_KEY: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing'}</div>
-        </div>
-      </div>
-
       {/* Club Selector */}
       <ClubSelector
         selectedCategory={selectedCategory}
         selectedClub={selectedClub}
         onClubSelect={setSelectedClub}
+        onClubDataChange={setClubTeamMap}
         className="mb-6"
       />
 
@@ -260,21 +253,38 @@ export default function MatchesPage() {
       {/* Matches by Month */}
       {loading ? (
         <div className="text-center py-8">
+          {/* TODO: another spinner - blueone, better */}
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Načítání zápasů...</p>
         </div>
       ) : (
         <div className="space-y-8">
           {Object.entries(filteredGroupedMatches)
             .sort(([a], [b]) => {
-              const months = [ 'srpen', 'září', 'říjen', 'listopad', 'prosinec', 'leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec'];
-              const aMonth = a.split(' ')[0];
-              const bMonth = b.split(' ')[0];
-              const aYear = parseInt(a.split(' ')[1]);
-              const bYear = parseInt(b.split(' ')[1]);
+              const months = ['srpen', 'září', 'říjen', 'listopad', 'prosinec', 'leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec'];
+              const aParts = a.split(' ');
+              const bParts = b.split(' ');
               
+              if (aParts.length < 2 || bParts.length < 2) return 0;
+              
+              const aMonth = aParts[0];
+              const bMonth = bParts[0];
+              const aYear = parseInt(aParts[1]);
+              const bYear = parseInt(bParts[1]);
+              
+              // Handle invalid years
+              if (isNaN(aYear) || isNaN(bYear)) return 0;
+              
+              // First sort by year
               if (aYear !== bYear) return aYear - bYear;
-              return months.indexOf(aMonth) - months.indexOf(bMonth);
+              
+              // Then sort by month within the same year
+              const aMonthIndex = months.indexOf(aMonth);
+              const bMonthIndex = months.indexOf(bMonth);
+              
+              // Handle unknown months
+              if (aMonthIndex === -1 || bMonthIndex === -1) return 0;
+              
+              return aMonthIndex - bMonthIndex;
             })
             .map(([month, matches]) => (
               <div key={month}>
@@ -283,12 +293,22 @@ export default function MatchesPage() {
                 </h3>
                 <div className="space-y-4">
                   {matches
-                    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                    .sort((a, b) => {
+                      // First sort by date
+                      const dateA = new Date(a.date);
+                      const dateB = new Date(b.date);
+                      const dateComparison = dateA.getTime() - dateB.getTime();
+                      
+                      // If dates are the same, sort by time
+                      if (dateComparison === 0 && a.time && b.time) {
+                        const timeA = new Date(`2000-01-01T${a.time}`);
+                        const timeB = new Date(`2000-01-01T${b.time}`);
+                        return timeA.getTime() - timeB.getTime();
+                      }
+                      
+                      return dateComparison;
+                    })
                     .map((match) => {
-                      // Debug: Log each match before passing to MatchCard
-                      console.log('🔍 Rendering MatchCard for match:', match);
-                      console.log('🔍 Home team:', match.home_team);
-                      console.log('🔍 Away team:', match.away_team);
                       return <MatchCard key={match.id} match={match} />;
                     })}
                 </div>
