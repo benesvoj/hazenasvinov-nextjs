@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, Tab } from "@heroui/tabs";
 import { translations } from "@/lib/translations";
 import { useSeasons, useCategories, useOwnClubMatches, useStandings } from "@/hooks";
 import CategoryStandingsTable from "@/app/(main)/components/CategoryStandingsTable";
 import CategoryMatchesAndResults from "@/app/(main)/components/CategoryMatchesAndResults";
+import { Skeleton } from "@heroui/skeleton";
 
 export default function MatchSchedule() {
   const [selectedCategory, setSelectedCategory] = useState<string>("men");
@@ -76,16 +77,7 @@ export default function MatchSchedule() {
             </div>
           )}
           {matches.length === 0 && !loading && !matchesError && (
-            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
-              <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                Žádné zápasy nebyly nalezeny. Zkontrolujte:
-              </p>
-              <ul className="text-xs text-yellow-600 dark:text-yellow-400 mt-1 list-disc list-inside">
-                <li>Vybranou kategorii a sezónu</li>
-                <li>Zda existují zápasy v databázi</li>
-                <li>Zda je klub označen jako domácí v admin/kluby</li>
-              </ul>
-            </div>
+            <Skeleton className="w-full h-full" />
           )}
         </div>
 
