@@ -282,4 +282,11 @@ export const translations = {
 	team: {
 		unknownTeam: 'Neznámý tým',
 	},
+	sections: {
+		title: 'Sekce',
+		description: 'Správa sekcí, které jsou dostupné v systému.',
+		clubHighlight: 'O našem oddílu',
+		sponsors: 'Naši partneři a sponzoři',
+		callToAction: 'Chcete se připojit k našemu týmu?',
+	},
 } as const;

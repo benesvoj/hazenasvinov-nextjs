@@ -2,6 +2,7 @@
 import { Card, CardHeader, CardBody, Switch, Button, Spinner, Input } from "@heroui/react";
 import { usePageVisibility } from "@/hooks/usePageVisibility";
 import { useState } from "react";
+import { translations } from "@/lib/translations";
 
 export default function ClubPagesCard() {
     const { pages, loading, error, fetchPages, togglePageVisibility, updatePageOrder, updatePageRoute } = usePageVisibility();
@@ -62,6 +63,7 @@ export default function ClubPagesCard() {
         'categories': 'Kategorie týmů',
         'info': 'Informační stránky',
         'admin': 'Administrace',
+        'landing': 'Sekce hlavní stránky',
         'other': 'Ostatní'
     };
 
@@ -229,6 +231,92 @@ export default function ClubPagesCard() {
                             </div>
                         </div>
                     ))}
+                </CardBody>
+            </Card>
+
+            {/* Landing Page Sections Management */}
+            <Card>
+                <CardHeader>
+                    <h3 className="text-lg font-semibold">Sekce hlavní stránky</h3>
+                    <p className="text-sm text-gray-600">
+                        Zde můžete nastavit, které sekce budou zobrazeny na hlavní stránce webu.
+                        Skryté sekce nebudou zobrazeny návštěvníkům.
+                    </p>
+                </CardHeader>
+                <CardBody>
+                    <div className="space-y-4">
+                        {/* Club Highlight Section */}
+                        <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="flex-1">
+                                <h5 className="font-medium text-gray-900">{translations.sections.title} &ldquo;{translations.sections.clubHighlight}&rdquo;</h5>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    Zobrazuje informace o klubu a jeho historii
+                                </p>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <Switch
+                                    isSelected={pages.find(p => p.page_key === 'club_highlight_section')?.is_visible ?? true}
+                                    onValueChange={() => {
+                                        const page = pages.find(p => p.page_key === 'club_highlight_section');
+                                        if (page) {
+                                            handleToggleVisibility(page.id);
+                                        }
+                                    }}
+                                    color="success"
+                                >
+                                    {pages.find(p => p.page_key === 'club_highlight_section')?.is_visible ?? true ? 'Viditelné' : 'Skryté'}
+                                </Switch>
+                            </div>
+                        </div>
+
+                        {/* Sponsors Section */}
+                        <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                            <div className="flex-1">
+                                <h5 className="font-medium text-gray-900">{translations.sections.title} &ldquo;{translations.sections.sponsors}&rdquo;</h5>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    Zobrazuje seznam partnerů a sponzorů klubu
+                                </p>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <Switch
+                                    isSelected={pages.find(p => p.page_key === 'sponsors_section')?.is_visible ?? true}
+                                    onValueChange={() => {
+                                        const page = pages.find(p => p.page_key === 'sponsors_section');
+                                        if (page) {
+                                            handleToggleVisibility(page.id);
+                                        }
+                                    }}
+                                    color="success"
+                                >
+                                    {pages.find(p => p.page_key === 'sponsors_section')?.is_visible ?? true ? 'Viditelné' : 'Skryté'}
+                                </Switch>
+                            </div>
+                        </div>
+
+                        {/* Call to Action Section */}
+                        <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+                            <div className="flex-1">
+                                <h5 className="font-medium text-gray-900">{translations.sections.title} &ldquo;{translations.sections.callToAction}&rdquo;</h5>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    Zobrazuje výzvu k připojení se ke klubu
+                                </p>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <Switch
+                                    isSelected={pages.find(p => p.page_key === 'call_to_action_section')?.is_visible ?? true}
+                                    onValueChange={() => {
+                                        const page = pages.find(p => p.page_key === 'call_to_action_section');
+                                        if (page) {
+                                            handleToggleVisibility(page.id);
+                                        }
+                                    }}
+                                    color="success"
+                                >
+                                    {pages.find(p => p.page_key === 'call_to_action_section')?.is_visible ?? true ? 'Viditelné' : 'Skryté'}
+                                </Switch>
+                            </div>
+                        </div>
+                    </div>
                 </CardBody>
             </Card>
         </div>

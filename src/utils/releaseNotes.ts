@@ -21,7 +21,8 @@ export const releaseNotes: ReleaseNote[] = [
       "🏷️ Intelligent Team Suffix Logic - Smart display of team suffixes only when needed",
       "🔄 Unified Data Flow - Consistent data handling between public and admin match views",
       "📱 Improved Club Grid Layout - Better responsive design with proper spacing and centering",
-      "🎨 HeroUI Integration - Complete migration to HeroUI components for consistency"
+      "🎨 HeroUI Integration - Complete migration to HeroUI components for consistency",
+      "🎛️ Landing Page Section Management - New admin controls for hiding/showing main page sections"
     ],
     improvements: [
       "⚡ Performance Optimization - Eliminated infinite loading states in club selector",
@@ -29,7 +30,8 @@ export const releaseNotes: ReleaseNote[] = [
       "📊 Data Consistency - Unified team suffix logic across all match views",
       "🔄 Smart Filtering - Club selection now properly filters matches by all relevant teams",
       "📱 Responsive Design - Improved club grid layout with proper centering",
-      "🎯 User Experience - Clear visual feedback for selected clubs and categories"
+      "🎯 User Experience - Clear visual feedback for selected clubs and categories",
+      "🎛️ Content Management - Admin can now control visibility of landing page sections"
     ],
     bugFixes: [
       "🐛 Fixed endless loading in ClubSelector component",
@@ -46,7 +48,9 @@ export const releaseNotes: ReleaseNote[] = [
       "🎭 Improved error handling and loading states in club selection",
       "📱 Optimized club grid layout with responsive design patterns",
       "🔄 Unified usePublicMatches and useFetchMatches team suffix logic",
-      "🎨 Standardized UI components and improved visual consistency"
+      "🎨 Standardized UI components and improved visual consistency",
+      "🎛️ Created useSectionVisibility hook for dynamic section rendering",
+      "🗄️ Extended page visibility system to support landing page sections"
     ]
   },
   {

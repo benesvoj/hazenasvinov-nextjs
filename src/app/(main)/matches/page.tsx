@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { 
@@ -49,11 +49,11 @@ export default function MatchesPage() {
   }, [selectedCategory]);
 
   // Helper function to get all teams from a club in a specific category
-  const getClubTeamsInCategory = (clubId: string, categoryCode: string, allCategories: any[]) => {
+  const getClubTeamsInCategory = useCallback((clubId: string, categoryCode: string, allCategories: any[]) => {
     // The ClubSelector now properly handles both "all" and specific category cases
     // Just return the teams for the selected club
     return clubTeamMap[clubId] || [];
-  };
+  }, [clubTeamMap]);
 
   // Group matches by month and enrich with category information
   const groupedMatches = useMemo(() => {
@@ -122,7 +122,7 @@ export default function MatchesPage() {
         
         filteredMonthMatches = filteredMonthMatches.filter(match => {
           // Check if the match involves any team from the selected club
-          return clubTeams.some(teamId => 
+          return clubTeams.some((teamId: string) => 
             match.home_team_id === teamId || match.away_team_id === teamId
           );
         });
@@ -134,7 +134,7 @@ export default function MatchesPage() {
     });
 
     return filtered;
-  }, [groupedMatches, filterType, selectedClub, selectedCategory, categories, clubTeamMap]);
+  }, [groupedMatches, filterType, selectedClub, selectedCategory, categories, getClubTeamsInCategory]);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
