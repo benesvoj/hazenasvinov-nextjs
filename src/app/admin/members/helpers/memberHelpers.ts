@@ -1,4 +1,4 @@
-import { Category } from "@/types/types";
+import { Category } from "@/types";
 
 /**
  * Get the display name for a category code
