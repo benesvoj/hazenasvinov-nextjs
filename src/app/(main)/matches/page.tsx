@@ -20,6 +20,8 @@ export default function MatchesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedClub, setSelectedClub] = useState<string | undefined>(undefined);
   const [clubTeamMap, setClubTeamMap] = useState<{ [clubId: string]: string[] }>({});
+
+
   
   // Use the new public matches hook
   const { matches, loading, error } = usePublicMatches(selectedCategory);
@@ -44,9 +46,26 @@ export default function MatchesPage() {
     fetchCategories();
   }, [fetchActiveSeason, fetchCategories]);
 
-  // Reset club selection when category changes
+  // Reset club selection and filter type when category changes
   useEffect(() => {
     setSelectedClub(undefined);
+    // Reset filter type to "all" when category changes to avoid invalid filter states
+    if (filterType === "home" || filterType === "away") {
+      setFilterType("all");
+    }
+  }, [selectedCategory]); // Removed filterType from dependencies to prevent infinite loop
+
+  // Update URL when category changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (selectedCategory === 'all') {
+        url.searchParams.delete('category');
+      } else {
+        url.searchParams.set('category', selectedCategory);
+      }
+      window.history.replaceState({}, '', url.toString());
+    }
   }, [selectedCategory]);
 
   // Helper function to get all teams from a club in a specific category
@@ -105,7 +124,17 @@ export default function MatchesPage() {
     const filtered: { [key: string]: Match[] } = {};
     
     Object.entries(groupedMatches).forEach(([month, monthMatches]) => {
-      let filteredMonthMatches = monthMatches.filter(match => {
+      let filteredMonthMatches = monthMatches;
+
+      // Filter by selected category (if not "all") - apply this first
+      if (selectedCategory !== 'all') {
+        filteredMonthMatches = filteredMonthMatches.filter(match => 
+          match.category?.code === selectedCategory
+        );
+      }
+
+      // Apply filter type (past, future, home, away)
+      filteredMonthMatches = filteredMonthMatches.filter(match => {
         switch (filterType) {
           case "past":
             return match.status === "completed";
@@ -113,19 +142,21 @@ export default function MatchesPage() {
             return match.status === "upcoming";
           case "home":
             // Filter for home matches (club must be selected)
-            const homeClubTeams = getClubTeamsInCategory(selectedClub!, selectedCategory, categories);
+            if (!selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0) return false;
+            const homeClubTeams = getClubTeamsInCategory(selectedClub, selectedCategory, categories);
             return homeClubTeams.some((teamId: string) => match.home_team_id === teamId);
           case "away":
             // Filter for away matches (club must be selected)
-            const awayClubTeams = getClubTeamsInCategory(selectedClub!, selectedCategory, categories);
+            if (!selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0) return false;
+            const awayClubTeams = getClubTeamsInCategory(selectedClub, selectedCategory, categories);
             return awayClubTeams.some((teamId: string) => match.away_team_id === teamId);
           default:
             return true;
         }
       });
 
-      // Filter by selected club if one is selected
-      if (selectedClub) {
+      // Filter by selected club if one is selected (for non-home/away filters)
+      if (selectedClub && filterType !== "home" && filterType !== "away") {
         // Get all teams from the selected club in the selected category
         const clubTeams = getClubTeamsInCategory(selectedClub, selectedCategory, categories);
         
@@ -223,7 +254,7 @@ export default function MatchesPage() {
             size="sm"
             onPress={() => setFilterType("home")}
             aria-label={translations.matches.homeMatchesButtonDescription}
-            isDisabled={!selectedClub}
+            isDisabled={!selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0}
           >
             {translations.matches.homeMatchesButton}
           </Button>
@@ -233,7 +264,7 @@ export default function MatchesPage() {
             size="sm"
             onPress={() => setFilterType("away")}
             aria-label={translations.matches.awayMatchesButtonDescription}
-            isDisabled={!selectedClub}
+            isDisabled={!selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0}
           >
             {translations.matches.awayMatchesButton}
           </Button>
