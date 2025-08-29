@@ -11,8 +11,9 @@ import { usePublicMatches, useSeasons, useCategories } from "@/hooks";
 import { Select, SelectItem } from "@heroui/react";
 import MatchCard from "@/app/(main)/matches/components/MatchCard";
 import ClubSelector from "@/app/(main)/matches/components/ClubSelector";
-import { formatMonth } from "@/helpers/formatMonth";
-import { Match } from "@/types/match";
+import { formatMonth } from "@/helpers";
+import { Match } from "@/types";
+import { translations } from "@/lib/translations";
 
 export default function MatchesPage() {
   const [filterType, setFilterType] = useState("all");
@@ -110,6 +111,14 @@ export default function MatchesPage() {
             return match.status === "completed";
           case "future":
             return match.status === "upcoming";
+          case "home":
+            // Filter for home matches (club must be selected)
+            const homeClubTeams = getClubTeamsInCategory(selectedClub!, selectedCategory, categories);
+            return homeClubTeams.some((teamId: string) => match.home_team_id === teamId);
+          case "away":
+            // Filter for away matches (club must be selected)
+            const awayClubTeams = getClubTeamsInCategory(selectedClub!, selectedCategory, categories);
+            return awayClubTeams.some((teamId: string) => match.away_team_id === teamId);
           default:
             return true;
         }
@@ -166,7 +175,7 @@ export default function MatchesPage() {
               aria-label="Vyberte kategorii zápasů"
             >
               <SelectItem key="all">
-                Všechny kategorie
+                {translations.matches.allCategories}
               </SelectItem>
               <>
                 {categories.map((category) => (
@@ -186,27 +195,47 @@ export default function MatchesPage() {
             color="primary"
             size="sm"
             onPress={() => setFilterType("all")}
-            aria-label="Zobrazit všechny zápasy"
+            aria-label={translations.matches.allMatchesButtonDescription}
           >
-            Všechny zápasy
+            {translations.matches.allMatches}
           </Button>
           <Button
             variant={filterType === "past" ? "solid" : "bordered"}
             color="primary"
             size="sm"
             onPress={() => setFilterType("past")}
-            aria-label="Zobrazit minulé zápasy"
+            aria-label={translations.matches.recentResultsButtonDescription}
           >
-            Minulé
+            {translations.matches.recentResultsButton}
           </Button>
           <Button
             variant={filterType === "future" ? "solid" : "bordered"}
             color="primary"
             size="sm"
             onPress={() => setFilterType("future")}
-            aria-label="Zobrazit budoucí zápasy"
+            aria-label={translations.matches.upcomingMatchesButtonDescription}
           >
-            Budoucí
+            {translations.matches.upcomingMatchesButton}
+          </Button>
+          <Button
+            variant={filterType === "home" ? "solid" : "bordered"}
+            color="primary"
+            size="sm"
+            onPress={() => setFilterType("home")}
+            aria-label={translations.matches.homeMatchesButtonDescription}
+            isDisabled={!selectedClub}
+          >
+            {translations.matches.homeMatchesButton}
+          </Button>
+          <Button
+            variant={filterType === "away" ? "solid" : "bordered"}
+            color="primary"
+            size="sm"
+            onPress={() => setFilterType("away")}
+            aria-label={translations.matches.awayMatchesButtonDescription}
+            isDisabled={!selectedClub}
+          >
+            {translations.matches.awayMatchesButton}
           </Button>
         </div>
       </div>
