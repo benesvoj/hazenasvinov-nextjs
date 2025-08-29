@@ -11,6 +11,45 @@ export interface ReleaseNote {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: "2.4.0",
+    date: "2025-08-29",
+    title: "Club Selector & Team Management System Overhaul",
+    description: "Major refactoring of the club and team selection system, improved match filtering logic, enhanced team suffix display, and comprehensive UI/UX improvements across the matches management system.",
+    features: [
+      "🏢 Smart Club Selector - Intelligent club filtering with category-based team management",
+      "🎯 Enhanced Match Filtering - Advanced filtering by club, category, and team combinations",
+      "🏷️ Intelligent Team Suffix Logic - Smart display of team suffixes only when needed",
+      "🔄 Unified Data Flow - Consistent data handling between public and admin match views",
+      "📱 Improved Club Grid Layout - Better responsive design with proper spacing and centering",
+      "🎨 HeroUI Integration - Complete migration to HeroUI components for consistency"
+    ],
+    improvements: [
+      "⚡ Performance Optimization - Eliminated infinite loading states in club selector",
+      "🎨 UI/UX Enhancements - Better club button layouts and visual feedback",
+      "📊 Data Consistency - Unified team suffix logic across all match views",
+      "🔄 Smart Filtering - Club selection now properly filters matches by all relevant teams",
+      "📱 Responsive Design - Improved club grid layout with proper centering",
+      "🎯 User Experience - Clear visual feedback for selected clubs and categories"
+    ],
+    bugFixes: [
+      "🐛 Fixed endless loading in ClubSelector component",
+      "🔧 Resolved team suffix display inconsistencies between hooks",
+      "📝 Fixed club filtering not working without category selection",
+      "🖼️ Corrected club grid layout and centering issues",
+      "⚡ Fixed match filtering by club when multiple teams exist",
+      "📊 Resolved data transformation issues in club-team mapping"
+    ],
+    technical: [
+      "🏗️ Refactored ClubSelector to use proper team-based data structure",
+      "🗄️ Implemented centralized team suffix logic using transformMatchWithTeamNames utility",
+      "🔌 Enhanced data flow between ClubSelector and matches page",
+      "🎭 Improved error handling and loading states in club selection",
+      "📱 Optimized club grid layout with responsive design patterns",
+      "🔄 Unified usePublicMatches and useFetchMatches team suffix logic",
+      "🎨 Standardized UI components and improved visual consistency"
+    ]
+  },
+  {
     version: "2.3.0",
     date: "2025-08-21",
     title: "Component Refactoring & UI Consistency Improvements",

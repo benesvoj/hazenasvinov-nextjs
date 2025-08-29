@@ -16,12 +16,6 @@ interface CategoryPostsProps {
 
 export function CategoryPosts({ categoryName, categorySlug }: CategoryPostsProps) {
   const { posts: latestPosts, loading: postsLoading, error: postsError } = useFetchCategoryPosts(categorySlug, 3);
-
-  // Debug information
-  console.log(`CategoryPosts: ${categoryName} (${categorySlug})`);
-  console.log('Posts found:', latestPosts?.length || 0);
-  console.log('Posts:', latestPosts);
-
   return (
     <section className="relative">
       {/* Debug Information */}
