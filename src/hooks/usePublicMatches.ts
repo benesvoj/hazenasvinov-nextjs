@@ -122,11 +122,22 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
       
       // Transform matches to include team names and club information using the centralized utility
       const transformedMatches = matchesData?.map((match: any) => {
+        // For suffix logic, we need category-specific team details
+        // When "all categories" is selected, filter teamDetails by the match's category
+        let categorySpecificTeamDetails = teamDetails;
+        if (categorySlug === 'all' && teamDetails) {
+          categorySpecificTeamDetails = teamDetails.filter((team: any) => {
+            // Find the category for this team through club_categories
+            const teamCategoryId = team.club_category?.category_id;
+            return teamCategoryId === match.category_id;
+          });
+        }
+        
         // Use centralized team display utility with smart suffix logic
         const transformedMatch = transformMatchWithTeamNames(match, [], {
           useTeamMap: true,
           teamMap,
-          teamDetails
+          teamDetails: categorySpecificTeamDetails
         });
         
         // Add the is_own_club flags that are specific to this hook
