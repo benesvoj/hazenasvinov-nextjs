@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Match } from '@/types/match';
-import { transformMatchWithTeamNames } from '@/utils/teamDisplay';
 
 interface PublicMatchesResult {
   matches: {
@@ -81,7 +80,7 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
       }
       
       
-      // Step 3: Fetch team details from club_category_teams table
+      // Step 3: Use the new team_suffix_helper view for perfect suffix logic
       
       // Get unique team IDs to fetch details
       const teamIds = new Set<string>();
@@ -90,71 +89,56 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
         if (match.away_team_id) teamIds.add(match.away_team_id);
       });
       
-      
-      // Fetch team details with club information
+      // Fetch team details using the new view - this gives us perfect suffix logic
       const { data: teamDetails, error: teamError } = await supabase
-        .from('club_category_teams')
-        .select(`
-          id,
-          team_suffix,
-          club_category:club_categories(
-            club:clubs(
-              id,
-              name,
-              short_name,
-              logo_url,
-              is_own_club
-            )
-          )
-        `)
-        .in('id', Array.from(teamIds));
+        .from('team_suffix_helper')
+        .select('*')
+        .in('team_id', Array.from(teamIds));
       
       if (teamError) {  
         throw new Error(`Failed to fetch team details: ${teamError.message}`);
       }
       
-      
       // Create a map for quick team lookup
       const teamMap = new Map();
       teamDetails?.forEach((team: any) => {
-        teamMap.set(team.id, team);
+        teamMap.set(team.team_id, team);
       });
       
-      // Transform matches to include team names and club information using the centralized utility
+      // Transform matches to include team names and club information
       const transformedMatches = matchesData?.map((match: any) => {
-        // For suffix logic, we need category-specific team details
-        // When "all categories" is selected, filter teamDetails by the match's category
-        let categorySpecificTeamDetails = teamDetails;
-        if (categorySlug === 'all' && teamDetails) {
-          categorySpecificTeamDetails = teamDetails.filter((team: any) => {
-            // Find the category for this team through club_categories
-            const teamCategoryId = team.club_category?.category_id;
-            return teamCategoryId === match.category_id;
-          });
-        }
-        
-        // Use centralized team display utility with smart suffix logic
-        const transformedMatch = transformMatchWithTeamNames(match, [], {
-          useTeamMap: true,
-          teamMap,
-          teamDetails: categorySpecificTeamDetails
-        });
-        
-        // Add the is_own_club flags that are specific to this hook
+        // Get team details from the view
         const homeTeamDetails = teamMap.get(match.home_team_id);
         const awayTeamDetails = teamMap.get(match.away_team_id);
-        const homeTeamIsOwnClub = homeTeamDetails?.club_category?.club?.is_own_club === true;
-        const awayTeamIsOwnClub = awayTeamDetails?.club_category?.club?.is_own_club === true;
+        
+        // Build team names with perfect suffix logic using the view data
+        const homeTeamName = homeTeamDetails?.team_count_in_category > 1 
+          ? `${homeTeamDetails.club_name} ${homeTeamDetails.team_suffix}`
+          : homeTeamDetails?.club_name || 'Unknown Team';
+          
+        const awayTeamName = awayTeamDetails?.team_count_in_category > 1 
+          ? `${awayTeamDetails.club_name} ${awayTeamDetails.team_suffix}`
+          : awayTeamDetails?.club_name || 'Unknown Team';
+        
+        // Add the is_own_club flags that are specific to this hook
+        const homeTeamIsOwnClub = homeTeamDetails?.is_own_club === true;
+        const awayTeamIsOwnClub = awayTeamDetails?.is_own_club === true;
         
         return {
-          ...transformedMatch,
+          ...match,
           home_team: {
-            ...transformedMatch.home_team,
-            is_own_club: homeTeamIsOwnClub
+            id: match.home_team_id,
+            name: homeTeamName,
+            short_name: homeTeamDetails?.club_short_name,
+            is_own_club: homeTeamIsOwnClub,
+            logo_url: homeTeamDetails?.club_logo_url
           },
           away_team: {
-            ...transformedMatch.away_team,
-            is_own_club: awayTeamIsOwnClub
+            id: match.away_team_id,
+            name: awayTeamName,
+            short_name: awayTeamDetails?.club_short_name,
+            is_own_club: awayTeamIsOwnClub,
+            logo_url: awayTeamDetails?.club_logo_url
           }
         };
       }) || [];
