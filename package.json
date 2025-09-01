@@ -9,7 +9,8 @@
     "lint": "next lint",
     "setup:page-visibility": "node scripts/setup-page-visibility.js",
     "setup:landing-sections": "node scripts/setup-landing-sections.js",
-    "setup:team-suffix-view": "node scripts/setup-team-suffix-view.js"
+    "setup:team-suffix-view": "node scripts/setup-team-suffix-view.js",
+    "setup:videos-table": "node scripts/setup-videos-table.js"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",

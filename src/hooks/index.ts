@@ -1,5 +1,6 @@
 export * from './useAuth';
 export * from './useClubConfig';
+export * from './useClubs';
 export * from './useExcelImport';
 export { useFetchBlogPosts } from './useFetchBlogPosts';
 export * from './useFetchCategories';

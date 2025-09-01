@@ -53,6 +53,7 @@ export const privateRoutes = {
 	photoGallery: '/admin/photo-gallery',
 	clubs: '/admin/clubs',
 	clubCategories: '/admin/club-categories',
+	videos: '/admin/videos',
 };
 
 const routes: MenuItem[] = [
@@ -137,6 +138,7 @@ const routes: MenuItem[] = [
 	{route: privateRoutes.photoGallery, title: 'Fotogalerie', isPrivate: true, description: 'Správa fotoalb a fotografií.'},
 	{route: privateRoutes.clubs, title: 'Kluby', isPrivate: true, description: 'Správa klubů a jejich týmů.'},
 	{route: privateRoutes.clubCategories, title: 'Přiřazení klubů', isPrivate: true, description: 'Správa přiřazení klubů ke kategoriím pro různé sezóny.'},
+	{route: privateRoutes.videos, title: 'Videa', isPrivate: true, description: 'Správa videí pro jednotlivé kategorie.'},
 ]
 
 export default routes

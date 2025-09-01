@@ -22,6 +22,7 @@ import {
   HeartIcon,
   TagIcon,
   PhotoIcon,
+  VideoCameraIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
 
@@ -62,6 +63,8 @@ const getRouteIcon = (route: string) => {
       return <BuildingOfficeIcon className="w-5 h-5" />;
     case privateRoutes.clubCategories:
       return <BuildingOfficeIcon className="w-5 h-5" />;
+    case privateRoutes.videos:
+      return <VideoCameraIcon className="w-5 h-5" />;
     default:
       return <Cog6ToothIcon className="w-5 h-5" />;
   }
