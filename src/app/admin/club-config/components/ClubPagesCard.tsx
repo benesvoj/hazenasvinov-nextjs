@@ -5,10 +5,12 @@ import { useState } from "react";
 import { translations } from "@/lib/translations";
 
 export default function ClubPagesCard() {
-    const { pages, loading, error, fetchPages, togglePageVisibility, updatePageOrder, updatePageRoute } = usePageVisibility();
+    const { pages, loading, error, fetchPages, togglePageVisibility, updatePageOrder, updatePageRoute, updatePageTitle } = usePageVisibility();
     const [updating, setUpdating] = useState<string | null>(null);
     const [editingRoute, setEditingRoute] = useState<string | null>(null);
     const [routeValue, setRouteValue] = useState<string>('');
+    const [editingTitle, setEditingTitle] = useState<string | null>(null);
+    const [titleValue, setTitleValue] = useState<string>('');
 
     const handleToggleVisibility = async (id: string) => {
         setUpdating(id);
@@ -47,6 +49,27 @@ export default function ClubPagesCard() {
     const handleRouteCancel = () => {
         setEditingRoute(null);
         setRouteValue('');
+    };
+
+    const handleTitleEdit = (page: any) => {
+        setEditingTitle(page.id);
+        setTitleValue(page.page_title);
+    };
+
+    const handleTitleSave = async (id: string) => {
+        setUpdating(id);
+        try {
+            await updatePageTitle(id, titleValue);
+            setEditingTitle(null);
+            setTitleValue('');
+        } finally {
+            setUpdating(null);
+        }
+    };
+
+    const handleTitleCancel = () => {
+        setEditingTitle(null);
+        setTitleValue('');
     };
 
     const groupedPages = pages.reduce((acc, page) => {
@@ -168,7 +191,46 @@ export default function ClubPagesCard() {
                                                         />
                                                     </div>
                                                     <div>
-                                                        <h5 className="font-medium text-gray-900">{page.page_title}</h5>
+                                                        {editingTitle === page.id ? (
+                                                            <div className="flex items-center space-x-2 mb-2">
+                                                                <Input
+                                                                    size="sm"
+                                                                    value={titleValue}
+                                                                    onChange={(e) => setTitleValue(e.target.value)}
+                                                                    placeholder="Zadejte nový název stránky"
+                                                                    className="w-64"
+                                                                />
+                                                                <Button
+                                                                    size="sm"
+                                                                    color="success"
+                                                                    variant="flat"
+                                                                    onPress={() => handleTitleSave(page.id)}
+                                                                    isDisabled={updating === page.id}
+                                                                >
+                                                                    Uložit
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    color="default"
+                                                                    variant="light"
+                                                                    onPress={handleTitleCancel}
+                                                                >
+                                                                    Zrušit
+                                                                </Button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center space-x-2 mb-2">
+                                                                <h5 className="font-medium text-gray-900">{page.page_title}</h5>
+                                                                <Button
+                                                                    size="sm"
+                                                                    color="primary"
+                                                                    variant="light"
+                                                                    onPress={() => handleTitleEdit(page)}
+                                                                >
+                                                                    Upravit název
+                                                                </Button>
+                                                            </div>
+                                                        )}
                                                         {editingRoute === page.id ? (
                                                             <div className="flex items-center space-x-2 mt-1">
                                                                 <Input

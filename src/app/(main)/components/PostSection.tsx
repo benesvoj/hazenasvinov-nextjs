@@ -8,6 +8,7 @@ import { BlogPostCardSkeleton } from "@/components/BlogPostCard";
 import BlogPostCard from '@/components/BlogPostCard'
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useFetchBlogPosts } from "@/hooks/useFetchBlogPosts";
+import { translations } from "@/lib/translations";
 
 export default function PostSection() {
     const { posts: latestPosts, loading: postsLoading, error: postsError } = useFetchBlogPosts(3);
@@ -17,10 +18,10 @@ export default function PostSection() {
         {/* Section Header with enhanced styling */}
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            Nejnovější novinky
+            {translations.landingPage.posts.title}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Sledujte nejdůležitější události a informace z našeho klubu
+            {translations.landingPage.posts.description}
           </p>
         </div>
 
@@ -42,7 +43,7 @@ export default function PostSection() {
                     <TagIcon className="w-8 h-8 text-red-500" />
                   </div>
                   <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
-                    Chyba při načítání novinek
+                    {translations.landingPage.posts.errorPosts}
                   </h3>
                   <p className="text-red-600 dark:text-red-400 mb-4 max-w-md mx-auto">
                     {postsError}
@@ -53,7 +54,7 @@ export default function PostSection() {
                     onPress={() => window.location.reload()}
                     className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
                   >
-                    Zkusit znovu
+                      {translations.button.tryAgain}
                   </Button>
                 </CardBody>
               </Card>
@@ -77,11 +78,8 @@ export default function PostSection() {
                     <TagIcon className="w-8 h-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                    Zatím žádné novinky
+                    {translations.landingPage.posts.noPosts}
                   </h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-lg mx-auto">
-                    První články se objeví, jakmile budou publikovány v administraci.
-                  </p>
                   <Button 
                     as={Link} 
                     href="/blog" 
@@ -89,7 +87,7 @@ export default function PostSection() {
                     variant="bordered"
                     className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
                   >
-                    Procházet blog
+                    {translations.landingPage.posts.browsePostsButton}
                   </Button>
                 </CardBody>
               </Card>
@@ -109,7 +107,7 @@ export default function PostSection() {
               className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20"
               endContent={<ArrowRightIcon className="w-4 h-4" />}
             >
-              Zobrazit všechny novinky
+              {translations.landingPage.posts.viewAllPostsButton}
             </Button>
           </div>
         )}

@@ -94,6 +94,34 @@ export const usePageVisibility = () => {
     }
   };
 
+  const updatePageTitle = async (id: string, newTitle: string) => {
+    try {
+      const response = await fetch('/api/page-visibility', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, page_title: newTitle }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update page title');
+      }
+
+      const updatedPage = await response.json();
+      setPages(prevPages => 
+        prevPages.map(page => 
+          page.id === id ? updatedPage : page
+        )
+      );
+
+      return updatedPage;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchPages();
   }, []);
@@ -107,5 +135,6 @@ export const usePageVisibility = () => {
     togglePageVisibility,
     updatePageOrder,
     updatePageRoute,
+    updatePageTitle,
   };
 };

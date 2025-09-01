@@ -56,7 +56,7 @@ export const privateRoutes = {
 };
 
 const routes: MenuItem[] = [
-	{route: publicRoutes.home, title: 'Úvod'},
+	{route: publicRoutes.home, title: translations.landingPage.title},
 	{
 		title: 'Kategorie', children: [
 			{
