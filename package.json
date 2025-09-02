@@ -11,7 +11,12 @@
     "setup:landing-sections": "node scripts/setup-landing-sections.js",
     "setup:team-suffix-view": "node scripts/setup-team-suffix-view.js",
     "setup:videos-table": "node scripts/setup-videos-table.js",
-    "setup:coach-categories": "node scripts/setup-coach-categories.js"
+    "setup:coach-categories": "node scripts/setup-coach-categories.js",
+    "setup:user-roles": "node scripts/setup-user-roles.js",
+    "setup:initial-admin": "node scripts/setup-initial-admin.js",
+    "create:first-admin": "node scripts/create-first-admin.js",
+    "fix:admin-user": "node scripts/fix-admin-user.js",
+    "update:user-role-view": "node scripts/update-user-role-view.js"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",

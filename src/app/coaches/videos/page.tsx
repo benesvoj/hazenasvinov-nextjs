@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Video, VideoFormData, VideoFilters } from '@/types';
-import { useClubs, useSeasons, useAuth, useCategories } from '@/hooks';
+import { useClubs, useSeasons, useAuth, useCategories, useUserRoles } from '@/hooks';
 import { 
   VideoCameraIcon, 
   PlusIcon, 
@@ -43,31 +43,18 @@ export default function CoachesVideosPage() {
   const { clubs, loading: clubsLoading } = useClubs();
   const { seasons, loading: seasonsLoading, fetchAllSeasons } = useSeasons();
   const { user, loading: authLoading } = useAuth();
+  const { getCurrentUserCategories } = useUserRoles();
 
-  // Fetch coach's assigned categories
+  // Fetch coach's assigned categories using new role system
   const fetchAssignedCategories = async () => {
     if (!user?.id) return;
 
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('assigned_categories')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching assigned categories:', error);
-        if (error.code === 'PGRST116') {
-          console.log('User profile not found - this might be a new user');
-          setAssignedCategories([]);
-        }
-        return;
-      }
-
-      setAssignedCategories(data?.assigned_categories || []);
+      const categories = await getCurrentUserCategories();
+      setAssignedCategories(categories);
     } catch (err) {
       console.error('Error fetching assigned categories:', err);
+      setAssignedCategories([]);
     }
   };
 

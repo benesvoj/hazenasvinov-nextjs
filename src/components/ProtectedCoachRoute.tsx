@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { AcademicCapIcon } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody } from '@heroui/react';
+import { useUserRoles } from '@/hooks';
 
 interface ProtectedCoachRouteProps {
   children: React.ReactNode;
@@ -21,9 +22,9 @@ export default function ProtectedCoachRoute({
   fallback 
 }: ProtectedCoachRouteProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { hasRole } = useUserRoles();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -41,27 +42,18 @@ export default function ProtectedCoachRoute({
 
         setUser(user);
 
-        // Get user profile
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('role, club_id')
-          .eq('user_id', user.id)
-          .single();
+        // Check if user has coach or admin role using new role system
+        const [isCoach, isAdmin] = await Promise.all([
+          hasRole('coach'),
+          hasRole('admin')
+        ]);
 
-        if (profileError || !profile) {
-          setError('Uživatelský profil nebyl nalezen');
-          setLoading(false);
-          return;
-        }
-
-        // Check if user has coach role
-        if (profile.role !== 'coach' && profile.role !== 'head_coach') {
+        if (!isCoach && !isAdmin) {
           setError('Nemáte oprávnění pro přístup do trenérského portálu');
           setLoading(false);
           return;
         }
 
-        setUserProfile(profile);
         setLoading(false);
       } catch (err) {
         setError('Došlo k neočekávané chybě');
@@ -81,7 +73,7 @@ export default function ProtectedCoachRoute({
     );
   }
 
-  if (error || !user || !userProfile) {
+  if (error || !user) {
     if (fallback) {
       return <>{fallback}</>;
     }
