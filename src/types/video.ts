@@ -11,14 +11,14 @@ export interface Video {
     code: string;
   };
   club_id?: string;
-  club?: {
+  clubs?: {
     id: string;
     name: string;
     short_name: string;
   };
   recording_date?: string;
   season_id?: string;
-  season?: {
+  seasons?: {
     id: string;
     name: string;
     start_date: string;

@@ -489,6 +489,7 @@ export default function VideosPage() {
                     onEdit={openEditModal}
                     onDelete={openDeleteModal}
                     categories={categories}
+                    seasons={seasons}
                   />
                 ))}
         </div>

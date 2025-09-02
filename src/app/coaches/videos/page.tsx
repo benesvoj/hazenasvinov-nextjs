@@ -3,22 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Video, VideoFormData, VideoFilters } from '@/types';
-import { useCategories } from '@/hooks/useCategories';
-import { useClubs } from '@/hooks/useClubs';
-import { useSeasons } from '@/hooks/useSeasons';
-import { useAuth } from '@/hooks/useAuth';
+import { useClubs, useSeasons, useAuth, useCategories } from '@/hooks';
 import { 
   VideoCameraIcon, 
   PlusIcon, 
   MagnifyingGlassIcon,
   FunnelIcon,
-  PlayIcon
 } from '@heroicons/react/24/outline';
 import { 
   Button, 
   Card, 
   CardBody, 
-  CardHeader, 
   Input, 
   Select, 
   SelectItem,
@@ -28,8 +23,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Textarea,
-  Chip,
   Skeleton
 } from '@heroui/react';
 import { VideoFormModal, VideoCard } from '@/app/admin/videos/components';
@@ -552,6 +545,7 @@ export default function CoachesVideosPage() {
                     onEdit={openEditModal}
                     onDelete={openDeleteModal}
                     categories={availableCategories}
+                    seasons={seasons}
                   />
                 ))}
               </div>
