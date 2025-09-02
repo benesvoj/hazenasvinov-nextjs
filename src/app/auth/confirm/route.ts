@@ -22,6 +22,8 @@ export async function GET(request: NextRequest) {
 		fullUrl: request.url
 	})
 
+
+
 	// Handle token_hash, code, and token parameters
 	if ((token_hash || code || token) && type) {
 		try {

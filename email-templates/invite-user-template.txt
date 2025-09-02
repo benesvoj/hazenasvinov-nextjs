@@ -22,7 +22,7 @@ jsme součástí českého sportovního prostředí a během této doby jsme nas
 ✅ PŘIJMOUT POZVÁNKU
 ====================
 Klikněte na následující odkaz pro vytvoření vašeho účtu:
-{{ .ConfirmationURL }}?next={{ .SiteURL }}/set-password
+{{ .ConfirmationURL }}
 
 ℹ️ CO SE STANE DÁL?
 ===================
