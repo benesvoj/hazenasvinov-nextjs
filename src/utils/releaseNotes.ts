@@ -11,6 +11,62 @@ export interface ReleaseNote {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: "2.5.0",
+    date: "2025-09-02",
+    title: "Modal Refactoring & Navigation Visibility Fixes",
+    description: "Major refactoring of blog post management modals into reusable components, comprehensive coach portal authentication fixes, unified login system implementation, and resolved React Hook dependency warnings for better code maintainability.",
+    features: [
+      "🔧 Modal Component Refactoring - Extracted AddPostModal, EditPostModal, and DeletePostModal into separate reusable components",
+      "📅 Custom Date Creation - Added ability to set custom creation dates for blog posts",
+      "🎯 Navigation Visibility Control - Fixed admin link visibility to properly respect database settings",
+      "⚡ React Hook Optimization - Resolved dependency warnings with proper useCallback implementation",
+      "🎨 Component Architecture - Improved separation of concerns and code reusability",
+      "📱 Better User Experience - Enhanced modal interactions with proper form state management",
+      "🏃‍♂️ Coach Portal Authentication - Fixed multiple user profile handling and PGRST116 errors",
+      "🔐 Unified Login System - Created single login page with admin and coach portal tabs",
+      "🛡️ Protected Route Fixes - Resolved coach portal sidebar visibility and authentication issues"
+    ],
+    improvements: [
+      "⚡ Code Maintainability - Reduced duplication and improved component organization",
+      "🎨 UI Consistency - Standardized modal components across the application",
+      "📊 Database Integration - Admin navigation now properly respects page visibility settings",
+      "🔄 State Management - Cleaner form state handling in modal components",
+      "📱 Component Reusability - Modal components can now be used in other parts of the application",
+      "🎯 User Experience - Better form validation and error handling in modals",
+      "🏃‍♂️ Coach Portal UX - Improved login flow with unified interface for admin and coach access",
+      "🔐 Authentication Flow - Streamlined login process with role-based redirection",
+      "🛡️ Security Enhancements - Better error handling and user feedback in protected routes"
+    ],
+    bugFixes: [
+      "🐛 Fixed admin link showing in navigation despite database visibility set to false",
+      "🔧 Resolved React Hook dependency warning in AssignCategoryModal component",
+      "📝 Fixed TypeScript implicit any type error in useUserRoles hook",
+      "🖼️ Corrected Next.js 15 Suspense boundary requirement for useSearchParams",
+      "⚡ Fixed build compilation errors preventing production deployment",
+      "📊 Resolved hardcoded admin menu item ignoring database visibility settings",
+      "🏃‍♂️ Fixed PGRST116 error when admin users with multiple profiles tried to access coach portal",
+      "🔐 Resolved coach portal sidebar showing even when user was not logged in",
+      "🛡️ Fixed ProtectedCoachRoute syntax error preventing proper error handling",
+      "👥 Corrected multiple user profile handling in coach portal authentication"
+    ],
+    technical: [
+      "🏗️ Created separate modal components for blog post management (AddPostModal, EditPostModal, DeletePostModal)",
+      "🗄️ Implemented proper useCallback patterns for React Hook dependency management",
+      "🔌 Fixed dynamic routing system to respect database page visibility settings",
+      "🎭 Enhanced error handling and loading states in modal components",
+      "📱 Optimized component rendering with proper memoization",
+      "🔄 Refactored form state management for better performance and maintainability",
+      "🎨 Standardized modal component interfaces and prop handling",
+      "🗄️ Extended blog post creation with custom date functionality",
+      "🔧 Fixed Next.js 15 compatibility issues with Suspense boundaries",
+      "🏃‍♂️ Refactored coach portal authentication to handle multiple user profiles",
+      "🔐 Implemented unified login system with tabbed interface for admin and coach access",
+      "🛡️ Enhanced ProtectedCoachRoute component with proper error handling and role checking",
+      "👥 Updated useUserRoles hook to handle multiple profiles and legacy role systems",
+      "🗄️ Fixed Supabase queries to use .find() instead of .single() for multiple profile scenarios"
+    ]
+  },
+  {
     version: "2.4.0",
     date: "2025-08-29",
     title: "Club Selector & Team Management System Overhaul",
