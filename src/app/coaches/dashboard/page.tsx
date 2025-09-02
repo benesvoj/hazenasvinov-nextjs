@@ -6,7 +6,6 @@ import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { UserIcon, VideoCameraIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, CardHeader } from '@heroui/react';
-import AuthDebugger from '@/components/AuthDebugger';
 
 interface UserProfile {
   id: string;
@@ -114,9 +113,6 @@ export default function CoachesDashboard() {
 
   return (
     <div className="space-y-6">
-        {/* Debug Info - Remove this after fixing */}
-        <AuthDebugger />
-        
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
