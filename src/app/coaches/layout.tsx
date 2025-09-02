@@ -1,6 +1,7 @@
 'use client';
 
 import React from "react";
+import { usePathname } from "next/navigation";
 import { CoachesSidebar, CoachesTopBar, CoachesSidebarProvider } from "@/app/coaches/components";
 import ProtectedCoachRoute from "@/components/ProtectedCoachRoute";
 
@@ -9,6 +10,13 @@ export default function CoachesLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  
+  // Don't show sidebar and top bar on login page
+  if (pathname === '/coaches/login') {
+    return <>{children}</>;
+  }
+
   return (
     <ProtectedCoachRoute>
       <CoachesSidebarProvider>

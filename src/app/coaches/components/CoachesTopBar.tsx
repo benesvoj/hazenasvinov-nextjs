@@ -47,13 +47,14 @@ export function CoachesTopBar() {
         const { createClient } = await import('@/utils/supabase/client');
         const supabase = createClient();
         
-        const { data } = await supabase
+        const { data: profiles } = await supabase
           .from('user_profiles')
           .select('role, clubs(name)')
-          .eq('user_id', user.id)
-          .single();
+          .eq('user_id', user.id);
           
-        setUserProfile(data);
+        // Find coach profile or use first profile
+        const profile = profiles?.find((p: any) => p.role === 'coach' || p.role === 'head_coach') || profiles?.[0];
+        setUserProfile(profile);
       } catch (error) {
         console.error('Error fetching user profile:', error);
       }

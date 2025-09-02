@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pozvánka do systému TJ Sokol Svinov</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #1e3a8a;
+        }
+        .message {
+            font-size: 16px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            transition: transform 0.2s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
+        }
+        .info-box {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            color: #1e3a8a;
+            font-size: 16px;
+        }
+        .info-box p {
+            margin: 0;
+            font-size: 14px;
+            color: #374151;
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        .footer p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        .club-info {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .club-info h4 {
+            margin: 0 0 10px 0;
+            color: #92400e;
+            font-size: 16px;
+        }
+        .club-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #78350f;
+        }
+        .security-note {
+            background-color: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .security-note p {
+            margin: 0;
+            font-size: 13px;
+            color: #991b1b;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .header {
+                padding: 20px 15px;
+            }
+            .content {
+                padding: 20px 15px;
+            }
+            .cta-button {
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>🏐 TJ Sokol Svinov</h1>
+            <p>Oddíl národní házené s více než 90letou tradicí</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Vážený/á {{ .Email }},
+            </div>
+            
+            <div class="message">
+                <p>Dostali jste pozvánku k vytvoření uživatelského účtu v systému <strong>TJ Sokol Svinov</strong>. Jako člen našeho oddílu národní házené získáte přístup k:</p>
+                
+                <ul>
+                    <li>📊 Aktuálním výsledkům a programům zápasů</li>
+                    <li>👥 Správě členů a týmů</li>
+                    <li>📝 Administračním funkcím (podle vašich oprávnění)</li>
+                    <li>📸 Fotogalerii a novinkám</li>
+                    <li>🎥 Tréninkovým videím a materiálům</li>
+                </ul>
+            </div>
+            
+            <div class="club-info">
+                <h4>🏆 O našem oddílu</h4>
+                <p>TJ Sokol Svinov je tradiční házenkářský klub s bohatou historií. Už přes 90 let jsme součástí českého sportovního prostředí a během této doby jsme nasbírali řadu úspěchů v soutěžích dospělých i mládeže.</p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ .ConfirmationURL }}?next={{ .SiteURL }}/set-password" class="cta-button">
+                    ✅ Přijmout pozvánku a vytvořit účet
+                </a>
+            </div>
+            
+            <div class="info-box">
+                <h3>ℹ️ Co se stane dál?</h3>
+                <p>Po kliknutí na tlačítko výše budete přesměrováni na stránku, kde si nastavíte své heslo a dokončíte registraci. Poté se budete moci přihlásit do systému pomocí svého emailu a hesla.</p>
+            </div>
+            
+            <div class="security-note">
+                <p><strong>🔒 Bezpečnostní upozornění:</strong> Tento odkaz je platný pouze pro vás a má omezenou dobu platnosti. Pokud jste si tento email nevyžádali, prosím kontaktujte nás na admin@hazenasvinov.cz</p>
+            </div>
+            
+            <div class="message">
+                <p>Pokud máte jakékoliv dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat:</p>
+                <ul>
+                    <li>📧 Email: admin@hazenasvinov.cz</li>
+                    <li>🌐 Web: {{ .SiteURL }}</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>TJ Sokol Svinov</strong></p>
+            <p>Oddíl národní házené ve Svinově</p>
+            <p>Více než 90 let tradice • Váš tým pro národní házenou</p>
+            <p style="margin-top: 15px; font-size: 12px; color: #9ca3af;">
+                Tento email byl odeslán automaticky. Prosím neodpovídejte na tuto adresu.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

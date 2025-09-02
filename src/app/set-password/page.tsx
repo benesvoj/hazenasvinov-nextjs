@@ -4,9 +4,9 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Button, Input, Card, CardBody, CardHeader } from '@heroui/react';
-import { LockClosedIcon, EyeIcon, EyeSlashIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { LockClosedIcon, EyeIcon, EyeSlashIcon, CheckCircleIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 
-function ResetPasswordContent() {
+function SetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [password, setPassword] = useState('');
@@ -32,12 +32,9 @@ function ResetPasswordContent() {
   // Check if we have the required parameters (Supabase uses different parameter names)
   const accessToken = searchParams.get('access_token') || searchParams.get('token');
   const refreshToken = searchParams.get('refresh_token') || searchParams.get('type');
-  
-  // For password reset flow, users are redirected from auth/confirm route
-  // They should already be authenticated, so we don't require access_token in URL
 
   useEffect(() => {
-    console.log('Reset password page loaded with params:', {
+    console.log('Set password page loaded with params:', {
       accessToken: accessToken ? 'present' : 'missing',
       refreshToken: refreshToken ? 'present' : 'missing',
       supabaseError,
@@ -48,19 +45,17 @@ function ResetPasswordContent() {
 
     // Handle Supabase errors
     if (supabaseError) {
-      let errorMessage = 'Odkaz pro obnovení hesla je neplatný nebo vypršel.';
+      let errorMessage = 'Odkaz pro nastavení hesla je neplatný nebo vypršel.';
       
       if (supabaseErrorCode === 'otp_expired') {
-        errorMessage = 'Odkaz pro obnovení hesla vypršel. Požádejte o nový odkaz.';
+        errorMessage = 'Odkaz pro nastavení hesla vypršel. Požádejte administrátora o nový odkaz.';
       } else if (supabaseErrorCode === 'access_denied') {
         errorMessage = 'Přístup byl zamítnut. Odkaz může být neplatný nebo vypršel.';
       }
       
       setError(errorMessage);
-    } else if (!accessToken && !supabaseError) {
-      // Only show error if we have neither access token nor supabase error
-      // This allows the page to work when redirected from auth/confirm route
-      console.log('No access token found, but no error either - user may be redirected from auth/confirm');
+    } else if (!accessToken) {
+      setError('Neplatný odkaz pro nastavení hesla. Zkontrolujte svůj email.');
     }
   }, [accessToken, refreshToken, searchParams, supabaseError, supabaseErrorCode, supabaseErrorDescription]);
 
@@ -103,14 +98,36 @@ function ResetPasswordContent() {
 
       setSuccess(true);
       
-      // Redirect to login page after 3 seconds
-      setTimeout(() => {
-        router.push('/login');
+      // Redirect to appropriate page based on user role after 3 seconds
+      setTimeout(async () => {
+        try {
+          // Get user profile to determine redirect
+          const { data: userProfile, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('role')
+            .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+            .single();
+
+          if (profileError || !userProfile) {
+            // If no profile found, redirect to admin (default)
+            router.push('/admin');
+          } else if (userProfile.role === 'coach' || userProfile.role === 'head_coach') {
+            // Redirect coaches to coaches dashboard
+            router.push('/coaches/dashboard');
+          } else {
+            // Redirect other users to admin panel
+            router.push('/admin');
+          }
+        } catch (redirectError) {
+          console.error('Error determining redirect:', redirectError);
+          // Fallback to admin panel
+          router.push('/admin');
+        }
       }, 3000);
 
     } catch (error) {
-      console.error('Error updating password:', error);
-      setError('Chyba při aktualizaci hesla. Zkuste to znovu.');
+      console.error('Error setting password:', error);
+      setError('Chyba při nastavení hesla. Zkuste to znovu.');
     } finally {
       setIsLoading(false);
     }
@@ -122,24 +139,18 @@ function ResetPasswordContent() {
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Heslo bylo úspěšně změněno!</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Vítejte v systému!</h1>
             <p className="text-gray-600 mb-6">
-              Vaše nové heslo bylo uloženo. Budete přesměrováni na přihlašovací stránku.
+              Vaše heslo bylo úspěšně nastaveno. Budete přesměrováni do systému.
             </p>
-            <Button 
-              color="primary" 
-              onPress={() => router.push('/login')}
-              className="w-full"
-            >
-              Přejít na přihlášení
-            </Button>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
           </CardBody>
         </Card>
       </div>
     );
   }
 
-  if (supabaseError) {
+  if (!accessToken || supabaseError) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50">
         <Card className="w-full max-w-md">
@@ -149,13 +160,13 @@ function ResetPasswordContent() {
               {supabaseErrorCode === 'otp_expired' ? 'Odkaz vypršel' : 'Neplatný odkaz'}
             </h1>
             <p className="text-gray-600 mb-6">
-              {error || 'Odkaz pro obnovení hesla je neplatný nebo vypršel.'}
+              {error || 'Odkaz pro nastavení hesla je neplatný nebo vypršel.'}
             </p>
             
             {supabaseErrorCode === 'otp_expired' && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <p className="text-sm text-blue-800">
-                  <strong>Řešení:</strong> Požádejte administrátora o odeslání nového emailu pro obnovení hesla.
+                  <strong>Řešení:</strong> Požádejte administrátora o odeslání nového pozvánkového emailu.
                 </p>
               </div>
             )}
@@ -188,11 +199,11 @@ function ResetPasswordContent() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mb-4">
-            <LockClosedIcon className="w-8 h-8 text-white" />
+            <UserPlusIcon className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Nastavit nové heslo</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Vítejte v TJ Sokol Svinov!</h1>
           <p className="text-gray-600 text-sm">
-            Zadejte své nové heslo pro přístup do systému
+            Nastavte si heslo pro přístup do systému
           </p>
         </CardHeader>
         <CardBody>
@@ -288,7 +299,7 @@ function ResetPasswordContent() {
               isLoading={isLoading}
               isDisabled={!password || !confirmPassword || !Object.values(passwordStrength).every(Boolean)}
             >
-              Nastavit nové heslo
+              Nastavit heslo a pokračovat
             </Button>
 
             {/* Back to Login */}
@@ -308,7 +319,7 @@ function ResetPasswordContent() {
   );
 }
 
-export default function ResetPasswordPage() {
+export default function SetPasswordPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -320,7 +331,7 @@ export default function ResetPasswordPage() {
         </Card>
       </div>
     }>
-      <ResetPasswordContent />
+      <SetPasswordContent />
     </Suspense>
   );
 }

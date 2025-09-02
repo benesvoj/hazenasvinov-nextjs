@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     
     // Get the origin from the request headers
     const origin = request.headers.get('origin') || 'http://localhost:3000';
-    const redirectUrl = `${origin}/reset-password`;
+    const redirectUrl = `${origin}/auth/confirm`;
     
     console.log('Sending password reset email to:', email);
     console.log('Redirect URL:', redirectUrl);

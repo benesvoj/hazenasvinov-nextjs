@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { UserIcon, VideoCameraIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, CardHeader } from '@heroui/react';
+import AuthDebugger from '@/components/AuthDebugger';
 
 interface UserProfile {
   id: string;
@@ -37,8 +38,8 @@ export default function CoachesDashboard() {
 
         setUser(user);
 
-        // Get user profile
-        const { data: profile, error: profileError } = await supabase
+        // Get user profiles - handle multiple profiles
+        const { data: profiles, error: profileError } = await supabase
           .from('user_profiles')
           .select(`
             id,
@@ -47,28 +48,31 @@ export default function CoachesDashboard() {
             club_id,
             clubs(name)
           `)
-          .eq('user_id', user.id)
-          .single();
+          .eq('user_id', user.id);
 
-        if (profileError || !profile) {
+        if (profileError || !profiles || profiles.length === 0) {
           setError('Uživatelský profil nebyl nalezen.');
           return;
         }
 
-        // Check if user has coach role
-        if (profile.role !== 'coach' && profile.role !== 'head_coach') {
+        // Find coach profile
+        const coachProfile = profiles.find((profile: any) => 
+          profile.role === 'coach' || profile.role === 'head_coach'
+        );
+
+        if (!coachProfile) {
           setError('Nemáte oprávnění pro přístup do trenérského portálu.');
           return;
         }
 
         // Transform the profile data
         const transformedProfile: UserProfile = {
-          id: profile.id,
-          user_id: profile.user_id,
-          role: profile.role,
-          club_id: profile.club_id,
-          club_name: profile.clubs?.name,
-          created_at: profile.created_at || new Date().toISOString(),
+          id: coachProfile.id,
+          user_id: coachProfile.user_id,
+          role: coachProfile.role,
+          club_id: coachProfile.club_id,
+          club_name: coachProfile.clubs?.name,
+          created_at: coachProfile.created_at || new Date().toISOString(),
         };
 
         setUserProfile(transformedProfile);
@@ -110,6 +114,9 @@ export default function CoachesDashboard() {
 
   return (
     <div className="space-y-6">
+        {/* Debug Info - Remove this after fixing */}
+        <AuthDebugger />
+        
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">

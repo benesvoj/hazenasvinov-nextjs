@@ -43,13 +43,20 @@ export default function ProtectedCoachRoute({
         setUser(user);
 
         // Check if user has coach or admin role using new role system
-        const [isCoach, isAdmin] = await Promise.all([
-          hasRole('coach'),
-          hasRole('admin')
-        ]);
+        try {
+          const [isCoach, isAdmin] = await Promise.all([
+            hasRole('coach'),
+            hasRole('admin')
+          ]);
 
-        if (!isCoach && !isAdmin) {
-          setError('Nemáte oprávnění pro přístup do trenérského portálu');
+          if (!isCoach && !isAdmin) {
+            setError('Nemáte oprávnění pro přístup do trenérského portálu');
+            setLoading(false);
+            return;
+          }
+        } catch (roleError) {
+          console.error('Error checking user roles:', roleError);
+          setError('Uživatelský profil nebyl nalezen');
           setLoading(false);
           return;
         }
@@ -63,7 +70,7 @@ export default function ProtectedCoachRoute({
     };
 
     checkAuth();
-  }, []);
+  }, [hasRole]);
 
   if (loading) {
     return (
@@ -93,7 +100,7 @@ export default function ProtectedCoachRoute({
               <Button 
                 color="primary" 
                 className="w-full"
-                onPress={() => window.location.href = '/coaches/login'}
+                onPress={() => window.location.href = '/login?tab=coach'}
               >
                 Přihlásit se
               </Button>

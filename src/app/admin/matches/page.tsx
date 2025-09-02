@@ -15,6 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
+import { showToast } from '@/components/Toast';
 import { AddMatchModal, AddResultModal, EditMatchModal, BulkUpdateMatchweekModal, ExcelImportModal, MatchActionsModal, MatchProcessWizardModal, LineupManagerModal, StandingsTable, CategoryMatches } from './components';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import MobileActionsMenu from '@/components/MobileActionsMenu';
@@ -1099,7 +1100,7 @@ export default function MatchesAdminPage() {
         setError('');
         
         // Show success message
-        alert(`Import dokončen! Úspěšně importováno ${result.success} zápasů.${result.failed > 0 ? ` ${result.failed} zápasů selhalo.` : ''}`);
+        showToast.success(`Import dokončen! Úspěšně importováno ${result.success} zápasů.${result.failed > 0 ? ` ${result.failed} zápasů selhalo.` : ''}`);
       }
       
       if (result.errors.length > 0) {

@@ -177,15 +177,29 @@ export function useUserRoles() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
 
-      const { data, error } = await supabase
+      // Try user_roles table first (new system)
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
-        .eq('role', role)
-        .single();
+        .eq('role', role);
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return !!data;
+      if (!roleError && roleData && roleData.length > 0) {
+        return true;
+      }
+
+      // Fallback to user_profiles table (legacy system)
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', role);
+
+      if (!profileError && profileData && profileData.length > 0) {
+        return true;
+      }
+
+      return false;
     } catch (err) {
       console.error('Error checking user role:', err);
       return false;
