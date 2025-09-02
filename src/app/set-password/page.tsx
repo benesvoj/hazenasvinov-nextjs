@@ -135,15 +135,15 @@ function SetPasswordContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Vítejte v systému!</h1>
-            <p className="text-gray-600 mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Vítejte v systému!</h1>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               Vaše heslo bylo úspěšně nastaveno. Budete přesměrováni do systému.
             </p>
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 dark:border-green-400 mx-auto"></div>
           </CardBody>
         </Card>
       </div>
@@ -152,20 +152,20 @@ function SetPasswordContent() {
 
   if (!accessToken || supabaseError) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <LockClosedIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               {supabaseErrorCode === 'otp_expired' ? 'Odkaz vypršel' : 'Neplatný odkaz'}
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               {error || 'Odkaz pro nastavení hesla je neplatný nebo vypršel.'}
             </p>
             
             {supabaseErrorCode === 'otp_expired' && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-blue-800">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                <p className="text-sm text-blue-800 dark:text-blue-300">
                   <strong>Řešení:</strong> Požádejte administrátora o odeslání nového pozvánkového emailu.
                 </p>
               </div>
@@ -195,14 +195,14 @@ function SetPasswordContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mb-4">
             <UserPlusIcon className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Vítejte v TJ Sokol Svinov!</h1>
-          <p className="text-gray-600 text-sm">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Vítejte v TJ Sokol Svinov!</h1>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">
             Nastavte si heslo pro přístup do systému
           </p>
         </CardHeader>
@@ -219,11 +219,11 @@ function SetPasswordContent() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  startContent={<LockClosedIcon className="w-4 h-4 text-gray-400" />}
+                  startContent={<LockClosedIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />}
                   endContent={
                     <button
                       type="button"
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -238,12 +238,12 @@ function SetPasswordContent() {
               
               {/* Password Strength Indicator */}
               <div className="mt-3 space-y-2">
-                <p className="text-xs font-medium text-gray-700">Požadavky na heslo:</p>
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Požadavky na heslo:</p>
                 <div className="space-y-1">
                   {Object.entries(passwordStrength).map(([key, met]) => (
                     <div key={key} className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${met ? 'bg-green-500' : 'bg-gray-300'}`} />
-                      <span className={`text-xs ${met ? 'text-green-600' : 'text-gray-500'}`}>
+                      <div className={`w-2 h-2 rounded-full ${met ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
+                      <span className={`text-xs ${met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
                         {key === 'length' && 'Minimálně 8 znaků'}
                         {key === 'uppercase' && 'Velké písmeno (A-Z)'}
                         {key === 'lowercase' && 'Malé písmeno (a-z)'}
@@ -266,11 +266,11 @@ function SetPasswordContent() {
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                startContent={<LockClosedIcon className="w-4 h-4 text-gray-400" />}
+                startContent={<LockClosedIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />}
                 endContent={
                   <button
                     type="button"
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
@@ -285,8 +285,8 @@ function SetPasswordContent() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
               </div>
             )}
 
@@ -322,11 +322,11 @@ function SetPasswordContent() {
 export default function SetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Načítání...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-300">Načítání...</p>
           </CardBody>
         </Card>
       </div>
