@@ -7,7 +7,8 @@ import {
   PencilIcon, 
   TrashIcon,
   EyeIcon,
-  EyeSlashIcon
+  EyeSlashIcon,
+  LinkIcon
 } from '@heroicons/react/24/outline';
 import { 
   Card, 
@@ -17,16 +18,32 @@ import {
   Chip,
   Image
 } from '@heroui/react';
+import { showToast } from '@/components/Toast';
 
 interface VideoCardProps {
   video: Video;
   onEdit: (video: Video) => void;
   onDelete: (video: Video) => void;
+  categories?: Array<{ id: string; name: string; code: string }>;
 }
 
-export function VideoCard({ video, onEdit, onDelete }: VideoCardProps) {
+export function VideoCard({ video, onEdit, onDelete, categories }: VideoCardProps) {
+  const [isCopied, setIsCopied] = React.useState(false);
+
   const handlePlay = () => {
     window.open(video.youtube_url, '_blank');
+  };
+
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(video.youtube_url);
+      setIsCopied(true);
+      showToast.success('URL videa zkopírována do schránky');
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy URL:', err);
+      showToast.danger('Nepodařilo se zkopírovat URL');
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -37,7 +54,7 @@ export function VideoCard({ video, onEdit, onDelete }: VideoCardProps) {
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader className="p-0">
         {/* Thumbnail */}
-        <div className="relative w-full h-48 bg-gray-200 rounded-t-lg overflow-hidden">
+        <div className="relative w-full h-32 bg-gray-200 rounded-t-lg overflow-hidden">
           {video.thumbnail_url ? (
             <Image
               src={video.thumbnail_url}
@@ -56,67 +73,51 @@ export function VideoCard({ video, onEdit, onDelete }: VideoCardProps) {
             <Button
               isIconOnly
               color="primary"
-              size="lg"
+              size="md"
               className="bg-red-600 hover:bg-red-700"
               onPress={handlePlay}
             >
-              <PlayIcon className="w-6 h-6" />
+              <PlayIcon className="w-5 h-5" />
             </Button>
-          </div>
-
-          {/* Status Badge */}
-          <div className="absolute top-2 right-2">
-            <Chip
-              size="sm"
-              color={video.is_active ? "success" : "default"}
-              variant="flat"
-            >
-              {video.is_active ? (
-                <div className="flex items-center gap-1">
-                  <EyeIcon className="w-3 h-3" />
-                  Aktivní
-                </div>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <EyeSlashIcon className="w-3 h-3" />
-                  Neaktivní
-                </div>
-              )}
-            </Chip>
           </div>
         </div>
       </CardHeader>
 
-      <CardBody className="p-4">
+      <CardBody className="p-3">
         {/* Title */}
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">
           {video.title}
         </h3>
 
+        {/* Category Chip */}
+        <div className="mb-2">
+          <Chip size="sm" variant="shadow" color="primary">
+            {video.category?.name || 
+             (categories?.find(cat => cat.id === video.category_id)?.name) || 
+             video.category_id || 
+             'No Category'}
+          </Chip>
+        </div>
+
         {/* Description */}
         {video.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-xs text-gray-600 mb-2 line-clamp-2">
             {video.description}
           </p>
         )}
 
-        {/* Category and Club */}
-        <div className="mb-3 flex flex-wrap gap-2">
-          {video.category && (
-            <Chip size="sm" variant="bordered" color="primary">
-              {video.category.name}
-            </Chip>
-          )}
-          {video.club && (
+        {/* Club */}
+        {video.club && (
+          <div className="mb-2">
             <Chip size="sm" variant="bordered" color="secondary">
               {video.club.name}
             </Chip>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Season and Recording Date */}
         {(video.season || video.recording_date) && (
-          <div className="mb-3 text-xs text-gray-500 space-y-1">
+          <div className="mb-2 text-xs text-gray-500 space-y-1">
             {video.season && (
               <div>Sezóna: {video.season.name}</div>
             )}
@@ -127,7 +128,7 @@ export function VideoCard({ video, onEdit, onDelete }: VideoCardProps) {
         )}
 
         {/* Metadata */}
-        <div className="text-xs text-gray-500 mb-4 space-y-1">
+        <div className="text-xs text-gray-500 mb-3 space-y-1">
           <div>Vytvořeno: {formatDate(video.created_at)}</div>
           {video.updated_at !== video.created_at && (
             <div>Aktualizováno: {formatDate(video.updated_at)}</div>
@@ -135,15 +136,26 @@ export function VideoCard({ video, onEdit, onDelete }: VideoCardProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <Button
             size="sm"
             variant="bordered"
-            startContent={<PlayIcon className="w-4 h-4" />}
+            isIconOnly
             onPress={handlePlay}
-            className="flex-1"
+            title="Přehrát video"
           >
-            Přehrát
+            <PlayIcon className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            size="sm"
+            variant="bordered"
+            isIconOnly
+            onPress={handleCopyUrl}
+            title="Kopírovat URL"
+            color={isCopied ? "success" : "default"}
+          >
+            <LinkIcon className="w-4 h-4" />
           </Button>
           
           <Button
@@ -151,6 +163,7 @@ export function VideoCard({ video, onEdit, onDelete }: VideoCardProps) {
             variant="bordered"
             isIconOnly
             onPress={() => onEdit(video)}
+            title="Upravit video"
           >
             <PencilIcon className="w-4 h-4" />
           </Button>
@@ -161,6 +174,7 @@ export function VideoCard({ video, onEdit, onDelete }: VideoCardProps) {
             variant="bordered"
             isIconOnly
             onPress={() => onDelete(video)}
+            title="Smazat video"
           >
             <TrashIcon className="w-4 h-4" />
           </Button>

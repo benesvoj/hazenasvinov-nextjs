@@ -127,6 +127,7 @@ export default function VideosPage() {
         throw error;
       }
 
+      console.log('Fetched videos data:', data);
       setVideos(data || []);
     } catch (err) {
       console.error('Error fetching videos:', err);
@@ -303,7 +304,7 @@ export default function VideosPage() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-64 rounded-lg" />
           ))}
@@ -480,15 +481,16 @@ export default function VideosPage() {
           </CardBody>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {videos.map((video) => (
-            <VideoCard
-              key={video.id}
-              video={video}
-              onEdit={openEditModal}
-              onDelete={openDeleteModal}
-            />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                          {videos.map((video) => (
+                  <VideoCard
+                    key={video.id}
+                    video={video}
+                    onEdit={openEditModal}
+                    onDelete={openDeleteModal}
+                    categories={categories}
+                  />
+                ))}
         </div>
       )}
 
