@@ -59,8 +59,18 @@ const Header = () => {
             })}
           </nav>
 
-          {/* Right side - Theme switch and mobile menu button */}
+          {/* Right side - Theme switch, portal, and mobile menu button */}
           <div className="flex items-center space-x-4">
+            {/* Portal Link */}
+            {/* TODO: replace with routes.admin */}
+            <Link
+              href="/login"
+              className="hidden md:flex items-center px-3 py-2 text-sm font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors border border-green-200 dark:border-green-700 rounded-md hover:bg-green-50 dark:hover:bg-green-900/20"
+            >
+              <span className="mr-2">🎯</span>
+              Portal
+            </Link>
+
             <ThemeSwitch />
 
             {/* Mobile menu button */}
@@ -81,6 +91,15 @@ const Header = () => {
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-200 dark:border-gray-700">
             <div className="px-2 pt-2 pb-3 space-y-1">
+              {/* Portal Link - Mobile */}
+              <Link
+                href="/login"
+                className="block px-3 py-2 text-sm font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                🎯 Portal
+              </Link>
+              
               {menuItems.map((item: MenuItem) => {
                 return item.children ? (
                   <div key={item.title} className="space-y-1">

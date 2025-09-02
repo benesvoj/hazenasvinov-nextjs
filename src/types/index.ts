@@ -7,3 +7,5 @@ export * from './blogPost';
 export * from './clubs';
 export * from './member';
 export * from './lineup';
+export * from './video';
+export * from './userRoles';

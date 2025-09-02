@@ -59,12 +59,16 @@ export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
 		});
 	}
 
-	// Add admin login (always visible)
-	menuItems.push({
-		title: 'Admin',
-		route: '/login',
-		description: 'Přihlášení do administrace',
-	});
+	// Add admin pages (respect database visibility)
+	if (groupedPages.admin) {
+		groupedPages.admin.forEach(page => {
+			menuItems.push({
+				title: page.page_title,
+				route: page.page_route,
+				description: page.page_description,
+			});
+		});
+	}
 
 	return menuItems;
 };

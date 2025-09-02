@@ -67,11 +67,18 @@ export function useSeasons() {
       setLoading(true);
       setError(null);
       
+      console.log('Fetching seasons...');
+      const startTime = Date.now();
+      
       const supabase = createClient();
       const { data, error } = await supabase
         .from('seasons')
-        .select('*')
-        .order('name', { ascending: false });
+        .select('id, name, start_date, end_date, is_active, is_closed')
+        .order('start_date', { ascending: false })
+        .limit(50);
+
+      const endTime = Date.now();
+      console.log(`Seasons fetch took ${endTime - startTime}ms, got ${data?.length || 0} seasons`);
 
       if (error) throw error;
       setSeasons(data || []);
@@ -92,8 +99,9 @@ export function useSeasons() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('seasons')
-        .select('*')
-        .order('name', { ascending: false });
+        .select('id, name, start_date, end_date, is_active, is_closed')
+        .order('start_date', { ascending: false })
+        .limit(50);
 
       if (error) throw error;
       

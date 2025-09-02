@@ -1,0 +1,51 @@
+🏐 TJ SOKOL SVINOV - POZVÁNKA DO SYSTÉMU
+===============================================
+Oddíl národní házené s více než 90letou tradicí
+
+Vážený/á {{ .Email }},
+
+Dostali jste pozvánku k vytvoření uživatelského účtu v systému TJ Sokol Svinov. 
+Jako člen našeho oddílu národní házené získáte přístup k:
+
+📊 Aktuálním výsledkům a programům zápasů
+👥 Správě členů a týmů  
+📝 Administračním funkcím (podle vašich oprávnění)
+📸 Fotogalerii a novinkám
+🎥 Tréninkovým videím a materiálům
+
+🏆 O NAŠEM ODDÍLU
+=================
+TJ Sokol Svinov je tradiční házenkářský klub s bohatou historií. Už přes 90 let 
+jsme součástí českého sportovního prostředí a během této doby jsme nasbírali 
+řadu úspěchů v soutěžích dospělých i mládeže.
+
+✅ PŘIJMOUT POZVÁNKU
+====================
+Klikněte na následující odkaz pro vytvoření vašeho účtu:
+{{ .ConfirmationURL }}?next={{ .SiteURL }}/set-password
+
+ℹ️ CO SE STANE DÁL?
+===================
+Po kliknutí na odkaz výše budete přesměrováni na stránku, kde si nastavíte 
+své heslo a dokončíte registraci. Poté se budete moci přihlásit do systému 
+pomocí svého emailu a hesla.
+
+🔒 BEZPEČNOSTNÍ UPOZORNĚNÍ
+==========================
+Tento odkaz je platný pouze pro vás a má omezenou dobu platnosti. 
+Pokud jste si tento email nevyžádali, prosím kontaktujte nás na 
+admin@hazenasvinov.cz
+
+📞 KONTAKT
+==========
+Pokud máte jakékoliv dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat:
+
+📧 Email: admin@hazenasvinov.cz
+🌐 Web: {{ .SiteURL }}
+
+---
+TJ Sokol Svinov
+Oddíl národní házené ve Svinově
+Více než 90 let tradice • Váš tým pro národní házenou
+
+Tento email byl odeslán automaticky. Prosím neodpovídejte na tuto adresu.

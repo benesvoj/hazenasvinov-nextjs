@@ -32,6 +32,9 @@ function ResetPasswordContent() {
   // Check if we have the required parameters (Supabase uses different parameter names)
   const accessToken = searchParams.get('access_token') || searchParams.get('token');
   const refreshToken = searchParams.get('refresh_token') || searchParams.get('type');
+  
+  // For password reset flow, users are redirected from auth/confirm route
+  // They should already be authenticated, so we don't require access_token in URL
 
   useEffect(() => {
     console.log('Reset password page loaded with params:', {
@@ -54,8 +57,10 @@ function ResetPasswordContent() {
       }
       
       setError(errorMessage);
-    } else if (!accessToken) {
-      setError('Neplatný odkaz pro obnovení hesla. Zkontrolujte svůj email.');
+    } else if (!accessToken && !supabaseError) {
+      // Only show error if we have neither access token nor supabase error
+      // This allows the page to work when redirected from auth/confirm route
+      console.log('No access token found, but no error either - user may be redirected from auth/confirm');
     }
   }, [accessToken, refreshToken, searchParams, supabaseError, supabaseErrorCode, supabaseErrorDescription]);
 
@@ -134,7 +139,7 @@ function ResetPasswordContent() {
     );
   }
 
-  if (!accessToken || supabaseError) {
+  if (supabaseError) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50">
         <Card className="w-full max-w-md">

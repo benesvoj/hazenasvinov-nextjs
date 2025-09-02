@@ -1,19 +1,37 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { publicRoutes } from "@/routes/routes";
 import { createClient } from "@/utils/supabase/client";
 import { logSuccessfulLogin, logFailedLogin } from "@/utils/loginLogger";
-import { EyeIcon, EyeSlashIcon, LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
-import { Button, Input } from "@heroui/react";
+import { 
+  EyeIcon, 
+  EyeSlashIcon, 
+  LockClosedIcon, 
+  UserIcon, 
+  AcademicCapIcon,
+  ShieldCheckIcon
+} from "@heroicons/react/24/outline";
+import { Button, Input, Tabs, Tab } from "@heroui/react";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState("admin");
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Handle URL tab parameter
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'coach') {
+      setActiveTab('coach');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,8 +75,35 @@ export default function LoginPage() {
         // Log successful login
         await logSuccessfulLogin(email);
         
-        // Redirect to admin panel
-        window.location.href = '/admin';
+        if (activeTab === 'admin') {
+          // Redirect to admin panel
+          window.location.href = '/admin';
+        } else {
+          // Check if user has coach role - handle multiple profiles
+          const { data: userProfiles, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('role, club_id')
+            .eq('user_id', data.user.id);
+
+          if (profileError || !userProfiles || userProfiles.length === 0) {
+            setError('Uživatelský profil nebyl nalezen. Kontaktujte administrátora.');
+            return;
+          }
+
+          // Check if user has coach role in any of their profiles
+          const hasCoachRole = userProfiles.some((profile: any) => 
+            profile.role === 'coach' || profile.role === 'head_coach'
+          );
+
+          if (hasCoachRole) {
+            // Redirect to coaches dashboard
+            window.location.href = '/coaches/dashboard';
+          } else {
+            setError('Nemáte oprávnění pro přístup do trenérského portálu.');
+            // Sign out the user since they don't have coach access
+            await supabase.auth.signOut();
+          }
+        }
       }
     } catch (err) {
       setError('Došlo k neočekávané chybě. Zkuste to znovu.');
@@ -70,24 +115,92 @@ export default function LoginPage() {
     }
   };
 
+  const handleTabChange = (key: React.Key) => {
+    setActiveTab(key as string);
+    setError(''); // Clear error when switching tabs
+  };
+
+  const getTabIcon = (tabKey: string) => {
+    if (tabKey === 'admin') {
+      return <ShieldCheckIcon className="w-5 h-5" />;
+    }
+    return <AcademicCapIcon className="w-5 h-5" />;
+  };
+
+  const getTabTitle = (tabKey: string) => {
+    if (tabKey === 'admin') {
+      return 'Admin Portal';
+    }
+    return 'Trenérský Portal';
+  };
+
+  const getTabDescription = (tabKey: string) => {
+    if (tabKey === 'admin') {
+      return 'Přihlaste se do administračního rozhraní';
+    }
+    return 'Přihlaste se do trenérského rozhraní';
+  };
+
+  const getHeaderIcon = () => {
+    if (activeTab === 'admin') {
+      return <ShieldCheckIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />;
+    }
+    return <AcademicCapIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />;
+  };
+
+  const getHeaderGradient = () => {
+    if (activeTab === 'admin') {
+      return 'from-sky-600 to-blue-600';
+    }
+    return 'from-green-600 to-emerald-600';
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-sm sm:max-w-md">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-sky-600 to-blue-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
-            <LockClosedIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+          <div className={`mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r ${getHeaderGradient()} rounded-full flex items-center justify-center mb-4 shadow-lg`}>
+            {getHeaderIcon()}
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-            Admin Portal
+            {getTabTitle(activeTab)}
           </h1>
           <p className="text-gray-600 text-sm">
-            Přihlaste se do administračního rozhraní
+            {getTabDescription(activeTab)}
           </p>
         </div>
 
         {/* Login Form Card */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
+          {/* Tabs */}
+          <Tabs 
+            selectedKey={activeTab} 
+            onSelectionChange={handleTabChange}
+            className="mb-6"
+            color={activeTab === 'admin' ? 'primary' : 'success'}
+            variant="underlined"
+          >
+            <Tab 
+              key="admin" 
+              title={
+                <div className="flex items-center space-x-2">
+                  {getTabIcon('admin')}
+                  <span>Admin</span>
+                </div>
+              }
+            />
+            <Tab 
+              key="coach" 
+              title={
+                <div className="flex items-center space-x-2">
+                  {getTabIcon('coach')}
+                  <span>Trenér</span>
+                </div>
+              }
+            />
+          </Tabs>
+
           <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
             {/* Email Field */}
             <div>
@@ -170,7 +283,7 @@ export default function LoginPage() {
             <Button 
               type='submit'
               className="w-full"
-              color="primary"
+              color={activeTab === 'admin' ? 'primary' : 'success'}
               size="lg"
               disabled={loading}
               isLoading={loading}
@@ -180,23 +293,48 @@ export default function LoginPage() {
           </form>
 
           {/* Footer Links */}
-          <div className="mt-6 text-center">
-            <Link 
-              href={publicRoutes.home}
-              className="text-sm text-sky-600 hover:text-sky-700 font-medium transition-colors duration-200 inline-flex items-center min-h-[44px] px-2"
-            >
-              ← Zpět na úvodní stránku
-            </Link>
+          <div className="mt-6 text-center space-y-3">
+            <div>
+              <Link 
+                href="/reset-password" 
+                className="text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
+              >
+                Zapomněli jste heslo?
+              </Link>
+            </div>
+            <div>
+              <Link 
+                href={publicRoutes.home}
+                className="text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 inline-flex items-center"
+              >
+                ← Zpět na úvodní stránku
+              </Link>
+            </div>
           </div>
         </div>
 
         {/* Additional Info */}
         <div className="mt-6 text-center px-4">
           <p className="text-xs text-gray-500 leading-relaxed">
-            Pro přístup k administračnímu rozhraní kontaktujte správce systému
+            {activeTab === 'admin' 
+              ? 'Pro přístup k administračnímu rozhraní kontaktujte správce systému'
+              : 'Pro přístup k trenérskému portálu kontaktujte administrátora klubu'
+            }
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -22,6 +22,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { SupabaseUser } from "@/types/types";
 import { useState } from "react";
+import { showToast } from '@/components/Toast';
 
 interface UsersTabProps {
 	users: SupabaseUser[];
@@ -51,6 +52,19 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 	});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [passwordResetEmail, setPasswordResetEmail] = useState('');
+
+	// Initialize form data when adding new user
+	const handleAddUser = () => {
+		setSelectedUser(null);
+		setFormData({
+			email: '',
+			full_name: '',
+			phone: '',
+			bio: '',
+			position: ''
+		});
+		onAddOpen();
+	};
 
 	// Initialize form data when editing
 	const handleEditUser = (user: SupabaseUser) => {
@@ -101,7 +115,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 			window.location.reload();
 		} catch (error) {
 			console.error('Error saving user:', error);
-			alert(`Chyba při ukládání uživatele: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
+			showToast.danger(`Chyba při ukládání uživatele: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -130,7 +144,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 			window.location.reload();
 		} catch (error) {
 			console.error('Error toggling user status:', error);
-			alert(`Chyba při změně stavu uživatele: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
+			showToast.danger(`Chyba při změně stavu uživatele: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
 		}
 	};
 
@@ -155,12 +169,12 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 				throw new Error(errorData.error || 'Failed to send password reset');
 			}
 			
-			alert('Email pro obnovení hesla byl odeslán');
+			showToast.success('Email pro obnovení hesla byl odeslán');
 			onPasswordResetOpenChange();
 			setPasswordResetEmail('');
 		} catch (error) {
 			console.error('Error sending password reset:', error);
-			alert(`Chyba při odesílání emailu pro obnovení hesla: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
+			showToast.danger(`Chyba při odesílání emailu pro obnovení hesla: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -232,7 +246,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 								color="primary" 
 								size="sm"
 								startContent={<PlusIcon className="w-4 h-4" />}
-								onPress={onAddOpen}
+								onPress={handleAddUser}
 							>
 								Přidat uživatele
 							</Button>

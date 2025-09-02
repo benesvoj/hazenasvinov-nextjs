@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Admin Portal - Přihlášení | TJ Sokol Svinov',
-  description: 'Přihlaste se do administračního rozhraní TJ Sokol Svinov',
+  title: 'Přihlášení | TJ Sokol Svinov',
+  description: 'Přihlaste se do administračního nebo trenérského rozhraní TJ Sokol Svinov',
 }
 
 export default function LoginLayout({

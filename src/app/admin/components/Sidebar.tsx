@@ -1,6 +1,6 @@
 'use client';
 
-import React from "react";
+import React, { useState } from "react";
 import { translations } from "@/lib/translations";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -22,7 +22,11 @@ import {
   HeartIcon,
   TagIcon,
   PhotoIcon,
-  XMarkIcon
+  VideoCameraIcon,
+  ShieldCheckIcon,
+  XMarkIcon,
+  ChevronDownIcon,
+  ChevronRightIcon
 } from "@heroicons/react/24/outline";
 
 // Icon mapping for admin routes
@@ -62,6 +66,10 @@ const getRouteIcon = (route: string) => {
       return <BuildingOfficeIcon className="w-5 h-5" />;
     case privateRoutes.clubCategories:
       return <BuildingOfficeIcon className="w-5 h-5" />;
+    case privateRoutes.videos:
+      return <VideoCameraIcon className="w-5 h-5" />;
+    case privateRoutes.userRoles:
+      return <ShieldCheckIcon className="w-5 h-5" />;
     default:
       return <Cog6ToothIcon className="w-5 h-5" />;
   }
@@ -70,8 +78,43 @@ const getRouteIcon = (route: string) => {
 export const Sidebar = () => {
   const pathname = usePathname();
   const { isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen, isMobile } = useSidebar();
+  
+  // State for collapsible groups
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+
+  // Toggle group collapse/expand
+  const toggleGroup = (groupKey: string) => {
+    setCollapsedGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(groupKey)) {
+        newSet.delete(groupKey);
+      } else {
+        newSet.add(groupKey);
+      }
+      return newSet;
+    });
+  };
 
   const items = routes.filter((item) => item.isPrivate === true && !item.hidden);
+  
+  // Group items by group property
+  const groupedItems = items.reduce((acc, item) => {
+    const group = item.group || 'other';
+    if (!acc[group]) {
+      acc[group] = [];
+    }
+    acc[group].push(item);
+    return acc;
+  }, {} as Record<string, typeof items>);
+
+  // Group labels
+  const groupLabels: Record<string, string> = {
+    'team-management': 'Správa týmů',
+    'user-management': 'Správa uživatelů',
+    'members-management': 'Správa členů',
+    'club-management': 'Správa klubu',
+    'other': 'Ostatní'
+  };
 
   const handleNavClick = () => {
     if (isMobile) {
@@ -113,45 +156,76 @@ export const Sidebar = () => {
 
           {/* Mobile Navigation */}
           <nav className="flex-1 admin-sidebar-nav py-4" style={{ minHeight: 0, maxHeight: 'calc(100vh - 200px)' }}>
-            <div className="space-y-2 px-3">
-              {items.map((item) => {
-                const isActive = pathname === item.route;
-                const icon = getRouteIcon(item.route || '');
-                
-                return (
-                  <Link
-                    key={item.route}
-                    href={item.route || privateRoutes.admin}
-                    onClick={handleNavClick}
-                    className={`group flex items-center px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
-                      isActive
-                        ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg transform scale-105'
-                        : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:transform hover:scale-105'
-                    }`}
-                  >
-                    {/* Active background glow */}
-                    {isActive && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-500/20 rounded-xl"></div>
-                    )}
+            <div className="space-y-4 px-3">
+              {Object.entries(groupedItems).map(([groupKey, groupItems], groupIndex) => (
+                <div key={groupKey} className="space-y-2">
+                  {/* Group Header */}
+                  {groupKey !== 'other' && (
+                    <button
+                      onClick={() => toggleGroup(groupKey)}
+                      className="w-full px-3 py-2 flex items-center justify-between hover:bg-gray-700/30 rounded-lg transition-colors duration-200"
+                    >
+                      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        {groupLabels[groupKey]}
+                      </h3>
+                      {collapsedGroups.has(groupKey) ? (
+                        <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+                      )}
+                    </button>
+                  )}
+                  
+                  {/* Group Divider */}
+                  {groupIndex > 0 && groupKey !== 'other' && (
+                    <div className="mx-3 border-t border-gray-700/50"></div>
+                  )}
+                  
+                  {/* Group Items */}
+                  <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    collapsedGroups.has(groupKey) ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'
+                  }`}>
+                    {groupItems.map((item) => {
+                    const isActive = pathname === item.route;
+                    const icon = getRouteIcon(item.route || '');
                     
-                    <div className="flex items-center relative z-10 space-x-3">
-                      <div className={`flex-shrink-0 p-1 rounded-lg transition-all duration-200 ${
-                        isActive 
-                          ? 'text-white bg-white/20' 
-                          : 'text-gray-400 group-hover:text-white group-hover:bg-gray-600/30'
-                      }`}>
-                        {icon}
-                      </div>
-                      <span className="text-sm font-medium">{item.title}</span>
-                    </div>
-                    
-                    {/* Active indicator */}
-                    {isActive && (
-                      <div className="absolute right-3 w-2 h-2 bg-white rounded-full shadow-lg"></div>
-                    )}
-                  </Link>
-                );
-              })}
+                    return (
+                      <Link
+                        key={item.route}
+                        href={item.route || privateRoutes.admin}
+                        onClick={handleNavClick}
+                        className={`group flex items-center px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
+                          isActive
+                            ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg transform scale-105'
+                            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:transform hover:scale-105'
+                        }`}
+                      >
+                        {/* Active background glow */}
+                        {isActive && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-500/20 rounded-xl"></div>
+                        )}
+                        
+                        <div className="flex items-center relative z-10 space-x-3">
+                          <div className={`flex-shrink-0 p-1 rounded-lg transition-all duration-200 ${
+                            isActive 
+                              ? 'text-white bg-white/20' 
+                              : 'text-gray-400 group-hover:text-white group-hover:bg-gray-600/30'
+                          }`}>
+                            {icon}
+                          </div>
+                          <span className="text-sm font-medium">{item.title}</span>
+                        </div>
+                        
+                        {/* Active indicator */}
+                        {isActive && (
+                          <div className="absolute right-3 w-2 h-2 bg-white rounded-full shadow-lg"></div>
+                        )}
+                      </Link>
+                    );
+                  })}
+                  </div>
+                </div>
+              ))}
             </div>
           </nav>
 
@@ -203,47 +277,78 @@ export const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 admin-sidebar-nav py-4" style={{ minHeight: 0, maxHeight: 'calc(100vh - 200px)' }}>
-        <div className="space-y-2 px-3">
-          {items.map((item) => {
-            const isActive = pathname === item.route;
-            const icon = getRouteIcon(item.route || '');
-            
-            return (
-              <Link
-                key={item.route}
-                href={item.route || privateRoutes.admin}
-                className={`group flex items-center px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
-                  isActive
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg transform scale-105'
-                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:transform hover:scale-105'
-                }`}
-                title={isCollapsed ? item.title : undefined}
-              >
-                {/* Active background glow */}
-                {isActive && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-500/20 rounded-xl"></div>
-                )}
-                
-                <div className={`flex items-center relative z-10 ${isCollapsed ? 'justify-center w-full' : 'space-x-3'}`}>
-                  <div className={`flex-shrink-0 p-1 rounded-lg transition-all duration-200 ${
-                    isActive 
-                      ? 'text-white bg-white/20' 
-                      : 'text-gray-400 group-hover:text-white group-hover:bg-gray-600/30'
-                  }`}>
-                    {icon}
-                  </div>
-                  {!isCollapsed && (
-                    <span className="text-sm font-medium">{item.title}</span>
+        <div className="space-y-4 px-3">
+          {Object.entries(groupedItems).map(([groupKey, groupItems], groupIndex) => (
+            <div key={groupKey} className="space-y-2">
+              {/* Group Header */}
+              {groupKey !== 'other' && !isCollapsed && (
+                <button
+                  onClick={() => toggleGroup(groupKey)}
+                  className="w-full px-3 py-2 flex items-center justify-between hover:bg-gray-700/30 rounded-lg transition-colors duration-200"
+                >
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    {groupLabels[groupKey]}
+                  </h3>
+                  {collapsedGroups.has(groupKey) ? (
+                    <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <ChevronDownIcon className="w-4 h-4 text-gray-400" />
                   )}
-                </div>
+                </button>
+              )}
+              
+              {/* Group Divider */}
+              {groupIndex > 0 && groupKey !== 'other' && !isCollapsed && (
+                <div className="mx-3 border-t border-gray-700/50"></div>
+              )}
+              
+              {/* Group Items */}
+              <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                collapsedGroups.has(groupKey) ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'
+              }`}>
+                {groupItems.map((item) => {
+                const isActive = pathname === item.route;
+                const icon = getRouteIcon(item.route || '');
                 
-                {/* Active indicator */}
-                {isActive && !isCollapsed && (
-                  <div className="absolute right-3 w-2 h-2 bg-white rounded-full shadow-lg"></div>
-                )}
-              </Link>
-            );
-          })}
+                return (
+                  <Link
+                    key={item.route}
+                    href={item.route || privateRoutes.admin}
+                    className={`group flex items-center px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
+                      isActive
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg transform scale-105'
+                        : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:transform hover:scale-105'
+                    }`}
+                    title={isCollapsed ? item.title : undefined}
+                  >
+                    {/* Active background glow */}
+                    {isActive && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-500/20 rounded-xl"></div>
+                    )}
+                    
+                    <div className={`flex items-center relative z-10 ${isCollapsed ? 'justify-center w-full' : 'space-x-3'}`}>
+                      <div className={`flex-shrink-0 p-1 rounded-lg transition-all duration-200 ${
+                        isActive 
+                          ? 'text-white bg-white/20' 
+                          : 'text-gray-400 group-hover:text-white group-hover:bg-gray-600/30'
+                      }`}>
+                        {icon}
+                      </div>
+                      {!isCollapsed && (
+                        <span className="text-sm font-medium">{item.title}</span>
+                      )}
+                    </div>
+                    
+                    {/* Active indicator */}
+                    {isActive && !isCollapsed && (
+                      <div className="absolute right-3 w-2 h-2 bg-white rounded-full shadow-lg"></div>
+                    )}
+                  </Link>
+                );
+              })}
+              </div>
+            </div>
+          ))}
         </div>
       </nav>
 

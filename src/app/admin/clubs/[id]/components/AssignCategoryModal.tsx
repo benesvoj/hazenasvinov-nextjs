@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   ModalContent,
@@ -45,14 +45,7 @@ export default function AssignCategoryModal({
 
   const supabase = createClient();
 
-  // Fetch categories and seasons
-  useEffect(() => {
-    if (isOpen) {
-      fetchCategoriesAndSeasons();
-    }
-  }, [isOpen]);
-
-  const fetchCategoriesAndSeasons = async () => {
+  const fetchCategoriesAndSeasons = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -89,7 +82,14 @@ export default function AssignCategoryModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase, setCategories, setSeasons, setFormData]);
+
+  // Fetch categories and seasons
+  useEffect(() => {
+    if (isOpen) {
+      fetchCategoriesAndSeasons();
+    }
+  }, [isOpen, fetchCategoriesAndSeasons]);
 
   const handleSubmit = async () => {
     try {

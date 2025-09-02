@@ -7,6 +7,7 @@ export interface MenuItem {
 	description?: string;
 	isPrivate?: boolean;
 	hidden?: boolean;
+	group?: string;
 }
 
 export const publicRoutes = {
@@ -19,6 +20,7 @@ export const publicRoutes = {
 	celebration: '/100',
 	blog: '/blog',
 	login: '/login',
+	setPassword: '/set-password',
 	matches: '/matches',
 	photoGallery: '/photo-gallery',
 	youngestKids: '/categories/youngest-kids',
@@ -53,6 +55,8 @@ export const privateRoutes = {
 	photoGallery: '/admin/photo-gallery',
 	clubs: '/admin/clubs',
 	clubCategories: '/admin/club-categories',
+	  videos: '/admin/videos',
+  userRoles: '/admin/user-roles',
 };
 
 const routes: MenuItem[] = [
@@ -121,22 +125,24 @@ const routes: MenuItem[] = [
 	{route: publicRoutes.celebration, title: '100 let'},
 	{route: publicRoutes.login, title: 'Admin'},
 	{route: privateRoutes.admin, title: 'Dashboard', isPrivate: true, description: 'Správa obsahu a nastavení systému.'},
-	{route: privateRoutes.competitions, title: translations.competitions.title, isPrivate: true, description: translations.competitions.description, hidden: true},
-	{route: privateRoutes.teams, title: 'Týmy', isPrivate: true, description: 'Správa týmů a jejich informací.'},
-	{route: privateRoutes.committees, title: 'Komise', isPrivate: true, description: 'Správa oblastních soutěžních komisí.'},
-	{route: privateRoutes.matches, title: 'Zápasy', isPrivate: true, description: 'Správa zápasů, výsledků a tabulek pro všechny kategorie.'},
-	{route: privateRoutes.members, title: 'Členové', isPrivate: true, description: 'Správa členů klubu - přidávání, úprava a mazání členů.'},
-	{route: privateRoutes.memberFunctions, title: 'Funkce členů', isPrivate: true, description: 'Správa funkcí členů klubu - přidávání, úprava a mazání funkcí.'},
+	{route: privateRoutes.competitions, title: translations.competitions.title, isPrivate: true, description: translations.competitions.description, hidden: true, group: 'team-management'},
+	{route: privateRoutes.teams, title: 'Týmy', isPrivate: true, description: 'Správa týmů a jejich informací.', group: 'team-management'},
+	{route: privateRoutes.committees, title: 'Komise', isPrivate: true, description: 'Správa oblastních soutěžních komisí.', group: 'team-management'},
+	{route: privateRoutes.matches, title: 'Zápasy', isPrivate: true, description: 'Správa zápasů, výsledků a tabulek pro všechny kategorie.', group: 'team-management'},
+	{route: privateRoutes.members, title: 'Členové', isPrivate: true, description: 'Správa členů klubu - přidávání, úprava a mazání členů.', group: 'members-management'},
+	{route: privateRoutes.memberFunctions, title: 'Funkce členů', isPrivate: true, description: 'Správa funkcí členů klubu - přidávání, úprava a mazání funkcí.', group: 'members-management'},
 	{route: privateRoutes.teamCategories, title: 'Kategorie týmů', isPrivate: true, description: 'Správa kategorií týmů pro různé sezóny.', hidden: true},
-	{route: privateRoutes.seasons, title: translations.seasons.title, isPrivate: true, description: translations.seasons.description},
-	{route: privateRoutes.categories, title: 'Kategorie', isPrivate: true, description: 'Správa kategorií pro týmové soutěže a členy klubu.'},
+	{route: privateRoutes.seasons, title: translations.seasons.title, isPrivate: true, description: translations.seasons.description, group: 'team-management'},
+	{route: privateRoutes.categories, title: 'Kategorie', isPrivate: true, description: 'Správa kategorií pro týmové soutěže a členy klubu.', group: 'team-management'},
 	{route: privateRoutes.posts, title: 'Blog', isPrivate: true, description: 'Správa blogových článků a novinek.'},
-	{route: privateRoutes.users, title: 'Uživatelé', isPrivate: true, description: 'Správa uživatelů, kteří se mohou přihlásit do systému.'},
-	{route: privateRoutes.sponsorship, title: 'Sponzorství', isPrivate: true, description: 'Správa sponzorů, partnerů a sponzorských balíčků.'},
-	{route: privateRoutes.clubConfig, title: 'Konfigurace klubu', isPrivate: true, description: 'Správa nastavení a konfigurace klubu.'},
+	{route: privateRoutes.users, title: 'Uživatelé', isPrivate: true, description: 'Správa uživatelů, kteří se mohou přihlásit do systému.', group: 'user-management'},
+	{route: privateRoutes.sponsorship, title: 'Sponzorství', isPrivate: true, description: 'Správa sponzorů, partnerů a sponzorských balíčků.', group: 'club-management'},
+	{route: privateRoutes.clubConfig, title: 'Konfigurace klubu', isPrivate: true, description: 'Správa nastavení a konfigurace klubu.', group: 'club-management'},
 	{route: privateRoutes.photoGallery, title: 'Fotogalerie', isPrivate: true, description: 'Správa fotoalb a fotografií.'},
-	{route: privateRoutes.clubs, title: 'Kluby', isPrivate: true, description: 'Správa klubů a jejich týmů.'},
-	{route: privateRoutes.clubCategories, title: 'Přiřazení klubů', isPrivate: true, description: 'Správa přiřazení klubů ke kategoriím pro různé sezóny.'},
+	{route: privateRoutes.clubs, title: 'Kluby', isPrivate: true, description: 'Správa klubů a jejich týmů.', group: 'team-management'},
+	{route: privateRoutes.clubCategories, title: 'Přiřazení klubů', isPrivate: true, description: 'Správa přiřazení klubů ke kategoriím pro různé sezóny.', group: 'team-management'},
+	{route: privateRoutes.videos, title: 'Videa', isPrivate: true, description: 'Správa videí pro jednotlivé kategorie.'},
+	{route: privateRoutes.userRoles, title: 'Uživatelské role', isPrivate: true, description: 'Správa rolí a oprávnění uživatelů.', group: 'user-management'},
 ]
 
 export default routes

@@ -1,170 +1,57 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
+import { Input } from "@heroui/input";
+import { useDisclosure } from "@heroui/modal";
 import { Select, SelectItem } from "@heroui/select";
 import { Chip } from "@heroui/chip";
 import { 
   PlusIcon, 
   PencilIcon, 
   TrashIcon, 
-  EyeIcon,
   CalendarIcon,
   UserIcon,
   TagIcon,
-  PhotoIcon,
-  XMarkIcon
+  PhotoIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import Image from 'next/image';
-
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  author_id: string;
-  status: 'draft' | 'published' | 'archived';
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-  image_url?: string;
-  category_id?: string;
-}
+import { BlogPost } from "@/types";
+import { useCategories } from "@/hooks/useCategories";
+import {AddPostModal, EditPostModal, DeletePostModal} from "./components";
+import { formatDateString } from "@/helpers";
 
 interface User {
   id: string;
   email: string;
 }
 
-interface Category {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-}
-
 export default function BlogPostsPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dbError, setDbError] = useState<string | null>(null);
   const [userError, setUserError] = useState<string | null>(null);
   
+  // Use the categories hook
+  const { categories, loading: categoriesLoading, error: categoriesError, fetchCategoriesFull } = useCategories();
+  
   const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
   
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    slug: "",
-    content: "",
-    excerpt: "",
-    author_id: "",
-    status: "draft" as 'draft' | 'published' | 'archived',
-    tags: [] as string[],
-    image_url: "",
-    category_id: ""
-  });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
-  const [uploadingImage, setUploadingImage] = useState(false);
 
   const supabase = createClient();
 
-  // Test Supabase connection
-  const testConnection = useCallback(async () => {
-    try {
-      console.log('=== SUPABASE CONNECTION TEST ===');
-      console.log('Testing Supabase connection...');
-      
-      // Check environment variables
-      console.log('Environment variables check:');
-      console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Set' : '❌ Missing');
-      console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing');
-      
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        const errorMsg = 'Supabase environment variables are not configured. Please check your .env.local file.';
-        console.error(errorMsg);
-        setDbError(errorMsg);
-        return false;
-      }
-
-      // Check if the values look valid
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      
-      console.log('URL format check:', url?.startsWith('https://') ? '✅ Valid format' : '❌ Invalid format');
-      console.log('Key format check:', key?.startsWith('eyJ') ? '✅ Valid format' : '❌ Invalid format');
-      
-      if (!url?.startsWith('https://')) {
-        const errorMsg = 'Invalid Supabase URL format. Should start with https://';
-        console.error(errorMsg);
-        setDbError(errorMsg);
-        return false;
-      }
-      
-      if (!key?.startsWith('eyJ')) {
-        const errorMsg = 'Invalid Supabase key format. Should start with eyJ';
-        console.error(errorMsg);
-        setDbError(errorMsg);
-        return false;
-      }
-
-      // Check if supabase client is properly initialized
-      console.log('Supabase client check:');
-      console.log('Client exists:', !!supabase);
-      console.log('Client type:', typeof supabase);
-      console.log('Client methods:', supabase ? Object.keys(supabase) : 'No client');
-      
-      if (!supabase || typeof supabase.from !== 'function') {
-        const errorMsg = 'Supabase client not properly initialized';
-        console.error(errorMsg);
-        setDbError(errorMsg);
-        return false;
-      }
-
-      // Test basic connection
-      console.log('Testing auth.getUser()...');
-      const { data, error } = await supabase.auth.getUser();
-      
-      if (error) {
-        console.error('Connection test failed:', error);
-        setDbError(`Connection test failed: ${error.message}`);
-        return false;
-      }
-
-      console.log('✅ Connection test successful');
-      console.log('User data:', data);
-      setDbError(null);
-      return true;
-    } catch (error) {
-      console.error('Connection test error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setDbError(`Connection test error: ${errorMessage}`);
-      return false;
-    }
-  }, [supabase]);
 
   // Fetch blog posts
   const fetchPosts = useCallback(async () => {
     try {
-      // First test the connection
-      const isConnected = await testConnection();
-      if (!isConnected) {
-        setPosts([]);
-        return;
-      }
-
       // Check if supabase client is properly initialized
       if (!supabase || typeof supabase.from !== 'function') {
         console.error('Supabase client not properly initialized');
@@ -175,7 +62,6 @@ export default function BlogPostsPage() {
 
       setLoading(true);
       
-      // Test the connection first
       try {
         const { data: testData, error: testError } = await supabase
           .from('blog_posts')
@@ -247,7 +133,7 @@ export default function BlogPostsPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, dbError, testConnection]);
+  }, [supabase, dbError]);
 
   // Fetch users for author selection
   const fetchUsers = useCallback(async () => {
@@ -310,94 +196,18 @@ export default function BlogPostsPage() {
     }
   }, [supabase]);
 
-  // Fetch categories
-  const fetchCategories = useCallback(async () => {
-    try {
-      // Check if Supabase is properly configured
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        console.warn('Supabase environment variables not configured. Cannot fetch categories.');
-        setCategories([{ id: 'default-category', code: 'uncategorized', name: 'Nezaradené' }]);
-        return;
-      }
 
-      // Check if supabase client is properly initialized
-      if (!supabase || typeof supabase.from !== 'function') {
-        console.error('Supabase client not properly initialized');
-        setCategories([{ id: 'default-category', code: 'uncategorized', name: 'Nezaradené' }]);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-
-      if (error) {
-        console.error('Error fetching categories:', error);
-        setCategories([{ id: 'default-category', code: 'uncategorized', name: 'Nezaradené' }]);
-      } else {
-        setCategories(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      setCategories([{ id: 'default-category', code: 'uncategorized', name: 'Nezaradené' }]);
-    }
-  }, [supabase]);
 
   // Initial data fetch
   useEffect(() => {
     fetchPosts();
     fetchUsers();
-    fetchCategories();
-  }, [fetchPosts, fetchUsers, fetchCategories]);
-
-  // Generate slug from title
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  };
-
-  // Handle form input changes
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Auto-generate slug when title changes
-    if (field === 'title') {
-      setFormData(prev => ({ ...prev, slug: generateSlug(value) }));
-    }
-  };
-
-  // Handle tag input changes
-  const handleTagInputChange = (value: string) => {
-    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-    setFormData(prev => ({ ...prev, tags: tags }));
-  };
-
-  // Handle image file selection
-  const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setImageFile(null);
-      setImagePreview("");
-    }
-  };
+    fetchCategoriesFull();
+  }, [fetchPosts, fetchUsers, fetchCategoriesFull]);
 
   // Upload image to Supabase storage
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
-      setUploadingImage(true);
-      
       // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -422,63 +232,17 @@ export default function BlogPostsPage() {
     } catch (error) {
       console.error('Error uploading image:', error);
       return null;
-    } finally {
-      setUploadingImage(false);
     }
-  };
-
-  // Handle image removal
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setImagePreview("");
-    setFormData(prev => ({ ...prev, image_url: "" }));
-  };
-
-  // Reset form data
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      slug: "",
-      content: "",
-      excerpt: "",
-      author_id: "default-user", // Set default author instead of empty string
-      status: "draft",
-      tags: [],
-      image_url: "",
-      category_id: ""
-    });
-    setImageFile(null);
-    setImagePreview("");
   };
 
   // Open add post modal
   const handleAddPost = () => {
-    resetForm();
     onAddOpen();
   };
 
   // Handle edit post
   const handleEditPost = (post: BlogPost) => {
     setSelectedPost(post);
-    setFormData({
-      title: post.title,
-      slug: post.slug,
-      content: post.content,
-      excerpt: post.excerpt,
-      author_id: post.author_id,
-      status: post.status,
-      tags: post.tags || [],
-      image_url: post.image_url || "",
-      category_id: post.category_id || ""
-    });
-    // Set image preview if post has an image
-    if (post.image_url) {
-      setImagePreview(post.image_url);
-      setImageFile(null); // No file selected when editing
-    } else {
-      setImagePreview("");
-      setImageFile(null);
-    }
     onEditOpen();
   };
 
@@ -489,7 +253,7 @@ export default function BlogPostsPage() {
   };
 
   // Add new post
-  const addPost = async () => {
+  const addPost = async (formData: any, imageFile: File | null) => {
     try {
       // Validate required fields
       if (!formData.title || !formData.slug || !formData.content || !formData.excerpt) {
@@ -568,7 +332,7 @@ export default function BlogPostsPage() {
         status: formData.status,
         tags: formData.tags,
         published_at: formData.status === 'published' ? new Date().toISOString() : null,
-        created_at: new Date().toISOString(),
+        created_at: formData.created_at ? new Date(formData.created_at).toISOString() : new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
@@ -607,8 +371,6 @@ export default function BlogPostsPage() {
         console.log('Post added successfully:', data);
       }
       
-      onAddClose();
-      resetForm();
       fetchPosts();
     } catch (error) {
       console.error('Error adding post:', error);
@@ -627,7 +389,7 @@ export default function BlogPostsPage() {
   };
 
   // Update existing post
-  const updatePost = async () => {
+  const updatePost = async (formData: any, imageFile: File | null) => {
     if (!selectedPost) return;
 
     try {
@@ -678,6 +440,7 @@ export default function BlogPostsPage() {
         author_id: authorId,
         status: formData.status,
         tags: formData.tags,
+        created_at: formData.created_at ? new Date(formData.created_at).toISOString() : undefined,
         updated_at: new Date().toISOString()
       };
 
@@ -723,9 +486,7 @@ export default function BlogPostsPage() {
         console.log('Post updated successfully:', data);
       }
       
-      onEditClose();
       setSelectedPost(null);
-      resetForm();
       fetchPosts();
     } catch (error) {
       console.error('Error updating post:', error);
@@ -752,7 +513,6 @@ export default function BlogPostsPage() {
 
       if (error) throw error;
       
-      onDeleteClose();
       setSelectedPost(null);
       fetchPosts();
     } catch (error) {
@@ -773,11 +533,11 @@ export default function BlogPostsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'published':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Publikováno</span>;
+        return <Chip color="success" variant="flat">Publikováno</Chip>;
       case 'draft':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Koncept</span>;
+        return <Chip color="warning" variant="flat">Koncept</Chip>;
       case 'archived':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">Archivováno</span>;
+        return <Chip color="secondary" variant="flat">Archivováno</Chip>;
       default:
         return null;
     }
@@ -801,115 +561,6 @@ export default function BlogPostsPage() {
           Nový článek
         </Button>
       </div>
-
-      {/* Connection Status */}
-      <Card className="border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-        <CardBody className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-              <div>
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                  Stav připojení
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {dbError ? '❌ Chyba připojení' : '✅ Připojeno k Supabase'}
-                </p>
-              </div>
-            </div>
-            <Button 
-              color="secondary" 
-              variant="bordered"
-              size="sm"
-              onPress={async () => {
-                await testConnection();
-              }}
-            >
-              Test Connection
-            </Button>
-          </div>
-          {dbError && (
-            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700 font-medium">Chyba:</p>
-              <p className="text-sm text-red-600 mt-1">{dbError}</p>
-              <div className="mt-2 text-xs text-red-500">
-                <strong>Řešení:</strong>
-                <ul className="mt-1 ml-4 list-disc">
-                  <li>Zkontrolujte soubor .env.local v kořenovém adresáři projektu</li>
-                  <li>Ujistěte se, že NEXT_PUBLIC_SUPABASE_URL a NEXT_PUBLIC_SUPABASE_ANON_KEY jsou správně nastaveny</li>
-                  <li>Restartujte vývojový server (npm run dev)</li>
-                  <li>Zkontrolujte, zda je váš Supabase projekt aktivní</li>
-                </ul>
-              </div>
-            </div>
-          )}
-        </CardBody>
-      </Card>
-
-      {/* Configuration Error Message */}
-      {(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) && (
-        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
-          <CardBody className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <div>
-                <h3 className="font-semibold text-red-800 dark:text-red-200">
-                  Supabase není nakonfigurován
-                </h3>
-                <p className="text-sm text-red-600 dark:text-red-300">
-                  Pro správné fungování aplikace je potřeba nastavit Supabase environment proměnné. 
-                  Vytvořte soubor .env.local s NEXT_PUBLIC_SUPABASE_URL a NEXT_PUBLIC_SUPABASE_ANON_KEY.
-                </p>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
-      {/* Database Error Message */}
-      {dbError && (
-        <Card className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20">
-          <CardBody className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-              <div>
-                <h3 className="font-semibold text-orange-800 dark:text-orange-200">
-                  Chyba databáze
-                </h3>
-                <p className="text-sm text-orange-600 dark:text-orange-300">
-                  {dbError}
-                </p>
-                {dbError.includes('table does not exist') && (
-                  <div className="mt-2 text-xs text-orange-500 dark:text-orange-400">
-                    <strong>Řešení:</strong> Spusťte SQL skript create_blog_posts_table.sql ve vaší Supabase databázi.
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
-      {/* Permission Info Message */}
-      <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
-        <CardBody className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <div>
-              <h3 className="font-semibold text-blue-800 dark:text-blue-200">
-                Informace o oprávněních
-              </h3>
-              <p className="text-sm text-blue-600 dark:text-blue-300">
-                Chyba &quot;permission denied for table users&quot; je normální pro nepřihlášené uživatele. 
-                Aplikace používá fallback uživatele pro správné fungování.
-              </p>
-              <div className="mt-2 text-xs text-blue-500 dark:text-blue-400">
-                <strong>Poznámka:</strong> Pro plný přístup k databázi se přihlaste pomocí Supabase Auth.
-              </div>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
 
       {/* Filters */}
       <Card>
@@ -940,19 +591,20 @@ export default function BlogPostsPage() {
       {/* Posts Table */}
       <Card>
         <CardBody className="p-0">
-          {loading ? (
+          {loading || categoriesLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600 dark:text-gray-400">Načítání článků...</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
+              {/* TODO: replace table with Table component */}
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
                     <th className="text-left py-3 px-4 font-semibold">Obrázek</th>
                     <th className="text-left py-3 px-4 font-semibold">Název</th>
-                    <th className="text-left py-3 px-4 font-semibold">Tagy</th>
+                    <th className="text-left py-3 px-4 font-semibold">Kategorie</th>
                     <th className="text-left py-3 px-4 font-semibold">Autor</th>
                     <th className="text-left py-3 px-4 font-semibold">Stav</th>
                     <th className="text-left py-3 px-4 font-semibold">Vytvořeno</th>
@@ -984,6 +636,7 @@ export default function BlogPostsPage() {
                           <div className="text-sm text-gray-500 dark:text-gray-400">{post.slug}</div>
                         </div>
                       </td>
+                      {/* TODO: Add category name instead of tag */}
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {post.tags && post.tags.length > 0 ? (
@@ -1008,6 +661,7 @@ export default function BlogPostsPage() {
                           )}
                         </div>
                       </td>
+                      {/* TODO: add author name instead of ID */}
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
                           <UserIcon className="w-4 h-4 text-gray-400" />
@@ -1023,7 +677,7 @@ export default function BlogPostsPage() {
                         <div className="flex items-center gap-2">
                           <CalendarIcon className="w-4 h-4 text-gray-400" />
                           <span className="text-sm">
-                            {new Date(post.created_at).toLocaleDateString('cs-CZ')}
+                            {formatDateString(post.created_at)} 
                           </span>
                         </div>
                       </td>
@@ -1058,20 +712,20 @@ export default function BlogPostsPage() {
                 <div className="text-center py-12">
                   <TagIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                    {dbError ? 'Chyba databáze' : 'Žádné články'}
+                    {dbError || categoriesError ? 'Chyba databáze' : 'Žádné články'}
                   </h3>
                   <p className="text-gray-500 dark:text-gray-500">
-                    {dbError 
+                    {dbError || categoriesError
                       ? "Nelze načíst články kvůli chybě databáze. Zkontrolujte konfiguraci Supabase."
                       : searchTerm || statusFilter !== "all" 
                         ? "Pro vybrané filtry nebyly nalezeny žádné články."
                         : "Zatím nebyly vytvořeny žádné články."
                     }
                   </p>
-                  {dbError && (
+                  {(dbError || categoriesError) && (
                     <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
                       <p className="text-sm text-orange-700 dark:text-orange-300">
-                        <strong>Detaily chyby:</strong> {dbError}
+                        <strong>Detaily chyby:</strong> {dbError || categoriesError}
                       </p>
                     </div>
                   )}
@@ -1083,355 +737,33 @@ export default function BlogPostsPage() {
       </Card>
 
       {/* Add Post Modal */}
-      <Modal isOpen={isAddOpen} onClose={onAddClose} size="4xl" scrollBehavior="inside">
-        <ModalContent>
-          <ModalHeader>Nový článek</ModalHeader>
-          <ModalBody>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <Input
-                  label="Název článku"
-                  placeholder="Zadejte název článku"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  isRequired
-                />
-                <Input
-                  label="Slug (URL)"
-                  placeholder="automaticky generováno"
-                  value={formData.slug}
-                  onChange={(e) => handleInputChange('slug', e.target.value)}
-                  isRequired
-                />
-                <Select
-                  label="Autor"
-                  placeholder="Vyberte autora"
-                  selectedKeys={formData.author_id ? [formData.author_id] : []}
-                  onSelectionChange={(keys) => handleInputChange('author_id', Array.from(keys)[0] as string)}
-                  isRequired
-                >
-                  {users.map((user) => (
-                    <SelectItem key={user.id}>
-                      {user.email}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label="Stav"
-                  placeholder="Vyberte stav"
-                  selectedKeys={[formData.status]}
-                  onSelectionChange={(keys) => handleInputChange('status', Array.from(keys)[0] as string)}
-                  isRequired
-                >
-                  <SelectItem key="draft">Koncept</SelectItem>
-                  <SelectItem key="published">Publikováno</SelectItem>
-                  <SelectItem key="archived">Archivováno</SelectItem>
-                </Select>
-                
-                {/* Category Selection */}
-                <Select
-                  label="Kategorie"
-                  placeholder="Vyberte kategorii"
-                  selectedKeys={formData.category_id ? [formData.category_id] : []}
-                  onSelectionChange={(keys) => handleInputChange('category_id', Array.from(keys)[0] as string)}
-                >
-                  {categories.map((category) => (
-                    <SelectItem key={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                
-                <Input
-                  label="Tagy"
-                  placeholder="tag1, tag2, tag3"
-                  value={formData.tags.join(', ')}
-                  onChange={(e) => handleTagInputChange(e.target.value)}
-                  description="Tagy oddělené čárkami"
-                />
-
-                {/* Image Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Obrázek článku
-                  </label>
-                  
-                  {imagePreview ? (
-                    <div className="space-y-3">
-                      <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                        <Image
-                          src={imagePreview}
-                          alt="Preview"
-                          fill
-                          className="object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleRemoveImage}
-                          className="absolute top-2 right-2 h-8 w-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                          title="Odstranit obrázek"
-                        >
-                          <XMarkIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        Obrázek bude nahrán při uložení článku
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
-                        <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-2">
-                          <label htmlFor="image-upload" className="cursor-pointer">
-                            <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                              Nahrajte obrázek
-                            </span>
-                            <span className="text-gray-500"> nebo přetáhněte</span>
-                          </label>
-                          <input
-                            id="image-upload"
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleImageFileChange}
-                            disabled={uploadingImage}
-                          />
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          PNG, JPG, GIF do 5MB
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Perex
-                  </label>
-                  <Textarea
-                    placeholder="Krátký popis článku"
-                    value={formData.excerpt}
-                    onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                    rows={3}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Obsah článku <span className="text-red-500">*</span>
-                  </label>
-                  <Textarea
-                    placeholder="Zde napište obsah článku..."
-                    value={formData.content}
-                    onChange={(e) => handleInputChange('content', e.target.value)}
-                    rows={12}
-                    required
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onAddClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={addPost}>
-              Vytvořit článek
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <AddPostModal
+        isOpen={isAddOpen}
+        onClose={onAddClose}
+        onSubmit={addPost}
+        users={users}
+        categories={categories}
+        categoriesLoading={categoriesLoading}
+      />
 
       {/* Edit Post Modal */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} size="4xl" scrollBehavior="inside">
-        <ModalContent>
-          <ModalHeader>Upravit článek</ModalHeader>
-          <ModalBody>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <Input
-                  label="Název článku"
-                  placeholder="Zadejte název článku"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  isRequired
-                />
-                <Input
-                  label="Slug (URL)"
-                  placeholder="automaticky generováno"
-                  value={formData.slug}
-                  onChange={(e) => handleInputChange('slug', e.target.value)}
-                  isRequired
-                />
-                <Select
-                  label="Autor"
-                  placeholder="Vyberte autora"
-                  selectedKeys={formData.author_id ? [formData.author_id] : []}
-                  onSelectionChange={(keys) => handleInputChange('author_id', Array.from(keys)[0] as string)}
-                  isRequired
-                >
-                  {users.map((user) => (
-                    <SelectItem key={user.id}>
-                      {user.email}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label="Stav"
-                  placeholder="Vyberte stav"
-                  selectedKeys={[formData.status]}
-                  onSelectionChange={(keys) => handleInputChange('status', Array.from(keys)[0] as string)}
-                  isRequired
-                >
-                  <SelectItem key="draft">Koncept</SelectItem>
-                  <SelectItem key="published">Publikováno</SelectItem>
-                  <SelectItem key="archived">Archivováno</SelectItem>
-                </Select>
-                
-                {/* Category Selection */}
-                <Select
-                  label="Kategorie"
-                  placeholder="Vyberte kategorii"
-                  selectedKeys={formData.category_id ? [formData.category_id] : []}
-                  onSelectionChange={(keys) => handleInputChange('category_id', Array.from(keys)[0] as string)}
-                >
-                  {categories.map((category) => (
-                    <SelectItem key={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                
-                <Input
-                  label="Tagy"
-                  placeholder="tag1, tag2, tag3"
-                  value={formData.tags.join(', ')}
-                  onChange={(e) => handleTagInputChange(e.target.value)}
-                  description="Tagy oddělené čárkami"
-                />
-
-                {/* Image Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Obrázek článku
-                  </label>
-                  
-                  {imagePreview ? (
-                    <div className="space-y-3">
-                      <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                        <Image
-                          src={imagePreview}
-                          alt="Preview"
-                          fill
-                          className="object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleRemoveImage}
-                          className="absolute top-2 right-2 h-8 w-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                          title="Odstranit obrázek"
-                        >
-                          <XMarkIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        Obrázek bude nahrán při uložení článku
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
-                        <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-2">
-                          <label htmlFor="image-upload" className="cursor-pointer">
-                            <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                              Nahrajte obrázek
-                            </span>
-                            <span className="text-gray-500"> nebo přetáhněte</span>
-                          </label>
-                          <input
-                            id="image-upload"
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleImageFileChange}
-                            disabled={uploadingImage}
-                          />
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          PNG, JPG, GIF do 5MB
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Perex
-                  </label>
-                  <Textarea
-                    placeholder="Krátký popis článku"
-                    value={formData.excerpt}
-                    onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                    rows={3}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Obsah článku <span className="text-red-500">*</span>
-                  </label>
-                  <Textarea
-                    placeholder="Zde napište obsah článku..."
-                    value={formData.content}
-                    onChange={(e) => handleInputChange('content', e.target.value)}
-                    rows={12}
-                    required
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onEditClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={updatePost}>
-              Uložit změny
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <EditPostModal
+        isOpen={isEditOpen}
+        onClose={onEditClose}
+        onSubmit={updatePost}
+        post={selectedPost}
+        users={users}
+        categories={categories}
+        categoriesLoading={categoriesLoading}
+      />
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={isDeleteOpen} onClose={onDeleteClose}>
-        <ModalContent>
-          <ModalHeader>Smazat článek</ModalHeader>
-          <ModalBody>
-            <p>
-              Opravdu chcete smazat článek <strong>&ldquo;{selectedPost?.title}&rdquo;</strong>?
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Tato akce je nevratná.
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onDeleteClose}>
-              Zrušit
-            </Button>
-            <Button color="danger" onPress={deletePost}>
-              Smazat
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <DeletePostModal
+        isOpen={isDeleteOpen}
+        onClose={onDeleteClose}
+        onConfirm={deletePost}
+        post={selectedPost}
+      />
     </div>
   );
 }
