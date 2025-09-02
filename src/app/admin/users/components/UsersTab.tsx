@@ -223,8 +223,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 		return (
 			<Card>
 				<CardBody className="text-center py-12">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-					<p className="text-gray-600">Načítání uživatelů...</p>
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+					<p className="text-foreground-600">Načítání uživatelů...</p>
 				</CardBody>
 			</Card>
 		);
@@ -236,8 +236,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 				<CardHeader className="pb-4">
 					<div className="flex justify-between items-center w-full">
 						<div className="flex-1 min-w-0">
-							<h3 className="text-xl font-semibold text-gray-900">Správa uživatelů</h3>
-							<p className="text-sm text-gray-600 mt-1">
+							<h3 className="text-xl font-semibold text-foreground">Správa uživatelů</h3>
+							<p className="text-sm text-foreground-500 mt-1">
 								Spravujte uživatele, kteří mají přístup do administrace
 							</p>
 						</div>
@@ -274,10 +274,10 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 													color={user.user_metadata?.is_blocked ? "danger" : "primary"}
 												/>
 												<div className="flex flex-col">
-													<span className="font-medium text-gray-900">
+													<span className="font-medium text-foreground">
 														{user.user_metadata?.full_name || 'Bez jména'}
 													</span>
-													<span className="text-xs text-gray-500">
+													<span className="text-xs text-foreground-500">
 														{user.user_metadata?.position || 'Bez pozice'}
 													</span>
 												</div>
@@ -286,13 +286,13 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 										<TableCell>
 											<div className="flex flex-col gap-1">
 												<div className="flex items-center gap-2">
-													<EnvelopeIcon className="w-4 h-4 text-gray-400" />
-													<span className="text-sm text-gray-700">{user.email}</span>
+													<EnvelopeIcon className="w-4 h-4 text-foreground-400" />
+													<span className="text-sm text-foreground">{user.email}</span>
 												</div>
 												{user.user_metadata?.phone && (
 													<div className="flex items-center gap-2">
-														<UserIcon className="w-4 h-4 text-gray-400" />
-														<span className="text-sm text-gray-600">{user.user_metadata.phone}</span>
+														<UserIcon className="w-4 h-4 text-foreground-400" />
+														<span className="text-sm text-foreground-600">{user.user_metadata.phone}</span>
 													</div>
 												)}
 											</div>
@@ -302,10 +302,10 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 										</TableCell>
 										<TableCell>
 											<div className="flex flex-col">
-												<span className="text-sm font-medium text-gray-900">
+												<span className="text-sm font-medium text-foreground">
 													{new Date(user.created_at).toLocaleDateString('cs-CZ')}
 												</span>
-												<span className="text-xs text-gray-500">
+												<span className="text-xs text-foreground-500">
 													{new Date(user.created_at).toLocaleTimeString('cs-CZ', {
 														hour: '2-digit',
 														minute: '2-digit'
@@ -447,7 +447,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 						<>
 							<ModalHeader>Obnovení hesla</ModalHeader>
 							<ModalBody>
-								<p className="text-sm text-gray-600 mb-4">
+								<p className="text-sm text-foreground-600 mb-4">
 									Uživateli bude odeslán email s odkazem pro vytvoření nového hesla.
 								</p>
 								<Input

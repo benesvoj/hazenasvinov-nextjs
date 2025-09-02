@@ -10,7 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <ProtectedRoute>
       <SidebarProvider>
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
           <Sidebar />
           <div className="flex-1 transition-all duration-300 ease-in-out w-full lg:ml-64">
             <TopBar />

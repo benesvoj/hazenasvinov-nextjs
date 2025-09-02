@@ -31,8 +31,8 @@ export default function Page() {
 							<path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
 						</svg>
 					</div>
-					<h3 className="text-lg font-semibold text-gray-900 mb-2">Chyba při načítání</h3>
-					<p className="text-gray-600">{error.message}</p>
+					<h3 className="text-lg font-semibold text-foreground mb-2">Chyba při načítání</h3>
+					<p className="text-foreground-600">{error.message}</p>
 				</CardBody>
 			</Card>
 		);
@@ -49,6 +49,12 @@ export default function Page() {
 				color="primary"
 				variant="underlined"
 				size="lg"
+				classNames={{
+					tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+					cursor: "w-full bg-primary",
+					tab: "max-w-fit px-0 h-12 flex-1 bg-transparent",
+					tabContent: "group-data-[selected=true]:text-primary"
+				}}
 			>
 				<Tab key="users" title={translations.users.tabs.users} />
 				<Tab key="loginLogs" title={translations.users.tabs.loginLogs} />

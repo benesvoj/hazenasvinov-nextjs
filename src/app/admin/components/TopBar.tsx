@@ -231,7 +231,7 @@ export const TopBar = () => {
   };
 
   return (
-    <div className={`fixed top-0 right-0 h-16 bg-white border-b border-gray-200 shadow-sm z-40 transition-all duration-300 ease-in-out ${
+    <div className={`fixed top-0 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300 ease-in-out ${
       isMobile ? 'left-0' : isCollapsed ? 'left-16' : 'left-64'
     }`}>
       <div className="flex items-center justify-between h-full px-4 sm:px-6">
@@ -247,17 +247,17 @@ export const TopBar = () => {
               onPress={() => setIsMobileOpen(true)}
               title="Otevřít menu"
             >
-              <Bars3Icon className="w-5 h-5 text-gray-600" />
+              <Bars3Icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </Button>
           )}
           
           {/* Section info */}
           <div className="min-w-0 flex-1">
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">
               {currentSection.title}
             </h1>
             {currentSection.description && (
-              <p className="text-xs sm:text-sm text-gray-600 mt-1 hidden sm:block">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 hidden sm:block">
                 {currentSection.description}
               </p>
             )}
@@ -275,7 +275,7 @@ export const TopBar = () => {
             onPress={handleReleaseNotes}
             title="Release Notes"
           >
-            <DocumentTextIcon className="w-5 h-5 text-gray-600" />
+            <DocumentTextIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             {releaseNotes.length > 0 && (
               <Badge 
                 color="primary" 
@@ -295,7 +295,7 @@ export const TopBar = () => {
             className="relative hidden sm:flex"
             title="Notifikace"
           >
-            <BellIcon className="w-5 h-5 text-gray-600" />
+            <BellIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             {notifications > 0 && (
               <Badge 
                 color="danger" 
@@ -315,7 +315,7 @@ export const TopBar = () => {
             className="hidden sm:flex"
             title="Nastavení"
           >
-            <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
+            <Cog6ToothIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </Button>
 
           {/* User Profile Dropdown */}
@@ -323,15 +323,15 @@ export const TopBar = () => {
             <DropdownTrigger>
               <Button
                 variant="light"
-                className="flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 hover:bg-gray-100 transition-colors duration-200"
+                className="flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
               >
                 <Avatar
                   name={getUserInitials()}
                   className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-medium"
                 />
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-gray-900">{getDisplayName()}</p>
-                  <p className="text-xs text-gray-500">{user?.email || 'Načítání...'}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{getDisplayName()}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || 'Načítání...'}</p>
                 </div>
                 <div className="hidden lg:block">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -346,13 +346,13 @@ export const TopBar = () => {
                     className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white text-base font-medium"
                   />
                   <div>
-                    <p className="font-medium text-gray-900">{getDisplayName()}</p>
-                    <p className="text-sm text-gray-500">{user?.email}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{getDisplayName()}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
                   </div>
                 </div>
               </DropdownItem>
-              <DropdownItem key="divider-1" className="h-px bg-gray-200 my-2" isReadOnly>
-                <div className="h-px bg-gray-200"></div>
+              <DropdownItem key="divider-1" className="h-px bg-gray-200 dark:bg-gray-600 my-2" isReadOnly>
+                <div className="h-px bg-gray-200 dark:bg-gray-600"></div>
               </DropdownItem>
               <DropdownItem key="profile-action" startContent={<UserIcon className="w-4 h-4" />} onPress={handleProfileOpen} aria-label="Otevřít profil">
                 <span>Profil</span>
@@ -388,7 +388,7 @@ export const TopBar = () => {
               />
               <div>
                 <h2 className="text-xl font-semibold">Profil uživatele</h2>
-                <p className="text-sm text-gray-500">Upravte své osobní informace</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Upravte své osobní informace</p>
               </div>
             </div>
           </ModalHeader>
@@ -396,7 +396,7 @@ export const TopBar = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Full Name */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Celé jméno</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Celé jméno</label>
                 {isEditing ? (
                   <Input
                     value={profileData.fullName}
@@ -405,24 +405,24 @@ export const TopBar = () => {
                     size="sm"
                   />
                 ) : (
-                  <div className="p-3 bg-gray-50 rounded-lg border">
-                    <p className="text-gray-900">{profileData.fullName || 'Není vyplněno'}</p>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <p className="text-gray-900 dark:text-white">{profileData.fullName || 'Není vyplněno'}</p>
                   </div>
                 )}
               </div>
 
               {/* Email */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Email</label>
-                <div className="p-3 bg-gray-50 rounded-lg border">
-                  <p className="text-gray-900">{profileData.email}</p>
-                  <p className="text-xs text-gray-500 mt-1">Email nelze změnit</p>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <p className="text-gray-900 dark:text-white">{profileData.email}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Email nelze změnit</p>
                 </div>
               </div>
 
               {/* Phone */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Telefon</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Telefon</label>
                 {isEditing ? (
                   <Input
                     value={profileData.phone}
@@ -431,15 +431,15 @@ export const TopBar = () => {
                     size="sm"
                   />
                 ) : (
-                  <div className="p-3 bg-gray-50 rounded-lg border">
-                    <p className="text-gray-900">{profileData.phone || 'Není vyplněno'}</p>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <p className="text-gray-900 dark:text-white">{profileData.phone || 'Není vyplněno'}</p>
                   </div>
                 )}
               </div>
 
               {/* Position */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Pozice</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Pozice</label>
                 {isEditing ? (
                   <Input
                     value={profileData.position}
@@ -448,8 +448,8 @@ export const TopBar = () => {
                     size="sm"
                   />
                 ) : (
-                  <div className="p-3 bg-gray-50 rounded-lg border">
-                    <p className="text-gray-900">{profileData.position || 'Není vyplněno'}</p>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <p className="text-gray-900 dark:text-white">{profileData.position || 'Není vyplněno'}</p>
                   </div>
                 )}
               </div>
@@ -457,7 +457,7 @@ export const TopBar = () => {
 
             {/* Bio */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">O mně</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">O mně</label>
               {isEditing ? (
                 <Textarea
                   value={profileData.bio}
@@ -467,8 +467,8 @@ export const TopBar = () => {
                   minRows={3}
                 />
               ) : (
-                <div className="p-3 bg-gray-50 rounded-lg border">
-                  <p className="text-gray-900">{profileData.bio || 'Není vyplněno'}</p>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <p className="text-gray-900 dark:text-white">{profileData.bio || 'Není vyplněno'}</p>
                 </div>
               )}
             </div>
@@ -545,7 +545,7 @@ export const TopBar = () => {
           <ModalBody>
             <div className="space-y-6">
               {releaseNotes.map((release, index) => (
-                <div key={index} className="border rounded-lg p-4">
+                <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">

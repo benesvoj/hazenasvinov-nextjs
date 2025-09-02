@@ -156,23 +156,23 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900">
       <div className="w-full max-w-sm sm:max-w-md">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className={`mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r ${getHeaderGradient()} rounded-full flex items-center justify-center mb-4 shadow-lg`}>
             {getHeaderIcon()}
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
             {getTabTitle(activeTab)}
           </h1>
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 dark:text-gray-300 text-sm">
             {getTabDescription(activeTab)}
           </p>
         </div>
 
         {/* Login Form Card */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 sm:p-8">
           {/* Tabs */}
           <Tabs 
             selectedKey={activeTab} 
@@ -206,7 +206,7 @@ function LoginForm() {
             <div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                  <UserIcon className="h-5 w-5 text-gray-400" />
+                  <UserIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <Input 
                   className="pl-10"
@@ -231,7 +231,7 @@ function LoginForm() {
             <div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                  <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                  <LockClosedIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <Input 
                   className="pl-10 pr-12"
@@ -249,7 +249,7 @@ function LoginForm() {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200 min-h-[44px] min-w-[44px] justify-center z-10"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 min-h-[44px] min-w-[44px] justify-center z-10"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
                   aria-label={showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
@@ -265,15 +265,15 @@ function LoginForm() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="h-5 w-5 text-red-400 dark:text-red-500" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-red-700">{error}</p>
+                    <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
                   </div>
                 </div>
               </div>
@@ -297,7 +297,7 @@ function LoginForm() {
             <div>
               <Link 
                 href="/reset-password" 
-                className="text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors duration-200"
               >
                 Zapomněli jste heslo?
               </Link>
@@ -305,7 +305,7 @@ function LoginForm() {
             <div>
               <Link 
                 href={publicRoutes.home}
-                className="text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 inline-flex items-center"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors duration-200 inline-flex items-center"
               >
                 ← Zpět na úvodní stránku
               </Link>
@@ -315,7 +315,7 @@ function LoginForm() {
 
         {/* Additional Info */}
         <div className="mt-6 text-center px-4">
-          <p className="text-xs text-gray-500 leading-relaxed">
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
             {activeTab === 'admin' 
               ? 'Pro přístup k administračnímu rozhraní kontaktujte správce systému'
               : 'Pro přístup k trenérskému portálu kontaktujte administrátora klubu'
@@ -331,7 +331,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
       </div>
     }>
       <LoginForm />
