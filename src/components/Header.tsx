@@ -59,15 +59,16 @@ const Header = () => {
             })}
           </nav>
 
-          {/* Right side - Theme switch, coaches portal, and mobile menu button */}
+          {/* Right side - Theme switch, portal, and mobile menu button */}
           <div className="flex items-center space-x-4">
-            {/* Coaches Portal Link */}
+            {/* Portal Link */}
+            {/* TODO: replace with routes.admin */}
             <Link
-              href="/coaches/login"
+              href="/login"
               className="hidden md:flex items-center px-3 py-2 text-sm font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors border border-green-200 dark:border-green-700 rounded-md hover:bg-green-50 dark:hover:bg-green-900/20"
             >
               <span className="mr-2">🎯</span>
-              Trenérský Portal
+              Portal
             </Link>
 
             <ThemeSwitch />
@@ -90,13 +91,13 @@ const Header = () => {
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-200 dark:border-gray-700">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Coaches Portal Link - Mobile */}
+              {/* Portal Link - Mobile */}
               <Link
-                href="/coaches/login"
+                href="/login"
                 className="block px-3 py-2 text-sm font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                🎯 Trenérský Portal
+                🎯 Portal
               </Link>
               
               {menuItems.map((item: MenuItem) => {
