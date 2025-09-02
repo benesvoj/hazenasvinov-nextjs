@@ -24,6 +24,7 @@ interface VideoFormModalProps {
   onSubmit: (formData: VideoFormData) => void;
   video?: Video | null;
   clubs: Club[];
+  availableCategories?: Category[]; // For coaches - only show assigned categories
 }
 
 export function VideoFormModal({
@@ -32,6 +33,7 @@ export function VideoFormModal({
   onSubmit,
   video,
   clubs,
+  availableCategories,
 }: VideoFormModalProps) {
   const [formData, setFormData] = useState<VideoFormData>({
     title: "",
@@ -50,13 +52,18 @@ export function VideoFormModal({
   const { categories, loading: categoriesLoading, fetchCategories } = useCategories();
   const { seasons, loading: seasonsLoading, fetchAllSeasons } = useSeasons();
 
+  // Use availableCategories if provided (for coaches), otherwise use all categories
+  const displayCategories = availableCategories || categories;
+
   // Fetch data when modal opens
   useEffect(() => {
     if (isOpen) {
-      fetchCategories();
+      if (!availableCategories) {
+        fetchCategories();
+      }
       fetchAllSeasons();
     }
-  }, [isOpen, fetchCategories, fetchAllSeasons]);
+  }, [isOpen, fetchCategories, fetchAllSeasons, availableCategories]);
 
   // Reset form when modal opens/closes or video changes
   useEffect(() => {
@@ -216,8 +223,8 @@ export function VideoFormModal({
                   isLoading={categoriesLoading}
                 >
                   <>
-                    {categories.length > 0 ? (
-                      categories.map((category) => (
+                    {displayCategories.length > 0 ? (
+                      displayCategories.map((category) => (
                         <SelectItem key={category.id}>
                           {category.name}
                         </SelectItem>

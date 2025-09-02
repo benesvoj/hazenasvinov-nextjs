@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
-import { AcademicCapIcon, UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { UserIcon, VideoCameraIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, CardHeader } from '@heroui/react';
-import ProtectedCoachRoute from '@/components/ProtectedCoachRoute';
 
 interface UserProfile {
   id: string;
@@ -83,16 +83,6 @@ export default function CoachesDashboard() {
     checkAuth();
   }, []);
 
-  const handleSignOut = async () => {
-    try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      window.location.href = '/coaches/login';
-    } catch (err) {
-      console.error('Sign out error:', err);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -119,38 +109,7 @@ export default function CoachesDashboard() {
   }
 
   return (
-    <ProtectedCoachRoute>
-      <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <AcademicCapIcon className="w-8 h-8 text-green-600 mr-3" />
-              <h1 className="text-xl font-semibold text-gray-900">Trenérský Portal</h1>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-600">
-                <span>Přihlášen jako: </span>
-                <span className="font-medium">{user?.email}</span>
-              </div>
-              <Button
-                color="danger"
-                variant="light"
-                size="sm"
-                onPress={handleSignOut}
-                startContent={<ArrowRightOnRectangleIcon className="w-4 h-4" />}
-              >
-                Odhlásit
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="space-y-6">
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -201,7 +160,7 @@ export default function CoachesDashboard() {
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardBody className="text-center p-6">
               <UserIcon className="w-12 h-12 text-green-600 mx-auto mb-4" />
@@ -228,6 +187,26 @@ export default function CoachesDashboard() {
             </CardBody>
           </Card>
 
+          <Link href="/coaches/videos" className="block">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardBody className="text-center p-6">
+                <VideoCameraIcon className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Videa</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Spravujte videa pro své kategorie
+                </p>
+                <Button 
+                  color="primary" 
+                  variant="bordered" 
+                  size="sm"
+                  as="span"
+                >
+                  Zobrazit videa
+                </Button>
+              </CardBody>
+            </Card>
+          </Link>
+
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardBody className="text-center p-6">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -253,8 +232,6 @@ export default function CoachesDashboard() {
             Průběžně přidáváme nové možnosti pro trenéry
           </p>
         </div>
-      </main>
     </div>
-    </ProtectedCoachRoute>
   );
 }
