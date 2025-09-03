@@ -19,8 +19,7 @@
     "update:user-role-view": "node scripts/update-user-role-view.js",
     "setup:missing-tables": "node scripts/setup-missing-tables.js",
     "fix:admin-dashboard": "node scripts/fix-admin-dashboard-access.js",
-    "setup:user-profiles": "node scripts/setup-user-profiles.js",
-    "fix:rls-policies": "node scripts/fix-rls-policies.js"
+    "setup:user-profiles": "node scripts/setup-user-profiles.js"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",

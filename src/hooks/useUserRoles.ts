@@ -17,40 +17,23 @@ export function useUserRoles() {
       setLoading(true);
       setError(null);
 
-      // Fetch role summaries from the secure view
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_role_summary')
-        .select('*')
-        .order('user_id');
+      // Use the API endpoint to get user role summaries with email data
+      const response = await fetch('/api/user-roles');
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch user roles');
+      }
 
-      if (roleError) throw roleError;
-
-      // Fetch user profile data to get email and full_name
-      const { data: profileData, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('user_id, email, full_name')
-        .in('user_id', (roleData || []).map((r: any) => r.user_id));
-
-      if (profileError) throw profileError;
-
-      // Merge the data
-      const enrichedData = (roleData || []).map((role: any) => {
-        const profile = (profileData || []).find((p: any) => p.user_id === role.user_id);
-        return {
-          ...role,
-          email: profile?.email || 'Neznámý email',
-          full_name: profile?.full_name || 'Neznámý uživatel'
-        };
-      });
-
-      setUserRoleSummaries(enrichedData);
+      const { data } = await response.json();
+      setUserRoleSummaries(data || []);
     } catch (err) {
       console.error('Error fetching user role summaries:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch user roles');
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, []);
 
   // Fetch roles for a specific user
   const fetchUserRoles = useCallback(async (userId: string) => {
