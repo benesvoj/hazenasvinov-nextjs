@@ -16,6 +16,7 @@ function SetPasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [user, setUser] = useState(null);
   const [passwordStrength, setPasswordStrength] = useState({
     length: false,
     uppercase: false,
@@ -34,29 +35,49 @@ function SetPasswordContent() {
   const refreshToken = searchParams.get('refresh_token') || searchParams.get('type');
 
   useEffect(() => {
-    console.log('Set password page loaded with params:', {
-      accessToken: accessToken ? 'present' : 'missing',
-      refreshToken: refreshToken ? 'present' : 'missing',
-      supabaseError,
-      supabaseErrorCode,
-      supabaseErrorDescription,
-      allParams: Object.fromEntries(searchParams.entries())
-    });
+    const checkAuthStatus = async () => {
+      console.log('Set password page loaded with params:', {
+        accessToken: accessToken ? 'present' : 'missing',
+        refreshToken: refreshToken ? 'present' : 'missing',
+        supabaseError,
+        supabaseErrorCode,
+        supabaseErrorDescription,
+        allParams: Object.fromEntries(searchParams.entries())
+      });
 
-    // Handle Supabase errors
-    if (supabaseError) {
-      let errorMessage = 'Odkaz pro nastavení hesla je neplatný nebo vypršel.';
+      const supabase = createClient();
       
-      if (supabaseErrorCode === 'otp_expired') {
-        errorMessage = 'Odkaz pro nastavení hesla vypršel. Požádejte administrátora o nový odkaz.';
-      } else if (supabaseErrorCode === 'access_denied') {
-        errorMessage = 'Přístup byl zamítnut. Odkaz může být neplatný nebo vypršel.';
+      // Check if user is authenticated via session (from auth confirm route)
+      const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Error getting user:', userError);
+      } else {
+        setUser(currentUser);
       }
-      
-      setError(errorMessage);
-    } else if (!accessToken) {
-      setError('Neplatný odkaz pro nastavení hesla. Zkontrolujte svůj email.');
-    }
+
+      // Handle Supabase errors
+      if (supabaseError) {
+        let errorMessage = 'Odkaz pro nastavení hesla je neplatný nebo vypršel.';
+        
+        if (supabaseErrorCode === 'otp_expired') {
+          errorMessage = 'Odkaz pro nastavení hesla vypršel. Požádejte administrátora o nový odkaz.';
+        } else if (supabaseErrorCode === 'access_denied') {
+          errorMessage = 'Přístup byl zamítnut. Odkaz může být neplatný nebo vypršel.';
+        }
+        
+        setError(errorMessage);
+      } else if (!accessToken && !currentUser) {
+        // Only show error if we don't have access token AND user is not authenticated
+        setError('Neplatný odkaz pro nastavení hesla. Zkontrolujte svůj email.');
+      } else if (currentUser) {
+        console.log('User is authenticated via session:', currentUser.email);
+        // User is authenticated, clear any errors
+        setError('');
+      }
+    };
+
+    checkAuthStatus();
   }, [accessToken, refreshToken, searchParams, supabaseError, supabaseErrorCode, supabaseErrorDescription]);
 
   // Check password strength
@@ -150,7 +171,7 @@ function SetPasswordContent() {
     );
   }
 
-  if (!accessToken || supabaseError) {
+  if ((!accessToken && !user) || supabaseError) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
