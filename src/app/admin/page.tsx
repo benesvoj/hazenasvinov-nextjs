@@ -144,7 +144,7 @@ export default function AdminDashboard() {
 
       if (error) throw error;
       setTodos(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading todos:', {
         message: error?.message || 'Unknown error',
         details: error?.details,
@@ -441,7 +441,7 @@ export default function AdminDashboard() {
 
       if (error) throw error;
       setComments(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading comments:', {
         message: error?.message || 'Unknown error',
         details: error?.details,
