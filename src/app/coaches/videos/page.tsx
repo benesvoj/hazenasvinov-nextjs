@@ -25,7 +25,7 @@ import {
   ModalFooter,
   Skeleton
 } from '@heroui/react';
-import { VideoFormModal, VideoCard } from '@/app/admin/videos/components';
+import { VideoFormModal, VideoCard } from '@/components';
 
 
 export default function CoachesVideosPage() {

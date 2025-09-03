@@ -49,3 +49,9 @@ export {
   Breadcrumb, 
   Pagination 
 } from './Navigation';
+
+export { PasswordInput } from './PasswordInput';
+export { VideoCard } from './videos/VideoCard';
+export { VideoFormModal } from './videos/VideoFormModal';
+
+export { ButtonWithTooltip } from './ButtonWithTooltip';

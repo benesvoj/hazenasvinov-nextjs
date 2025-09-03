@@ -12,13 +12,11 @@ import {
   PlusIcon, 
   MagnifyingGlassIcon,
   FunnelIcon,
-  PlayIcon
 } from '@heroicons/react/24/outline';
 import { 
   Button, 
   Card, 
   CardBody, 
-  CardHeader, 
   Input, 
   Select, 
   SelectItem,
@@ -28,11 +26,9 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Textarea,
-  Chip,
   Skeleton
 } from '@heroui/react';
-import { VideoFormModal, VideoCard } from './components';
+import { VideoFormModal, VideoCard } from '@/components';
 
 export default function VideosPage() {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -44,7 +40,7 @@ export default function VideosPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
 
-  const { categories, loading: categoriesLoading } = useCategories();
+  const { categories, loading: categoriesLoading, fetchCategories } = useCategories();
   const { clubs, loading: clubsLoading } = useClubs();
   const { seasons, loading: seasonsLoading } = useSeasons();
   const { user } = useAuth();
@@ -141,6 +137,10 @@ export default function VideosPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     fetchVideos();

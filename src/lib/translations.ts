@@ -341,5 +341,16 @@ export const translations = {
       showPassword: "Zobrazit heslo",
       hidePassword: "Skrýt heslo",
     },
+    video: {
+      videoCard: {
+        recordingDate: "Odehráno:",
+        createdAt: "Vytvořeno:",
+        updatedAt: "Aktualizováno:",
+        play: "Přehrát video",
+        copyUrl: "Kopírovat URL",
+        edit: "Upravit video",
+        delete: "Smazat video",
+      }
+    }
   },
 } as const;
