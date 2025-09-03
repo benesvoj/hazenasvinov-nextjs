@@ -93,23 +93,50 @@ export default function AdminDashboard() {
       const supabase = createClient();
       const { data, error } = await supabase.auth.getUser();
       
-	if (error || !data?.user) {
+      if (error || !data?.user) {
+        console.error('User authentication error:', error);
         redirect('/login');
+        return;
       }
       
+      console.log('User authenticated:', data.user.email);
       setUser(data.user);
       setLoading(false);
+      
+      // Load data after user is confirmed
+      loadReleaseNotes();
+      loadTodos();
     };
 
     checkUser();
-    loadReleaseNotes();
-    loadTodos();
   }, []);
 
   const loadTodos = async () => {
     try {
       setTodosLoading(true);
       const supabase = createClient();
+      
+      // First check if the todos table exists
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('todos')
+        .select('id')
+        .limit(1);
+
+      if (tableError) {
+        console.error('Todos table error:', {
+          message: tableError.message,
+          details: tableError.details,
+          hint: tableError.hint,
+          code: tableError.code
+        });
+        if (tableError.message && tableError.message.includes('relation "todos" does not exist')) {
+          console.warn('Todos table does not exist. Run: npm run setup:missing-tables');
+          setTodos([]);
+          return;
+        }
+        throw tableError;
+      }
+
       const { data, error } = await supabase
         .from('todos')
         .select('*')
@@ -118,7 +145,14 @@ export default function AdminDashboard() {
       if (error) throw error;
       setTodos(data || []);
     } catch (error) {
-      console.error('Error loading todos:', error);
+      console.error('Error loading todos:', {
+        message: error?.message || 'Unknown error',
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code,
+        fullError: error
+      });
+      setTodos([]);
     } finally {
       setTodosLoading(false);
     }
@@ -166,7 +200,13 @@ export default function AdminDashboard() {
           user_email: user?.email || 'unknown@hazenasvinov.cz'
         });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('relation "todos" does not exist')) {
+          console.warn('Todos table does not exist. Run: npm run setup:todos-table');
+          return;
+        }
+        throw error;
+      }
       
       onAddTodoClose();
       loadTodos();
@@ -306,7 +346,13 @@ export default function AdminDashboard() {
           user_email: user?.email || 'unknown@hazenasvinov.cz'
         });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('relation "comments" does not exist')) {
+          console.warn('Comments table does not exist. Run: npm run setup:comments-table');
+          return;
+        }
+        throw error;
+      }
       
       onAddCommentClose();
       setCommentFormData({ content: '', type: 'general' });
@@ -366,6 +412,28 @@ export default function AdminDashboard() {
   const loadComments = async () => {
     try {
       const supabase = createClient();
+      
+      // First check if the comments table exists
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('comments')
+        .select('id')
+        .limit(1);
+
+      if (tableError) {
+        console.error('Comments table error:', {
+          message: tableError.message,
+          details: tableError.details,
+          hint: tableError.hint,
+          code: tableError.code
+        });
+        if (tableError.message && tableError.message.includes('relation "comments" does not exist')) {
+          console.warn('Comments table does not exist. Run: npm run setup:missing-tables');
+          setComments([]);
+          return;
+        }
+        throw tableError;
+      }
+
       const { data, error } = await supabase
         .from('comments')
         .select('*')
@@ -374,7 +442,14 @@ export default function AdminDashboard() {
       if (error) throw error;
       setComments(data || []);
     } catch (error) {
-      console.error('Error loading comments:', error);
+      console.error('Error loading comments:', {
+        message: error?.message || 'Unknown error',
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code,
+        fullError: error
+      });
+      setComments([]);
     }
   };
 

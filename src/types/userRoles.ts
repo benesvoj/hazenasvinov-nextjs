@@ -16,13 +16,14 @@ export interface CoachCategory {
 
 export interface UserRoleSummary {
   user_id: string;
-  email: string;
-  full_name: string;
   profile_role: string; // Keep for backward compatibility
   roles: string[];
   assigned_categories: string[];
   assigned_category_names: string[];
   assigned_category_codes: string[];
+  // These fields are populated separately from user_profiles
+  email?: string;
+  full_name?: string;
 }
 
 export interface RoleAssignment {

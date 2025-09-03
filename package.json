@@ -16,7 +16,11 @@
     "setup:initial-admin": "node scripts/setup-initial-admin.js",
     "create:first-admin": "node scripts/create-first-admin.js",
     "fix:admin-user": "node scripts/fix-admin-user.js",
-    "update:user-role-view": "node scripts/update-user-role-view.js"
+    "update:user-role-view": "node scripts/update-user-role-view.js",
+    "setup:missing-tables": "node scripts/setup-missing-tables.js",
+    "fix:admin-dashboard": "node scripts/fix-admin-dashboard-access.js",
+    "setup:user-profiles": "node scripts/setup-user-profiles.js",
+    "fix:rls-policies": "node scripts/fix-rls-policies.js"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",
