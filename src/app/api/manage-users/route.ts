@@ -34,8 +34,6 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        console.log('Updating user:', { userId, userData });
-
         // For existing users, only update metadata, not email
         const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
           user_metadata: {
@@ -47,7 +45,6 @@ export async function POST(request: NextRequest) {
         });
 
         if (updateError) {
-          console.error('Update error:', updateError);
           throw updateError;
         }
         break;
@@ -60,8 +57,6 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        console.log('Creating user:', { userData });
-
         const { data: createData, error: createError } = await supabase.auth.admin.inviteUserByEmail(userData.email, {
           data: {
             full_name: userData.full_name,
@@ -72,7 +67,14 @@ export async function POST(request: NextRequest) {
         });
 
         if (createError) {
-          console.error('Create error:', createError);
+          
+          // Handle specific error cases
+          if (createError.code === 'over_email_send_rate_limit') {
+            return NextResponse.json({ 
+              error: 'Překročen limit odesílání emailů. Zkuste to znovu za několik minut.' 
+            }, { status: 429 });
+          }
+          
           throw createError;
         }
 
@@ -91,12 +93,9 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        console.log('Toggling block for user:', { userId });
-
         // First get current user metadata
         const { data: currentUser, error: fetchError } = await supabase.auth.admin.getUserById(userId);
         if (fetchError) {
-          console.error('Fetch error:', fetchError);
           throw fetchError;
         }
 
@@ -111,7 +110,6 @@ export async function POST(request: NextRequest) {
         });
 
         if (blockError) {
-          console.error('Block error:', blockError);
           throw blockError;
         }
         break;
@@ -129,7 +127,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error in manage-users API:', error);
     return NextResponse.json(
       { error: 'Failed to manage user', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

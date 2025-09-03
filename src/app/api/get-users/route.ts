@@ -18,7 +18,6 @@ export async function GET(request: Request) {
 		const { data: users, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
 
 		if (usersError) {
-			console.error('Error fetching users:', usersError);
 			return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
 		}
 
@@ -44,7 +43,6 @@ export async function GET(request: Request) {
 					.range(offset, offset + limit - 1);
 
 				if (logsError) {
-					console.error('Error fetching login logs:', logsError);
 					// Return users even if logs fail
 					return NextResponse.json({
 						users: users.users,
@@ -71,7 +69,6 @@ export async function GET(request: Request) {
 					}
 				});
 			} catch (logsError) {
-				console.error('Error fetching login logs:', logsError);
 				// Return users even if logs fail
 				return NextResponse.json({
 					users: users.users,
@@ -88,7 +85,6 @@ export async function GET(request: Request) {
 
 		return NextResponse.json(users.users);
 	} catch (error) {
-		console.error('Unexpected error:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

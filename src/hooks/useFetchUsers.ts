@@ -108,6 +108,7 @@ export function useFetchUsers(includeLogs: boolean = false) {
 		selectedUser,
 		changePage,
 		changeUserFilter,
-		clearFilters
+		clearFilters,
+		fetchUsers
 	};
 }

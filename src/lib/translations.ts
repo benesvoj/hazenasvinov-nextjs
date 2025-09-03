@@ -334,4 +334,12 @@ export const translations = {
     sponsors: "Naši partneři a sponzoři",
     callToAction: "Chcete se připojit k našemu týmu?",
   },
+  components: {
+    passwordInput: {
+      label: "Heslo",
+      placeholder: "Vložte své heslo",
+      showPassword: "Zobrazit heslo",
+      hidePassword: "Skrýt heslo",
+    },
+  },
 } as const;

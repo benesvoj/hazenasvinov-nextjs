@@ -39,7 +39,7 @@ export function useUserRoles() {
   const fetchUserRoles = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('user_roles')
+        .from('user_profiles')
         .select('*')
         .eq('user_id', userId);
 
@@ -67,30 +67,46 @@ export function useUserRoles() {
     }
   }, [supabase]);
 
-  // Assign roles to a user
+  // Assign role to a user (user_profiles has single role per user)
   const assignRoles = useCallback(async (userId: string, roles: ('admin' | 'coach')[]) => {
     try {
       setLoading(true);
       setError(null);
 
-      // First, remove existing roles for this user
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
+      // user_profiles table has single role per user, so we take the first role
+      const primaryRole = roles[0] || 'member';
+      
+      // Check if user already has a profile
+      const { data: existingProfile } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
 
-      // Then add new roles
-      if (roles.length > 0) {
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        const roleInserts = roles.map(role => ({
-          user_id: userId,
-          role,
-          created_by: currentUser?.id
-        }));
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
 
+      if (existingProfile) {
+        // Update existing profile
         const { error } = await supabase
-          .from('user_roles')
-          .insert(roleInserts);
+          .from('user_profiles')
+          .update({
+            role: primaryRole,
+            assigned_categories: primaryRole === 'coach' ? [] : null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+
+        if (error) throw error;
+      } else {
+        // Create new profile
+        const { error } = await supabase
+          .from('user_profiles')
+          .insert({
+            user_id: userId,
+            role: primaryRole,
+            assigned_categories: primaryRole === 'coach' ? [] : null,
+            created_by: currentUser?.id
+          });
 
         if (error) throw error;
       }
@@ -112,27 +128,16 @@ export function useUserRoles() {
       setLoading(true);
       setError(null);
 
-      // First, remove existing category assignments for this user
-      await supabase
-        .from('coach_categories')
-        .delete()
+      // Update user_profiles with assigned_categories array
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          assigned_categories: categoryIds,
+          updated_at: new Date().toISOString()
+        })
         .eq('user_id', userId);
 
-      // Then add new category assignments
-      if (categoryIds.length > 0) {
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        const categoryInserts = categoryIds.map(categoryId => ({
-          user_id: userId,
-          category_id: categoryId,
-          created_by: currentUser?.id
-        }));
-
-        const { error } = await supabase
-          .from('coach_categories')
-          .insert(categoryInserts);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       // Refresh the summaries
       await fetchUserRoleSummaries();
@@ -179,18 +184,7 @@ export function useUserRoles() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
 
-      // Try user_roles table first (new system)
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', role);
-
-      if (!roleError && roleData && roleData.length > 0) {
-        return true;
-      }
-
-      // Fallback to user_profiles table (legacy system)
+      // Use user_profiles table (primary system)
       const { data: profileData, error: profileError } = await supabase
         .from('user_profiles')
         .select('role')
@@ -215,12 +209,13 @@ export function useUserRoles() {
       if (!user) return [];
 
       const { data, error } = await supabase
-        .from('coach_categories')
-        .select('category_id')
-        .eq('user_id', user.id);
+        .from('user_profiles')
+        .select('assigned_categories')
+        .eq('user_id', user.id)
+        .single();
 
       if (error) throw error;
-      return data?.map((item: any) => item.category_id) || [];
+      return data?.assigned_categories || [];
     } catch (err) {
       console.error('Error fetching current user categories:', err);
       return [];

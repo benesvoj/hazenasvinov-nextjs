@@ -19,7 +19,8 @@ export default function Page() {
 		selectedUser,
 		changePage,
 		changeUserFilter,
-		clearFilters
+		clearFilters,
+		fetchUsers
 	} = useFetchUsers(selectedTab === "loginLogs");
 
 	if (error) {
@@ -62,7 +63,11 @@ export default function Page() {
 
 			{/* Tab Content */}
 			{selectedTab === "users" && (
-				<UsersTab users={users} loading={loading} />
+				<UsersTab 
+					users={users} 
+					loading={loading} 
+					onRefresh={() => fetchUsers(1, selectedUser)}
+				/>
 			)}
 			
 			{selectedTab === "loginLogs" && (

@@ -3,10 +3,9 @@
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Badge } from "@heroui/badge";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/modal";
-import { Input, Textarea } from "@heroui/input";
+import { Input } from "@heroui/input";
 import { Avatar } from "@heroui/avatar";
 import { 
 	PlusIcon, 
@@ -17,40 +16,28 @@ import {
 	KeyIcon,
 	UserIcon,
 	EnvelopeIcon,
-	ShieldCheckIcon,
-	ShieldExclamationIcon
 } from "@heroicons/react/24/outline";
 import { SupabaseUser } from "@/types/types";
 import { useState } from "react";
 import { showToast } from '@/components/Toast';
-import RoleAssignmentModal from '@/components/RoleAssignmentModal';
+import RoleAssignmentModal from '@/app/admin/users/components/RoleAssignmentModal';
+import UserFormModal from '@/app/admin/users/components/UserFormModal';
+import { Chip } from "@heroui/chip";
 
 interface UsersTabProps {
 	users: SupabaseUser[];
 	loading: boolean;
+	onRefresh?: () => void;
 }
 
-interface UserFormData {
-	email: string;
-	full_name: string;
-	phone?: string;
-	bio?: string;
-	position?: string;
-}
 
-export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
+
+export const UsersTab: React.FC<UsersTabProps> = ({ users, loading, onRefresh }) => {
 	const { isOpen: isAddOpen, onOpen: onAddOpen, onOpenChange: onAddOpenChange } = useDisclosure();
 	const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
 	const { isOpen: isPasswordResetOpen, onOpen: onPasswordResetOpen, onOpenChange: onPasswordResetOpenChange } = useDisclosure();
 	
 	const [selectedUser, setSelectedUser] = useState<SupabaseUser | null>(null);
-	const [formData, setFormData] = useState<UserFormData>({
-		email: '',
-		full_name: '',
-		phone: '',
-		bio: '',
-		position: ''
-	});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [showRoleAssignment, setShowRoleAssignment] = useState(false);
 	const [newlyCreatedUser, setNewlyCreatedUser] = useState<{ id: string; email: string } | null>(null);
@@ -59,36 +46,19 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 	// Initialize form data when adding new user
 	const handleAddUser = () => {
 		setSelectedUser(null);
-		setFormData({
-			email: '',
-			full_name: '',
-			phone: '',
-			bio: '',
-			position: ''
-		});
 		onAddOpen();
 	};
 
 	// Initialize form data when editing
 	const handleEditUser = (user: SupabaseUser) => {
 		setSelectedUser(user);
-		setFormData({
-			email: user.email || '',
-			full_name: user.user_metadata?.full_name || '',
-			phone: user.user_metadata?.phone || '',
-			bio: user.user_metadata?.bio || '',
-			position: user.user_metadata?.position || ''
-		});
 		onEditOpen();
 	};
 
 	// Handle form submission for adding/editing users
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		setIsSubmitting(true);
-
+	const handleSubmit = async (formData: any, isEdit: boolean) => {
 		try {
-			const action = selectedUser ? 'update' : 'create';
+			const action = isEdit ? 'update' : 'create';
 			const payload = {
 				action,
 				userData: formData,
@@ -110,14 +80,13 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 
 			const responseData = await response.json();
 
-			// Close modal
-			onEditOpenChange();
-			onAddOpenChange();
-			setSelectedUser(null);
-			setFormData({ email: '', full_name: '', phone: '', bio: '', position: '' });
-			
 			// If it's a new user creation, show role assignment modal
 			if (action === 'create' && responseData.userId && responseData.userEmail) {
+				// Close the user form modal first
+				onAddOpenChange();
+				setSelectedUser(null);
+				
+				// Then show role assignment modal
 				setNewlyCreatedUser({
 					id: responseData.userId,
 					email: responseData.userEmail
@@ -125,15 +94,13 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 				setShowRoleAssignment(true);
 				showToast.success('Uživatel byl úspěšně vytvořen! Nyní přiřaďte roli.');
 			} else {
-				// For updates, just refresh
+				// For updates, refresh the users list
 				showToast.success('Uživatel byl úspěšně aktualizován!');
-				window.location.reload();
+				onRefresh?.();
 			}
 		} catch (error) {
 			console.error('Error saving user:', error);
-			showToast.danger(`Chyba při ukládání uživatele: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
-		} finally {
-			setIsSubmitting(false);
+			throw error; // Re-throw to let the component handle it
 		}
 	};
 
@@ -156,8 +123,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 				throw new Error(errorData.error || 'Failed to toggle user status');
 			}
 			
-			// Refresh the page to get updated data
-			window.location.reload();
+			// Refresh the users list to get updated data
+			onRefresh?.();
 		} catch (error) {
 			console.error('Error toggling user status:', error);
 			showToast.danger(`Chyba při změně stavu uživatele: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
@@ -203,36 +170,25 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 		
 		if (isBlocked) {
 			return (
-				<Badge color="danger" variant="flat">
-					<ShieldExclamationIcon className="w-3 h-3 mr-1" />
+				<Chip color="danger" variant="flat" size="sm">
 					Blokován
-				</Badge>
+				</Chip>
 			);
 		}
 		
 		if (!isConfirmed) {
 			return (
-				<Badge color="warning" variant="flat">
-					<EnvelopeIcon className="w-3 h-3 mr-1" />
+				<Chip color="warning" variant="flat" size="sm">
 					Neověřen
-				</Badge>
+				</Chip>
 			);
 		}
 		
 		return (
-			<Badge color="success" variant="flat">
-				<ShieldCheckIcon className="w-3 h-3 mr-1" />
+			<Chip color="success" variant="flat" size="sm">
 				Aktivní
-			</Badge>
+			</Chip>
 		);
-	};
-
-	// Get user initials for avatar
-	const getUserInitials = (user: SupabaseUser) => {
-		if (user.user_metadata?.full_name) {
-			return user.user_metadata.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
-		}
-		return user.email?.charAt(0).toUpperCase() || 'U';
 	};
 
 	if (loading) {
@@ -377,84 +333,21 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 			</Card>
 
 			{/* Add/Edit User Modal */}
-			<Modal isOpen={isAddOpen || isEditOpen} onOpenChange={isAddOpen ? onAddOpenChange : onEditOpenChange} size="2xl">
-				<ModalContent>
-					{(onClose) => (
-						<form onSubmit={handleSubmit}>
-							<ModalHeader className="flex flex-col gap-1">
-								{selectedUser ? 'Upravit uživatele' : 'Přidat nového uživatele'}
-							</ModalHeader>
-							<ModalBody className="gap-4">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<Input
-										isRequired
-										label="Email"
-										labelPlacement="outside"
-										name="email"
-										placeholder="uzivatel@example.cz"
-										type="email"
-										value={formData.email}
-										onChange={(e) => setFormData({...formData, email: e.target.value})}
-										isReadOnly={!!selectedUser} // Read-only for existing users
-										description={selectedUser ? "Email nelze změnit" : undefined}
-									/>
-									<Input
-										isRequired
-										label="Celé jméno"
-										labelPlacement="outside"
-										name="full_name"
-										placeholder="Jan Novák"
-										type="text"
-										value={formData.full_name}
-										onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-									/>
-									<Input
-										label="Telefon"
-										labelPlacement="outside"
-										name="phone"
-										placeholder="+420 123 456 789"
-										type="tel"
-										value={formData.phone}
-										onChange={(e) => setFormData({...formData, phone: e.target.value})}
-									/>
-									<Input
-										label="Pozice"
-										labelPlacement="outside"
-										name="position"
-										placeholder="Administrátor"
-										type="text"
-										value={formData.position}
-										onChange={(e) => setFormData({...formData, position: e.target.value})}
-									/>
-								</div>
-								<Textarea
-									label="Bio"
-									labelPlacement="outside"
-									name="bio"
-									placeholder="Krátký popis uživatele..."
-									value={formData.bio}
-									onChange={(e) => setFormData({...formData, bio: e.target.value})}
-								/>
-								{!selectedUser && (
-									<div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-										<p className="text-sm text-blue-800">
-											Novému uživateli bude odeslán email s pozvánkou do systému.
-										</p>
-									</div>
-								)}
-							</ModalBody>
-							<ModalFooter>
-								<Button color="danger" variant="light" onPress={onClose}>
-									Zrušit
-								</Button>
-								<Button color="primary" type="submit" isLoading={isSubmitting}>
-									{selectedUser ? 'Uložit změny' : 'Vytvořit uživatele'}
-								</Button>
-							</ModalFooter>
-						</form>
-					)}
-				</ModalContent>
-			</Modal>
+			<UserFormModal
+				isOpen={isAddOpen || isEditOpen}
+				onOpenChange={isAddOpen ? onAddOpenChange : onEditOpenChange}
+				selectedUser={selectedUser}
+				onSubmit={handleSubmit}
+				onSuccess={() => {
+					// Close modal and reset form
+					if (isEditOpen) {
+						onEditOpenChange();
+					} else if (isAddOpen) {
+						onAddOpenChange();
+					}
+					setSelectedUser(null);
+				}}
+			/>
 
 			{/* Password Reset Modal */}
 			<Modal isOpen={isPasswordResetOpen} onOpenChange={onPasswordResetOpenChange} size="md">
@@ -500,7 +393,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 					onClose={() => {
 						setShowRoleAssignment(false);
 						setNewlyCreatedUser(null);
-						window.location.reload(); // Refresh to show updated data
+						// Refresh the users list to show updated data
+						onRefresh?.();
 					}}
 					userId={newlyCreatedUser.id}
 					userEmail={newlyCreatedUser.email}
@@ -508,7 +402,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 						setShowRoleAssignment(false);
 						setNewlyCreatedUser(null);
 						showToast.success('Role byla úspěšně přiřazena!');
-						window.location.reload(); // Refresh to show updated data
+						// Refresh the users list to show updated data
+						onRefresh?.();
 					}}
 				/>
 			)}
