@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 				if (type === 'recovery') {
 					// Password reset - redirect to reset-password page
 					redirect('/reset-password')
-				} else if (type === 'signup') {
+				} else if (type === 'signup' || type === 'invite') {
 					// User invitation - redirect to set-password page
 					redirect('/set-password')
 				} else {
