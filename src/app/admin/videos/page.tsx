@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { Video, VideoFormData, VideoFilters } from '@/types';
-import { useCategories } from '@/hooks/useCategories';
-import { useClubs } from '@/hooks/useClubs';
-import { useSeasons } from '@/hooks/useSeasons';
-import { useAuth } from '@/hooks/useAuth';
-import { 
-  VideoCameraIcon, 
-  PlusIcon, 
+import React, { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { Video, VideoFormData, VideoFilters } from "@/types";
+import { useCategories } from "@/hooks/useCategories";
+import { useClubs } from "@/hooks/useClubs";
+import { useSeasons } from "@/hooks/useSeasons";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  VideoCameraIcon,
+  PlusIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
-} from '@heroicons/react/24/outline';
-import { 
-  Button, 
-  Card, 
-  CardBody, 
-  Input, 
-  Select, 
+} from "@heroicons/react/24/outline";
+import {
+  Button,
+  Card,
+  CardBody,
+  Input,
+  Select,
   SelectItem,
   Switch,
   Modal,
@@ -26,9 +26,11 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Skeleton
-} from '@heroui/react';
-import { VideoFormModal, VideoCard } from '@/components';
+  Skeleton,
+} from "@heroui/react";
+import { VideoFormModal, VideoCard } from "@/components";
+import { AdminContainer } from "../components/AdminContainer";
+import { translations } from "@/lib/translations";
 
 export default function VideosPage() {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -40,36 +42,45 @@ export default function VideosPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
 
-  const { categories, loading: categoriesLoading, fetchCategories } = useCategories();
+  const {
+    categories,
+    loading: categoriesLoading,
+    fetchCategories,
+  } = useCategories();
   const { clubs, loading: clubsLoading } = useClubs();
-  const { seasons, loading: seasonsLoading } = useSeasons();
+  const { seasons, loading: seasonsLoading, fetchAllSeasons } = useSeasons();
   const { user } = useAuth();
+
+  const t = translations.components.video.videos;
 
   // Fetch videos
   const fetchVideos = async () => {
     try {
       setLoading(true);
       const supabase = createClient();
-      
+
       // First, try to check if the videos table exists
       const { data: tableCheck, error: tableError } = await supabase
-        .from('videos')
-        .select('id')
+        .from("videos")
+        .select("id")
         .limit(1);
 
       if (tableError) {
-        console.error('Videos table error:', tableError);
+        console.error("Videos table error:", tableError);
         if (tableError.message.includes('relation "videos" does not exist')) {
-          setError('Tabulka videí neexistuje. Spusťte: npm run setup:videos-table');
+          setError(
+            "Tabulka videí neexistuje. Spusťte: npm run setup:videos-table"
+          );
           setVideos([]);
           return;
         }
         throw tableError;
       }
-      
+
       let query = supabase
-        .from('videos')
-        .select(`
+        .from("videos")
+        .select(
+          `
           *,
           categories (
             id,
@@ -87,28 +98,31 @@ export default function VideosPage() {
             start_date,
             end_date
           )
-        `)
-        .order('created_at', { ascending: false });
+        `
+        )
+        .order("created_at", { ascending: false });
 
       // Apply filters
       if (filters.category_id) {
-        query = query.eq('category_id', filters.category_id);
+        query = query.eq("category_id", filters.category_id);
       }
-      
+
       if (filters.club_id) {
-        query = query.eq('club_id', filters.club_id);
+        query = query.eq("club_id", filters.club_id);
       }
-      
+
       if (filters.season_id) {
-        query = query.eq('season_id', filters.season_id);
+        query = query.eq("season_id", filters.season_id);
       }
-      
+
       if (filters.is_active !== undefined) {
-        query = query.eq('is_active', filters.is_active);
+        query = query.eq("is_active", filters.is_active);
       }
 
       if (filters.search) {
-        query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+        query = query.or(
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`
+        );
       }
 
       // TODO: Implement category-based access control for coaches
@@ -119,20 +133,24 @@ export default function VideosPage() {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Supabase error:', error);
+        console.error("Supabase error:", error);
         throw error;
       }
 
-      console.log('Fetched videos data:', data);
+      console.log("Fetched videos data:", data);
       setVideos(data || []);
     } catch (err) {
-      console.error('Error fetching videos:', err);
-      console.error('Error details:', {
-        message: err instanceof Error ? err.message : 'Unknown error',
+      console.error("Error fetching videos:", err);
+      console.error("Error details:", {
+        message: err instanceof Error ? err.message : "Unknown error",
         stack: err instanceof Error ? err.stack : undefined,
-        error: err
+        error: err,
       });
-      setError(`Chyba při načítání videí: ${err instanceof Error ? err.message : 'Neznámá chyba'}`);
+      setError(
+        `Chyba při načítání videí: ${
+          err instanceof Error ? err.message : "Neznámá chyba"
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -140,6 +158,7 @@ export default function VideosPage() {
 
   useEffect(() => {
     fetchCategories();
+    fetchAllSeasons();
   }, []);
 
   useEffect(() => {
@@ -150,21 +169,25 @@ export default function VideosPage() {
   const handleCreateVideo = async (formData: VideoFormData) => {
     try {
       const supabase = createClient();
-      
+
       // Extract YouTube ID from URL
       const youtubeId = extractYouTubeId(formData.youtube_url);
       if (!youtubeId) {
-        throw new Error('Neplatná YouTube URL');
+        throw new Error("Neplatná YouTube URL");
       }
 
       const { data, error } = await supabase
-        .from('videos')
+        .from("videos")
         .insert({
           ...formData,
           youtube_id: youtubeId,
           thumbnail_url: `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
           created_by: user?.id,
-          updated_by: user?.id
+          updated_by: user?.id,
+          // Convert empty strings to null for optional fields
+          club_id: formData.club_id || null,
+          season_id: formData.season_id || null,
+          recording_date: formData.recording_date || null,
         })
         .select()
         .single();
@@ -173,33 +196,43 @@ export default function VideosPage() {
         throw error;
       }
 
-      setVideos(prev => [data, ...prev]);
+      setVideos((prev) => [data, ...prev]);
       setIsFormModalOpen(false);
-    } catch (err) {
-      console.error('Error creating video:', err);
-      setError('Chyba při vytváření videa');
+    } catch (err: any) {
+      console.error("Error creating video:", err);
+      console.error("Error details:", {
+        message: err?.message,
+        code: err?.code,
+        details: err?.details,
+        hint: err?.hint,
+      });
+      setError(`Chyba při vytváření videa: ${err?.message || "Neznámá chyba"}`);
     }
   };
 
   const handleUpdateVideo = async (id: string, formData: VideoFormData) => {
     try {
       const supabase = createClient();
-      
+
       // Extract YouTube ID from URL
       const youtubeId = extractYouTubeId(formData.youtube_url);
       if (!youtubeId) {
-        throw new Error('Neplatná YouTube URL');
+        throw new Error("Neplatná YouTube URL");
       }
 
       const { data, error } = await supabase
-        .from('videos')
+        .from("videos")
         .update({
           ...formData,
           youtube_id: youtubeId,
           thumbnail_url: `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
-          updated_by: user?.id
+          updated_by: user?.id,
+          // Convert empty strings to null for optional fields
+          club_id: formData.club_id || null,
+          season_id: formData.season_id || null,
+          recording_date: formData.recording_date || null,
         })
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
@@ -207,63 +240,77 @@ export default function VideosPage() {
         throw error;
       }
 
-      setVideos(prev => prev.map(video => video.id === id ? data : video));
+      setVideos((prev) =>
+        prev.map((video) => (video.id === id ? data : video))
+      );
       setEditingVideo(null);
       setIsFormModalOpen(false);
-    } catch (err) {
-      console.error('Error updating video:', err);
-      setError('Chyba při aktualizaci videa');
+    } catch (err: any) {
+      console.error("Error updating video:", err);
+      console.error("Error details:", {
+        message: err?.message,
+        code: err?.code,
+        details: err?.details,
+        hint: err?.hint,
+      });
+      setError(
+        `Chyba při aktualizaci videa: ${err?.message || "Neznámá chyba"}`
+      );
     }
   };
 
   const handleDeleteVideo = async (id: string) => {
     try {
       const supabase = createClient();
-      
-      const { error } = await supabase
-        .from('videos')
-        .delete()
-        .eq('id', id);
+
+      const { error } = await supabase.from("videos").delete().eq("id", id);
 
       if (error) {
         throw error;
       }
 
-      setVideos(prev => prev.filter(video => video.id !== id));
+      setVideos((prev) => prev.filter((video) => video.id !== id));
       setDeleteModalOpen(false);
       setVideoToDelete(null);
-    } catch (err) {
-      console.error('Error deleting video:', err);
-      setError('Chyba při mazání videa');
+    } catch (err: any) {
+      console.error("Error deleting video:", err);
+      console.error("Error details:", {
+        message: err?.message,
+        code: err?.code,
+        details: err?.details,
+        hint: err?.hint,
+      });
+      setError(`Chyba při mazání videa: ${err?.message || "Neznámá chyba"}`);
     }
   };
 
   // Extract YouTube ID from URL
   const extractYouTubeId = (url: string): string | null => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^&?\/\s]{11})/;
+    const regex =
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^&?\/\s]{11})/;
     const match = url.match(regex);
     return match ? match[1] : null;
   };
 
   // Filter handlers
   const handleCategoryFilter = (categoryId: string) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      category_id: categoryId === 'all' ? undefined : categoryId
+      category_id: categoryId === "all" ? undefined : categoryId,
     }));
   };
 
   const handleSearchFilter = (search: string) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      search: search || undefined
+      search: search || undefined,
     }));
   };
 
   const handleActiveFilter = (isActive: boolean) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      is_active: isActive
+      is_active: isActive,
     }));
   };
 
@@ -300,10 +347,12 @@ export default function VideosPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Videa</h1>
-            <p className="text-gray-600">Správa videí pro jednotlivé kategorie</p>
+            <p className="text-gray-600">
+              Správa videí pro jednotlivé kategorie
+            </p>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-64 rounded-lg" />
@@ -314,26 +363,20 @@ export default function VideosPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <VideoCameraIcon className="w-8 h-8 text-blue-600" />
-            Videa
-          </h1>
-          <p className="text-gray-600">Správa videí pro jednotlivé kategorie</p>
-        </div>
-        
+    <AdminContainer
+      title={t.title}
+      description={t.description}
+      icon={<VideoCameraIcon className="w-8 h-8 text-blue-600" />}
+      actions={
         <Button
           color="primary"
           startContent={<PlusIcon className="w-5 h-5" />}
           onPress={openCreateModal}
         >
-          Přidat video
+          {t.addVideo}
         </Button>
-      </div>
-
+      }
+    >
       {/* Filters */}
       <Card>
         <CardBody>
@@ -341,15 +384,19 @@ export default function VideosPage() {
             {/* Search */}
             <Input
               placeholder="Hledat videa..."
-              startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
-              value={filters.search || ''}
+              startContent={
+                <MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />
+              }
+              value={filters.search || ""}
               onValueChange={handleSearchFilter}
             />
 
             {/* Category Filter */}
             <Select
               placeholder="Všechny kategorie"
-              selectedKeys={filters.category_id ? [filters.category_id] : ['all']}
+              selectedKeys={
+                filters.category_id ? [filters.category_id] : ["all"]
+              }
               onSelectionChange={(keys) => {
                 const selected = Array.from(keys)[0] as string;
                 handleCategoryFilter(selected);
@@ -358,9 +405,7 @@ export default function VideosPage() {
               <>
                 <SelectItem key="all">Všechny kategorie</SelectItem>
                 {categories.map((category) => (
-                  <SelectItem key={category.id}>
-                    {category.name}
-                  </SelectItem>
+                  <SelectItem key={category.id}>{category.name}</SelectItem>
                 ))}
               </>
             </Select>
@@ -368,21 +413,19 @@ export default function VideosPage() {
             {/* Club Filter */}
             <Select
               placeholder="Všechny kluby"
-              selectedKeys={filters.club_id ? [filters.club_id] : ['all']}
+              selectedKeys={filters.club_id ? [filters.club_id] : ["all"]}
               onSelectionChange={(keys) => {
                 const selected = Array.from(keys)[0] as string;
-                setFilters(prev => ({
+                setFilters((prev) => ({
                   ...prev,
-                  club_id: selected === 'all' ? undefined : selected
+                  club_id: selected === "all" ? undefined : selected,
                 }));
               }}
             >
               <>
                 <SelectItem key="all">Všechny kluby</SelectItem>
                 {clubs.map((club) => (
-                  <SelectItem key={club.id}>
-                    {club.name}
-                  </SelectItem>
+                  <SelectItem key={club.id}>{club.name}</SelectItem>
                 ))}
               </>
             </Select>
@@ -390,21 +433,19 @@ export default function VideosPage() {
             {/* Season Filter */}
             <Select
               placeholder="Všechny sezóny"
-              selectedKeys={filters.season_id ? [filters.season_id] : ['all']}
+              selectedKeys={filters.season_id ? [filters.season_id] : ["all"]}
               onSelectionChange={(keys) => {
                 const selected = Array.from(keys)[0] as string;
-                setFilters(prev => ({
+                setFilters((prev) => ({
                   ...prev,
-                  season_id: selected === 'all' ? undefined : selected
+                  season_id: selected === "all" ? undefined : selected,
                 }));
               }}
             >
               <>
                 <SelectItem key="all">Všechny sezóny</SelectItem>
                 {seasons.map((season) => (
-                  <SelectItem key={season.id}>
-                    {season.name}
-                  </SelectItem>
+                  <SelectItem key={season.id}>{season.name}</SelectItem>
                 ))}
               </>
             </Select>
@@ -436,18 +477,28 @@ export default function VideosPage() {
           <CardBody>
             <div className="space-y-3">
               <p className="text-red-700 font-medium">{error}</p>
-              {error.includes('Tabulka videí neexistuje') && (
+              {error.includes("Tabulka videí neexistuje") && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Jak vyřešit:</h4>
+                  <h4 className="font-medium text-blue-900 mb-2">
+                    Jak vyřešit:
+                  </h4>
                   <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
                     <li>Jděte do Supabase Dashboard</li>
                     <li>Otevřete SQL Editor</li>
-                    <li>Zkopírujte obsah souboru <code className="bg-blue-100 px-1 rounded">scripts/create_videos_table.sql</code></li>
+                    <li>
+                      Zkopírujte obsah souboru{" "}
+                      <code className="bg-blue-100 px-1 rounded">
+                        scripts/create_videos_table.sql
+                      </code>
+                    </li>
                     <li>Vložte do SQL Editor a spusťte</li>
                     <li>Obnovte stránku</li>
                   </ol>
                   <p className="text-xs text-blue-600 mt-2">
-                    Podrobné instrukce najdete v <code className="bg-blue-100 px-1 rounded">docs/VIDEOS_MANUAL_SETUP.md</code>
+                    Podrobné instrukce najdete v{" "}
+                    <code className="bg-blue-100 px-1 rounded">
+                      docs/VIDEOS_MANUAL_SETUP.md
+                    </code>
                   </p>
                 </div>
               )}
@@ -465,33 +516,37 @@ export default function VideosPage() {
               Žádná videa
             </h3>
             <p className="text-gray-600 mb-4">
-              {filters.search || filters.category_id || filters.is_active !== undefined
-                ? 'Nebyla nalezena žádná videa odpovídající filtru.'
-                : 'Zatím nejsou přidána žádná videa.'}
+              {filters.search ||
+              filters.category_id ||
+              filters.is_active !== undefined
+                ? "Nebyla nalezena žádná videa odpovídající filtru."
+                : "Zatím nejsou přidána žádná videa."}
             </p>
-            {!filters.search && !filters.category_id && filters.is_active === undefined && (
-              <Button
-                color="primary"
-                startContent={<PlusIcon className="w-5 h-5" />}
-                onPress={openCreateModal}
-              >
-                Přidat první video
-              </Button>
-            )}
+            {!filters.search &&
+              !filters.category_id &&
+              filters.is_active === undefined && (
+                <Button
+                  color="primary"
+                  startContent={<PlusIcon className="w-5 h-5" />}
+                  onPress={openCreateModal}
+                >
+                  Přidat první video
+                </Button>
+              )}
           </CardBody>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                          {videos.map((video) => (
-                  <VideoCard
-                    key={video.id}
-                    video={video}
-                    onEdit={openEditModal}
-                    onDelete={openDeleteModal}
-                    categories={categories}
-                    seasons={seasons}
-                  />
-                ))}
+          {videos.map((video) => (
+            <VideoCard
+              key={`${video.id}-${video.updated_at}`}
+              video={video}
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+              categories={categories}
+              seasons={seasons}
+            />
+          ))}
         </div>
       )}
 
@@ -499,9 +554,11 @@ export default function VideosPage() {
       <VideoFormModal
         isOpen={isFormModalOpen}
         onClose={closeModals}
-        onSubmit={editingVideo ? 
-          (formData: VideoFormData) => handleUpdateVideo(editingVideo.id, formData) : 
-          handleCreateVideo
+        onSubmit={
+          editingVideo
+            ? (formData: VideoFormData) =>
+                handleUpdateVideo(editingVideo.id, formData)
+            : handleCreateVideo
         }
         video={editingVideo}
         clubs={clubs}
@@ -513,7 +570,7 @@ export default function VideosPage() {
           <ModalHeader>Smazat video</ModalHeader>
           <ModalBody>
             <p>
-              Opravdu chcete smazat video &ldquo;{videoToDelete?.title}&rdquo;? 
+              Opravdu chcete smazat video &ldquo;{videoToDelete?.title}&rdquo;?
               Tato akce je nevratná.
             </p>
           </ModalBody>
@@ -521,15 +578,17 @@ export default function VideosPage() {
             <Button variant="light" onPress={closeModals}>
               Zrušit
             </Button>
-            <Button 
-              color="danger" 
-              onPress={() => videoToDelete && handleDeleteVideo(videoToDelete.id)}
+            <Button
+              color="danger"
+              onPress={() =>
+                videoToDelete && handleDeleteVideo(videoToDelete.id)
+              }
             >
               Smazat
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </div>
+    </AdminContainer>
   );
 }

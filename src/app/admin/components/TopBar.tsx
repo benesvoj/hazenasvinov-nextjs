@@ -2,15 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import routes, { privateRoutes } from "@/routes/routes";
+import routes from "@/routes/routes";
 import { useSidebar } from "./SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
-import { logSuccessfulLogin, logFailedLogin, logLogout } from "@/utils/loginLogger";
+import { logLogout } from "@/utils/loginLogger";
 import { 
   UserIcon,
-  ArrowRightOnRectangleIcon,
+  ArrowRightEndOnRectangleIcon,
   BellIcon,
-  InformationCircleIcon,
   Cog6ToothIcon,
   DocumentTextIcon,
   PencilIcon,
@@ -34,7 +33,6 @@ import {
   Avatar,
   Input,
   Textarea,
-  Divider
 } from "@heroui/react";
 import { ReleaseNote, getReleaseNotes } from "@/utils/releaseNotes";
 import { createClient } from "@/utils/supabase/client";
@@ -231,7 +229,7 @@ export const TopBar = () => {
   };
 
   return (
-    <div className={`fixed top-0 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300 ease-in-out ${
+    <div className={`fixed top-0 right-0 bg-white h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300 ease-in-out ${
       isMobile ? 'left-0' : isCollapsed ? 'left-16' : 'left-64'
     }`}>
       <div className="flex items-center justify-between h-full px-4 sm:px-6">
@@ -360,7 +358,7 @@ export const TopBar = () => {
               <DropdownItem key="settings" startContent={<Cog6ToothIcon className="w-4 h-4" />} aria-label="Nastavení">
                 <span>Nastavení</span>
               </DropdownItem>
-              <DropdownItem key="logout" color="danger" startContent={<ArrowRightOnRectangleIcon className="w-4 h-4" />} onPress={handleLogout} aria-label="Odhlásit se">
+              <DropdownItem key="logout" color="danger" startContent={<ArrowRightEndOnRectangleIcon className="w-4 h-4" />} onPress={handleLogout} aria-label="Odhlásit se">
                 <span>Odhlásit</span>
               </DropdownItem>
             </DropdownMenu>

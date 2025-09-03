@@ -43,6 +43,9 @@ export function VideoCard({
 }: VideoCardProps) {
   const t = translations.components.video.videoCard;
   const [isCopied, setIsCopied] = React.useState(false);
+  
+  // Debug log to verify component is rendering
+  console.log('VideoCard rendering:', video.title, 'Club:', video.clubs?.name);
 
 
   const handlePlay = () => {
@@ -137,7 +140,7 @@ export function VideoCard({
                 {video.seasons?.name ||
                   seasons?.find((season) => season.id === video.season_id)
                     ?.name ||
-                  `Season ${video.season_id}`}
+                  (video.season_id ? `Sezóna ${video.season_id.slice(0, 8)}...` : 'Neznámá sezóna')}
               </Chip>
             )}
           </div>
@@ -146,7 +149,7 @@ export function VideoCard({
 
       <CardBody className="p-3">
         {/* Title */}
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 text-sm">
           {video.clubs?.name} - {video.title}
         </h3>
 

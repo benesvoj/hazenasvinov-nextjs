@@ -81,6 +81,26 @@ export const translations = {
   loginRequiredForAccess: "Pro přístup k této stránce se musíte přihlásit.",
   admin: {
     title: "Administrace",
+    posts: {
+      title: "Správa článků",
+      description: "Správa článků, které jsou dostupné v systému.",
+      addPost: "Nový článek",
+    },
+    photoGallery: {
+      title: "Správa fotogalerie",
+      description: "Správa fotogalerie, které jsou dostupné v systému.",
+      addPhoto: "Nová fotka",
+    },
+    videos: {
+      title: "Správa videí",
+      description: "Správa videí, které jsou dostupné v systému.",
+      addVideo: "Nové video",
+    },
+    committees: {
+      title: "Správa komisí",
+      description: "Správa komisí, které jsou dostupné v systému.",
+      addCommittee: "Nová komise",
+    },
   },
   button: {
     add: "Přidat",
@@ -193,6 +213,7 @@ export const translations = {
   loading: "Načítání...",
   matches: {
     title: "Zápasy",
+    description: "Správa zápasů, které se konají v rámci systému.",
     matchNumber: "Číslo zápasu",
     matchNumberPlaceholder: "např. 1, 2, Finále, Semifinále",
     matchNumberError: "Zadejte číslo zápasu",
@@ -342,6 +363,11 @@ export const translations = {
       hidePassword: "Skrýt heslo",
     },
     video: {
+      videos: {
+        title: "Videa",
+        description: "Správa videí, které jsou dostupné v systému.",
+        addVideo: "Přidat video",
+      },
       videoCard: {
         recordingDate: "Odehráno:",
         createdAt: "Vytvořeno:",

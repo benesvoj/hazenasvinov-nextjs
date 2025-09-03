@@ -1,11 +1,5 @@
 <h2 style="text-align: center;"><strong style="font-size: 1.5em;">1.LIGA 2023/2024 <strong><strong>-------&gt;</strong></strong></strong><span style="font-size: 1.5em; font-weight: normal;"> </span></h2>
 
-<p> </p>
-
-<p><span style="font-size: small;"><strong>Svinov X Podlázky 18.5.2025 </strong></span>– Výsledek 17:17 (5:7)<br />
-I.poločas – <a href="https://youtu.be/FFftGihVswE">https://youtu.be/FFftGihVswE</a><br />
-II.poločas – <a href="https://youtu.be/fN_wU6GW3kY">https://youtu.be/fN_wU6GW3kY</a></p>
-
 <p><span style="font-size: small;"><strong>Přeštice X Svinov 4.5.2025</strong></span> – Výsledek 19:16 (12:10)<br />
 I.poločas – <a href="https://youtu.be/lPkNiIRNk_A">https://youtu.be/lPkNiIRNk_A</a><br />
 II.poločas – <a href="https://youtu.be/m3TKBE8lEVY">https://youtu.be/m3TKBE8lEVY</a></p>
@@ -230,10 +224,6 @@ II.poločas: <a href="https://youtu.be/cvW1ROas61Q">https://youtu.be/cvW1ROas61
 <p><strong><span style="font-size: small;">TJ Sokol Svinov – TJ Sokol Podlázky 23.10.2022 – </span></strong><span style="font-size: small;">Výsledek </span><span style="font-size: small;">16:15 (8:10)</span><br />
  I.poločas – bez záznamu<br />
 II.poločas – <a href="https://youtu.be/M-eQOQE4544">https://youtu.be/M-eQOQE4544</a></p>
-
-<p><span style="font-size: small;"><strong>TJ Sokol Svinov – TJ Sokol Kyšice 16.10.2022</strong></span> – Výsledek 23:19 (11:12)<br />
- I.poločas – <a href="https://youtu.be/QzNs0iTm44A">https://youtu.be/QzNs0iTm44A</a><br />
-II.poločas – <a href="https://youtu.be/K12PmN_mUT4">https://youtu.be/K12PmN_mUT4</a></p>
 
 <p><span style="font-size: small;"><strong>TJ Sokol Svinov – Sokol Tymákov 15.10.2022</strong></span> – Výsledek 19:19 (9:9)<br />
  I.poločas – <a href="https://youtu.be/dO521zyLk9E">https://youtu.be/dO521zyLk9E</a><br />
@@ -537,7 +527,7 @@ II.poločas – <a href="https://youtu.be/8uqTZkVs-hU">https://youtu.be/8uqTZk
 I.poločas – <a href="https://youtu.be/-WCw0xOFrtU?fbclid=IwAR0_1Y6v5Q6d9KgTwW0YgNndfj-Fxi9LMZLoyVbAX9iaUij8Ef-6VcwT7Xk">https://youtu.be/-WCw0×OFrtU…</a><br />
 II.poločas – <a href="https://youtu.be/2ujmr-8vtis?fbclid=IwAR1YTDlMx92YxI3-zZ7OuodzVRpXYj1s1cCtjxQblGna7nz6Dp97kiTE4w0">https://youtu.be/2ujmr-8vtis…</a></p>
 
-<p><span style="font-size: medium;"><strong><strong><strong><strong>TJ</strong> Sokol</strong></strong> Svinov – Podhorní Újezd 16.6.2018</strong></span> – výsledek utkání 21:20<br />
+<p><span style="font-size: medium;"><strong><strong><strong><strong>TJ</strong> Sokol</strong></strong> Svinov – Podhorní Újezd 16.6.2018</strong></span> – výsledek utkání 21:20<br />https://youtu.be/KgBRcMJ85zI
 I.poločas – <a href="https://youtu.be/KgBRcMJ85zI">https://youtu.be/KgBRcMJ85zI</a><br />
 II.poločas – <a href="https://youtu.be/U073lxg0vqU">https://youtu.be/U073lxg0vqU</a></p>
 

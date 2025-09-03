@@ -64,7 +64,7 @@ export default function NewClubPage() {
 
   return (
     <div className="p-3 sm:p-4 lg:p-6">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
@@ -94,46 +94,55 @@ export default function NewClubPage() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <Input
-                label="Název klubu *"
-                placeholder="např. Hazena Švínov"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                isRequired
-              />
-              
-              <Input
-                label="Krátký název"
-                placeholder="např. Švínov"
-                value={formData.short_name}
-                onChange={(e) => setFormData({...formData, short_name: e.target.value})}
-                description="Krátký název pro zobrazení v tabulkách a sestavách"
-              />
-              
-              <Input
-                label="Město"
-                placeholder="např. Švínov"
-                value={formData.city}
-                onChange={(e) => setFormData({...formData, city: e.target.value})}
-                description="Město, kde se klub nachází"
-              />
-              
-              <Input
-                label="Rok založení"
-                type="number"
-                placeholder="např. 1920"
-                value={formData.founded_year}
-                onChange={(e) => setFormData({...formData, founded_year: e.target.value})}
-                description="Rok založení klubu (volitelné)"
-              />
-              
-              <Input
-                label="URL loga"
-                placeholder="https://example.com/logo.png"
-                value={formData.logo_url}
-                onChange={(e) => setFormData({...formData, logo_url: e.target.value})}
-                description="URL obrázku loga klubu (volitelné)"
-              />
+              {/* Two-column layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  <Input
+                    label="Název klubu *"
+                    placeholder="např. Hazena Švínov"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    isRequired
+                  />
+                  
+                  <Input
+                    label="Krátký název"
+                    placeholder="např. Švínov"
+                    value={formData.short_name}
+                    onChange={(e) => setFormData({...formData, short_name: e.target.value})}
+                    description="Krátký název pro zobrazení v tabulkách a sestavách"
+                  />
+                  
+                  <Input
+                    label="Město"
+                    placeholder="např. Švínov"
+                    value={formData.city}
+                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                    description="Město, kde se klub nachází"
+                  />
+                </div>
+                
+                {/* Right Column */}
+                <div className="space-y-6">
+                  <Input
+                    label="Rok založení"
+                    type="number"
+                    placeholder="např. 1920"
+                    value={formData.founded_year}
+                    onChange={(e) => setFormData({...formData, founded_year: e.target.value})}
+                    description="Rok založení klubu (volitelné)"
+                  />
+                  
+                  <Input
+                    label="URL loga"
+                    placeholder="https://example.com/logo.png"
+                    value={formData.logo_url}
+                    onChange={(e) => setFormData({...formData, logo_url: e.target.value})}
+                    description="URL obrázku loga klubu (volitelné)"
+                  />
+                </div>
+              </div>
               
               <div className="flex gap-3 pt-4">
                 <Link href="/admin/clubs" prefetch={true}>

@@ -377,11 +377,11 @@ export default function ClubsAdminPage() {
       </Card>
 
       {/* Create Club Modal */}
-      <Modal isOpen={isCreateOpen} onClose={onCreateClose} size="lg">
+      <Modal isOpen={isCreateOpen} onClose={onCreateClose} size="2xl">
         <ModalContent>
           <ModalHeader>Přidat nový klub</ModalHeader>
           <ModalBody>
-            <div className="space-y-4">
+            <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Název klubu *"
                 placeholder="např. Hazena Švínov"
@@ -482,11 +482,11 @@ export default function ClubsAdminPage() {
       </Modal>
 
       {/* Edit Club Modal */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} size="lg">
+      <Modal isOpen={isEditOpen} onClose={onEditClose} size="2xl">
         <ModalContent>
           <ModalHeader>Upravit klub</ModalHeader>
           <ModalBody>
-            <div className="space-y-4">
+            <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Název klubu *"
                 placeholder="např. Hazena Švínov"
