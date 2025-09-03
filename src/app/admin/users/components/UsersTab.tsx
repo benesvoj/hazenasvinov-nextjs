@@ -23,6 +23,7 @@ import {
 import { SupabaseUser } from "@/types/types";
 import { useState } from "react";
 import { showToast } from '@/components/Toast';
+import RoleAssignmentModal from '@/components/RoleAssignmentModal';
 
 interface UsersTabProps {
 	users: SupabaseUser[];
@@ -51,6 +52,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 		position: ''
 	});
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [showRoleAssignment, setShowRoleAssignment] = useState(false);
+	const [newlyCreatedUser, setNewlyCreatedUser] = useState<{ id: string; email: string } | null>(null);
 	const [passwordResetEmail, setPasswordResetEmail] = useState('');
 
 	// Initialize form data when adding new user
@@ -105,14 +108,27 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 				throw new Error(errorData.error || 'Failed to save user');
 			}
 
-			// Close modal and refresh
+			const responseData = await response.json();
+
+			// Close modal
 			onEditOpenChange();
 			onAddOpenChange();
 			setSelectedUser(null);
 			setFormData({ email: '', full_name: '', phone: '', bio: '', position: '' });
 			
-			// Refresh the page to get updated data
-			window.location.reload();
+			// If it's a new user creation, show role assignment modal
+			if (action === 'create' && responseData.userId && responseData.userEmail) {
+				setNewlyCreatedUser({
+					id: responseData.userId,
+					email: responseData.userEmail
+				});
+				setShowRoleAssignment(true);
+				showToast.success('Uživatel byl úspěšně vytvořen! Nyní přiřaďte roli.');
+			} else {
+				// For updates, just refresh
+				showToast.success('Uživatel byl úspěšně aktualizován!');
+				window.location.reload();
+			}
 		} catch (error) {
 			console.error('Error saving user:', error);
 			showToast.danger(`Chyba při ukládání uživatele: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
@@ -476,6 +492,26 @@ export const UsersTab: React.FC<UsersTabProps> = ({ users, loading }) => {
 					)}
 				</ModalContent>
 			</Modal>
+
+			{/* Role Assignment Modal */}
+			{newlyCreatedUser && (
+				<RoleAssignmentModal
+					isOpen={showRoleAssignment}
+					onClose={() => {
+						setShowRoleAssignment(false);
+						setNewlyCreatedUser(null);
+						window.location.reload(); // Refresh to show updated data
+					}}
+					userId={newlyCreatedUser.id}
+					userEmail={newlyCreatedUser.email}
+					onRoleAssigned={() => {
+						setShowRoleAssignment(false);
+						setNewlyCreatedUser(null);
+						showToast.success('Role byla úspěšně přiřazena!');
+						window.location.reload(); // Refresh to show updated data
+					}}
+				/>
+			)}
 		</>
 	);
 };

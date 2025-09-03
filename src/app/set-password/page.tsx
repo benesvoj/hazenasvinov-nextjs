@@ -130,8 +130,8 @@ function SetPasswordContent() {
             .single();
 
           if (profileError || !userProfile) {
-            // If no profile found, redirect to admin (default)
-            router.push('/admin');
+            // If no profile found, user has no role - redirect to login with message
+            router.push('/login?error=no_role&message=Uživatel nemá přiřazenou roli. Kontaktujte administrátora.');
           } else if (userProfile.role === 'coach' || userProfile.role === 'head_coach') {
             // Redirect coaches to coaches dashboard
             router.push('/coaches/dashboard');

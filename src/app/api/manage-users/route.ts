@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
         console.log('Creating user:', { userData });
 
-        const { error: createError } = await supabase.auth.admin.inviteUserByEmail(userData.email, {
+        const { data: createData, error: createError } = await supabase.auth.admin.inviteUserByEmail(userData.email, {
           data: {
             full_name: userData.full_name,
             phone: userData.phone,
@@ -75,7 +75,13 @@ export async function POST(request: NextRequest) {
           console.error('Create error:', createError);
           throw createError;
         }
-        break;
+
+        return NextResponse.json({ 
+          success: true, 
+          message: 'User created successfully',
+          userId: createData.user?.id,
+          userEmail: createData.user?.email
+        });
 
       case 'toggleBlock':
         if (!userId) {

@@ -4,12 +4,13 @@ import {createClient} from "@/utils/supabase/server";
 
 export async function middleware(request: NextRequest) {
 	try {
-		// Only check auth for admin routes
-		if (request.nextUrl.pathname.startsWith(privateRoutes.admin)) {
+		// Check auth for admin routes and coaches routes
+		if (request.nextUrl.pathname.startsWith(privateRoutes.admin) || 
+			request.nextUrl.pathname.startsWith('/coaches')) {
 			const supabase = await createClient()
 			const {data: {user}} = await supabase.auth.getUser()
 
-			// If no user and trying to access admin routes
+			// If no user and trying to access protected routes
 			if (!user) {
 				// Redirect to login page
 				const redirectUrl = new URL(publicRoutes.login, request.url)
@@ -26,14 +27,29 @@ export async function middleware(request: NextRequest) {
 					const blockedUrl = new URL('/blocked', request.url)
 					return NextResponse.redirect(blockedUrl)
 				}
+
+				// Check if user has a role assigned
+				const { data: userProfile, error: profileError } = await supabase
+					.from('user_profiles')
+					.select('role')
+					.eq('user_id', user.id)
+					.single();
+
+				// If user has no role assigned, redirect to login with message
+				if (profileError || !userProfile) {
+					const redirectUrl = new URL(publicRoutes.login, request.url)
+					redirectUrl.searchParams.set('error', 'no_role')
+					return NextResponse.redirect(redirectUrl)
+				}
 			}
 		}
 
 		// For all other routes, allow access
 		return NextResponse.next()
 	} catch (error) {
-		// If there's an error accessing admin routes, redirect to login
-		if (request.nextUrl.pathname.startsWith(privateRoutes.admin)) {
+		// If there's an error accessing protected routes, redirect to login
+		if (request.nextUrl.pathname.startsWith(privateRoutes.admin) || 
+			request.nextUrl.pathname.startsWith('/coaches')) {
 			return NextResponse.redirect(new URL(publicRoutes.login, request.url))
 		}
 		// For other routes, just proceed even with errors
@@ -53,7 +69,7 @@ export const config = {
 		 */
 		// Only protect the following paths
 		'/admin/:path*',
-		// '/admin/:path*',
+		'/coaches/:path*',
 		// Exclude all other routes - especially main routes
 		'/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
 	],

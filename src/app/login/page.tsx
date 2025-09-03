@@ -25,11 +25,19 @@ function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Handle URL tab parameter
+  // Handle URL tab parameter and error messages
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab === 'coach') {
       setActiveTab('coach');
+    }
+
+    // Check for error parameters
+    const errorParam = searchParams.get('error');
+    const messageParam = searchParams.get('message');
+    
+    if (errorParam === 'no_role' && messageParam) {
+      setError(decodeURIComponent(messageParam));
     }
   }, [searchParams]);
 
