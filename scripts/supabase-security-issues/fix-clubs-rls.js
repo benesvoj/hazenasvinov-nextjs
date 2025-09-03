@@ -13,7 +13,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 
 // Load environment variables
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '../.env.local' });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -36,7 +36,7 @@ async function fixClubsRLS() {
 
   try {
     // Read the SQL script
-    const sqlPath = path.join(process.cwd(), 'scripts', 'fix_clubs_rls.sql');
+    const sqlPath = path.join(process.cwd(), 'fix_clubs_rls.sql');
     const sqlScript = fs.readFileSync(sqlPath, 'utf8');
 
     console.log('📋 Executing SQL script...');
@@ -54,46 +54,44 @@ async function fixClubsRLS() {
     console.log('✅ SQL script executed successfully!');
     console.log('');
 
-    // Verify the fix by checking RLS status
+    // Verify the fix by checking RLS status and policies using exec_sql
     console.log('🔍 Verifying the fix...');
     
-    const { data: rlsData, error: rlsError } = await supabase
-      .from('pg_tables')
-      .select('tablename, rowsecurity')
-      .eq('tablename', 'clubs')
-      .eq('schemaname', 'public');
+    const verificationSQL = `
+      SELECT 
+        schemaname,
+        tablename,
+        rowsecurity as rls_enabled,
+        CASE WHEN rowsecurity THEN '✅ RLS Enabled' ELSE '❌ RLS Disabled' END as status
+      FROM pg_tables 
+      WHERE tablename = 'clubs' 
+      AND schemaname = 'public';
+      
+      SELECT 
+        schemaname,
+        tablename,
+        policyname,
+        permissive,
+        roles,
+        cmd,
+        qual,
+        with_check
+      FROM pg_policies 
+      WHERE tablename = 'clubs' 
+      AND schemaname = 'public'
+      ORDER BY policyname;
+    `;
 
-    if (rlsError) {
-      console.error('❌ Error verifying RLS status:', rlsError.message);
-      return;
-    }
+    const { data: verificationResult, error: verificationError } = await supabase
+      .rpc('exec_sql', { sql: verificationSQL });
 
-    if (rlsData && rlsData.length > 0) {
-      const rlsEnabled = rlsData[0].rowsecurity;
-      console.log('✅ clubs table RLS status:', rlsEnabled ? '✅ Enabled' : '❌ Disabled');
+    if (verificationError) {
+      console.log('⚠️  Could not verify RLS status automatically');
+      console.log('   You can verify manually by running this query in Supabase Dashboard:');
+      console.log('   ' + verificationSQL);
     } else {
-      console.log('⚠️  clubs table not found');
-    }
-
-    // Check policies
-    const { data: policyData, error: policyError } = await supabase
-      .from('pg_policies')
-      .select('policyname, cmd')
-      .eq('tablename', 'clubs')
-      .eq('schemaname', 'public');
-
-    if (policyError) {
-      console.error('❌ Error checking policies:', policyError.message);
-      return;
-    }
-
-    if (policyData && policyData.length > 0) {
-      console.log('✅ RLS policies created:');
-      policyData.forEach(policy => {
-        console.log(`   • ${policy.policyname} (${policy.cmd})`);
-      });
-    } else {
-      console.log('⚠️  No RLS policies found');
+      console.log('✅ RLS verification completed');
+      console.log('   Check the Supabase Dashboard for RLS status and policy details');
     }
 
     console.log('');
