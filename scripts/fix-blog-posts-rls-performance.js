@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Fix clubs RLS security warning
+ * Fix blog_posts RLS performance issue
  * 
- * This script enables Row Level Security on the clubs table
- * to resolve the security warning about tables without RLS.
+ * This script optimizes RLS policies by replacing auth.role() with (SELECT auth.role())
+ * to prevent re-evaluation for each row, improving query performance at scale.
  */
 
 const { createClient } = require('@supabase/supabase-js');
@@ -30,13 +30,13 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
 // Create Supabase client with service role key
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-async function fixClubsRLS() {
-  console.log('🔧 Fixing clubs RLS security warning...');
+async function fixBlogPostsRLSPerformance() {
+  console.log('🔧 Fixing blog_posts RLS performance issue...');
   console.log('');
 
   try {
     // Read the SQL script
-    const sqlPath = path.join(process.cwd(), 'fix_clubs_rls.sql');
+    const sqlPath = path.join(process.cwd(), 'fix_blog_posts_rls_performance.sql');
     const sqlScript = fs.readFileSync(sqlPath, 'utf8');
 
     console.log('📋 Executing SQL script...');
@@ -54,19 +54,10 @@ async function fixClubsRLS() {
     console.log('✅ SQL script executed successfully!');
     console.log('');
 
-    // Verify the fix by checking RLS status and policies using exec_sql
+    // Verify the fix by checking policies using exec_sql
     console.log('🔍 Verifying the fix...');
     
     const verificationSQL = `
-      SELECT 
-        schemaname,
-        tablename,
-        rowsecurity as rls_enabled,
-        CASE WHEN rowsecurity THEN '✅ RLS Enabled' ELSE '❌ RLS Disabled' END as status
-      FROM pg_tables 
-      WHERE tablename = 'clubs' 
-      AND schemaname = 'public';
-      
       SELECT 
         schemaname,
         tablename,
@@ -77,7 +68,7 @@ async function fixClubsRLS() {
         qual,
         with_check
       FROM pg_policies 
-      WHERE tablename = 'clubs' 
+      WHERE tablename = 'blog_posts'
       AND schemaname = 'public'
       ORDER BY policyname;
     `;
@@ -86,41 +77,41 @@ async function fixClubsRLS() {
       .rpc('exec_sql', { sql: verificationSQL });
 
     if (verificationError) {
-      console.log('⚠️  Could not verify RLS status automatically');
+      console.log('⚠️  Could not verify policies automatically');
       console.log('   You can verify manually by running this query in Supabase Dashboard:');
       console.log('   ' + verificationSQL);
     } else {
-      console.log('✅ RLS verification completed');
-      console.log('   Check the Supabase Dashboard for RLS status and policy details');
+      console.log('✅ RLS policies verification completed');
+      console.log('   Check the Supabase Dashboard for policy details');
     }
 
     console.log('');
-    console.log('🎉 Security fix completed successfully!');
+    console.log('🎉 Performance optimization completed successfully!');
     console.log('');
-    console.log('📋 What was fixed:');
-    console.log('   • Enabled Row Level Security on clubs table');
-    console.log('   • Created read policy for all authenticated users');
-    console.log('   • Created write policies for admins only');
-    console.log('   • Added proper permissions and documentation');
+    console.log('📋 What was optimized:');
+    console.log('   • Replaced auth.role() with (SELECT auth.role()) in all policies');
+    console.log('   • Fixed blog_posts table RLS policies');
+    console.log('   • Optimized read, insert, update, and delete policies');
+    console.log('   • Added documentation comments');
     console.log('');
-    console.log('🔒 Security benefits:');
-    console.log('   • RLS now properly controls access to club data');
-    console.log('   • Public read access for club information');
-    console.log('   • Admin-only write access for data integrity');
-    console.log('   • Follows principle of least privilege');
+    console.log('⚡ Performance benefits:');
+    console.log('   • auth.role() evaluated once per query instead of per row');
+    console.log('   • Improved query performance at scale');
+    console.log('   • Reduced database load for large datasets');
+    console.log('   • Better user experience with faster blog post queries');
     console.log('');
-    console.log('✅ The security warning should now be resolved!');
+    console.log('✅ The performance warning should now be resolved!');
 
   } catch (error) {
     console.error('❌ Unexpected error:', error.message);
     console.error('');
     console.error('💡 Manual fix instructions:');
     console.error('   1. Go to your Supabase Dashboard → SQL Editor');
-    console.error('   2. Copy and paste the contents of scripts/fix_clubs_rls.sql');
+    console.error('   2. Copy and paste the contents of scripts/fix_blog_posts_rls_performance.sql');
     console.error('   3. Run the SQL script');
-    console.error('   4. Verify the security warning disappears');
+    console.error('   4. Verify the performance warning disappears');
   }
 }
 
 // Run the fix
-fixClubsRLS();
+fixBlogPostsRLSPerformance();

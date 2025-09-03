@@ -7,10 +7,10 @@
  * to resolve the security warning about views with SECURITY DEFINER property.
  */
 
-import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
+const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
 
 // Load environment variables
 dotenv.config({ path: '.env.local' });
