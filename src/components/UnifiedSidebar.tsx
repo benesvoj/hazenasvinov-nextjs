@@ -196,7 +196,7 @@ export const UnifiedSidebar = ({
   const getSidebarClasses = () => {
     if (variant === "admin") {
       return {
-        container: `fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white transition-all duration-300 ease-in-out z-50 shadow-xl flex flex-col ${
+        container: `fixed left-0 top-0 h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white transition-all duration-300 ease-in-out z-50 shadow-xl flex flex-col ${
           isCollapsed ? "w-16" : "w-64"
         }`,
         mobileContainer: `fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white w-80 max-w-[85vw] z-50 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col`,
@@ -223,7 +223,7 @@ export const UnifiedSidebar = ({
       };
     } else {
       return {
-        container: `fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
+        container: `fixed top-0 left-0 z-50 h-screen bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
           isCollapsed ? "w-16" : "w-64"
         }`,
         mobileContainer: `fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
@@ -321,8 +321,11 @@ export const UnifiedSidebar = ({
 
           {/* Mobile Navigation */}
           <nav
-            className="flex-1 py-4 overflow-y-auto"
-            style={{ minHeight: 0 }}
+            className="flex-1 py-4 overflow-y-auto scrollbar-hide"
+            style={{ 
+              minHeight: 0,
+              height: 'calc(100vh - 120px)' // Fixed height for proper scrolling
+            }}
           >
             <div className="space-y-4 px-3">
               {Object.entries(config.groupedItems).map(
@@ -549,8 +552,11 @@ export const UnifiedSidebar = ({
 
       {/* Navigation */}
       <nav
-        className="flex-1 py-4 overflow-y-auto"
-        style={{ minHeight: 0 }}
+        className="flex-1 py-4 overflow-y-auto scrollbar-hide"
+        style={{ 
+          minHeight: 0,
+          height: 'calc(100vh - 120px)' // Fixed height for proper scrolling
+        }}
       >
         <div className="space-y-4 px-3">
           {Object.entries(config.groupedItems).map(
