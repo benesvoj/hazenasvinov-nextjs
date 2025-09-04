@@ -3,8 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import routes from "@/routes/routes";
-import { useSidebar } from "./SidebarContext";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminSidebar } from "./AdminSidebarContext";
 import { UnifiedTopBar } from "@/components";
 
 // Get current section info based on pathname
@@ -43,7 +42,7 @@ const getCurrentSection = (pathname: string) => {
 
 export const AdminTopBar = () => {
   const pathname = usePathname();
-  const { isCollapsed, isMobileOpen, setIsMobileOpen, isMobile } = useSidebar();
+  const { isCollapsed, isMobileOpen, setIsMobileOpen, isMobile } = useAdminSidebar();
   const currentSection = getCurrentSection(pathname);
 
   return (

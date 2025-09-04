@@ -223,10 +223,10 @@ export const UnifiedSidebar = ({
       };
     } else {
       return {
-        container: `fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out ${
+        container: `fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
           isCollapsed ? "w-16" : "w-64"
         }`,
-        mobileContainer: `fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out ${
+        mobileContainer: `fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
           isCollapsed ? "w-16" : "w-64"
         }`,
         header:
@@ -239,7 +239,7 @@ export const UnifiedSidebar = ({
           }`,
         navItemIcon: (isActive: boolean) =>
           `w-5 h-5 ${isCollapsed ? "mx-auto" : "mr-3"}`,
-        footer: "absolute bottom-4 left-4 right-4",
+        footer: "p-4 border-t border-gray-200 dark:border-gray-700 mt-auto",
         groupHeader: "",
         groupLabel: "",
         divider: "",
@@ -321,8 +321,8 @@ export const UnifiedSidebar = ({
 
           {/* Mobile Navigation */}
           <nav
-            className="flex-1 py-4"
-            style={{ minHeight: 0, maxHeight: "calc(100vh - 200px)" }}
+            className="flex-1 py-4 overflow-y-auto"
+            style={{ minHeight: 0 }}
           >
             <div className="space-y-4 px-3">
               {Object.entries(config.groupedItems).map(
@@ -549,8 +549,8 @@ export const UnifiedSidebar = ({
 
       {/* Navigation */}
       <nav
-        className="flex-1 py-4"
-        style={{ minHeight: 0, maxHeight: "calc(100vh - 200px)" }}
+        className="flex-1 py-4 overflow-y-auto"
+        style={{ minHeight: 0 }}
       >
         <div className="space-y-4 px-3">
           {Object.entries(config.groupedItems).map(
@@ -667,32 +667,30 @@ export const UnifiedSidebar = ({
       </nav>
 
       {/* Footer */}
-      {!isCollapsed && (
-        <div className={classes.footer}>
-          <div className="text-center">
+      <div className={classes.footer}>
+        <div className="text-center">
+          <div
+            className={`text-xs mb-1 ${
+              variant === "admin"
+                ? "text-gray-400"
+                : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
+            {config.footer.title}
+          </div>
+          {config.footer.subtitle && (
             <div
-              className={`text-xs mb-1 ${
+              className={`text-xs ${
                 variant === "admin"
-                  ? "text-gray-400"
-                  : "text-gray-500 dark:text-gray-400"
+                  ? "text-gray-500"
+                  : "text-gray-400 dark:text-gray-500"
               }`}
             >
-              {config.footer.title}
+              {config.footer.subtitle}
             </div>
-            {config.footer.subtitle && (
-              <div
-                className={`text-xs ${
-                  variant === "admin"
-                    ? "text-gray-500"
-                    : "text-gray-400 dark:text-gray-500"
-                }`}
-              >
-                {config.footer.subtitle}
-              </div>
-            )}
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </aside>
   );
 };

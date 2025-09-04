@@ -2,10 +2,10 @@
 
 import React from "react";
 import { UnifiedSidebar } from "@/components";
-import { useSidebar } from "./SidebarContext";
+import { useAdminSidebar } from "./AdminSidebarContext";
 
 export const AdminSidebar = () => {
-  const sidebarContext = useSidebar();
+  const sidebarContext = useAdminSidebar();
 
   return (
     <UnifiedSidebar

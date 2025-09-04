@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface SidebarContextType {
+interface AdminSidebarContextType {
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
   isMobileOpen: boolean;
@@ -10,17 +10,17 @@ interface SidebarContextType {
   isMobile: boolean;
 }
 
-const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
+const AdminSidebarContext = createContext<AdminSidebarContextType | undefined>(undefined);
 
-export const useSidebar = () => {
-  const context = useContext(SidebarContext);
+export const useAdminSidebar = () => {
+  const context = useContext(AdminSidebarContext);
   if (context === undefined) {
-    throw new Error('useSidebar must be used within a SidebarProvider');
+    throw new Error('useAdminSidebar must be used within a AdminSidebarProvider');
   }
   return context;
 };
 
-export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AdminSidebarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -41,7 +41,7 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   return (
-    <SidebarContext.Provider value={{ 
+    <AdminSidebarContext.Provider value={{ 
       isCollapsed, 
       setIsCollapsed, 
       isMobileOpen, 
@@ -49,6 +49,6 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({ child
       isMobile 
     }}>
       {children}
-    </SidebarContext.Provider>
+    </AdminSidebarContext.Provider>
   );
 };
