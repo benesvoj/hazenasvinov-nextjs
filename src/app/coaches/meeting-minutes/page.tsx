@@ -143,11 +143,12 @@ export default function CoachMeetingMinutesPage() {
                 const selected = Array.from(keys)[0] as string;
                 handleFilterChange('season_id', selected);
               }}
+              items={[
+                { key: "all", label: t.filters.allSeasons },
+                ...seasons.map(season => ({ key: season.id, label: season.name }))
+              ]}
             >
-              <SelectItem key="all">{t.filters.allSeasons}</SelectItem>
-              {seasons.map((season) => (
-                <SelectItem key={season.id}>{season.name}</SelectItem>
-              ))}
+              {(item) => <SelectItem key={item.key}>{item.label}</SelectItem>}
             </Select>
 
             <Select
@@ -157,11 +158,12 @@ export default function CoachMeetingMinutesPage() {
                 const selected = Array.from(keys)[0] as string;
                 handleFilterChange('wrote_by', selected);
               }}
+              items={[
+                { key: "all", label: t.filters.allUsers },
+                ...users.map(user => ({ key: user.id, label: user.full_name || user.email }))
+              ]}
             >
-              <SelectItem key="all">{t.filters.allUsers}</SelectItem>
-              {users.map((user) => (
-                <SelectItem key={user.id}>{user.full_name || user.email}</SelectItem>
-              ))}
+              {(item) => <SelectItem key={item.key}>{item.label}</SelectItem>}
             </Select>
 
             <div className="flex gap-2">
@@ -236,7 +238,7 @@ export default function CoachMeetingMinutesPage() {
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2">
                         <UserIcon className="w-4 h-4 text-gray-400" />
-                        <span>Zapsal: {meeting.wrote_by_user?.full_name || meeting.wrote_by_user?.email}</span>
+                        <span>Zapsal: {meeting.wrote_by_user?.user_metadata?.full_name || meeting.wrote_by_user?.email}</span>
                       </div>
                       {meeting.attachment_url && (
                         <div className="flex items-center gap-2">
@@ -261,7 +263,7 @@ export default function CoachMeetingMinutesPage() {
                         {meeting.attendees.map((attendee) => (
                           <div key={attendee.id} className="flex items-center justify-between">
                             <span className="text-sm">
-                              {attendee.user?.full_name || attendee.user?.email}
+                              {attendee.member?.name} {attendee.member?.surname}
                             </span>
                             <Badge
                               color={getStatusColor(attendee.status)}

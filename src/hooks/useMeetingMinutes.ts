@@ -61,7 +61,7 @@ export function useMeetingMinutes() {
 
       // Fetch user data for wrote_by (still using users for who wrote the minutes)
       const wroteByUserIds = new Set<string>();
-      data?.forEach(item => {
+      data?.forEach((item: MeetingMinutes) => {
         if (item.wrote_by) wroteByUserIds.add(item.wrote_by);
       });
 
@@ -81,7 +81,7 @@ export function useMeetingMinutes() {
 
       // Fetch members data for attendees
       const memberIds = new Set<string>();
-      data?.forEach(item => {
+      data?.forEach((item: MeetingMinutes) => {
         item.attendees?.forEach(attendee => {
           if (attendee.user_id) memberIds.add(attendee.user_id);
         });
@@ -104,10 +104,10 @@ export function useMeetingMinutes() {
       }
 
       // Transform the data to include user and member information
-      const transformedData = data?.map(item => ({
+      const transformedData = data?.map((item: MeetingMinutes) => ({
         ...item,
         wrote_by_user: wroteByUsersData.find(u => u.id === item.wrote_by) || null,
-        attendees: item.attendees?.map(attendee => ({
+        attendees: item.attendees?.map((attendee: MeetingAttendee) => ({
           ...attendee,
           member: membersData.find(m => m.id === attendee.user_id) || null
         })) || []

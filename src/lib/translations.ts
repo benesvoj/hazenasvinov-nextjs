@@ -394,6 +394,7 @@ export const translations = {
       previous: "Předchozí",
       next: "Další",
       filtersByStatus: "Filtrovat podle statusu",
+      noAttendeesDescription: "Klikněte na \"Správa účastníků\" pro přidání členů",
       all: "Všichni",
       filters: {
         season: "Sezóna",
