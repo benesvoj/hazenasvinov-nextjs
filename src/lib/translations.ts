@@ -429,6 +429,7 @@ export const translations = {
       currentAttendees: "Aktuální účastníci",
       manageAttendees: "Správa účastníků",
       added: "Přidáno",
+      unknownMember: "Neznámý člen",
     },
     video: {
       videos: {

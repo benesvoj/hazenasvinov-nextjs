@@ -9,12 +9,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Button,
-  Card,
-  CardBody,
-  Chip,
-} from "@heroui/react";
+import { Button, Card, CardBody, Chip, User } from "@heroui/react";
 import { translations } from "@/lib/translations";
 
 interface MeetingMinutesCardProps {
@@ -37,11 +32,11 @@ export function MeetingMinutesCard({
   };
 
   const getStatusColor = (status: string) => {
-    return status === 'present' ? 'success' : 'warning';
+    return status === "present" ? "success" : "warning";
   };
 
   const getStatusText = (status: string) => {
-    return status === 'present' ? t.present : t.excused;
+    return status === "present" ? t.present : t.excused;
   };
 
   return (
@@ -99,13 +94,19 @@ export function MeetingMinutesCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <h4 className="font-medium text-gray-900 mb-2">{t.meetingDetails}</h4>
+            <h4 className="font-medium text-gray-900 mb-2">
+              {t.meetingDetails}
+            </h4>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <UserIcon className="w-4 h-4 text-gray-400" />
-                <span>{t.wroteBy}: {meeting.wrote_by_user?.user_metadata?.full_name || meeting.wrote_by_user?.email}</span>
+                <span>
+                  {t.wroteBy}:{" "}
+                  {meeting.wrote_by_user?.user_metadata?.full_name ||
+                    meeting.wrote_by_user?.email}
+                </span>
               </div>
               {meeting.attachment_url && (
                 <div className="flex items-center gap-2">
@@ -124,27 +125,41 @@ export function MeetingMinutesCard({
           </div>
 
           <div>
-            <h4 className="font-medium text-gray-900 mb-2">{t.attendanceList}</h4>
+            <h4 className="font-medium text-gray-900 mb-2">
+              {t.attendanceList}
+            </h4>
             {meeting.attendees && meeting.attendees.length > 0 ? (
-              <div className="space-y-1">
-                {meeting.attendees.map((attendee) => (
-                  <div key={attendee.id} className="flex items-center justify-between">
-                    <span className="text-sm">
-                      {attendee.member ? `${attendee.member.name} ${attendee.member.surname} (${attendee.member.registration_number})` : 'Neznámý člen'}
-                    </span>
-                    <Chip
-                      color={getStatusColor(attendee.status)}
-                      variant="flat"
-                      size="sm"
-                    >
-                      {getStatusText(attendee.status)}
-                    </Chip>
+              <div className="space-y-3">
+                <div className="overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {meeting.attendees.map((attendee) => (
+                      <User
+                        key={attendee.id}
+                        name={
+                          attendee.member
+                            ? `${attendee.member.name} ${attendee.member.surname}`
+                            : t.unknownMember
+                        }
+                        description={attendee.member?.registration_number}
+                        className={`p-2 border rounded-lg border-${getStatusColor(
+                          attendee.status
+                        )}`}
+                      />
+                    ))}
                   </div>
-                ))}
+                </div>
                 <div className="pt-2 border-t text-xs text-gray-500">
-                  {t.totalAttendees}: {meeting.attendees.length} | 
-                  {t.presentCount}: {meeting.attendees.filter(a => a.status === 'present').length} | 
-                  {t.excusedCount}: {meeting.attendees.filter(a => a.status === 'excused').length}
+                  {t.totalAttendees}: {meeting.attendees.length} |
+                  {t.presentCount}:{" "}
+                  {
+                    meeting.attendees.filter((a) => a.status === "present")
+                      .length
+                  }{" "}
+                  |{t.excusedCount}:{" "}
+                  {
+                    meeting.attendees.filter((a) => a.status === "excused")
+                      .length
+                  }
                 </div>
               </div>
             ) : (
