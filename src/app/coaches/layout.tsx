@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import { CoachesSidebar, CoachesTopBar, CoachesSidebarProvider, CoachSidebar } from "@/app/coaches/components";
+import { CoachesTopBar, CoachesSidebarProvider, CoachesSidebar } from "@/app/coaches/components";
 import ProtectedCoachRoute from "@/components/ProtectedCoachRoute";
 
 export default function CoachesLayout({
@@ -21,8 +21,7 @@ export default function CoachesLayout({
     <ProtectedCoachRoute>
       <CoachesSidebarProvider>
         <div className="flex min-h-screen bg-gray-50">
-          {/* <CoachesSidebar /> */}
-          <CoachSidebar />
+          <CoachesSidebar />
           <div className="flex-1 transition-all duration-300 ease-in-out w-full lg:ml-64">
             <CoachesTopBar />
             <main className="pt-16 p-3 sm:p-4 lg:p-6 mt-16">

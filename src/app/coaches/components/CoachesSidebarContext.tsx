@@ -4,6 +4,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface CoachesSidebarContextType {
   isCollapsed: boolean;
+  isMobileOpen: boolean;
+  setIsMobileOpen: (open: boolean) => void;
+  isMobile: boolean;
   toggleSidebar: () => void;
   setCollapsed: (collapsed: boolean) => void;
 }
@@ -12,6 +15,19 @@ const CoachesSidebarContext = createContext<CoachesSidebarContextType | undefine
 
 export function CoachesSidebarProvider({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Load sidebar state from localStorage on mount
   useEffect(() => {
@@ -35,7 +51,14 @@ export function CoachesSidebarProvider({ children }: { children: React.ReactNode
   };
 
   return (
-    <CoachesSidebarContext.Provider value={{ isCollapsed, toggleSidebar, setCollapsed }}>
+    <CoachesSidebarContext.Provider value={{ 
+      isCollapsed, 
+      isMobileOpen, 
+      setIsMobileOpen, 
+      isMobile, 
+      toggleSidebar, 
+      setCollapsed 
+    }}>
       {children}
     </CoachesSidebarContext.Provider>
   );

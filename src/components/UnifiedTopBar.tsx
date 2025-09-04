@@ -208,7 +208,10 @@ export const UnifiedTopBar = ({
         sidebarContext?.isCollapsed ? 'left-16' : 'left-64'
       }`;
     } else {
-      return "fixed top-0 right-0 left-0 lg:left-64 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 z-30 transition-all duration-300 h-20";
+      return `fixed top-0 right-0 bg-white h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-30 transition-all duration-300 ease-in-out ${
+        sidebarContext?.isMobile ? 'left-0' : 
+        sidebarContext?.isCollapsed ? 'left-16' : 'left-64'
+      }`;
     }
   };
 

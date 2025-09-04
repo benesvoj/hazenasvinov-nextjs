@@ -25,7 +25,7 @@ const getPageTitle = (pathname: string) => {
 
 export const CoachesTopBar = () => {
   const pathname = usePathname();
-  const { toggleSidebar } = useCoachesSidebar();
+  const { toggleSidebar, isCollapsed, isMobileOpen, setIsMobileOpen, isMobile } = useCoachesSidebar();
   const { user } = useAuth();
   const [userProfile, setUserProfile] = useState<any>(null);
 
@@ -57,6 +57,10 @@ export const CoachesTopBar = () => {
     <UnifiedTopBar
       variant="coach"
       sidebarContext={{
+        isCollapsed,
+        isMobileOpen,
+        setIsMobileOpen,
+        isMobile,
         toggleSidebar
       }}
       pageTitle={getPageTitle(pathname)}
