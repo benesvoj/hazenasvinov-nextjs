@@ -55,6 +55,7 @@ export { VideoCard } from './videos/VideoCard';
 export { VideoFormModal } from './videos/VideoFormModal';
 export { MeetingMinutesFormModal } from './meetingMinutes/MeetingMinutesFormModal';
 export { MeetingMinutesCard } from './meetingMinutes/MeetingMinutesCard';
+export { MeetingMinutesContainer, type MeetingMinutesContainerRef } from './meetingMinutes/MeetingMinutesContainer';
 
 export { ButtonWithTooltip } from './ButtonWithTooltip';
 
