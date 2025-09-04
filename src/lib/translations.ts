@@ -469,6 +469,7 @@ export const translations = {
       dashboard: "Dashboard",
       teams: "Moje týmy",
       videos: "Videa",
+      attendance: "Docházka členů",
       statistics: "Statistiky",
       meetingMinutes: "Zápisy z výborových schůzí",
     },

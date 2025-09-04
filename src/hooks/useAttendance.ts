@@ -1,0 +1,359 @@
+import { useState, useEffect, useCallback } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { 
+  TrainingSession, 
+  MemberAttendance, 
+  AttendanceRecord, 
+  AttendanceSummary, 
+  TrainingSessionFormData,
+  AttendanceFilters,
+  AttendanceStats
+} from '@/types/attendance';
+import { useAuth } from './useAuth';
+import { useUserRoles } from './useUserRoles';
+
+export function useAttendance() {
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [trainingSessions, setTrainingSessions] = useState<TrainingSession[]>([]);
+  const [attendanceSummary, setAttendanceSummary] = useState<AttendanceSummary[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { user } = useAuth();
+  const { getCurrentUserCategories, hasRole } = useUserRoles();
+  const supabase = createClient();
+
+  // Fetch training sessions for a specific category and season
+  const fetchTrainingSessions = useCallback(async (category: string, seasonId: string) => {
+    if (!user?.id) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .rpc('get_training_sessions', {
+          p_category: category,
+          p_season_id: seasonId,
+          p_user_id: user.id
+        });
+
+      if (error) throw error;
+
+      setTrainingSessions(data || []);
+    } catch (err) {
+      console.error('Error fetching training sessions:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch training sessions');
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id, supabase]);
+
+  // Fetch attendance records for a training session
+  const fetchAttendanceRecords = useCallback(async (trainingSessionId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .from('member_attendance')
+        .select(`
+          id,
+          member_id,
+          training_session_id,
+          attendance_status,
+          notes,
+          recorded_by,
+          recorded_at,
+          created_at,
+          updated_at,
+          members!inner (
+            id,
+            name,
+            surname,
+            category
+          ),
+          training_sessions!inner (
+            id,
+            title,
+            session_date,
+            session_time,
+            category
+          )
+        `)
+        .eq('training_session_id', trainingSessionId)
+        .order('recorded_at', { ascending: false });
+
+      if (error) throw error;
+
+      const records: AttendanceRecord[] = (data || []).map(record => ({
+        id: record.id,
+        member: {
+          id: record.members.id,
+          name: record.members.name,
+          surname: record.members.surname,
+          category: record.members.category
+        },
+        training_session: {
+          id: record.training_sessions.id,
+          title: record.training_sessions.title,
+          session_date: record.training_sessions.session_date,
+          session_time: record.training_sessions.session_time,
+          category: record.training_sessions.category
+        },
+        attendance_status: record.attendance_status,
+        notes: record.notes,
+        recorded_by: record.recorded_by,
+        recorded_at: record.recorded_at
+      }));
+
+      setAttendanceRecords(records);
+    } catch (err) {
+      console.error('Error fetching attendance records:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch attendance records');
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase]);
+
+  // Fetch attendance summary for a category and season
+  const fetchAttendanceSummary = useCallback(async (category: string, seasonId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .rpc('get_attendance_summary', {
+          p_category: category,
+          p_season_id: seasonId
+        });
+
+      if (error) throw error;
+
+      setAttendanceSummary(data || []);
+    } catch (err) {
+      console.error('Error fetching attendance summary:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch attendance summary');
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase]);
+
+  // Create a new training session
+  const createTrainingSession = useCallback(async (sessionData: TrainingSessionFormData) => {
+    if (!user?.id) throw new Error('User not authenticated');
+
+    try {
+      setError(null);
+
+      const { data, error } = await supabase
+        .from('training_sessions')
+        .insert({
+          ...sessionData,
+          coach_id: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Refresh training sessions
+      await fetchTrainingSessions(sessionData.category, sessionData.season_id);
+      
+      return data;
+    } catch (err) {
+      console.error('Error creating training session:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create training session');
+      throw err;
+    }
+  }, [user?.id, supabase, fetchTrainingSessions]);
+
+  // Update a training session
+  const updateTrainingSession = useCallback(async (id: string, sessionData: Partial<TrainingSessionFormData>) => {
+    try {
+      setError(null);
+
+      const { data, error } = await supabase
+        .from('training_sessions')
+        .update(sessionData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Refresh training sessions if category or season changed
+      if (sessionData.category && sessionData.season_id) {
+        await fetchTrainingSessions(sessionData.category, sessionData.season_id);
+      }
+
+      return data;
+    } catch (err) {
+      console.error('Error updating training session:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update training session');
+      throw err;
+    }
+  }, [supabase, fetchTrainingSessions]);
+
+  // Delete a training session
+  const deleteTrainingSession = useCallback(async (id: string) => {
+    try {
+      setError(null);
+
+      const { error } = await supabase
+        .from('training_sessions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setTrainingSessions(prev => prev.filter(session => session.id !== id));
+    } catch (err) {
+      console.error('Error deleting training session:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete training session');
+      throw err;
+    }
+  }, [supabase]);
+
+  // Record member attendance
+  const recordAttendance = useCallback(async (
+    memberId: string,
+    trainingSessionId: string,
+    attendanceStatus: 'present' | 'absent' | 'late' | 'excused',
+    notes?: string
+  ) => {
+    if (!user?.id) throw new Error('User not authenticated');
+
+    try {
+      setError(null);
+
+      const { data, error } = await supabase
+        .from('member_attendance')
+        .upsert({
+          member_id: memberId,
+          training_session_id: trainingSessionId,
+          attendance_status: attendanceStatus,
+          notes,
+          recorded_by: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Refresh attendance records
+      await fetchAttendanceRecords(trainingSessionId);
+      
+      return data;
+    } catch (err) {
+      console.error('Error recording attendance:', err);
+      setError(err instanceof Error ? err.message : 'Failed to record attendance');
+      throw err;
+    }
+  }, [user?.id, supabase, fetchAttendanceRecords]);
+
+  // Update attendance record
+  const updateAttendance = useCallback(async (
+    attendanceId: string,
+    attendanceStatus: 'present' | 'absent' | 'late' | 'excused',
+    notes?: string
+  ) => {
+    try {
+      setError(null);
+
+      const { data, error } = await supabase
+        .from('member_attendance')
+        .update({
+          attendance_status: attendanceStatus,
+          notes
+        })
+        .eq('id', attendanceId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Refresh attendance records
+      const record = attendanceRecords.find(r => r.id === attendanceId);
+      if (record) {
+        await fetchAttendanceRecords(record.training_session.id);
+      }
+
+      return data;
+    } catch (err) {
+      console.error('Error updating attendance:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update attendance');
+      throw err;
+    }
+  }, [supabase, attendanceRecords, fetchAttendanceRecords]);
+
+  // Delete attendance record
+  const deleteAttendance = useCallback(async (attendanceId: string) => {
+    try {
+      setError(null);
+
+      const { error } = await supabase
+        .from('member_attendance')
+        .delete()
+        .eq('id', attendanceId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setAttendanceRecords(prev => prev.filter(record => record.id !== attendanceId));
+    } catch (err) {
+      console.error('Error deleting attendance record:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete attendance record');
+      throw err;
+    }
+  }, [supabase]);
+
+  // Get attendance statistics
+  const getAttendanceStats = useCallback(async (category: string, seasonId: string): Promise<AttendanceStats> => {
+    try {
+      const summary = await fetchAttendanceSummary(category, seasonId);
+      
+      const totalMembers = summary.length;
+      const totalSessions = summary.reduce((sum, member) => sum + member.total_sessions, 0);
+      const totalPresent = summary.reduce((sum, member) => sum + member.present_count, 0);
+      const totalAbsent = summary.reduce((sum, member) => sum + member.absent_count, 0);
+      const totalLate = summary.reduce((sum, member) => sum + member.late_count, 0);
+      const totalExcused = summary.reduce((sum, member) => sum + member.excused_count, 0);
+
+      return {
+        total_members: totalMembers,
+        total_sessions: totalSessions,
+        average_attendance: totalSessions > 0 ? Math.round((totalPresent / totalSessions) * 100) : 0,
+        attendance_by_status: {
+          present: totalPresent,
+          absent: totalAbsent,
+          late: totalLate,
+          excused: totalExcused
+        }
+      };
+    } catch (err) {
+      console.error('Error getting attendance stats:', err);
+      throw err;
+    }
+  }, [fetchAttendanceSummary]);
+
+  return {
+    attendanceRecords,
+    trainingSessions,
+    attendanceSummary,
+    loading,
+    error,
+    setError,
+    fetchTrainingSessions,
+    fetchAttendanceRecords,
+    fetchAttendanceSummary,
+    createTrainingSession,
+    updateTrainingSession,
+    deleteTrainingSession,
+    recordAttendance,
+    updateAttendance,
+    deleteAttendance,
+    getAttendanceStats
+  };
+}
