@@ -53,6 +53,11 @@ export {
 export { PasswordInput } from './PasswordInput';
 export { VideoCard } from './videos/VideoCard';
 export { VideoFormModal } from './videos/VideoFormModal';
+export { VideoFilters } from './videos/VideoFilters';
+export { VideoPageHeader } from './videos/VideoPageHeader';
+export { VideoGrid } from './videos/VideoGrid';
+export { VideoPageLayout } from './videos/VideoPageLayout';
+export { VideoPagination } from './videos/VideoPagination';
 export { MeetingMinutesFormModal } from './meetingMinutes/MeetingMinutesFormModal';
 export { MeetingMinutesCard } from './meetingMinutes/MeetingMinutesCard';
 export { MeetingMinutesContainer, type MeetingMinutesContainerRef } from './meetingMinutes/MeetingMinutesContainer';

@@ -95,7 +95,7 @@ export function useAuth() {
             if (isProduction && !isLocalhost) {
               // Use global flag to prevent multiple login logs across hook instances
               if (globalLoginLogged) {
-                showToast.warning(`[AUTH] Login already logged globally for ${user.email}, skipping`);
+                // showToast.warning(`[AUTH] Login already logged globally for ${user.email}, skipping`);
                 return;
               }
               
@@ -108,7 +108,7 @@ export function useAuth() {
                 globalLoginLogged = false;
               }, 10000);
               
-              showToast.warning(`[AUTH] Logging login for ${user.email}`);
+              // showToast.warning(`[AUTH] Logging login for ${user.email}`);
               
               // Log login attempt in background without blocking auth state change
               // Use a timeout to prevent hanging requests
@@ -129,7 +129,7 @@ export function useAuth() {
                 signal: controller.signal,
               }).then(() => {
                 clearTimeout(timeoutId);
-                showToast.success(`[AUTH] Login logged successfully for ${user.email}`);
+                // showToast.success(`[AUTH] Login logged successfully for ${user.email}`);
               }).catch((logError) => {
                 clearTimeout(timeoutId);
               });

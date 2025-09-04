@@ -95,6 +95,10 @@ export const translations = {
       title: "Správa videí",
       description: "Správa videí, které jsou dostupné v systému.",
       addVideo: "Nové video",
+      deleteModal: {
+        title: "Smazat video",
+        description: "Opravdu chcete smazat video? Tato akce je nevratná.",
+      },
     },
     committees: {
       title: "Správa komisí",
@@ -377,7 +381,7 @@ export const translations = {
         copyUrl: "Kopírovat URL",
         edit: "Upravit video",
         delete: "Smazat video",
-      }
+      },
     },
     meetingMinutes: {
       title: "Zápisy z výborových schůzí",

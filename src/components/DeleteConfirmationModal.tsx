@@ -29,7 +29,7 @@ export default function DeleteConfirmationModal({
       <ModalContent>
         <ModalHeader>{title}</ModalHeader>
         <ModalBody>
-          <p dangerouslySetInnerHTML={{ __html: message }} />
+          <p>{message}</p>
         </ModalBody>
         <ModalFooter>
           <Button variant="light" onPress={onClose}>

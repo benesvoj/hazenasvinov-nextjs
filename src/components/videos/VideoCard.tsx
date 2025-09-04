@@ -43,9 +43,6 @@ export function VideoCard({
 }: VideoCardProps) {
   const t = translations.components.videos.videoCard;
   const [isCopied, setIsCopied] = React.useState(false);
-  
-  // Debug log to verify component is rendering
-  console.log('VideoCard rendering:', video.title, 'Club:', video.clubs?.name);
 
 
   const handlePlay = () => {
