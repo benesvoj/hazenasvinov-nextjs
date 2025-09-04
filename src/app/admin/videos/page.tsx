@@ -66,7 +66,6 @@ export default function VideosPage() {
         .limit(1);
 
       if (tableError) {
-        console.error("Videos table error:", tableError);
         if (tableError.message.includes('relation "videos" does not exist')) {
           setError(
             "Tabulka videí neexistuje. Spusťte: npm run setup:videos-table"
@@ -133,19 +132,10 @@ export default function VideosPage() {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Supabase error:", error);
         throw error;
       }
-
-      console.log("Fetched videos data:", data);
       setVideos(data || []);
     } catch (err) {
-      console.error("Error fetching videos:", err);
-      console.error("Error details:", {
-        message: err instanceof Error ? err.message : "Unknown error",
-        stack: err instanceof Error ? err.stack : undefined,
-        error: err,
-      });
       setError(
         `Chyba při načítání videí: ${
           err instanceof Error ? err.message : "Neznámá chyba"
@@ -199,13 +189,6 @@ export default function VideosPage() {
       setVideos((prev) => [data, ...prev]);
       setIsFormModalOpen(false);
     } catch (err: any) {
-      console.error("Error creating video:", err);
-      console.error("Error details:", {
-        message: err?.message,
-        code: err?.code,
-        details: err?.details,
-        hint: err?.hint,
-      });
       setError(`Chyba při vytváření videa: ${err?.message || "Neznámá chyba"}`);
     }
   };
@@ -246,13 +229,6 @@ export default function VideosPage() {
       setEditingVideo(null);
       setIsFormModalOpen(false);
     } catch (err: any) {
-      console.error("Error updating video:", err);
-      console.error("Error details:", {
-        message: err?.message,
-        code: err?.code,
-        details: err?.details,
-        hint: err?.hint,
-      });
       setError(
         `Chyba při aktualizaci videa: ${err?.message || "Neznámá chyba"}`
       );

@@ -62,6 +62,10 @@ export { ButtonWithTooltip } from './ButtonWithTooltip';
 export { ReleaseNotesModal } from './ReleaseNotesModal';
 export { UserProfileModal } from './UserProfileModal';
 export { UnifiedTopBar } from './UnifiedTopBar';
+export { UnifiedSidebar } from './UnifiedSidebar';
+export { UnifiedSidebarProvider, useUnifiedSidebar } from './UnifiedSidebarContext';
 
 // Headings
 export { Heading1, Heading2, Heading3, Heading4, Heading5, Heading6 } from './Headings';
+
+export { showToast, useToast } from './Toast';

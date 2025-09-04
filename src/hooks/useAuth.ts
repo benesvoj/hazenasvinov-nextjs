@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/client';
 import { useState, useEffect, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { showToast } from '@/components';
 
 // Global flag to prevent multiple login logs for the same session
 let globalLoginLogged = false;
@@ -38,14 +39,7 @@ export function useAuth() {
           // Check if it's a permission error and handle gracefully
           if (error.message.includes('permission denied') || 
               error.message.includes('permission denied for table')) {
-            console.log('Permission denied in useAuth - this is normal for unauthenticated users')
-            setAuthState({
-              user: null,
-              session: null,
-              loading: false,
-              error: null, // Don't show permission errors to users
-              isAuthenticated: false,
-            })
+            showToast.danger('Permission denied in useAuth - this is normal for unauthenticated users')
             return
           }
           
@@ -72,7 +66,7 @@ export function useAuth() {
         
       } catch (error) {
         // Handle any unexpected errors
-        console.error('Unexpected error in useAuth:', error)
+        showToast.danger(`Unexpected error in useAuth:${error}`)
         setAuthState(prev => ({
           ...prev,
           loading: false,
@@ -101,7 +95,7 @@ export function useAuth() {
             if (isProduction && !isLocalhost) {
               // Use global flag to prevent multiple login logs across hook instances
               if (globalLoginLogged) {
-                console.log(`[AUTH] Login already logged globally for ${user.email}, skipping`);
+                showToast.warning(`[AUTH] Login already logged globally for ${user.email}, skipping`);
                 return;
               }
               
@@ -114,7 +108,7 @@ export function useAuth() {
                 globalLoginLogged = false;
               }, 10000);
               
-              console.log(`[AUTH] Logging login for ${user.email}`);
+              showToast.warning(`[AUTH] Logging login for ${user.email}`);
               
               // Log login attempt in background without blocking auth state change
               // Use a timeout to prevent hanging requests
@@ -135,14 +129,12 @@ export function useAuth() {
                 signal: controller.signal,
               }).then(() => {
                 clearTimeout(timeoutId);
-                console.log(`[AUTH] Login logged successfully for ${user.email}`);
+                showToast.success(`[AUTH] Login logged successfully for ${user.email}`);
               }).catch((logError) => {
                 clearTimeout(timeoutId);
-                // Silently fail - don't log to console to avoid spam
-                // console.error('Failed to log successful login:', logError);
               });
             } else {
-              console.log(`[DEV] Login would be logged: ${user.email} (skipped in development)`);
+              showToast.warning(`[DEV] Login would be logged: ${user.email} (skipped in development)`);
             }
           }
 
@@ -154,7 +146,7 @@ export function useAuth() {
             isAuthenticated: !!user,
           })
         } catch (error) {
-          console.error('Error in auth state change:', error)
+          showToast.danger(`Error in auth state change:${error}`)
           // Don't update state on error, keep current state
         }
       }
@@ -168,7 +160,7 @@ export function useAuth() {
       const supabase = createClient()
       await supabase.auth.signOut()
     } catch (error) {
-      console.error('Error signing out:', error)
+      showToast.danger(`Error signing out:${error}`)
       // Even if signout fails, we should clear local state
       setAuthState({
         user: null,

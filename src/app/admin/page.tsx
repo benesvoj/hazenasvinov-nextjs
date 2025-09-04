@@ -5,8 +5,6 @@ import { redirect } from "next/navigation";
 import { logout } from "@/utils/supabase/actions";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Badge } from "@heroui/badge";
-import { Tabs, Tab } from "@heroui/tabs";
 import { 
   CheckCircleIcon, 
   ClockIcon, 
@@ -24,16 +22,12 @@ import {
   SparklesIcon,
   Cog6ToothIcon,
   InformationCircleIcon,
-  ExclamationCircleIcon
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { Input } from "@heroui/input";
 import { 
   TodoItem, 
-  getPriorityColor, 
-  getStatusColor, 
-  getCategoryColor,
   getPriorityLabel,
   getStatusLabel,
   getCategoryLabel
@@ -43,6 +37,7 @@ import {
   getReleaseNotes
 } from "@/utils/releaseNotes";
 import { Chip } from "@heroui/react";
+import { showToast } from "@/components";
 
 const buttonStyle = 'rounded bg-sky-600 px-4 py-2 text-sm text-white data-active:bg-sky-700 data-hover:bg-sky-500';
 
@@ -94,12 +89,9 @@ export default function AdminDashboard() {
       const { data, error } = await supabase.auth.getUser();
       
       if (error || !data?.user) {
-        console.error('User authentication error:', error);
         redirect('/login');
         return;
       }
-      
-      console.log('User authenticated:', data.user.email);
       setUser(data.user);
       setLoading(false);
       
@@ -123,14 +115,7 @@ export default function AdminDashboard() {
         .limit(1);
 
       if (tableError) {
-        console.error('Todos table error:', {
-          message: tableError.message,
-          details: tableError.details,
-          hint: tableError.hint,
-          code: tableError.code
-        });
         if (tableError.message && tableError.message.includes('relation "todos" does not exist')) {
-          console.warn('Todos table does not exist. Run: npm run setup:missing-tables');
           setTodos([]);
           return;
         }
@@ -145,13 +130,6 @@ export default function AdminDashboard() {
       if (error) throw error;
       setTodos(data || []);
     } catch (error: any) {
-      console.error('Error loading todos:', {
-        message: error?.message || 'Unknown error',
-        details: error?.details,
-        hint: error?.hint,
-        code: error?.code,
-        fullError: error
-      });
       setTodos([]);
     } finally {
       setTodosLoading(false);
@@ -161,10 +139,8 @@ export default function AdminDashboard() {
   const loadReleaseNotes = () => {
     try {
       const notes = getReleaseNotes();
-      console.log('Loaded release notes:', notes);
       setReleaseNotes(notes);
     } catch (error) {
-      console.error('Error loading release notes:', error);
       setReleaseNotes([]);
     }
   };
@@ -202,7 +178,6 @@ export default function AdminDashboard() {
 
       if (error) {
         if (error.message.includes('relation "todos" does not exist')) {
-          console.warn('Todos table does not exist. Run: npm run setup:todos-table');
           return;
         }
         throw error;
@@ -211,7 +186,6 @@ export default function AdminDashboard() {
       onAddTodoClose();
       loadTodos();
     } catch (error) {
-      console.error('Error adding todo:', error);
     }
   };
 
@@ -251,7 +225,7 @@ export default function AdminDashboard() {
       setSelectedTodo(null);
       loadTodos();
     } catch (error) {
-      console.error('Error updating todo:', error);
+      showToast.danger('Chyba při aktualizaci úkolu');
     }
   };
 
@@ -266,7 +240,7 @@ export default function AdminDashboard() {
       if (error) throw error;
       loadTodos(); // Reload todos from database
     } catch (error) {
-      console.error('Error deleting todo:', error);
+      showToast.danger(`Error deleting todo:${error}`);
     }
   };
 
@@ -281,7 +255,7 @@ export default function AdminDashboard() {
       if (error) throw error;
       loadTodos(); // Reload todos from database
     } catch (error) {
-      console.error('Error updating todo:', error);
+      showToast.danger(`Error updating todo:${error}`);
     }
   };
 
@@ -348,7 +322,6 @@ export default function AdminDashboard() {
 
       if (error) {
         if (error.message.includes('relation "comments" does not exist')) {
-          console.warn('Comments table does not exist. Run: npm run setup:comments-table');
           return;
         }
         throw error;
@@ -358,7 +331,7 @@ export default function AdminDashboard() {
       setCommentFormData({ content: '', type: 'general' });
       loadComments();
     } catch (error) {
-      console.error('Error adding comment:', error);
+      showToast.danger(`Error adding comment:${error}`);
     }
   };
 
@@ -390,7 +363,7 @@ export default function AdminDashboard() {
       setSelectedComment(null);
       loadComments();
     } catch (error) {
-      console.error('Error updating comment:', error);
+      showToast.danger(`Error updating comment:${error}`);
     }
   };
 
@@ -405,7 +378,7 @@ export default function AdminDashboard() {
       if (error) throw error;
       loadComments();
     } catch (error) {
-      console.error('Error deleting comment:', error);
+      showToast.danger(`Error deleting comment:${error}`);
     }
   };
 
@@ -420,14 +393,9 @@ export default function AdminDashboard() {
         .limit(1);
 
       if (tableError) {
-        console.error('Comments table error:', {
-          message: tableError.message,
-          details: tableError.details,
-          hint: tableError.hint,
-          code: tableError.code
-        });
+        showToast.danger(`Comments table error:${tableError}`);
         if (tableError.message && tableError.message.includes('relation "comments" does not exist')) {
-          console.warn('Comments table does not exist. Run: npm run setup:missing-tables');
+          showToast.danger('Comments table does not exist. Run: npm run setup:missing-tables');
           setComments([]);
           return;
         }
@@ -442,13 +410,7 @@ export default function AdminDashboard() {
       if (error) throw error;
       setComments(data || []);
     } catch (error: any) {
-      console.error('Error loading comments:', {
-        message: error?.message || 'Unknown error',
-        details: error?.details,
-        hint: error?.hint,
-        code: error?.code,
-        fullError: error
-      });
+      showToast.danger(`Error loading comments:${error}`);
       setComments([]);
     }
   };
