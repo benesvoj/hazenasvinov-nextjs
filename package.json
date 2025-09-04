@@ -20,7 +20,9 @@
     "setup:missing-tables": "node scripts/setup-missing-tables.js",
     "import:videos": "node scripts/import-videos-simple.js",
     "fix:admin-dashboard": "node scripts/fix-admin-dashboard-access.js",
-    "setup:user-profiles": "node scripts/setup-user-profiles.js"
+    "setup:user-profiles": "node scripts/setup-user-profiles.js",
+    "setup:meeting-minutes": "node scripts/building-app/setup-meeting-minutes-table.js",
+    "fix:meeting-attendees-fk": "node scripts/building-app/fix-meeting-attendees-fk.js"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",

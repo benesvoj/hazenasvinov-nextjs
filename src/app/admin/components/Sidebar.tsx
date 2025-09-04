@@ -26,7 +26,8 @@ import {
   ShieldCheckIcon,
   XMarkIcon,
   ChevronDownIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ClipboardDocumentListIcon
 } from "@heroicons/react/24/outline";
 
 // Icon mapping for admin routes
@@ -70,6 +71,8 @@ const getRouteIcon = (route: string) => {
       return <VideoCameraIcon className="w-5 h-5" />;
     case privateRoutes.userRoles:
       return <ShieldCheckIcon className="w-5 h-5" />;
+    case privateRoutes.meetingMinutes:
+      return <ClipboardDocumentListIcon className="w-5 h-5" />;
     default:
       return <Cog6ToothIcon className="w-5 h-5" />;
   }

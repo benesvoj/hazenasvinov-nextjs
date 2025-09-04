@@ -9,3 +9,4 @@ export * from './member';
 export * from './lineup';
 export * from './video';
 export * from './userRoles';
+export * from './meetingMinutes';
