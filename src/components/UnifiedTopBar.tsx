@@ -208,7 +208,7 @@ export const UnifiedTopBar = ({
         sidebarContext?.isCollapsed ? 'left-16' : 'left-64'
       }`;
     } else {
-      return "fixed top-0 right-0 left-0 lg:left-64 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 z-30 transition-all duration-300";
+      return "fixed top-0 right-0 left-0 lg:left-64 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 z-30 transition-all duration-300 h-20";
     }
   };
 

@@ -201,19 +201,15 @@ export const UnifiedSidebar = ({
         }`,
         mobileContainer: `fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white w-80 max-w-[85vw] z-50 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col`,
         header:
-          "flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800/50 backdrop-blur-sm",
+          "flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800/50 backdrop-blur-sm h-20",
         navItem: (isActive: boolean) =>
-          `group flex items-center px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
+          `group flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
             isActive
-              ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg transform scale-105"
-              : "text-gray-300 hover:bg-gray-700/50 hover:text-white hover:transform hover:scale-105"
+              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-r-2 border-blue-600 dark:border-blue-400"
+              : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
           }`,
         navItemIcon: (isActive: boolean) =>
-          `flex-shrink-0 p-1 rounded-lg transition-all duration-200 ${
-            isActive
-              ? "text-white bg-white/20"
-              : "text-gray-400 group-hover:text-white group-hover:bg-gray-600/30"
-          }`,
+          `w-5 h-5 ${isCollapsed ? "mx-auto" : "mr-3"}`,
         footer: "p-4 border-t border-gray-700 bg-gray-800/30",
         groupHeader:
           "w-full px-3 py-2 flex items-center justify-between hover:bg-gray-700/30 rounded-lg transition-colors duration-200",
@@ -230,7 +226,7 @@ export const UnifiedSidebar = ({
           isCollapsed ? "w-16" : "w-64"
         }`,
         header:
-          "flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700",
+          "flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 h-20",
         navItem: (isActive: boolean) =>
           `flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
             isActive
@@ -324,7 +320,7 @@ export const UnifiedSidebar = ({
             className="flex-1 py-4 overflow-y-auto scrollbar-hide"
             style={{ 
               minHeight: 0,
-              height: 'calc(100vh - 120px)' // Fixed height for proper scrolling
+              height: 'calc(100vh - 140px)' // Fixed height for proper scrolling (80px header + 60px footer)
             }}
           >
             <div className="space-y-4 px-3">
@@ -407,10 +403,6 @@ export const UnifiedSidebar = ({
                                   : undefined
                               }
                             >
-                              {/* Active background glow - Admin only */}
-                              {variant === "admin" && isActive && (
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-500/20 rounded-xl"></div>
-                              )}
 
                               <div
                                 className={`flex items-center relative z-10 ${
@@ -431,12 +423,6 @@ export const UnifiedSidebar = ({
                                 )}
                               </div>
 
-                              {/* Active indicator - Admin only */}
-                              {variant === "admin" &&
-                                isActive &&
-                                !isCollapsed && (
-                                  <div className="absolute right-3 w-2 h-2 bg-white rounded-full shadow-lg"></div>
-                                )}
                             </Link>
                           );
                         }
@@ -555,7 +541,7 @@ export const UnifiedSidebar = ({
         className="flex-1 py-4 overflow-y-auto scrollbar-hide"
         style={{ 
           minHeight: 0,
-          height: 'calc(100vh - 120px)' // Fixed height for proper scrolling
+          height: 'calc(100vh - 140px)' // Fixed height for proper scrolling (80px header + 60px footer)
         }}
       >
         <div className="space-y-4 px-3">
@@ -636,10 +622,6 @@ export const UnifiedSidebar = ({
                             : undefined
                         }
                       >
-                        {/* Active background glow - Admin only */}
-                        {variant === "admin" && isActive && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-500/20 rounded-xl"></div>
-                        )}
 
                         <div
                           className={`flex items-center relative z-10 ${
@@ -658,10 +640,6 @@ export const UnifiedSidebar = ({
                           )}
                         </div>
 
-                        {/* Active indicator - Admin only */}
-                        {variant === "admin" && isActive && !isCollapsed && (
-                          <div className="absolute right-3 w-2 h-2 bg-white rounded-full shadow-lg"></div>
-                        )}
                       </Link>
                     );
                   })}
