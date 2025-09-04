@@ -94,6 +94,13 @@ export async function GET(request: NextRequest) {
 					type,
 					hasToken: !!(token_hash || code || token)
 				})
+				// Instead of redirecting to error page, let's try to handle this better
+				// For now, let's redirect to reset-password page even if there's an error
+				// This will allow the user to try again
+				if (type === 'recovery') {
+					console.log('Auth failed but redirecting to reset-password anyway for recovery type')
+					redirect('/reset-password')
+				}
 			}
 		} catch (error) {
 			console.error('Error in auth confirm route:', {
@@ -102,6 +109,11 @@ export async function GET(request: NextRequest) {
 				type,
 				hasToken: !!(token_hash || code || token)
 			})
+			// For recovery type, try to redirect to reset-password even on error
+			if (type === 'recovery') {
+				console.log('Caught error but redirecting to reset-password for recovery type')
+				redirect('/reset-password')
+			}
 		}
 	} else {
 		console.log('Missing required parameters:', {
