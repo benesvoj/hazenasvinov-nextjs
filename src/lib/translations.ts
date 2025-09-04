@@ -397,11 +397,12 @@ export const translations = {
       noAttendeesDescription: "Klikněte na \"Správa účastníků\" pro přidání členů",
       all: "Všichni",
       filters: {
+        title: "Filtry",
         season: "Sezóna",
         wroteBy: "Zapsal",
         dateFrom: "Datum od",
         dateTo: "Datum do",
-        search: "Hledat",
+        search: "Hledat ...",
         clear: "Vymazat",
         allSeasons: "Všechny sezóny",
         allUsers: "Všichni uživatelé",
@@ -431,13 +432,6 @@ export const translations = {
       manageAttendees: "Správa účastníků",
       added: "Přidáno",
       unknownMember: "Neznámý člen",
-    },
-    video: {
-      videos: {
-        title: "Videa",
-        description: "Správa videí, které jsou dostupné v systému.",
-        addVideo: "Přidat video",
-      },
       videoCard: {
         recordingDate: "Odehráno:",
         createdAt: "Vytvořeno:",

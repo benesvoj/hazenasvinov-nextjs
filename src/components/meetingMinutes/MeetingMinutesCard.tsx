@@ -13,7 +13,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button, Card, CardBody, Chip, User } from "@heroui/react";
 import { translations } from "@/lib/translations";
-
+import { Heading3, Heading4 } from "@/components";
+import { formatDateString } from "@/helpers";
 interface MeetingMinutesCardProps {
   meeting: MeetingMinutes;
   onEdit: (meeting: MeetingMinutes) => void;
@@ -28,10 +29,6 @@ export function MeetingMinutesCard({
   onEditAttendees,
 }: MeetingMinutesCardProps) {
   const t = translations.components.meetingMinutes;
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("cs-CZ");
-  };
 
   const getStatusColor = (status: string) => {
     return status === "present" ? "success" : "warning";
@@ -65,13 +62,13 @@ export function MeetingMinutesCard({
       <CardBody>
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <Heading3>
               {t.meetingNumber} #{meeting.meeting_number}
-            </h3>
+            </Heading3>
             <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
               <div className="flex items-center gap-1">
                 <CalendarIcon className="w-4 h-4" />
-                {formatDate(meeting.meeting_date)}
+                {formatDateString(meeting.meeting_date)}
               </div>
               {meeting.meeting_place && (
                 <div className="flex items-center gap-1">
@@ -117,9 +114,9 @@ export function MeetingMinutesCard({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <h4 className="font-medium text-gray-900 mb-2">
+            <Heading4>
               {t.meetingDetails}
-            </h4>
+            </Heading4>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <UserIcon className="w-4 h-4 text-gray-400" />
@@ -161,9 +158,9 @@ export function MeetingMinutesCard({
           </div>
 
           <div>
-            <h4 className="font-medium text-gray-900 mb-2">
+            <Heading4>
               {t.attendanceList}
-            </h4>
+            </Heading4>
             {meeting.attendees && meeting.attendees.length > 0 ? (
               <div className="space-y-3">
                 <div className="overflow-y-auto">

@@ -24,6 +24,7 @@ import { useMeetingMinutes } from "@/hooks/useMeetingMinutes";
 import { showToast } from "../Toast";
 import { AttendeesModal } from "./AttendeesModal";
 import { DeleteConfirmationModal, MeetingMinutesFormModal } from "..";
+import { LoadingSpinner } from "@/components";
 
 interface MeetingMinutesContainerProps {
   onAddMeetingMinutes?: () => void;
@@ -33,7 +34,10 @@ export interface MeetingMinutesContainerRef {
   openCreateModal: () => void;
 }
 
-export const MeetingMinutesContainer = forwardRef<MeetingMinutesContainerRef, MeetingMinutesContainerProps>(({ onAddMeetingMinutes }, ref) => {
+export const MeetingMinutesContainer = forwardRef<
+  MeetingMinutesContainerRef,
+  MeetingMinutesContainerProps
+>(({ onAddMeetingMinutes }, ref) => {
   const [filters, setFilters] = useState<MeetingMinutesFilters>({});
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingMeetingMinutes, setEditingMeetingMinutes] =
@@ -191,13 +195,13 @@ export const MeetingMinutesContainer = forwardRef<MeetingMinutesContainerRef, Me
         <CardHeader>
           <div className="flex items-center gap-2">
             <FunnelIcon className="w-5 h-5" />
-            <h3 className="text-lg font-semibold">Filtry</h3>
+            <h3 className="text-lg font-semibold">{t.filters.title}</h3>
           </div>
         </CardHeader>
         <CardBody>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Input
-              placeholder="Hledat..."
+              placeholder={t.filters.search}
               startContent={
                 <MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />
               }
@@ -264,8 +268,25 @@ export const MeetingMinutesContainer = forwardRef<MeetingMinutesContainerRef, Me
         </Card>
       )}
 
+      {/* Loading State */}
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <div className="space-y-4">
+          {meetingMinutes.map((meeting) => (
+            <MeetingMinutesCard
+              key={meeting.id}
+              meeting={meeting}
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+              onEditAttendees={openEditAttendeesModal}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Meeting Minutes List */}
-      {meetingMinutes.length === 0 ? (
+      {meetingMinutes.length === 0 && !loading && (
         <Card>
           <CardBody>
             <div className="text-center py-8">
@@ -286,20 +307,8 @@ export const MeetingMinutesContainer = forwardRef<MeetingMinutesContainerRef, Me
             </div>
           </CardBody>
         </Card>
-      ) : (
-        <div className="space-y-4">
-          {meetingMinutes.map((meeting) => (
-            <MeetingMinutesCard
-              key={meeting.id}
-              meeting={meeting}
-              onEdit={openEditModal}
-              onDelete={openDeleteModal}
-              onEditAttendees={openEditAttendeesModal}
-            />
-          ))}
-        </div>
       )}
-      
+
       {/* Form Modal */}
       <MeetingMinutesFormModal
         isOpen={isFormModalOpen}
@@ -323,11 +332,13 @@ export const MeetingMinutesContainer = forwardRef<MeetingMinutesContainerRef, Me
         <AttendeesModal
           isOpen={isAttendeesModalOpen}
           onClose={closeModals}
-          attendees={editingAttendeesMeeting.attendees?.map(attendee => ({
-            user_id: attendee.member?.id || attendee.user_id,
-            status: attendee.status,
-            notes: attendee.notes || ""
-          })) || []}
+          attendees={
+            editingAttendeesMeeting.attendees?.map((attendee) => ({
+              user_id: attendee.member?.id || attendee.user_id,
+              status: attendee.status,
+              notes: attendee.notes || "",
+            })) || []
+          }
           onAttendeesChange={handleAttendeesUpdate}
         />
       )}
@@ -335,4 +346,4 @@ export const MeetingMinutesContainer = forwardRef<MeetingMinutesContainerRef, Me
   );
 });
 
-MeetingMinutesContainer.displayName = 'MeetingMinutesContainer';
+MeetingMinutesContainer.displayName = "MeetingMinutesContainer";
