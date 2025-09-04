@@ -16,7 +16,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     
     // Get the origin from the request headers or use environment variable
-    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    // In production, we should always use the production URL
+    const origin = process.env.NODE_ENV === 'production' 
+      ? 'https://www.hazenasvinov.cz'
+      : (request.headers.get('origin') || process.env.NEXT_PUBLIC_PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
     const redirectUrl = `${origin}/auth/confirm`;
     
     console.log('Sending password reset email to:', email);
