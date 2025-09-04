@@ -15,11 +15,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
     
-    // Get the origin from the request headers
-    const origin = request.headers.get('origin') || 'http://localhost:3000';
+    // Get the origin from the request headers or use environment variable
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const redirectUrl = `${origin}/auth/confirm`;
     
     console.log('Sending password reset email to:', email);
+    console.log('Origin detected:', origin);
     console.log('Redirect URL:', redirectUrl);
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {

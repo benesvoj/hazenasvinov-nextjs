@@ -30,30 +30,45 @@ export async function GET(request: NextRequest) {
 			const supabase = await createClient()
 
 			let error;
+			let result;
+			
 			if (token_hash) {
 				// Handle token_hash (older format)
 				console.log('Verifying OTP with token_hash')
-				const result = await supabase.auth.verifyOtp({
+				result = await supabase.auth.verifyOtp({
 					type,
 					token_hash,
 				})
 				error = result.error;
-				console.log('Token_hash verification result:', { error: error?.message })
+				console.log('Token_hash verification result:', { 
+					error: error?.message,
+					user: result.data?.user?.id,
+					session: !!result.data?.session
+				})
 			} else if (code) {
 				// Handle code parameter (newer format)
 				console.log('Exchanging code for session')
-				const result = await supabase.auth.exchangeCodeForSession(code)
+				result = await supabase.auth.exchangeCodeForSession(code)
 				error = result.error;
-				console.log('Code exchange result:', { error: error?.message })
+				console.log('Code exchange result:', { 
+					error: error?.message,
+					user: result.data?.user?.id,
+					session: !!result.data?.session
+				})
 			} else if (token) {
 				// Handle token parameter (email template format)
 				console.log('Verifying OTP with token')
-				const result = await supabase.auth.verifyOtp({
+				// For password reset, we need to use the token as a token_hash
+				result = await supabase.auth.verifyOtp({
 					type,
 					token_hash: token,
 				})
 				error = result.error;
-				console.log('Token verification result:', { error: error?.message })
+				console.log('Token verification result:', { 
+					error: error?.message,
+					user: result.data?.user?.id,
+					session: !!result.data?.session
+				})
 			}
 
 			if (!error) {
@@ -61,24 +76,40 @@ export async function GET(request: NextRequest) {
 				// Handle different types of email confirmations
 				if (type === 'recovery') {
 					// Password reset - redirect to reset-password page
+					console.log('Redirecting to reset-password page')
 					redirect('/reset-password')
 				} else if (type === 'signup' || type === 'invite') {
 					// User invitation - redirect to set-password page
+					console.log('Redirecting to set-password page')
 					redirect('/set-password')
 				} else {
 					// Other types - use the next parameter or default to home
+					console.log('Redirecting to next:', next)
 					redirect(next)
 				}
 			} else {
-				console.error('Auth verification failed:', error)
+				console.error('Auth verification failed:', {
+					error: error.message,
+					code: error.status,
+					type,
+					hasToken: !!(token_hash || code || token)
+				})
 			}
 		} catch (error) {
-			console.error('Error in auth confirm route:', error)
+			console.error('Error in auth confirm route:', {
+				error: error instanceof Error ? error.message : 'Unknown error',
+				stack: error instanceof Error ? error.stack : undefined,
+				type,
+				hasToken: !!(token_hash || code || token)
+			})
 		}
 	} else {
 		console.log('Missing required parameters:', {
 			hasToken: !!(token_hash || code || token),
-			hasType: !!type
+			hasType: !!type,
+			tokenLength: token?.length,
+			codeLength: code?.length,
+			tokenHashLength: token_hash?.length
 		})
 	}
 
