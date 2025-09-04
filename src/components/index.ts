@@ -57,3 +57,6 @@ export { MeetingMinutesFormModal } from './meetingMinutes/MeetingMinutesFormModa
 export { MeetingMinutesCard } from './meetingMinutes/MeetingMinutesCard';
 
 export { ButtonWithTooltip } from './ButtonWithTooltip';
+
+export { ReleaseNotesModal } from './ReleaseNotesModal';
+export { UserProfileModal } from './UserProfileModal';

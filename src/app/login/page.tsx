@@ -112,10 +112,12 @@ function LoginForm() {
             await supabase.auth.signOut();
           }
         } else {
-          // Check if user has coach role in any of their profiles
+          // Check if user has coach role or admin role in any of their profiles
           const hasCoachRole = userProfiles.some(
             (profile: any) =>
-              profile.role === "coach" || profile.role === "head_coach"
+              profile.role === "coach" || 
+              profile.role === "head_coach" ||
+              profile.role === "admin"
           );
 
           if (hasCoachRole) {

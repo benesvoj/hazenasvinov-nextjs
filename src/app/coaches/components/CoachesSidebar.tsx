@@ -5,36 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCoachesSidebar } from "./CoachesSidebarContext";
 import { 
-  HomeIcon,
-  UserGroupIcon,
-  VideoCameraIcon,
-  ChartBarIcon,
   AcademicCapIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
-
-const coachesRoutes = [
-  {
-    name: 'Dashboard',
-    href: '/coaches/dashboard',
-    icon: HomeIcon,
-  },
-  {
-    name: 'Moje týmy',
-    href: '/coaches/teams',
-    icon: UserGroupIcon,
-  },
-  {
-    name: 'Videa',
-    href: '/coaches/videos',
-    icon: VideoCameraIcon,
-  },
-  {
-    name: 'Statistiky',
-    href: '/coaches/statistics',
-    icon: ChartBarIcon,
-  },
-];
+import { coachesRoutes } from "../routes/routes";
 
 export function CoachesSidebar() {
   const pathname = usePathname();

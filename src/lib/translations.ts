@@ -449,4 +449,13 @@ export const translations = {
       }
     }
   },
+  coaches: {
+    routes: {
+      dashboard: "Dashboard",
+      teams: "Moje týmy",
+      videos: "Videa",
+      statistics: "Statistiky",
+      meetingMinutes: "Zápisy z výborových schůzí",
+    },
+  },
 } as const;
