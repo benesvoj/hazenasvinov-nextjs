@@ -8,6 +8,8 @@ import {
   DocumentArrowDownIcon,
   PencilIcon,
   TrashIcon,
+  EyeIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Card, CardBody, Chip, User } from "@heroui/react";
 import { translations } from "@/lib/translations";
@@ -35,8 +37,27 @@ export function MeetingMinutesCard({
     return status === "present" ? "success" : "warning";
   };
 
-  const getStatusText = (status: string) => {
-    return status === "present" ? t.present : t.excused;
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      // Fallback to direct link
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleView = (url: string) => {
+    window.open(url, '_blank');
   };
 
   return (
@@ -111,14 +132,29 @@ export function MeetingMinutesCard({
               {meeting.attachment_url && (
                 <div className="flex items-center gap-2">
                   <DocumentArrowDownIcon className="w-4 h-4 text-gray-400" />
-                  <a
-                    href={meeting.attachment_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800"
-                  >
+                  <span className="text-sm text-gray-600">
                     {meeting.attachment_filename || t.attachment}
-                  </a>
+                  </span>
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      isIconOnly
+                      onPress={() => handleView(meeting.attachment_url!)}
+                      aria-label="Zobrazit soubor"
+                      className="min-w-6 h-6"
+                      startContent={<EyeIcon className="w-3 h-3" />}
+                    />
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      isIconOnly
+                      onPress={() => handleDownload(meeting.attachment_url!, meeting.attachment_filename || 'attachment')}
+                      aria-label="Stáhnout soubor"
+                      className="min-w-6 h-6"
+                      startContent={<ArrowDownTrayIcon className="w-3 h-3" />}
+                    />
+                  </div>
                 </div>
               )}
             </div>
