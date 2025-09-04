@@ -1,3 +1,4 @@
+// Deprecated - use AdminTopBar instead
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -26,7 +27,6 @@ import {
   Avatar,
 } from "@heroui/react";
 import { ReleaseNote, getReleaseNotes } from "@/utils/releaseNotes";
-import { createClient } from "@/utils/supabase/client";
 import { ReleaseNotesModal, UserProfileModal } from "@/components";
 
 // Get current section info based on pathname

@@ -356,6 +356,12 @@ export const translations = {
     callToAction: "Chcete se připojit k našemu týmu?",
   },
   components: {
+    themeSwitch: {
+      label: "Téma",
+      light: "Světlé",
+      dark: "Tmavé",
+      system: "Systém",
+    },
     passwordInput: {
       label: "Heslo",
       placeholder: "Vložte své heslo",
