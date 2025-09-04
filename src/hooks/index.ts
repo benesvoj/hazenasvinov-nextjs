@@ -1,5 +1,6 @@
 export * from './useAuth';
 export * from './useClubConfig';
+export * from './usePortalAccess';
 export * from './useClubs';
 export * from './useUserRoles';
 export * from './useExcelImport';

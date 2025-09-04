@@ -57,6 +57,7 @@ export const privateRoutes = {
 	clubCategories: '/admin/club-categories',
 	  videos: '/admin/videos',
   userRoles: '/admin/user-roles',
+  meetingMinutes: '/admin/meeting-minutes',
 };
 
 const routes: MenuItem[] = [
@@ -143,6 +144,7 @@ const routes: MenuItem[] = [
 	{route: privateRoutes.clubCategories, title: 'Přiřazení klubů', isPrivate: true, description: 'Správa přiřazení klubů ke kategoriím pro různé sezóny.', group: 'team-management'},
 	{route: privateRoutes.videos, title: 'Videa', isPrivate: true, description: 'Správa videí pro jednotlivé kategorie.'},
 	{route: privateRoutes.userRoles, title: 'Uživatelské role', isPrivate: true, description: 'Správa rolí a oprávnění uživatelů.', group: 'user-management'},
+	{route: privateRoutes.meetingMinutes, title: 'Zápisy z výborových schůzí', isPrivate: true, description: 'Správa zápisů z výborových schůzí a jejich účastníků.', group: 'club-management'},
 ]
 
 export default routes

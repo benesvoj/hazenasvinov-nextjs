@@ -11,6 +11,57 @@ export interface ReleaseNote {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: "2.6.0",
+    date: "2025-09-04",
+    title: "Meeting Minutes Agenda System",
+    description: "Comprehensive meeting minutes management system with advanced attendee management, role-based access control, and intuitive UI components for both admin and coach portals.",
+    features: [
+      "📝 Meeting Minutes Management - Complete CRUD operations for meeting minutes with season integration",
+      "👥 Advanced Attendee Management - Bulk selection, search, and status tracking for meeting participants",
+      "🎯 Role-Based Access Control - Separate admin and coach portals with appropriate permissions",
+      "📊 Smart Data Integration - Automatic member lookup and user profile management",
+      "🎨 Modern UI Components - Reusable MeetingMinutesCard and AttendeesModal components",
+      "📱 Responsive Design - Mobile-friendly interface with HeroUI components",
+      "🔍 Advanced Filtering - Search and filter meetings by season, writer, and date",
+      "📄 Attachment Support - File upload and management for meeting documents",
+      "🔄 Real-time Updates - Live data synchronization with Supabase backend"
+    ],
+    improvements: [
+      "⚡ Performance Optimization - Efficient data fetching with proper pagination",
+      "🎨 UI/UX Enhancements - Intuitive 3-column attendee grid layout with status indicators",
+      "📊 Data Consistency - Unified member and user data handling across components",
+      "🔄 Smart Workflows - Streamlined meeting creation and attendee management process",
+      "📱 Mobile Experience - Responsive design optimized for all screen sizes",
+      "🎯 User Experience - Clear visual feedback and status management for attendees",
+      "🔍 Search Functionality - Advanced filtering and search capabilities",
+      "📄 Document Management - Integrated file attachment system for meeting documents"
+    ],
+    bugFixes: [
+      "🐛 Fixed foreign key constraint errors in meeting_attendees table",
+      "🔧 Resolved TypeScript compilation errors in Select components",
+      "📝 Fixed user data structure inconsistencies between admin and coach portals",
+      "🖼️ Corrected attendee display logic for member vs user data",
+      "⚡ Fixed infinite loop issues in Autocomplete component filtering",
+      "📊 Resolved database schema conflicts between auth.users and members tables",
+      "🔍 Fixed search functionality in attendee selection modal",
+      "🎨 Corrected UI alignment issues in User component display"
+    ],
+    technical: [
+      "🏗️ Created comprehensive meeting minutes database schema with proper relationships",
+      "🗄️ Implemented useMeetingMinutes and useMembers hooks for data management",
+      "🔌 Built AttendeesModal component with bulk selection and search capabilities",
+      "🎭 Enhanced MeetingMinutesCard component with responsive 3-column layout",
+      "📱 Optimized component rendering with proper memoization and state management",
+      "🔄 Implemented real-time data synchronization with Supabase",
+      "🎨 Migrated to HeroUI components for consistent design language",
+      "🗄️ Created SQL migration scripts for meeting_attendees foreign key fixes",
+      "🔧 Fixed TypeScript type definitions for meeting minutes and attendees",
+      "📊 Implemented proper error handling and loading states across all components",
+      "🎯 Enhanced form validation and user feedback systems",
+      "🔍 Built advanced search and filtering functionality with pagination support"
+    ]
+  },
+  {
     version: "2.5.0",
     date: "2025-09-02",
     title: "Modal Refactoring & Navigation Visibility Fixes",
