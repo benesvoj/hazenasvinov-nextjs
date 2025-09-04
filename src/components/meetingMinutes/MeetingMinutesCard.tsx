@@ -144,6 +144,12 @@ export function MeetingMinutesCard({
                         className={`p-2 border rounded-lg border-${getStatusColor(
                           attendee.status
                         )}`}
+                        classNames={{
+                          base: "justify-start",
+                          wrapper: "justify-start",
+                          name: "text-left",
+                          description: "text-left"
+                        }}
                       />
                     ))}
                   </div>
