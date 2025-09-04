@@ -390,6 +390,11 @@ export const translations = {
       excusedCount: "Omluveno",
       meetingDetails: "Detaily schůze",
       attendanceList: "Seznam účastníků",
+      noMembersFound: "Žádní členové nenalezeni",
+      previous: "Předchozí",
+      next: "Další",
+      filtersByStatus: "Filtrovat podle statusu",
+      all: "Všichni",
       filters: {
         season: "Sezóna",
         wroteBy: "Zapsal",
@@ -421,6 +426,9 @@ export const translations = {
         attendeeAdded: "Účastník byl přidán",
         attendeeRemoved: "Účastník byl odebrán",
       },
+      currentAttendees: "Aktuální účastníci",
+      manageAttendees: "Správa účastníků",
+      added: "Přidáno",
     },
     video: {
       videos: {

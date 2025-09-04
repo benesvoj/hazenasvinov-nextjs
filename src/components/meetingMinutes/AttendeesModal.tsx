@@ -23,7 +23,9 @@ import {
   MagnifyingGlassIcon, 
   UserPlusIcon, 
   CheckIcon,
-  XMarkIcon 
+  XMarkIcon,
+  UserIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { translations } from "@/lib/translations";
 
@@ -136,21 +138,13 @@ export function AttendeesModal({
     return member ? `${member.name} ${member.surname} (${member.registration_number})` : "Neznámý člen";
   };
 
-  const getStatusColor = (status: string) => {
-    return status === 'present' ? 'success' : 'warning';
-  };
-
-  const getStatusText = (status: string) => {
-    return status === 'present' ? t.present : t.excused;
-  };
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="5xl" scrollBehavior="inside">
       <ModalContent>
         <ModalHeader>
           <div className="flex items-center gap-2">
             <UserPlusIcon className="w-6 h-6" />
-            <h2 className="text-xl font-semibold">Správa účastníků</h2>
+            <h2 className="text-xl font-semibold">{t.manageAttendees}</h2>
           </div>
         </ModalHeader>
 
@@ -216,9 +210,8 @@ export function AttendeesModal({
                             </div>
                           </div>
                           {isAlreadyAdded && (
-                            <Chip size="sm" color="success" variant="flat">
-                              <CheckIcon className="w-3 h-3" />
-                              Přidáno
+                            <Chip size="sm" color="success" variant="flat" aria-label={t.added} startContent={<CheckIcon className="w-3 h-3" />}>
+                              {t.added}
                             </Chip>
                           )}
                         </div>
@@ -228,7 +221,7 @@ export function AttendeesModal({
                     {paginatedMembers.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
                         <UserIcon className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                        <p>Žádní členové nenalezeni</p>
+                        <p>{t.noMembersFound}</p>
                       </div>
                     )}
                   </div>
@@ -242,7 +235,7 @@ export function AttendeesModal({
                         onPress={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                         isDisabled={currentPage === 1}
                       >
-                        Předchozí
+                        {t.previous}
                       </Button>
                       
                       <div className="flex gap-1">
@@ -269,7 +262,7 @@ export function AttendeesModal({
                         onPress={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         isDisabled={currentPage === totalPages}
                       >
-                        Další
+                        {t.next}
                       </Button>
                     </div>
                   )}
@@ -283,24 +276,24 @@ export function AttendeesModal({
           {/* Current Attendees */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Aktuální účastníci ({attendees.length})</h3>
+              <h3 className="text-lg font-semibold">{t.currentAttendees} ({attendees.length})</h3>
               <Select
                 size="sm"
-                placeholder="Filtrovat podle statusu"
+                placeholder={t.filtersByStatus}
                 selectedKeys={[statusFilter]}
                 onSelectionChange={(keys) => setStatusFilter(Array.from(keys)[0] as string)}
                 className="w-48"
               >
-                <SelectItem key="all">Všichni</SelectItem>
-                <SelectItem key="present">Přítomni</SelectItem>
-                <SelectItem key="excused">Omluveni</SelectItem>
+                <SelectItem key="all">{t.all}</SelectItem>
+                <SelectItem key="present">{t.present}</SelectItem>
+                <SelectItem key="excused">{t.excused}</SelectItem>
               </Select>
             </div>
 
             <div className="max-h-96 overflow-y-auto">
-              <div className="space-y-2">
+              <div className="space-y-2 h-[300px] overflow-y-auto py-2">
                 {filteredAttendees.map((attendee, index) => (
-                  <Card key={`${attendee.user_id}-${index}`} className="hover:shadow-md transition-shadow">
+                  <Card key={`${attendee.user_id}-${index}`} className="hover:shadow-md transition-shadow mx-2">
                     <CardBody className="p-3">
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
                         <div className="md:col-span-1">
@@ -338,7 +331,7 @@ export function AttendeesModal({
                             isIconOnly
                             onPress={() => handleRemoveAttendee(index)}
                           >
-                            <XMarkIcon className="w-4 h-4" />
+                            <TrashIcon className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
@@ -349,7 +342,7 @@ export function AttendeesModal({
                 {filteredAttendees.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <UserPlusIcon className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                    <p>Žádní účastníci</p>
+                    <p>{t.noMembersFound}</p>
                   </div>
                 )}
               </div>
@@ -358,8 +351,8 @@ export function AttendeesModal({
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="light" onPress={onClose}>
-            Hotovo
+          <Button color="primary" onPress={onClose}>
+            {translations.button.save}
           </Button>
         </ModalFooter>
       </ModalContent>
