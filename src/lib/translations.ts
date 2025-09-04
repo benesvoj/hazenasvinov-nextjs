@@ -362,6 +362,17 @@ export const translations = {
       showPassword: "Zobrazit heslo",
       hidePassword: "Skrýt heslo",
     },
+    videos: {
+      videoCard: {
+        recordingDate: "Odehráno:",
+        createdAt: "Vytvořeno:",
+        updatedAt: "Aktualizováno:",
+        play: "Přehrát video",
+        copyUrl: "Kopírovat URL",
+        edit: "Upravit video",
+        delete: "Smazat video",
+      }
+    },
     meetingMinutes: {
       title: "Zápisy z výborových schůzí",
       description: "Správa zápisů z výborových schůzí a jejich účastníků.",

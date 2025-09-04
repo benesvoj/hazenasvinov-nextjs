@@ -41,7 +41,7 @@ export function VideoCard({
   categories,
   seasons,
 }: VideoCardProps) {
-  const t = translations.components.video.videoCard;
+  const t = translations.components.videos.videoCard;
   const [isCopied, setIsCopied] = React.useState(false);
   
   // Debug log to verify component is rendering

@@ -51,7 +51,7 @@ export default function VideosPage() {
   const { seasons, loading: seasonsLoading, fetchAllSeasons } = useSeasons();
   const { user } = useAuth();
 
-  const t = translations.components.video.videos;
+  const t = translations.admin.videos;
 
   // Fetch videos
   const fetchVideos = async () => {
