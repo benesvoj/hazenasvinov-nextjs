@@ -26,7 +26,6 @@ import {
 import { ReleaseNote, getReleaseNotes } from "@/utils/releaseNotes";
 import { ReleaseNotesModal, UserProfileModal, ThemeSwitch, CoachPortalCategoryDialog } from "@/components";
 import { logLogout } from "@/utils/loginLogger";
-import { useAdminCategorySimulation } from "@/contexts/AdminCategorySimulationContext";
 
 interface UnifiedTopBarProps {
   variant: 'admin' | 'coach';
@@ -56,8 +55,6 @@ export const UnifiedTopBar = ({
   const { user, signOut } = useAuth();
   const { hasCoachAccess, hasBothAccess, hasAdminAccess, loading } = usePortalAccess();
   
-  // Category selection for admin
-  const adminCategorySimulation = variant === 'admin' ? useAdminCategorySimulation() : null;
   
   // State
   const [notifications, setNotifications] = useState(3);

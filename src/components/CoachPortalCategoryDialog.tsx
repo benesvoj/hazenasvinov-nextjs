@@ -107,7 +107,7 @@ export function CoachPortalCategoryDialog({
             <span>Test Coach Portal</span>
           </div>
           <p className="text-sm text-gray-600 font-normal">
-            Select categories to simulate coach access. You'll see filtered
+            Select categories to simulate coach access. You&apos;ll see filtered
             content in the coach portal.
           </p>
         </ModalHeader>
@@ -175,9 +175,9 @@ export function CoachPortalCategoryDialog({
                 <strong>How it works:</strong>
                 <ol className="list-decimal list-inside mt-1 space-y-1">
                   <li>Select the categories you want to test</li>
-                  <li>Click "Switch to Coach Portal" to proceed</li>
+                  <li>Click &quot;Switch to Coach Portal&quot; to proceed</li>
                   <li>
-                    You'll see filtered content as if you were a coach with
+                    You&apos;ll see filtered content as if you were a coach with
                     those categories
                   </li>
                 </ol>

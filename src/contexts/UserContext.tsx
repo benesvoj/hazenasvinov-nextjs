@@ -181,7 +181,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (!data || data.length === 0) return null;
 
       // Find coach profile first, fallback to first profile
-      let profile = data.find(p => p.role === 'coach' || p.role === 'head_coach');
+      let profile = data.find((p: any) => p.role === 'coach' || p.role === 'head_coach');
       if (!profile) profile = data[0];
 
       return {
@@ -413,7 +413,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeUser();
-  }, []); // Only run once on mount
+  }, [refreshUser]); // Only run once on mount
 
   // No auth state change listener - let Supabase handle session management
   // This prevents unnecessary re-fetches when switching tabs

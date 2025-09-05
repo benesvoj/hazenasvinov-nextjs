@@ -79,7 +79,7 @@ export default function CoachesLineupsPage() {
   useEffect(() => {
     fetchAllSeasons();
     fetchCategories();
-  }, []);
+  }, [fetchAllSeasons, fetchCategories]);
 
   useEffect(() => {
     const fetchUserCategories = async () => {
@@ -95,7 +95,7 @@ export default function CoachesLineupsPage() {
     };
 
     fetchUserCategories();
-  }, [getCurrentUserCategories]);
+  }, [getCurrentUserCategories, selectedCategory]);
 
   // Get active season
   const activeSeason = seasons.find(season => season.is_active);

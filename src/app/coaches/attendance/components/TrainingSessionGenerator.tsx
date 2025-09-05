@@ -405,7 +405,7 @@ export default function TrainingSessionGenerator({
                 onValueChange={setIncludeNumber}
                 aria-label="Přidat číslo do názvu"
               >
-                Přidat číslo do názvu (např. "Trénink 1", "Trénink 2")
+                Přidat číslo do názvu (např. &quot;Trénink 1&quot;, &quot;Trénink 2&quot;)
               </Checkbox>
             </div>
           </div>

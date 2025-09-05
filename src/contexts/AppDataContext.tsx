@@ -259,7 +259,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeData();
-  }, []); // Only run once on mount
+  }, [refreshAll]); // Only run once on mount
 
   const value: AppDataContextType = {
     // Data

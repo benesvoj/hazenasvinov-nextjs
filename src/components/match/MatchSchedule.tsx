@@ -27,7 +27,16 @@ export default function MatchSchedule({
 
   const { activeSeason, fetchActiveSeason } = useSeasons();
   const { categories, fetchCategories } = useCategories();
-  const { getCurrentUserCategories } = useUserRoles();
+  
+  // Try to get user roles, but handle case where UserProvider is not available
+  let getCurrentUserCategories: (() => Promise<string[]>) | null = null;
+  try {
+    const userRoles = useUserRoles();
+    getCurrentUserCategories = userRoles.getCurrentUserCategories;
+  } catch (error) {
+    // UserProvider not available (e.g., on public pages)
+    console.log('UserProvider not available, using all categories');
+  }
 
   // Filter categories based on the prop
   const availableCategories = showOnlyAssignedCategories 
@@ -58,7 +67,7 @@ export default function MatchSchedule({
 
   // Fetch assigned categories if needed for coach portal
   useEffect(() => {
-    if (showOnlyAssignedCategories) {
+    if (showOnlyAssignedCategories && getCurrentUserCategories) {
       const fetchAssignedCategories = async () => {
         try {
           const categories = await getCurrentUserCategories();
@@ -69,8 +78,11 @@ export default function MatchSchedule({
         }
       };
       fetchAssignedCategories();
+    } else if (showOnlyAssignedCategories && !getCurrentUserCategories) {
+      // If UserProvider is not available, use all categories
+      setAssignedCategoryIds(categories.map(cat => cat.id));
     }
-  }, [showOnlyAssignedCategories, getCurrentUserCategories]);
+  }, [showOnlyAssignedCategories, getCurrentUserCategories, categories]);
 
   // Update selected category when available categories change
   useEffect(() => {
@@ -102,7 +114,7 @@ export default function MatchSchedule({
       lastFetchedRef.current = { categoryId, seasonId };
       fetchStandings(categoryId, seasonId);
     }
-  }, [selectedCategory, activeSeason?.id, selectedCategoryData?.id]);
+  }, [selectedCategory, activeSeason?.id, selectedCategoryData?.id, activeSeason, availableCategories.length, fetchStandings, selectedCategoryData]);
 
   const upcomingMatches = matches
     .filter((match) => match.status === "upcoming")

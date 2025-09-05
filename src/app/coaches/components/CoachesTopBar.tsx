@@ -39,7 +39,7 @@ export const CoachesTopBar = () => {
         toggleSidebar
       }}
       pageTitle={getPageTitle(pathname)}
-      userProfile={userProfile}
+      userProfile={userProfile || undefined}
     />
   );
 };

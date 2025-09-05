@@ -1,4 +1,5 @@
 import { useUser } from '@/contexts/UserContext';
+import { createClient } from '@/utils/supabase/client';
 
 // Simplified useAuth hook that uses UserContext
 export function useAuth() {
@@ -10,13 +11,20 @@ export function useAuth() {
     refreshUser 
   } = useUser();
 
+  const signOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    // UserContext will automatically update when auth state changes
+  };
+
   return {
     user,
     session: null, // We don't need session data for security
     loading,
     error,
     isAuthenticated,
-    refreshUser
+    refreshUser,
+    signOut
   };
 }
 

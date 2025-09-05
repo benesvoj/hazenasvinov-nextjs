@@ -168,8 +168,9 @@ export function useUserRoles() {
       setLoading(true);
       setError(null);
 
-      // Assign roles
-      await assignRoles(assignment.userId, assignment.roles);
+      // Assign roles (filter to only admin/coach roles)
+      const validRoles = assignment.roles.filter(role => role === 'admin' || role === 'coach') as ('admin' | 'coach')[];
+      await assignRoles(assignment.userId, validRoles);
 
       // If user has coach role, assign categories
       if (assignment.roles.includes('coach')) {

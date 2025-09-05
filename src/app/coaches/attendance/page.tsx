@@ -111,7 +111,7 @@ export default function CoachesAttendancePage() {
     if (selectedCategory && selectedSeason) {
       fetchLineups(selectedCategory, selectedSeason);
     }
-  }, [selectedCategory, selectedSeason]); // Remove fetchLineups from dependencies
+  }, [selectedCategory, selectedSeason, fetchLineups]);
 
   // Set initial category from UserContext, admin simulation, or all categories for admin
   useEffect(() => {
@@ -148,14 +148,14 @@ export default function CoachesAttendancePage() {
       fetchTrainingSessions(categoryCode, selectedSeason);
       fetchAttendanceSummary(categoryCode, selectedSeason);
     }
-  }, [selectedCategory, selectedSeason]); // Remove categories from dependencies to prevent duplicate calls
+  }, [selectedCategory, selectedSeason, categories, fetchTrainingSessions, fetchAttendanceSummary]);
 
   // Fetch attendance records when session changes
   useEffect(() => {
     if (selectedSession) {
       fetchAttendanceRecords(selectedSession);
     }
-  }, [selectedSession]); // Remove fetchAttendanceRecords from dependencies
+  }, [selectedSession, fetchAttendanceRecords]);
 
   // Memoize filtered members calculation
   const filteredMembers = useMemo(() => {
