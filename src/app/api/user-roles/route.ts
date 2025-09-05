@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
       
       return {
         ...role,
+        id: role.user_id, // Include user_id as id for compatibility
         email: user?.email || 'Neznámý email',
         full_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Neznámý uživatel'
       };

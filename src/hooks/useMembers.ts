@@ -31,9 +31,7 @@ export function useMembers() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchMembers();
-  }, [fetchMembers]);
+  // Removed automatic fetch - components should call fetchMembers explicitly
 
   return {
     members,

@@ -1,4 +1,4 @@
-import { ChartBarIcon, HomeIcon, UserGroupIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon, HomeIcon, UserGroupIcon, VideoCameraIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { translations } from "@/lib/translations";
 
 export const coachesRoutes = [
@@ -8,14 +8,19 @@ export const coachesRoutes = [
       icon: HomeIcon,
     },
     {
-      name: translations.coaches.routes.teams,
-      href: '/coaches/teams',
+      name: translations.coaches.routes.lineups,
+      href: '/coaches/lineups',
       icon: UserGroupIcon,
     },
     {
       name: translations.coaches.routes.videos,
       href: '/coaches/videos',
       icon: VideoCameraIcon,
+    },
+    {
+      name: translations.coaches.routes.attendance,
+      href: '/coaches/attendance',
+      icon: ClipboardDocumentListIcon,
     },
     {
       name: translations.coaches.routes.statistics,
@@ -25,6 +30,6 @@ export const coachesRoutes = [
     {
       name: translations.coaches.routes.meetingMinutes,
       href: '/coaches/meeting-minutes',
-      icon: ChartBarIcon,
+      icon: ClipboardDocumentListIcon,
     },
   ];

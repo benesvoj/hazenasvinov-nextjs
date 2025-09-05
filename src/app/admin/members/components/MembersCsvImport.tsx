@@ -126,22 +126,24 @@ export default function MembersCsvImport({
 
     for (const member of preview) {
       try {
-        // Validate required fields
-        if (!member.surname || !member.firstName || !member.dateOfBirth) {
+        // Validate required fields (date of birth is now optional)
+        if (!member.surname || !member.firstName) {
           result.failed++;
           result.errors.push(`Chybí povinná data pro: ${member.surname} ${member.firstName}`);
           continue;
         }
 
-        // Parse date
-        let parsedDate: string;
-        if (member.dateOfBirth.includes('.')) {
-          // European format: DD.MM.YYYY
-          const [day, month, year] = member.dateOfBirth.split('.');
-          parsedDate = `${parseInt(year)}-${String(parseInt(month)).padStart(2, '0')}-${String(parseInt(day)).padStart(2, '0')}`;
-        } else {
-          // Standard format
-          parsedDate = member.dateOfBirth;
+        // Parse date (optional)
+        let parsedDate: string | null = null;
+        if (member.dateOfBirth && member.dateOfBirth.trim()) {
+          if (member.dateOfBirth.includes('.')) {
+            // European format: DD.MM.YYYY
+            const [day, month, year] = member.dateOfBirth.split('.');
+            parsedDate = `${parseInt(year)}-${String(parseInt(month)).padStart(2, '0')}-${String(parseInt(day)).padStart(2, '0')}`;
+          } else {
+            // Standard format
+            parsedDate = member.dateOfBirth;
+          }
         }
 
         // Insert member
@@ -151,7 +153,7 @@ export default function MembersCsvImport({
             registration_number: member.regNumber || undefined,
             name: member.firstName,
             surname: member.surname,
-            date_of_birth: parsedDate,
+            date_of_birth: parsedDate, // Can be null if not provided
             category: defaultCategory,
             sex: defaultSex,
             functions: defaultFunctions

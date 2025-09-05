@@ -34,10 +34,28 @@ export async function signup(formData: FormData) {
 		password: formData.get('password') as string,
 	}
 
-	const { error } = await supabase.auth.signUp(data)
+	const { data: signupData, error } = await supabase.auth.signUp(data)
 
 	if (error) {
 		redirect(publicRoutes.error)
+	}
+
+	// If user was created successfully, ensure they have a profile
+	if (signupData.user) {
+		try {
+			// Use the safe profile function to ensure profile exists
+			const { error: profileError } = await supabase
+				.rpc('get_user_profile_safe', { user_uuid: signupData.user.id });
+
+			if (profileError) {
+				console.error('Error ensuring user profile:', profileError);
+				// Don't fail the signup, just log the error
+				// The trigger should have created the profile automatically
+			}
+		} catch (err) {
+			console.error('Error in profile creation fallback:', err);
+			// Don't fail the signup, just log the error
+		}
 	}
 
 	revalidatePath(privateRoutes.admin, 'layout')

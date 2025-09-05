@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuthNew";
 import { usePortalAccess } from "@/hooks/usePortalAccess";
 import { 
   UserIcon,
@@ -24,7 +24,7 @@ import {
   Avatar,
 } from "@heroui/react";
 import { ReleaseNote, getReleaseNotes } from "@/utils/releaseNotes";
-import { ReleaseNotesModal, UserProfileModal, ThemeSwitch } from "@/components";
+import { ReleaseNotesModal, UserProfileModal, ThemeSwitch, CoachPortalCategoryDialog } from "@/components";
 import { logLogout } from "@/utils/loginLogger";
 
 interface UnifiedTopBarProps {
@@ -55,10 +55,12 @@ export const UnifiedTopBar = ({
   const { user, signOut } = useAuth();
   const { hasCoachAccess, hasBothAccess, hasAdminAccess, loading } = usePortalAccess();
   
+  
   // State
   const [notifications, setNotifications] = useState(3);
   const [showReleaseNotes, setShowReleaseNotes] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showCoachPortalDialog, setShowCoachPortalDialog] = useState(false);
   const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
 
   // Load release notes
@@ -97,6 +99,17 @@ export const UnifiedTopBar = ({
   };
 
   const handleSwitchToCoachPortal = () => {
+    if (variant === 'admin') {
+      // Show category selection dialog first
+      setShowCoachPortalDialog(true);
+    } else {
+      // Direct switch for coaches
+      window.location.href = '/coaches/dashboard';
+    }
+  };
+
+  const handleConfirmCoachPortalSwitch = () => {
+    setShowCoachPortalDialog(false);
     window.location.href = '/coaches/dashboard';
   };
 
@@ -330,7 +343,7 @@ export const UnifiedTopBar = ({
             <DropdownMenu aria-label="User actions">
               {variant === 'admin' ? (
                 <>
-                  <DropdownItem key="profile-header" className="py-3" onPress={handleProfileOpen}>
+                  <DropdownItem key="profile-header" className="py-3" onPress={handleProfileOpen} aria-label="Otevřít profil">
                     <div className="flex items-center space-x-3">
                       <Avatar
                         name={getUserInitials()}
@@ -342,7 +355,7 @@ export const UnifiedTopBar = ({
                       </div>
                     </div>
                   </DropdownItem>
-                  <DropdownItem key="divider-1" className="h-px bg-gray-200 dark:bg-gray-600 my-2" isReadOnly>
+                  <DropdownItem key="divider-1" className="h-px bg-gray-200 dark:bg-gray-600 my-2" isReadOnly aria-label="Oddělovač">
                     <div className="h-px bg-gray-200 dark:bg-gray-600"></div>
                   </DropdownItem>
                 </>
@@ -387,6 +400,13 @@ export const UnifiedTopBar = ({
         user={user}
       />
       <ReleaseNotesModal showReleaseNotes={showReleaseNotes} setShowReleaseNotes={setShowReleaseNotes} />
+      {variant === 'admin' && (
+        <CoachPortalCategoryDialog
+          isOpen={showCoachPortalDialog}
+          onClose={() => setShowCoachPortalDialog(false)}
+          onConfirm={handleConfirmCoachPortalSwitch}
+        />
+      )}
     </div>
   );
 };

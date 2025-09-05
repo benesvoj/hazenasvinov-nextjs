@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Category } from '@/types';
 
@@ -76,6 +76,8 @@ export function useCategories() {
       setLoading(false);
     }
   }, []);
+
+  // No auto-fetch - components should call fetchCategories explicitly
 
   return {
     categories,

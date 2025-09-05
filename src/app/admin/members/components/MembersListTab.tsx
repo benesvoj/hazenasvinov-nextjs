@@ -3,10 +3,22 @@ import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/table";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
 import { Badge } from "@heroui/badge";
 import { useDisclosure } from "@heroui/use-disclosure";
-import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
 import { Member, Category } from "@/types";
@@ -17,16 +29,27 @@ import BulkEditModal from "./BulkEditModal";
 import { showToast } from "@/components/Toast";
 import { Pagination } from "@heroui/react";
 
+// Define the form data type to match MemberFormData interface
+interface FormData {
+  registration_number: string;
+  name: string;
+  surname: string;
+  date_of_birth?: string;
+  category: string;
+  sex: 'male' | 'female';
+  functions: string[];
+}
+
 interface MembersListTabProps {
   categoriesData: Category[] | null;
   functionOptions: Record<string, string>;
   sexOptions: Record<string, string>;
 }
 
-export default function MembersListTab({ 
-  categoriesData, 
-  functionOptions, 
-  sexOptions 
+export default function MembersListTab({
+  categoriesData,
+  functionOptions,
+  sexOptions,
 }: MembersListTabProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
@@ -69,14 +92,14 @@ export default function MembersListTab({
     category: "",
     functions: [] as string[],
   });
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     registration_number: "",
     name: "",
     surname: "",
-    date_of_birth: "",
+    date_of_birth: undefined,
     category: "",
-    sex: "male" as "male" | "female",
-    functions: [] as string[],
+    sex: "male",
+    functions: [],
   });
 
   const supabase = createClient();
@@ -92,7 +115,6 @@ export default function MembersListTab({
         .order("name", { ascending: true });
 
       if (error) {
-        console.error("Supabase fetch error:", error);
         throw error;
       }
       setMembers(data || []);
@@ -121,7 +143,6 @@ export default function MembersListTab({
         ? `${errorMessage} ${debugInfo}`
         : errorMessage;
       showToast.danger(finalErrorMessage);
-      console.error("Error fetching members:", error);
     } finally {
       setLoading(false);
     }
@@ -147,7 +168,9 @@ export default function MembersListTab({
           member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           member.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (member.registration_number &&
-            member.registration_number.toLowerCase().includes(searchTerm.toLowerCase()))
+            member.registration_number
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -158,13 +181,16 @@ export default function MembersListTab({
 
     // Filter by category
     if (filters.category) {
-      filtered = filtered.filter((member) => member.category === filters.category);
+      filtered = filtered.filter(
+        (member) => member.category === filters.category
+      );
     }
 
     // Filter by function
     if (filters.function) {
-      filtered = filtered.filter((member) =>
-        member.functions && member.functions.includes(filters.function)
+      filtered = filtered.filter(
+        (member) =>
+          member.functions && member.functions.includes(filters.function)
       );
     }
 
@@ -278,7 +304,6 @@ export default function MembersListTab({
         .in("id", memberIds);
 
       if (error) {
-        console.error("Bulk update error:", error);
         throw error;
       }
 
@@ -294,7 +319,6 @@ export default function MembersListTab({
       fetchMembers();
       showToast.success(`Úspěšně upraveno ${memberIds.length} členů`);
     } catch (error: any) {
-      console.error("Error in bulk edit:", error);
       showToast.danger(
         `Chyba při hromadné úpravě: ${error.message || "Neznámá chyba"}`
       );
@@ -327,7 +351,7 @@ export default function MembersListTab({
       registration_number: "",
       name: "",
       surname: "",
-      date_of_birth: "",
+      date_of_birth: undefined, // Changed to undefined for optional field
       category: "",
       sex: "male",
       functions: [],
@@ -341,7 +365,7 @@ export default function MembersListTab({
       registration_number: member.registration_number || "",
       name: member.name,
       surname: member.surname,
-      date_of_birth: member.date_of_birth,
+      date_of_birth: member.date_of_birth || "",
       category: member.category,
       sex: member.sex,
       functions: member.functions || [],
@@ -362,7 +386,7 @@ export default function MembersListTab({
         {
           name: formData.name,
           surname: formData.surname,
-          date_of_birth: formData.date_of_birth,
+          date_of_birth: formData.date_of_birth || null, // Handle optional birth date
           category: formData.category,
           sex: formData.sex,
           functions: formData.functions,
@@ -371,7 +395,6 @@ export default function MembersListTab({
       ]);
 
       if (error) {
-        console.error("Error adding member:", error);
         throw error;
       }
 
@@ -379,8 +402,9 @@ export default function MembersListTab({
       onAddMemberClose();
       fetchMembers();
     } catch (error: any) {
-      console.error("Error adding member:", error);
-      showToast.danger(`Chyba při přidávání člena: ${error.message || "Neznámá chyba"}`);
+      showToast.danger(
+        `Chyba při přidávání člena: ${error.message || "Neznámá chyba"}`
+      );
     } finally {
       setLoading(false);
     }
@@ -397,7 +421,7 @@ export default function MembersListTab({
         .update({
           name: formData.name,
           surname: formData.surname,
-          date_of_birth: formData.date_of_birth,
+          date_of_birth: formData.date_of_birth || null, // Handle optional birth date
           category: formData.category,
           sex: formData.sex,
           functions: formData.functions,
@@ -406,7 +430,6 @@ export default function MembersListTab({
         .eq("id", selectedMember.id);
 
       if (error) {
-        console.error("Error updating member:", error);
         throw error;
       }
 
@@ -414,8 +437,9 @@ export default function MembersListTab({
       onEditMemberClose();
       fetchMembers();
     } catch (error: any) {
-      console.error("Error updating member:", error);
-      showToast.danger(`Chyba při úpravě člena: ${error.message || "Neznámá chyba"}`);
+      showToast.danger(
+        `Chyba při úpravě člena: ${error.message || "Neznámá chyba"}`
+      );
     } finally {
       setLoading(false);
     }
@@ -433,7 +457,6 @@ export default function MembersListTab({
         .eq("id", selectedMember.id);
 
       if (error) {
-        console.error("Error deleting member:", error);
         throw error;
       }
 
@@ -441,8 +464,9 @@ export default function MembersListTab({
       onDeleteMemberClose();
       fetchMembers();
     } catch (error: any) {
-      console.error("Error deleting member:", error);
-      showToast.danger(`Chyba při mazání člena: ${error.message || "Neznámá chyba"}`);
+      showToast.danger(
+        `Chyba při mazání člena: ${error.message || "Neznámá chyba"}`
+      );
     } finally {
       setLoading(false);
     }
@@ -455,19 +479,23 @@ export default function MembersListTab({
 
   const getCategoryBadgeColor = (category: string) => {
     if (!categoriesData) return "default";
-    
-    const categoryData = categoriesData.find(cat => cat.code === category);
+
+    const categoryData = categoriesData.find((cat) => cat.code === category);
     if (!categoryData) return "default";
-    
-    if (categoryData.gender === 'male') return "primary";
-    if (categoryData.gender === 'female') return "secondary";
-    if (categoryData.gender === 'mixed') return "success";
-    
+
+    if (categoryData.gender === "male") return "primary";
+    if (categoryData.gender === "female") return "secondary";
+    if (categoryData.gender === "mixed") return "success";
+
     // Fallback for categories without gender
-    if (category.toLowerCase().includes('kids') || category.toLowerCase().includes('prep')) return "warning";
-    if (category.toLowerCase().includes('boys')) return "primary";
-    if (category.toLowerCase().includes('girls')) return "secondary";
-    
+    if (
+      category.toLowerCase().includes("kids") ||
+      category.toLowerCase().includes("prep")
+    )
+      return "warning";
+    if (category.toLowerCase().includes("boys")) return "primary";
+    if (category.toLowerCase().includes("girls")) return "secondary";
+
     return "default";
   };
 
@@ -506,7 +534,7 @@ export default function MembersListTab({
       case "surname":
         return <span className="font-medium">{member.surname}</span>;
       case "date_of_birth":
-        const birthDate = new Date(member.date_of_birth);
+        const birthDate = new Date(member.date_of_birth || "");
         const age = new Date().getFullYear() - birthDate.getFullYear();
         return (
           <span>
@@ -526,11 +554,6 @@ export default function MembersListTab({
           </Badge>
         );
       case "functions":
-        console.log('Functions case debug:', {
-          memberFunctions: member.functions,
-          functionOptions,
-          memberId: member.id
-        });
         if (!member.functions || member.functions.length === 0) {
           return <span className="text-gray-500">Žádné funkce</span>;
         }
@@ -624,16 +647,6 @@ export default function MembersListTab({
     fetchMembers();
   }, [fetchMembers]);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('MembersListTab Debug:', {
-      functionOptions,
-      categoriesData,
-      membersCount: members.length,
-      filteredCount: filteredMembers.length
-    });
-  }, [functionOptions, categoriesData, members.length, filteredMembers.length]);
-
   return (
     <div className="flex flex-col gap-6">
       {/* Header with Action Buttons */}
@@ -659,7 +672,10 @@ export default function MembersListTab({
             color="primary"
             startContent={<PlusIcon className="w-4 h-4" />}
             onPress={openAddModal}
-            isDisabled={Object.keys(categories).length === 0 || Object.keys(functionOptions).length === 0}
+            isDisabled={
+              Object.keys(categories).length === 0 ||
+              Object.keys(functionOptions).length === 0
+            }
           >
             Přidat člena
           </Button>
@@ -675,12 +691,17 @@ export default function MembersListTab({
               {/* Search Input - Smaller on desktop */}
               <div className="w-full lg:w-80">
                 <Input
-                  placeholder={translations.members.membersTable.searchPlaceholder}
+                  placeholder={
+                    translations.members.membersTable.searchPlaceholder
+                  }
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
+                  startContent={
+                    <MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />
+                  }
                   className="w-full"
                   size="sm"
+                  area-label="Search"
                 />
               </div>
 
@@ -689,10 +710,11 @@ export default function MembersListTab({
                 {/* Sex Filter */}
                 <div className="w-full sm:w-40">
                   <Select
+                    area-label="Sex selection"
                     placeholder="Všechna pohlaví"
                     selectedKeys={filters.sex ? [filters.sex] : []}
                     onSelectionChange={(keys) =>
-                      setFilters(prev => ({
+                      setFilters((prev) => ({
                         ...prev,
                         sex: Array.from(keys)[0] as "male" | "female" | "",
                       }))
@@ -708,10 +730,11 @@ export default function MembersListTab({
                 {/* Category Filter */}
                 <div className="w-full sm:w-48">
                   <Select
+                    area-label="Category selection"
                     placeholder="Všechny kategorie"
                     selectedKeys={filters.category ? [filters.category] : []}
                     onSelectionChange={(keys) =>
-                      setFilters(prev => ({
+                      setFilters((prev) => ({
                         ...prev,
                         category: Array.from(keys)[0] as string,
                       }))
@@ -720,7 +743,9 @@ export default function MembersListTab({
                     size="sm"
                   >
                     {categoriesData?.map((category) => (
-                      <SelectItem key={category.code}>{category.name}</SelectItem>
+                      <SelectItem key={category.code} area-label="Category selection">
+                        {category.name}
+                      </SelectItem>
                     )) || []}
                   </Select>
                 </div>
@@ -728,10 +753,11 @@ export default function MembersListTab({
                 {/* Function Filter */}
                 <div className="w-full sm:w-48">
                   <Select
+                    area-label="Function selection"
                     placeholder="Všechny funkce"
                     selectedKeys={filters.function ? [filters.function] : []}
                     onSelectionChange={(keys) =>
-                      setFilters(prev => ({
+                      setFilters((prev) => ({
                         ...prev,
                         function: Array.from(keys)[0] as string,
                       }))
@@ -740,7 +766,7 @@ export default function MembersListTab({
                     size="sm"
                   >
                     {Object.entries(functionOptions).map(([key, value]) => (
-                      <SelectItem key={key}>{value}</SelectItem>
+                      <SelectItem key={key} area-label="Function selection">{value}</SelectItem>
                     ))}
                   </Select>
                 </div>
@@ -751,9 +777,13 @@ export default function MembersListTab({
                     <Button
                       variant="light"
                       size="sm"
-                      onPress={() => setFilters({ sex: "", category: "", function: "" })}
+                      onPress={() =>
+                        setFilters({ sex: "", category: "", function: "" })
+                      }
                       className="w-full sm:w-auto"
+                      area-label="Clear filters"
                     >
+                      <TrashIcon className="w-4 h-4" />
                       Vymazat filtry
                     </Button>
                   </div>
@@ -765,80 +795,71 @@ export default function MembersListTab({
       </Card>
 
       {/* Members Table */}
-      <Card>
-        <CardBody>
-          <Table
-            aria-label="Tabulka členů"
-            selectionMode="multiple"
-            selectedKeys={selectedMembers}
-            onSelectionChange={(keys) => {
-              if (typeof keys === "string") {
-                setSelectedMembers(new Set([keys]));
-              } else {
-                setSelectedMembers(
-                  new Set(Array.from(keys).map((key) => String(key)))
-                );
-              }
-            }}
-            sortDescriptor={sortDescriptor}
-            onSortChange={handleSortChange}
-            classNames={{
-              wrapper: "min-h-[400px]",
-            }}
-            bottomContent={
-              <div className="flex w-full justify-center">
-                <Pagination
-                  isCompact
-                  showControls
-                  showShadow
-                  color="secondary"
-                  page={page}
-                  total={pages}
-                  onChange={(page) => setPage(page)}
-                />
-              </div>
-            }
-          >
-            <TableHeader columns={columns}>
-              {(column) => (
-                <TableColumn
-                  key={column.key}
-                  allowsSorting={column.sortable}
-                  align={column.key === "actions" ? "center" : "start"}
-                >
-                  {column.label}
-                </TableColumn>
-              )}
-            </TableHeader>
-            <TableBody
-              items={items}
-              loadingContent={
-                loading
-                  ? translations.loading
-                  : "Načítání dat..."
-              }
-              loadingState={loading ? "loading" : "idle"}
-              emptyContent={
-                searchTerm
-                  ? "Žádní členové nebyli nalezeni pro zadaný vyhledávací termín."
-                  : Object.keys(functionOptions).length === 0
-                  ? "Žádní členové nebyli nalezeni. Pro přidání členů je potřeba nejprve nastavit funkce v sekci 'Funkce členů'."
-                  : "Žádní členové nebyli nalezeni."
-              }
+      <Table
+        aria-label="Tabulka členů"
+        selectionMode="multiple"
+        selectedKeys={selectedMembers}
+        onSelectionChange={(keys) => {
+          if (typeof keys === "string") {
+            setSelectedMembers(new Set([keys]));
+          } else {
+            setSelectedMembers(
+              new Set(Array.from(keys).map((key) => String(key)))
+            );
+          }
+        }}
+        sortDescriptor={sortDescriptor}
+        onSortChange={handleSortChange}
+        classNames={{
+          wrapper: "min-h-[400px]",
+        }}
+        bottomContent={
+          <div className="flex w-full justify-center">
+            <Pagination
+              area-label="Pagination"
+              isCompact
+              showControls
+              showShadow
+              color="secondary"
+              page={page}
+              total={pages}
+              onChange={(page) => setPage(page)}
+            />
+          </div>
+        }
+      >
+        <TableHeader columns={columns}>
+          {(column) => (
+            <TableColumn
+              key={column.key}
+              allowsSorting={column.sortable}
+              align={column.key === "actions" ? "center" : "start"}
             >
-              {(member) => (
-                <TableRow key={member.id}>
-                  {(columnKey) => (
-                    <TableCell>
-                      {renderCell(member, columnKey as string)}
-                    </TableCell>
-                  )}
-                </TableRow>
+              {column.label}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody
+          items={items}
+          loadingContent={loading ? translations.loading : "Načítání dat..."}
+          loadingState={loading ? "loading" : "idle"}
+          emptyContent={
+            searchTerm
+              ? "Žádní členové nebyli nalezeni pro zadaný vyhledávací termín."
+              : Object.keys(functionOptions).length === 0
+              ? "Žádní členové nebyli nalezeni. Pro přidání členů je potřeba nejprve nastavit funkce v sekci 'Funkce členů'."
+              : "Žádní členové nebyli nalezeni."
+          }
+        >
+          {(member) => (
+            <TableRow key={member.id}>
+              {(columnKey) => (
+                <TableCell>{renderCell(member, columnKey as string)}</TableCell>
               )}
-            </TableBody>
-          </Table>
-        </CardBody>
-      </Card>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
 
       {/* Modals */}
       <MemberFormModal

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useAuth } from '@/hooks/useAuth'
+import { useUser } from '@/contexts/UserContext'
 import { translations } from '@/lib/translations'
 
 interface ProtectedRouteProps {
@@ -17,7 +17,7 @@ export default function ProtectedRoute({
   requireAuth = true,
   redirectTo = '/login'
 }: ProtectedRouteProps) {
-  const { user, loading, isAuthenticated } = useAuth()
+  const { user, loading, isAuthenticated } = useUser()
 
   if (loading) {
     return (

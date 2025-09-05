@@ -18,7 +18,12 @@ export function formatDateTime(date: Date): string {
 
 export const formatDateString = (dateString: string) => {
   try {
-    return formatDate(new Date(dateString));
+    const date = new Date(dateString);
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original string if invalid
+    }
+    return formatDate(date);
   } catch {
     return dateString;
   }
@@ -26,9 +31,13 @@ export const formatDateString = (dateString: string) => {
 
 export const formatDateToWeekday = (dateString: string) => {
   try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
     return new Intl.DateTimeFormat('cs-CZ', {
       weekday: 'long'
-    }).format(new Date(dateString));
+    }).format(date);
   } catch {
     return dateString;
   }
@@ -36,7 +45,11 @@ export const formatDateToWeekday = (dateString: string) => {
 
 export const formatDateToDayAndMonth = (dateString: string) => {
   try {
-    return new Date(dateString).toLocaleDateString('cs-CZ', { 
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+    return date.toLocaleDateString('cs-CZ', { 
       day: 'numeric',
       month: 'numeric'
     });

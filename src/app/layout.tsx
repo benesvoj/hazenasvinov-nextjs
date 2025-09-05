@@ -2,8 +2,7 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProviders } from "@/app/theme-providers";
-import { ChunkErrorBoundary, DatabaseErrorBoundary } from "@/components";
+import { ConditionalProviders } from "@/components/ConditionalProviders";
 import React from "react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -52,11 +51,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProviders>
-          <ChunkErrorBoundary>
-            <DatabaseErrorBoundary>{children}</DatabaseErrorBoundary>
-          </ChunkErrorBoundary>
-        </ThemeProviders>
+        <ConditionalProviders>
+          {children}
+        </ConditionalProviders>
       </body>
     </html>
   );
