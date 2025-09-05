@@ -346,7 +346,7 @@ export const UnifiedTopBar = ({
             <DropdownMenu aria-label="User actions">
               {variant === 'admin' ? (
                 <>
-                  <DropdownItem key="profile-header" className="py-3" onPress={handleProfileOpen}>
+                  <DropdownItem key="profile-header" className="py-3" onPress={handleProfileOpen} aria-label="Otevřít profil">
                     <div className="flex items-center space-x-3">
                       <Avatar
                         name={getUserInitials()}
@@ -358,7 +358,7 @@ export const UnifiedTopBar = ({
                       </div>
                     </div>
                   </DropdownItem>
-                  <DropdownItem key="divider-1" className="h-px bg-gray-200 dark:bg-gray-600 my-2" isReadOnly>
+                  <DropdownItem key="divider-1" className="h-px bg-gray-200 dark:bg-gray-600 my-2" isReadOnly aria-label="Oddělovač">
                     <div className="h-px bg-gray-200 dark:bg-gray-600"></div>
                   </DropdownItem>
                 </>
