@@ -94,13 +94,13 @@ export async function GET(request: NextRequest) {
 					type,
 					hasToken: !!(token_hash || code || token)
 				})
-				// Instead of redirecting to error page, let's try to handle this better
-				// For now, let's redirect to reset-password page even if there's an error
-				// This will allow the user to try again
-				if (type === 'recovery') {
-					console.log('Auth failed but redirecting to reset-password anyway for recovery type')
-					redirect('/reset-password')
-				}
+				// Redirect to error page with proper error parameters
+				const errorParams = new URLSearchParams({
+					error: error.message,
+					error_code: error.status?.toString() || 'unknown',
+					error_description: error.message
+				})
+				redirect(`/reset-password?${errorParams.toString()}`)
 			}
 		} catch (error) {
 			console.error('Error in auth confirm route:', {
@@ -109,11 +109,13 @@ export async function GET(request: NextRequest) {
 				type,
 				hasToken: !!(token_hash || code || token)
 			})
-			// For recovery type, try to redirect to reset-password even on error
-			if (type === 'recovery') {
-				console.log('Caught error but redirecting to reset-password for recovery type')
-				redirect('/reset-password')
-			}
+			// Redirect to error page with proper error parameters
+			const errorParams = new URLSearchParams({
+				error: error instanceof Error ? error.message : 'Unknown error',
+				error_code: 'server_error',
+				error_description: error instanceof Error ? error.message : 'Unknown error'
+			})
+			redirect(`/reset-password?${errorParams.toString()}`)
 		}
 	} else {
 		console.log('Missing required parameters:', {

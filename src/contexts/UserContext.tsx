@@ -122,16 +122,41 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   // Fetch user data
   const fetchUser = useCallback(async (): Promise<User | null> => {
     return getCachedData('user', async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) {
-        // Don't throw error for unauthenticated users, just return null
-        if (error.message.includes('permission denied') || 
-            error.message.includes('not authenticated')) {
+      try {
+        // First check if there's a session to avoid AuthSessionMissingError
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
           return null;
         }
-        throw error;
+        
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          // Don't throw error for unauthenticated users, just return null
+          if (error.message.includes('permission denied') || 
+              error.message.includes('not authenticated') ||
+              error.message.includes('AuthSessionMissingError') ||
+              error.message.includes('session_not_found')) {
+            return null;
+          }
+          throw error;
+        }
+        return user;
+      } catch (err) {
+        // Catch any other errors and return null for unauthenticated users
+        if (err instanceof Error && (
+          err.message.includes('AuthSessionMissingError') ||
+          err.message.includes('session_not_found') ||
+          err.message.includes('not authenticated') ||
+          err.name === 'AuthSessionMissingError'
+        )) {
+          return null;
+        }
+        // Also check for the specific error type
+        if (err && typeof err === 'object' && 'name' in err && err.name === 'AuthSessionMissingError') {
+          return null;
+        }
+        throw err;
       }
-      return user;
     });
   }, [supabase]);
 
@@ -214,13 +239,33 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setUserCategories([]);
       }
     } catch (err) {
-      console.error('Error refreshing user:', err);
-      setError(err instanceof Error ? err.message : 'Failed to refresh user');
-      // Clear user data on error
-      setUser(null);
-      setUserProfile(null);
-      setUserRoles([]);
-      setUserCategories([]);
+      // Only log errors that are not related to missing sessions
+      if (err instanceof Error && (
+        err.message.includes('AuthSessionMissingError') ||
+        err.message.includes('session_not_found') ||
+        err.message.includes('not authenticated') ||
+        err.name === 'AuthSessionMissingError'
+      )) {
+        // This is expected for unauthenticated users, don't log as error
+        setUser(null);
+        setUserProfile(null);
+        setUserRoles([]);
+        setUserCategories([]);
+      } else if (err && typeof err === 'object' && 'name' in err && err.name === 'AuthSessionMissingError') {
+        // This is expected for unauthenticated users, don't log as error
+        setUser(null);
+        setUserProfile(null);
+        setUserRoles([]);
+        setUserCategories([]);
+      } else {
+        console.error('Error refreshing user:', err);
+        setError(err instanceof Error ? err.message : 'Failed to refresh user');
+        // Clear user data on error
+        setUser(null);
+        setUserProfile(null);
+        setUserRoles([]);
+        setUserCategories([]);
+      }
     }
   }, [fetchUser, fetchUserProfile, fetchUserRoles]);
 
@@ -335,13 +380,33 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         await refreshUser();
         hasProcessedInitialSession.current = true;
       } catch (err) {
-        console.error('Error initializing user:', err);
-        setError(err instanceof Error ? err.message : 'Failed to initialize user');
-        // Clear user data on initialization error
-        setUser(null);
-        setUserProfile(null);
-        setUserRoles([]);
-        setUserCategories([]);
+        // Only log errors that are not related to missing sessions
+        if (err instanceof Error && (
+          err.message.includes('AuthSessionMissingError') ||
+          err.message.includes('session_not_found') ||
+          err.message.includes('not authenticated') ||
+          err.name === 'AuthSessionMissingError'
+        )) {
+          // This is expected for unauthenticated users, don't log as error
+          setUser(null);
+          setUserProfile(null);
+          setUserRoles([]);
+          setUserCategories([]);
+        } else if (err && typeof err === 'object' && 'name' in err && err.name === 'AuthSessionMissingError') {
+          // This is expected for unauthenticated users, don't log as error
+          setUser(null);
+          setUserProfile(null);
+          setUserRoles([]);
+          setUserCategories([]);
+        } else {
+          console.error('Error initializing user:', err);
+          setError(err instanceof Error ? err.message : 'Failed to initialize user');
+          // Clear user data on initialization error
+          setUser(null);
+          setUserProfile(null);
+          setUserRoles([]);
+          setUserCategories([]);
+        }
       } finally {
         setLoading(false);
       }
