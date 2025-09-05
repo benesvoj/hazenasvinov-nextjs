@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { redirect } from "next/navigation";
 import { logout } from "@/utils/supabase/actions";
+import { useUser } from "@/contexts/UserContext";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { 
@@ -49,11 +50,10 @@ interface Comment {
 }
 
 export default function AdminDashboard() {
-  const [user, setUser] = useState<any>(null);
+  const { user, userProfile, loading, isAuthenticated, isAdmin } = useUser();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
   const [todosLoading, setTodosLoading] = useState(true);
   
   // Modal states
@@ -82,24 +82,22 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    const checkUser = async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.getUser();
-      
-      if (error || !data?.user) {
-        redirect('/login');
-        return;
-      }
-      setUser(data.user);
-      setLoading(false);
-      
+    if (!loading && !isAuthenticated) {
+      redirect('/login');
+      return;
+    }
+
+    if (!loading && isAuthenticated && !isAdmin) {
+      redirect('/login?error=no_admin_access');
+      return;
+    }
+
+    if (!loading && isAuthenticated && isAdmin) {
       // Load data after user is confirmed
       loadReleaseNotes();
       loadTodos();
-    };
-
-    checkUser();
-  }, []);
+    }
+  }, [loading, isAuthenticated, isAdmin]);
 
   const loadTodos = async () => {
     try {
@@ -701,100 +699,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Release Notes Tab */}
-      <Card>
-        <CardHeader className="flex items-center gap-2">
-          <DocumentTextIcon className="w-5 h-5 text-green-500" />
-          <h2 className="text-xl font-semibold">Release Notes ({releaseNotes.length})</h2>
-        </CardHeader>
-        <CardBody>
-          {releaseNotes.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No release notes found.</p>
-              <p className="text-sm mt-2">Check the console for debugging information.</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {releaseNotes.map((release, index) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                          Version {release.version}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {release.date}
-                        </p>
-                      </div>
-                      {index === 0 && (
-                        <Chip color='success' variant="shadow" size='sm' className="mx-3">
-                          Current Version
-                        </Chip>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardBody>
-                    <div className="space-y-4">
-                      {release.features.length > 0 && (
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            🚀 New Features
-                          </h4>
-                          <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                            {release.features.map((feature, idx) => (
-                              <li key={idx}>{feature}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {release.improvements.length > 0 && (
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            🔧 Improvements
-                          </h4>
-                          <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                            {release.improvements.map((improvement, idx) => (
-                              <li key={idx}>{improvement}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {release.bugFixes.length > 0 && (
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            🐛 Bug Fixes
-                          </h4>
-                          <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                            {release.bugFixes.map((bugFix, idx) => (
-                              <li key={idx}>{bugFix}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {release.technical.length > 0 && (
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            📋 Technical Updates
-                          </h4>
-                          <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                            {release.technical.map((update, idx) => (
-                              <li key={idx}>{update}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </CardBody>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardBody>
-      </Card>
 
       {/* Modals */}
       {/* Add Todo Modal */}

@@ -4,13 +4,13 @@ import {
   TrainingSession, 
   MemberAttendance, 
   AttendanceRecord, 
+  RawAttendanceRecord,
   AttendanceSummary, 
   TrainingSessionFormData,
   AttendanceFilters,
   AttendanceStats
 } from '@/types/attendance';
-import { useAuth } from './useAuth';
-import { useUserRoles } from './useUserRoles';
+import { useUser } from '@/contexts/UserContext';
 
 export function useAttendance() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
@@ -19,8 +19,7 @@ export function useAttendance() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { user } = useAuth();
-  const { getCurrentUserCategories, hasRole } = useUserRoles();
+  const { user, hasRole } = useUser();
   const supabase = createClient();
 
   // Fetch training sessions for a specific category and season
@@ -31,13 +30,6 @@ export function useAttendance() {
       setLoading(true);
       setError(null);
 
-      // Debug: Log the parameters being sent to RPC
-      console.log('🔍 RPC Debug - Calling get_training_sessions with:', {
-        p_category: category,
-        p_season_id: seasonId,
-        p_user_id: user.id
-      });
-
       // First try the RPC function
       const { data, error } = await supabase
         .rpc('get_training_sessions', {
@@ -46,13 +38,11 @@ export function useAttendance() {
           p_user_id: user.id
         });
 
-      console.log('🔍 RPC Debug - RPC response:', { data, error });
 
       if (error) {
         console.error('RPC function error:', error);
         
         // Fallback: query training_sessions directly
-        console.log('Falling back to direct query...');
         const { data: fallbackData, error: fallbackError } = await supabase
           .from('training_sessions')
           .select('*')
@@ -61,15 +51,12 @@ export function useAttendance() {
           .order('session_date', { ascending: false })
           .order('session_time', { ascending: false });
 
-        console.log('🔍 Direct query result:', { fallbackData, fallbackError });
-
         if (fallbackError) {
           throw fallbackError;
         }
 
         setTrainingSessions(fallbackData || []);
       } else {
-        console.log('🔍 RPC success, setting training sessions:', data);
         setTrainingSessions(data || []);
       }
     } catch (err) {
@@ -85,8 +72,6 @@ export function useAttendance() {
     try {
       setLoading(true);
       setError(null);
-
-      console.log('🔍 Fetching attendance records for training session:', trainingSessionId);
 
       const { data, error } = await supabase
         .from('member_attendance')
@@ -118,13 +103,10 @@ export function useAttendance() {
         .order('recorded_at', { ascending: false });
 
       if (error) {
-        console.error('🔍 Error fetching attendance records:', error);
         throw error;
       }
 
-      console.log('🔍 Raw attendance records data:', data);
-
-      const records: AttendanceRecord[] = (data || []).map(record => ({
+      const records: AttendanceRecord[] = (data || []).map((record: RawAttendanceRecord) => ({
         id: record.id,
         member: {
           id: record.members.id,
@@ -145,7 +127,6 @@ export function useAttendance() {
         recorded_at: record.recorded_at
       }));
 
-      console.log('🔍 Processed attendance records:', records);
       setAttendanceRecords(records);
     } catch (err) {
       console.error('Error fetching attendance records:', err);
@@ -172,7 +153,6 @@ export function useAttendance() {
         console.error('RPC function error:', error);
         
         // Fallback: create basic summary from members
-        console.log('Falling back to basic summary...');
         const { data: members, error: membersError } = await supabase
           .from('members')
           .select('id, name, surname')
@@ -183,7 +163,7 @@ export function useAttendance() {
         }
 
         // Create basic summary with zero attendance
-        const basicSummary = members.map(member => ({
+        const basicSummary = members.map((member: { id: string; name: string; surname: string }) => ({
           member_id: member.id,
           member_name: member.name,
           member_surname: member.surname,
@@ -196,12 +176,15 @@ export function useAttendance() {
         }));
 
         setAttendanceSummary(basicSummary);
+        return basicSummary;
       } else {
         setAttendanceSummary(data || []);
+        return data || [];
       }
     } catch (err) {
       console.error('Error fetching attendance summary:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch attendance summary');
+      return [];
     } finally {
       setLoading(false);
     }
@@ -213,10 +196,6 @@ export function useAttendance() {
 
     try {
       setError(null);
-
-      // Debug: Check user role and permissions
-      console.log('🔍 Debug: User ID:', user.id);
-      console.log('🔍 Debug: Session data:', sessionData);
       
       // Check user profile and role
       const { data: userProfile, error: profileError } = await supabase
@@ -225,7 +204,6 @@ export function useAttendance() {
         .eq('user_id', user.id)
         .single();
       
-      console.log('🔍 Debug: User profile:', userProfile);
       if (profileError) {
         console.error('🔍 Debug: Profile error:', profileError);
       }
@@ -242,7 +220,6 @@ export function useAttendance() {
         ...(sessionData.location && { location: sessionData.location })
       };
 
-      console.log('Creating training session with data:', insertData);
 
       const { data, error } = await supabase
         .from('training_sessions')
@@ -287,7 +264,6 @@ export function useAttendance() {
       if (sessionData.session_time !== undefined) updateData.session_time = sessionData.session_time;
       if (sessionData.location !== undefined) updateData.location = sessionData.location;
 
-      console.log('Updating training session with data:', updateData);
 
       const { data, error } = await supabase
         .from('training_sessions')
@@ -356,22 +332,16 @@ export function useAttendance() {
         recorded_at: new Date().toISOString()
       }));
 
-      console.log('🔍 Creating attendance records for lineup members:', attendanceData);
-
       const { data, error } = await supabase
         .from('member_attendance')
         .insert(attendanceData)
         .select();
 
       if (error) {
-        console.error('🔍 Error creating bulk attendance records:', error);
         throw error;
       }
-
-      console.log('🔍 Successfully created attendance records:', data);
       return data || [];
     } catch (err) {
-      console.error('Error creating attendance for lineup members:', err);
       throw err;
     }
   }, [supabase, user?.id]);
@@ -388,12 +358,6 @@ export function useAttendance() {
     try {
       setError(null);
 
-      // Debug: Check user profile and permissions
-      console.log('🔍 Debug: Recording attendance for user:', user.id);
-      console.log('🔍 Debug: Member ID:', memberId);
-      console.log('🔍 Debug: Training Session ID:', trainingSessionId);
-      console.log('🔍 Debug: Status:', attendanceStatus);
-
       // Check user profile
       const { data: userProfile, error: profileError } = await supabase
         .from('user_profiles')
@@ -401,7 +365,6 @@ export function useAttendance() {
         .eq('user_id', user.id)
         .single();
       
-      console.log('🔍 Debug: User profile:', userProfile);
       if (profileError) {
         console.error('🔍 Debug: Profile error:', profileError);
       }
@@ -413,7 +376,6 @@ export function useAttendance() {
         .eq('id', trainingSessionId)
         .single();
       
-      console.log('🔍 Debug: Training session:', sessionData);
       if (sessionError) {
         console.error('🔍 Debug: Session error:', sessionError);
       }
@@ -426,7 +388,6 @@ export function useAttendance() {
         recorded_by: user.id
       };
 
-      console.log('🔍 Debug: Attendance data:', attendanceData);
 
       // First, try to find existing attendance record
       const { data: existingRecord, error: findError } = await supabase
@@ -446,7 +407,6 @@ export function useAttendance() {
 
       if (existingRecord) {
         // Update existing record
-        console.log('🔍 Debug: Updating existing attendance record:', existingRecord.id);
         const updateResult = await supabase
           .from('member_attendance')
           .update({
@@ -463,7 +423,6 @@ export function useAttendance() {
         error = updateResult.error;
       } else {
         // Insert new record
-        console.log('🔍 Debug: Creating new attendance record');
         const insertResult = await supabase
           .from('member_attendance')
           .insert(attendanceData)
@@ -475,13 +434,6 @@ export function useAttendance() {
       }
 
       if (error) {
-        console.error('🔍 Debug: Database error:', error);
-        console.error('🔍 Debug: Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
         
         // Provide more user-friendly error messages
         if (error.code === '23505') {
@@ -566,11 +518,11 @@ export function useAttendance() {
       const summary = await fetchAttendanceSummary(category, seasonId);
       
       const totalMembers = summary.length;
-      const totalSessions = summary.reduce((sum, member) => sum + member.total_sessions, 0);
-      const totalPresent = summary.reduce((sum, member) => sum + member.present_count, 0);
-      const totalAbsent = summary.reduce((sum, member) => sum + member.absent_count, 0);
-      const totalLate = summary.reduce((sum, member) => sum + member.late_count, 0);
-      const totalExcused = summary.reduce((sum, member) => sum + member.excused_count, 0);
+      const totalSessions = summary.reduce((sum: number, member: AttendanceSummary) => sum + member.total_sessions, 0);
+      const totalPresent = summary.reduce((sum: number, member: AttendanceSummary) => sum + member.present_count, 0);
+      const totalAbsent = summary.reduce((sum: number, member: AttendanceSummary) => sum + member.absent_count, 0);
+      const totalLate = summary.reduce((sum: number, member: AttendanceSummary) => sum + member.late_count, 0);
+      const totalExcused = summary.reduce((sum: number, member: AttendanceSummary) => sum + member.excused_count, 0);
 
       return {
         total_members: totalMembers,

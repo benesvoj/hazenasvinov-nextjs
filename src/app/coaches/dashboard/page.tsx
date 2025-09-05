@@ -2,98 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
+import { useUser } from '@/contexts/UserContext';
 import { UserIcon, VideoCameraIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, CardHeader } from '@heroui/react';
 import MatchSchedule from '@/components/match/MatchSchedule';
 import { BirthdayCard } from './components';
 
-interface UserProfile {
-  id: string;
-  user_id: string;
-  role: string;
-  club_id: string;
-  club_name?: string;
-  created_at: string;
-}
 
 export default function CoachesDashboard() {
-  const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user, userProfile, loading, error } = useUser();
 
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const supabase = createClient();
-        
-        // Get current user
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError || !user) {
-          window.location.href = '/coaches/login';
-          return;
-        }
-
-        setUser(user);
-
-        // Get user profiles - handle multiple profiles
-        const { data: profiles, error: profileError } = await supabase
-          .from('user_profiles')
-          .select(`
-            id,
-            user_id,
-            role,
-            club_id,
-            clubs(name)
-          `)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false }); // Get most recent first
-
-        if (profileError || !profiles || profiles.length === 0) {
-          setError('Uživatelský profil nebyl nalezen.');
-          return;
-        }
-
-        // Find coach profile (prefer coach/head_coach, fallback to first profile)
-        let coachProfile = profiles.find((profile: any) => 
-          profile.role === 'coach' || profile.role === 'head_coach'
-        );
-
-        // If no coach profile found, use the first profile
-        if (!coachProfile) {
-          coachProfile = profiles[0];
-        }
-
-        if (!coachProfile) {
-          setError('Nemáte oprávnění pro přístup do trenérského portálu.');
-          return;
-        }
-
-        // Transform the profile data
-        const transformedProfile: UserProfile = {
-          id: coachProfile.id,
-          user_id: coachProfile.user_id,
-          role: coachProfile.role,
-          club_id: coachProfile.club_id,
-          club_name: coachProfile.clubs?.name,
-          created_at: coachProfile.created_at || new Date().toISOString(),
-        };
-
-        setUserProfile(transformedProfile);
-      } catch (err) {
-        setError('Došlo k neočekávané chybě.');
-        console.error('Auth check error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
+  // Authentication is handled by ProtectedCoachRoute
 
   if (loading) {
     return (

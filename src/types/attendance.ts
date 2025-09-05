@@ -24,6 +24,30 @@ export interface MemberAttendance {
   updated_at: string;
 }
 
+// Raw database record structure from Supabase query
+export interface RawAttendanceRecord {
+  id: string;
+  member_id: string;
+  training_session_id: string;
+  attendance_status: 'present' | 'absent' | 'late' | 'excused';
+  notes?: string;
+  recorded_by: string;
+  recorded_at: string;
+  members: {
+    id: string;
+    name: string;
+    surname: string;
+    category: string;
+  };
+  training_sessions: {
+    id: string;
+    title: string;
+    session_date: string;
+    session_time?: string;
+    category: string;
+  };
+}
+
 export interface AttendanceRecord {
   id: string;
   member: {

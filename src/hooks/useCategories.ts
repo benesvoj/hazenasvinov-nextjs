@@ -77,12 +77,7 @@ export function useCategories() {
     }
   }, []);
 
-  // Auto-fetch categories when hook is used
-  useEffect(() => {
-    if (categories.length === 0 && !loading) {
-      fetchCategories();
-    }
-  }, [categories.length, loading, fetchCategories]);
+  // No auto-fetch - components should call fetchCategories explicitly
 
   return {
     categories,

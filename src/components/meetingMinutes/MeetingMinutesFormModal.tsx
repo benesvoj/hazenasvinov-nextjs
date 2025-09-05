@@ -7,7 +7,7 @@ import {
   MeetingAttendeeFormData,
 } from "@/types";
 import { useSeasons } from "@/hooks/useSeasons";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuthNew";
 import { useMembers } from "@/hooks/useMembers";
 import {
   Modal,

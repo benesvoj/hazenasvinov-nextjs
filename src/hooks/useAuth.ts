@@ -134,7 +134,7 @@ export function useAuth() {
                 clearTimeout(timeoutId);
               });
             } else {
-              showToast.warning(`[DEV] Login would be logged: ${user.email} (skipped in development)`);
+              // Development mode - no logging needed
             }
           }
 

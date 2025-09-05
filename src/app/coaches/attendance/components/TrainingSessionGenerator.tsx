@@ -18,8 +18,8 @@ import {
 } from "@heroui/react";
 import { CalendarIcon, ClockIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useAttendance } from "@/hooks/useAttendance";
-import { useUserRoles } from "@/hooks/useUserRoles";
-import { useCategories } from "@/hooks/useCategories";
+import { useUser } from "@/contexts/UserContext";
+import { useAppData } from "@/contexts/AppDataContext";
 import { useCategoryLineups } from "@/hooks/useCategoryLineups";
 import { formatDateString, formatTime } from "@/helpers";
 
@@ -59,11 +59,12 @@ export default function TrainingSessionGenerator({
   const [createAttendanceRecords, setCreateAttendanceRecords] = useState(true);
 
   const { createTrainingSession, createAttendanceForLineupMembers } = useAttendance();
-  const { getCurrentUserCategories } = useUserRoles();
-  const { categories } = useCategories();
+  const { userCategories } = useUser();
+  const { categories } = useAppData();
   const { fetchLineups } = useCategoryLineups();
 
-  const [assignedCategories, setAssignedCategories] = useState<string[]>([]);
+  // Use userCategories from UserContext instead of local state
+  const assignedCategories = userCategories;
 
   // Function to fetch lineup members directly
   const fetchLineupMembersForCategory = async (categoryId: string, seasonId: string) => {
@@ -81,7 +82,6 @@ export default function TrainingSessionGenerator({
         .single();
 
       if (lineupError || !lineupData) {
-        console.log('No lineup found for category:', categoryId, 'season:', seasonId);
         return [];
       }
 
@@ -101,13 +101,12 @@ export default function TrainingSessionGenerator({
         .eq('is_active', true);
 
       if (membersError) {
-        console.error('Error fetching lineup members:', membersError);
         return [];
       }
 
-      return membersData?.map((item: any) => item.member?.id).filter(Boolean) || [];
+      const memberIds = membersData?.map((item: any) => item.member_id).filter(Boolean) || [];
+      return memberIds;
     } catch (err) {
-      console.error('Error in fetchLineupMembersForCategory:', err);
       return [];
     }
   };
@@ -144,22 +143,7 @@ export default function TrainingSessionGenerator({
     return { value: timeString, label: timeString };
   });
 
-  // Fetch assigned categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const categories = await getCurrentUserCategories();
-        setAssignedCategories(categories);
-      } catch (error) {
-        console.error("Error fetching assigned categories:", error);
-        setAssignedCategories([]);
-      }
-    };
-
-    if (isOpen) {
-      fetchCategories();
-    }
-  }, [isOpen, getCurrentUserCategories]);
+  // assignedCategories is now provided by UserContext
 
   // Generate sessions based on criteria
   const generateSessions = () => {
@@ -229,11 +213,9 @@ export default function TrainingSessionGenerator({
       if (createAttendanceRecords && selectedCategory && selectedSeason) {
         try {
           memberIds = await fetchLineupMembersForCategory(selectedCategory, selectedSeason);
-          console.log('🔍 Lineup members for attendance:', memberIds);
           
           // If no lineup members found, try to get all members from the category
           if (memberIds.length === 0) {
-            console.log('🔍 No lineup members found, trying to get all category members...');
             const { createClient } = await import('@/utils/supabase/client');
             const supabase = createClient();
             
@@ -248,12 +230,11 @@ export default function TrainingSessionGenerator({
                 
               if (!membersError && membersData) {
                 memberIds = membersData.map((m: any) => m.id);
-                console.log('🔍 Using all category members as fallback:', memberIds);
               }
             }
           }
         } catch (err) {
-          console.warn('Could not fetch lineup members, skipping attendance creation:', err);
+          // Could not fetch lineup members, skipping attendance creation
         }
       }
 
@@ -274,22 +255,16 @@ export default function TrainingSessionGenerator({
           // Create attendance records for lineup members if enabled
           if (createAttendanceRecords && memberIds.length > 0) {
             try {
-              console.log(`🔍 Creating attendance records for session ${session.title} with ${memberIds.length} members`);
               await createAttendanceForLineupMembers(
                 createdSession.id,
                 memberIds,
                 'present' // Default status for generated sessions
               );
-              console.log(`✅ Successfully created attendance records for session ${session.title}`);
             } catch (attendanceErr) {
-              console.error(`❌ Could not create attendance records for session ${session.title}:`, attendanceErr);
               // Don't fail the entire process if attendance creation fails
             }
-          } else if (createAttendanceRecords && memberIds.length === 0) {
-            console.warn(`⚠️ No members found for attendance creation for session ${session.title}`);
           }
         } catch (err) {
-          console.error(`Error creating session ${session.title}:`, err);
           errorCount++;
         }
       }

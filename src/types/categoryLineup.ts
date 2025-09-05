@@ -13,6 +13,27 @@ export interface CategoryLineup {
   created_by: string;
 }
 
+// Raw database record structure from Supabase query
+export interface RawCategoryLineupMember {
+  id: string;
+  lineup_id: string;
+  member_id: string;
+  position: 'goalkeeper' | 'field_player';
+  jersey_number?: number;
+  is_captain: boolean;
+  is_vice_captain: boolean;
+  is_active: boolean;
+  added_at: string;
+  added_by: string;
+  members: {
+    id: string;
+    name: string;
+    surname: string;
+    registration_number: string;
+    category: string;
+  };
+}
+
 export interface CategoryLineupMember {
   id: string;
   lineup_id: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useCategories } from '@/hooks/useCategories';
+import { useAppData } from '@/contexts/AppDataContext';
 
 interface AdminCategorySimulationContextType {
   selectedCategories: string[];
@@ -16,9 +16,10 @@ const AdminCategorySimulationContext = createContext<AdminCategorySimulationCont
 
 export function AdminCategorySimulationProvider({ children }: { children: React.ReactNode }) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const { categories, loading, fetchCategories } = useCategories();
+  const { categories, categoriesLoading } = useAppData();
 
   const availableCategories = categories || [];
+  const loading = categoriesLoading;
 
   // Load selected categories from localStorage on mount
   useEffect(() => {

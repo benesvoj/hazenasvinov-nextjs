@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSupabaseClient } from './useSupabaseClient';
+import { useUser } from '@/contexts/UserContext';
 import { UserRole, CoachCategory, UserRoleSummary, RoleAssignment } from '@/types';
 
 export function useUserRoles() {
-  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [coachCategories, setCoachCategories] = useState<CoachCategory[]>([]);
   const [userRoleSummaries, setUserRoleSummaries] = useState<UserRoleSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const supabase = useSupabaseClient();
+  const { user, userProfile, userRoles, userCategories, refreshProfile, refreshRoles } = useUser();
   const fetchUserRoleSummariesRef = useRef<() => Promise<void>>();
   const supabaseRef = useRef(supabase);
   supabaseRef.current = supabase;
@@ -195,42 +195,24 @@ export function useUserRoles() {
   // Check if current user has a specific role
   const hasRole = useCallback(async (role: 'admin' | 'coach'): Promise<boolean> => {
     try {
-      const { data: { user } } = await supabaseRef.current.auth.getUser();
       if (!user) return false;
 
       // Check user_profiles table (primary system)
-      const { data: profileData, error: profileError } = await supabaseRef.current
-        .from('user_profiles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', role);
-
-      if (!profileError && profileData && profileData.length > 0) {
+      if (userProfile?.role === role) {
         return true;
       }
 
       // Fallback: Check user_roles table (legacy system)
-      const { data: roleData, error: roleError } = await supabaseRef.current
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', role);
-
-      if (!roleError && roleData && roleData.length > 0) {
-        return true;
-      }
-
-      return false;
+      return userRoles.some(r => r.role === role);
     } catch (err) {
       console.error('Error checking user role:', err);
       return false;
     }
-  }, []);
+  }, [user, userProfile, userRoles]);
 
   // Get current user's assigned categories (for coaches)
   const getCurrentUserCategories = useCallback(async (): Promise<string[]> => {
     try {
-      const { data: { user } } = await supabaseRef.current.auth.getUser();
       if (!user) return [];
 
       // Check if we're in admin category testing mode
@@ -248,34 +230,13 @@ export function useUserRoles() {
         }
       }
 
-      const { data, error } = await supabaseRef.current
-        .from('user_profiles')
-        .select('assigned_categories, role')
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      
-      // Handle multiple profiles - prefer coach/head_coach profile
-      if (data && data.length > 0) {
-        // Find coach profile first
-        const coachProfile = data.find(profile => 
-          profile.role === 'coach' || profile.role === 'head_coach'
-        );
-        
-        if (coachProfile) {
-          return coachProfile.assigned_categories || [];
-        }
-        
-        // If no coach profile, use the first profile
-        return data[0]?.assigned_categories || [];
-      }
-      
-      return [];
+      // Return categories from UserContext
+      return userCategories;
     } catch (err) {
       console.error('Error fetching current user categories:', err);
       return [];
     }
-  }, []); // Empty dependency array - use ref instead
+  }, [user, userCategories]);
 
   // Removed automatic fetch - components should call fetchUserRoleSummaries explicitly
 
@@ -291,5 +252,8 @@ export function useUserRoles() {
     assignUserRoles,
     hasRole,
     getCurrentUserCategories,
+    // Add UserContext data for backward compatibility
+    userRoles,
+    coachCategories: userCategories,
   };
 }

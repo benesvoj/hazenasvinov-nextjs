@@ -67,7 +67,6 @@ export function useSeasons() {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching seasons...');
       const startTime = Date.now();
       
       const supabase = createClient();
@@ -78,7 +77,6 @@ export function useSeasons() {
         .limit(50);
 
       const endTime = Date.now();
-      console.log(`Seasons fetch took ${endTime - startTime}ms, got ${data?.length || 0} seasons`);
 
       if (error) throw error;
       setSeasons(data || []);

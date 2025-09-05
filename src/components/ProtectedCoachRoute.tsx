@@ -1,76 +1,24 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
+import React from 'react';
 import { AcademicCapIcon } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody } from '@heroui/react';
-import { useUserRoles } from '@/hooks';
+import { useUser } from '@/contexts/UserContext';
 
 interface ProtectedCoachRouteProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }
 
-interface UserProfile {
-  role: string;
-  club_id: string;
-}
 
 export default function ProtectedCoachRoute({ 
   children, 
   fallback 
 }: ProtectedCoachRouteProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { hasRole } = useUserRoles();
+  const { user, userProfile, loading, isAuthenticated, isAdmin, isCoach, error } = useUser();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const supabase = createClient();
-        
-        // Get current user
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError || !user) {
-          setError('Uživatel není přihlášen');
-          setLoading(false);
-          return;
-        }
-
-        setUser(user);
-
-        // Check if user has coach or admin role using new role system
-        try {
-          const [isCoach, isAdmin] = await Promise.all([
-            hasRole('coach'),
-            hasRole('admin')
-          ]);
-
-          if (!isCoach && !isAdmin) {
-            setError('Nemáte oprávnění pro přístup do trenérského portálu');
-            setLoading(false);
-            return;
-          }
-        } catch (roleError) {
-          console.error('Error checking user roles:', roleError);
-          setError('Uživatelský profil nebyl nalezen');
-          setLoading(false);
-          return;
-        }
-
-        setLoading(false);
-      } catch (err) {
-        setError('Došlo k neočekávané chybě');
-        console.error('Auth check error:', err);
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [hasRole]);
+  // Check if user has access to coaches portal
+  const hasAccess = isAuthenticated && (isCoach || isAdmin);
 
   if (loading) {
     return (
@@ -80,7 +28,7 @@ export default function ProtectedCoachRoute({
     );
   }
 
-  if (error || !user) {
+  if (!hasAccess) {
     if (fallback) {
       return <>{fallback}</>;
     }
@@ -95,7 +43,9 @@ export default function ProtectedCoachRoute({
             <h1 className="text-xl font-semibold text-gray-900 mb-2">
               Přístup zamítnut
             </h1>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <p className="text-gray-600 mb-6">
+              {error || 'Nemáte oprávnění pro přístup do trenérského portálu'}
+            </p>
             <div className="space-y-3">
               <Button 
                 color="primary" 

@@ -1,13 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   CategoryLineup, 
   CategoryLineupMember, 
+  RawCategoryLineupMember,
   CategoryLineupFormData, 
   AddMemberToLineupData,
   CategoryLineupFilters 
 } from '@/types/categoryLineup';
-import { useAuth } from './useAuth';
+import { useUser } from '@/contexts/UserContext';
 
 export function useCategoryLineups() {
   const [lineups, setLineups] = useState<CategoryLineup[]>([]);
@@ -15,8 +16,8 @@ export function useCategoryLineups() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { user } = useAuth();
-  const supabase = createClient();
+  const { user } = useUser();
+  const supabase = useMemo(() => createClient(), []);
 
   // Fetch lineups for a specific category and season
   const fetchLineups = useCallback(async (categoryId: string, seasonId: string) => {
@@ -26,12 +27,6 @@ export function useCategoryLineups() {
       setLoading(true);
       setError(null);
 
-      // Debug: Log the parameters
-      console.log('🔍 Debug: Fetching lineups with:', {
-        categoryId,
-        seasonId,
-        userId: user.id
-      });
 
       const { data, error } = await supabase
         .from('category_lineups')
@@ -41,13 +36,7 @@ export function useCategoryLineups() {
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      console.log('🔍 Database query result:', {
-        categoryId,
-        seasonId,
-        dataCount: data?.length || 0,
-        data: data,
-        error: error
-      });
+
 
       if (error) {
         console.error('Database error:', error);
@@ -101,7 +90,7 @@ export function useCategoryLineups() {
 
       if (error) throw error;
 
-      const members: CategoryLineupMember[] = (data || []).map(record => ({
+      const members: CategoryLineupMember[] = (data || []).map((record: RawCategoryLineupMember) => ({
         id: record.id,
         lineup_id: record.lineup_id,
         member_id: record.member_id,
