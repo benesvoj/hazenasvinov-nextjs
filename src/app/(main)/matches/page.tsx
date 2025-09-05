@@ -53,7 +53,7 @@ export default function MatchesPage() {
     if (filterType === "home" || filterType === "away") {
       setFilterType("all");
     }
-  }, [selectedCategory]); // Removed filterType from dependencies to prevent infinite loop
+  }, [selectedCategory, filterType]);
 
   // Update URL when category changes
   useEffect(() => {
@@ -174,7 +174,7 @@ export default function MatchesPage() {
     });
 
     return filtered;
-  }, [groupedMatches, filterType, selectedClub, selectedCategory, categories, getClubTeamsInCategory]);
+  }, [groupedMatches, filterType, selectedClub, selectedCategory, categories, getClubTeamsInCategory, clubTeamMap]);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">

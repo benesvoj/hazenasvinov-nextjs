@@ -335,7 +335,7 @@ export default function MatchesAdminPage() {
     } else {
       clearTeams();
     }
-  }, [selectedCategory, selectedSeason, fetchFilteredTeams]);
+  }, [selectedCategory, selectedSeason, fetchFilteredTeams, clearTeams]);
 
   // Initial data fetch
   useEffect(() => {
@@ -1255,7 +1255,7 @@ export default function MatchesAdminPage() {
         );
       }
     },
-    [selectedSeason, importMatches, fetchStandings]
+    [selectedSeason, importMatches, fetchStandings, selectedCategory]
   );
 
   return (

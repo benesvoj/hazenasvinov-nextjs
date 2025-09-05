@@ -55,12 +55,13 @@ export function useUserRoles() {
   const fetchCoachCategories = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('coach_categories')
-        .select('*')
-        .eq('user_id', userId);
+        .from('user_profiles')
+        .select('assigned_categories')
+        .eq('user_id', userId)
+        .single();
 
       if (error) throw error;
-      return data || [];
+      return data?.assigned_categories || [];
     } catch (err) {
       console.error('Error fetching coach categories:', err);
       throw err;

@@ -49,12 +49,12 @@ export default function VideosPage() {
   // Fetch videos when filters change
   useEffect(() => {
     fetchVideos(filters);
-  }, [filters]);
+  }, [filters, fetchVideos]);
 
   useEffect(() => {
     fetchCategories();
     fetchAllSeasons();
-  }, []);
+  }, [fetchCategories, fetchAllSeasons]);
 
   // Handle video operations
   const handleCreateVideo = async (formData: VideoFormData) => {
