@@ -339,19 +339,110 @@ export function useAttendance() {
     try {
       setError(null);
 
-      const { data, error } = await supabase
+      // Debug: Check user profile and permissions
+      console.log('🔍 Debug: Recording attendance for user:', user.id);
+      console.log('🔍 Debug: Member ID:', memberId);
+      console.log('🔍 Debug: Training Session ID:', trainingSessionId);
+      console.log('🔍 Debug: Status:', attendanceStatus);
+
+      // Check user profile
+      const { data: userProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role, assigned_categories')
+        .eq('user_id', user.id)
+        .single();
+      
+      console.log('🔍 Debug: User profile:', userProfile);
+      if (profileError) {
+        console.error('🔍 Debug: Profile error:', profileError);
+      }
+
+      // Check training session details
+      const { data: sessionData, error: sessionError } = await supabase
+        .from('training_sessions')
+        .select('id, category, coach_id')
+        .eq('id', trainingSessionId)
+        .single();
+      
+      console.log('🔍 Debug: Training session:', sessionData);
+      if (sessionError) {
+        console.error('🔍 Debug: Session error:', sessionError);
+      }
+
+      const attendanceData = {
+        member_id: memberId,
+        training_session_id: trainingSessionId,
+        attendance_status: attendanceStatus,
+        notes,
+        recorded_by: user.id
+      };
+
+      console.log('🔍 Debug: Attendance data:', attendanceData);
+
+      // First, try to find existing attendance record
+      const { data: existingRecord, error: findError } = await supabase
         .from('member_attendance')
-        .upsert({
-          member_id: memberId,
-          training_session_id: trainingSessionId,
-          attendance_status: attendanceStatus,
-          notes,
-          recorded_by: user.id
-        })
-        .select()
+        .select('id')
+        .eq('member_id', memberId)
+        .eq('training_session_id', trainingSessionId)
         .single();
 
-      if (error) throw error;
+      let data, error;
+
+      if (findError && findError.code !== 'PGRST116') {
+        // PGRST116 is "not found" error, which is expected for new records
+        console.error('🔍 Debug: Error finding existing record:', findError);
+        throw findError;
+      }
+
+      if (existingRecord) {
+        // Update existing record
+        console.log('🔍 Debug: Updating existing attendance record:', existingRecord.id);
+        const updateResult = await supabase
+          .from('member_attendance')
+          .update({
+            attendance_status: attendanceStatus,
+            notes,
+            recorded_by: user.id,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingRecord.id)
+          .select()
+          .single();
+        
+        data = updateResult.data;
+        error = updateResult.error;
+      } else {
+        // Insert new record
+        console.log('🔍 Debug: Creating new attendance record');
+        const insertResult = await supabase
+          .from('member_attendance')
+          .insert(attendanceData)
+          .select()
+          .single();
+        
+        data = insertResult.data;
+        error = insertResult.error;
+      }
+
+      if (error) {
+        console.error('🔍 Debug: Database error:', error);
+        console.error('🔍 Debug: Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        
+        // Provide more user-friendly error messages
+        if (error.code === '23505') {
+          throw new Error('Tento člen už má zaznamenanou docházku pro tento trénink. Zkuste aktualizovat stránku.');
+        } else if (error.code === '42501') {
+          throw new Error('Nemáte oprávnění k zaznamenání docházky. Kontaktujte administrátora.');
+        } else {
+          throw new Error(`Chyba při zaznamenávání docházky: ${error.message}`);
+        }
+      }
 
       // Refresh attendance records
       await fetchAttendanceRecords(trainingSessionId);

@@ -41,6 +41,14 @@ export function useCategoryLineups() {
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
+      console.log('🔍 Database query result:', {
+        categoryId,
+        seasonId,
+        dataCount: data?.length || 0,
+        data: data,
+        error: error
+      });
+
       if (error) {
         console.error('Database error:', error);
         console.error('Error details:', {

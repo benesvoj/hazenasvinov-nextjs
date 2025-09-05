@@ -36,20 +36,29 @@ export default function AttendanceModal({
   getStatusColor,
   getStatusText
 }: AttendanceModalProps) {
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       size="4xl"
+      scrollBehavior="inside"
+      classNames={{
+        body: "max-h-[80vh] overflow-y-auto"
+      }}
     >
       <ModalContent>
         <ModalHeader>
-          Zaznamenat docházku
+          Zaznamenat docházku {filteredMembers.length} členů
         </ModalHeader>
         <ModalBody>
           {membersLoading ? (
             <div className="flex justify-center py-8">
               <Spinner />
+            </div>
+          ) : filteredMembers.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Žádní členové nejsou k dispozici pro vybranou kategorii</p>
             </div>
           ) : (
             <Table aria-label="Members attendance">
@@ -66,9 +75,9 @@ export default function AttendanceModal({
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {member.name} {member.surname}
+                            {member.surname} {member.name}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-xs text-gray-500">
                             {member.registration_number}
                           </div>
                         </div>
@@ -85,18 +94,27 @@ export default function AttendanceModal({
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          {(['present', 'absent', 'late', 'excused'] as const).map((status) => (
-                            <Button
-                              key={status}
-                              size="sm"
-                              variant={existingRecord?.attendance_status === status ? 'solid' : 'light'}
-                              color={getStatusColor(status)}
-                              onPress={() => onRecordAttendance(member.id, status)}
-                            >
-                              {getStatusText(status)}
-                            </Button>
-                          ))}
+                          {(['present', 'absent', 'late', 'excused'] as const).map((status) => {
+                            const isCurrentStatus = existingRecord?.attendance_status === status;
+                            return (
+                              <Button
+                                key={status}
+                                size="sm"
+                                variant={isCurrentStatus ? 'solid' : 'light'}
+                                color={getStatusColor(status)}
+                                onPress={() => onRecordAttendance(member.id, status)}
+                                className={isCurrentStatus ? 'font-bold' : ''}
+                              >
+                                {getStatusText(status)}
+                              </Button>
+                            );
+                          })}
                         </div>
+                        {existingRecord && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Aktuální: {getStatusText(existingRecord.attendance_status)}
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   );

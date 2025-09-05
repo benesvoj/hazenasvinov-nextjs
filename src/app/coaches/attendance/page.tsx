@@ -6,6 +6,7 @@ import { useSeasons } from "@/hooks/useSeasons";
 import { useCategories } from "@/hooks/useCategories";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useMembers } from "@/hooks/useMembers";
+import { useCategoryLineups } from "@/hooks/useCategoryLineups";
 import { 
   ClipboardDocumentListIcon,
   PlusIcon,
@@ -78,6 +79,13 @@ export default function CoachesAttendancePage() {
   } = useCategories();
   const { getCurrentUserCategories } = useUserRoles();
   const { members, loading: membersLoading, fetchMembers } = useMembers();
+  const { 
+    lineups, 
+    loading: lineupsLoading, 
+    fetchLineups, 
+    lineupMembers,
+    fetchLineupMembers 
+  } = useCategoryLineups();
 
   // Get user's assigned categories
   const [userCategories, setUserCategories] = useState<string[]>([]);
@@ -88,7 +96,15 @@ export default function CoachesAttendancePage() {
     fetchAllSeasons();
     fetchCategories();
     fetchMembers();
-  }, []); // Empty dependency array - only run once on mount
+  }, [fetchAllSeasons, fetchCategories, fetchMembers]);
+
+  // Fetch lineups when category and season change
+  useEffect(() => {
+    if (selectedCategory && selectedSeason) {
+      console.log("🔄 Fetching lineups for category:", selectedCategory, "season:", selectedSeason);
+      fetchLineups(selectedCategory, selectedSeason);
+    }
+  }, [selectedCategory, selectedSeason, fetchLineups]);
 
   useEffect(() => {
     const fetchUserCategories = async () => {
@@ -152,11 +168,48 @@ export default function CoachesAttendancePage() {
     }
   }, [selectedSession, fetchAttendanceRecords]);
 
-  // Filter members by selected category
-  const filteredMembers = members.filter((member) => {
-    // Find the category for this member and check if it matches selected category
-    const memberCategory = categories.find((c) => c.id === member.category);
-    return memberCategory && memberCategory.id === selectedCategory;
+  // Get lineup members for the selected category, fallback to filtered members if no lineups
+  const lineupMembersList = lineupMembers.map(lineupMember => lineupMember.member).filter(Boolean);
+  
+  // Fallback: if no lineup members, filter all members by category
+  const fallbackMembers = members.filter((member) => {
+    const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
+    const selectedCategoryCode = selectedCategoryData?.code;
+    return member.category === selectedCategoryCode;
+  });
+
+  // Use lineup members if available, otherwise use filtered members
+  const unsortedMembers = lineupMembersList.length > 0 ? lineupMembersList : fallbackMembers;
+
+  // Sort members by surname, then by name
+  const filteredMembers = unsortedMembers.sort((a, b) => {
+    // Type guard to ensure both members exist
+    if (!a || !b) return 0;
+    
+    // First sort by surname
+    const surnameComparison = (a.surname || '').localeCompare(b.surname || '');
+    if (surnameComparison !== 0) {
+      return surnameComparison;
+    }
+    // If surnames are the same, sort by name
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  // Debug logging
+  console.log('🔍 Members debug:', {
+    selectedCategory,
+    totalMembers: members.length,
+    lineupMembersCount: lineupMembers.length,
+    lineupMembersListCount: lineupMembersList.length,
+    fallbackMembersCount: fallbackMembers.length,
+    finalFilteredMembersCount: filteredMembers.length,
+    usingLineupMembers: lineupMembersList.length > 0,
+    lineupMembers: lineupMembers.map(lm => ({ 
+      id: lm.member?.id, 
+      name: lm.member?.name, 
+      surname: lm.member?.surname,
+      position: lm.position 
+    }))
   });
 
   const handleSessionSubmit = async (sessionData: TrainingSessionFormData) => {
@@ -226,6 +279,8 @@ export default function CoachesAttendancePage() {
       await recordAttendance(memberId, selectedSession, status);
     } catch (err) {
       console.error("Error recording attendance:", err);
+      // Show error to user - you might want to add a toast notification here
+      alert(err instanceof Error ? err.message : "Chyba při zaznamenávání docházky");
     }
   };
 
@@ -462,7 +517,17 @@ export default function CoachesAttendancePage() {
                     <TableColumn>AKCE</TableColumn>
                   </TableHeader>
                   <TableBody>
-                    {attendanceRecords.map((record) => (
+                    {attendanceRecords
+                      .sort((a, b) => {
+                        // Sort by surname, then by name
+                        if (!a.member || !b.member) return 0;
+                        const surnameComparison = (a.member.surname || '').localeCompare(b.member.surname || '');
+                        if (surnameComparison !== 0) {
+                          return surnameComparison;
+                        }
+                        return (a.member.name || '').localeCompare(b.member.name || '');
+                      })
+                      .map((record) => (
                       <TableRow key={record.id}>
                         <TableCell>
                           <div>
@@ -529,16 +594,16 @@ export default function CoachesAttendancePage() {
       />
 
       {/* Attendance Modal */}
-      <AttendanceModal
+              <AttendanceModal
         isOpen={isAttendanceModalOpen}
         onClose={() => setIsAttendanceModalOpen(false)}
-        membersLoading={membersLoading}
-        filteredMembers={filteredMembers}
-        attendanceRecords={attendanceRecords}
-        onRecordAttendance={handleRecordAttendance}
-        getStatusColor={getStatusColor}
-        getStatusText={getStatusText}
-      />
+          membersLoading={membersLoading || lineupsLoading}
+          filteredMembers={filteredMembers}
+          attendanceRecords={attendanceRecords}
+          onRecordAttendance={handleRecordAttendance}
+          getStatusColor={getStatusColor}
+          getStatusText={getStatusText}
+        />
 
       {/* Training Session Generator Modal */}
       <TrainingSessionGenerator
