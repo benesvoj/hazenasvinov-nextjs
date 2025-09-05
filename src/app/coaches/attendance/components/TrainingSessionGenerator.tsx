@@ -61,9 +61,56 @@ export default function TrainingSessionGenerator({
   const { createTrainingSession, createAttendanceForLineupMembers } = useAttendance();
   const { getCurrentUserCategories } = useUserRoles();
   const { categories } = useCategories();
-  const { lineupMembers, fetchLineups } = useCategoryLineups();
+  const { fetchLineups } = useCategoryLineups();
 
   const [assignedCategories, setAssignedCategories] = useState<string[]>([]);
+
+  // Function to fetch lineup members directly
+  const fetchLineupMembersForCategory = async (categoryId: string, seasonId: string) => {
+    try {
+      const { createClient } = await import('@/utils/supabase/client');
+      const supabase = createClient();
+      
+      // First get the lineup for this category and season
+      const { data: lineupData, error: lineupError } = await supabase
+        .from('category_lineups')
+        .select('id')
+        .eq('category_id', categoryId)
+        .eq('season_id', seasonId)
+        .eq('is_active', true)
+        .single();
+
+      if (lineupError || !lineupData) {
+        console.log('No lineup found for category:', categoryId, 'season:', seasonId);
+        return [];
+      }
+
+      // Then get the lineup members
+      const { data: membersData, error: membersError } = await supabase
+        .from('category_lineup_members')
+        .select(`
+          member_id,
+          members!inner (
+            id,
+            name,
+            surname,
+            category
+          )
+        `)
+        .eq('lineup_id', lineupData.id)
+        .eq('is_active', true);
+
+      if (membersError) {
+        console.error('Error fetching lineup members:', membersError);
+        return [];
+      }
+
+      return membersData?.map((item: any) => item.member?.id).filter(Boolean) || [];
+    } catch (err) {
+      console.error('Error in fetchLineupMembersForCategory:', err);
+      return [];
+    }
+  };
 
   // Days of the week options
   const dayOptions = [
@@ -181,11 +228,30 @@ export default function TrainingSessionGenerator({
       let memberIds: string[] = [];
       if (createAttendanceRecords && selectedCategory && selectedSeason) {
         try {
-          await fetchLineups(selectedCategory, selectedSeason);
-          memberIds = lineupMembers
-            .map(lm => lm.member?.id)
-            .filter(Boolean) as string[];
-          console.log('Lineup members for attendance:', memberIds);
+          memberIds = await fetchLineupMembersForCategory(selectedCategory, selectedSeason);
+          console.log('🔍 Lineup members for attendance:', memberIds);
+          
+          // If no lineup members found, try to get all members from the category
+          if (memberIds.length === 0) {
+            console.log('🔍 No lineup members found, trying to get all category members...');
+            const { createClient } = await import('@/utils/supabase/client');
+            const supabase = createClient();
+            
+            const selectedCategoryData = categories.find(c => c.id === selectedCategory);
+            const categoryCode = selectedCategoryData?.code;
+            
+            if (categoryCode) {
+              const { data: membersData, error: membersError } = await supabase
+                .from('members')
+                .select('id')
+                .eq('category', categoryCode);
+                
+              if (!membersError && membersData) {
+                memberIds = membersData.map((m: any) => m.id);
+                console.log('🔍 Using all category members as fallback:', memberIds);
+              }
+            }
+          }
         } catch (err) {
           console.warn('Could not fetch lineup members, skipping attendance creation:', err);
         }
@@ -208,16 +274,19 @@ export default function TrainingSessionGenerator({
           // Create attendance records for lineup members if enabled
           if (createAttendanceRecords && memberIds.length > 0) {
             try {
+              console.log(`🔍 Creating attendance records for session ${session.title} with ${memberIds.length} members`);
               await createAttendanceForLineupMembers(
                 createdSession.id,
                 memberIds,
                 'present' // Default status for generated sessions
               );
-              console.log(`Created attendance records for session ${session.title}`);
+              console.log(`✅ Successfully created attendance records for session ${session.title}`);
             } catch (attendanceErr) {
-              console.warn(`Could not create attendance records for session ${session.title}:`, attendanceErr);
+              console.error(`❌ Could not create attendance records for session ${session.title}:`, attendanceErr);
               // Don't fail the entire process if attendance creation fails
             }
+          } else if (createAttendanceRecords && memberIds.length === 0) {
+            console.warn(`⚠️ No members found for attendance creation for session ${session.title}`);
           }
         } catch (err) {
           console.error(`Error creating session ${session.title}:`, err);

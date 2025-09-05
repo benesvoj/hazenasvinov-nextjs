@@ -11,9 +11,6 @@ import {
   ClipboardDocumentListIcon,
   PlusIcon,
   CalendarIcon,
-  ChartBarIcon,
-  ClockIcon,
-  MapPinIcon,
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
@@ -24,8 +21,6 @@ import {
   CardHeader,
   Select,
   SelectItem,
-  Chip,
-  Badge,
   Skeleton,
   Table,
   TableHeader,
@@ -231,7 +226,72 @@ export default function CoachesAttendancePage() {
         await updateTrainingSession(editingSession.id, dataWithCategory);
         setEditingSession(null);
       } else {
-        await createTrainingSession(dataWithCategory);
+        // Create new training session
+        const createdSession = await createTrainingSession(dataWithCategory);
+        
+        // Create attendance records for the new session
+        try {
+          let memberIds: string[] = [];
+          
+          // Try to get lineup members first
+          try {
+            const { createClient } = await import('@/utils/supabase/client');
+            const supabase = createClient();
+            
+            // First get the lineup for this category and season
+            const { data: lineupData, error: lineupError } = await supabase
+              .from('category_lineups')
+              .select('id')
+              .eq('category_id', selectedCategory)
+              .eq('season_id', selectedSeason)
+              .eq('is_active', true)
+              .single();
+
+            if (!lineupError && lineupData) {
+              // Then get the lineup members
+              const { data: membersData, error: membersError } = await supabase
+                .from('category_lineup_members')
+                .select(`
+                  member_id,
+                  members!inner (
+                    id,
+                    name,
+                    surname,
+                    category
+                  )
+                `)
+                .eq('lineup_id', lineupData.id)
+                .eq('is_active', true);
+
+              if (!membersError && membersData) {
+                memberIds = membersData.map((item: any) => item.member?.id).filter(Boolean) || [];
+              }
+            }
+          } catch (err) {
+            console.log('Could not fetch lineup members, will use fallback');
+          }
+
+          console.log('🔍 Creating attendance for new session:', createdSession.id, 'with lineup members:', memberIds);
+
+          if (memberIds.length === 0) {
+            // Fallback to filtered members if no lineup members
+            const fallbackMembers = members.filter((member) => member.category === categoryCode);
+            const fallbackMemberIds = fallbackMembers.map(m => m.id);
+            
+            console.log('🔍 Using fallback members for new session:', fallbackMemberIds);
+            
+            if (fallbackMemberIds.length > 0) {
+              await createAttendanceForLineupMembers(createdSession.id, fallbackMemberIds, 'present');
+              console.log(`✅ Created ${fallbackMemberIds.length} attendance records for new session (fallback)`);
+            }
+          } else {
+            await createAttendanceForLineupMembers(createdSession.id, memberIds, 'present');
+            console.log(`✅ Created ${memberIds.length} attendance records for new session`);
+          }
+        } catch (attendanceErr) {
+          console.warn('Could not create attendance records for new session:', attendanceErr);
+          // Don't fail the session creation if attendance fails
+        }
       }
 
       setIsSessionModalOpen(false);
