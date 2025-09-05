@@ -31,6 +31,13 @@ export function useAttendance() {
       setLoading(true);
       setError(null);
 
+      // Debug: Log the parameters being sent to RPC
+      console.log('🔍 RPC Debug - Calling get_training_sessions with:', {
+        p_category: category,
+        p_season_id: seasonId,
+        p_user_id: user.id
+      });
+
       // First try the RPC function
       const { data, error } = await supabase
         .rpc('get_training_sessions', {
@@ -38,6 +45,8 @@ export function useAttendance() {
           p_season_id: seasonId,
           p_user_id: user.id
         });
+
+      console.log('🔍 RPC Debug - RPC response:', { data, error });
 
       if (error) {
         console.error('RPC function error:', error);
@@ -52,12 +61,15 @@ export function useAttendance() {
           .order('session_date', { ascending: false })
           .order('session_time', { ascending: false });
 
+        console.log('🔍 Direct query result:', { fallbackData, fallbackError });
+
         if (fallbackError) {
           throw fallbackError;
         }
 
         setTrainingSessions(fallbackData || []);
       } else {
+        console.log('🔍 RPC success, setting training sessions:', data);
         setTrainingSessions(data || []);
       }
     } catch (err) {
@@ -194,6 +206,22 @@ export function useAttendance() {
     try {
       setError(null);
 
+      // Debug: Check user role and permissions
+      console.log('🔍 Debug: User ID:', user.id);
+      console.log('🔍 Debug: Session data:', sessionData);
+      
+      // Check user profile and role
+      const { data: userProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role, assigned_categories')
+        .eq('user_id', user.id)
+        .single();
+      
+      console.log('🔍 Debug: User profile:', userProfile);
+      if (profileError) {
+        console.error('🔍 Debug: Profile error:', profileError);
+      }
+
       // Prepare data with only non-empty optional fields
       const insertData = {
         title: sessionData.title,
@@ -216,6 +244,12 @@ export function useAttendance() {
 
       if (error) {
         console.error('Database error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error;
       }
 

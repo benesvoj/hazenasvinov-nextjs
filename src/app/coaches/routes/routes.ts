@@ -30,6 +30,6 @@ export const coachesRoutes = [
     {
       name: translations.coaches.routes.meetingMinutes,
       href: '/coaches/meeting-minutes',
-      icon: ChartBarIcon,
+      icon: ClipboardDocumentListIcon,
     },
   ];

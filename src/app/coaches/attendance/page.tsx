@@ -13,7 +13,9 @@ import {
   UserGroupIcon,
   ChartBarIcon,
   ClockIcon,
-  MapPinIcon
+  MapPinIcon,
+  PencilIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import {
   Button,
@@ -25,13 +27,6 @@ import {
   Chip,
   Badge,
   Skeleton,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Input,
-  Textarea,
   Table,
   TableHeader,
   TableColumn,
@@ -44,6 +39,8 @@ import {
 } from '@heroui/react';
 import { TrainingSessionFormData, AttendanceRecord } from '@/types/attendance';
 import { formatDateString, formatTime } from '@/helpers';
+import AttendanceModal from './components/AttendanceModal';
+import TrainingSessionModal from './components/TrainingSessionModal';
 
 export default function CoachesAttendancePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -52,15 +49,6 @@ export default function CoachesAttendancePage() {
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<any>(null);
-  const [sessionFormData, setSessionFormData] = useState<TrainingSessionFormData>({
-    title: '',
-    description: '',
-    session_date: '',
-    session_time: '',
-    category: '',
-    season_id: '',
-    location: ''
-  });
 
   const { 
     trainingSessions, 
@@ -149,76 +137,38 @@ export default function CoachesAttendancePage() {
     return memberCategory && memberCategory.id === selectedCategory;
   });
 
-  const handleCreateSession = async () => {
+  const handleSessionSubmit = async (sessionData: TrainingSessionFormData) => {
     try {
       // Convert category ID to category code
       const selectedCategoryData = categories.find(c => c.id === selectedCategory);
       const categoryCode = selectedCategoryData?.code || selectedCategory;
       
-      const sessionData = {
-        ...sessionFormData,
+      const dataWithCategory = {
+        ...sessionData,
         category: categoryCode,
         season_id: selectedSeason
       };
       
-      await createTrainingSession(sessionData);
-      setIsSessionModalOpen(false);
-      setSessionFormData({
-        title: '',
-        description: '',
-        session_date: '',
-        session_time: '',
-        category: selectedCategory,
-        season_id: selectedSeason,
-        location: ''
-      });
-    } catch (err) {
-      console.error('Error creating session:', err);
-    }
-  };
-
-  const handleUpdateSession = async () => {
-    if (!editingSession) return;
-
-    try {
-      // Convert category ID to category code
-      const selectedCategoryData = categories.find(c => c.id === selectedCategory);
-      const categoryCode = selectedCategoryData?.code || selectedCategory;
+      if (editingSession) {
+        await updateTrainingSession(editingSession.id, dataWithCategory);
+        setEditingSession(null);
+      } else {
+        await createTrainingSession(dataWithCategory);
+      }
       
-      const sessionData = {
-        ...sessionFormData,
-        category: categoryCode,
-        season_id: selectedSeason
-      };
-      
-      await updateTrainingSession(editingSession.id, sessionData);
       setIsSessionModalOpen(false);
-      setEditingSession(null);
-      setSessionFormData({
-        title: '',
-        description: '',
-        session_date: '',
-        session_time: '',
-        category: selectedCategory,
-        season_id: selectedSeason,
-        location: ''
-      });
     } catch (err) {
-      console.error('Error updating session:', err);
+      console.error('Error saving session:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : 'Unknown'
+      });
     }
   };
 
   const handleEditSession = (session: any) => {
     setEditingSession(session);
-    setSessionFormData({
-      title: session.title,
-      description: session.description || '',
-      session_date: session.session_date,
-      session_time: session.session_time || '',
-      category: session.category,
-      season_id: session.season_id,
-      location: session.location || ''
-    });
     setIsSessionModalOpen(true);
   };
 
@@ -295,12 +245,12 @@ export default function CoachesAttendancePage() {
               placeholder="Vyberte kategorii"
               selectedKeys={selectedCategory ? [selectedCategory] : []}
               onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
-              isDisabled={categoriesLoading}
+              isDisabled={categoriesLoading || categories.length === 1}
             >
               {userCategories.map((categoryId) => {
                 const category = categories.find(c => c.id === categoryId);
                 return (
-                  <SelectItem key={categoryId} value={categoryId}>
+                  <SelectItem key={categoryId}>
                     {category?.name || categoryId}
                   </SelectItem>
                 );
@@ -315,7 +265,7 @@ export default function CoachesAttendancePage() {
               isDisabled={seasonsLoading}
             >
               {seasons.map((season) => (
-                <SelectItem key={season.id} value={season.id}>
+                <SelectItem key={season.id}>
                   {season.name}
                 </SelectItem>
               ))}
@@ -327,15 +277,6 @@ export default function CoachesAttendancePage() {
                 startContent={<PlusIcon className="w-4 h-4" />}
                 onPress={() => {
                   setEditingSession(null);
-                  setSessionFormData({
-                    title: '',
-                    description: '',
-                    session_date: '',
-                    session_time: '',
-                    category: selectedCategory,
-                    season_id: selectedSeason,
-                    location: ''
-                  });
                   setIsSessionModalOpen(true);
                 }}
                 isDisabled={!selectedCategory || !selectedSeason}
@@ -380,18 +321,17 @@ export default function CoachesAttendancePage() {
                         <div className="flex-1">
                           <h4 className="font-medium text-sm">{session.title}</h4>
                           <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                            <CalendarIcon className="w-3 h-3" />
+                            <div>
                             {formatDateString(session.session_date)}
+                            </div>
                             {session.session_time && (
-                              <>
-                                <ClockIcon className="w-3 h-3 ml-2" />
+                              <div>
                                 {formatTime(session.session_time)}
-                              </>
+                              </div>
                             )}
                           </div>
                           {session.location && (
                             <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                              <MapPinIcon className="w-3 h-3" />
                               {session.location}
                             </div>
                           )}
@@ -400,18 +340,20 @@ export default function CoachesAttendancePage() {
                           <Button
                             size="sm"
                             variant="light"
+                            startContent={<PencilIcon className="w-4 h-4" />}
+                            isIconOnly
+                            aria-label={`Upravit trénink ${session.title}`}
                             onPress={() => handleEditSession(session)}
-                          >
-                            Upravit
-                          </Button>
+                          />
                           <Button
                             size="sm"
                             color="danger"
                             variant="light"
                             onPress={() => handleDeleteSession(session.id)}
-                          >
-                            Smazat
-                          </Button>
+                            isIconOnly
+                            aria-label={`Upravit trénink ${session.title}`}
+                            startContent={<TrashIcon className="w-4 h-4" />}
+                          />
                         </div>
                       </div>
                     </div>
@@ -509,154 +451,26 @@ export default function CoachesAttendancePage() {
       </div>
 
       {/* Training Session Modal */}
-      <Modal
+      <TrainingSessionModal
         isOpen={isSessionModalOpen}
         onClose={() => setIsSessionModalOpen(false)}
-        size="2xl"
-      >
-        <ModalContent>
-          <ModalHeader>
-            {editingSession ? 'Upravit trénink' : 'Nový trénink'}
-          </ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Název tréninku"
-                placeholder="Zadejte název tréninku"
-                value={sessionFormData.title}
-                onChange={(e) => setSessionFormData(prev => ({ ...prev, title: e.target.value }))}
-                isRequired
-              />
-              
-              <Textarea
-                label="Popis"
-                placeholder="Zadejte popis tréninku"
-                value={sessionFormData.description}
-                onChange={(e) => setSessionFormData(prev => ({ ...prev, description: e.target.value }))}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Datum"
-                  type="date"
-                  value={sessionFormData.session_date}
-                  onChange={(e) => setSessionFormData(prev => ({ ...prev, session_date: e.target.value }))}
-                  isRequired
-                />
-                
-                <Input
-                  label="Čas"
-                  type="time"
-                  value={sessionFormData.session_time}
-                  onChange={(e) => setSessionFormData(prev => ({ ...prev, session_time: e.target.value }))}
-                />
-              </div>
-
-              <Input
-                label="Místo"
-                placeholder="Zadejte místo konání"
-                value={sessionFormData.location}
-                onChange={(e) => setSessionFormData(prev => ({ ...prev, location: e.target.value }))}
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              variant="light"
-              onPress={() => setIsSessionModalOpen(false)}
-            >
-              Zrušit
-            </Button>
-            <Button
-              color="primary"
-              onPress={editingSession ? handleUpdateSession : handleCreateSession}
-              isDisabled={!sessionFormData.title || !sessionFormData.session_date}
-            >
-              {editingSession ? 'Uložit změny' : 'Vytvořit trénink'}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        onSubmit={handleSessionSubmit}
+        session={editingSession}
+        selectedCategory={selectedCategory}
+        selectedSeason={selectedSeason}
+      />
 
       {/* Attendance Modal */}
-      <Modal
+      <AttendanceModal
         isOpen={isAttendanceModalOpen}
         onClose={() => setIsAttendanceModalOpen(false)}
-        size="4xl"
-      >
-        <ModalContent>
-          <ModalHeader>
-            Zaznamenat docházku
-          </ModalHeader>
-          <ModalBody>
-            {membersLoading ? (
-              <div className="flex justify-center py-8">
-                <Spinner />
-              </div>
-            ) : (
-              <Table aria-label="Members attendance">
-                <TableHeader>
-                  <TableColumn>ČLEN</TableColumn>
-                  <TableColumn>STATUS</TableColumn>
-                  <TableColumn>AKCE</TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {filteredMembers.map((member) => {
-                    const existingRecord = attendanceRecords.find(r => r.member.id === member.id);
-                    return (
-                      <TableRow key={member.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {member.name} {member.surname}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {member.registration_number}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {existingRecord && (
-                            <Chip
-                              color={getStatusColor(existingRecord.attendance_status)}
-                              size="sm"
-                            >
-                              {getStatusText(existingRecord.attendance_status)}
-                            </Chip>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            {(['present', 'absent', 'late', 'excused'] as const).map((status) => (
-                              <Button
-                                key={status}
-                                size="sm"
-                                variant={existingRecord?.attendance_status === status ? 'solid' : 'light'}
-                                color={getStatusColor(status)}
-                                onPress={() => handleRecordAttendance(member.id, status)}
-                              >
-                                {getStatusText(status)}
-                              </Button>
-                            ))}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              variant="light"
-              onPress={() => setIsAttendanceModalOpen(false)}
-            >
-              Zavřít
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        membersLoading={membersLoading}
+        filteredMembers={filteredMembers}
+        attendanceRecords={attendanceRecords}
+        onRecordAttendance={handleRecordAttendance}
+        getStatusColor={getStatusColor}
+        getStatusText={getStatusText}
+      />
     </div>
   );
 }
