@@ -8,8 +8,8 @@ export const coachesRoutes = [
       icon: HomeIcon,
     },
     {
-      name: translations.coaches.routes.teams,
-      href: '/coaches/teams',
+      name: translations.coaches.routes.lineups,
+      href: '/coaches/lineups',
       icon: UserGroupIcon,
     },
     {

@@ -3,7 +3,7 @@ export interface Member {
   registration_number: string;
   name: string;
   surname: string;
-  date_of_birth: string;
+  date_of_birth?: string; // Made optional
   category: string;
   sex: 'male' | 'female';
   functions: string[];

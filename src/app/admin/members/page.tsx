@@ -25,27 +25,14 @@ export default function MembersAdminPage() {
   const functionOptions = useMemo(() => {
     // Only use data from the database, no hardcoded fallback
     if (!functionsData || functionsData.length === 0) {
-      console.warn('No member functions data available, using fallback constants');
       return DEFAULT_MEMBER_FUNCTIONS;
     }
-    console.log('Functions data structure:', functionsData);
     const result = functionsData.reduce((acc, func) => {
       acc[func.name] = func.display_name;
       return acc;
     }, {} as Record<string, string>);
-    console.log('Generated functionOptions:', result);
     return result;
   }, [functionsData]);
-
-  // Log function fetch status for debugging
-  useEffect(() => {
-    console.log("Member functions fetch status:", {
-      functionsData,
-      functionsLoading,
-      functionsError,
-      functionOptions,
-    });
-  }, [functionsData, functionsLoading, functionsError, functionOptions]);
 
   const supabase = createClient();
 
@@ -65,12 +52,10 @@ export default function MembersAdminPage() {
         .order("name", { ascending: true });
 
       if (error) {
-        console.error("Supabase fetch error:", error);
         throw error;
       }
       setMembers(data || []);
     } catch (error: any) {
-      console.error("Error fetching members:", error);
       showToast.danger("Chyba při načítání členů");
     } finally {
       setLoading(false);

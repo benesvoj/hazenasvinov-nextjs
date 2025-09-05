@@ -467,7 +467,7 @@ export const translations = {
   coaches: {
     routes: {
       dashboard: "Dashboard",
-      teams: "Moje týmy",
+      lineups: "Soupisky týmů",
       videos: "Videa",
       attendance: "Docházka členů",
       statistics: "Statistiky",

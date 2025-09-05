@@ -17,7 +17,7 @@ interface MemberFormData {
   registration_number: string;
   name: string;
   surname: string;
-  date_of_birth: string;
+  date_of_birth?: string; // Made optional
   category: string;
   sex: 'male' | 'female';
   functions: string[];
@@ -96,11 +96,11 @@ export default function MemberFormModal({
               <Input
                 label="Datum narození"
                 type="date"
-                value={formData.date_of_birth}
+                value={formData.date_of_birth || ''}
                 onChange={(e) =>
-                  setFormData({ ...formData, date_of_birth: e.target.value })
+                  setFormData({ ...formData, date_of_birth: e.target.value || undefined })
                 }
-                isRequired
+                placeholder="Vyberte datum narození"
               />
               <Select
                 label="Pohlaví"
@@ -153,35 +153,12 @@ export default function MemberFormModal({
               {!formData.sex && (
                 <p className="text-sm text-gray-500 mt-1">Vyberte nejprve pohlaví pro zobrazení dostupných kategorií</p>
               )}
-              {/* Debug info */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="text-xs text-gray-400 mt-1 space-y-1">
-                  <div>
-                    Debug: {categories.length} categories, sex: {formData.sex}, filtered: {
-                      categories.filter(cat => {
-                        if (formData.sex === 'male') {
-                          return cat.gender === 'male' || cat.gender === 'mixed';
-                        } else if (formData.sex === 'female') {
-                          return cat.gender === 'female' || cat.gender === 'mixed';
-                        }
-                        return false;
-                      }).length
-                    }
-                  </div>
-                  <div>
-                    Available genders: {Array.from(new Set(categories.map(cat => cat.gender))).join(', ')}
-                  </div>
-                  <div>
-                    Category codes: {categories.map(cat => `${cat.code}(${cat.gender})`).join(', ')}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Row 5: Function Selection with Chips */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Funkce (volitelné)
+                Funkce
               </label>
               {Object.keys(functionOptions).length === 0 ? (
                 <div className="text-sm text-gray-500 p-3 bg-gray-50 rounded-lg border">
@@ -189,6 +166,7 @@ export default function MemberFormModal({
                 </div>
               ) : (
                 <>
+                {/* TODO: Check for better solution for this */}
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(functionOptions).map(([key, value]) => (
                       <Chip
