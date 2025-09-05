@@ -74,18 +74,28 @@ export async function GET(request: NextRequest) {
 			if (!error) {
 				console.log('Auth verification successful, redirecting based on type:', type)
 				// Handle different types of email confirmations
-				if (type === 'recovery') {
-					// Password reset - redirect to reset-password page
-					console.log('Redirecting to reset-password page')
-					redirect('/reset-password')
-				} else if (type === 'signup' || type === 'invite') {
-					// User invitation - redirect to set-password page
-					console.log('Redirecting to set-password page')
-					redirect('/set-password')
-				} else {
-					// Other types - use the next parameter or default to home
-					console.log('Redirecting to next:', next)
-					redirect(next)
+				try {
+					if (type === 'recovery') {
+						// Password reset - redirect to reset-password page
+						console.log('Redirecting to reset-password page')
+						redirect('/reset-password')
+					} else if (type === 'signup' || type === 'invite') {
+						// User invitation - redirect to set-password page
+						console.log('Redirecting to set-password page')
+						redirect('/set-password')
+					} else {
+						// Other types - use the next parameter or default to home
+						console.log('Redirecting to next:', next)
+						redirect(next)
+					}
+				} catch (redirectError) {
+					// Check if this is a Next.js redirect (which throws NEXT_REDIRECT error)
+					if (redirectError instanceof Error && redirectError.message === 'NEXT_REDIRECT') {
+						// This is a redirect, not an actual error - re-throw it
+						throw redirectError
+					}
+					// If it's a real error, handle it
+					throw redirectError
 				}
 			} else {
 				console.error('Auth verification failed:', {
@@ -103,6 +113,12 @@ export async function GET(request: NextRequest) {
 				redirect(`/reset-password?${errorParams.toString()}`)
 			}
 		} catch (error) {
+			// Check if this is a Next.js redirect (which throws NEXT_REDIRECT error)
+			if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+				// This is a redirect, not an actual error - re-throw it
+				throw error
+			}
+			
 			console.error('Error in auth confirm route:', {
 				error: error instanceof Error ? error.message : 'Unknown error',
 				stack: error instanceof Error ? error.stack : undefined,

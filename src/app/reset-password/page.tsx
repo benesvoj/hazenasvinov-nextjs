@@ -91,6 +91,11 @@ function ResetPasswordContent() {
           errorMessage = 'Odkaz pro obnovení hesla vypršel. Požádejte o nový odkaz.';
         } else if (supabaseErrorCode === 'access_denied') {
           errorMessage = 'Přístup byl zamítnut. Odkaz může být neplatný nebo vypršel.';
+        } else if (supabaseError === 'NEXT_REDIRECT') {
+          // This is a redirect error, not a real error - clear it
+          console.log('NEXT_REDIRECT error detected, clearing error state');
+          setError('');
+          return;
         }
         
         setError(errorMessage);
@@ -127,7 +132,7 @@ function ResetPasswordContent() {
       
       // Send password reset email - Supabase handles security internally
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: `${window.location.origin}/auth/confirm`
       });
 
       if (error) throw error;
