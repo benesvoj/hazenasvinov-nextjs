@@ -77,7 +77,7 @@ export const MeetingMinutesContainer = forwardRef<
   useEffect(() => {
     fetchMeetingMinutes(filters);
     fetchSeasonsWithActive();
-  }, [fetchMeetingMinutes, fetchSeasonsWithActive]);
+  }, [fetchMeetingMinutes, fetchSeasonsWithActive, filters]);
 
   //   TODO: typizovat users
   useEffect(() => {

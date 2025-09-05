@@ -27,19 +27,7 @@ CREATE TABLE user_roles (
 );
 ```
 
-#### `coach_categories`
-Stores category assignments for coaches.
-
-```sql
-CREATE TABLE coach_categories (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    created_by UUID REFERENCES auth.users(id),
-    UNIQUE(user_id, category_id)
-);
-```
+*Category assignments are now stored in the `user_profiles.assigned_categories` array field.*
 
 ### Views
 
@@ -75,7 +63,7 @@ GROUP BY u.id, u.email, up.full_name, u.raw_user_meta_data, up.role;
 Returns all roles for a specific user.
 
 #### `get_user_coach_categories(user_uuid UUID)`
-Returns assigned categories for a coach.
+Returns assigned categories for a coach (now uses `user_profiles.assigned_categories`).
 
 #### `has_role(user_uuid UUID, role_name VARCHAR)`
 Checks if a user has a specific role.

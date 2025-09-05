@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Video, VideoFormData, VideoFilters } from '@/types';
 import { useClubs, useSeasons, useAuth, useCategories, useUserRoles } from '@/hooks';
 import { useVideos } from '@/hooks/useVideos';
@@ -44,7 +44,7 @@ export default function CoachesVideosPage() {
   });
 
   // Fetch coach's assigned categories using new role system
-  const fetchAssignedCategories = async () => {
+  const fetchAssignedCategories = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -54,27 +54,27 @@ export default function CoachesVideosPage() {
       console.error('Error fetching assigned categories:', err);
       setAssignedCategories([]);
     }
-  };
+  }, [user?.id, getCurrentUserCategories]);
 
   useEffect(() => {
     if (user?.id && !authLoading) {
       fetchAssignedCategories();
     }
-  }, [user?.id, authLoading]);
+  }, [user?.id, authLoading, fetchAssignedCategories]);
 
   useEffect(() => {
     if (assignedCategories.length > 0) {
       fetchCategories();
       fetchAllSeasons();
     }
-  }, [assignedCategories]);
+  }, [assignedCategories, fetchCategories, fetchAllSeasons]);
 
   // Fetch videos when filters or assigned categories change
   useEffect(() => {
     if (assignedCategories.length > 0) {
       fetchVideos(filters);
     }
-  }, [filters, assignedCategories]);
+  }, [filters, assignedCategories, fetchVideos]);
 
   // Handle video operations
   const handleCreateVideo = async (formData: VideoFormData) => {

@@ -76,53 +76,7 @@ CREATE TABLE user_profiles (
 
 ## 🎭 Role & Permission Tables
 
-### `user_roles`
-**Purpose**: Legacy role system (being phased out in favor of `user_profiles`).
-
-```sql
-CREATE TABLE user_roles (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'coach')),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    created_by UUID REFERENCES auth.users(id),
-    UNIQUE(user_id, role)
-);
-```
-
-**Key Fields**:
-- `user_id` (UUID) - References `auth.users(id)`
-- `role` (VARCHAR) - Legacy roles: admin, coach
-- `created_by` (UUID) - Who assigned this role
-
-**Usage**:
-- **Legacy system** - being replaced by `user_profiles.role`
-- **Backward compatibility** for existing data
-- **Helper functions** still check this table
-
-### `coach_categories`
-**Purpose**: Category assignments for coaches (legacy system).
-
-```sql
-CREATE TABLE coach_categories (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    created_by UUID REFERENCES auth.users(id),
-    UNIQUE(user_id, category_id)
-);
-```
-
-**Key Fields**:
-- `user_id` (UUID) - References `auth.users(id)`
-- `category_id` (UUID) - References `categories(id)`
-- `created_by` (UUID) - Who made the assignment
-
-**Usage**:
-- **Legacy system** - being replaced by `user_profiles.assigned_categories`
-- **Many-to-many** relationship between users and categories
-- **Access control** for coach-specific features
+*All role and permission management is now handled through the `user_profiles` table.*
 
 ---
 
@@ -307,10 +261,7 @@ erDiagram
     }
     
     auth_users ||--o{ user_profiles : "has profile"
-    auth_users ||--o{ user_roles : "has roles"
-    auth_users ||--o{ coach_categories : "assigned to"
     auth_users ||--o{ login_logs : "logs activity"
-    categories ||--o{ coach_categories : "assigned to coach"
     clubs ||--o{ user_profiles : "belongs to"
 ```
 
@@ -364,25 +315,23 @@ All user-related tables have RLS enabled with the following policies:
 
 ## 🔄 Migration Notes
 
-### From Legacy to New System
-- **Old system**: `user_roles` + `coach_categories` tables
-- **New system**: `user_profiles` table with `assigned_categories` array
-- **Migration**: Helper functions check both systems for backward compatibility
-- **Future**: Legacy tables will be deprecated once migration is complete
+### Current System
+- **Primary system**: `user_profiles` table with `assigned_categories` array
+- **Simplified architecture**: Single table for all user roles and category assignments
+- **No legacy tables**: All role management uses `user_profiles` table exclusively
 
 ### Data Consistency
 - **Primary source**: `user_profiles.role` is the authoritative role
-- **Fallback**: `user_roles` table provides backward compatibility
-- **Views**: `user_role_summary` combines data from both systems
+- **Views**: `user_role_summary` provides comprehensive user role information
+- **Category assignments**: Stored in `user_profiles.assigned_categories` for coaches
 
 ---
 
 ## 🚨 Important Notes
 
 1. **`user_profiles` is the primary role table** - middleware and access control use this
-2. **`user_roles` is legacy** - being phased out but still supported
-3. **RLS policies prevent recursion** - use helper functions for role checks
-4. **Email is stored in `auth.users`** - not in custom tables
-5. **Category assignments** are moving from `coach_categories` to `user_profiles.assigned_categories`
+2. **RLS policies prevent recursion** - use helper functions for role checks
+3. **Email is stored in `auth.users`** - not in custom tables
+4. **Category assignments** are stored in `user_profiles.assigned_categories` for coaches
 
 This system provides a robust, secure, and scalable foundation for user management and role-based access control.
