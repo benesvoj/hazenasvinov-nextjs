@@ -83,16 +83,43 @@ function LoginForm() {
         await logSuccessfulLogin(email);
 
         // Check if user has a profile in user_profiles table
-        const { data: userProfiles, error: profileError } = await supabase
+        let userProfiles;
+        let profileError;
+
+        // First try to get existing profile
+        const { data: existingProfiles, error: existingError } = await supabase
           .from("user_profiles")
           .select("role, club_id")
           .eq("user_id", data.user.id);
 
-        if (profileError || !userProfiles || userProfiles.length === 0) {
-          setError(
-            "Uživatelský profil nebyl nalezen. Kontaktujte administrátora."
-          );
-          return;
+        if (existingError || !existingProfiles || existingProfiles.length === 0) {
+          // No profile found, try to create one using the safe function
+          try {
+            const { data: safeProfiles, error: safeError } = await supabase
+              .rpc('get_user_profile_safe', { user_uuid: data.user.id });
+
+            if (safeError || !safeProfiles || safeProfiles.length === 0) {
+              setError(
+                "Uživatelský profil nebyl nalezen. Kontaktujte administrátora."
+              );
+              return;
+            }
+
+            // Convert the safe profile result to the expected format
+            userProfiles = [{
+              role: safeProfiles[0].role,
+              club_id: safeProfiles[0].club_id
+            }];
+            profileError = null;
+          } catch (err) {
+            setError(
+              "Uživatelský profil nebyl nalezen. Kontaktujte administrátora."
+            );
+            return;
+          }
+        } else {
+          userProfiles = existingProfiles;
+          profileError = existingError;
         }
 
         if (activeTab === "admin") {

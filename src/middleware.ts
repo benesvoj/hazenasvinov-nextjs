@@ -35,11 +35,25 @@ export async function middleware(request: NextRequest) {
 					.eq('user_id', user.id)
 					.single();
 
-				// If user has no role assigned, redirect to login with message
+				// If user has no profile, try to create one using the safe function
 				if (profileError || !userProfile) {
-					const redirectUrl = new URL(publicRoutes.login, request.url)
-					redirectUrl.searchParams.set('error', 'no_role')
-					return NextResponse.redirect(redirectUrl)
+					try {
+						// Use the safe profile function to ensure profile exists
+						const { data: safeProfile, error: safeProfileError } = await supabase
+							.rpc('get_user_profile_safe', { user_uuid: user.id });
+
+						if (safeProfileError || !safeProfile || safeProfile.length === 0) {
+							// Still no profile, redirect to login
+							const redirectUrl = new URL(publicRoutes.login, request.url)
+							redirectUrl.searchParams.set('error', 'no_role')
+							return NextResponse.redirect(redirectUrl)
+						}
+					} catch (err) {
+						// Error in fallback, redirect to login
+						const redirectUrl = new URL(publicRoutes.login, request.url)
+						redirectUrl.searchParams.set('error', 'no_role')
+						return NextResponse.redirect(redirectUrl)
+					}
 				}
 			}
 		}

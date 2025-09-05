@@ -1,7 +1,7 @@
 export interface UserRole {
   id: string;
   user_id: string;
-  role: 'admin' | 'coach';
+  role: 'admin' | 'coach' | 'head_coach' | 'member';
   created_at: string;
   created_by?: string;
 }
@@ -28,8 +28,8 @@ export interface UserRoleSummary {
 
 export interface RoleAssignment {
   userId: string;
-  roles: ('admin' | 'coach')[];
+  roles: ('admin' | 'coach' | 'head_coach' | 'member')[];
   categories: string[]; // category IDs for coach role
 }
 
-export type UserRoleType = 'admin' | 'coach';
+export type UserRoleType = 'admin' | 'coach' | 'head_coach' | 'member';

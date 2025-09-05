@@ -31,6 +31,7 @@ export function useAttendance() {
       setLoading(true);
       setError(null);
 
+      // First try the RPC function
       const { data, error } = await supabase
         .rpc('get_training_sessions', {
           p_category: category,
@@ -38,9 +39,27 @@ export function useAttendance() {
           p_user_id: user.id
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('RPC function error:', error);
+        
+        // Fallback: query training_sessions directly
+        console.log('Falling back to direct query...');
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('training_sessions')
+          .select('*')
+          .eq('category', category)
+          .eq('season_id', seasonId)
+          .order('session_date', { ascending: false })
+          .order('session_time', { ascending: false });
 
-      setTrainingSessions(data || []);
+        if (fallbackError) {
+          throw fallbackError;
+        }
+
+        setTrainingSessions(fallbackData || []);
+      } else {
+        setTrainingSessions(data || []);
+      }
     } catch (err) {
       console.error('Error fetching training sessions:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch training sessions');
@@ -122,15 +141,44 @@ export function useAttendance() {
       setLoading(true);
       setError(null);
 
+      // First try the RPC function
       const { data, error } = await supabase
         .rpc('get_attendance_summary', {
           p_category: category,
           p_season_id: seasonId
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('RPC function error:', error);
+        
+        // Fallback: create basic summary from members
+        console.log('Falling back to basic summary...');
+        const { data: members, error: membersError } = await supabase
+          .from('members')
+          .select('id, name, surname')
+          .eq('category', category);
 
-      setAttendanceSummary(data || []);
+        if (membersError) {
+          throw membersError;
+        }
+
+        // Create basic summary with zero attendance
+        const basicSummary = members.map(member => ({
+          member_id: member.id,
+          member_name: member.name,
+          member_surname: member.surname,
+          total_sessions: 0,
+          present_count: 0,
+          absent_count: 0,
+          late_count: 0,
+          excused_count: 0,
+          attendance_percentage: 0
+        }));
+
+        setAttendanceSummary(basicSummary);
+      } else {
+        setAttendanceSummary(data || []);
+      }
     } catch (err) {
       console.error('Error fetching attendance summary:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch attendance summary');
@@ -146,16 +194,30 @@ export function useAttendance() {
     try {
       setError(null);
 
+      // Prepare data with only non-empty optional fields
+      const insertData = {
+        title: sessionData.title,
+        session_date: sessionData.session_date,
+        category: sessionData.category,
+        season_id: sessionData.season_id,
+        coach_id: user.id,
+        ...(sessionData.description && { description: sessionData.description }),
+        ...(sessionData.session_time && { session_time: sessionData.session_time }),
+        ...(sessionData.location && { location: sessionData.location })
+      };
+
+      console.log('Creating training session with data:', insertData);
+
       const { data, error } = await supabase
         .from('training_sessions')
-        .insert({
-          ...sessionData,
-          coach_id: user.id
-        })
+        .insert(insertData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
 
       // Refresh training sessions
       await fetchTrainingSessions(sessionData.category, sessionData.season_id);
@@ -173,14 +235,29 @@ export function useAttendance() {
     try {
       setError(null);
 
+      // Prepare data with only non-empty optional fields
+      const updateData: any = {};
+      if (sessionData.title) updateData.title = sessionData.title;
+      if (sessionData.session_date) updateData.session_date = sessionData.session_date;
+      if (sessionData.category) updateData.category = sessionData.category;
+      if (sessionData.season_id) updateData.season_id = sessionData.season_id;
+      if (sessionData.description !== undefined) updateData.description = sessionData.description;
+      if (sessionData.session_time !== undefined) updateData.session_time = sessionData.session_time;
+      if (sessionData.location !== undefined) updateData.location = sessionData.location;
+
+      console.log('Updating training session with data:', updateData);
+
       const { data, error } = await supabase
         .from('training_sessions')
-        .update(sessionData)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
 
       // Refresh training sessions if category or season changed
       if (sessionData.category && sessionData.season_id) {

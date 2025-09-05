@@ -47,17 +47,23 @@ export default function CoachesDashboard() {
             club_id,
             clubs(name)
           `)
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }); // Get most recent first
 
         if (profileError || !profiles || profiles.length === 0) {
           setError('Uživatelský profil nebyl nalezen.');
           return;
         }
 
-        // Find coach profile
-        const coachProfile = profiles.find((profile: any) => 
+        // Find coach profile (prefer coach/head_coach, fallback to first profile)
+        let coachProfile = profiles.find((profile: any) => 
           profile.role === 'coach' || profile.role === 'head_coach'
         );
+
+        // If no coach profile found, use the first profile
+        if (!coachProfile) {
+          coachProfile = profiles[0];
+        }
 
         if (!coachProfile) {
           setError('Nemáte oprávnění pro přístup do trenérského portálu.');

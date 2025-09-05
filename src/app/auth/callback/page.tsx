@@ -45,6 +45,25 @@ export default function AuthCallbackPage() {
 
           console.log('Session set successfully:', data);
 
+          // Ensure user has a profile before proceeding
+          if (data.user) {
+            try {
+              // Use the safe profile function to ensure profile exists
+              const { error: profileError } = await supabase
+                .rpc('get_user_profile_safe', { user_uuid: data.user.id });
+
+              if (profileError) {
+                console.error('Error ensuring user profile:', profileError);
+                // Continue anyway, the trigger should have created the profile
+              } else {
+                console.log('User profile ensured');
+              }
+            } catch (err) {
+              console.error('Error in profile creation fallback:', err);
+              // Continue anyway
+            }
+          }
+
           // Check if this is an invitation (signup) or password reset
           if (type === 'invite' || type === 'signup') {
             // Redirect to set-password page for new users

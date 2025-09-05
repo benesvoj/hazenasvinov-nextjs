@@ -24,8 +24,9 @@ import {
   Avatar,
 } from "@heroui/react";
 import { ReleaseNote, getReleaseNotes } from "@/utils/releaseNotes";
-import { ReleaseNotesModal, UserProfileModal, ThemeSwitch } from "@/components";
+import { ReleaseNotesModal, UserProfileModal, ThemeSwitch, CoachPortalCategoryDialog } from "@/components";
 import { logLogout } from "@/utils/loginLogger";
+import { useAdminCategorySimulation } from "@/contexts/AdminCategorySimulationContext";
 
 interface UnifiedTopBarProps {
   variant: 'admin' | 'coach';
@@ -55,10 +56,14 @@ export const UnifiedTopBar = ({
   const { user, signOut } = useAuth();
   const { hasCoachAccess, hasBothAccess, hasAdminAccess, loading } = usePortalAccess();
   
+  // Category selection for admin
+  const adminCategorySimulation = variant === 'admin' ? useAdminCategorySimulation() : null;
+  
   // State
   const [notifications, setNotifications] = useState(3);
   const [showReleaseNotes, setShowReleaseNotes] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showCoachPortalDialog, setShowCoachPortalDialog] = useState(false);
   const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
 
   // Load release notes
@@ -97,6 +102,17 @@ export const UnifiedTopBar = ({
   };
 
   const handleSwitchToCoachPortal = () => {
+    if (variant === 'admin') {
+      // Show category selection dialog first
+      setShowCoachPortalDialog(true);
+    } else {
+      // Direct switch for coaches
+      window.location.href = '/coaches/dashboard';
+    }
+  };
+
+  const handleConfirmCoachPortalSwitch = () => {
+    setShowCoachPortalDialog(false);
     window.location.href = '/coaches/dashboard';
   };
 
@@ -387,6 +403,13 @@ export const UnifiedTopBar = ({
         user={user}
       />
       <ReleaseNotesModal showReleaseNotes={showReleaseNotes} setShowReleaseNotes={setShowReleaseNotes} />
+      {variant === 'admin' && (
+        <CoachPortalCategoryDialog
+          isOpen={showCoachPortalDialog}
+          onClose={() => setShowCoachPortalDialog(false)}
+          onConfirm={handleConfirmCoachPortalSwitch}
+        />
+      )}
     </div>
   );
 };

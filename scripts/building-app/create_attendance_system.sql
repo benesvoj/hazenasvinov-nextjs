@@ -296,7 +296,11 @@ BEGIN
             WHERE up.user_id = p_user_id
             AND (
                 up.role = 'head_coach' OR
-                (up.role = 'coach' AND up.assigned_categories @> ARRAY[ts.category])
+                (up.role = 'coach' AND EXISTS (
+                    SELECT 1 FROM categories c
+                    WHERE c.id = ANY(up.assigned_categories)
+                    AND c.code = ts.category
+                ))
             )
         )
     )

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Category } from '@/types';
 
@@ -76,6 +76,13 @@ export function useCategories() {
       setLoading(false);
     }
   }, []);
+
+  // Auto-fetch categories when hook is used
+  useEffect(() => {
+    if (categories.length === 0 && !loading) {
+      fetchCategories();
+    }
+  }, [categories.length, loading, fetchCategories]);
 
   return {
     categories,

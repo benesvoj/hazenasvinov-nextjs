@@ -40,7 +40,8 @@ export const CoachesTopBar = () => {
         const { data: profiles } = await supabase
           .from('user_profiles')
           .select('role, clubs(name)')
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }); // Get most recent first
           
         // Find coach profile or use first profile
         const profile = profiles?.find((p: any) => p.role === 'coach' || p.role === 'head_coach') || profiles?.[0];

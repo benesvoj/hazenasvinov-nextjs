@@ -43,7 +43,7 @@ import {
   Spinner
 } from '@heroui/react';
 import { TrainingSessionFormData, AttendanceRecord } from '@/types/attendance';
-import { formatDate, formatTime } from '@/helpers';
+import { formatDateString, formatTime } from '@/helpers';
 
 export default function CoachesAttendancePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -77,20 +77,31 @@ export default function CoachesAttendancePage() {
     recordAttendance
   } = useAttendance();
 
-  const { seasons, loading: seasonsLoading } = useSeasons();
-  const { categories, loading: categoriesLoading } = useCategories();
+  const { seasons, loading: seasonsLoading, fetchAllSeasons } = useSeasons();
+  const { categories, loading: categoriesLoading, fetchCategories } = useCategories();
   const { getCurrentUserCategories } = useUserRoles();
   const { members, loading: membersLoading, fetchMembers } = useMembers();
 
   // Get user's assigned categories
   const [userCategories, setUserCategories] = useState<string[]>([]);
 
+  // Fetch initial data
+  useEffect(() => {
+    console.log('🔄 Fetching initial data...');
+    fetchAllSeasons();
+    fetchCategories();
+    fetchMembers();
+  }, []); // Empty dependency array - only run once on mount
+
   useEffect(() => {
     const fetchUserCategories = async () => {
       try {
+        console.log('🔄 Fetching user categories...');
         const categories = await getCurrentUserCategories();
+        console.log('📊 User categories:', categories);
         setUserCategories(categories);
         if (categories.length > 0 && !selectedCategory) {
+          console.log('🎯 Setting selected category to:', categories[0]);
           setSelectedCategory(categories[0]);
         }
       } catch (err) {
@@ -99,7 +110,7 @@ export default function CoachesAttendancePage() {
     };
 
     fetchUserCategories();
-  }, [getCurrentUserCategories, selectedCategory]);
+  }, [getCurrentUserCategories]); // Removed selectedCategory from dependencies
 
   // Get active season
   const activeSeason = seasons.find(season => season.is_active);
@@ -113,10 +124,16 @@ export default function CoachesAttendancePage() {
   // Fetch data when category and season change
   useEffect(() => {
     if (selectedCategory && selectedSeason) {
-      fetchTrainingSessions(selectedCategory, selectedSeason);
-      fetchAttendanceSummary(selectedCategory, selectedSeason);
+      console.log('🔄 Fetching data for category:', selectedCategory, 'season:', selectedSeason);
+      // Convert category ID to category code
+      const selectedCategoryData = categories.find(c => c.id === selectedCategory);
+      const categoryCode = selectedCategoryData?.code || selectedCategory;
+      console.log('📊 Using category code:', categoryCode);
+      
+      fetchTrainingSessions(categoryCode, selectedSeason);
+      fetchAttendanceSummary(categoryCode, selectedSeason);
     }
-  }, [selectedCategory, selectedSeason, fetchTrainingSessions, fetchAttendanceSummary]);
+  }, [selectedCategory, selectedSeason, categories, fetchTrainingSessions, fetchAttendanceSummary]);
 
   // Fetch attendance records when session changes
   useEffect(() => {
@@ -126,11 +143,25 @@ export default function CoachesAttendancePage() {
   }, [selectedSession, fetchAttendanceRecords]);
 
   // Filter members by selected category
-  const filteredMembers = members.filter(member => member.category === selectedCategory);
+  const filteredMembers = members.filter(member => {
+    // Find the category for this member and check if it matches selected category
+    const memberCategory = categories.find(c => c.id === member.category);
+    return memberCategory && memberCategory.id === selectedCategory;
+  });
 
   const handleCreateSession = async () => {
     try {
-      await createTrainingSession(sessionFormData);
+      // Convert category ID to category code
+      const selectedCategoryData = categories.find(c => c.id === selectedCategory);
+      const categoryCode = selectedCategoryData?.code || selectedCategory;
+      
+      const sessionData = {
+        ...sessionFormData,
+        category: categoryCode,
+        season_id: selectedSeason
+      };
+      
+      await createTrainingSession(sessionData);
       setIsSessionModalOpen(false);
       setSessionFormData({
         title: '',
@@ -150,7 +181,17 @@ export default function CoachesAttendancePage() {
     if (!editingSession) return;
 
     try {
-      await updateTrainingSession(editingSession.id, sessionFormData);
+      // Convert category ID to category code
+      const selectedCategoryData = categories.find(c => c.id === selectedCategory);
+      const categoryCode = selectedCategoryData?.code || selectedCategory;
+      
+      const sessionData = {
+        ...sessionFormData,
+        category: categoryCode,
+        season_id: selectedSeason
+      };
+      
+      await updateTrainingSession(editingSession.id, sessionData);
       setIsSessionModalOpen(false);
       setEditingSession(null);
       setSessionFormData({
@@ -256,11 +297,11 @@ export default function CoachesAttendancePage() {
               onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
               isDisabled={categoriesLoading}
             >
-              {userCategories.map((categoryCode) => {
-                const category = categories.find(c => c.code === categoryCode);
+              {userCategories.map((categoryId) => {
+                const category = categories.find(c => c.id === categoryId);
                 return (
-                  <SelectItem key={categoryCode} value={categoryCode}>
-                    {category?.name || categoryCode}
+                  <SelectItem key={categoryId} value={categoryId}>
+                    {category?.name || categoryId}
                   </SelectItem>
                 );
               })}
@@ -340,7 +381,7 @@ export default function CoachesAttendancePage() {
                           <h4 className="font-medium text-sm">{session.title}</h4>
                           <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                             <CalendarIcon className="w-3 h-3" />
-                            {formatDate(session.session_date)}
+                            {formatDateString(session.session_date)}
                             {session.session_time && (
                               <>
                                 <ClockIcon className="w-3 h-3 ml-2" />
