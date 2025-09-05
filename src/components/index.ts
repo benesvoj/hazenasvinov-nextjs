@@ -75,3 +75,6 @@ export { CoachPortalCategoryDialog } from './CoachPortalCategoryDialog';
 export { Heading1, Heading2, Heading3, Heading4, Heading5, Heading6 } from './Headings';
 
 export { showToast, useToast } from './Toast';
+
+export { default as MatchSchedule } from './match/MatchSchedule';
+export { default as MatchRow } from './match/MatchRow';

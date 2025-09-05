@@ -12,11 +12,12 @@ import { Match } from "@/types";
 interface MatchRowProps {
   match: Match;
   compact?: boolean;
+  redirectionLinks: boolean;
 }
 
-const MatchRow: React.FC<MatchRowProps> = ({ match, compact = true }) => {
+const MatchRow: React.FC<MatchRowProps> = ({ match, compact = true, redirectionLinks = true }) => {
   return (
-    <Link href={`/matches/${match.id}`} className="block">
+    <Link href={redirectionLinks ? `/matches/${match.id}` : "#"} className="block">
       <div className="border rounded-lg p-3 lg:p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
         <div className="flex items-center justify-between">
           {/* Date and Time - Left Side */}

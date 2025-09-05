@@ -1,0 +1,200 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import { Tabs, Tab } from "@heroui/tabs";
+import { translations } from "@/lib/translations";
+import { useSeasons, useCategories, useOwnClubMatches, useStandings, useUserRoles } from "@/hooks";
+import CategoryStandingsTable from "@/app/(main)/components/CategoryStandingsTable";
+import CategoryMatchesAndResults from "@/app/(main)/components/CategoryMatchesAndResults";
+import { Skeleton } from "@heroui/skeleton";
+
+interface MatchScheduleProps {
+  title?: string;
+  description?: string;
+  showOnlyAssignedCategories?: boolean; // New prop to control category filtering
+  redirectionLinks?: boolean;
+}
+
+export default function MatchSchedule({ 
+  title, 
+  description, 
+  showOnlyAssignedCategories = false,
+  redirectionLinks = true
+}: MatchScheduleProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>("men");
+  const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
+  const lastFetchedRef = useRef<{ categoryId: string; seasonId: string } | null>(null);
+
+  const { activeSeason, fetchActiveSeason } = useSeasons();
+  const { categories, fetchCategories } = useCategories();
+  const { getCurrentUserCategories } = useUserRoles();
+
+  // Filter categories based on the prop
+  const availableCategories = showOnlyAssignedCategories 
+    ? categories.filter(cat => assignedCategoryIds.includes(cat.id))
+    : categories;
+
+  // Get the selected category data from available categories
+  const selectedCategoryData = availableCategories.find(
+    (cat) => cat.code === selectedCategory
+  );
+  
+  const {
+    matches,
+    loading: matchesLoading,
+    error: matchesError,
+  } = useOwnClubMatches(selectedCategoryData?.id || undefined);
+  
+  // Use the standings hook
+  const { standings, loading: standingsLoading, error: standingsError, fetchStandings } = useStandings();
+
+
+
+  // Fetch active season and categories on mount
+  useEffect(() => {
+    fetchActiveSeason();
+    fetchCategories();
+  }, [fetchActiveSeason, fetchCategories]);
+
+  // Fetch assigned categories if needed for coach portal
+  useEffect(() => {
+    if (showOnlyAssignedCategories) {
+      const fetchAssignedCategories = async () => {
+        try {
+          const categories = await getCurrentUserCategories();
+          setAssignedCategoryIds(categories);
+        } catch (error) {
+          console.error('Error fetching assigned categories:', error);
+          setAssignedCategoryIds([]);
+        }
+      };
+      fetchAssignedCategories();
+    }
+  }, [showOnlyAssignedCategories, getCurrentUserCategories]);
+
+  // Update selected category when available categories change
+  useEffect(() => {
+    if (availableCategories.length > 0) {
+      // If current selected category is not available, select the first available one
+      const isCurrentCategoryAvailable = availableCategories.some(
+        cat => cat.code === selectedCategory
+      );
+      
+      if (!isCurrentCategoryAvailable) {
+        setSelectedCategory(availableCategories[0].code);
+      }
+    }
+  }, [availableCategories, selectedCategory]);
+
+  // Fetch standings when category or active season changes
+  useEffect(() => {
+    if (availableCategories.length > 0 && activeSeason && selectedCategoryData) {
+      const categoryId = selectedCategoryData.id;
+      const seasonId = activeSeason.id;
+      
+      // Check if we've already fetched for this combination
+      const lastFetched = lastFetchedRef.current;
+      if (lastFetched && lastFetched.categoryId === categoryId && lastFetched.seasonId === seasonId) {
+        return; // Already fetched for this combination
+      }
+      
+      // Update the ref and fetch
+      lastFetchedRef.current = { categoryId, seasonId };
+      fetchStandings(categoryId, seasonId);
+    }
+  }, [selectedCategory, activeSeason?.id, selectedCategoryData?.id]);
+
+  const upcomingMatches = matches
+    .filter((match) => match.status === "upcoming")
+    .slice(0, 3);
+
+  const recentResults = matches
+    .filter((match) => match.status === 'completed')
+    .slice(0, 3);
+
+  const loading = matchesLoading || standingsLoading;
+
+  return (
+    <section className="bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl">
+        <div className="text-center mb-12">
+          {title && (
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              {title}
+            </h2>
+          )}
+          {description && (
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              {description}
+            </p>
+          )}
+
+          {matchesError && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+              <p className="text-sm text-red-700 dark:text-red-300">
+                Chyba při načítání zápasů: {matchesError instanceof Error ? matchesError.message : matchesError}
+              </p>
+            </div>
+          )}
+          {standingsError && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+              <p className="text-sm text-red-700 dark:text-red-300">
+                Chyba při načítání tabulky: {standingsError}
+              </p>
+            </div>
+          )}
+          {matches.length === 0 && !loading && !matchesError && (
+            <Skeleton className="w-full h-full" />
+          )}
+        </div>
+
+        {/* Category Tabs */}
+        {availableCategories.length > 0 ? (
+          <Tabs
+            selectedKey={selectedCategory}
+            onSelectionChange={(key) => setSelectedCategory(key as string)}
+            className="w-full mb-8"
+            color="primary"
+            variant="underlined"
+          >
+            {availableCategories.map((category) => (
+              <Tab key={category.code} title={category.name} />
+            ))}
+          </Tabs>
+        ) : showOnlyAssignedCategories ? (
+          <div className="text-center py-8 mb-8">
+            <p className="text-gray-600 mb-2">Nemáte přiřazené žádné kategorie</p>
+            <p className="text-sm text-gray-500">
+              Pro testování trenérského portálu použijte simulaci kategorií v administraci
+            </p>
+          </div>
+        ) : (
+          <div className="text-center py-8 mb-8">
+            <p className="text-gray-600">Žádné kategorie nejsou k dispozici</p>
+          </div>
+        )}
+
+        {/* Content */}
+        {availableCategories.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column - Matches and Results */}
+            <CategoryMatchesAndResults
+              loading={matchesLoading}
+              selectedCategory={selectedCategory}
+              allMatches={matches}
+              upcomingMatches={upcomingMatches}
+              recentResults={recentResults}
+              redirectionLinks={redirectionLinks}
+            />
+
+            {/* Right Column - Standings */}
+            <CategoryStandingsTable
+              standings={standings}
+              standingsLoading={standingsLoading}
+            />
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

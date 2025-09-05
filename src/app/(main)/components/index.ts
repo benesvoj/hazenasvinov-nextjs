@@ -5,5 +5,5 @@ export { default as ClubHighlightSection } from "./ClubHighlightSection";
 export { default as PostSection } from "./PostSection";
 export { default as CategoryMatchesAndResults } from "./CategoryMatchesAndResults";
 export { default as CategoryStandingsTable } from "./CategoryStandingsTable";
-export { default as MatchRow } from "./MatchRow";
-export { default as MatchSchedule } from "./MatchSchedule";
+export { default as MatchRow } from "../../../components/match/MatchRow";
+export { default as MatchSchedule } from "../../../components/match/MatchSchedule";
