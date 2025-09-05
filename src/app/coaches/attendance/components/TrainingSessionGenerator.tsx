@@ -20,6 +20,7 @@ import { CalendarIcon, ClockIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useAttendance } from "@/hooks/useAttendance";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useCategories } from "@/hooks/useCategories";
+import { useCategoryLineups } from "@/hooks/useCategoryLineups";
 import { formatDateString, formatTime } from "@/helpers";
 
 interface TrainingSessionGeneratorProps {
@@ -55,10 +56,12 @@ export default function TrainingSessionGenerator({
   >([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createAttendanceRecords, setCreateAttendanceRecords] = useState(true);
 
-  const { createTrainingSession } = useAttendance();
+  const { createTrainingSession, createAttendanceForLineupMembers } = useAttendance();
   const { getCurrentUserCategories } = useUserRoles();
   const { categories } = useCategories();
+  const { lineupMembers, fetchLineups } = useCategoryLineups();
 
   const [assignedCategories, setAssignedCategories] = useState<string[]>([]);
 
@@ -172,10 +175,25 @@ export default function TrainingSessionGenerator({
     try {
       let successCount = 0;
       let errorCount = 0;
+      const createdSessionIds: string[] = [];
+
+      // Get lineup members for the selected category and season
+      let memberIds: string[] = [];
+      if (createAttendanceRecords && selectedCategory && selectedSeason) {
+        try {
+          await fetchLineups(selectedCategory, selectedSeason);
+          memberIds = lineupMembers
+            .map(lm => lm.member?.id)
+            .filter(Boolean) as string[];
+          console.log('Lineup members for attendance:', memberIds);
+        } catch (err) {
+          console.warn('Could not fetch lineup members, skipping attendance creation:', err);
+        }
+      }
 
       for (const session of generatedSessions) {
         try {
-          await createTrainingSession({
+          const createdSession = await createTrainingSession({
             title: session.title,
             session_date: session.date,
             session_time: session.time,
@@ -183,7 +201,24 @@ export default function TrainingSessionGenerator({
             season_id: selectedSeason || "", // Use the selected season ID
             description: `Automaticky vygenerovaný trénink - ${session.title}`,
           });
+          
+          createdSessionIds.push(createdSession.id);
           successCount++;
+
+          // Create attendance records for lineup members if enabled
+          if (createAttendanceRecords && memberIds.length > 0) {
+            try {
+              await createAttendanceForLineupMembers(
+                createdSession.id,
+                memberIds,
+                'present' // Default status for generated sessions
+              );
+              console.log(`Created attendance records for session ${session.title}`);
+            } catch (attendanceErr) {
+              console.warn(`Could not create attendance records for session ${session.title}:`, attendanceErr);
+              // Don't fail the entire process if attendance creation fails
+            }
+          }
         } catch (err) {
           console.error(`Error creating session ${session.title}:`, err);
           errorCount++;
@@ -219,6 +254,7 @@ export default function TrainingSessionGenerator({
     setIncludeNumber(false);
     setGeneratedSessions([]);
     setError(null);
+    setCreateAttendanceRecords(true);
   };
 
   // Handle modal close
@@ -328,6 +364,20 @@ export default function TrainingSessionGenerator({
                 Přidat číslo do názvu (např. "Trénink 1", "Trénink 2")
               </Checkbox>
             </div>
+          </div>
+
+          {/* Attendance Records Option */}
+          <div>
+            <Checkbox
+              isSelected={createAttendanceRecords}
+              onValueChange={setCreateAttendanceRecords}
+              aria-label="Vytvořit záznamy docházky"
+            >
+              Automaticky vytvořit záznamy docházky pro členy sestavy (výchozí: přítomen)
+            </Checkbox>
+            <p className="text-sm text-gray-600 mt-1">
+              Pokud je zaškrtnuto, budou automaticky vytvořeny záznamy docházky pro všechny členy sestavy vybrané kategorie a sezóny.
+            </p>
           </div>
 
           {/* Generate Button */}

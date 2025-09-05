@@ -11,7 +11,6 @@ import {
   ClipboardDocumentListIcon,
   PlusIcon,
   CalendarIcon,
-  UserGroupIcon,
   ChartBarIcon,
   ClockIcon,
   MapPinIcon,
@@ -40,7 +39,6 @@ import {
 } from "@heroui/react";
 import { TrainingSessionFormData, AttendanceRecord } from "@/types/attendance";
 import { formatDateString, formatTime } from "@/helpers";
-import AttendanceModal from "./components/AttendanceModal";
 import TrainingSessionModal from "./components/TrainingSessionModal";
 import TrainingSessionGenerator from "./components/TrainingSessionGenerator";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
@@ -50,7 +48,6 @@ export default function CoachesAttendancePage() {
   const [selectedSeason, setSelectedSeason] = useState<string>("");
   const [selectedSession, setSelectedSession] = useState<string>("");
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
-  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
@@ -69,6 +66,7 @@ export default function CoachesAttendancePage() {
     updateTrainingSession,
     deleteTrainingSession,
     recordAttendance,
+    createAttendanceForLineupMembers,
   } = useAttendance();
 
   const { seasons, loading: seasonsLoading, fetchAllSeasons } = useSeasons();
@@ -164,6 +162,7 @@ export default function CoachesAttendancePage() {
   // Fetch attendance records when session changes
   useEffect(() => {
     if (selectedSession) {
+      console.log("🔄 Fetching attendance records for session:", selectedSession);
       fetchAttendanceRecords(selectedSession);
     }
   }, [selectedSession, fetchAttendanceRecords]);
@@ -195,22 +194,24 @@ export default function CoachesAttendancePage() {
     return (a.name || '').localeCompare(b.name || '');
   });
 
-  // Debug logging
-  console.log('🔍 Members debug:', {
-    selectedCategory,
-    totalMembers: members.length,
-    lineupMembersCount: lineupMembers.length,
-    lineupMembersListCount: lineupMembersList.length,
-    fallbackMembersCount: fallbackMembers.length,
-    finalFilteredMembersCount: filteredMembers.length,
-    usingLineupMembers: lineupMembersList.length > 0,
-    lineupMembers: lineupMembers.map(lm => ({ 
-      id: lm.member?.id, 
-      name: lm.member?.name, 
-      surname: lm.member?.surname,
-      position: lm.position 
-    }))
-  });
+  // Debug logging (only when values change significantly)
+  useEffect(() => {
+    console.log('🔍 Members debug:', {
+      selectedCategory,
+      totalMembers: members.length,
+      lineupMembersCount: lineupMembers.length,
+      lineupMembersListCount: lineupMembersList.length,
+      fallbackMembersCount: fallbackMembers.length,
+      finalFilteredMembersCount: filteredMembers.length,
+      usingLineupMembers: lineupMembersList.length > 0,
+      lineupMembers: lineupMembers.map(lm => ({ 
+        id: lm.member?.id, 
+        name: lm.member?.name, 
+        surname: lm.member?.surname,
+        position: lm.position 
+      }))
+    });
+  }, [selectedCategory, members.length, lineupMembers.length, lineupMembersList.length, fallbackMembers.length, filteredMembers.length]);
 
   const handleSessionSubmit = async (sessionData: TrainingSessionFormData) => {
     try {
@@ -281,6 +282,52 @@ export default function CoachesAttendancePage() {
       console.error("Error recording attendance:", err);
       // Show error to user - you might want to add a toast notification here
       alert(err instanceof Error ? err.message : "Chyba při zaznamenávání docházky");
+    }
+  };
+
+  const handleCreateAttendanceForSession = async () => {
+    if (!selectedSession || !selectedCategory || !selectedSeason) return;
+
+    try {
+      // Get lineup members for the selected category and season
+      await fetchLineups(selectedCategory, selectedSeason);
+      const memberIds = lineupMembers
+        .map(lm => lm.member?.id)
+        .filter(Boolean) as string[];
+
+      console.log('Lineup members found:', lineupMembers.length, 'Member IDs:', memberIds);
+
+      if (memberIds.length === 0) {
+        // Fallback to filtered members if no lineup members
+        const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
+        const selectedCategoryCode = selectedCategoryData?.code;
+        const fallbackMembers = members.filter((member) => member.category === selectedCategoryCode);
+        const fallbackMemberIds = fallbackMembers.map(m => m.id);
+        
+        console.log('Using fallback members:', fallbackMembers.length, 'Fallback member IDs:', fallbackMemberIds);
+        
+        if (fallbackMemberIds.length === 0) {
+          alert("Žádní členové nejsou k dispozici pro vybranou kategorii");
+          return;
+        }
+        
+        await createAttendanceForLineupMembers(selectedSession, fallbackMemberIds, 'present');
+        await fetchAttendanceRecords(selectedSession);
+        alert(`Vytvořeno ${fallbackMemberIds.length} záznamů docházky pro tento trénink (použiti všichni členové kategorie)`);
+        return;
+      }
+
+      console.log('Creating attendance records for existing session:', selectedSession, 'with members:', memberIds);
+      
+      await createAttendanceForLineupMembers(selectedSession, memberIds, 'present');
+      
+      // Refresh attendance records
+      await fetchAttendanceRecords(selectedSession);
+      
+      alert(`Vytvořeno ${memberIds.length} záznamů docházky pro tento trénink`);
+    } catch (err) {
+      console.error("Error creating attendance records:", err);
+      alert(err instanceof Error ? err.message : "Chyba při vytváření záznamů docházky");
     }
   };
 
@@ -482,14 +529,14 @@ export default function CoachesAttendancePage() {
             <CardHeader>
               <div className="flex items-center justify-between w-full">
                 <h3 className="text-lg font-semibold">Docházka</h3>
-                {selectedSession && (
+                {selectedSession && attendanceRecords.length === 0 && (
                   <Button
                     size="sm"
                     color="primary"
-                    startContent={<UserGroupIcon className="w-4 h-4" />}
-                    onPress={() => setIsAttendanceModalOpen(true)}
+                    variant="bordered"
+                    onPress={handleCreateAttendanceForSession}
                   >
-                    Zaznamenat docházku
+                    Vytvořit záznamy docházky
                   </Button>
                 )}
               </div>
@@ -506,15 +553,19 @@ export default function CoachesAttendancePage() {
                   ))}
                 </div>
               ) : attendanceRecords.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  Žádné záznamy docházky pro tento trénink
-                </p>
+                <div className="text-center py-8">
+                  <p className="text-gray-500 mb-2">
+                    Žádné záznamy docházky pro tento trénink
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    Debug: selectedSession = {selectedSession}, attendanceRecords.length = {attendanceRecords.length}
+                  </p>
+                </div>
               ) : (
                 <Table aria-label="Attendance records">
                   <TableHeader>
                     <TableColumn>ČLEN</TableColumn>
                     <TableColumn>STATUS</TableColumn>
-                    <TableColumn>AKCE</TableColumn>
                   </TableHeader>
                   <TableBody>
                     {attendanceRecords
@@ -534,18 +585,7 @@ export default function CoachesAttendancePage() {
                             <div className="font-medium">
                               {record.member.name} {record.member.surname}
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {record.member.category}
-                            </div>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            color={getStatusColor(record.attendance_status)}
-                            size="sm"
-                          >
-                            {getStatusText(record.attendance_status)}
-                          </Chip>
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
@@ -593,17 +633,6 @@ export default function CoachesAttendancePage() {
         selectedSeason={selectedSeason}
       />
 
-      {/* Attendance Modal */}
-              <AttendanceModal
-        isOpen={isAttendanceModalOpen}
-        onClose={() => setIsAttendanceModalOpen(false)}
-          membersLoading={membersLoading || lineupsLoading}
-          filteredMembers={filteredMembers}
-          attendanceRecords={attendanceRecords}
-          onRecordAttendance={handleRecordAttendance}
-          getStatusColor={getStatusColor}
-          getStatusText={getStatusText}
-        />
 
       {/* Training Session Generator Modal */}
       <TrainingSessionGenerator

@@ -86,6 +86,8 @@ export function useAttendance() {
       setLoading(true);
       setError(null);
 
+      console.log('🔍 Fetching attendance records for training session:', trainingSessionId);
+
       const { data, error } = await supabase
         .from('member_attendance')
         .select(`
@@ -115,7 +117,12 @@ export function useAttendance() {
         .eq('training_session_id', trainingSessionId)
         .order('recorded_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('🔍 Error fetching attendance records:', error);
+        throw error;
+      }
+
+      console.log('🔍 Raw attendance records data:', data);
 
       const records: AttendanceRecord[] = (data || []).map(record => ({
         id: record.id,
@@ -138,6 +145,7 @@ export function useAttendance() {
         recorded_at: record.recorded_at
       }));
 
+      console.log('🔍 Processed attendance records:', records);
       setAttendanceRecords(records);
     } catch (err) {
       console.error('Error fetching attendance records:', err);
@@ -326,6 +334,47 @@ export function useAttendance() {
       throw err;
     }
   }, [supabase]);
+
+  // Create attendance records for all lineup members
+  const createAttendanceForLineupMembers = useCallback(async (
+    trainingSessionId: string,
+    memberIds: string[],
+    defaultStatus: 'present' | 'absent' | 'late' | 'excused' = 'present'
+  ) => {
+    if (!user?.id) throw new Error('User not authenticated');
+    if (memberIds.length === 0) return [];
+
+    try {
+      setError(null);
+
+      // Prepare attendance data for all members
+      const attendanceData = memberIds.map(memberId => ({
+        member_id: memberId,
+        training_session_id: trainingSessionId,
+        attendance_status: defaultStatus,
+        recorded_by: user.id,
+        recorded_at: new Date().toISOString()
+      }));
+
+      console.log('🔍 Creating attendance records for lineup members:', attendanceData);
+
+      const { data, error } = await supabase
+        .from('member_attendance')
+        .insert(attendanceData)
+        .select();
+
+      if (error) {
+        console.error('🔍 Error creating bulk attendance records:', error);
+        throw error;
+      }
+
+      console.log('🔍 Successfully created attendance records:', data);
+      return data || [];
+    } catch (err) {
+      console.error('Error creating attendance for lineup members:', err);
+      throw err;
+    }
+  }, [supabase, user?.id]);
 
   // Record member attendance
   const recordAttendance = useCallback(async (
@@ -556,6 +605,7 @@ export function useAttendance() {
     recordAttendance,
     updateAttendance,
     deleteAttendance,
-    getAttendanceStats
+    getAttendanceStats,
+    createAttendanceForLineupMembers
   };
 }
