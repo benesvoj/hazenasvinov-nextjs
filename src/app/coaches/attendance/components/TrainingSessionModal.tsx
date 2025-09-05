@@ -66,6 +66,21 @@ export default function TrainingSessionModal({
     }
   }, [session, selectedCategory, selectedSeason]);
 
+  // Reset form when modal opens for new session
+  useEffect(() => {
+    if (isOpen && !session) {
+      setSessionFormData({
+        title: "",
+        description: "",
+        session_date: "",
+        session_time: "",
+        category: selectedCategory,
+        season_id: selectedSeason,
+        location: ""
+      });
+    }
+  }, [isOpen, session, selectedCategory, selectedSeason]);
+
   const handleSubmit = () => {
     onSubmit(sessionFormData);
   };

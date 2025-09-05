@@ -489,7 +489,10 @@ export default function CoachesAttendancePage() {
                 startContent={<PlusIcon className="w-4 h-4" />}
                 onPress={() => {
                   setEditingSession(null);
-                  setIsSessionModalOpen(true);
+                  // Small delay to ensure state is reset before opening modal
+                  setTimeout(() => {
+                    setIsSessionModalOpen(true);
+                  }, 0);
                 }}
                 isDisabled={!selectedCategory || !selectedSeason}
               >
@@ -686,7 +689,10 @@ export default function CoachesAttendancePage() {
       {/* Training Session Modal */}
       <TrainingSessionModal
         isOpen={isSessionModalOpen}
-        onClose={() => setIsSessionModalOpen(false)}
+        onClose={() => {
+          setEditingSession(null);
+          setIsSessionModalOpen(false);
+        }}
         onSubmit={handleSessionSubmit}
         session={editingSession}
         selectedCategory={selectedCategory}
