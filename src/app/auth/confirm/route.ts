@@ -23,13 +23,23 @@ export async function GET(request: NextRequest) {
 		tokenLength: token?.length,
 		codeLength: code?.length,
 		tokenHashLength: token_hash?.length,
-		searchParams: Object.fromEntries(searchParams.entries())
+		searchParams: Object.fromEntries(searchParams.entries()),
+		allParams: {
+			token_hash: searchParams.get('token_hash'),
+			code: searchParams.get('code'),
+			token: searchParams.get('token'),
+			type: searchParams.get('type')
+		}
 	})
 
 
 
 	// Handle token_hash, code, and token parameters
-	if ((token_hash || code || token) && type) {
+	const hasToken = !!(token_hash || code || token)
+	const hasType = !!type
+	console.log('Condition check:', { hasToken, hasType, willProcess: hasToken && hasType })
+	
+	if (hasToken && hasType) {
 		console.log('Processing auth verification with parameters:', {
 			hasTokenHash: !!token_hash,
 			hasCode: !!code,
@@ -191,12 +201,18 @@ export async function GET(request: NextRequest) {
 			redirect(`/reset-password?${errorParams.toString()}`)
 		}
 	} else {
-		console.log('Missing required parameters:', {
+		console.log('Missing required parameters - condition failed:', {
 			hasToken: !!(token_hash || code || token),
 			hasType: !!type,
 			tokenLength: token?.length,
 			codeLength: code?.length,
-			tokenHashLength: token_hash?.length
+			tokenHashLength: token_hash?.length,
+			actualValues: {
+				token_hash: token_hash || 'null',
+				code: code || 'null',
+				token: token || 'null',
+				type: type || 'null'
+			}
 		})
 	}
 
