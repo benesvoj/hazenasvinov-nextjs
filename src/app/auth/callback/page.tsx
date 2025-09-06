@@ -20,6 +20,11 @@ export default function AuthCallbackPage() {
         const type = hashParams.get('type');
         const expiresIn = hashParams.get('expires_in');
         const expiresAt = hashParams.get('expires_at');
+        
+        // Also check for error parameters
+        const error = hashParams.get('error');
+        const errorCode = hashParams.get('error_code');
+        const errorDescription = hashParams.get('error_description');
 
         console.log('Auth callback received:', {
           hasAccessToken: !!accessToken,
@@ -27,8 +32,24 @@ export default function AuthCallbackPage() {
           tokenType,
           type,
           expiresIn,
-          expiresAt
+          expiresAt,
+          error,
+          errorCode,
+          errorDescription
         });
+        
+        // Handle error cases first
+        if (error) {
+          console.error('Auth callback error:', { error, errorCode, errorDescription });
+          // Redirect to error page with error parameters
+          const errorParams = new URLSearchParams({
+            error,
+            error_code: errorCode || 'unknown',
+            error_description: errorDescription || error
+          });
+          router.push(`/error?${errorParams.toString()}`);
+          return;
+        }
 
         if (accessToken && refreshToken) {
           // Set the session using the tokens from the URL
@@ -80,6 +101,11 @@ export default function AuthCallbackPage() {
           }
         } else {
           console.error('Missing required tokens in URL');
+          // Check if we have any hash parameters at all
+          const hasAnyParams = hashParams.toString().length > 0;
+          if (hasAnyParams) {
+            console.log('Hash parameters found but no tokens:', Object.fromEntries(hashParams.entries()));
+          }
           router.push('/error');
         }
       } catch (error) {
