@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const origin = process.env.NODE_ENV === 'production' 
       ? 'https://www.hazenasvinov.cz'
       : (request.headers.get('origin') || process.env.NEXT_PUBLIC_PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
-    const redirectUrl = `${origin}/auth/callback`;
+    const redirectUrl = `${origin}/auth/confirm`;
     
     console.log('Sending password reset email to:', email);
     console.log('Origin detected:', origin);
@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
     console.log('Environment:', process.env.NODE_ENV);
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectUrl
+      redirectTo: redirectUrl,
+      captchaToken: undefined // Disable captcha for now
     });
 
     if (error) throw error;
