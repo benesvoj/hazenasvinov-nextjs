@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
 		fullUrl: request.url,
 		tokenLength: token?.length,
 		codeLength: code?.length,
-		tokenHashLength: token_hash?.length
+		tokenHashLength: token_hash?.length,
+		searchParams: Object.fromEntries(searchParams.entries())
 	})
 
 
@@ -73,6 +74,17 @@ export async function GET(request: NextRequest) {
 						user: result.data?.user?.id,
 						session: !!result.data?.session
 					})
+					
+					// If PKCE token exchange fails, provide specific error handling
+					if (error) {
+						console.error('PKCE token exchange failed:', error)
+						const errorParams = new URLSearchParams({
+							error: error.message,
+							error_code: error.status?.toString() || 'pkce_exchange_failed',
+							error_description: error.message
+						})
+						redirect(`/reset-password?${errorParams.toString()}`)
+					}
 				} else {
 					// Try different approaches for regular token verification
 					// First try as token_hash (most common for password reset)
@@ -174,6 +186,11 @@ export async function GET(request: NextRequest) {
 	}
 
 	// redirect the user to an error page with some instructions
-	console.log('Redirecting to error page')
-	redirect(publicRoutes.error)
+	console.log('Redirecting to error page with missing parameters error')
+	const errorParams = new URLSearchParams({
+		error: 'Missing required parameters',
+		error_code: 'missing_parameters',
+		error_description: 'The password reset link is missing required parameters. Please request a new password reset email.'
+	})
+	redirect(`${publicRoutes.error}?${errorParams.toString()}`)
 }

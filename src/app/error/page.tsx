@@ -10,9 +10,13 @@ function ErrorPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   
-  const error = searchParams.get('error')
-  const errorCode = searchParams.get('error_code')
-  const errorDescription = searchParams.get('error_description')
+  // Get error parameters from both query params and hash
+  const error = searchParams.get('error') || (typeof window !== 'undefined' ? new URLSearchParams(window.location.hash.substring(1)).get('error') : null)
+  const errorCode = searchParams.get('error_code') || (typeof window !== 'undefined' ? new URLSearchParams(window.location.hash.substring(1)).get('error_code') : null)
+  const errorDescription = searchParams.get('error_description') || (typeof window !== 'undefined' ? new URLSearchParams(window.location.hash.substring(1)).get('error_description') : null)
+  
+  // Debug logging
+  console.log('Error page parameters:', { error, errorCode, errorDescription, hash: typeof window !== 'undefined' ? window.location.hash : 'N/A' })
   
   // Handle specific password reset errors
   if (errorCode === 'otp_expired') {
@@ -33,6 +37,43 @@ function ErrorPageContent() {
                 <strong>Řešení:</strong> Požádejte administrátora o odeslání nového emailu pro obnovení hesla.
               </p>
             </div>
+            
+            <div className="space-y-3">
+              <Button 
+                color="primary" 
+                onPress={() => router.push('/reset-password')}
+                className="w-full"
+              >
+                Požádat o nový odkaz
+              </Button>
+              
+              <Button 
+                variant="light" 
+                onPress={() => router.push('/login')}
+                className="w-full"
+              >
+                Přejít na přihlášení
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+    )
+  }
+  
+  // Handle missing parameters errors
+  if (errorCode === 'missing_parameters') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+        <Card className="w-full max-w-md">
+          <CardBody className="text-center py-12">
+            <ExclamationTriangleIcon className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Neplatný odkaz
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Odkaz pro obnovení hesla neobsahuje všechny potřebné parametry. Požádejte o nový odkaz.
+            </p>
             
             <div className="space-y-3">
               <Button 
