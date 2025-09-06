@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
     console.log('Sending password reset email to:', email);
     console.log('Origin detected:', origin);
     console.log('Redirect URL:', redirectUrl);
+    console.log('Supabase URL:', process.env.SUPABASE_URL);
+    console.log('Environment:', process.env.NODE_ENV);
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl

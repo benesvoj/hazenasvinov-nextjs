@@ -35,7 +35,10 @@ export default function AuthCallbackPage() {
           expiresAt,
           error,
           errorCode,
-          errorDescription
+          errorDescription,
+          fullUrl: window.location.href,
+          hash: window.location.hash,
+          search: window.location.search
         });
         
         // Handle error cases first
@@ -67,7 +70,7 @@ export default function AuthCallbackPage() {
           console.log('Session set successfully:', data);
 
           // Ensure user has a profile before proceeding
-          if (data.user) {
+          if (data && data.user) {
             try {
               // Use the safe profile function to ensure profile exists
               const { error: profileError } = await supabase
@@ -83,6 +86,10 @@ export default function AuthCallbackPage() {
               console.error('Error in profile creation fallback:', err);
               // Continue anyway
             }
+          } else {
+            console.error('No user data in session:', data);
+            router.push('/error');
+            return;
           }
 
           // Check if this is an invitation (signup) or password reset
@@ -96,7 +103,7 @@ export default function AuthCallbackPage() {
             router.push('/reset-password');
           } else {
             // Default redirect to admin dashboard
-            console.log('Redirecting to admin dashboard');
+            console.log('Redirecting to admin dashboard (type:', type, ')');
             router.push('/admin');
           }
         } else {
