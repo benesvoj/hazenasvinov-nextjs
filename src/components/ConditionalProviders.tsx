@@ -39,6 +39,16 @@ export function ConditionalProviders({ children }: ConditionalProvidersProps) {
   const shouldLoadUserContext = !EXCLUDED_PAGES.includes(basePath);
   const shouldLoadAppDataContext = !NO_APP_DATA_PAGES.includes(basePath) && shouldLoadUserContext;
 
+  // Debug logging
+  console.log('ConditionalProviders debug:', {
+    pathname,
+    basePath,
+    shouldLoadUserContext,
+    shouldLoadAppDataContext,
+    isExcluded: EXCLUDED_PAGES.includes(basePath),
+    isNoAppData: NO_APP_DATA_PAGES.includes(basePath)
+  });
+
   // If this is a page that doesn't need any contexts, just render the children
   if (!shouldLoadUserContext) {
     return (

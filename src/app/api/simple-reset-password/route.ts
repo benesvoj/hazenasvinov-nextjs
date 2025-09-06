@@ -16,34 +16,41 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     
     // Get the origin from the request headers or use environment variable
-    // In production, we should always use the production URL
     const origin = process.env.NODE_ENV === 'production' 
       ? 'https://www.hazenasvinov.cz'
       : (request.headers.get('origin') || process.env.NEXT_PUBLIC_PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
-    const redirectUrl = `${origin}/auth/confirm`;
     
-    console.log('Sending password reset email to:', email);
+    console.log('Simple password reset for:', email);
     console.log('Origin detected:', origin);
-    console.log('Redirect URL:', redirectUrl);
-    console.log('Supabase URL:', process.env.SUPABASE_URL);
-    console.log('Environment:', process.env.NODE_ENV);
     
-    // Try to force OTP flow by using a different approach
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectUrl,
-      captchaToken: undefined // Disable captcha for now
+    // Use the admin client to send a password reset email
+    // This should use the traditional OTP flow instead of PKCE
+    const { error } = await supabase.auth.admin.generateLink({
+      type: 'recovery',
+      email: email,
+      options: {
+        redirectTo: `${origin}/auth/confirm`
+      }
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Admin generateLink error:', error);
+      // Fallback to regular resetPasswordForEmail
+      const { error: fallbackError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${origin}/auth/confirm`
+      });
+      
+      if (fallbackError) throw fallbackError;
+    }
 
     return NextResponse.json({ 
       success: true, 
       message: 'Password reset email sent successfully',
-      redirectUrl: redirectUrl
+      method: error ? 'fallback' : 'admin'
     });
 
   } catch (error) {
-    console.error('Error in reset-password API:', error);
+    console.error('Error in simple reset-password API:', error);
     return NextResponse.json(
       { error: 'Failed to send password reset email', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

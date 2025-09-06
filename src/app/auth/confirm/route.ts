@@ -82,34 +82,12 @@ export async function GET(request: NextRequest) {
 				
 				// Check if this is a PKCE token (starts with 'pkce_')
 				if (token.startsWith('pkce_')) {
-					console.log('Detected PKCE token, using exchangeCodeForSession', {
-						tokenLength: token.length,
-						tokenPrefix: token.substring(0, 10)
-					})
-					// For PKCE tokens, we need to use exchangeCodeForSession
-					result = await supabase.auth.exchangeCodeForSession(token)
-					error = result.error;
-					console.log('PKCE token exchange result:', { 
-						error: error?.message,
-						errorCode: error?.status,
-						user: result.data?.user?.id,
-						session: !!result.data?.session,
-						sessionData: result.data?.session ? {
-							accessToken: result.data.session.access_token ? 'present' : 'missing',
-							refreshToken: result.data.session.refresh_token ? 'present' : 'missing'
-						} : 'no session'
-					})
-					
-					// If PKCE token exchange fails, provide specific error handling
-					if (error) {
-						console.error('PKCE token exchange failed:', error)
-						const errorParams = new URLSearchParams({
-							error: error.message,
-							error_code: error.status?.toString() || 'pkce_exchange_failed',
-							error_description: error.message
-						})
-						redirect(`/reset-password?${errorParams.toString()}`)
-					}
+					console.log('PKCE token detected - redirecting to callback for proper handling')
+					// Redirect PKCE tokens to the callback page for proper handling
+					const callbackUrl = new URL('/auth/callback', request.url)
+					callbackUrl.searchParams.set('token', token)
+					callbackUrl.searchParams.set('type', type || 'recovery')
+					redirect(callbackUrl.toString())
 				} else {
 					// Try different approaches for regular token verification
 					// First try as token_hash (most common for password reset)

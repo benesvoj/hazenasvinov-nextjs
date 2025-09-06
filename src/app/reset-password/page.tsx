@@ -128,8 +128,8 @@ function ResetPasswordContent() {
     setError('');
 
     try {
-      // Use the server-side API route for password reset
-      const response = await fetch('/api/reset-password', {
+      // Use the simple reset-password API route
+      const response = await fetch('/api/simple-reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
