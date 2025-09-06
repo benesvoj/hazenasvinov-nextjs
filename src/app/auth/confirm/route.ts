@@ -30,6 +30,13 @@ export async function GET(request: NextRequest) {
 
 	// Handle token_hash, code, and token parameters
 	if ((token_hash || code || token) && type) {
+		console.log('Processing auth verification with parameters:', {
+			hasTokenHash: !!token_hash,
+			hasCode: !!code,
+			hasToken: !!token,
+			type,
+			tokenValue: token ? `${token.substring(0, 10)}...` : 'none'
+		})
 		try {
 			const supabase = await createClient()
 
@@ -65,14 +72,22 @@ export async function GET(request: NextRequest) {
 				
 				// Check if this is a PKCE token (starts with 'pkce_')
 				if (token.startsWith('pkce_')) {
-					console.log('Detected PKCE token, using exchangeCodeForSession')
+					console.log('Detected PKCE token, using exchangeCodeForSession', {
+						tokenLength: token.length,
+						tokenPrefix: token.substring(0, 10)
+					})
 					// For PKCE tokens, we need to use exchangeCodeForSession
 					result = await supabase.auth.exchangeCodeForSession(token)
 					error = result.error;
 					console.log('PKCE token exchange result:', { 
 						error: error?.message,
+						errorCode: error?.status,
 						user: result.data?.user?.id,
-						session: !!result.data?.session
+						session: !!result.data?.session,
+						sessionData: result.data?.session ? {
+							accessToken: result.data.session.access_token ? 'present' : 'missing',
+							refreshToken: result.data.session.refresh_token ? 'present' : 'missing'
+						} : 'no session'
 					})
 					
 					// If PKCE token exchange fails, provide specific error handling
