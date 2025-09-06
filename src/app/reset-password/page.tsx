@@ -132,7 +132,7 @@ function ResetPasswordContent() {
       
       // Send password reset email - Supabase handles security internally
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/confirm`
+        redirectTo: `${window.location.origin}/auth/callback`
       });
 
       if (error) throw error;

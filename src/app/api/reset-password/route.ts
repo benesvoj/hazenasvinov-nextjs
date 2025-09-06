@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const origin = process.env.NODE_ENV === 'production' 
       ? 'https://www.hazenasvinov.cz'
       : (request.headers.get('origin') || process.env.NEXT_PUBLIC_PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
-    const redirectUrl = `${origin}/auth/confirm`;
+    const redirectUrl = `${origin}/auth/callback`;
     
     console.log('Sending password reset email to:', email);
     console.log('Origin detected:', origin);
