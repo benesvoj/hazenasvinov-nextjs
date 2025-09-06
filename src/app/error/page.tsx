@@ -4,8 +4,9 @@ import { useSearchParams } from 'next/navigation'
 import { Button, Card, CardBody, CardHeader } from '@heroui/react'
 import { LockClosedIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function ErrorPage() {
+function ErrorPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   
@@ -126,5 +127,22 @@ export default function ErrorPage() {
         </CardBody>
       </Card>
     </div>
+  )
+}
+
+export default function ErrorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+        <Card className="w-full max-w-md">
+          <CardBody className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 dark:border-red-400 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-300">Načítání...</p>
+          </CardBody>
+        </Card>
+      </div>
+    }>
+      <ErrorPageContent />
+    </Suspense>
   )
 }

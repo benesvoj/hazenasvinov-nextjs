@@ -90,16 +90,9 @@ export async function GET(request: NextRequest) {
 					// If that fails, try as direct token (for some email formats)
 					if (error && type === 'recovery') {
 						console.log('Token_hash failed, trying direct token verification')
-						result = await supabase.auth.verifyOtp({
-							type,
-							token,
-						})
-						error = result.error;
-						console.log('Direct token verification result:', { 
-							error: error?.message,
-							user: result.data?.user?.id,
-							session: !!result.data?.session
-						})
+						// For direct token verification, we need to provide an email
+						// Since we don't have the email, we'll skip this approach
+						console.log('Skipping direct token verification - email required but not available')
 					}
 				}
 			}
