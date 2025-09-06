@@ -26,6 +26,12 @@ export default function AuthCallbackPage() {
         const errorCode = hashParams.get('error_code');
         const errorDescription = hashParams.get('error_description');
 
+        // Check for PKCE tokens in query parameters
+        const searchParams = new URLSearchParams(window.location.search);
+        const pkceToken = searchParams.get('token');
+        const pkceType = searchParams.get('type');
+        const pkceCode = searchParams.get('code');
+
         console.log('Auth callback received:', {
           hasAccessToken: !!accessToken,
           hasRefreshToken: !!refreshToken,
@@ -36,6 +42,9 @@ export default function AuthCallbackPage() {
           error,
           errorCode,
           errorDescription,
+          hasPkceToken: !!pkceToken,
+          hasPkceCode: !!pkceCode,
+          pkceType,
           fullUrl: window.location.href,
           hash: window.location.hash,
           search: window.location.search
@@ -52,6 +61,94 @@ export default function AuthCallbackPage() {
           });
           router.push(`/error?${errorParams.toString()}`);
           return;
+        }
+
+        // Handle PKCE tokens from query parameters
+        if (pkceToken || pkceCode) {
+          console.log('Processing PKCE token/code:', { 
+            hasToken: !!pkceToken, 
+            hasCode: !!pkceCode, 
+            type: pkceType,
+            tokenLength: pkceToken?.length,
+            codeLength: pkceCode?.length
+          });
+          
+          try {
+            let result;
+            let error;
+            
+            if (pkceCode) {
+              // Handle code parameter (newer PKCE format)
+              console.log('Exchanging PKCE code for session');
+              result = await supabase.auth.exchangeCodeForSession(pkceCode);
+              error = result.error;
+            } else if (pkceToken) {
+              // Handle token parameter (email template format)
+              console.log('Exchanging PKCE token for session');
+              result = await supabase.auth.exchangeCodeForSession(pkceToken);
+              error = result.error;
+            }
+
+            if (error) {
+              console.error('PKCE exchange failed:', error);
+              const errorParams = new URLSearchParams({
+                error: error.message,
+                error_code: error.status?.toString() || 'pkce_exchange_failed',
+                error_description: error.message
+              });
+              router.push(`/error?${errorParams.toString()}`);
+              return;
+            }
+
+            console.log('PKCE exchange successful:', { 
+              user: result.data?.user?.id,
+              session: !!result.data?.session
+            });
+
+            // Ensure user has a profile before proceeding
+            if (result.data && result.data.user) {
+              try {
+                // Use the safe profile function to ensure profile exists
+                const { error: profileError } = await supabase
+                  .rpc('get_user_profile_safe', { user_uuid: result.data.user.id });
+
+                if (profileError) {
+                  console.error('Error ensuring user profile:', profileError);
+                  // Continue anyway, the trigger should have created the profile
+                } else {
+                  console.log('User profile ensured');
+                }
+              } catch (err) {
+                console.error('Error in profile creation fallback:', err);
+                // Continue anyway
+              }
+            }
+
+            // Check if this is an invitation (signup) or password reset
+            if (pkceType === 'invite' || pkceType === 'signup') {
+              // Redirect to set-password page for new users
+              console.log('Redirecting to set-password page');
+              router.push('/set-password');
+            } else if (pkceType === 'recovery') {
+              // Redirect to reset-password page for password reset
+              console.log('Redirecting to reset-password page');
+              router.push('/reset-password');
+            } else {
+              // Default redirect to admin dashboard
+              console.log('Redirecting to admin dashboard (type:', pkceType, ')');
+              router.push('/admin');
+            }
+            return;
+          } catch (err) {
+            console.error('Error processing PKCE token:', err);
+            const errorParams = new URLSearchParams({
+              error: err instanceof Error ? err.message : 'PKCE processing failed',
+              error_code: 'pkce_processing_error',
+              error_description: err instanceof Error ? err.message : 'PKCE processing failed'
+            });
+            router.push(`/error?${errorParams.toString()}`);
+            return;
+          }
         }
 
         if (accessToken && refreshToken) {

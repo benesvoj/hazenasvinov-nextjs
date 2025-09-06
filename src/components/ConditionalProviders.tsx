@@ -33,8 +33,11 @@ interface ConditionalProvidersProps {
 export function ConditionalProviders({ children }: ConditionalProvidersProps) {
   const pathname = usePathname();
   
-  const shouldLoadUserContext = !EXCLUDED_PAGES.includes(pathname);
-  const shouldLoadAppDataContext = !NO_APP_DATA_PAGES.includes(pathname) && shouldLoadUserContext;
+  // Get the base path without query parameters
+  const basePath = pathname.split('?')[0];
+  
+  const shouldLoadUserContext = !EXCLUDED_PAGES.includes(basePath);
+  const shouldLoadAppDataContext = !NO_APP_DATA_PAGES.includes(basePath) && shouldLoadUserContext;
 
   // If this is a page that doesn't need any contexts, just render the children
   if (!shouldLoadUserContext) {
