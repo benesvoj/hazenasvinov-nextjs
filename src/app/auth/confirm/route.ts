@@ -60,18 +60,48 @@ export async function GET(request: NextRequest) {
 				})
 			} else if (token) {
 				// Handle token parameter (email template format)
-				console.log('Verifying OTP with token')
-				// For password reset, we need to use the token as token_hash
-				result = await supabase.auth.verifyOtp({
-					type,
-					token_hash: token,
-				})
-				error = result.error;
-				console.log('Token verification result:', { 
-					error: error?.message,
-					user: result.data?.user?.id,
-					session: !!result.data?.session
-				})
+				console.log('Verifying OTP with token:', { token, type, tokenLength: token.length, isPKCE: token.startsWith('pkce_') })
+				
+				// Check if this is a PKCE token (starts with 'pkce_')
+				if (token.startsWith('pkce_')) {
+					console.log('Detected PKCE token, using exchangeCodeForSession')
+					// For PKCE tokens, we need to use exchangeCodeForSession
+					result = await supabase.auth.exchangeCodeForSession(token)
+					error = result.error;
+					console.log('PKCE token exchange result:', { 
+						error: error?.message,
+						user: result.data?.user?.id,
+						session: !!result.data?.session
+					})
+				} else {
+					// Try different approaches for regular token verification
+					// First try as token_hash (most common for password reset)
+					result = await supabase.auth.verifyOtp({
+						type,
+						token_hash: token,
+					})
+					error = result.error;
+					console.log('Token_hash verification result:', { 
+						error: error?.message,
+						user: result.data?.user?.id,
+						session: !!result.data?.session
+					})
+					
+					// If that fails, try as direct token (for some email formats)
+					if (error && type === 'recovery') {
+						console.log('Token_hash failed, trying direct token verification')
+						result = await supabase.auth.verifyOtp({
+							type,
+							token,
+						})
+						error = result.error;
+						console.log('Direct token verification result:', { 
+							error: error?.message,
+							user: result.data?.user?.id,
+							session: !!result.data?.session
+						})
+					}
+				}
 			}
 
 			if (!error) {
