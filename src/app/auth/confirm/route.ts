@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
 		token: token ? 'present' : 'missing',
 		type,
 		next,
-		fullUrl: request.url
+		fullUrl: request.url,
+		tokenLength: token?.length,
+		codeLength: code?.length,
+		tokenHashLength: token_hash?.length
 	})
 
 
@@ -58,10 +61,10 @@ export async function GET(request: NextRequest) {
 			} else if (token) {
 				// Handle token parameter (email template format)
 				console.log('Verifying OTP with token')
-				// For password reset, we need to use the token as a token_hash
+				// For password reset, we need to use the token directly
 				result = await supabase.auth.verifyOtp({
 					type,
-					token_hash: token,
+					token,
 				})
 				error = result.error;
 				console.log('Token verification result:', { 
@@ -69,6 +72,21 @@ export async function GET(request: NextRequest) {
 					user: result.data?.user?.id,
 					session: !!result.data?.session
 				})
+				
+				// If token verification fails, try as token_hash as fallback
+				if (error && type === 'recovery') {
+					console.log('Token verification failed, trying as token_hash')
+					result = await supabase.auth.verifyOtp({
+						type,
+						token_hash: token,
+					})
+					error = result.error;
+					console.log('Token_hash verification result:', { 
+						error: error?.message,
+						user: result.data?.user?.id,
+						session: !!result.data?.session
+					})
+				}
 			}
 
 			if (!error) {
@@ -102,7 +120,11 @@ export async function GET(request: NextRequest) {
 					error: error.message,
 					code: error.status,
 					type,
-					hasToken: !!(token_hash || code || token)
+					hasToken: !!(token_hash || code || token),
+					tokenLength: token?.length,
+					codeLength: code?.length,
+					tokenHashLength: token_hash?.length,
+					errorDetails: error
 				})
 				// Redirect to error page with proper error parameters
 				const errorParams = new URLSearchParams({
