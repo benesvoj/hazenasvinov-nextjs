@@ -61,10 +61,10 @@ export async function GET(request: NextRequest) {
 			} else if (token) {
 				// Handle token parameter (email template format)
 				console.log('Verifying OTP with token')
-				// For password reset, we need to use the token directly
+				// For password reset, we need to use the token as token_hash
 				result = await supabase.auth.verifyOtp({
 					type,
-					token,
+					token_hash: token,
 				})
 				error = result.error;
 				console.log('Token verification result:', { 
@@ -72,21 +72,6 @@ export async function GET(request: NextRequest) {
 					user: result.data?.user?.id,
 					session: !!result.data?.session
 				})
-				
-				// If token verification fails, try as token_hash as fallback
-				if (error && type === 'recovery') {
-					console.log('Token verification failed, trying as token_hash')
-					result = await supabase.auth.verifyOtp({
-						type,
-						token_hash: token,
-					})
-					error = result.error;
-					console.log('Token_hash verification result:', { 
-						error: error?.message,
-						user: result.data?.user?.id,
-						session: !!result.data?.session
-					})
-				}
 			}
 
 			if (!error) {
