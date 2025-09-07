@@ -141,22 +141,24 @@ const Header = () => {
               {/* Menu items */}
               {displayMenuItems.map((item: MenuItem) => {
                 if (item.children) {
-                  // Category with sub-items
+                  // Category with sub-items - Two columns layout
                   return (
-                    <div key={item.title} className="space-y-1">
+                    <div key={item.title} className="space-y-2">
                       <div className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
                         {item.title}
                       </div>
-                      {item.children.map((child: MenuItem) => (
-                        <Link
-                          key={child.route || child.title}
-                          href={child.route || "#"}
-                          className="block w-full p-3 pl-6 text-left text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 border-l-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          {child.title}
-                        </Link>
-                      ))}
+                      <div className="grid grid-cols-2 gap-2">
+                        {item.children.map((child: MenuItem) => (
+                          <Link
+                            key={child.route || child.title}
+                            href={child.route || "#"}
+                            className="block p-3 text-center text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            {child.title}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   );
                 } else {
