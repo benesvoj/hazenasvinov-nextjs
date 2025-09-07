@@ -1,85 +1,71 @@
-'use client';
-
-import { useParams } from 'next/navigation';
-import { useFetchCategories } from '@/hooks/useFetchCategories';
-import { useFetchMatches } from '@/hooks/useFetchMatches';
+import { notFound } from 'next/navigation';
+import { getCategoryPageData } from '@/utils/categoryPageData';
 import { CategoryStandings } from '@/app/(main)/categories/components/CategoryStandings';
 import { CategoryMatches } from '@/app/(main)/categories/components/CategoryMatches';
 import { CategoryPosts } from '@/app/(main)/categories/components/CategoryPosts';
-import { Spinner } from '@heroui/react';
 
-export default function CategoryPage() {
-  const params = useParams();
-  const categorySlug = params.slug as string;
+interface CategoryPageProps {
+  params: {
+    slug: string;
+  };
+}
+
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const { slug: categorySlug } = await params;
   
-  const { data: categories, loading: categoriesLoading, error: categoriesError } = useFetchCategories();
-  const { matches, loading: matchesLoading, error: matchesError, debugInfo } = useFetchMatches(categorySlug);
-  
-  // Find the current category
-  const currentCategory = categories?.find(cat => 
-    cat.code === categorySlug
-  );
-  
-  if (categoriesLoading) {
+  try {
+    // Fetch all data server-side in optimized batches
+    const { category, matches, posts, standings, season } = await getCategoryPageData(categorySlug);
+    
+    console.log('Page received standings:', standings);
+    console.log('First page standing team:', standings[0]?.team);
+    
+    if (!category) {
+      notFound();
+    }
+    
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-  
-  if (categoriesError || !currentCategory) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Kategorie nenalezena
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            {category.name}{category.description && ` - ${category.description}`}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Požadovaná kategorie nebyla nalezena nebo není dostupná.
-          </p>
+        </div>
+        
+        {/* Responsive Grid Layout with Different Ordering */}
+        <div className="grid grid-cols-1 gap-8">
+          {/* Posts - Desktop: 1st, Mobile: 3rd */}
+          <div className="order-3 md:order-1">
+            <CategoryPosts 
+              categoryName={category.name}
+              categorySlug={categorySlug}
+              posts={posts}
+            />
+          </div>
+          
+          {/* Standings - Desktop: 2nd, Mobile: 1st */}
+          <div className="order-1 md:order-2">
+            <CategoryStandings 
+              categoryId={category.id} 
+              categoryName={category.name}
+              standings={standings}
+            />
+          </div>
+          
+          {/* Matches - Desktop: 3rd, Mobile: 2nd */}
+          <div className="order-2 md:order-3">
+            <CategoryMatches 
+              categoryId={category.id}
+              categoryName={category.name}
+              matches={matches}
+              matchweeks={0}
+            />
+          </div>
         </div>
       </div>
     );
+  } catch (error) {
+    console.error('Error loading category page:', error);
+    notFound();
   }
-  
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {currentCategory.name}{currentCategory.description && ` - ${currentCategory.description}`}
-        </h1>
-      </div>
-      
-      {/* Responsive Grid Layout with Different Ordering */}
-      <div className="grid grid-cols-1 gap-8">
-        {/* Posts - Desktop: 1st, Mobile: 3rd */}
-        <div className="order-3 md:order-1">
-          <CategoryPosts 
-            categoryName={currentCategory.name}
-            categorySlug={categorySlug}
-          />
-        </div>
-        
-        {/* Standings - Desktop: 2nd, Mobile: 1st */}
-        <div className="order-1 md:order-2">
-          <CategoryStandings 
-            categoryId={currentCategory.id} 
-            categoryName={currentCategory.name}
-          />
-        </div>
-        
-        {/* Matches - Desktop: 3rd, Mobile: 2nd */}
-        <div className="order-2 md:order-3">
-          <CategoryMatches 
-            categoryId={currentCategory.id}
-            categoryName={currentCategory.name}
-            matches={matches}
-            loading={matchesLoading}
-            matchweeks={currentCategory.matchweek_count || 0}
-          />
-        </div>
-      </div>
-    </div>
-  );
 }

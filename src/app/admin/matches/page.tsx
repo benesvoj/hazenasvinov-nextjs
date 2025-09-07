@@ -1207,7 +1207,7 @@ export default function MatchesAdminPage() {
 
     // Find the category to get its matchweek_count
     const category = categories.find((cat) => cat.id === categoryId);
-    const maxMatchweeks = category?.matchweek_count || 20; // Default to 20 if not set
+    const maxMatchweeks = 20; // Default to 20 matchweeks since column doesn't exist
 
     // Add matchweek numbers based on category setting
     for (let i = 1; i <= maxMatchweeks; i++) {
