@@ -14,10 +14,21 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { visiblePages, loading } = useVisiblePages();
+  const { visiblePages, loading, error } = useVisiblePages();
   
   // Build menu items from visible pages, with fallback to static routes
   const menuItems: MenuItem[] = loading ? [] : buildMenuFromPages(visiblePages);
+  
+  // Fallback menu items if none are available
+  const fallbackMenuItems: MenuItem[] = [
+    { title: "Domů", route: "/" },
+    { title: "O nás", route: "/about" },
+    { title: "Novinky", route: "/news" },
+    { title: "Kontakt", route: "/contact" }
+  ];
+  
+  // Use dynamic menu items if available, otherwise fallback
+  const displayMenuItems = menuItems.length > 0 ? menuItems : fallbackMenuItems;
 
   return (
     <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
@@ -44,7 +55,7 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-6">
-            {menuItems.map((item: MenuItem) => {
+            {displayMenuItems.map((item: MenuItem) => {
               return item.children ? (
                 <DropdownMenu key={item.title} item={item} />
               ) : (
@@ -87,49 +98,93 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Simple Full Screen */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 dark:border-gray-700">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Portal Link - Mobile */}
+          <div 
+            className="fixed inset-0 z-[9999] lg:hidden"
+            style={{ 
+              zIndex: 9999,
+              backgroundColor: 'white',
+              background: 'white'
+            }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 h-16">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Menu</h2>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              </button>
+            </div>
+            
+            {/* Navigation Content - Scrollable */}
+            <div 
+              className="overflow-y-auto p-4 space-y-2" 
+              style={{ 
+                height: 'calc(100vh - 120px)',
+                backgroundColor: 'white'
+              }}
+            >
+              {/* Portal Link */}
               <Link
                 href="/login"
-                className="block px-3 py-2 text-sm font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20"
+                className="block w-full p-4 text-left text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                🎯 Portal
+                <span className="text-xl mr-3">🎯</span>
+                Portal
               </Link>
               
-              {menuItems.map((item: MenuItem) => {
-                return item.children ? (
-                  <div key={item.title} className="space-y-1">
-                    <div className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {item.title}
-                    </div>
-                    <div className="pl-4 space-y-1">
-                      {item.children?.map((child: MenuItem) => (
+              {/* Menu items */}
+              {displayMenuItems.map((item: MenuItem) => {
+                if (item.children) {
+                  // Category with sub-items
+                  return (
+                    <div key={item.title} className="space-y-1">
+                      <div className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+                        {item.title}
+                      </div>
+                      {item.children.map((child: MenuItem) => (
                         <Link
-                          key={child.route}
-                          href={child.route || ""}
-                          className="block px-3 py-2 text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                          key={child.route || child.title}
+                          href={child.route || "#"}
+                          className="block w-full p-3 pl-6 text-left text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 border-l-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           {child.title}
                         </Link>
                       ))}
                     </div>
-                  </div>
-                ) : (
-                  <Link
-                    key={item.route}
-                    href={item.route || ""}
-                    className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
-                );
+                  );
+                } else {
+                  // Regular menu item
+                  return (
+                    <Link
+                      key={item.route || item.title}
+                      href={item.route || "#"}
+                      className="block w-full p-4 text-left text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {item.title}
+                    </Link>
+                  );
+                }
               })}
+            </div>
+            
+            {/* Footer */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700" 
+              style={{ backgroundColor: 'white' }}
+            >
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full py-3 px-6 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium"
+              >
+                Zavřít menu
+              </button>
             </div>
           </div>
         )}
@@ -137,6 +192,5 @@ const Header = () => {
     </header>
   );
 };
-
 
 export default Header;

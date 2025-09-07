@@ -197,11 +197,11 @@ export const UnifiedSidebar = ({
         container: `fixed left-0 top-0 h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white transition-all duration-300 ease-in-out z-50 shadow-xl flex flex-col ${
           isCollapsed ? "w-16" : "w-64"
         }`,
-        mobileContainer: `fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white w-80 max-w-[85vw] z-50 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col`,
+        mobileContainer: `fixed left-0 top-0 h-full w-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white z-50 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col`,
         header:
           "flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800/50 backdrop-blur-sm h-20",
         navItem: (isActive: boolean) =>
-          `group flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+          `group flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors min-h-[48px] ${
             isActive
               ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-r-2 border-blue-600 dark:border-blue-400"
               : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
@@ -210,7 +210,7 @@ export const UnifiedSidebar = ({
           `w-5 h-5 ${isCollapsed ? "mx-auto" : "mr-3"}`,
         footer: "p-4 border-t border-gray-700 bg-gray-800/30",
         groupHeader:
-          "w-full px-3 py-2 flex items-center justify-between hover:bg-gray-700/30 rounded-lg transition-colors duration-200",
+          "w-full px-4 py-3 flex items-center justify-between hover:bg-gray-700/30 rounded-lg transition-colors duration-200 min-h-[48px]",
         groupLabel:
           "text-xs font-semibold text-gray-400 uppercase tracking-wider",
         divider: "mx-3 border-t border-gray-700/50",
@@ -220,13 +220,11 @@ export const UnifiedSidebar = ({
         container: `fixed top-0 left-0 z-50 h-screen bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
           isCollapsed ? "w-16" : "w-64"
         }`,
-        mobileContainer: `fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
-          isCollapsed ? "w-16" : "w-64"
-        }`,
+        mobileContainer: `fixed top-0 left-0 z-50 h-full w-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col`,
         header:
           "flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 h-20",
         navItem: (isActive: boolean) =>
-          `flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+          `flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors min-h-[48px] ${
             isActive
               ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-r-2 border-green-600 dark:border-green-400"
               : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
@@ -296,7 +294,7 @@ export const UnifiedSidebar = ({
             </div>
             <button
               onClick={() => sidebarContext?.setIsMobileOpen?.(false)}
-              className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+              className={`p-3 rounded-lg transition-all duration-200 hover:scale-105 min-h-[48px] min-w-[48px] flex items-center justify-center ${
                 variant === "admin"
                   ? "hover:bg-gray-700/50"
                   : "hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -315,13 +313,25 @@ export const UnifiedSidebar = ({
 
           {/* Mobile Navigation */}
           <nav
-            className="flex-1 py-4 overflow-y-auto scrollbar-hide"
+            className="flex-1 py-6 overflow-y-auto scrollbar-hide relative"
             style={{ 
               minHeight: 0,
-              height: 'calc(100vh - 140px)' // Fixed height for proper scrolling (80px header + 60px footer)
+              height: 'calc(100vh - 120px)' // Fixed height for proper scrolling (80px header + 40px footer)
             }}
           >
-            <div className="space-y-4 px-3">
+            {/* Scroll gradient indicators */}
+            <div className={`absolute top-0 left-0 right-0 h-4 pointer-events-none z-10 ${
+              variant === "admin" 
+                ? "bg-gradient-to-b from-gray-900 via-gray-900/50 to-transparent" 
+                : "bg-gradient-to-b from-white dark:from-gray-800 via-white/50 dark:via-gray-800/50 to-transparent"
+            }`} />
+            <div className={`absolute bottom-0 left-0 right-0 h-4 pointer-events-none z-10 ${
+              variant === "admin" 
+                ? "bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent" 
+                : "bg-gradient-to-t from-white dark:from-gray-800 via-white/50 dark:via-gray-800/50 to-transparent"
+            }`} />
+            
+            <div className="space-y-6 px-4">
               {Object.entries(config.groupedItems).map(
                 ([groupKey, groupItems], groupIndex) => (
                   <div key={groupKey} className="space-y-2">
@@ -433,7 +443,17 @@ export const UnifiedSidebar = ({
           </nav>
 
           {/* Mobile Footer */}
-          <div className={classes.footer}>
+          <div className={`${classes.footer} flex flex-col items-center space-y-3`}>
+            <button
+              onClick={() => sidebarContext?.setIsMobileOpen?.(false)}
+              className={`w-full max-w-xs py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+                variant === "admin"
+                  ? "bg-gray-700 hover:bg-gray-600 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
+              }`}
+            >
+              Zavřít menu
+            </button>
             <div className="text-center">
               <div
                 className={`text-xs mb-1 ${

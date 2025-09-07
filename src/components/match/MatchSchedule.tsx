@@ -35,7 +35,6 @@ export default function MatchSchedule({
     getCurrentUserCategories = userRoles.getCurrentUserCategories;
   } catch (error) {
     // UserProvider not available (e.g., on public pages)
-    console.log('UserProvider not available, using all categories');
   }
 
   // Filter categories based on the prop

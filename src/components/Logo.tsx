@@ -37,8 +37,8 @@ export default function Logo({
       width={sizePixels[size]}
       height={sizePixels[size]}
       className={`${sizeClasses[size]} ${className}`}
-      style={{ width: 'auto', height: 'auto' }}
-      priority={size === 'lg'} // Prioritize loading for larger logos
+      // TODO: still getting image warning about priority
+      priority={true} // Always prioritize logo loading since it's above the fold
     />
   );
 }

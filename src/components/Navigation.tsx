@@ -248,18 +248,18 @@ export function MobileNavigation({
   const renderMobileItem = (item: NavigationItem, level: number = 0) => (
     <div key={item.title}>
       <div
-        className={`flex items-center justify-between px-4 py-3 text-base cursor-pointer transition-colors ${
+        className={`flex items-center justify-between px-6 py-4 text-base cursor-pointer transition-colors min-h-[56px] ${
           level === 0 
-            ? 'text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700' 
-            : 'text-gray-700 dark:text-gray-300 ml-4'
+            ? 'text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800' 
+            : 'text-gray-700 dark:text-gray-300 ml-6 hover:bg-gray-50 dark:hover:bg-gray-800'
         }`}
         onClick={() => handleItemClick(item)}
       >
-        <div className="flex items-center gap-3">
-          {item.icon && <span className="w-5 h-5">{item.icon}</span>}
-          <span>{item.title}</span>
+        <div className="flex items-center gap-4">
+          {item.icon && <span className="w-6 h-6 flex-shrink-0">{item.icon}</span>}
+          <span className="font-medium">{item.title}</span>
           {item.badge && (
-            <span className={`px-2 py-1 text-xs rounded-full bg-${item.badge.color || 'primary'}-100 text-${item.badge.color || 'primary'}-800 dark:bg-${item.badge.color || 'primary'}-900/20 dark:text-${item.badge.color || 'primary'}-400`}>
+            <span className={`px-3 py-1 text-xs rounded-full bg-${item.badge.color || 'primary'}-100 text-${item.badge.color || 'primary'}-800 dark:bg-${item.badge.color || 'primary'}-900/20 dark:text-${item.badge.color || 'primary'}-400`}>
               {item.badge.text}
             </span>
           )}
@@ -267,7 +267,7 @@ export function MobileNavigation({
         
         {item.children && (
           <ChevronRightIcon 
-            className={`w-5 h-5 transition-transform ${
+            className={`w-5 h-5 transition-transform flex-shrink-0 ${
               openItems.has(item.title) ? 'rotate-90' : ''
             }`} 
           />
@@ -288,21 +288,38 @@ export function MobileNavigation({
     <div className="fixed inset-0 z-50 lg:hidden">
       <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
       
-      <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-900 shadow-xl">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Menu</h2>
-          <Button
-            variant="light"
-            size="sm"
-            onPress={onClose}
+      <div className="fixed inset-0 bg-white dark:bg-gray-900 shadow-xl flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 h-16">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Menu</h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            title="Zavřít menu"
           >
-            <XMarkIcon className="w-6 h-6" />
-          </Button>
+            <XMarkIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+          </button>
         </div>
         
-        <div className="overflow-y-auto h-full">
-          {renderMobileItem({ title: "Zavřít", href: "#", onClick: onClose })}
-          {items.map((item) => renderMobileItem(item))}
+        {/* Navigation Content */}
+        <div className="flex-1 overflow-y-auto relative">
+          {/* Scroll gradient indicators */}
+          <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white dark:from-gray-900 via-white/50 dark:via-gray-900/50 to-transparent pointer-events-none z-10" />
+          <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white dark:from-gray-900 via-white/50 dark:via-gray-900/50 to-transparent pointer-events-none z-10" />
+          
+          <div className="py-2">
+            {items.map((item) => renderMobileItem(item))}
+          </div>
+        </div>
+        
+        {/* Footer with close button */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={onClose}
+            className="w-full py-3 px-6 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
+          >
+            Zavřít menu
+          </button>
         </div>
       </div>
     </div>
