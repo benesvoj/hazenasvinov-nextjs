@@ -128,16 +128,6 @@ const Header = () => {
                 height: 'calc(100vh - 64px)'
               }}
             >
-              {/* Portal Link */}
-              <Link
-                href="/login"
-                className="block w-full p-4 text-left text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <span className="text-xl mr-3">🎯</span>
-                Portal
-              </Link>
-              
               {/* Menu items */}
               {displayMenuItems.map((item: MenuItem) => {
                 if (item.children) {
@@ -175,6 +165,18 @@ const Header = () => {
                   );
                 }
               })}
+              
+              {/* Portal Link - Bottom */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Link
+                  href="/login"
+                  className="block w-full p-4 text-center text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="text-xl mr-3">🎯</span>
+                  Portal
+                </Link>
+              </div>
             </div>
             
           </div>
