@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { texts } from "@/utils/texts";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import Link from "@/components/Link";
@@ -11,6 +10,7 @@ import DropdownMenu from "@/components/DropdownMenu";
 import Logo from "@/components/Logo";
 import { useState } from "react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Button } from "@heroui/react";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -101,30 +101,31 @@ const Header = () => {
         {/* Mobile Navigation - Simple Full Screen */}
         {isMobileMenuOpen && (
           <div 
-            className="fixed inset-0 z-[9999] lg:hidden"
+            className="fixed inset-0 z-[9999] lg:hidden bg-white dark:bg-gray-900"
             style={{ 
-              zIndex: 9999,
-              backgroundColor: 'white',
-              background: 'white'
+              zIndex: 9999
             }}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 h-16">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Menu</h2>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
+              <Button
                 className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Zavřít menu"
+                isIconOnly
+                size="sm"
+                variant="light"
+                onPress={() => setIsMobileMenuOpen(false)}
               >
                 <XMarkIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-              </button>
+              </Button>
             </div>
             
             {/* Navigation Content - Scrollable */}
             <div 
-              className="overflow-y-auto p-4 space-y-2" 
+              className="overflow-y-auto p-4 space-y-2 bg-white dark:bg-gray-900" 
               style={{ 
-                height: 'calc(100vh - 120px)',
-                backgroundColor: 'white'
+                height: 'calc(100vh - 64px)'
               }}
             >
               {/* Portal Link */}
@@ -174,18 +175,6 @@ const Header = () => {
               })}
             </div>
             
-            {/* Footer */}
-            <div 
-              className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700" 
-              style={{ backgroundColor: 'white' }}
-            >
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="w-full py-3 px-6 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium"
-              >
-                Zavřít menu
-              </button>
-            </div>
           </div>
         )}
       </div>
