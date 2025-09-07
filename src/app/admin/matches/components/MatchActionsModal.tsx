@@ -58,9 +58,22 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="sm">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      size="sm"
+      classNames={{
+        base: "max-w-[95vw] mx-2",
+        wrapper: "items-center justify-center p-2 sm:p-4",
+        body: "px-4 py-4",
+        header: "px-4 py-4",
+        footer: "px-4 py-4"
+      }}
+      placement="center"
+      scrollBehavior="inside"
+    >
       <ModalContent>
-        <ModalHeader>
+        <ModalHeader className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             <h3 className="text-lg font-semibold">Akce pro zápas</h3>
@@ -153,6 +166,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
             variant="light"
             onPress={onClose}
             className="w-full"
+            size="lg"
           >
             Zavřít
           </Button>

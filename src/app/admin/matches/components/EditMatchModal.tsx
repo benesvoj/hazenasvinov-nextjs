@@ -87,9 +87,24 @@ export default function EditMatchModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="3xl">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      size="3xl"
+      classNames={{
+        base: "max-w-[95vw] mx-2",
+        wrapper: "items-center justify-center p-2 sm:p-4",
+        body: "px-4 py-4",
+        header: "px-4 py-4",
+        footer: "px-4 py-4"
+      }}
+      placement="center"
+      scrollBehavior="inside"
+    >
       <ModalContent>
-        <ModalHeader>Upravit zápas</ModalHeader>
+        <ModalHeader className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">Upravit zápas</h2>
+        </ModalHeader>
         <ModalBody>
           {selectedMatch && (
             <>

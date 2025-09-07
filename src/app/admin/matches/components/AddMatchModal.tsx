@@ -40,9 +40,24 @@ export default function AddMatchModal({
   getMatchweekOptions
 }: AddMatchModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose}
+      size="2xl"
+      classNames={{
+        base: "max-w-[95vw] mx-2",
+        wrapper: "items-center justify-center p-2 sm:p-4",
+        body: "px-4 py-4",
+        header: "px-4 py-4",
+        footer: "px-4 py-4"
+      }}
+      placement="center"
+      scrollBehavior="inside"
+    >
       <ModalContent>
-        <ModalHeader>Přidat nový zápas</ModalHeader>
+        <ModalHeader className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">Přidat nový zápas</h2>
+        </ModalHeader>
         <ModalBody>
           <div className="space-y-4">
             <Input
