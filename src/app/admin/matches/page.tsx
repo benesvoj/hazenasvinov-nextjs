@@ -1497,6 +1497,10 @@ export default function MatchesAdminPage() {
                               onLineupModalOpen();
                             }}
                             onDeleteClick={handleDeleteClick}
+                            onMatchActionsOpen={(match) => {
+                              setSelectedMatch(match);
+                              onMatchActionsOpen();
+                            }}
                             isSeasonClosed={isSeasonClosed()}
                           />
                         )}

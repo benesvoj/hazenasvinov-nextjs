@@ -23,6 +23,7 @@ interface CategoryMatchesProps {
   onEditMatch: (match: Match) => void;
   onLineupModalOpen: (match: Match) => void;
   onDeleteClick: (match: Match) => void;
+  onMatchActionsOpen: (match: Match) => void;
   isSeasonClosed: boolean;
 }
 
@@ -36,6 +37,7 @@ export default function CategoryMatches({
   onEditMatch,
   onLineupModalOpen,
   onDeleteClick,
+  onMatchActionsOpen,
   isSeasonClosed,
 }: CategoryMatchesProps) {
   // Group matches by matchweek
@@ -127,13 +129,12 @@ export default function CategoryMatches({
                     <div
                       key={match.id}
                       className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow lg:cursor-default cursor-pointer"
-                      onClick={() => {
-                        // Only handle click on mobile
+                      onClick={(e) => {
+                        // Only handle click on mobile - prevent event bubbling
+                        e.stopPropagation();
+                        // Check if we're on mobile using CSS media query approach
                         if (window.innerWidth < 1024) {
-                          // lg breakpoint
-                          // This would need to be handled by the parent component
-                          // For now, we'll just show the actions modal
-                          console.log("Mobile click on match:", match.id);
+                          onMatchActionsOpen(match);
                         }
                       }}
                     >
