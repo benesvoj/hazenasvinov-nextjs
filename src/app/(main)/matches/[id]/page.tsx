@@ -20,50 +20,7 @@ import { formatTime } from "@/helpers/formatTime";
 import { translations } from "@/lib/translations";
 import { useLineupData, useFetchMatch } from "@/hooks";
 import TeamDisplay from "./components/TeamDisplay";
-
-function getResultBadge(result: string) {
-  switch (result) {
-    case "win":
-      return (
-        <Badge color="success" variant="flat">
-          Výhra
-        </Badge>
-      );
-    case "loss":
-      return (
-        <Badge color="danger" variant="flat">
-          Prohra
-        </Badge>
-      );
-    case "draw":
-      return (
-        <Badge color="warning" variant="flat">
-          Remíza
-        </Badge>
-      );
-    default:
-      return null;
-  }
-}
-
-function getStatusBadge(status: string) {
-  switch (status) {
-    case "upcoming":
-      return (
-        <Badge color="primary" variant="flat">
-          Nadcházející
-        </Badge>
-      );
-    case "completed":
-      return (
-        <Badge color="default" variant="flat">
-          Dokončeno
-        </Badge>
-      );
-    default:
-      return null;
-  }
-}
+import { LoadingSpinner } from "@/components";
 
 export default function MatchDetailPage() {
   const [homeLineup, setHomeLineup] = useState<any>(null);
@@ -149,7 +106,7 @@ export default function MatchDetailPage() {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start">
         <Button
           as={Link}
           href={`/matches${
@@ -161,10 +118,6 @@ export default function MatchDetailPage() {
         >
           {translations.matchDetail.backToMatches}
         </Button>
-        <div className="flex gap-2">
-          {match.status && getStatusBadge(match.status)}
-          {match.status === "completed" && match.result && getResultBadge(match.result)}
-        </div>
       </div>
 
       {/* Match Header */}
@@ -174,11 +127,10 @@ export default function MatchDetailPage() {
             {/* Competition Info */}
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {match.category.name} {match.category.description}{" "}
-                {match.matchweek && `- ${match.matchweek}. kolo`}
+                {match.category.name}
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                {match.season?.name}
+              {match.category.description}, {match.matchweek && `- ${match.matchweek}. kolo, `} {match.season?.name}
               </p>
             </div>
 
@@ -230,44 +182,6 @@ export default function MatchDetailPage() {
         </CardBody>
       </Card>
 
-      {/* Match Statistics (if completed) */}
-      {match.status === "completed" && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <TrophyIcon className="w-5 h-5 text-yellow-500" />
-              <h3 className="text-lg font-semibold">Výsledek zápasu</h3>
-            </div>
-          </CardHeader>
-          <CardBody>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {match.home_score || 0}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {match.home_team.name}
-                </div>
-              </div>
-              <div className="flex items-center justify-center">
-                <div className="text-2xl font-bold text-gray-400">:</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {match.away_score || 0}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {match.away_team.name}
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 text-center">
-              {getResultBadge(match.result!)}
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
       {/* Lineup Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Home Team Lineup */}
@@ -283,8 +197,7 @@ export default function MatchDetailPage() {
           <CardBody>
             {lineupLoading ? (
               <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-sm text-gray-500">Načítání sestavy...</p>
+                <LoadingSpinner />
               </div>
             ) : homeLineup &&
               (homeLineup.players.length > 0 ||

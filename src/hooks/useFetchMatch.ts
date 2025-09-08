@@ -145,8 +145,15 @@ export function useFetchMatch(matchId: string | null) {
         .single();
 
       if (error) {
+        if (error.code === 'PGRST116') {
+          // Match not found - this is a valid case
+          console.log("Match not found:", matchId);
+          setError("Zápas nebyl nalezen");
+          setMatch(null);
+          return;
+        }
         console.error("Error fetching match:", error);
-        setError("Zápas nebyl nalezen");
+        setError("Chyba při načítání zápasu");
         return;
       }
 
@@ -154,17 +161,22 @@ export function useFetchMatch(matchId: string | null) {
       let homeTeamCount = 1;
       let awayTeamCount = 1;
       
-      if (data.category?.code) {
+      if (data.category_id) {
         try {
           // Fetch team counts for the clubs in this category
-          const { data: teamCountsData } = await supabase
+          const { data: teamCountsData, error: teamCountsError } = await supabase
             .from('club_categories')
             .select(`
               club_id,
               club_category_teams(id)
             `)
-            .eq('category_id', data.category.code)
+            .eq('category_id', data.category_id)
             .eq('is_active', true);
+          
+          if (teamCountsError) {
+            console.warn('Error fetching team counts:', teamCountsError);
+            // Continue with default values
+          }
           
           if (teamCountsData) {
             const clubTeamCounts = new Map<string, number>();

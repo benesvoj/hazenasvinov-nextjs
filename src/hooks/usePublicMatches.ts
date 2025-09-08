@@ -80,7 +80,7 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
       }
       
       
-      // Step 3: Use the new team_suffix_helper view for perfect suffix logic
+      // Step 3: Fetch team details and club categories for suffix logic
       
       // Get unique team IDs to fetch details
       const teamIds = new Set<string>();
@@ -89,11 +89,25 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
         if (match.away_team_id) teamIds.add(match.away_team_id);
       });
       
-      // Fetch team details using the new view - this gives us perfect suffix logic
+      // Fetch team details with club information
       const { data: teamDetails, error: teamError } = await supabase
-        .from('team_suffix_helper')
-        .select('*')
-        .in('team_id', Array.from(teamIds));
+        .from('club_category_teams')
+        .select(`
+          id,
+          team_suffix,
+          club_category:club_categories(
+            id,
+            max_teams,
+            club:clubs(
+              id,
+              name,
+              short_name,
+              logo_url,
+              is_own_club
+            )
+          )
+        `)
+        .in('id', Array.from(teamIds));
       
       if (teamError) {  
         throw new Error(`Failed to fetch team details: ${teamError.message}`);
@@ -102,8 +116,44 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
       // Create a map for quick team lookup
       const teamMap = new Map();
       teamDetails?.forEach((team: any) => {
-        teamMap.set(team.team_id, team);
+        teamMap.set(team.id, team);
       });
+      
+      // Get club categories to determine which clubs need suffixes per category (max_teams > 1)
+      const { data: clubCategoriesData, error: clubCategoriesError } = await supabase
+        .from('club_categories')
+        .select(`
+          id,
+          category_id,
+          max_teams,
+          club:clubs(
+            id,
+            name,
+            short_name,
+            logo_url,
+            is_own_club
+          )
+        `)
+        .eq('is_active', true);
+      
+      if (clubCategoriesError) {
+        throw new Error(`Failed to fetch club categories: ${clubCategoriesError.message}`);
+      }
+      
+      // Build map of clubs that need suffixes per category
+      const clubsNeedingSuffixesPerCategory = new Map<string, Set<string>>();
+      if (clubCategoriesData) {
+        clubCategoriesData.forEach((clubCategory: any) => {
+          const club = clubCategory.club;
+          if (club && club.name && clubCategory.max_teams > 1) {
+            const categoryId = clubCategory.category_id;
+            if (!clubsNeedingSuffixesPerCategory.has(categoryId)) {
+              clubsNeedingSuffixesPerCategory.set(categoryId, new Set());
+            }
+            clubsNeedingSuffixesPerCategory.get(categoryId)!.add(club.name);
+          }
+        });
+      }
       
       // Transform matches to include team names and club information
       const transformedMatches = matchesData?.map((match: any) => {
@@ -111,34 +161,81 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
         const homeTeamDetails = teamMap.get(match.home_team_id);
         const awayTeamDetails = teamMap.get(match.away_team_id);
         
-        // Build team names with perfect suffix logic using the view data
-        const homeTeamName = homeTeamDetails?.team_count_in_category > 1 
-          ? `${homeTeamDetails.club_name} ${homeTeamDetails.team_suffix}`
-          : homeTeamDetails?.club_name || 'Unknown Team';
-          
-        const awayTeamName = awayTeamDetails?.team_count_in_category > 1 
-          ? `${awayTeamDetails.club_name} ${awayTeamDetails.team_suffix}`
-          : awayTeamDetails?.club_name || 'Unknown Team';
+        // Process home team using per-category suffix logic
+        const homeClub = homeTeamDetails?.club_category?.club;
+        let homeTeamName: string;
+        let homeShortName: string;
         
-        // Add the is_own_club flags that are specific to this hook
-        const homeTeamIsOwnClub = homeTeamDetails?.is_own_club === true;
-        const awayTeamIsOwnClub = awayTeamDetails?.is_own_club === true;
+        if (!homeClub || !homeClub.name) {
+          homeTeamName = 'Neznámý tým';
+          homeShortName = 'Neznámý tým';
+        } else {
+          const clubName = homeClub.name;
+          const teamSuffix = homeTeamDetails.team_suffix;
+          const categoryId = match.category_id;
+          
+          // Check if this club needs suffixes in THIS specific category
+          const clubsNeedingSuffixesInThisCategory = clubsNeedingSuffixesPerCategory.get(categoryId) || new Set();
+          const thisClubNeedsSuffixes = clubsNeedingSuffixesInThisCategory.has(clubName);
+          
+          if (thisClubNeedsSuffixes) {
+            // Club has max_teams > 1 in this category - include suffix
+            homeTeamName = `${clubName} ${teamSuffix}`;
+            homeShortName = homeClub.short_name ? `${homeClub.short_name} ${teamSuffix}` : homeTeamName;
+          } else {
+            // Club has max_teams = 1 in this category - no suffix needed
+            homeTeamName = clubName;
+            homeShortName = homeClub.short_name || clubName;
+          }
+        }
+        
+        const homeIsOwnClub = homeClub?.is_own_club === true;
+
+        // Process away team using per-category suffix logic
+        const awayClub = awayTeamDetails?.club_category?.club;
+        let awayTeamName: string;
+        let awayShortName: string;
+        
+        if (!awayClub || !awayClub.name) {
+          awayTeamName = 'Neznámý tým';
+          awayShortName = 'Neznámý tým';
+        } else {
+          const clubName = awayClub.name;
+          const teamSuffix = awayTeamDetails.team_suffix;
+          const categoryId = match.category_id;
+          
+          // Check if this club needs suffixes in THIS specific category
+          const clubsNeedingSuffixesInThisCategory = clubsNeedingSuffixesPerCategory.get(categoryId) || new Set();
+          const thisClubNeedsSuffixes = clubsNeedingSuffixesInThisCategory.has(clubName);
+          
+          if (thisClubNeedsSuffixes) {
+            // Club has max_teams > 1 in this category - include suffix
+            awayTeamName = `${clubName} ${teamSuffix}`;
+            awayShortName = awayClub.short_name ? `${awayClub.short_name} ${teamSuffix}` : awayTeamName;
+          } else {
+            // Club has max_teams = 1 in this category - no suffix needed
+            awayTeamName = clubName;
+            awayShortName = awayClub.short_name || clubName;
+          }
+        }
+        
+        const awayIsOwnClub = awayClub?.is_own_club === true;
         
         return {
           ...match,
           home_team: {
             id: match.home_team_id,
             name: homeTeamName,
-            short_name: homeTeamDetails?.club_short_name,
-            is_own_club: homeTeamIsOwnClub,
-            logo_url: homeTeamDetails?.club_logo_url
+            short_name: homeShortName,
+            is_own_club: homeIsOwnClub,
+            logo_url: homeClub?.logo_url
           },
           away_team: {
             id: match.away_team_id,
             name: awayTeamName,
-            short_name: awayTeamDetails?.club_short_name,
-            is_own_club: awayTeamIsOwnClub,
-            logo_url: awayTeamDetails?.club_logo_url
+            short_name: awayShortName,
+            is_own_club: awayIsOwnClub,
+            logo_url: awayClub?.logo_url
           }
         };
       }) || [];
