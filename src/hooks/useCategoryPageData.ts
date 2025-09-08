@@ -331,11 +331,18 @@ export function useCategoryPageData(
               ? `${club.short_name} ${team.team_suffix}`
               : teamName;
             
-            // Remove legacy team property and create new one
-            const { team: legacyTeam, ...standingWithoutLegacyTeam } = standing;
-            
+            // Create clean standing object with only our generated team data
             return {
-              ...standingWithoutLegacyTeam,
+              id: standing.id,
+              team_id: standing.team_id,
+              matches: standing.matches,
+              wins: standing.wins,
+              draws: standing.draws,
+              losses: standing.losses,
+              goals_for: standing.goals_for,
+              goals_against: standing.goals_against,
+              points: standing.points,
+              position: standing.position,
               team: {
                 id: team?.id,
                 name: teamName,

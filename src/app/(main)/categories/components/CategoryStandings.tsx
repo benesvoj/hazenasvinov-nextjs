@@ -2,6 +2,7 @@
 
 import { Card, CardHeader, CardBody, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Image } from '@heroui/react';
 import { CategoryStandingsFallback } from './CategoryStandingsFallback';
+import { LoadingSpinner } from '@/components';
 
 interface CategoryStandingsProps {
   categoryId: string;
@@ -13,11 +14,7 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
   const loading = false;
   const error = null;
 
-  // Debug logging to see what data the component receives
-  console.log('CategoryStandings received standings:', standings);
-  console.log('First standing team data:', standings[0]?.team);
-  console.log('First standing team displayName:', standings[0]?.team?.displayName);
-  console.log('First standing team shortDisplayName:', standings[0]?.team?.shortDisplayName);
+
 
   // Helper function to check if suffixes are needed
   const checkIfSuffixesNeeded = (standings: any[]) => {
@@ -54,6 +51,7 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
   
   // Update team names based on suffix needs
   const processedStandings = standings.map((standing: any) => {
+
     const team = standing.team;
     if (!team?.name || team.name === 'Neznámý tým') return standing;
     
@@ -90,7 +88,7 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
         </CardHeader>
         <CardBody>
           <div className="flex justify-center items-center py-8">
-            <Spinner size="lg" />
+            <LoadingSpinner />
           </div>
         </CardBody>
       </Card>
@@ -130,7 +128,6 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
       </Card>
     );
   }
-
   return (
     <Card>
       <CardHeader>
@@ -150,8 +147,8 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
           </TableHeader>
           <TableBody>
             {processedStandings.map((team) => {
-              console.log('Rendering team:', team);
-              console.log('Team.team:', team.team);
+              // console.log('Rendering team:', team);
+              // console.log('Team.team:', team.team);
               return (
                 <TableRow key={team.id}>
                   <TableCell className="font-medium text-center">{team.position}</TableCell>
@@ -164,11 +161,12 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
                         height={20} 
                         className="hidden md:block"
                       />
+                      
                       <span className="md:hidden">
-                        {team.team?.shortDisplayName || team.team?.displayName || team.team?.name || 'Neznámý tým'}
+                        {team.team?.shortDisplayName || team.team?.shortName || 'Neznámý tým'}
                       </span>
                       <span className="hidden md:inline">
-                        {team.team?.shortDisplayName || team.team?.displayName || team.team?.name || 'Neznámý tým'}
+                        {team.team?.displayName || team.team?.name || 'Neznámý tým'}
                       </span>
                     </div>
                   </TableCell>

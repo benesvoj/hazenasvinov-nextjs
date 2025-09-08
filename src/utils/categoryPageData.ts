@@ -259,23 +259,10 @@ export async function getCategoryPageData(
     if (includeStandings && !standingsResult.error && standingsResult.data) {
       const allStandings = standingsResult.data;
       
-      console.log('Raw standings data structure:', allStandings[0]);
-      
       // Process standings to include team names and club information
       const transformedStandings = allStandings.map((standing: any) => {
         const team = standing.club_category_teams;
         const club = team?.club_category?.club;
-        
-        // Comprehensive debug logging for every standing
-        console.log('Processing standing:', {
-          standingId: standing.id,
-          teamId: standing.team_id,
-          team: team,
-          club: club,
-          clubName: club?.name,
-          clubShortName: club?.short_name,
-          teamSuffix: team?.team_suffix
-        });
         
         // Create team name from club + suffix
         const teamName = club && club.name
@@ -287,21 +274,18 @@ export async function getCategoryPageData(
           ? `${club.short_name} ${team.team_suffix}`
           : teamName;
         
-        console.log('Team name generation:', {
-          clubName: club?.name,
-          clubShortName: club?.short_name,
-          teamSuffix: team.team_suffix,
-          generatedTeamName: teamName,
-          generatedShortName: shortTeamName
-        });
-        
-        console.log('Generated team name:', teamName);
-        
-        // Remove legacy team property and create new one
-        const { team: legacyTeam, ...standingWithoutLegacyTeam } = standing;
-        
+        // Create clean standing object with only our generated team data
         const processedStanding = {
-          ...standingWithoutLegacyTeam,
+          id: standing.id,
+          team_id: standing.team_id,
+          matches: standing.matches,
+          wins: standing.wins,
+          draws: standing.draws,
+          losses: standing.losses,
+          goals_for: standing.goals_for,
+          goals_against: standing.goals_against,
+          points: standing.points,
+          position: standing.position,
           team: {
             id: team?.id,
             name: teamName,
@@ -311,9 +295,6 @@ export async function getCategoryPageData(
             logo_url: club?.logo_url
           }
         };
-        
-        console.log('Processed standing team:', processedStanding.team);
-        console.log('Legacy team removed:', legacyTeam);
         
         return processedStanding;
       });
@@ -350,8 +331,6 @@ export async function getCategoryPageData(
       standings = transformedStandings.map((standing: any) => {
         const team = standing.team;
         
-        console.log('Suffix logic processing team:', team);
-        
         // Use the already generated team names from transformedStandings
         let displayName = team.name;
         let shortDisplayName = team.shortName;
@@ -371,7 +350,7 @@ export async function getCategoryPageData(
           }
         }
         
-        const result = {
+        return {
           ...standing,
           team: {
             ...team,
@@ -379,14 +358,10 @@ export async function getCategoryPageData(
             shortDisplayName: shortDisplayName
           }
         };
-        
-        console.log('Suffix logic result:', result.team);
-        
-        return result;
       });
       
-      console.log('Final standings array:', standings);
-      console.log('First final standing team:', standings[0]?.team);
+      // Set the final standings to use
+      standings = transformedStandings;
     }
 
     // Process matches into seasonal groups
@@ -408,29 +383,6 @@ export async function getCategoryPageData(
     autumnMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Process standings to include team names
-    const processedStandings = standings.map((standing: any) => {
-      const team = standing.team;
-      const club = team?.club_category?.club;
-      
-      const teamName = club 
-        ? `${club.name} ${team.team_suffix}`
-        : 'Neznámý tým';
-      
-      const shortTeamName = club?.short_name 
-        ? `${club.short_name} ${team.team_suffix}`
-        : teamName;
-
-      return {
-        ...standing,
-        team: {
-          id: team?.id,
-          name: teamName,
-          shortName: shortTeamName,
-          logo_url: club?.logo_url
-        }
-      };
-    });
 
     return {
       category,
@@ -439,7 +391,7 @@ export async function getCategoryPageData(
         spring: springMatches
       },
       posts,
-      standings: processedStandings,
+      standings: standings,
       season
     };
 

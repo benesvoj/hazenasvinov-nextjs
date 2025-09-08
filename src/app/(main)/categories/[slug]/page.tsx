@@ -17,8 +17,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     // Fetch all data server-side in optimized batches
     const { category, matches, posts, standings, season } = await getCategoryPageData(categorySlug);
     
-    console.log('Page received standings:', standings);
-    console.log('First page standing team:', standings[0]?.team);
     
     if (!category) {
       notFound();
