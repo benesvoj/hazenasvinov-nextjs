@@ -12,14 +12,13 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Spinner,
   Image,
 } from "@heroui/react";
 import { Match } from "@/types";
 import { formatDateString, formatTime } from "@/helpers";
 import { CategoryMatchesFallback } from "./CategoryMatchesFallback";
-import { getMatchStatusText } from "@/app/constants";
 import { useRouter } from "next/navigation";
+import { LoadingSpinner } from "@/components";
 
 interface CategoryMatchesProps {
   categoryId: string;
@@ -81,7 +80,9 @@ export function CategoryMatches({
                         "Neznámý tým"}
                     </div>
                   </div>
-                  <div className="mx-3 text-gray-400 dark:text-gray-500 text-sm">vs</div>
+                  <div className="mx-3 text-gray-400 dark:text-gray-500 text-sm">
+                    vs
+                  </div>
                   <div className="text-left flex-1">
                     <div className="font-medium text-gray-900 dark:text-white">
                       {match.away_team?.short_name ||
@@ -113,12 +114,11 @@ export function CategoryMatches({
               <TableColumn className="text-right">Domácí</TableColumn>
               <TableColumn className="text-center">-</TableColumn>
               <TableColumn className="text-left">Hosté</TableColumn>
-              <TableColumn>Status</TableColumn>
               <TableColumn>Skóre</TableColumn>
             </TableHeader>
             <TableBody>
               {seasonMatches.map((match) => (
-                <TableRow 
+                <TableRow
                   key={match.id}
                   className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
                   onClick={() => handleMatchClick(match.id)}
@@ -134,9 +134,7 @@ export function CategoryMatches({
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    {matchweeks > 0 && match.matchweek
-                      ? `${match.matchweek}. kolo`
-                      : "-"}
+                    {matchweeks > 0 ? `${match.matchweek}. kolo` : ""}
                   </TableCell>
                   <TableCell className="font-medium text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -150,7 +148,9 @@ export function CategoryMatches({
                     </div>
                   </TableCell>
                   <TableCell className="flex items-center justify-center">
-                    <span className="text-xs text-gray-600 dark:text-gray-400">vs</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      vs
+                    </span>
                   </TableCell>
                   <TableCell className="font-medium text-left">
                     <div className="flex items-center gap-2">
@@ -163,14 +163,15 @@ export function CategoryMatches({
                       />
                     </div>
                   </TableCell>
-                  <TableCell>{getMatchStatusText(match.status)}</TableCell>
                   <TableCell className="text-center">
                     {match.status === "completed" ? (
                       <span className="font-bold">
                         {match.home_score} : {match.away_score}
                       </span>
                     ) : (
-                      <span className="text-gray-400 dark:text-gray-500">-</span>
+                      <span className="text-gray-400 dark:text-gray-500">
+                        -
+                      </span>
                     )}
                   </TableCell>
                 </TableRow>
@@ -189,7 +190,7 @@ export function CategoryMatches({
           <h2 className="text-xl font-semibold">Zápasy</h2>
         </CardHeader>
         <CardBody className="flex justify-center py-8">
-          <Spinner size="lg" />
+          <LoadingSpinner />
         </CardBody>
       </Card>
     );

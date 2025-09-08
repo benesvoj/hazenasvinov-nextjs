@@ -191,10 +191,7 @@ export async function getCategoryPageData(
         });
       }
       
-      // If no category-specific posts found, show all posts as fallback
-      if (filteredPosts.length === 0) {
-        filteredPosts = allPosts;
-      }
+      // Keep only category-specific posts (no fallback to all posts)
       
       posts = filteredPosts.map((post: any) => ({
         ...post,
@@ -327,7 +324,7 @@ export async function getCategoryPageData(
         }
       }
       
-      // Update team names based on suffix needs
+      // Update team names based on suffix needs - check per club, not globally
       standings = transformedStandings.map((standing: any) => {
         const team = standing.team;
         
@@ -337,13 +334,20 @@ export async function getCategoryPageData(
         
         // Only apply suffix logic if we have valid team names
         if (team.name && team.name !== 'Neznámý tým') {
-          if (needsSuffixes) {
-            // Keep the full name with suffix
+          // Extract club name from team name (everything except the last part which is the suffix)
+          const parts = team.name.split(' ');
+          const clubName = parts.slice(0, -1).join(' ');
+          
+          // Check if THIS specific club has multiple teams
+          const clubSuffixes = clubTeams.get(clubName) || [];
+          const thisClubNeedsSuffixes = clubSuffixes.length > 1;
+          
+          if (thisClubNeedsSuffixes) {
+            // Keep the full name with suffix for clubs with multiple teams
             displayName = team.name;
             shortDisplayName = team.shortName;
           } else {
-            // Show only club name without suffix
-            const clubName = team.name.split(' ').slice(0, -1).join(' ');
+            // Show only club name without suffix for clubs with single team
             const shortClubName = team.shortName.split(' ').slice(0, -1).join(' ');
             displayName = clubName || team.name;
             shortDisplayName = shortClubName || team.shortName;
@@ -360,8 +364,6 @@ export async function getCategoryPageData(
         };
       });
       
-      // Set the final standings to use
-      standings = transformedStandings;
     }
 
     // Process matches into seasonal groups
