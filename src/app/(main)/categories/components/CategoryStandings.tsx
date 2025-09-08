@@ -138,12 +138,12 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
           <TableHeader>
             <TableColumn>Poz.</TableColumn>
             <TableColumn>Tým</TableColumn>
-            <TableColumn className="hidden md:table-cell">Z</TableColumn>
-            <TableColumn className="hidden md:table-cell">V</TableColumn>
-            <TableColumn className="hidden md:table-cell">R</TableColumn>
-            <TableColumn className="hidden md:table-cell">P</TableColumn>
-            <TableColumn>Skóre</TableColumn>
-            <TableColumn>Body</TableColumn>
+            <TableColumn className="hidden md:table-cell text-center">Z</TableColumn>
+            <TableColumn className="hidden md:table-cell text-center">V</TableColumn>
+            <TableColumn className="hidden md:table-cell text-center">R</TableColumn>
+            <TableColumn className="hidden md:table-cell text-center">P</TableColumn>
+            <TableColumn className="text-center">Skóre</TableColumn>
+            <TableColumn className="text-center">Body</TableColumn>
           </TableHeader>
           <TableBody>
             {processedStandings.map((team) => {

@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { Category, Match, BlogPost } from '@/types';
+import { Category, Match, BlogPost, StandingWithTeam, ProcessedStanding, ClubCategoryWithClub } from '@/types';
 
 export interface CategoryPageServerData {
   category: Category | null;
@@ -8,7 +8,7 @@ export interface CategoryPageServerData {
     spring: Match[];
   };
   posts: BlogPost[];
-  standings: any[];
+  standings: ProcessedStanding[];
   season: any;
 }
 
@@ -136,7 +136,7 @@ export async function getCategoryPageData(
           goals_against,
           points,
           position,
-          club_category_teams!team_id(
+          team:club_category_teams!team_id(
             id,
             team_suffix,
             club_category:club_categories(
@@ -158,12 +158,40 @@ export async function getCategoryPageData(
     // Process results
     let posts: BlogPost[] = [];
     let matches: Match[] = [];
-    let standings: any[] = [];
+    let standings: ProcessedStanding[] = [];
+    
+    // Get club categories to determine which clubs need suffixes (max_teams > 1)
+    const clubCategoriesResult = await supabase
+      .from('club_categories')
+      .select(`
+        id,
+        max_teams,
+        club:clubs(
+          id,
+          name,
+          short_name,
+          logo_url,
+          is_own_club
+        )
+      `)
+      .eq('category_id', category.id)
+      .eq('season_id', season.id);
+    
+    const clubsNeedingSuffixes = new Set<string>();
+    if (!clubCategoriesResult.error && clubCategoriesResult.data) {
+      clubCategoriesResult.data.forEach((clubCategory: any) => {
+        const club = clubCategory.club;
+        if (club && club.name && clubCategory.max_teams > 1) {
+          clubsNeedingSuffixes.add(club.name);
+        }
+      });
+    }
 
     if (includePosts && !postsResult.error && postsResult.data) {
       const allPosts = postsResult.data;
       
       // Filter posts by category using tag-based matching
+      // TODO: remove this map, it should be working based on categoryId
       const categoryTagMap: { [key: string]: string[] } = {
         'men': ['muži', 'mužský', 'dospělí', 'muž', 'mužů', 'mužská', 'mužské', 'mužský tým', 'mužský oddíl', 'muži', 'muž', 'dospělí', 'senior', 'senioři'],
         'women': ['ženy', 'ženský', 'dospělé', 'žena', 'ženská', 'ženské', 'ženský tým', 'ženský oddíl', 'ženy', 'žena', 'dospělé', 'seniorky', 'seniorky'],
@@ -204,28 +232,62 @@ export async function getCategoryPageData(
     if (includeMatches && !matchesResult.error && matchesResult.data) {
       const allMatches = matchesResult.data;
       
-      // Process team names for each match using the already fetched team data
+      // Process team names for each match using the same suffix logic as standings
       const processedMatches = allMatches.map((match: any) => {
         // Process home team
         const homeTeamDetails = match.home_team;
         const homeClub = homeTeamDetails?.club_category?.club;
-        const homeTeamName = homeClub 
-          ? `${homeClub.name} ${homeTeamDetails.team_suffix}`
-          : 'Neznámý tým';
-        const homeShortName = homeClub?.short_name 
-          ? `${homeClub.short_name} ${homeTeamDetails.team_suffix}`
-          : homeTeamName;
+        
+        let homeTeamName: string;
+        let homeShortName: string;
+        
+        if (!homeClub || !homeClub.name) {
+          homeTeamName = 'Neznámý tým';
+          homeShortName = 'Neznámý tým';
+        } else {
+          const clubName = homeClub.name;
+          const teamSuffix = homeTeamDetails.team_suffix;
+          const thisClubNeedsSuffixes = clubsNeedingSuffixes.has(clubName);
+          
+          if (thisClubNeedsSuffixes) {
+            // Club has max_teams > 1 - include suffix
+            homeTeamName = `${clubName} ${teamSuffix}`;
+            homeShortName = homeClub.short_name ? `${homeClub.short_name} ${teamSuffix}` : homeTeamName;
+          } else {
+            // Club has max_teams = 1 - no suffix needed
+            homeTeamName = clubName;
+            homeShortName = homeClub.short_name || clubName;
+          }
+        }
+        
         const homeIsOwnClub = homeClub?.is_own_club === true;
 
         // Process away team
         const awayTeamDetails = match.away_team;
         const awayClub = awayTeamDetails?.club_category?.club;
-        const awayTeamName = awayClub 
-          ? `${awayClub.name} ${awayTeamDetails.team_suffix}`
-          : 'Neznámý tým';
-        const awayShortName = awayClub?.short_name 
-          ? `${awayClub.short_name} ${awayTeamDetails.team_suffix}`
-          : awayTeamName;
+        
+        let awayTeamName: string;
+        let awayShortName: string;
+        
+        if (!awayClub || !awayClub.name) {
+          awayTeamName = 'Neznámý tým';
+          awayShortName = 'Neznámý tým';
+        } else {
+          const clubName = awayClub.name;
+          const teamSuffix = awayTeamDetails.team_suffix;
+          const thisClubNeedsSuffixes = clubsNeedingSuffixes.has(clubName);
+          
+          if (thisClubNeedsSuffixes) {
+            // Club has max_teams > 1 - include suffix
+            awayTeamName = `${clubName} ${teamSuffix}`;
+            awayShortName = awayClub.short_name ? `${awayClub.short_name} ${teamSuffix}` : awayTeamName;
+          } else {
+            // Club has max_teams = 1 - no suffix needed
+            awayTeamName = clubName;
+            awayShortName = awayClub.short_name || clubName;
+          }
+        }
+        
         const awayIsOwnClub = awayClub?.is_own_club === true;
 
         return {
@@ -256,23 +318,55 @@ export async function getCategoryPageData(
     if (includeStandings && !standingsResult.error && standingsResult.data) {
       const allStandings = standingsResult.data;
       
+      // Club analysis already done above
+      
       // Process standings to include team names and club information
-      const transformedStandings = allStandings.map((standing: any) => {
-        const team = standing.club_category_teams;
+      const transformedStandings = allStandings.map((standing: any): ProcessedStanding => {
+        const team = standing.team;
         const club = team?.club_category?.club;
         
-        // Create team name from club + suffix
-        const teamName = club && club.name
-          ? `${club.name} ${team.team_suffix}`
-          : 'Neznámý tým';
+        if (!club || !club.name) {
+          return {
+            id: standing.id,
+            team_id: standing.team_id,
+            matches: standing.matches,
+            wins: standing.wins,
+            draws: standing.draws,
+            losses: standing.losses,
+            goals_for: standing.goals_for,
+            goals_against: standing.goals_against,
+            points: standing.points,
+            position: standing.position,
+            team: {
+              id: team?.id,
+              name: 'Neznámý tým',
+              shortName: 'Neznámý tým',
+              displayName: 'Neznámý tým',
+              shortDisplayName: 'Neznámý tým',
+              logo_url: undefined
+            }
+          };
+        }
         
-        // Create short team name from club short_name + suffix
-        const shortTeamName = club?.short_name 
-          ? `${club.short_name} ${team.team_suffix}`
-          : teamName;
+        const clubName = club.name;
+        const teamSuffix = team.team_suffix;
+        const thisClubNeedsSuffixes = clubsNeedingSuffixes.has(clubName);
         
-        // Create clean standing object with only our generated team data
-        const processedStanding = {
+        // Create team names based on whether this club needs suffixes
+        let teamName: string;
+        let shortTeamName: string;
+        
+        if (thisClubNeedsSuffixes) {
+          // Club has max_teams > 1 - include suffix
+          teamName = `${clubName} ${teamSuffix}`;
+          shortTeamName = club.short_name ? `${club.short_name} ${teamSuffix}` : teamName;
+        } else {
+          // Club has max_teams = 1 - no suffix needed
+          teamName = clubName;
+          shortTeamName = club.short_name || clubName;
+        }
+        
+        return {
           id: standing.id,
           team_id: standing.team_id,
           matches: standing.matches,
@@ -292,77 +386,9 @@ export async function getCategoryPageData(
             logo_url: club?.logo_url
           }
         };
-        
-        return processedStanding;
       });
       
-      // Check if we need to show suffixes (multiple teams from same club in same category)
-      const clubTeams = new Map<string, string[]>(); // club name -> array of team suffixes
-      
-      transformedStandings.forEach(standing => {
-        const team = standing.team;
-        if (team?.name && team.name !== 'Neznámý tým') {
-          const parts = team.name.split(' ');
-          if (parts.length > 1) {
-            const suffix = parts[parts.length - 1]; // Last part is the suffix
-            const clubName = parts.slice(0, -1).join(' '); // Everything except suffix
-            
-            if (!clubTeams.has(clubName)) {
-              clubTeams.set(clubName, []);
-            }
-            clubTeams.get(clubName)!.push(suffix);
-          }
-        }
-      });
-      
-      // Check if any club has multiple teams
-      let needsSuffixes = false;
-      for (const [clubName, suffixes] of clubTeams) {
-        if (suffixes.length > 1) {
-          needsSuffixes = true;
-          break;
-        }
-      }
-      
-      // Update team names based on suffix needs - check per club, not globally
-      standings = transformedStandings.map((standing: any) => {
-        const team = standing.team;
-        
-        // Use the already generated team names from transformedStandings
-        let displayName = team.name;
-        let shortDisplayName = team.shortName;
-        
-        // Only apply suffix logic if we have valid team names
-        if (team.name && team.name !== 'Neznámý tým') {
-          // Extract club name from team name (everything except the last part which is the suffix)
-          const parts = team.name.split(' ');
-          const clubName = parts.slice(0, -1).join(' ');
-          
-          // Check if THIS specific club has multiple teams
-          const clubSuffixes = clubTeams.get(clubName) || [];
-          const thisClubNeedsSuffixes = clubSuffixes.length > 1;
-          
-          if (thisClubNeedsSuffixes) {
-            // Keep the full name with suffix for clubs with multiple teams
-            displayName = team.name;
-            shortDisplayName = team.shortName;
-          } else {
-            // Show only club name without suffix for clubs with single team
-            const shortClubName = team.shortName.split(' ').slice(0, -1).join(' ');
-            displayName = clubName || team.name;
-            shortDisplayName = shortClubName || team.shortName;
-          }
-        }
-        
-        return {
-          ...standing,
-          team: {
-            ...team,
-            displayName: displayName,
-            shortDisplayName: shortDisplayName
-          }
-        };
-      });
+      standings = transformedStandings;
       
     }
 

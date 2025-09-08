@@ -18,6 +18,7 @@ export interface Club {
   updated_at: string;
 }
 
+// Table club_category_teams
 export interface ClubTeam {
   id: string;
   club_id: string;
@@ -27,11 +28,19 @@ export interface ClubTeam {
   created_at: string;
 }
 
+// Table club_categories
 export interface ClubCategory {
   id: string;
   club_id: string;
   category_id: string;
   season_id: string;
+  max_teams: number;
   is_active: boolean;
   created_at: string;
+}
+
+export interface ClubCategoryWithClub {
+  id: string;
+  max_teams: number;
+  club: Club;
 }

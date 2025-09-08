@@ -58,23 +58,23 @@ export function CategoryMatches({
     return (
       <div>
         {/* Mobile Cards Layout */}
-        <div className="md:hidden space-y-3">
+        <div className="md:hidden space-y-2">
           {seasonMatches.map((match) => (
             <div
               key={match.id}
-              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2 shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
               onClick={() => handleMatchClick(match.id)}
             >
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 {formatDateString(match.date)}
                 {match.time && (
                   <span className="ml-2">{formatTime(match.time)}</span>
                 )}
               </div>
-              <div className="flex justify-between mb-3">
+              <div className="flex justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <div className="text-right flex-1">
-                    <div className="font-medium text-gray-900 dark:text-white">
+                  <div className="text-right no-wrap">
+                    <div className="font-medium text-gray-900 dark:text-white no-wrap">
                       {match.home_team?.short_name ||
                         match.home_team?.name ||
                         "Neznámý tým"}
@@ -83,15 +83,15 @@ export function CategoryMatches({
                   <div className="mx-3 text-gray-400 dark:text-gray-500 text-sm">
                     vs
                   </div>
-                  <div className="text-left flex-1">
-                    <div className="font-medium text-gray-900 dark:text-white">
+                  <div className="text-left no-wrap">
+                    <div className="font-medium text-gray-900 dark:text-white no-wrap">
                       {match.away_team?.short_name ||
                         match.away_team?.name ||
                         "Neznámý tým"}
                     </div>
                   </div>
                 </div>
-                <div className="text-center flex-1">
+                <div className="text-center mr-4">
                   {match.status === "completed" ? (
                     <span className="font-bold text-lg text-gray-900 dark:text-white">
                       {match.home_score} : {match.away_score}
