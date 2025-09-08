@@ -61,22 +61,25 @@ interface TransformedMatch {
   time: string;
   home_team_id: string;
   away_team_id: string;
-  venue?: string;
-  competition?: string;
+  venue: string;
+  competition: string;
   home_score?: number;
   away_score?: number;
-  status?: string;
+  status: 'upcoming' | 'completed';
   matchweek?: number;
   result?: 'win' | 'loss' | 'draw';
+  is_home: boolean;
   home_team: {
     id: string;
     name: string;
+    short_name?: string;
     logo_url?: string;
     is_own_club: boolean;
   };
   away_team: {
     id: string;
     name: string;
+    short_name?: string;
     logo_url?: string;
     is_own_club: boolean;
   };
@@ -203,6 +206,9 @@ export function useFetchMatch(matchId: string | null) {
       // Transform match data to use centralized team display logic
       const transformedMatch: TransformedMatch = {
         ...data,
+        is_home: true, // Default value, can be determined based on your logic
+        competition: data.competition || 'Neznámá soutěž',
+        status: (data.status as 'upcoming' | 'completed') || 'upcoming',
         home_team: {
           id: data.home_team?.id,
           name: getTeamDisplayNameSafe(
@@ -211,6 +217,7 @@ export function useFetchMatch(matchId: string | null) {
             homeTeamCount,
             translations.team.unknownTeam
           ),
+          short_name: data.home_team?.club_category?.club?.short_name,
           logo_url: data.home_team?.club_category?.club?.logo_url,
           is_own_club: data.home_team?.club_category?.club?.is_own_club || false
         },
@@ -222,6 +229,7 @@ export function useFetchMatch(matchId: string | null) {
             awayTeamCount,
             translations.team.unknownTeam
           ),
+          short_name: data.away_team?.club_category?.club?.short_name,
           logo_url: data.away_team?.club_category?.club?.logo_url,
           is_own_club: data.away_team?.club_category?.club?.is_own_club || false
         }

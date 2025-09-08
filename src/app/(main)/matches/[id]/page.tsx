@@ -1,28 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Badge } from "@heroui/badge";
 import {
-  CalendarIcon,
-  ClockIcon,
   ArrowLeftIcon,
   TrophyIcon,
   ArrowTopRightOnSquareIcon,
-  UserGroupIcon,
-  UserIcon,
 } from "@heroicons/react/24/outline";
 import Link from "@/components/Link";
 import { useParams } from "next/navigation";
-
-import { formatTime } from "@/helpers/formatTime";
 import { translations } from "@/lib/translations";
 import { useLineupData, useFetchMatch } from "@/hooks";
-import TeamDisplay from "./components/TeamDisplay";
 import { LoadingSpinner } from "@/components";
+import { LineupCard, MatchInfoCard } from "./components";
 
 export default function MatchDetailPage() {
+
+  // TODO: Change to Lineup type
   const [homeLineup, setHomeLineup] = useState<any>(null);
   const [awayLineup, setAwayLineup] = useState<any>(null);
   const [lineupLoading, setLineupLoading] = useState(false);
@@ -66,11 +60,8 @@ export default function MatchDetailPage() {
     return (
       <div className="max-w-4xl mx-auto p-6">
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">
-            {translations.matchDetail.loading}
-          </p>
-        </div>
+          <LoadingSpinner />
+          </div>
       </div>
     );
   }
@@ -104,7 +95,7 @@ export default function MatchDetailPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-4xl mx-auto p-2 sm:p-6 space-y-2 sm:space-y-6">
       {/* Header */}
       <div className="flex items-start">
         <Button
@@ -121,297 +112,15 @@ export default function MatchDetailPage() {
       </div>
 
       {/* Match Header */}
-      <Card>
-        <CardBody className="p-8">
-          <div className="text-center space-y-6">
-            {/* Competition Info */}
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {match.category.name}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-              {match.category.description}, {match.matchweek && `- ${match.matchweek}. kolo, `} {match.season?.name}
-              </p>
-            </div>
-
-            {/* Teams */}
-            <div className="grid grid-cols-3 items-center gap-8">
-              {/* Home Team */}
-              <TeamDisplay team={match.home_team} />
-
-              {/* Score */}
-              <div className="flex flex-col items-center space-y-2">
-                <div className="text-4xl font-bold text-gray-900 dark:text-white">
-                  {match.status === "completed"
-                    ? `${match.home_score || 0} : ${match.away_score || 0}`
-                    : "vs"}
-                </div>
-                {match.status === "upcoming" && (
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {translations.matchDetail.matchNotStarted}
-                  </div>
-                )}
-              </div>
-
-              {/* Away Team */}
-              <TeamDisplay team={match.away_team} />
-            </div>
-            <div className="flex justify-center items-center gap-2">
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5 text-gray-500" />
-                  <div className="font-semibold">
-                    {new Date(match.date).toLocaleDateString("cs-CZ", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <ClockIcon className="w-5 h-5 text-gray-500" />
-                  <div className="font-semibold">{formatTime(match.time)}</div>
-                </div>
-            </div>
-            {match.venue && (
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {match.venue}
-              </div>
-            )}
-          </div>
-        </CardBody>
-      </Card>
+      <MatchInfoCard match={match} />
 
       {/* Lineup Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Home Team Lineup */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <UserGroupIcon className="w-5 h-5 text-blue-500" />
-              <h3 className="text-lg font-semibold">
-                Sestava - {match.home_team.name}
-              </h3>
-            </div>
-          </CardHeader>
-          <CardBody>
-            {lineupLoading ? (
-              <div className="text-center py-4">
-                <LoadingSpinner />
-              </div>
-            ) : homeLineup &&
-              (homeLineup.players.length > 0 ||
-                homeLineup.coaches.length > 0) ? (
-              <div className="space-y-4">
-                {/* Players */}
-                {homeLineup.players.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <UserIcon className="w-4 h-4" />
-                      Hráči ({homeLineup.players.length})
-                    </h4>
-                    <div className="space-y-2">
-                      {homeLineup.players.map((player: any, index: number) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">
-                              {player.display_name ||
-                                `${player.external_name || "Neznámý"} ${
-                                  player.external_surname || ""
-                                }`}
-                            </span>
-                            {player.is_external && (
-                              <Badge color="warning" variant="flat" size="sm">
-                                Externí
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge
-                              color={
-                                player.position === "goalkeeper"
-                                  ? "primary"
-                                  : "default"
-                              }
-                              variant="flat"
-                              size="sm"
-                            >
-                              {player.position === "goalkeeper"
-                                ? "Brankář"
-                                : "Hráč v poli"}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Coaches */}
-                {homeLineup.coaches.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <UserIcon className="w-4 h-4" />
-                      Trenéři ({homeLineup.coaches.length})
-                    </h4>
-                    <div className="space-y-2">
-                      {homeLineup.coaches.map((coach: any, index: number) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded"
-                        >
-                          <span className="text-sm font-medium">
-                            {coach.member
-                              ? `${coach.member.name} ${coach.member.surname}`
-                              : "Neznámý trenér"}
-                          </span>
-                          <Badge color="secondary" variant="flat" size="sm">
-                            {coach.role === "head_coach"
-                              ? "Hlavní trenér"
-                              : coach.role === "assistant_coach"
-                              ? "Asistent"
-                              : coach.role === "goalkeeper_coach"
-                              ? "Trenér brankářů"
-                              : coach.role}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {homeLineup.players.length === 0 &&
-                  homeLineup.coaches.length === 0 && (
-                    <div className="text-center py-4 text-gray-500">
-                      Sestava zatím nebyla vytvořena
-                    </div>
-                  )}
-              </div>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                Sestava zatím nebyla vytvořena
-              </div>
-            )}
-          </CardBody>
-        </Card>
+        <LineupCard match={match} lineup={homeLineup} lineupLoading={lineupLoading} />
 
         {/* Away Team Lineup */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <UserGroupIcon className="w-5 h-5 text-green-500" />
-              <h3 className="text-lg font-semibold">
-                Sestava - {match.away_team.name}
-              </h3>
-            </div>
-          </CardHeader>
-          <CardBody>
-            {lineupLoading ? (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mx-auto mb-2"></div>
-                <p className="text-sm text-gray-500">Načítání sestavy...</p>
-              </div>
-            ) : awayLineup &&
-              (awayLineup.players.length > 0 ||
-                awayLineup.coaches.length > 0) ? (
-              <div className="space-y-4">
-                {/* Players */}
-                {awayLineup.players.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <UserIcon className="w-4 h-4" />
-                      Hráči ({awayLineup.players.length})
-                    </h4>
-                    <div className="space-y-2">
-                      {awayLineup.players.map((player: any, index: number) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">
-                              {player.display_name ||
-                                `${player.external_name || "Neznámý"} ${
-                                  player.external_surname || ""
-                                }`}
-                            </span>
-                            {player.is_external && (
-                              <Badge color="warning" variant="flat" size="sm">
-                                Externí
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge
-                              color={
-                                player.position === "goalkeeper"
-                                  ? "primary"
-                                  : "default"
-                              }
-                              variant="flat"
-                              size="sm"
-                            >
-                              {player.position === "goalkeeper"
-                                ? "Brankář"
-                                : "Hráč v poli"}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Coaches */}
-                {awayLineup.coaches.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <UserIcon className="w-4 h-4" />
-                      Trenéři ({awayLineup.coaches.length})
-                    </h4>
-                    <div className="space-y-2">
-                      {awayLineup.coaches.map((coach: any, index: number) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded"
-                        >
-                          <span className="text-sm font-medium">
-                            {coach.member
-                              ? `${coach.member.name} ${coach.member.surname}`
-                              : "Neznámý trenér"}
-                          </span>
-                          <Badge color="secondary" variant="flat" size="sm">
-                            {coach.role === "head_coach"
-                              ? "Hlavní trenér"
-                              : coach.role === "assistant_coach"
-                              ? "Asistent"
-                              : coach.role === "goalkeeper_coach"
-                              ? "Trenér brankářů"
-                              : coach.role}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {awayLineup.players.length === 0 &&
-                  awayLineup.coaches.length === 0 && (
-                    <div className="text-center py-4 text-gray-500">
-                      Sestava zatím nebyla vytvořena
-                    </div>
-                  )}
-              </div>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                Sestava zatím nebyla vytvořena
-              </div>
-            )}
-          </CardBody>
-        </Card>
+        <LineupCard match={match} lineup={awayLineup} lineupLoading={lineupLoading} />
       </div>
 
       {/* Actions */}
