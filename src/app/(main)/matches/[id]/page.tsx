@@ -21,6 +21,7 @@ export default function MatchDetailPage() {
   const [awayLineup, setAwayLineup] = useState<any>(null);
   const [lineupLoading, setLineupLoading] = useState(false);
 
+
   const params = useParams();
   const matchId = params.id as string;
 
@@ -45,7 +46,7 @@ export default function MatchDetailPage() {
         // Fetch away team lineup
         const awayLineupData = await fetchLineup(match.id, match.away_team_id);
         setAwayLineup(awayLineupData);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching lineup data:", error);
         // Don't set error state for lineup - it's optional data
       } finally {
@@ -117,10 +118,10 @@ export default function MatchDetailPage() {
       {/* Lineup Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Home Team Lineup */}
-        <LineupCard match={match} lineup={homeLineup} lineupLoading={lineupLoading} />
+        <LineupCard match={match} lineup={homeLineup} lineupLoading={lineupLoading} teamType="home" />
 
         {/* Away Team Lineup */}
-        <LineupCard match={match} lineup={awayLineup} lineupLoading={lineupLoading} />
+        <LineupCard match={match} lineup={awayLineup} lineupLoading={lineupLoading} teamType="away" />
       </div>
 
       {/* Actions */}

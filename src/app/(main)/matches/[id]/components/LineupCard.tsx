@@ -11,18 +11,19 @@ interface LineupCardProps {
     lineup: {
         players: LineupPlayer[];
         coaches: LineupCoach[];
-    };
+    } | null;
     lineupLoading: boolean;
+    teamType: 'home' | 'away';
 }
 
-export default function LineupCard({ match, lineup, lineupLoading }: LineupCardProps) {
+export default function LineupCard({ match, lineup, lineupLoading, teamType }: LineupCardProps) {
     return (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <UserGroupIcon className="w-5 h-5 text-blue-500" />
+              <UserGroupIcon className={`w-5 h-5 ${teamType === 'home' ? 'text-blue-500' : 'text-green-500'}`} />
               <h3 className="text-lg font-semibold">
-                Sestava - {match.home_team.name}
+                Sestava - {teamType === 'home' ? match.home_team.name : match.away_team.name}
               </h3>
             </div>
           </CardHeader>

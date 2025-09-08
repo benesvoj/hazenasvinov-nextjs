@@ -57,3 +57,20 @@ export const formatDateToDayAndMonth = (dateString: string) => {
     return dateString;
   }
 }
+
+export const formatDateWithWeekday = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+    return date.toLocaleDateString("cs-CZ", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateString;
+  }
+}

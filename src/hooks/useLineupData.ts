@@ -64,24 +64,33 @@ export const useLineupData = () => {
       setLoading(true);
       setError(null);
 
-      // Check if lineup exists
+      // Check if lineup exists - use .maybeSingle() instead of .single() to avoid PGRST116
       const { data: lineupData, error: lineupError } = await supabase
         .from('lineups')
         .select('*')
         .eq('match_id', matchId)
         .eq('team_id', teamId)
-        .single();
+        .maybeSingle();
 
       if (lineupError) {
-        if (lineupError.code === 'PGRST116') {
-          // No lineup found - this is normal for new matches
-          console.log('No lineup found for match/team, returning empty data');
+        // Handle 406 Not Acceptable error
+        if (lineupError.message && lineupError.message.includes('406')) {
           return {
             players: [],
             coaches: []
           };
         }
+        
+        console.error('Error fetching lineup:', lineupError);
         throw lineupError;
+      }
+
+      // If no lineup data found (maybeSingle returns null)
+      if (!lineupData) {
+        return {
+          players: [],
+          coaches: []
+        };
       }
 
       // Fetch players
