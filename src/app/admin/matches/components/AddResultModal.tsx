@@ -41,7 +41,7 @@ export default function AddResultModal({
       onClose={onClose}
       size="sm"
       classNames={{
-        base: "max-w-[95vw] mx-2",
+        base: "max-w-[95vw] sm:max-w-xl mx-2",
         wrapper: "items-center justify-center p-2 sm:p-4",
         body: "px-4 py-4",
         header: "px-4 py-4",
