@@ -90,7 +90,8 @@ export interface Member {
   name: string;
   surname: string;
   date_of_birth: string;
-  category: string;
+  category: string; // Legacy field - kept for backward compatibility
+  category_id?: string; // New field - foreign key to categories table
   sex: 'male' | 'female';
   functions: string[];
   created_at: string;
@@ -121,7 +122,6 @@ export interface LineupPlayer {
   id?: string;
   lineup_id?: string;
   member_id?: string;
-  external_player_id?: string;
   external_name?: string;
   external_surname?: string;
   external_registration_number?: string;
@@ -162,7 +162,6 @@ export interface LineupFormData {
 
 export interface LineupPlayerFormData {
   member_id?: string;
-  external_player_id?: string;
   external_name?: string;
   external_surname?: string;
   external_registration_number?: string;
@@ -170,6 +169,13 @@ export interface LineupPlayerFormData {
   is_external?: boolean;
   position: string;
   role?: string;
+  is_captain?: boolean;
+  jersey_number?: number;
+  goals?: number;
+  yellow_cards?: number;
+  red_cards_5min?: number;
+  red_cards_10min?: number;
+  red_cards_personal?: number;
 }
 
 export interface LineupCoachFormData {
@@ -183,20 +189,7 @@ export interface LineupValidation {
   warnings: string[];
 }
 
-interface Team {
-  id: string;
-  name: string;
-  short_name?: string;
-  logo_url?: string;
-  club_id?: string;
-  club_name?: string;
-  team_suffix?: string;
-  display_name?: string;
-  venue?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// Team interface removed - use ClubCategoryTeam from clubs.ts instead
 
 export interface TeamCategory {
   id: string;
@@ -206,7 +199,6 @@ export interface TeamCategory {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  team?: Team;
 }
 
 export interface MemberFunction {
@@ -288,4 +280,4 @@ interface ClubCategory {
   created_at: string;
 }
 
-export type { Team, Club, ClubTeam, ClubCategory }
+export type { Club, ClubTeam, ClubCategory }

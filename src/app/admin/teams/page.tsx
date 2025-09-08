@@ -39,25 +39,8 @@ interface Committee {
 	updated_at: string;
 }
 
-interface Team {
-	id: string;
-	name: string;
-	short_name?: string;
-	city?: string;
-	committee_id?: string;
-	committee?: Committee;
-	logo_url?: string;
-	website?: string;
-	email?: string;
-	phone?: string;
-	contact_person?: string;
-	founded_year?: number;
-	home_venue?: string;
-	is_active: boolean;
-	is_own_club?: boolean;
-	created_at: string;
-	updated_at: string;
-}
+// Team interface removed - this page should be replaced with club management
+// Use Club interface from types/clubs.ts instead
 
 interface Season {
 	id: string;

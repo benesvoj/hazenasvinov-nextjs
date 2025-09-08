@@ -23,7 +23,6 @@ export interface LineupPlayer {
   id?: string;
   lineup_id?: string;
   member_id?: string;
-  external_player_id?: string;
   external_name?: string;
   external_surname?: string;
   external_registration_number?: string;
@@ -31,6 +30,13 @@ export interface LineupPlayer {
   is_external?: boolean;
   position: string;
   role?: string;
+  is_captain?: boolean;
+  jersey_number?: number;
+  goals?: number;
+  yellow_cards?: number;
+  red_cards_5min?: number;
+  red_cards_10min?: number;
+  red_cards_personal?: number;
 }
 
 export interface LineupCoach {
@@ -64,7 +70,6 @@ export interface LineupFormData {
 
 export interface LineupPlayerFormData {
   member_id?: string;
-  external_player_id?: string;
   external_name?: string;
   external_surname?: string;
   external_registration_number?: string;
@@ -72,6 +77,13 @@ export interface LineupPlayerFormData {
   is_external?: boolean;
   position: string;
   role?: string;
+  is_captain?: boolean;
+  jersey_number?: number;
+  goals?: number;
+  yellow_cards?: number;
+  red_cards_5min?: number;
+  red_cards_10min?: number;
+  red_cards_personal?: number;
 }
 
 export interface LineupCoachFormData {
