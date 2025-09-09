@@ -1,16 +1,18 @@
 'use client';
 
 import React, { useState } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, Image } from "@heroui/react";
 import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import Image from 'next/image';
 import { CategoryNew } from "@/types";
+import { postStatuses } from "@/constants";
+import { generateSlug } from "@/utils/slugGenerator";
 
 interface User {
   id: string;
   email: string;
 }
 
+// TODO: remove any
 interface AddPostModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -32,10 +34,8 @@ export default function AddPostModal({
     title: "",
     slug: "",
     content: "",
-    excerpt: "",
     author_id: "",
-    status: "draft" as 'draft' | 'published' | 'archived',
-    tags: [] as string[],
+    status: postStatuses.draft,
     image_url: "",
     category_id: "",
     created_at: ""
@@ -44,31 +44,20 @@ export default function AddPostModal({
   const [imagePreview, setImagePreview] = useState<string>("");
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Generate slug from title
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
+  // Generate slug from title using the utility function
+  const generateSlugFromTitle = (title: string) => {
+    return generateSlug(title);
   };
 
   // Handle form input changes
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
     // Auto-generate slug when title changes
     if (field === 'title') {
-      setFormData(prev => ({ ...prev, slug: generateSlug(value) }));
+      setFormData(prev => ({ ...prev, slug: generateSlugFromTitle(value) }));
     }
   };
 
-  // Handle tag input changes
-  const handleTagInputChange = (value: string) => {
-    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-    setFormData(prev => ({ ...prev, tags: tags }));
-  };
 
   // Handle image file selection
   const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,10 +88,8 @@ export default function AddPostModal({
       title: "",
       slug: "",
       content: "",
-      excerpt: "",
       author_id: "default-user",
-      status: "draft",
-      tags: [],
+      status: postStatuses.draft,
       image_url: "",
       category_id: "",
       created_at: ""
@@ -164,9 +151,9 @@ export default function AddPostModal({
                 onSelectionChange={(keys) => handleInputChange('status', Array.from(keys)[0] as string)}
                 isRequired
               >
-                <SelectItem key="draft">Koncept</SelectItem>
-                <SelectItem key="published">Publikováno</SelectItem>
-                <SelectItem key="archived">Archivováno</SelectItem>
+                {Object.values(postStatuses).map((status) => (
+                  <SelectItem key={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</SelectItem>
+                ))}
               </Select>
               
               <Input
@@ -184,6 +171,7 @@ export default function AddPostModal({
                 selectedKeys={formData.category_id ? [formData.category_id] : []}
                 onSelectionChange={(keys) => handleInputChange('category_id', Array.from(keys)[0] as string)}
                 isDisabled={categoriesLoading}
+                isRequired
               >
                 {categories.length > 0 ? (
                   categories.map((category) => (
@@ -198,13 +186,6 @@ export default function AddPostModal({
                 )}
               </Select>
               
-              <Input
-                label="Tagy"
-                placeholder="tag1, tag2, tag3"
-                value={formData.tags.join(', ')}
-                onChange={(e) => handleTagInputChange(e.target.value)}
-                description="Tagy oddělené čárkami"
-              />
 
               {/* Image Upload */}
               <div>
@@ -214,21 +195,26 @@ export default function AddPostModal({
                 
                 {imagePreview ? (
                   <div className="space-y-3">
-                    <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                    <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center">
                       <Image
                         src={imagePreview}
                         alt="Preview"
-                        fill
+                        width={200}
+                        height={200}
                         className="object-cover"
                       />
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="absolute top-2 right-2 h-8 w-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                      <Button
+                        onPress={handleRemoveImage}
+                        className="absolute top-2 right-2"
                         title="Odstranit obrázek"
-                      >
-                        <XMarkIcon className="h-4 w-4" />
-                      </button>
+                        radius="full"
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        isIconOnly
+                        aria-label="Odstranit obrázek"
+                        startContent={<XMarkIcon className="h-4 w-4" />}
+                      />
                     </div>
                     <p className="text-xs text-gray-500">
                       Obrázek bude nahrán při uložení článku
@@ -263,18 +249,6 @@ export default function AddPostModal({
               </div>
             </div>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Perex
-                </label>
-                <Textarea
-                  placeholder="Krátký popis článku"
-                  value={formData.excerpt}
-                  onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                  rows={3}
-                  className="w-full"
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Obsah článku <span className="text-red-500">*</span>

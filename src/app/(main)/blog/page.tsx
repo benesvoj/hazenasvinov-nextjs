@@ -1,23 +1,13 @@
 'use client';
 
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Chip } from "@heroui/chip";
-import BlogPostCard, { BlogPostCardSkeleton } from "@/components/BlogPostCard";
-import Link from "@/components/Link";
-import Image from "next/image";
+import { useState, useMemo } from "react";
+import { Card, CardBody, Button, Input, Select, SelectItem } from "@heroui/react";
+import { BlogPostCard, BlogPostCardSkeleton } from "@/components";
 import { 
-  CalendarIcon, 
-  UserIcon, 
   TagIcon,
-  ArrowRightIcon,
-  PhotoIcon,
   MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-import { useFetchBlogPosts } from "@/hooks/useFetchBlogPosts";
-import { useState, useMemo } from "react";
+import { useFetchBlogPosts } from "@/hooks";
 
 export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,17 +18,9 @@ export default function BlogPage() {
   
   // Get unique categories from posts
   const categories = useMemo(() => {
-    if (!allPosts) return ["Všechny"];
-    
-    const uniqueCategories = new Set<string>();
-    allPosts.forEach(post => {
-      if (post.tags) {
-        post.tags.forEach(tag => uniqueCategories.add(tag));
-      }
-    });
-    
-    return ["Všechny", ...Array.from(uniqueCategories).sort()];
-  }, [allPosts]);
+    // Since we removed tags, just return a simple category list
+    return ["Všechny"];
+  }, []);
 
   // Filter posts based on search and category
   const filteredPosts = useMemo(() => {
@@ -47,11 +29,9 @@ export default function BlogPage() {
     return allPosts.filter(post => {
       const matchesSearch = searchTerm === "" || 
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+        post.content.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesCategory = selectedCategory === "Všechny" || 
-        (post.tags && post.tags.includes(selectedCategory));
+      const matchesCategory = selectedCategory === "Všechny";
       
       return matchesSearch && matchesCategory;
     });

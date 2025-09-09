@@ -1,9 +1,15 @@
+/**
+ * @description Headings component, NEEDS to be analysed
+ * @param param0 { children: React.ReactNode }
+ * @returns React.ReactNode
+ */
+
 export const Heading1 = ({ children }: { children: React.ReactNode }) => {
   return <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{children}</h1>;
 };
 
 export const Heading2 = ({ children }: { children: React.ReactNode }) => {
-  return <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{children}</h2>;
+  return <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 my-4">{children}</h2>;
 };
 
 export const Heading3 = ({ children }: { children: React.ReactNode }) => {

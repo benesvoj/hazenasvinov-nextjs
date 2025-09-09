@@ -5,6 +5,7 @@ export * from './useClubs';
 export * from './useUserRoles';
 export * from './useExcelImport';
 export { useFetchBlogPosts } from './useFetchBlogPosts';
+export { useFetchBlogPost } from './useFetchBlogPost';
 export * from './useFetchCategories';
 export { useFetchCategoryPosts } from './useFetchCategoryPosts';
 export * from './useFetchMatches';

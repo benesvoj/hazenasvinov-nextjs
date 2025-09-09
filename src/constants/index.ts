@@ -4,3 +4,4 @@ export * from './environment';
 export * from './roleOptions';
 export * from './categoryTagMap';
 export * from './gender';
+export * from './posts';

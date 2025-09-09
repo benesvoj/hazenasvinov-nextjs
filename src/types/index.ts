@@ -2,7 +2,7 @@ export * from './match';
 export * from './category';
 export * from './season';
 export * from './standing';
-export * from './blogPost';
+
 export * from './clubs';
 export * from './member';
 export * from './lineup';
@@ -11,3 +11,10 @@ export * from './userRoles';
 export * from './meetingMinutes';
 export * from './attendance';
 export * from './teamData';
+
+
+/**
+ * @description Blog types
+ */
+export * from './blogPost';
+export * from './blogPostCard';

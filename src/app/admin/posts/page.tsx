@@ -1,30 +1,24 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { useDisclosure } from "@heroui/modal";
-import { Select, SelectItem } from "@heroui/select";
-import { Chip } from "@heroui/chip";
+import { Card, CardBody, Button, Input, useDisclosure, Select, SelectItem, Chip, Image } from "@heroui/react";
 import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
-  CalendarIcon,
-  UserIcon,
   TagIcon,
   PhotoIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
-import Image from "next/image";
 import { BlogPost } from "@/types";
 import { useCategories } from "@/hooks/useCategories";
 import { AddPostModal, EditPostModal, DeletePostModal } from "./components";
 import { formatDateString } from "@/helpers";
 import { AdminContainer } from "../components/AdminContainer";
 import { translations } from "@/lib/translations";
+import { showToast, LoadingSpinner } from "@/components";
+import { adminStatusFilterOptions } from "@/constants";
 
 interface User {
   id: string;
@@ -107,7 +101,6 @@ export default function BlogPostsPage() {
           ) {
             const errorMsg =
               "Permission denied for blog_posts table. This is normal for unauthenticated users. Please log in to access admin features.";
-            console.log(errorMsg);
             setDbError(errorMsg);
           } else {
             setDbError(
@@ -120,10 +113,8 @@ export default function BlogPostsPage() {
           throw testError;
         }
 
-        console.log("Database connection successful");
         setDbError(null); // Clear any previous errors
       } catch (connectionError) {
-        console.error("Failed to connect to database:", connectionError);
         if (!dbError) {
           setDbError(
             "Failed to connect to database. Please check your Supabase configuration."
@@ -145,9 +136,6 @@ export default function BlogPostsPage() {
           error.code === "42501" &&
           error.message.includes("permission denied")
         ) {
-          console.log(
-            "Permission denied for blog_posts table - this is normal for unauthenticated users"
-          );
           setDbError(
             "Permission denied for blog_posts table. This is normal for unauthenticated users. Please log in to access admin features."
           );
@@ -160,11 +148,9 @@ export default function BlogPostsPage() {
         throw error;
       }
 
-      console.log("Posts fetched successfully:", data?.length || 0, "posts");
       setPosts(data || []);
     } catch (error) {
-      console.error("Error fetching posts:", error);
-
+      
       // Log more details about the error
       if (error instanceof Error) {
         console.error("Error message:", error.message);
@@ -218,7 +204,6 @@ export default function BlogPostsPage() {
       } = await supabase.auth.getUser();
 
       if (userError) {
-        console.log("User error, using fallback users:", userError);
         setUsers([
           {
             id: "default-user",
@@ -230,7 +215,6 @@ export default function BlogPostsPage() {
 
       // If we have a user, use the current user
       if (user) {
-        console.log("Authenticated user found:", user.email);
         setUsers([
           {
             id: user.id,
@@ -239,7 +223,6 @@ export default function BlogPostsPage() {
         ]);
       } else {
         // No user, use fallback user
-        console.log("No authenticated user found, using fallback users");
         setUsers([
           {
             id: "default-user",
@@ -324,14 +307,10 @@ export default function BlogPostsPage() {
         !formData.title ||
         !formData.slug ||
         !formData.content ||
-        !formData.excerpt
+        !formData.status ||
+        !formData.category_id
       ) {
-        console.error("Missing required fields for new post:", {
-          title: !!formData.title,
-          slug: !!formData.slug,
-          content: !!formData.content,
-          excerpt: !!formData.excerpt,
-        });
+        showToast.warning("Missing required fields for new post");
         return;
       }
 
@@ -349,17 +328,6 @@ export default function BlogPostsPage() {
           // Continue without image
         }
       }
-
-      console.log("Attempting to add post with data:", {
-        title: formData.title,
-        slug: formData.slug,
-        content: formData.content.substring(0, 100) + "...",
-        excerpt: formData.excerpt,
-        author_id: authorId,
-        status: formData.status,
-        tags: formData.tags,
-        image_url: imageUrl,
-      });
 
       // Check if table exists and has proper structure
       try {
@@ -387,7 +355,6 @@ export default function BlogPostsPage() {
           ) {
             const errorMsg =
               "Permission denied for blog_posts table. This is normal for unauthenticated users. Please log in to access admin features.";
-            console.log(errorMsg);
             setDbError(errorMsg);
             return;
           } else {
@@ -398,8 +365,6 @@ export default function BlogPostsPage() {
             );
             return;
           }
-        } else {
-          console.log("Table structure check passed");
         }
       } catch (tableCheckError) {
         console.error("Error checking table structure:", tableCheckError);
@@ -410,11 +375,9 @@ export default function BlogPostsPage() {
         title: formData.title,
         slug: formData.slug,
         content: formData.content,
-        excerpt: formData.excerpt,
         author_id: authorId,
         status: formData.status,
-        tags: formData.tags,
-        category_id: formData.category_id || null,
+        category_id: formData.category_id,
         published_at:
           formData.status === "published" ? new Date().toISOString() : null,
         created_at: formData.created_at
@@ -451,18 +414,13 @@ export default function BlogPostsPage() {
           if (retryError) {
             throw retryError;
           }
-
-          console.log("Post added successfully without image:", retryData);
         } else {
           throw error;
         }
-      } else {
-        console.log("Post added successfully:", data);
       }
 
       fetchPosts();
     } catch (error) {
-      console.error("Error adding post:", error);
 
       // Log detailed error information
       if (error instanceof Error) {
@@ -486,14 +444,12 @@ export default function BlogPostsPage() {
       if (
         !formData.title ||
         !formData.slug ||
-        !formData.content ||
-        !formData.excerpt
+        !formData.content
       ) {
         console.error("Missing required fields for update:", {
           title: !!formData.title,
           slug: !!formData.slug,
           content: !!formData.content,
-          excerpt: !!formData.excerpt,
         });
         return;
       }
@@ -518,11 +474,9 @@ export default function BlogPostsPage() {
         title: formData.title,
         slug: formData.slug,
         content: formData.content,
-        excerpt: formData.excerpt,
         author_id: authorId,
         status: formData.status,
-        tags: formData.tags,
-        category_id: formData.category_id || null,
+        category_id: formData.category_id,
         created_at: formData.created_at
           ? new Date(formData.created_at).toISOString()
           : undefined,
@@ -564,15 +518,11 @@ export default function BlogPostsPage() {
           if (retryError) {
             throw retryError;
           }
-
-          console.log("Post updated successfully without image:", retryData);
         } else {
           throw error;
         }
-      } else {
-        console.log("Post updated successfully:", data);
       }
-
+      
       setSelectedPost(null);
       fetchPosts();
     } catch (error) {
@@ -611,8 +561,7 @@ export default function BlogPostsPage() {
   const filteredPosts = posts.filter((post) => {
     const matchesSearch =
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+      post.content.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || post.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -624,19 +573,19 @@ export default function BlogPostsPage() {
       case "published":
         return (
           <Chip color="success" variant="flat">
-            Publikováno
+            {adminStatusFilterOptions.published}
           </Chip>
         );
       case "draft":
         return (
           <Chip color="warning" variant="flat">
-            Koncept
+            {adminStatusFilterOptions.draft}
           </Chip>
         );
       case "archived":
         return (
           <Chip color="secondary" variant="flat">
-            Archivováno
+            {adminStatusFilterOptions.archived}
           </Chip>
         );
       default:
@@ -678,10 +627,11 @@ export default function BlogPostsPage() {
               }
               className="w-full md:w-48"
             >
-              <SelectItem key="all">Všechny stavy</SelectItem>
-              <SelectItem key="draft">Koncept</SelectItem>
-              <SelectItem key="published">Publikováno</SelectItem>
-              <SelectItem key="archived">Archivováno</SelectItem>
+              {Object.entries(adminStatusFilterOptions).map(([key, value]) => (
+                <SelectItem key={key}>
+                  {value}
+                </SelectItem>
+              ))}
             </Select>
           </div>
         </CardBody>
@@ -692,10 +642,7 @@ export default function BlogPostsPage() {
         <CardBody className="p-0">
           {loading || categoriesLoading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">
-                Načítání článků...
-              </p>
+              <LoadingSpinner />
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -730,7 +677,8 @@ export default function BlogPostsPage() {
                             <Image
                               src={post.image_url}
                               alt={post.title}
-                              fill
+                              width={64}
+                              height={64}
                               className="object-cover"
                             />
                           </div>
@@ -753,39 +701,12 @@ export default function BlogPostsPage() {
                       {/* TODO: Add category name instead of tag */}
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
-                          {post.tags && post.tags.length > 0 ? (
-                            post.tags.slice(0, 3).map((tag, index) => (
-                              <Chip
-                                key={index}
-                                size="sm"
-                                variant="bordered"
-                                color="primary"
-                                className="text-xs"
-                              >
-                                {tag}
-                              </Chip>
-                            ))
-                          ) : (
-                            <span className="text-sm text-gray-400">
-                              Žádné tagy
-                            </span>
-                          )}
-                          {post.tags && post.tags.length > 3 && (
-                            <Chip
-                              size="sm"
-                              variant="bordered"
-                              color="default"
-                              className="text-xs"
-                            >
-                              +{post.tags.length - 3}
-                            </Chip>
-                          )}
+                          {post.category_id !== null ? categories.find((category) => category.id === post.category_id)?.name : "-"}
                         </div>
                       </td>
                       {/* TODO: add author name instead of ID */}
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
-                          <UserIcon className="w-4 h-4 text-gray-400" />
                           <span className="text-sm">
                             {post.author_id === "default-user"
                               ? "Admin"
@@ -798,7 +719,6 @@ export default function BlogPostsPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
-                          <CalendarIcon className="w-4 h-4 text-gray-400" />
                           <span className="text-sm">
                             {formatDateString(post.created_at)}
                           </span>

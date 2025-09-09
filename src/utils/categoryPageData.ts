@@ -233,11 +233,7 @@ export async function getCategoryPageData(
 
       posts = filteredPosts.map((post: BlogPost) => ({
         ...post,
-        excerpt:
-          post.excerpt ||
-          post.content?.substring(0, 150) + "..." ||
-          "Bez popisu",
-        tags: post.tags || [],
+        content: post.content?.substring(0, 150) + "..." || "Bez popisu",
         image_url: post.image_url || undefined,
       }));
     }

@@ -8,6 +8,7 @@ import { Select, SelectItem } from "@heroui/select";
 import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
 import { BlogPost, CategoryNew } from "@/types";
+import { generateSlug } from "@/utils/slugGenerator";
 
 interface User {
   id: string;
@@ -37,10 +38,8 @@ export default function EditPostModal({
     title: "",
     slug: "",
     content: "",
-    excerpt: "",
     author_id: "",
     status: "draft" as 'draft' | 'published' | 'archived',
-    tags: [] as string[],
     image_url: "",
     category_id: "",
     created_at: ""
@@ -49,14 +48,9 @@ export default function EditPostModal({
   const [imagePreview, setImagePreview] = useState<string>("");
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Generate slug from title
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
+  // Generate slug from title using the utility function
+  const generateSlugFromTitle = (title: string) => {
+    return generateSlug(title);
   };
 
   // Handle form input changes
@@ -65,15 +59,10 @@ export default function EditPostModal({
     
     // Auto-generate slug when title changes
     if (field === 'title') {
-      setFormData(prev => ({ ...prev, slug: generateSlug(value) }));
+      setFormData(prev => ({ ...prev, slug: generateSlugFromTitle(value) }));
     }
   };
 
-  // Handle tag input changes
-  const handleTagInputChange = (value: string) => {
-    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-    setFormData(prev => ({ ...prev, tags: tags }));
-  };
 
   // Handle image file selection
   const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,10 +93,8 @@ export default function EditPostModal({
       title: "",
       slug: "",
       content: "",
-      excerpt: "",
       author_id: "default-user",
       status: "draft",
-      tags: [],
       image_url: "",
       category_id: "",
       created_at: ""
@@ -138,10 +125,8 @@ export default function EditPostModal({
         title: post.title,
         slug: post.slug,
         content: post.content,
-        excerpt: post.excerpt,
         author_id: post.author_id,
         status: post.status,
-        tags: post.tags || [],
         image_url: post.image_url || "",
         category_id: post.category_id || "",
         created_at: createdDate
@@ -233,13 +218,6 @@ export default function EditPostModal({
                 )}
               </Select>
               
-              <Input
-                label="Tagy"
-                placeholder="tag1, tag2, tag3"
-                value={formData.tags.join(', ')}
-                onChange={(e) => handleTagInputChange(e.target.value)}
-                description="Tagy oddělené čárkami"
-              />
 
               {/* Image Upload */}
               <div>
@@ -298,18 +276,6 @@ export default function EditPostModal({
               </div>
             </div>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Perex
-                </label>
-                <Textarea
-                  placeholder="Krátký popis článku"
-                  value={formData.excerpt}
-                  onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                  rows={3}
-                  className="w-full"
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Obsah článku <span className="text-red-500">*</span>

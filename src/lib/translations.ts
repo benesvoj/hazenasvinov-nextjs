@@ -15,6 +15,7 @@ export const translations = {
         viewAllPostsDescription: 'Zobrazit všechny aktuality',
         viewAllPostsButton: 'Zobrazit všechny aktuality',
         viewAllPostsButtonDescription: 'Zobrazit všechny aktuality',
+        backToPosts: 'Zpět na aktuality',
     }
   },
   footer: {
