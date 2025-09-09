@@ -10,11 +10,7 @@ interface CategoryPageProps {
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const awaitedParams = await params;
-  if (
-    !awaitedParams ||
-    typeof awaitedParams.slug !== 'string' ||
-    awaitedParams.slug.trim() === ''
-  ) {
+  if (!awaitedParams?.slug?.trim()) {
     notFound();
   }
   const categorySlug = awaitedParams.slug;
