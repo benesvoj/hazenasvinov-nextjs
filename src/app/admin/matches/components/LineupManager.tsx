@@ -31,10 +31,9 @@ import {
   ExternalPlayer,
 } from "@/types";
 import { createClient } from "@/utils/supabase/client";
-import { addToast } from "@heroui/toast";
-import { DeleteConfirmationModal, showToast, Toast } from "@/components";
+import { DeleteConfirmationModal, showToast } from "@/components";
 import LineupManagerPlayerCard from "./LineupManagerPlayerCard";
-import { generateLineupId, generateUUID } from "@/utils/uuid";
+import { generateLineupId } from "@/utils/uuid";
 
 interface LineupManagerProps {
   matchId: string;
@@ -59,21 +58,10 @@ export default function LineupManager({
   categoryCode,
   onClose,
 }: LineupManagerProps) {
-  // Debug: Log the received props
-  console.log("LineupManager props:", {
-    matchId,
-    homeTeamId,
-    awayTeamId,
-    homeTeamName,
-    awayTeamName,
-    categoryId,
-    categoryCode,
-  });
 
   // Filter members by category
   const filteredMembers = useMemo(() => {
     if (!categoryId) {
-      console.warn("No categoryId provided, showing all members");
       return members;
     }
 
@@ -84,41 +72,17 @@ export default function LineupManager({
 
     // If no members found with category_id, fallback to legacy category code filtering
     if (filtered.length === 0 && categoryCode) {
-      console.warn(
-        "No members found with category_id, trying legacy category code filtering"
-      );
       filtered = members.filter((member) => member.category === categoryCode);
     }
 
     // If still no members found, show all members as fallback
     if (filtered.length === 0) {
-      console.warn(
-        `No members found for categoryId '${categoryId}' or categoryCode '${categoryCode}', showing all members as fallback`
-      );
       return members;
     }
 
     return filtered;
   }, [members, categoryId, categoryCode]);
 
-  console.log("Category filtering:", {
-    totalMembers: members.length,
-    filteredMembers: filteredMembers.length,
-    categoryId,
-    categoryCode,
-    sampleMembers: members.slice(0, 3).map((m) => ({
-      name: m.name,
-      surname: m.surname,
-      category: m.category,
-      category_id: m.category_id,
-    })),
-    allCategories: [...new Set(members.map((m) => m.category))],
-    allCategoryIds: [
-      ...new Set(members.map((m) => m.category_id).filter(Boolean)),
-    ],
-    membersWithCategory: members.filter((m) => m.category).length,
-    membersWithCategoryId: members.filter((m) => m.category_id).length,
-  });
 
   const [selectedTeam, setSelectedTeam] = useState<"home" | "away">("home");
   const [homeFormData, setHomeFormData] = useState<LineupFormData>({
@@ -398,11 +362,6 @@ export default function LineupManager({
 
       // Show success message
       showToast.success("Sestava byla úspěšně uložena!");
-
-      // Close the dialog
-      if (onClose) {
-        onClose();
-      }
     } catch (error: any) {
       console.error("Error saving lineup:", error);
       const errorMessage =
@@ -421,6 +380,11 @@ export default function LineupManager({
       }
 
       showToast.danger(`Chyba při ukládání sestavy: ${errorMessage}`);
+    } finally {
+      // Close the dialog regardless of success/failure
+      if (onClose) {
+        onClose();
+      }
     }
   };
 
