@@ -18,9 +18,9 @@ export default function MatchInfoCard({ match }: MatchInfoCardProps) {
         {/* Competition Info */}
         <Heading2>{match.category.name}</Heading2>
         <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-          {match.category.description},{" "}
-          {match.matchweek && `- ${match.matchweek}. kolo, `}{" "}
-          {match.season?.name}
+          {match.category.description}
+          {match.matchweek && ` - ${match.matchweek}. kolo`}
+          {`, ${match.season?.name}`}
         </p>
       </CardHeader>
       <CardBody className="p-2 sm:p-4">
