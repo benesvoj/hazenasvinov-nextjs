@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { translations } from '@/lib/translations';
+import { CategoryNew, Season } from '@/types';
 
 /**
  * TransformedMatch interface for the match data
@@ -38,14 +39,8 @@ interface TransformedMatch {
     logo_url?: string;
     is_own_club: boolean;
   };
-  category: {
-    code: string;
-    name: string;
-    description?: string;
-  };
-  season: {
-    name: string;
-  };
+  category: CategoryNew;
+  season: Season;
 }
 
 // Helper function to safely get team display name
@@ -96,7 +91,7 @@ export function useFetchMatch(matchId: string | null) {
               club:clubs(id, name, short_name, logo_url, is_own_club)
             )
           ),
-          category:categories(code, name, description),
+          category:categories(id, name, description),
           season:seasons(name)
         `)
         .eq("id", matchId)
@@ -105,12 +100,10 @@ export function useFetchMatch(matchId: string | null) {
       if (error) {
         if (error.code === 'PGRST116') {
           // Match not found - this is a valid case
-          console.log("Match not found:", matchId);
           setError("Zápas nebyl nalezen");
           setMatch(null);
           return;
         }
-        console.error("Error fetching match:", error);
         setError("Chyba při načítání zápasu");
         return;
       }
@@ -192,7 +185,6 @@ export function useFetchMatch(matchId: string | null) {
 
       setMatch(transformedMatch);
     } catch (error) {
-      console.error("Error fetching match:", error);
       setError("Chyba při načítání zápasu");
     } finally {
       setLoading(false);
