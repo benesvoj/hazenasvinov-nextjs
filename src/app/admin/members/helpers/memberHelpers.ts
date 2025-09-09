@@ -1,19 +1,30 @@
-import { Category } from "@/types";
+import { CategoryNew } from "@/types";
 
 /**
  * Get the display name for a category code
+ * @deprecated Use getCategoryNameById instead for new system
  */
 export const getCategoryName = (categoryCode: string, categories: Record<string, string>) => {
   return categories[categoryCode] || categoryCode;
 };
 
 /**
+ * Get the display name for a category by ID
+ * Updated for the new category system using IDs
+ */
+export const getCategoryNameById = (categoryId: string, categories: CategoryNew[] | null) => {
+  if (!categories) return categoryId;
+  const category = categories.find(cat => cat.id === categoryId);
+  return category?.name || categoryId;
+};
+
+/**
  * Get the appropriate badge color for a category based on gender and name
  */
-export const getCategoryBadgeColor = (category: string, categoriesData: Category[] | null) => {
+export const getCategoryBadgeColor = (categoryId: string, categoriesData: CategoryNew[] | null) => {
   if (!categoriesData) return "default";
   
-  const categoryData = categoriesData.find(cat => cat.code === category);
+  const categoryData = categoriesData.find(cat => cat.id === categoryId);
   if (!categoryData) return "default";
   
   if (categoryData.gender === 'male') return "primary";
@@ -21,9 +32,9 @@ export const getCategoryBadgeColor = (category: string, categoriesData: Category
   if (categoryData.gender === 'mixed') return "success";
   
   // Fallback for categories without gender
-  if (category.toLowerCase().includes('kids') || category.toLowerCase().includes('prep')) return "warning";
-  if (category.toLowerCase().includes('boys')) return "primary";
-  if (category.toLowerCase().includes('girls')) return "secondary";
+  if (categoryData.name.toLowerCase().includes('kids') || categoryData.name.toLowerCase().includes('prep')) return "warning";
+  if (categoryData.name.toLowerCase().includes('boys')) return "primary";
+  if (categoryData.name.toLowerCase().includes('girls')) return "secondary";
   
   return "default";
 };
@@ -143,19 +154,33 @@ export const sortMembers = (
 
 /**
  * Convert categories array to Record format for compatibility
+ * Uses category code as key for backward compatibility with existing components
  */
-export const convertCategoriesToRecord = (categoriesData: Category[] | null) => {
+export const convertCategoriesToRecord = (categoriesData: CategoryNew[] | null) => {
   if (!categoriesData) return {};
   return categoriesData.reduce((acc, category) => {
-    acc[category.id] = category.name;
+    acc[category.code] = category.name;
     return acc;
   }, {} as Record<string, string>);
 };
 
 /**
- * Create reverse mapping from name to code for form submission
+ * Create reverse mapping from name to ID for form submission
+ * Updated to use category ID instead of code for the new system
  */
-export const createCategoryNameToCodeMap = (categoriesData: Category[] | null) => {
+export const createCategoryNameToIdMap = (categoriesData: CategoryNew[] | null) => {
+  if (!categoriesData) return {};
+  return categoriesData.reduce((acc, category) => {
+    acc[category.name] = category.id;
+    return acc;
+  }, {} as Record<string, string>);
+};
+
+/**
+ * @deprecated Use createCategoryNameToIdMap instead
+ * Legacy function for backward compatibility
+ */
+export const createCategoryNameToCodeMap = (categoriesData: CategoryNew[] | null) => {
   if (!categoriesData) return {};
   return categoriesData.reduce((acc, category) => {
     acc[category.name] = category.code;
