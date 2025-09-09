@@ -7,6 +7,8 @@ export { default as Toast } from './Toast';
 
 // Blog Components
 export { default as BlogPostCard, BlogPostCardSkeleton } from './BlogPostCard';
+export { default as MatchInfo } from './MatchInfo';
+export { default as BlogContent } from './BlogContent';
 
 // UI Components
 export { default as DeleteConfirmationModal } from './DeleteConfirmationModal';

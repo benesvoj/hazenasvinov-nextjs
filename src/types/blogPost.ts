@@ -10,4 +10,5 @@ export interface BlogPost {
   updated_at: string;
   image_url?: string;
   category_id?: string;
+  match_id?: string; // Optional reference to related match
 }

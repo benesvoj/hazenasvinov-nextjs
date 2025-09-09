@@ -3,10 +3,11 @@
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import { Card, CardBody, CardHeader, Button, Chip } from "@heroui/react";
+import { Card, CardBody, Button, Chip,Divider} from "@heroui/react";
 // TODO: Remove Link from here, use Heroui Link
 import Link from "@/components/Link";
 import { useCategories, useFetchBlogPost } from "@/hooks";
+import { useFetchPostMatch } from "@/hooks/useFetchPostMatch";
 import {
   CalendarIcon,
   UserIcon,
@@ -17,7 +18,8 @@ import {
   PhotoIcon,
 } from "@heroicons/react/24/outline";
 import { translations } from "@/lib/translations";
-import { BlogPostCard, Heading2 } from "@/components";
+import { BlogPostCard, Heading2, MatchInfo } from "@/components";
+import BlogContent from "@/components/BlogContent";
 
 export default function BlogPostPage() {
   const params = useParams();
@@ -25,6 +27,9 @@ export default function BlogPostPage() {
 
   const { post, relatedPosts, loading, error } = useFetchBlogPost(slug);
   const { categories, fetchCategories } = useCategories();
+  const { match: relatedMatch, loading: matchLoading } = useFetchPostMatch(
+    post?.id || null
+  );
 
   useEffect(() => {
     fetchCategories();
@@ -144,9 +149,15 @@ export default function BlogPostPage() {
         </div>
 
         {/* Article Content */}
-        <div className="prose prose-lg max-w-none dark:prose-invert">
-          <div dangerouslySetInnerHTML={{ __html: post.content }} />
-        </div>
+        <BlogContent content={post.content} />
+
+        {/* Related Match Information */}
+        {relatedMatch && !matchLoading && (
+          <>
+            <Divider className="my-6" />
+            <MatchInfo match={relatedMatch} />
+          </>
+        )}
 
         {/* Share and Bookmark */}
         <div className="flex items-center justify-between mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">

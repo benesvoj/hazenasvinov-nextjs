@@ -378,6 +378,7 @@ export default function BlogPostsPage() {
         author_id: authorId,
         status: formData.status,
         category_id: formData.category_id,
+        match_id: formData.match_id || null, // Include match_id
         published_at:
           formData.status === "published" ? new Date().toISOString() : null,
         created_at: formData.created_at
@@ -477,6 +478,7 @@ export default function BlogPostsPage() {
         author_id: authorId,
         status: formData.status,
         category_id: formData.category_id,
+        match_id: formData.match_id || null, // Include match_id
         created_at: formData.created_at
           ? new Date(formData.created_at).toISOString()
           : undefined,

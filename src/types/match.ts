@@ -39,6 +39,7 @@ export interface Match {
     match_number?: number;
     category: { code: string; name: string; description?: string };
     season: { name: string };
+    post_id?: string; // Optional reference to related blog post
     // Additional properties for transformed data
     home_team_is_own_club?: boolean;
     away_team_is_own_club?: boolean;

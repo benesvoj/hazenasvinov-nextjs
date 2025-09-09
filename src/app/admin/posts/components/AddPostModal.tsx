@@ -2,10 +2,12 @@
 
 import React, { useState } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, Image } from "@heroui/react";
-import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { CategoryNew } from "@/types";
+import { PhotoIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { CategoryNew, Match } from "@/types";
 import { postStatuses } from "@/constants";
 import { generateSlug } from "@/utils/slugGenerator";
+import { formatDateString } from "@/helpers";
+import MatchSelectionModal from "./MatchSelectionModal";
 
 interface User {
   id: string;
@@ -38,11 +40,14 @@ export default function AddPostModal({
     status: postStatuses.draft,
     image_url: "",
     category_id: "",
+    match_id: "",
     created_at: ""
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
 
   // Generate slug from title using the utility function
   const generateSlugFromTitle = (title: string) => {
@@ -56,6 +61,12 @@ export default function AddPostModal({
     if (field === 'title') {
       setFormData(prev => ({ ...prev, slug: generateSlugFromTitle(value) }));
     }
+  };
+
+  // Handle match selection
+  const handleMatchSelect = (match: Match | null) => {
+    setSelectedMatch(match);
+    setFormData(prev => ({ ...prev, match_id: match?.id || "" }));
   };
 
 
@@ -92,10 +103,12 @@ export default function AddPostModal({
       status: postStatuses.draft,
       image_url: "",
       category_id: "",
+      match_id: "",
       created_at: ""
     });
     setImageFile(null);
     setImagePreview("");
+    setSelectedMatch(null);
   };
 
   // Handle modal close
@@ -185,7 +198,47 @@ export default function AddPostModal({
                   </SelectItem>
                 )}
               </Select>
-              
+
+              {/* Match Selection (Optional) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Související zápas (volitelné)
+                </label>
+                {selectedMatch ? (
+                  <div className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          {selectedMatch.home_team.name} vs {selectedMatch.away_team.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {selectedMatch.competition} • {formatDateString(selectedMatch.date)}
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        color="danger"
+                        onPress={() => handleMatchSelect(null)}
+                      >
+                        Odstranit
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    variant="bordered"
+                    startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
+                    onPress={() => setIsMatchModalOpen(true)}
+                    className="w-full justify-start"
+                  >
+                    Vybrat zápas
+                  </Button>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Vyberte zápas pro propojení s článkem
+                </p>
+              </div>
 
               {/* Image Upload */}
               <div>
@@ -274,6 +327,15 @@ export default function AddPostModal({
           </Button>
         </ModalFooter>
       </ModalContent>
+      
+      {/* Match Selection Modal */}
+      <MatchSelectionModal
+        isOpen={isMatchModalOpen}
+        onClose={() => setIsMatchModalOpen(false)}
+        onSelect={handleMatchSelect}
+        selectedMatchId={selectedMatch?.id}
+        categoryId={formData.category_id || undefined}
+      />
     </Modal>
   );
 }

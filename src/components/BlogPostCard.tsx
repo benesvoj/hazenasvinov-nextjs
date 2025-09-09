@@ -139,9 +139,11 @@ export default function BlogPostCard({
         </h2>
 
         {/* Post Content Preview */}
-        <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 leading-relaxed">
-          {post.content.substring(0, 150)}...
-        </p>
+        <div className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 leading-relaxed">
+          <div className="whitespace-pre-wrap">
+            {post.content.substring(0, 150)}...
+          </div>
+        </div>
 
         {/* Post Meta */}
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
