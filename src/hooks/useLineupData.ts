@@ -265,8 +265,7 @@ export const useLineupData = () => {
       // Client-side validation before saving
       const validation = validateLineupData(formData);
       if (!validation.isValid) {
-        console.error('Lineup validation failed:', validation.errors);
-        throw new Error(`VALIDATION_WARNING: ${validation.errors.join(', ')}`);
+        throw new Error(validation.errors.join(', '));
       }
       
       // First verify that the match exists

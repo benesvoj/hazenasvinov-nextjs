@@ -2,3 +2,4 @@
 export * from './memberFunctions';
 export * from './environment';
 export * from './roleOptions';
+export * from './categoryTagMap';

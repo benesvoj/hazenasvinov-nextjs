@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
-import { Category, Match, BlogPost, StandingWithTeam, ProcessedStanding, ClubCategoryWithClub } from '@/types';
+import { Category, Match, BlogPost, ProcessedStanding } from '@/types';
+import { categoryTagMap } from '@/constants';
 
 export interface CategoryPageServerData {
   category: Category | null;
@@ -189,18 +190,6 @@ export async function getCategoryPageData(
 
     if (includePosts && !postsResult.error && postsResult.data) {
       const allPosts = postsResult.data;
-      
-      // Filter posts by category using tag-based matching
-      // TODO: remove this map, it should be working based on categoryId
-      const categoryTagMap: { [key: string]: string[] } = {
-        'men': ['muži', 'mužský', 'dospělí', 'muž', 'mužů', 'mužská', 'mužské', 'mužský tým', 'mužský oddíl', 'muži', 'muž', 'dospělí', 'senior', 'senioři'],
-        'women': ['ženy', 'ženský', 'dospělé', 'žena', 'ženská', 'ženské', 'ženský tým', 'ženský oddíl', 'ženy', 'žena', 'dospělé', 'seniorky', 'seniorky'],
-        'youngerBoys': ['mladší žáci', 'mladší', 'žáci', 'mladší žák', 'dorostenci', 'dorostenec', 'žáci', 'mladší', 'dorostenci'],
-        'youngerGirls': ['mladší žačky', 'mladší', 'žačky', 'mladší žačka', 'dorostenky', 'dorostenka', 'žačky', 'mladší', 'dorostenky'],
-        'olderBoys': ['starší žáci', 'starší', 'žáci', 'starší žák', 'junioři', 'junior', 'žáci', 'starší', 'junioři'],
-        'olderGirls': ['starší žačky', 'starší', 'žačky', 'starší žačka', 'juniorky', 'juniorka', 'žačky', 'starší', 'juniorky'],
-        'prepKids': ['přípravka', 'přípravky', 'děti', 'dítě', 'přípravka', 'přípravka', 'přípravka', 'děti', 'přípravka']
-      };
 
       const tagPatterns = categoryTagMap[categorySlug] || [];
       
