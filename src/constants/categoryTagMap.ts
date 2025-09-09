@@ -1,6 +1,5 @@
-      // Filter posts by category using tag-based matching
-      // TODO: remove this map, it should be working based on categoryId
-
+// Filter posts by category using tag-based matching
+// @deprecated use categoryId instead, will be removed in the future
 export const categoryTagMap: { [key: string]: string[] } = {
     'men': ['muži', 'mužský', 'dospělí', 'muž', 'mužů', 'mužská', 'mužské', 'mužský tým', 'mužský oddíl', 'dospělí', 'senior', 'senioři'],
     'women': ['ženy', 'ženský', 'dospělé', 'žena', 'ženská', 'ženské', 'ženský tým', 'ženský oddíl', 'dospělé', 'seniorky', 'seniorky'],

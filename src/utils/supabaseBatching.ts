@@ -1,14 +1,29 @@
 import { createClient as createServerClient } from '@/utils/supabase/server';
 
+/**
+ * Standard error interface for Supabase operations
+ */
+export interface SupabaseError {
+  message: string;
+  details?: string;
+  hint?: string;
+  code?: string;
+}
+
+/**
+ * Query function type for batched operations
+ */
+export type BatchedQueryFunction<T = any> = () => Promise<{ data: T | null; error: SupabaseError | null }>;
+
 export interface BatchedQuery {
   id: string;
-  query: () => Promise<any>;
+  query: BatchedQueryFunction;
 }
 
 export interface BatchedResult<T = any> {
   id: string;
   data: T | null;
-  error: any;
+  error: SupabaseError | null;
 }
 
 /**
@@ -18,7 +33,7 @@ export interface BatchedResult<T = any> {
 export class SupabaseBatcher {
   private queries: BatchedQuery[] = [];
 
-  addQuery<T = any>(id: string, queryFn: () => Promise<{ data: T | null; error: any }>): this {
+  addQuery<T = any>(id: string, queryFn: BatchedQueryFunction<T>): this {
     this.queries.push({
       id,
       query: queryFn
@@ -37,10 +52,16 @@ export class SupabaseBatcher {
             error: result.error
           };
         } catch (error) {
+          // Convert caught errors to SupabaseError format
+          const supabaseError: SupabaseError = {
+            message: error instanceof Error ? error.message : 'Unknown error occurred',
+            details: error instanceof Error ? error.stack : undefined,
+            code: 'UNKNOWN_ERROR'
+          };
           return {
             id: query.id,
             data: null,
-            error
+            error: supabaseError
           };
         }
       })
@@ -50,10 +71,16 @@ export class SupabaseBatcher {
       if (result.status === 'fulfilled') {
         return result.value;
       } else {
+        // Convert rejected promises to SupabaseError format
+        const supabaseError: SupabaseError = {
+          message: result.reason instanceof Error ? result.reason.message : 'Promise rejected',
+          details: result.reason instanceof Error ? result.reason.stack : undefined,
+          code: 'PROMISE_REJECTED'
+        };
         return {
           id: this.queries[index].id,
           data: null,
-          error: result.reason
+          error: supabaseError
         };
       }
     });
@@ -76,7 +103,7 @@ export class SupabaseServerBatcher {
     this.supabaseClientFactory = supabaseClientFactory || createServerClient;
   }
 
-  addQuery<T = any>(id: string, queryFn: (supabase: any) => Promise<{ data: T | null; error: any }>): this {
+  addQuery<T = any>(id: string, queryFn: (supabase: any) => Promise<{ data: T | null; error: SupabaseError | null }>): this {
     this.queries.push({
       id,
       query: async () => {
@@ -98,10 +125,16 @@ export class SupabaseServerBatcher {
             error: result.error
           };
         } catch (error) {
+          // Convert caught errors to SupabaseError format
+          const supabaseError: SupabaseError = {
+            message: error instanceof Error ? error.message : 'Unknown error occurred',
+            details: error instanceof Error ? error.stack : undefined,
+            code: 'UNKNOWN_ERROR'
+          };
           return {
             id: query.id,
             data: null,
-            error
+            error: supabaseError
           };
         }
       })
@@ -111,10 +144,16 @@ export class SupabaseServerBatcher {
       if (result.status === 'fulfilled') {
         return result.value;
       } else {
+        // Convert rejected promises to SupabaseError format
+        const supabaseError: SupabaseError = {
+          message: result.reason instanceof Error ? result.reason.message : 'Promise rejected',
+          details: result.reason instanceof Error ? result.reason.stack : undefined,
+          code: 'PROMISE_REJECTED'
+        };
         return {
           id: this.queries[index].id,
           data: null,
-          error: result.reason
+          error: supabaseError
         };
       }
     });

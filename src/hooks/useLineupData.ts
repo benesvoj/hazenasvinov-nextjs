@@ -2,8 +2,6 @@ import { useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   LineupFormData, 
-  LineupPlayerFormData, 
-  LineupCoachFormData, 
   LineupSummary, 
   LineupValidation,
   ExternalPlayer
@@ -299,7 +297,7 @@ export const useLineupData = () => {
 
       // Use the club_category_teams.id directly (no more teams table needed)
       const teamData = {
-        id: clubCategoryTeamData.id, // This is the club_category_teams.id that lineups table now expects
+        id: clubCategoryTeamData.id,
         club_id: clubCategoryTeamData.club_category_id,
         name: `Tým ${clubCategoryTeamData.team_suffix}`
       };

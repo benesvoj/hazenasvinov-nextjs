@@ -211,11 +211,11 @@ export async function getCategoryPageData(
       
       // Keep only category-specific posts (no fallback to all posts)
       
-      posts = filteredPosts.map((post: any) => ({
+      posts = filteredPosts.map((post: BlogPost) => ({
         ...post,
         excerpt: post.excerpt || post.content?.substring(0, 150) + '...' || 'Bez popisu',
         tags: post.tags || [],
-        image_url: post.image_url || null
+        image_url: post.image_url || undefined
       }));
     }
 

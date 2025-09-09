@@ -26,8 +26,32 @@ export function generateUUID(): string {
 }
 
 /**
+ * Simple Linear Congruential Generator (LCG) for deterministic random numbers
+ * This creates a seeded random number generator that produces consistent results
+ */
+class SeededRandom {
+  private seed: number;
+
+  constructor(seed: number) {
+    this.seed = seed;
+  }
+
+  // LCG formula: (a * seed + c) % m
+  // Using constants from Numerical Recipes
+  next(): number {
+    this.seed = (this.seed * 1664525 + 1013904223) % 4294967296;
+    return this.seed / 4294967296; // Normalize to [0, 1)
+  }
+
+  // Generate a random integer in range [0, max)
+  nextInt(max: number): number {
+    return Math.floor(this.next() * max);
+  }
+}
+
+/**
  * Generate a deterministic UUID based on input parameters
- * Useful for creating consistent IDs based on match and team data
+ * Uses a seeded random number generator to ensure true determinism
  * 
  * @param matchId - The match ID
  * @param teamId - The team ID
@@ -46,12 +70,15 @@ export function generateDeterministicUUID(matchId: string, teamId: string, isHom
     hash = hash & hash; // Convert to 32-bit integer
   }
   
-  // Convert to positive number and use as seed for UUID generation
+  // Convert to positive number and use as seed for deterministic generation
   const positiveHash = Math.abs(hash);
   
-  // Generate UUID v4 with deterministic seed
+  // Create seeded random number generator
+  const rng = new SeededRandom(positiveHash);
+  
+  // Generate UUID v4 with deterministic values
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = (positiveHash + Math.random() * 16) % 16 | 0;
+    const r = rng.nextInt(16);
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
@@ -80,4 +107,41 @@ export function isValidUUID(uuid: string): boolean {
  */
 export function generateLineupId(matchId: string, teamId: string, isHome: boolean): string {
   return generateDeterministicUUID(matchId, teamId, isHome);
+}
+
+/**
+ * Test function to verify deterministic UUID generation
+ * This ensures that the same inputs always produce the same UUID
+ * 
+ * @returns True if all tests pass, false otherwise
+ */
+export function testDeterministicUUID(): boolean {
+  const testCases = [
+    { matchId: 'match-1', teamId: 'team-1', isHome: true },
+    { matchId: 'match-1', teamId: 'team-1', isHome: false },
+    { matchId: 'match-2', teamId: 'team-1', isHome: true },
+    { matchId: 'match-1', teamId: 'team-2', isHome: true },
+  ];
+
+  for (const testCase of testCases) {
+    // Generate UUID multiple times with same inputs
+    const uuid1 = generateDeterministicUUID(testCase.matchId, testCase.teamId, testCase.isHome);
+    const uuid2 = generateDeterministicUUID(testCase.matchId, testCase.teamId, testCase.isHome);
+    const uuid3 = generateDeterministicUUID(testCase.matchId, testCase.teamId, testCase.isHome);
+
+    // All should be identical
+    if (uuid1 !== uuid2 || uuid2 !== uuid3) {
+      console.error('Deterministic UUID test failed:', testCase, { uuid1, uuid2, uuid3 });
+      return false;
+    }
+
+    // Should be valid UUIDs
+    if (!isValidUUID(uuid1)) {
+      console.error('Generated UUID is not valid:', uuid1);
+      return false;
+    }
+  }
+
+  console.log('✅ All deterministic UUID tests passed');
+  return true;
 }

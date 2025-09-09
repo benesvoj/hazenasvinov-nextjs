@@ -1,8 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getCategoryPageData } from '@/utils/categoryPageData';
-import { CategoryStandings } from '@/app/(main)/categories/components/CategoryStandings';
-import { CategoryMatches } from '@/app/(main)/categories/components/CategoryMatches';
-import { CategoryPosts } from '@/app/(main)/categories/components/CategoryPosts';
+import { CategoryStandings, CategoryMatches, CategoryPosts } from '@/app/(main)/categories/components';
 
 interface CategoryPageProps {
   params: Promise<{
@@ -11,7 +9,15 @@ interface CategoryPageProps {
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { slug: categorySlug } = await params;
+  const awaitedParams = await params;
+  if (
+    !awaitedParams ||
+    typeof awaitedParams.slug !== 'string' ||
+    awaitedParams.slug.trim() === ''
+  ) {
+    notFound();
+  }
+  const categorySlug = awaitedParams.slug;
   
   try {
     // Fetch all data server-side in optimized batches

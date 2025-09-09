@@ -88,13 +88,15 @@ export default function LineupManagerPlayerCard({
                   type="number"
                   label="Číslo dresu"
                   value={player.jersey_number?.toString() || ""}
-                  onValueChange={(value) =>
+                  onValueChange={(value) => {
+                    const num = value ? parseInt(value) : undefined;
+                    const valid = typeof num === "number" && !isNaN(num) && num >= 1 && num <= 99;
                     updatePlayer(
                       index,
                       "jersey_number",
-                      value ? parseInt(value) : undefined
-                    )
-                  }
+                      valid ? num : undefined
+                    );
+                  }}
                   min="1"
                   max="99"
                   placeholder="1-99"
