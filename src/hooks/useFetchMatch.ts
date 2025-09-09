@@ -1,58 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Match } from '@/types';
 import { translations } from '@/lib/translations';
 
-interface RawMatch {
-  id: string;
-  category_id: string;
-  season_id: string;
-  date: string;
-  time: string;
-  home_team_id: string;
-  away_team_id: string;
-  venue?: string;
-  competition?: string;
-  home_score?: number;
-  away_score?: number;
-  status?: string;
-  matchweek?: number;
-  home_team: {
-    id: string;
-    team_suffix: string;
-    club_category: {
-      club: {
-        id: string;
-        name: string;
-        short_name?: string;
-        logo_url?: string;
-        is_own_club: boolean;
-      };
-    };
-  };
-  away_team: {
-    id: string;
-    team_suffix: string;
-    club_category: {
-      club: {
-        id: string;
-        name: string;
-        short_name?: string;
-        logo_url?: string;
-        is_own_club: boolean;
-      };
-    };
-  };
-  category: {
-    code: string;
-    name: string;
-    description?: string;
-  };
-  season: {
-    name: string;
-  };
-}
-
+/**
+ * TransformedMatch interface for the match data
+ * This is the interface for the match data that is used in the app
+ * It is transformed from the database data to be used in the app
+ * TODO: use proper types or move to types folder
+ */
 interface TransformedMatch {
   id: string;
   category_id: string;
