@@ -26,6 +26,15 @@ const NO_APP_DATA_PAGES = [
   '/blocked'
 ];
 
+// Public pages that don't need user context
+const PUBLIC_PAGES = [
+  '/categories',
+  '/blog',
+  '/matches',
+  '/about',
+  '/contact'
+];
+
 interface ConditionalProvidersProps {
   children: React.ReactNode;
 }
@@ -36,8 +45,13 @@ export function ConditionalProviders({ children }: ConditionalProvidersProps) {
   // Get the base path without query parameters
   const basePath = pathname.split('?')[0];
   
-  const shouldLoadUserContext = !EXCLUDED_PAGES.includes(basePath);
-  const shouldLoadAppDataContext = !NO_APP_DATA_PAGES.includes(basePath) && shouldLoadUserContext;
+  // Check if this is a public page (categories, blog, etc.)
+  const isPublicPage = PUBLIC_PAGES.some(publicPath => 
+    basePath.startsWith(publicPath)
+  );
+  
+  const shouldLoadUserContext = !EXCLUDED_PAGES.includes(basePath) && !isPublicPage;
+  const shouldLoadAppDataContext = !NO_APP_DATA_PAGES.includes(basePath) && shouldLoadUserContext && !isPublicPage;
 
   // If this is a page that doesn't need any contexts, just render the children
   if (!shouldLoadUserContext) {

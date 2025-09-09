@@ -7,36 +7,20 @@ import { TagIcon } from "@heroicons/react/24/outline";
 import { BlogPostCardSkeleton } from "@/components/BlogPostCard";
 import BlogPostCard from '@/components/BlogPostCard'
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { useFetchCategoryPosts } from "@/hooks/useFetchCategoryPosts";
+import { BlogPost } from "@/types";
 
 interface CategoryPostsProps {
   categoryName: string;
   categorySlug: string;
+  posts?: BlogPost[];
 }
 
-export function CategoryPosts({ categoryName, categorySlug }: CategoryPostsProps) {
-  const { posts: latestPosts, loading: postsLoading, error: postsError } = useFetchCategoryPosts(categorySlug, 3);
+export function CategoryPosts({ categoryName, categorySlug, posts = [] }: CategoryPostsProps) {
+  const latestPosts = posts;
+  const postsLoading = false;
+  const postsError = null;
   return (
     <section className="relative">
-      {/* Debug Information */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-          <strong>Debug:</strong> Category: {categoryName} | Slug: {categorySlug} | 
-          Posts found: {latestPosts?.length || 0}
-          {latestPosts && latestPosts.length > 0 && (
-            <div className="mt-2">
-              <strong>Posts:</strong>
-              <ul className="list-disc list-inside">
-                {latestPosts.map(post => (
-                  <li key={post.id}>
-                    &ldquo;{post.title}&rdquo; - Tags: {post.tags?.join(', ') || 'none'}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -61,22 +61,25 @@ interface TransformedMatch {
   time: string;
   home_team_id: string;
   away_team_id: string;
-  venue?: string;
-  competition?: string;
+  venue: string;
+  competition: string;
   home_score?: number;
   away_score?: number;
-  status?: string;
+  status: 'upcoming' | 'completed';
   matchweek?: number;
   result?: 'win' | 'loss' | 'draw';
+  is_home: boolean;
   home_team: {
     id: string;
     name: string;
+    short_name?: string;
     logo_url?: string;
     is_own_club: boolean;
   };
   away_team: {
     id: string;
     name: string;
+    short_name?: string;
     logo_url?: string;
     is_own_club: boolean;
   };
@@ -145,8 +148,15 @@ export function useFetchMatch(matchId: string | null) {
         .single();
 
       if (error) {
+        if (error.code === 'PGRST116') {
+          // Match not found - this is a valid case
+          console.log("Match not found:", matchId);
+          setError("Zápas nebyl nalezen");
+          setMatch(null);
+          return;
+        }
         console.error("Error fetching match:", error);
-        setError("Zápas nebyl nalezen");
+        setError("Chyba při načítání zápasu");
         return;
       }
 
@@ -154,17 +164,22 @@ export function useFetchMatch(matchId: string | null) {
       let homeTeamCount = 1;
       let awayTeamCount = 1;
       
-      if (data.category?.code) {
+      if (data.category_id) {
         try {
           // Fetch team counts for the clubs in this category
-          const { data: teamCountsData } = await supabase
+          const { data: teamCountsData, error: teamCountsError } = await supabase
             .from('club_categories')
             .select(`
               club_id,
               club_category_teams(id)
             `)
-            .eq('category_id', data.category.code)
+            .eq('category_id', data.category_id)
             .eq('is_active', true);
+          
+          if (teamCountsError) {
+            console.warn('Error fetching team counts:', teamCountsError);
+            // Continue with default values
+          }
           
           if (teamCountsData) {
             const clubTeamCounts = new Map<string, number>();
@@ -191,6 +206,9 @@ export function useFetchMatch(matchId: string | null) {
       // Transform match data to use centralized team display logic
       const transformedMatch: TransformedMatch = {
         ...data,
+        is_home: true, // Default value, can be determined based on your logic
+        competition: data.competition || 'Neznámá soutěž',
+        status: (data.status as 'upcoming' | 'completed') || 'upcoming',
         home_team: {
           id: data.home_team?.id,
           name: getTeamDisplayNameSafe(
@@ -199,6 +217,7 @@ export function useFetchMatch(matchId: string | null) {
             homeTeamCount,
             translations.team.unknownTeam
           ),
+          short_name: data.home_team?.club_category?.club?.short_name,
           logo_url: data.home_team?.club_category?.club?.logo_url,
           is_own_club: data.home_team?.club_category?.club?.is_own_club || false
         },
@@ -210,6 +229,7 @@ export function useFetchMatch(matchId: string | null) {
             awayTeamCount,
             translations.team.unknownTeam
           ),
+          short_name: data.away_team?.club_category?.club?.short_name,
           logo_url: data.away_team?.club_category?.club?.logo_url,
           is_own_club: data.away_team?.club_category?.club?.is_own_club || false
         }

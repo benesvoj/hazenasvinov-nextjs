@@ -10,3 +10,4 @@ export { default as MatchProcessWizardModal } from './MatchProcessWizardModal';
 export { default as LineupManagerModal } from './LineupManagerModal';
 export { default as StandingsTable } from './StandingsTable';
 export { default as CategoryMatches } from './CategoryMatches';
+export { default as LineupManagerPlayerCard } from './LineupManagerPlayerCard';

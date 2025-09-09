@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Tabs, Tab } from "@heroui/tabs";
 import { translations } from "@/lib/translations";
 import { useSeasons, useCategories, useOwnClubMatches, useStandings, useUserRoles } from "@/hooks";
@@ -115,13 +115,18 @@ export default function MatchSchedule({
     }
   }, [selectedCategory, activeSeason?.id, selectedCategoryData?.id, activeSeason, availableCategories.length, fetchStandings, selectedCategoryData]);
 
-  const upcomingMatches = matches
-    .filter((match) => match.status === "upcoming")
-    .slice(0, 3);
+  const upcomingMatches = useMemo(() => {
+    return matches
+      .filter((match) => match.status === "upcoming")
+      .slice(0, 3);
+  }, [matches]);
 
-  const recentResults = matches
-    .filter((match) => match.status === 'completed')
-    .slice(0, 3);
+  const recentResults = useMemo(() => {
+    return matches
+      .filter((match) => match.status === 'completed')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 3);
+  }, [matches]);
 
   const loading = matchesLoading || standingsLoading;
 

@@ -1,6 +1,11 @@
 import { useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { FilteredTeam } from '@/types';
+interface FilteredTeam {
+  id: string;
+  name: string;
+  display_name?: string;
+  venue?: string;
+}
 import { getTeamDisplayNameSafe } from '@/utils/teamDisplay';
 
 /**

@@ -3,8 +3,14 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@herou
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
-import { FilteredTeam } from "@/types";
 import { translations } from "@/lib/translations";
+
+interface FilteredTeam {
+  id: string;
+  name: string;
+  display_name?: string;
+  venue?: string;
+}
 
 interface AddMatchModalProps {
   isOpen: boolean;

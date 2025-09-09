@@ -5,7 +5,14 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Match, FilteredTeam } from "@/types";
+import { Match } from "@/types";
+
+interface FilteredTeam {
+  id: string;
+  name: string;
+  display_name?: string;
+  venue?: string;
+}
 
 interface EditMatchModalProps {
   isOpen: boolean;

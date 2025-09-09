@@ -18,20 +18,48 @@ export interface Club {
   updated_at: string;
 }
 
+// Table club_category_teams
 export interface ClubTeam {
   id: string;
   club_id: string;
   team_id: string;
   team_suffix: string;
-  is_primary: boolean;
-  created_at: string;
+  category_id: string;
+  is_primary?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
+// @deprecated('Use ClubCategoryTeams instead')
 export interface ClubCategory {
   id: string;
   club_id: string;
   category_id: string;
   season_id: string;
+  max_teams: number;
   is_active: boolean;
   created_at: string;
+}
+
+export interface ClubCategoryWithClub {
+  id: string;
+  max_teams: number;
+  club: Club;
+}
+
+export interface ClubWithTeams {
+  id: string;
+  name: string;
+  short_name?: string;
+  logo_url?: string;
+  teams: ClubCategoryTeams[];
+}
+
+export interface ClubCategoryTeams {
+  id: string;
+  club_category_id: string;
+  team_suffix: string;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

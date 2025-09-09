@@ -32,7 +32,6 @@ import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import MobileActionsMenu from "@/components/MobileActionsMenu";
 import { useExcelImport } from "@/hooks/useExcelImport";
 // TODO: use proper types
-import { Team } from "@/types";
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
 import { useTeamDisplayLogic } from "@/hooks/useTeamDisplayLogic";
 import { Match, Category } from "@/types";
@@ -46,7 +45,7 @@ import { AdminContainer } from "../components/AdminContainer";
 import { ButtonWithTooltip } from "@/components";
 
 export default function MatchesAdminPage() {
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<any[]>([]);
 
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -1207,7 +1206,7 @@ export default function MatchesAdminPage() {
 
     // Find the category to get its matchweek_count
     const category = categories.find((cat) => cat.id === categoryId);
-    const maxMatchweeks = category?.matchweek_count || 20; // Default to 20 if not set
+    const maxMatchweeks = 20; // Default to 20 matchweeks since column doesn't exist
 
     // Add matchweek numbers based on category setting
     for (let i = 1; i <= maxMatchweeks; i++) {

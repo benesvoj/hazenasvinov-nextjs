@@ -39,25 +39,8 @@ interface Committee {
 	updated_at: string;
 }
 
-interface Team {
-	id: string;
-	name: string;
-	short_name?: string;
-	city?: string;
-	committee_id?: string;
-	committee?: Committee;
-	logo_url?: string;
-	website?: string;
-	email?: string;
-	phone?: string;
-	contact_person?: string;
-	founded_year?: number;
-	home_venue?: string;
-	is_active: boolean;
-	is_own_club?: boolean;
-	created_at: string;
-	updated_at: string;
-}
+// Team interface removed - this page should be replaced with club management
+// Use Club interface from types/clubs.ts instead
 
 interface Season {
 	id: string;
@@ -86,23 +69,23 @@ interface TeamCategory {
 	is_active: boolean;
 	created_at: string;
 	updated_at: string;
-	team?: Team;
+	team?: any;
 	season?: Season;
 	category?: Category;
 }
 
 export default function TeamsAdminPage() {
-	const [teams, setTeams] = useState<Team[]>([]);
+	const [teams, setTeams] = useState<any[]>([]);
 	const [committees, setCommittees] = useState<Committee[]>([]);
 	const [seasons, setSeasons] = useState<Season[]>([]);
 	const [categories, setCategories] = useState<Category[]>([]);
 	const [teamCategories, setTeamCategories] = useState<TeamCategory[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
-	const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+	const [selectedTeam, setSelectedTeam] = useState<any | null>(null);
 	const [selectedSeason, setSelectedSeason] = useState<string>('');
 	const [activeTab, setActiveTab] = useState<'details' | 'categories'>('details');
-	const [existingOwnClub, setExistingOwnClub] = useState<Team | null>(null);
+	const [existingOwnClub, setExistingOwnClub] = useState<any | null>(null);
 	const [selectedCommittee, setSelectedCommittee] = useState<string>('all');
 
 	// Modal states
@@ -348,7 +331,7 @@ export default function TeamsAdminPage() {
 
 
 	// Open edit modal
-	const handleEditTeam = (team: Team) => {
+	const handleEditTeam = (team: any) => {
 		setSelectedTeam(team);
 		setFormData({
 			name: team.name,
@@ -370,7 +353,7 @@ export default function TeamsAdminPage() {
 	};
 
 	// Open view modal
-	const handleViewTeam = (team: Team) => {
+	const handleViewTeam = (team: any) => {
 		setSelectedTeam(team);
 		setActiveTab('details');
 		onViewTeamOpen();

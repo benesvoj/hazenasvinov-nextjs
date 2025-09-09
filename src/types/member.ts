@@ -4,7 +4,8 @@ export interface Member {
   name: string;
   surname: string;
   date_of_birth?: string; // Made optional
-  category: string;
+  category: string; // Legacy field - kept for backward compatibility
+  category_id?: string; // New field - foreign key to categories table
   sex: 'male' | 'female';
   functions: string[];
   created_at: string;

@@ -26,6 +26,9 @@ export default function LineupManagerModal({
         homeTeamName: selectedMatch.home_team?.name || 'Neznámý tým',
         awayTeamName: selectedMatch.away_team?.name || 'Neznámý tým',
         members: members,
+        categoryId: selectedMatch.category_id,
+        categoryCode: selectedMatch.category?.code || selectedMatch.category_code || '',
+        onClose: onClose,
     };
 
     return (

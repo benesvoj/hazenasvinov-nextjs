@@ -17,7 +17,7 @@ RETURNS TABLE (
     is_valid BOOLEAN
 ) AS $$
 DECLARE
-    lineup_id UUID;
+    current_lineup_id UUID;
     player_count INTEGER;
     goalkeeper_count INTEGER;
     field_player_count INTEGER;
@@ -25,12 +25,12 @@ DECLARE
     is_valid_lineup BOOLEAN;
 BEGIN
     -- Get the lineup ID for this match and team
-    SELECT id INTO lineup_id
+    SELECT id INTO current_lineup_id
     FROM lineups
     WHERE match_id = match_uuid AND team_id = team_uuid;
     
     -- If no lineup exists, return empty counts
-    IF lineup_id IS NULL THEN
+    IF current_lineup_id IS NULL THEN
         RETURN QUERY SELECT 0, 0, 0, 0, false;
         RETURN;
     END IF;
@@ -38,22 +38,22 @@ BEGIN
     -- Count total players
     SELECT COUNT(*) INTO player_count
     FROM lineup_players
-    WHERE lineup_id = lineup_id;
+    WHERE lineup_id = current_lineup_id;
     
     -- Count goalkeepers
     SELECT COUNT(*) INTO goalkeeper_count
     FROM lineup_players
-    WHERE lineup_id = lineup_id AND position = 'goalkeeper';
+    WHERE lineup_id = current_lineup_id AND position = 'goalkeeper';
     
     -- Count field players
     SELECT COUNT(*) INTO field_player_count
     FROM lineup_players
-    WHERE lineup_id = lineup_id AND position = 'field_player';
+    WHERE lineup_id = current_lineup_id AND position = 'field_player';
     
     -- Count coaches
     SELECT COUNT(*) INTO coach_count
     FROM lineup_coaches
-    WHERE lineup_id = lineup_id;
+    WHERE lineup_id = current_lineup_id;
     
     -- Validate lineup according to handball rules
     is_valid_lineup := (
@@ -66,7 +66,7 @@ BEGIN
         coach_count <= 3 AND
         (coach_count = 0 OR EXISTS (
             SELECT 1 FROM lineup_coaches 
-            WHERE lineup_id = lineup_id AND role = 'head_coach'
+            WHERE lineup_id = current_lineup_id AND role = 'head_coach'
         ))
     );
     

@@ -2,8 +2,6 @@ import { useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   LineupFormData, 
-  LineupPlayerFormData, 
-  LineupCoachFormData, 
   LineupSummary, 
   LineupValidation,
   ExternalPlayer
@@ -15,47 +13,21 @@ export const useLineupData = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Search external players
+  // External players functionality removed - only internal players (members) are supported
   const searchExternalPlayers = useCallback(async (searchTerm: string): Promise<ExternalPlayer[]> => {
-    try {
-      const { data, error } = await supabase
-        .rpc('search_external_players', {
-          search_term: searchTerm
-        });
-
-      if (error) {
-        console.warn('Error searching external players:', error);
-        return [];
-      }
-
-      return data || [];
-    } catch (error: any) {
-      console.error('Error searching external players:', error);
-      return [];
-    }
+    console.warn('External players functionality is not available');
+    return [];
   }, []);
 
-  // Get or create external player
+  // External players functionality removed - only internal players (members) are supported
   const getOrCreateExternalPlayer = useCallback(async (
     registrationNumber: string,
     name: string,
     surname: string,
     position: string
   ): Promise<string> => {
-    try {
-      const { data, error } = await supabase.rpc('get_or_create_external_player', {
-        p_registration_number: registrationNumber,
-        p_name: name,
-        p_surname: surname,
-        p_position: position
-      });
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error getting/creating external player:', error);
-      throw error;
-    }
+    console.warn('External players functionality is not available');
+    throw new Error('External players are not supported');
   }, []);
 
   // Fetch lineup data
@@ -64,24 +36,25 @@ export const useLineupData = () => {
       setLoading(true);
       setError(null);
 
-      // Check if lineup exists
+      // Check if lineup exists - use .maybeSingle() instead of .single() to avoid PGRST116
       const { data: lineupData, error: lineupError } = await supabase
         .from('lineups')
         .select('*')
         .eq('match_id', matchId)
         .eq('team_id', teamId)
-        .single();
+        .maybeSingle();
 
       if (lineupError) {
-        if (lineupError.code === 'PGRST116') {
-          // No lineup found - this is normal for new matches
-          console.log('No lineup found for match/team, returning empty data');
-          return {
-            players: [],
-            coaches: []
-          };
-        }
+        console.error('Error fetching lineup:', lineupError);
         throw lineupError;
+      }
+
+      // If no lineup data found (maybeSingle returns null)
+      if (!lineupData) {
+        return {
+          players: [],
+          coaches: []
+        };
       }
 
       // Fetch players
@@ -89,8 +62,7 @@ export const useLineupData = () => {
         .from('lineup_players')
         .select(`
           *,
-          member:members(id, name, surname, registration_number),
-          external_player:external_players(id, name, surname, registration_number)
+          member:members(id, name, surname, registration_number)
         `)
         .eq('lineup_id', lineupData.id);
 
@@ -111,16 +83,6 @@ export const useLineupData = () => {
             ...player,
             display_name: `${player.member.name} ${player.member.surname} (${player.member.registration_number})`,
             is_external: false
-          };
-        } else if (player.external_player) {
-          // External player
-          return {
-            ...player,
-            display_name: `${player.external_player.name} ${player.external_player.surname} (${player.external_player.registration_number})`,
-            is_external: true,
-            external_name: player.external_player.name,
-            external_surname: player.external_player.surname,
-            external_registration_number: player.external_player.registration_number
           };
         }
         return player;
@@ -188,8 +150,7 @@ export const useLineupData = () => {
         .from('lineup_players')
         .select(`
           *,
-          member:members(id, name, surname, registration_number),
-          external_player:external_players(id, name, surname, registration_number)
+          member:members(id, name, surname, registration_number)
         `)
         .eq('lineup_id', lineupId);
 
@@ -210,16 +171,6 @@ export const useLineupData = () => {
             ...player,
             display_name: `${player.member.name} ${player.member.surname} (${player.member.registration_number})`,
             is_external: false
-          };
-        } else if (player.external_player) {
-          // External player
-          return {
-            ...player,
-            display_name: `${player.external_player.name} ${player.external_player.surname} (${player.external_player.registration_number})`,
-            is_external: true,
-            external_name: player.external_player.name,
-            external_surname: player.external_player.surname,
-            external_registration_number: player.external_player.registration_number
           };
         }
         return player;
@@ -291,13 +242,22 @@ export const useLineupData = () => {
       if (error.code === '42P01') {
         throw new Error('Tabulka sestav ještě nebyla vytvořena. Spusťte prosím SQL skript pro vytvoření systému sestav.');
       }
-      throw error;
+      
+      // Create a more descriptive error message
+      const errorMessage = error?.message || error?.details || error?.hint || 'Neznámá chyba při mazání sestavy';
+      throw new Error(errorMessage);
     }
   }, []);
 
   // Save lineup
   const saveLineup = useCallback(async (lineupId: string, formData: LineupFormData): Promise<void> => {
     try {
+      // Client-side validation before saving
+      const validation = validateLineupData(formData);
+      if (!validation.isValid) {
+        throw new Error(validation.errors.join(', '));
+      }
+      
       // First verify that the match exists
       const { data: matchData, error: matchError } = await supabase
         .from('matches')
@@ -314,104 +274,130 @@ export const useLineupData = () => {
         throw new Error(`Zápas s ID ${formData.match_id} nebyl nalezen v databázi.`);
       }
 
-      // Verify that the team exists
-      const { data: teamData, error: teamError } = await supabase
-        .from('teams')
-        .select('id')
+      // Verify that the club_category_team exists - formData.team_id is actually a club_category_teams.id
+      console.log('Looking for club_category_team with ID:', formData.team_id);
+      
+      const { data: clubCategoryTeamData, error: clubCategoryTeamError } = await supabase
+        .from('club_category_teams')
+        .select('id, team_suffix, club_category_id')
         .eq('id', formData.team_id)
-        .single();
+        .maybeSingle();
+      
+      console.log('Club category team lookup result:', { clubCategoryTeamData, clubCategoryTeamError });
 
-      if (teamError) {
-        console.error('Team not found:', teamError);
+      if (clubCategoryTeamError) {
+        console.error('Club category team not found:', clubCategoryTeamError);
         throw new Error(`Tým s ID ${formData.team_id} nebyl nalezen v databázi.`);
       }
 
-      if (!teamData) {
-        throw new Error(`Tým s ID ${formData.team_id} nebyl nalezen v databázi.`);
+      if (!clubCategoryTeamData) {
+        console.log('Club category team not found, this should not happen if team IDs are correct');
+        throw new Error(`Tým s ID ${formData.team_id} nebyl nalezen v databázi. Zkontrolujte, zda jsou správně předány ID týmů.`);
       }
+
+      // Use the club_category_teams.id directly (no more teams table needed)
+      const teamData = {
+        id: clubCategoryTeamData.id,
+        club_id: clubCategoryTeamData.club_category_id,
+        name: `Tým ${clubCategoryTeamData.team_suffix}`
+      };
 
       console.log('Match and team verified, proceeding with lineup save:', { match: matchData, team: teamData });
 
       // Delete existing lineup data
       await deleteLineup(lineupId);
 
-      // Insert new lineup
+      // Insert new lineup using the club_category_teams.id directly
       const { error: lineupError } = await supabase
         .from('lineups')
         .insert({
           id: lineupId,
           match_id: formData.match_id,
-          team_id: formData.team_id,
+          team_id: clubCategoryTeamData.id, // Use the club_category_teams.id directly
           is_home_team: formData.is_home_team
         });
 
-      if (lineupError) throw lineupError;
+      if (lineupError) {
+        console.error('Error inserting lineup:', lineupError);
+        throw new Error(`Chyba při ukládání sestavy: ${lineupError.message || lineupError.details || lineupError.hint || 'Neznámá chyba'}`);
+      }
 
-      // Insert players
-      for (const player of formData.players) {
-        if (player.member_id) {
-          // Internal player
-          const { error: playerError } = await supabase
-            .from('lineup_players')
-            .insert({
-              lineup_id: lineupId,
-              member_id: player.member_id,
-              position: player.position || 'field_player', // Ensure position is set
-              role: player.role || 'player' // Ensure role is set
-            });
+      // Debug: Log the players being inserted
+      console.log('Players to be inserted:', formData.players.map(p => ({
+        member_id: p.member_id,
+        position: p.position,
+        role: p.role,
+        is_goalkeeper: p.position === 'goalkeeper'
+      })));
+      
+      const goalkeepers = formData.players.filter(p => p.position === 'goalkeeper');
+      const fieldPlayers = formData.players.filter(p => p.position === 'field_player');
+      console.log('Goalkeepers count:', goalkeepers.length);
+      console.log('Field players count:', fieldPlayers.length);
 
-          if (playerError) {
-            console.error('Error inserting internal player:', playerError, player);
-            throw playerError;
+      // Insert all players at once to avoid validation trigger issues
+      const playersToInsert = formData.players
+        .filter(player => player.member_id)
+        .map(player => ({
+          lineup_id: lineupId,
+          member_id: player.member_id,
+          position: player.position || 'field_player',
+          is_captain: player.role === 'captain',
+          jersey_number: player.jersey_number || null,
+          goals: player.goals || 0,
+          yellow_cards: player.yellow_cards || 0,
+          red_cards_5min: player.red_cards_5min || 0,
+          red_cards_10min: player.red_cards_10min || 0,
+          red_cards_personal: player.red_cards_personal || 0
+        }));
+
+      if (playersToInsert.length > 0) {
+        console.log('Inserting all players at once:', playersToInsert);
+        
+        const { error: playersError } = await supabase
+          .from('lineup_players')
+          .insert(playersToInsert);
+
+        if (playersError) {
+          console.error('Error inserting players:', playersError);
+          
+          // Check if it's a validation error (lineup rules)
+          if (playersError.message && playersError.message.includes('Lineup must have')) {
+            throw new Error(`VALIDATION_WARNING: ${playersError.message}`);
           }
-        } else if (player.external_name && player.external_surname && player.external_registration_number) {
-          // External player
-          const externalPlayerId = await getOrCreateExternalPlayer(
-            player.external_registration_number,
-            player.external_name,
-            player.external_surname,
-            player.position || 'field_player'
-          );
-
-          const { error: playerError } = await supabase
-            .from('lineup_players')
-            .insert({
-              lineup_id: lineupId,
-              external_player_id: externalPlayerId,
-              position: player.position || 'field_player', // Ensure position is set
-              role: player.role || 'player' // Ensure role is set
-            });
-
-          if (playerError) {
-            console.error('Error inserting external player:', playerError, player);
-            throw playerError;
-          }
-        } else {
-          // Player data is incomplete
-          console.error('Incomplete player data:', player);
-          throw new Error(`Neúplná data hráče: ${player.external_name || 'Neznámý hráč'}`);
+          
+          throw new Error(`Chyba při ukládání hráčů: ${playersError.message || playersError.details || playersError.hint || 'Neznámá chyba'}`);
         }
       }
 
-      // Insert coaches
-      for (const coach of formData.coaches) {
-        if (coach.member_id && coach.role) {
-          const { error: coachError } = await supabase
-            .from('lineup_coaches')
-            .insert({
-              lineup_id: lineupId,
-              member_id: coach.member_id,
-              role: coach.role
-            });
+      // Handle external players (not supported in current schema)
+      const externalPlayers = formData.players.filter(player => 
+        !player.member_id && player.external_name && player.external_surname && player.external_registration_number
+      );
+      
+      if (externalPlayers.length > 0) {
+        console.warn('External players not supported in current schema, skipping:', externalPlayers);
+      }
 
-          if (coachError) {
-            console.error('Error inserting coach:', coachError, coach);
-            throw coachError;
-          }
-        } else {
-          // Coach data is incomplete
-          console.error('Incomplete coach data:', coach);
-          throw new Error(`Neúplná data trenéra: ${coach.member_id || 'Neznámý trenér'}`);
+      // Insert all coaches at once
+      const coachesToInsert = formData.coaches
+        .filter(coach => coach.member_id && coach.role)
+        .map(coach => ({
+          lineup_id: lineupId,
+          member_id: coach.member_id,
+          role: coach.role
+        }));
+
+      if (coachesToInsert.length > 0) {
+        console.log('Inserting all coaches at once:', coachesToInsert);
+        
+        const { error: coachesError } = await supabase
+          .from('lineup_coaches')
+          .insert(coachesToInsert);
+
+        if (coachesError) {
+          console.error('Error inserting coaches:', coachesError);
+          throw new Error(`Chyba při ukládání trenérů: ${coachesError.message || coachesError.details || coachesError.hint || 'Neznámá chyba'}`);
         }
       }
 
@@ -423,7 +409,7 @@ export const useLineupData = () => {
       }
       throw error;
     }
-  }, [deleteLineup, fetchLineupById, getOrCreateExternalPlayer]);
+  }, [deleteLineup, fetchLineupById]);
 
   // Get lineup summary
   const getLineupSummary = useCallback(async (matchId: string, teamId: string): Promise<LineupSummary | null> => {
