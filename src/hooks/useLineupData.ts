@@ -420,7 +420,7 @@ export const useLineupData = () => {
       }
       throw error;
     }
-  }, [deleteLineup, fetchLineupById, getOrCreateExternalPlayer]);
+  }, [deleteLineup, fetchLineupById]);
 
   // Get lineup summary
   const getLineupSummary = useCallback(async (matchId: string, teamId: string): Promise<LineupSummary | null> => {

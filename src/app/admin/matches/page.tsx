@@ -32,7 +32,6 @@ import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import MobileActionsMenu from "@/components/MobileActionsMenu";
 import { useExcelImport } from "@/hooks/useExcelImport";
 // TODO: use proper types
-import { Team } from "@/types";
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
 import { useTeamDisplayLogic } from "@/hooks/useTeamDisplayLogic";
 import { Match, Category } from "@/types";
@@ -46,7 +45,7 @@ import { AdminContainer } from "../components/AdminContainer";
 import { ButtonWithTooltip } from "@/components";
 
 export default function MatchesAdminPage() {
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<any[]>([]);
 
   const [categories, setCategories] = useState<Category[]>([]);
 

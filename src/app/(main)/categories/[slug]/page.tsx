@@ -5,9 +5,9 @@ import { CategoryMatches } from '@/app/(main)/categories/components/CategoryMatc
 import { CategoryPosts } from '@/app/(main)/categories/components/CategoryPosts';
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {

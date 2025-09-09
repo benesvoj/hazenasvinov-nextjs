@@ -1,40 +1,25 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
-import { Tabs, Tab } from "@heroui/tabs";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Tabs, Tab, Input, Button, Image } from "@heroui/react";
 import { 
   PencilIcon, 
   UserGroupIcon,
   TrophyIcon,
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
-import { Club, Team } from "@/types/types";
-import { Category, Season } from "@/types";
-import { useParams, usePathname } from "next/navigation";
+import { Category, Season, Club, TeamData } from "@/types";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation } from './components';
-import { Image } from "@heroui/image";
 
 export default function ClubDetailPage() {
   const params = useParams();
-  const pathname = usePathname();
   const clubId = params.id as string;
-  
-  // Debug: Log all params and router info
-  console.log('🔍 ClubDetailPage - All params:', params);
-  console.log('🔍 ClubDetailPage - Router pathname:', pathname);
-  console.log('🔍 ClubDetailPage - URL clubId:', clubId);
-  console.log('🔍 ClubDetailPage - clubId type:', typeof clubId);
-  console.log('🔍 ClubDetailPage - clubId length:', clubId?.length);
   
   // Memoize clubId to prevent unnecessary re-renders
   const memoizedClubId = React.useMemo(() => clubId, [clubId]);
   
-  // Debug: Log the club ID being used
-  console.log('🔍 ClubDetailPage - memoizedClubId:', memoizedClubId);
   
   const [club, setClub] = useState<Club | null>(null);
   const [teams, setTeams] = useState<any[]>([]);
@@ -58,18 +43,13 @@ export default function ClubDetailPage() {
     logo_url: ''
   });
   
-
-  
-
-  
-  const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
+  const [teamToDelete, setTeamToDelete] = useState<TeamData | null>(null);
   
   const supabase = createClient();
 
   // Fetch club data
   const fetchClub = useCallback(async () => {
     try {
-      console.log('🔍 Fetching club data for ID:', memoizedClubId);
       setLoading(true);
       const { data, error } = await supabase
         .from('clubs')
@@ -78,8 +58,6 @@ export default function ClubDetailPage() {
         .single();
 
       if (error) throw error;
-      
-      console.log('✅ Club data fetched:', data);
       setClub(data);
       
       // Set edit form
@@ -101,7 +79,6 @@ export default function ClubDetailPage() {
   // Fetch club teams from new structure
   const fetchClubTeams = useCallback(async () => {
     try {
-      console.log('🔍 Fetching club teams for club ID:', memoizedClubId);
       
       // First, get all club_categories for this specific club
       const { data: clubCategoriesData, error: clubCategoriesError } = await supabase
@@ -111,21 +88,16 @@ export default function ClubDetailPage() {
         .eq('is_active', true);
 
       if (clubCategoriesError) {
-        console.error('❌ Error fetching club categories:', clubCategoriesError);
         throw clubCategoriesError;
       }
 
-      console.log('✅ Club categories found:', clubCategoriesData);
-
       if (!clubCategoriesData || clubCategoriesData.length === 0) {
-        console.log('ℹ️ No club categories found for this club');
         setTeams([]);
         return;
       }
 
       // Get the club_category_ids for this club
       const clubCategoryIds = clubCategoriesData.map((cc: any) => cc.id);
-      console.log('🔍 Club category IDs:', clubCategoryIds);
 
       // Now fetch teams that belong to these club_categories
       const { data: teamsData, error: teamsError } = await supabase
@@ -141,11 +113,9 @@ export default function ClubDetailPage() {
         .in('club_category_id', clubCategoryIds);
 
       if (teamsError) {
-        console.error('❌ Supabase error in fetchClubTeams:', teamsError);
         throw teamsError;
       }
       
-      console.log('✅ Raw club teams data:', teamsData);
       
       // Transform data to show teams with category and season info
       const transformedTeams = teamsData?.map((item: any) => ({
@@ -167,7 +137,6 @@ export default function ClubDetailPage() {
         return a.team_suffix.localeCompare(b.team_suffix);
       });
       
-      console.log('✅ Final transformed teams:', sortedTeamsData);
       
       // Additional validation: ensure all teams belong to the correct club
       const validatedTeams = sortedTeamsData.filter((team: any) => {
@@ -179,7 +148,6 @@ export default function ClubDetailPage() {
         return isValid;
       });
       
-      console.log('✅ Validated teams count:', validatedTeams.length);
       setTeams(validatedTeams);
     } catch (error) {
       console.error('Error fetching club teams:', error);
@@ -207,7 +175,6 @@ export default function ClubDetailPage() {
   // Fetch club categories
   const fetchClubCategories = useCallback(async () => {
     try {
-      console.log('🔍 Fetching club categories for club:', memoizedClubId);
       
       const { data, error } = await supabase
         .from('club_categories')
@@ -220,11 +187,9 @@ export default function ClubDetailPage() {
         .eq('is_active', true);
 
       if (error) {
-        console.error('❌ Supabase error:', error);
         throw error;
       }
       
-      console.log('✅ Club categories data:', data);
       
       // Get team counts for each club category
       const categoriesWithTeamCounts = await Promise.all(
@@ -245,11 +210,9 @@ export default function ClubDetailPage() {
       const sortedData = categoriesWithTeamCounts.sort((a, b) => 
         (a.category?.name || '').localeCompare(b.category?.name || '')
       );
-      
-      console.log('🔄 Sorted club categories with team counts:', sortedData);
+
       setClubCategories(sortedData);
     } catch (error) {
-      console.error('❌ Error fetching club categories:', error);
       setError(`Chyba při načítání kategorií: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
     }
   }, [supabase, memoizedClubId]);
@@ -387,34 +350,29 @@ export default function ClubDetailPage() {
   // Initial fetch
   useEffect(() => {
     if (memoizedClubId && memoizedClubId.length > 0) {
-      console.log('🔄 useEffect triggered - loading data for club:', memoizedClubId);
       
       // Validate that the clubId looks like a valid UUID
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(memoizedClubId)) {
-        console.error('❌ Invalid club ID format:', memoizedClubId);
         setError('Neplatné ID klubu');
         return;
       }
       
       const loadData = async () => {
         try {
-          console.log('🔄 Starting parallel data load...');
           await Promise.all([
             fetchClub(),
             fetchClubTeams(),
             fetchCategoriesAndSeasons(),
             fetchClubCategories()
           ]);
-          console.log('✅ All data loaded successfully');
         } catch (error) {
-          console.error('❌ Error loading club data:', error);
+          console.error('Error loading club data:', error);
         }
       };
       
       loadData();
     } else {
-      console.log('⚠️ useEffect: memoizedClubId is falsy or empty');
       setError('Chybí ID klubu');
     }
   }, [memoizedClubId, fetchClub, fetchClubTeams, fetchCategoriesAndSeasons, fetchClubCategories]);
@@ -426,11 +384,6 @@ export default function ClubDetailPage() {
   if (!club) {
     return <div className="p-6 text-center text-red-600">Klub nebyl nalezen</div>;
   }
-
-  // Debug: Log what's being rendered
-  console.log('🎨 Rendering page for club:', club);
-  console.log('🎨 Teams count:', teams.length);
-  console.log('🎨 Club categories count:', clubCategories.length);
 
   return (
     <div className="p-3 sm:p-4 lg:p-6">
