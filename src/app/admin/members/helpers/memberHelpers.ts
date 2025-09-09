@@ -147,7 +147,7 @@ export const sortMembers = (
 export const convertCategoriesToRecord = (categoriesData: Category[] | null) => {
   if (!categoriesData) return {};
   return categoriesData.reduce((acc, category) => {
-    acc[category.code] = category.name;
+    acc[category.id] = category.name;
     return acc;
   }, {} as Record<string, string>);
 };

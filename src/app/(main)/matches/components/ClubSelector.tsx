@@ -159,7 +159,7 @@ export default function ClubSelector({
     }
 
     // Find the category ID that matches the selected category code
-    const selectedCategoryData = categories.find(cat => cat.code === selectedCategory);
+    const selectedCategoryData = categories.find(cat => cat.id === selectedCategory);
     if (!selectedCategoryData) {
       return [];
     }
