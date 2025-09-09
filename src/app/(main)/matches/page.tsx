@@ -210,7 +210,7 @@ export default function MatchesPage() {
               </SelectItem>
               <>
                 {categories.map((category) => (
-                  <SelectItem key={category.code}>
+                  <SelectItem key={category.id}>
                     {category.name}
                   </SelectItem>
                 ))}
