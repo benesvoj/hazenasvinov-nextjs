@@ -3,34 +3,34 @@
 import React from "react";
 import { Card, CardBody } from "@heroui/card";
 import Link from "@/components/Link";
-import Image from 'next/image';
 import { Match } from "@/types";
 import { MapPinIcon } from "@heroicons/react/24/outline";
-import { formatDateToDayAndMonth, formatDateToWeekday, formatTime } from "@/helpers";
+import { formatDateToDayAndMonth, formatDateToWeekday, formatDateString, formatTime } from "@/helpers";
+import TeamDisplay from "./TeamDisplay";
+import TeamDisplayMobile from "./TeamDisplayMobile";
 
 interface MatchCardProps {
   match: Match;
 }
 
 export default function MatchCard({ match }: MatchCardProps) {
-
   return (
     <Link href={`/matches/${match.id}`} className="block">
       <Card className="hover:shadow-lg transition-shadow cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
-        <CardBody className="p-3 sm:p-4">
+        <CardBody className="p-4 px-6 sm:p-4">
           {/* Mobile Layout */}
           <div className="block sm:hidden">
             {/* Date and Time - Top */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex mb-3 items-end">
               <div className="flex flex-col">
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   {formatDateToWeekday(match.date)}
                 </div>
                 <div className="font-semibold text-sm text-gray-900 dark:text-white">
-                  {formatDateToDayAndMonth(match.date)}
+                  {formatDateString(match.date)}
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right pl-4">
                 <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {formatTime(match.time)}
                 </div>
@@ -43,42 +43,10 @@ export default function MatchCard({ match }: MatchCardProps) {
               <div className="flex-1 min-w-0">
                 <div className="space-y-2">
                   {/* Home Team */}
-                  <div className="flex items-center gap-2">
-                    {match.home_team?.logo_url && (
-                      <Image 
-                        src={match.home_team.logo_url} 
-                        alt={`${match.home_team?.name || 'Home team'} logo`}
-                        width={20}
-                        height={20}
-                        className="w-5 h-5 object-contain rounded-full flex-shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    )}
-                    <span className={`text-sm font-medium truncate ${match.home_team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                      {match.home_team?.name || 'Home team'}
-                    </span>
-                  </div>
+                  <TeamDisplay team={match.home_team} fallbackName="Home team" />
                   
                   {/* Away Team */}
-                  <div className="flex items-center gap-2">
-                    {match.away_team?.logo_url && (
-                      <Image 
-                        src={match.away_team.logo_url} 
-                        alt={`${match.away_team?.name || 'Away team'} logo`}
-                        width={20}
-                        height={20}
-                        className="w-5 h-5 object-contain rounded-full flex-shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    )}
-                    <span className={`text-sm font-medium truncate ${match.away_team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                      {match.away_team?.name || 'Away team'}
-                    </span>
-                  </div>
+                  <TeamDisplay team={match.away_team} fallbackName="Away team" />
                 </div>
               </div>
 
@@ -103,13 +71,13 @@ export default function MatchCard({ match }: MatchCardProps) {
             </div>
 
             {/* Category and Venue - Bottom */}
-            <div className="mt-3 space-y-1">
+            <div className="mt-2 space-y-1 flex justify-between">
               <div className="text-xs text-gray-600 dark:text-gray-400">
                 {match.category?.name} {match.matchweek && (`- ${match.matchweek}. kolo`)}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
+              <div className="text-xs text-gray-600 dark:text-gray-400 flex">
                 <MapPinIcon className="w-3 h-3 mr-1" />
-                {match.venue || 'Venue'}
+                {match.venue || ''}
               </div>
             </div>
           </div>
@@ -134,44 +102,12 @@ export default function MatchCard({ match }: MatchCardProps) {
               {/* Teams Row */}
               <div className="flex items-center gap-4 mb-2">
                 {/* Home Team */}
-                <div className="flex items-center gap-3">
-                  {match.home_team?.logo_url && (
-                    <Image 
-                      src={match.home_team.logo_url} 
-                      alt={`${match.home_team?.name || 'Home team'} logo`}
-                      width={32}
-                      height={32}
-                      className="w-8 h-8 object-contain rounded-full"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  )}
-                  <span className={`font-medium ${match.home_team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                    {match.home_team?.name || 'Home team'}
-                  </span>
-                </div>
+                <TeamDisplayMobile team={match.home_team} fallbackName="Home team" isHomeTeam={true} />
                 
                 <span className="text-gray-400 text-sm">x</span>
                 
                 {/* Away Team */}
-                <div className="flex items-center gap-3">
-                  <span className={`font-medium ${match.away_team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                    {match.away_team?.name || 'Away team'}
-                  </span>
-                  {match.away_team?.logo_url && (
-                    <Image 
-                      src={match.away_team.logo_url} 
-                      alt={`${match.away_team?.name || 'Away team'} logo`}
-                      width={32}
-                      height={32}
-                      className="w-8 h-8 object-contain rounded-full"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  )}
-                </div>
+                <TeamDisplayMobile team={match.away_team} fallbackName="Away team" isHomeTeam={false} />
               </div>
               
               {/* Venue and League Info */}

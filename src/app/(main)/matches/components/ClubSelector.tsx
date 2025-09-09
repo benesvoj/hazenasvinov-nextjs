@@ -5,7 +5,7 @@ import { Button } from '@heroui/button';
 import Image from 'next/image';
 import { BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { useSeasons, useCategories } from '@/hooks';
-
+import { ClubWithTeams } from '@/types';
 interface Club {
   id: string;
   name: string;
@@ -33,7 +33,7 @@ export default function ClubSelector({
   onClubDataChange,
   className = ''
 }: ClubSelectorProps) {
-  const [clubs, setClubs] = useState<Club[]>([]);
+  const [clubs, setClubs] = useState<ClubWithTeams[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -107,7 +107,7 @@ export default function ClubSelector({
 
 
         // Transform the data to match our Club interface
-        const transformedClubs: Club[] = (clubData || []).map((club: any) => {
+        const transformedClubs: ClubWithTeams[] = (clubData || []).map((club: any) => {
           // Find all club categories for this club
           const clubCategories = clubCategoriesData?.filter((cc: any) => cc.club_id === club.id) || [];
           
@@ -116,7 +116,7 @@ export default function ClubSelector({
             cc.club_category_teams?.map((team: any) => ({
               id: team.id,
               team_suffix: team.team_suffix,
-              category_id: cc.category_id
+              club_category_id: cc.category_id
             })) || []
           );
 
@@ -150,7 +150,7 @@ export default function ClubSelector({
         if (selectedCategory && selectedCategory !== 'all') {
           // Filter teams by selected category
           const categoryTeams = club.teams.filter(team => {
-            const category = categories.find(cat => cat.id === team.category_id);
+            const category = categories.find(cat => cat.id === team.club_category_id);
             return category?.code === selectedCategory;
           });
           clubTeamMap[club.id] = categoryTeams.map(team => team.id);
@@ -177,7 +177,7 @@ export default function ClubSelector({
     }
 
     const filtered = clubs.filter(club => 
-      club.teams.some(team => team.category_id === selectedCategoryData.id)
+      club.teams.some(team => team.club_category_id === selectedCategoryData.id)
     );
 
     return filtered;
@@ -245,7 +245,7 @@ export default function ClubSelector({
   }
 
   return (
-    <div className={`space-y-4 ${className} flex items-center flex-col`}>
+    <div className={`md:space-y-4 space-y-2 ${className} flex items-center flex-col`}>
       {/* Club Grid */}
       <div className="flex flex-wrap justify-center gap-1">
         {filteredClubs.map((club) => (
@@ -290,20 +290,6 @@ export default function ClubSelector({
           </Button>
         ))}
       </div>
-
-              {/* Clear Selection Button */}
-        {selectedClub && (
-          <div className="text-center">
-            <Button
-              size="sm"
-              variant="bordered"
-              color="default"
-              onPress={() => onClubSelect(undefined)}
-            >
-              Zrušit filtr klubu
-            </Button>
-          </div>
-        )}
     </div>
   );
 }

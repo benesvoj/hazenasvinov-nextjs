@@ -177,7 +177,7 @@ export default function MatchesPage() {
   }, [groupedMatches, filterType, selectedClub, selectedCategory, categories, getClubTeamsInCategory, clubTeamMap]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto md:space-y-8 space-y-4">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -220,7 +220,7 @@ export default function MatchesPage() {
         </div>
 
         {/* Status Filter */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           <Button
             variant={filterType === "all" ? "solid" : "bordered"}
             color="primary"
@@ -277,7 +277,7 @@ export default function MatchesPage() {
         selectedClub={selectedClub}
         onClubSelect={setSelectedClub}
         onClubDataChange={setClubTeamMap}
-        className="mb-6"
+        className="mb-2 md:mb-6"
       />
 
       {/* Error Display */}
