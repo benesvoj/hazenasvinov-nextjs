@@ -1,22 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Button } from '@heroui/button';
-import Image from 'next/image';
+import { Button, Image } from '@heroui/react';
 import { BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { useSeasons, useCategories } from '@/hooks';
 import { ClubWithTeams } from '@/types';
-interface Club {
-  id: string;
-  name: string;
-  short_name?: string;
-  logo_url?: string;
-  teams: Array<{
-    id: string;
-    team_suffix: string;
-    category_id: string;
-  }>;
-}
 
 interface ClubSelectorProps {
   selectedCategory?: string;
@@ -247,7 +235,7 @@ export default function ClubSelector({
   return (
     <div className={`md:space-y-4 space-y-2 ${className} flex items-center flex-col`}>
       {/* Club Grid */}
-      <div className="flex flex-wrap justify-center gap-1">
+      <div className="flex flex-wrap justify-center gap-1 md:gap-2">
         {filteredClubs.map((club) => (
           <Button
             key={club.id}
@@ -255,7 +243,7 @@ export default function ClubSelector({
             size="sm"
             onPress={() => handleClubSelect(club.id)}
             aria-label={`${selectedClub === club.id ? 'Zrušit filtr pro klub' : 'Filtrovat zápasy pro klub'} ${club.name}`}
-            className={`flex flex-col items-center gap-1 p-2 h-auto ${
+            className={`flex items-center gap-1 md:flex-col md:gap-1 p-1 md:p-2 h-auto ${
               selectedClub === club.id
                 ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                 : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
@@ -266,24 +254,20 @@ export default function ClubSelector({
               <Image
                 src={club.logo_url}
                 alt={`${club.name} logo`}
-                width={48}
-                height={48}
-                className="w-12 h-12 object-contain rounded-full"
-                onError={(e) => {
-                  const target = e.currentTarget as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
+                width={32}
+                height={32}
+                className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-full"
               />
             ) : (
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <span className="text-lg font-bold text-gray-500">
+              <div className="w-6 h-6 md:w-12 md:h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs md:text-lg font-bold text-gray-500">
                   {club.short_name ? club.short_name.charAt(0) : club.name.charAt(0)}
                 </span>
               </div>
             )}
 
-            {/* Club Name */}
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 text-center max-w-[80px]">
+            {/* Club Name - Hidden on mobile, shown on desktop */}
+            <span className="hidden md:block text-xs font-medium text-gray-600 dark:text-gray-400 text-center max-w-[80px]">
               {club.short_name || club.name}
             </span>
 
