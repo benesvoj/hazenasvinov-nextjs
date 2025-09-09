@@ -11,6 +11,15 @@ export interface SupabaseError {
 }
 
 /**
+ * Generic Supabase client type for batching operations
+ * This provides type safety while remaining flexible for different Supabase client implementations
+ */
+export type SupabaseClient = {
+  from(table: string): any;
+  auth?: any;
+} & Record<string, any>;
+
+/**
  * Query function type for batched operations
  */
 export type BatchedQueryFunction<T = any> = () => Promise<{ data: T | null; error: SupabaseError | null }>;
@@ -97,13 +106,13 @@ export class SupabaseBatcher {
  */
 export class SupabaseServerBatcher {
   private queries: BatchedQuery[] = [];
-  private supabaseClientFactory: () => Promise<any>;
+  private supabaseClientFactory: () => Promise<SupabaseClient>;
 
-  constructor(supabaseClientFactory?: () => Promise<any>) {
+  constructor(supabaseClientFactory?: () => Promise<SupabaseClient>) {
     this.supabaseClientFactory = supabaseClientFactory || createServerClient;
   }
 
-  addQuery<T = any>(id: string, queryFn: (supabase: any) => Promise<{ data: T | null; error: SupabaseError | null }>): this {
+  addQuery<T = any>(id: string, queryFn: (supabase: SupabaseClient) => Promise<{ data: T | null; error: SupabaseError | null }>): this {
     this.queries.push({
       id,
       query: async () => {
@@ -175,13 +184,14 @@ export function createBatcher(): SupabaseBatcher {
 /**
  * Utility function to create a server batcher instance
  */
-export function createServerBatcher(supabaseClientFactory?: () => Promise<any>): SupabaseServerBatcher {
+export function createServerBatcher(supabaseClientFactory?: () => Promise<SupabaseClient>): SupabaseServerBatcher {
   return new SupabaseServerBatcher(supabaseClientFactory);
 }
 
 /**
  * Example usage:
  * 
+ * // Client-side batching
  * const batcher = createBatcher();
  * batcher
  *   .addQuery('categories', () => supabase.from('categories').select('*'))
@@ -192,4 +202,12 @@ export function createServerBatcher(supabaseClientFactory?: () => Promise<any>):
  * const categories = results.find(r => r.id === 'categories')?.data;
  * const seasons = results.find(r => r.id === 'seasons')?.data;
  * const matches = results.find(r => r.id === 'matches')?.data;
+ * 
+ * // Server-side batching with type safety
+ * const serverBatcher = createServerBatcher();
+ * serverBatcher
+ *   .addQuery('users', (supabase) => supabase.from('users').select('id, name, email'))
+ *   .addQuery('posts', (supabase) => supabase.from('posts').select('*').eq('published', true));
+ * 
+ * const serverResults = await serverBatcher.execute();
  */
