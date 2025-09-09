@@ -743,7 +743,7 @@ export default function MembersListTab({
                     size="sm"
                   >
                     {categoriesData?.map((category) => (
-                      <SelectItem key={category.code} area-label="Category selection">
+                      <SelectItem key={category.id} area-label="Category selection">
                         {category.name}
                       </SelectItem>
                     )) || []}

@@ -147,7 +147,7 @@ export default function MemberFormModal({
                     return false;
                   })
                   .map((category) => (
-                    <SelectItem key={category.code}>{category.name}</SelectItem>
+                    <SelectItem key={category.id}>{category.name}</SelectItem>
                   ))}
               </Select>
               {!formData.sex && (

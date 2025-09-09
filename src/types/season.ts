@@ -16,11 +16,11 @@ export interface Season {
     /**
      * Start date of the season
      */
-    start_date: string;
+    start_date?: string;
     /**
      * End date of the season
      */
-    end_date: string;
+    end_date?: string;
     /**
      * Whether the season is active
      */
