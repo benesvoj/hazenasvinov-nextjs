@@ -8,16 +8,46 @@
 
 /**
  * Generate a UUID v4 compatible with PostgreSQL gen_random_uuid()
- * This uses the Web Crypto API which generates RFC 4122 compliant UUIDs
- * that are compatible with PostgreSQL's UUID type.
+ * 
+ * SECURITY NOTICE:
+ * - Uses Web Crypto API (crypto.randomUUID) when available - CRYPTOGRAPHICALLY SECURE
+ * - Falls back to Math.random() in older environments - NOT CRYPTOGRAPHICALLY SECURE
+ * 
+ * For non-critical use cases (UI IDs, temporary identifiers), the fallback is acceptable.
+ * For security-critical use cases (tokens, session IDs), ensure crypto.randomUUID is available.
+ * 
+ * @returns RFC 4122 compliant UUID v4 string
  */
 export function generateUUID(): string {
-  // Check if crypto.randomUUID is available (modern browsers)
+  // Check if crypto.randomUUID is available (modern browsers and Node.js 19+)
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
   
-  // Fallback for older browsers or Node.js environments
+  // Check if crypto.getRandomValues is available (more secure than Math.random)
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    
+    // Set version (4) and variant bits
+    array[6] = (array[6] & 0x0f) | 0x40; // Version 4
+    array[8] = (array[8] & 0x3f) | 0x80; // Variant bits
+    
+    // Convert to UUID string format
+    const hex = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return [
+      hex.slice(0, 8),
+      hex.slice(8, 12),
+      hex.slice(12, 16),
+      hex.slice(16, 20),
+      hex.slice(20, 32)
+    ].join('-');
+  }
+  
+  // Fallback for very old environments - NOT CRYPTOGRAPHICALLY SECURE
+  // This should only be used for non-security-critical identifiers
+  console.warn('UUID generation: Using non-cryptographically secure fallback (Math.random). Consider upgrading to a modern environment with crypto.randomUUID support.');
+  
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -85,6 +115,15 @@ export function generateDeterministicUUID(matchId: string, teamId: string, isHom
 }
 
 /**
+ * Check if cryptographically secure UUID generation is available
+ * 
+ * @returns True if crypto.randomUUID is available, false otherwise
+ */
+export function isSecureUUIDAvailable(): boolean {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function';
+}
+
+/**
  * Validate if a string is a valid UUID format
  * Compatible with PostgreSQL UUID type
  * 
@@ -94,6 +133,32 @@ export function generateDeterministicUUID(matchId: string, teamId: string, isHom
 export function isValidUUID(uuid: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
+}
+
+/**
+ * Generate a cryptographically secure UUID v4
+ * 
+ * This function will throw an error if crypto.randomUUID is not available,
+ * ensuring that only cryptographically secure UUIDs are generated.
+ * 
+ * Use this for security-critical identifiers like:
+ * - Session tokens
+ * - API keys
+ * - Authentication tokens
+ * - Any identifier that requires cryptographic security
+ * 
+ * @returns RFC 4122 compliant UUID v4 string
+ * @throws Error if crypto.randomUUID is not available
+ */
+export function generateSecureUUID(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  
+  throw new Error(
+    'Cryptographically secure UUID generation requires crypto.randomUUID, which is not available in this environment. ' +
+    'Consider upgrading to a modern browser or Node.js 19+ environment.'
+  );
 }
 
 /**
