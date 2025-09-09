@@ -1,4 +1,5 @@
 import { CategoryNew } from "@/types";
+import { GenderType } from "@/constants";
 
 /**
  * Get the display name for a category code
@@ -65,7 +66,7 @@ export const filterMembers = (
   members: any[],
   searchTerm: string,
   filters: {
-    sex: "" | "male" | "female";
+    sex: GenderType;
     category: string;
     function: string;
   }

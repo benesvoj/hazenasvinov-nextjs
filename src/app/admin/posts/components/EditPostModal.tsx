@@ -7,7 +7,7 @@ import { Input, Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
-import { BlogPost, Category } from "@/types";
+import { BlogPost, CategoryNew } from "@/types";
 
 interface User {
   id: string;
@@ -20,7 +20,7 @@ interface EditPostModalProps {
   onSubmit: (formData: any, imageFile: File | null) => Promise<void>;
   post: BlogPost | null;
   users: User[];
-  categories: Category[];
+  categories: CategoryNew[];
   categoriesLoading: boolean;
 }
 

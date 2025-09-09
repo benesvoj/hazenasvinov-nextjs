@@ -1,10 +1,8 @@
 'use client';
 
 import React from "react";
-import { Button } from "@heroui/button";
-import { Select, SelectItem } from "@heroui/react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Category, Match } from "@/types";
+import { Select, SelectItem, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@heroui/react";
+import { CategoryNew, Match } from "@/types";
 
 interface BulkUpdateMatchweekModalProps {
   isOpen: boolean;
@@ -16,7 +14,7 @@ interface BulkUpdateMatchweekModalProps {
   };
   onBulkUpdateDataChange: (data: { categoryId: string; matchweek: string; action: 'set' | 'remove' }) => void;
   onBulkUpdate: () => void;
-  categories: Category[];
+  categories: CategoryNew[];
   matches: Match[];
   getMatchweekOptions: () => Array<{ value: string; label: string }>;
   isSeasonClosed: boolean;

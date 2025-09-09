@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { VideoFilters as VideoFiltersType, Category, Club, Season } from "@/types";
+import { VideoFilters as VideoFiltersType, CategoryNew, Club, Season } from "@/types";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -19,10 +19,10 @@ import {
 interface VideoFiltersProps {
   filters: VideoFiltersType;
   onFiltersChange: (filters: VideoFiltersType) => void;
-  categories: Category[];
+  categories: CategoryNew[];
   clubs: Club[];
   seasons: Season[];
-  availableCategories?: Category[]; // For coaches - only show assigned categories
+  availableCategories?: CategoryNew[]; // For coaches - only show assigned categories
 }
 
 export function VideoFilters({

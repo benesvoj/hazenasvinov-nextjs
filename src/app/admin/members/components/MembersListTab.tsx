@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Card, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/react";
 import {
+  Pagination,
+  useDisclosure,
+  Card,
+  CardBody,
+  Badge,
+  Button,
+  Input,
+  Select,
+  SelectItem,
   Table,
   TableHeader,
   TableColumn,
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
-import { Badge } from "@heroui/badge";
-import { useDisclosure } from "@heroui/use-disclosure";
+} from "@heroui/react";
 import {
   PlusIcon,
   PencilIcon,
@@ -21,13 +24,13 @@ import {
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
-import { Member, Category } from "@/types";
+import { Member, CategoryNew } from "@/types";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import MemberFormModal from "./MemberFormModal";
 import MembersCsvImport from "./MembersCsvImport";
 import BulkEditModal from "./BulkEditModal";
 import { showToast } from "@/components/Toast";
-import { Pagination } from "@heroui/react";
+import { GenderType } from "@/constants";
 
 // Define the form data type to match MemberFormData interface
 interface FormData {
@@ -36,12 +39,12 @@ interface FormData {
   surname: string;
   date_of_birth?: string;
   category: string;
-  sex: 'male' | 'female';
+  sex: GenderType;
   functions: string[];
 }
 
 interface MembersListTabProps {
-  categoriesData: Category[] | null;
+  categoriesData: CategoryNew[] | null;
   functionOptions: Record<string, string>;
   sexOptions: Record<string, string>;
 }
@@ -56,7 +59,7 @@ export default function MembersListTab({
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
-    sex: "" as "" | "male" | "female",
+    sex: "empty" as GenderType,
     category: "",
     function: "",
   });
@@ -88,7 +91,7 @@ export default function MembersListTab({
     new Set()
   );
   const [bulkEditFormData, setBulkEditFormData] = useState({
-    sex: "" as "" | "male" | "female",
+    sex: "" as GenderType,
     category: "",
     functions: [] as string[],
   });
@@ -310,7 +313,7 @@ export default function MembersListTab({
       // Clear selection and form
       setSelectedMembers(new Set());
       setBulkEditFormData({
-        sex: "",
+        sex: "empty",
         category: "",
         functions: [],
       });
@@ -338,7 +341,7 @@ export default function MembersListTab({
   const closeBulkEditModal = () => {
     setSelectedMembers(new Set());
     setBulkEditFormData({
-      sex: "",
+      sex: "empty",
       category: "",
       functions: [],
     });
@@ -716,7 +719,7 @@ export default function MembersListTab({
                     onSelectionChange={(keys) =>
                       setFilters((prev) => ({
                         ...prev,
-                        sex: Array.from(keys)[0] as "male" | "female" | "",
+                        sex: Array.from(keys)[0] as GenderType,
                       }))
                     }
                     className="w-full"
@@ -743,7 +746,10 @@ export default function MembersListTab({
                     size="sm"
                   >
                     {categoriesData?.map((category) => (
-                      <SelectItem key={category.id} area-label="Category selection">
+                      <SelectItem
+                        key={category.id}
+                        area-label="Category selection"
+                      >
                         {category.name}
                       </SelectItem>
                     )) || []}
@@ -766,7 +772,9 @@ export default function MembersListTab({
                     size="sm"
                   >
                     {Object.entries(functionOptions).map(([key, value]) => (
-                      <SelectItem key={key} area-label="Function selection">{value}</SelectItem>
+                      <SelectItem key={key} area-label="Function selection">
+                        {value}
+                      </SelectItem>
                     ))}
                   </Select>
                 </div>
@@ -778,7 +786,7 @@ export default function MembersListTab({
                       variant="light"
                       size="sm"
                       onPress={() =>
-                        setFilters({ sex: "", category: "", function: "" })
+                        setFilters({ sex: "empty", category: "", function: "" })
                       }
                       className="w-full sm:w-auto"
                       area-label="Clear filters"

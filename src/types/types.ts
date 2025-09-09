@@ -1,4 +1,4 @@
-import { Category } from "./category";
+import { CategoryNew } from "./category";
 
 type CategoryProps = {
 	id: string;
@@ -189,17 +189,6 @@ export interface LineupValidation {
   warnings: string[];
 }
 
-// Team interface removed - use ClubCategoryTeam from clubs.ts instead
-
-export interface TeamCategory {
-  id: string;
-  team_id: string;
-  season_id: string;
-  category_id: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface MemberFunction {
 	id: string; // Can be either UUID or simple text ID like 'func_player'
@@ -214,70 +203,13 @@ export interface MemberFunction {
 
 export interface MembersListTabProps {
   members: Member[];
-  categoriesData: Category[] | null;
+  categoriesData: CategoryNew[] | null;
   functionOptions: Record<string, string>;
   sexOptions: Record<string, string>;
 }
 
 export interface MembersStatisticTabProps {
   members: Member[];  
-  categoriesData: Category[] | null;
+  categoriesData: CategoryNew[] | null;
   functionOptions: Record<string, string>;
 }
-
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  author_id: string;
-  status: 'draft' | 'published' | 'archived';
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-  image_url?: string;
-  category_id?: string;
-}
-
-// Club interfaces
-interface Club {
-  id: string;
-  name: string;
-  short_name?: string;
-  logo_url?: string;
-  city?: string;
-  founded_year?: number;
-  venue?: string;
-  web?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  description?: string;
-  contact_person?: string;
-  is_own_club?: boolean;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-interface ClubTeam {
-  id: string;
-  club_id: string;
-  team_id: string;
-  team_suffix: string;
-  is_primary: boolean;
-  created_at: string;
-}
-
-interface ClubCategory {
-  id: string;
-  club_id: string;
-  category_id: string;
-  season_id: string;
-  is_active: boolean;
-  created_at: string;
-}
-
-export type { Club, ClubTeam, ClubCategory }

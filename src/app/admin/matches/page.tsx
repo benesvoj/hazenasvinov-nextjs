@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Alert, Select, SelectItem } from "@heroui/react";
-import { useDisclosure } from "@heroui/modal";
-import { Tabs, Tab } from "@heroui/tabs";
+import { Alert, Select, SelectItem, Tabs, Tab, Card, CardBody, Button, useDisclosure } from "@heroui/react";
 import {
   TrophyIcon,
   PlusIcon,
@@ -34,7 +30,7 @@ import { useExcelImport } from "@/hooks/useExcelImport";
 // TODO: use proper types
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
 import { useTeamDisplayLogic } from "@/hooks/useTeamDisplayLogic";
-import { Match, Category } from "@/types";
+import { Match, CategoryNew } from "@/types";
 import {
   useSeasons,
   useFilteredTeams,
@@ -47,7 +43,7 @@ import { ButtonWithTooltip } from "@/components";
 export default function MatchesAdminPage() {
   const [teams, setTeams] = useState<any[]>([]);
 
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryNew[]>([]);
 
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");

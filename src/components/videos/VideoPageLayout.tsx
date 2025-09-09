@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Video, VideoFilters as VideoFiltersType, Category, Club, Season } from "@/types";
+import { Video, VideoFilters as VideoFiltersType, CategoryNew, Club, Season } from "@/types";
 import { Card, CardBody } from "@heroui/react";
 import { VideoPageHeader } from "./VideoPageHeader";
 import { VideoFilters } from "./VideoFilters";
@@ -24,10 +24,10 @@ interface VideoPageLayoutProps {
   loading: boolean;
   error: string | null;
   filters: VideoFiltersType;
-  categories: Category[];
+  categories: CategoryNew[];
   clubs: Club[];
   seasons: Season[];
-  availableCategories?: Category[]; // For coaches - only show assigned categories
+  availableCategories?: CategoryNew[]; // For coaches - only show assigned categories
 
   // Event handlers
   onFiltersChange: (filters: VideoFiltersType) => void;

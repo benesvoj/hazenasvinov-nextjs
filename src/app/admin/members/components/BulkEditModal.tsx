@@ -5,13 +5,15 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Select, SelectItem } from "@heroui/select";
-import { Checkbox } from "@heroui/checkbox";
-import { Category } from "@/types";
+  Button,
+  Select,
+  SelectItem,
+  Checkbox,
+} from "@heroui/react";
+import { CategoryNew } from "@/types";
+import { GenderType } from "@/constants";
 interface BulkEditFormData {
-  sex: "" | "male" | "female";
+  sex: GenderType;
   category: string;
   functions: string[];
 }
@@ -23,7 +25,7 @@ interface BulkEditModalProps {
   selectedCount: number;
   formData: BulkEditFormData;
   setFormData: React.Dispatch<React.SetStateAction<BulkEditFormData>>;
-  categories: Category[];
+  categories: CategoryNew[];
   functionOptions: Record<string, string>;
   isLoading: boolean;
 }
@@ -48,7 +50,8 @@ export default function BulkEditModal({
         <ModalBody>
           <div className="space-y-6">
             <div className="text-sm text-gray-600">
-              Vyberte pole, která chcete upravit. Prázdná pole zůstanou beze změny.
+              Vyberte pole, která chcete upravit. Prázdná pole zůstanou beze
+              změny.
             </div>
 
             {/* Row 1: Sex and Category */}
@@ -61,12 +64,15 @@ export default function BulkEditModal({
                 <Select
                   selectedKeys={formData.sex ? [formData.sex] : []}
                   onSelectionChange={(keys) => {
-                    const newSex = Array.from(keys)[0] as "male" | "female" | "";
-                    setFormData(prev => ({
+                    const newSex = Array.from(keys)[0] as
+                      | "male"
+                      | "female"
+                      | "";
+                    setFormData((prev) => ({
                       ...prev,
                       sex: newSex,
                       // Clear category when sex changes to ensure proper filtering
-                      category: newSex !== prev.sex ? "" : prev.category
+                      category: newSex !== prev.sex ? "" : prev.category,
                     }));
                   }}
                   placeholder="Ponechat beze změny"
@@ -84,7 +90,7 @@ export default function BulkEditModal({
                 <Select
                   selectedKeys={formData.category ? [formData.category] : []}
                   onSelectionChange={(keys) =>
-                    setFormData(prev => ({
+                    setFormData((prev) => ({
                       ...prev,
                       category: Array.from(keys)[0] as string,
                     }))
@@ -95,12 +101,18 @@ export default function BulkEditModal({
                   {categories
                     .filter((category) => {
                       // Filter categories based on sex using the gender field from database
-                      if (formData.sex === 'male') {
+                      if (formData.sex === "male") {
                         // For male sex, show male and mixed categories
-                        return category.gender === 'male' || category.gender === 'mixed';
-                      } else if (formData.sex === 'female') {
+                        return (
+                          category.gender === "male" ||
+                          category.gender === "mixed"
+                        );
+                      } else if (formData.sex === "female") {
                         // For female sex, show female and mixed categories
-                        return category.gender === 'female' || category.gender === 'mixed';
+                        return (
+                          category.gender === "female" ||
+                          category.gender === "mixed"
+                        );
                       }
                       return false;
                     })
@@ -109,7 +121,9 @@ export default function BulkEditModal({
                     ))}
                 </Select>
                 {!formData.sex && (
-                  <p className="text-sm text-gray-500 mt-1">Vyberte nejprve pohlaví pro zobrazení dostupných kategorií</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Vyberte nejprve pohlaví pro zobrazení dostupných kategorií
+                  </p>
                 )}
               </div>
             </div>
@@ -131,12 +145,12 @@ export default function BulkEditModal({
                       isSelected={formData.functions.includes(key)}
                       onValueChange={(checked) => {
                         if (checked) {
-                          setFormData(prev => ({
+                          setFormData((prev) => ({
                             ...prev,
                             functions: [...prev.functions, key],
                           }));
                         } else {
-                          setFormData(prev => ({
+                          setFormData((prev) => ({
                             ...prev,
                             functions: prev.functions.filter((f) => f !== key),
                           }));
@@ -163,8 +177,8 @@ export default function BulkEditModal({
             onPress={onSubmit}
             isLoading={isLoading}
             isDisabled={
-              !formData.sex && 
-              !formData.category && 
+              !formData.sex &&
+              !formData.category &&
               formData.functions.length === 0
             }
           >

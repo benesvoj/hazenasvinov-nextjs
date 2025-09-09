@@ -5,13 +5,15 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Chip } from "@heroui/chip";
+  Button,
+  Input,
+  Select,
+  SelectItem,
+  Chip,
+} from "@heroui/react";
 import { translations } from "@/lib/translations";
-import { Category } from "@/types";
+import { CategoryNew } from "@/types";
+import { GenderType } from "@/constants";
 
 interface MemberFormData {
   registration_number: string;
@@ -19,7 +21,7 @@ interface MemberFormData {
   surname: string;
   date_of_birth?: string; // Made optional
   category: string;
-  sex: 'male' | 'female';
+  sex: GenderType;
   functions: string[];
 }
 
@@ -30,7 +32,7 @@ interface MemberFormModalProps {
   title: string;
   formData: MemberFormData;
   setFormData: (data: MemberFormData) => void;
-  categories: Category[];
+  categories: CategoryNew[];
   sexOptions: Record<string, string>;
   functionOptions: Record<string, string>;
   submitButtonText: string;

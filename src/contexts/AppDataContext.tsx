@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Season, Category, Member } from '@/types';
+import { Season, CategoryNew, Member } from '@/types';
 
 interface AppDataContextType {
   // Data
   seasons: Season[];
-  categories: Category[];
+  categories: CategoryNew[];
   members: Member[];
   
   // Loading states

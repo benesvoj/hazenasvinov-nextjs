@@ -15,7 +15,7 @@ import {
   CalendarIcon
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
-import { Club, Category } from "@/types";
+import { Club, CategoryNew } from "@/types";
 import { Season } from "@/types";
 
 interface ClubCategory {
@@ -26,14 +26,14 @@ interface ClubCategory {
   max_teams: number;
   is_active: boolean;
   club: Club;
-  category: Category;
+  category: CategoryNew;
   season: Season;
 }
 
 export default function ClubCategoriesAdminPage() {
   const [clubCategories, setClubCategories] = useState<ClubCategory[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryNew[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

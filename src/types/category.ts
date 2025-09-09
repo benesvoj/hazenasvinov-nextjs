@@ -1,3 +1,4 @@
+import { GenderType } from "@/constants";
 /**
  * @deprecated This interface is deprecated and will be replaced by the new CategoryNew interface
  * Category interface representing the database schema for categories table.
@@ -63,7 +64,7 @@ export interface CategoryNew {
     name: string;
     description?: string;
     age_group?: string;
-    gender?: string;
+    gender?: GenderType;
     is_active: boolean;
     sort_order: number;
     created_at?: string;

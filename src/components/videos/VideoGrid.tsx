@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Video, VideoFilters as VideoFiltersType, Category, Season } from "@/types";
+import { Video, VideoFilters as VideoFiltersType, CategoryNew, Season } from "@/types";
 import { VideoCameraIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Card, CardBody, Button, Skeleton } from "@heroui/react";
 import { VideoCard } from "./VideoCard";
@@ -11,7 +11,7 @@ interface VideoGridProps {
   videos: Video[];
   loading: boolean;
   filters: VideoFiltersType;
-  categories: Category[];
+  categories: CategoryNew[];
   seasons: Season[];
   onEdit: (video: Video) => void;
   onDelete: (video: Video) => void;

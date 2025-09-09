@@ -1,9 +1,9 @@
 import {useEffect, useState} from "react";
 import {Api} from "@/app/api/api";
-import { Category } from "@/types";
+import { CategoryNew } from "@/types";
 
 export function useFetchCategories() {
-	const [data, setData] = useState<Category[]>([]);
+	const [data, setData] = useState<CategoryNew[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 

@@ -8,7 +8,7 @@ import {
   TrophyIcon,
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
-import { Category, Season, Club, TeamData } from "@/types";
+import { CategoryNew, Season, Club, TeamData } from "@/types";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation } from './components';
@@ -23,7 +23,7 @@ export default function ClubDetailPage() {
   
   const [club, setClub] = useState<Club | null>(null);
   const [teams, setTeams] = useState<any[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryNew[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [clubCategories, setClubCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

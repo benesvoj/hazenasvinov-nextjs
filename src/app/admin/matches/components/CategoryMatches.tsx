@@ -9,7 +9,7 @@ import {
   UserGroupIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Match, Category } from "@/types";
+import { Match, CategoryNew } from "@/types";
 import { formatTime, formatDateString } from "@/helpers";
 import { translations } from "@/lib/translations";
 

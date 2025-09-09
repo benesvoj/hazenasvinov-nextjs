@@ -19,16 +19,3 @@ export const DEFAULT_MEMBER_FUNCTIONS = {
  * Member function types for TypeScript
  */
 export type MemberFunctionType = keyof typeof DEFAULT_MEMBER_FUNCTIONS;
-
-/**
- * Sex options for members
- */
-export const GENDER_OPTIONS = {
-  male: "Muž",
-  female: "Žena",
-} as const;
-
-/**
- * Sex types for TypeScript
- */
-export type GenderType = keyof typeof GENDER_OPTIONS;

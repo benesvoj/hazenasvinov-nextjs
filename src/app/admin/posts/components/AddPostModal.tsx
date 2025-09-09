@@ -1,13 +1,10 @@
 'use client';
 
 import React, { useState } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem } from "@heroui/react";
 import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
-import { BlogPost, Category } from "@/types";
+import { CategoryNew } from "@/types";
 
 interface User {
   id: string;
@@ -19,7 +16,7 @@ interface AddPostModalProps {
   onClose: () => void;
   onSubmit: (formData: any, imageFile: File | null) => Promise<void>;
   users: User[];
-  categories: Category[];
+  categories: CategoryNew[];
   categoriesLoading: boolean;
 }
 
