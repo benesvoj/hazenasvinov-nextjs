@@ -1,4 +1,3 @@
-import { createClient } from '@/utils/supabase/client';
 import { createClient as createServerClient } from '@/utils/supabase/server';
 
 export interface BatchedQuery {
@@ -18,7 +17,6 @@ export interface BatchedResult<T = any> {
  */
 export class SupabaseBatcher {
   private queries: BatchedQuery[] = [];
-  private supabase = createClient();
 
   addQuery<T = any>(id: string, queryFn: () => Promise<{ data: T | null; error: any }>): this {
     this.queries.push({
@@ -72,29 +70,24 @@ export class SupabaseBatcher {
  */
 export class SupabaseServerBatcher {
   private queries: BatchedQuery[] = [];
-  private supabase: any;
+  private supabaseClientFactory: () => Promise<any>;
 
-  constructor() {
-    // We'll initialize supabase in the execute method
-  }
-
-  async initialize() {
-    this.supabase = await createServerClient();
+  constructor(supabaseClientFactory?: () => Promise<any>) {
+    this.supabaseClientFactory = supabaseClientFactory || createServerClient;
   }
 
   addQuery<T = any>(id: string, queryFn: (supabase: any) => Promise<{ data: T | null; error: any }>): this {
     this.queries.push({
       id,
-      query: () => queryFn(this.supabase)
+      query: async () => {
+        const supabase = await this.supabaseClientFactory();
+        return queryFn(supabase);
+      }
     });
     return this;
   }
 
   async execute(): Promise<BatchedResult[]> {
-    if (!this.supabase) {
-      await this.initialize();
-    }
-
     const results = await Promise.allSettled(
       this.queries.map(async (query) => {
         try {
@@ -143,8 +136,8 @@ export function createBatcher(): SupabaseBatcher {
 /**
  * Utility function to create a server batcher instance
  */
-export function createServerBatcher(): SupabaseServerBatcher {
-  return new SupabaseServerBatcher();
+export function createServerBatcher(supabaseClientFactory?: () => Promise<any>): SupabaseServerBatcher {
+  return new SupabaseServerBatcher(supabaseClientFactory);
 }
 
 /**

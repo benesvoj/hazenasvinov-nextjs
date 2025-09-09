@@ -95,8 +95,8 @@ export default function AdminMatchesPage() {
 ```tsx
 import { useFetchMatches } from '@/hooks/useFetchMatches';
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const categorySlug = params.slug;
+export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug: categorySlug } = await params;
   
   // Custom use: own club matches, active season, with team details
   const { matches, loading, error } = useFetchMatches(

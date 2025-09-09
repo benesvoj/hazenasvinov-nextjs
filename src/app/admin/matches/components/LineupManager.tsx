@@ -34,6 +34,7 @@ import { createClient } from "@/utils/supabase/client";
 import { addToast } from "@heroui/toast";
 import { DeleteConfirmationModal, showToast, Toast } from "@/components";
 import LineupManagerPlayerCard from "./LineupManagerPlayerCard";
+import { generateLineupId, generateUUID } from "@/utils/uuid";
 
 interface LineupManagerProps {
   matchId: string;
@@ -378,8 +379,8 @@ export default function LineupManager({
         );
       }
 
-      // Use existing ID or create a new UUID
-      const lineupId = existingLineup?.id || crypto.randomUUID();
+      // Use existing ID or create a new deterministic UUID
+      const lineupId = existingLineup?.id || generateLineupId(matchId, currentTeamId, isHome);
 
       // Debug: Verify the match exists in database
       console.log("Match ID being used:", matchId);

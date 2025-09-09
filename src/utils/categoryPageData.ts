@@ -63,7 +63,7 @@ export async function getCategoryPageData(
     const season = seasonResult.data;
 
     // Batch 2: Execute remaining queries in parallel
-    const [postsResult, matchesResult, standingsResult] = await Promise.all([
+    const [postsResult, matchesResult, standingsResult, clubCategoriesResult] = await Promise.all([
       // Posts query
       includePosts ? supabase
         .from('blog_posts')
@@ -153,7 +153,24 @@ export async function getCategoryPageData(
         `)
         .eq('category_id', category.id)
         .eq('season_id', season.id)
-        .order('position', { ascending: true }) : Promise.resolve({ data: [], error: null })
+        .order('position', { ascending: true }) : Promise.resolve({ data: [], error: null }),
+      
+      // Club categories query - moved from separate execution
+      supabase
+        .from('club_categories')
+        .select(`
+          id,
+          max_teams,
+          club:clubs(
+            id,
+            name,
+            short_name,
+            logo_url,
+            is_own_club
+          )
+        `)
+        .eq('category_id', category.id)
+        .eq('season_id', season.id)
     ]);
 
     // Process results
@@ -162,22 +179,6 @@ export async function getCategoryPageData(
     let standings: ProcessedStanding[] = [];
     
     // Get club categories to determine which clubs need suffixes (max_teams > 1)
-    const clubCategoriesResult = await supabase
-      .from('club_categories')
-      .select(`
-        id,
-        max_teams,
-        club:clubs(
-          id,
-          name,
-          short_name,
-          logo_url,
-          is_own_club
-        )
-      `)
-      .eq('category_id', category.id)
-      .eq('season_id', season.id);
-    
     const clubsNeedingSuffixes = new Set<string>();
     if (!clubCategoriesResult.error && clubCategoriesResult.data) {
       clubCategoriesResult.data.forEach((clubCategory: any) => {

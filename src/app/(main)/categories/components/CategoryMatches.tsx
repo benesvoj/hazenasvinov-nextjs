@@ -134,7 +134,7 @@ export function CategoryMatches({
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    {matchweeks > 0 ? `${match.matchweek}. kolo` : ""}
+                    {matchweeks > 0 && match.matchweek !== null ? `${match.matchweek}. kolo` : ""}
                   </TableCell>
                   <TableCell className="font-medium text-right">
                     <div className="flex items-center justify-end gap-2">

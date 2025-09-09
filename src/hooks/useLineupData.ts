@@ -47,14 +47,6 @@ export const useLineupData = () => {
         .maybeSingle();
 
       if (lineupError) {
-        // Handle 406 Not Acceptable error
-        if (lineupError.message && lineupError.message.includes('406')) {
-          return {
-            players: [],
-            coaches: []
-          };
-        }
-        
         console.error('Error fetching lineup:', lineupError);
         throw lineupError;
       }

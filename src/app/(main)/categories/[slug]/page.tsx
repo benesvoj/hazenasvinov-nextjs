@@ -56,7 +56,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               categoryId={category.id}
               categoryName={category.name}
               matches={matches}
-              matchweeks={0}
+              matchweeks={matches.autumn.length + matches.spring.length}
             />
           </div>
         </div>
