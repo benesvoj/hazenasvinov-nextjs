@@ -15,7 +15,7 @@ import { translations } from "@/lib/translations";
 
 interface CategoryMatchesProps {
   matches: Match[];
-  category: Category;
+  category: CategoryNew;
   expandedMatchweeks: Set<string>;
   toggleMatchweek: (categoryId: string, matchweek: number) => void;
   isMatchweekExpanded: (categoryId: string, matchweek: number) => boolean;

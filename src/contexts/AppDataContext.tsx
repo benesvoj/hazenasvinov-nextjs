@@ -82,7 +82,7 @@ const getCachedData = async <T,>(
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [seasons, setSeasons] = useState<Season[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryNew[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   
   const [loading, setLoading] = useState(false);
@@ -113,7 +113,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   // Fetch categories
-  const fetchCategories = useCallback(async (): Promise<Category[]> => {
+  const fetchCategories = useCallback(async (): Promise<CategoryNew[]> => {
     return getCachedData('categories', async () => {
       const { data, error } = await supabase
         .from('categories')

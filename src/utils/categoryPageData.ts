@@ -52,7 +52,7 @@ export async function getCategoryPageData(
         .single(),
       supabase
         .from("seasons")
-        .select("id, name, is_active")
+        .select("id, name, is_active, start_date, end_date")
         .eq("is_active", true)
         .single(),
     ]);
@@ -448,7 +448,6 @@ export async function getCategoryPageData(
       season,
     };
   } catch (error) {
-    console.error("Error fetching category page data:", error);
     throw error;
   }
 }

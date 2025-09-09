@@ -6,16 +6,17 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-} from "@heroui/table";
+} from "@heroui/react";
 import { useFetchSeasons } from "@/hooks/useFetchSeasons";
 import { formatDateString } from "@/helpers/formatDate";
+import { LoadingSpinner } from "@/components";
 
 export const SeasonsTable = () => {
   const { data, loading, error } = useFetchSeasons();
 
   return (
     <>
-      {loading && <TableCell>Loading...</TableCell>}
+      {loading && <LoadingSpinner />}
       {error && <TableCell>Error: {error.message}</TableCell>}
       <Table aria-label={translations.season.title}>
         <TableHeader>

@@ -65,14 +65,12 @@ export default function BulkEditModal({
                   selectedKeys={formData.sex ? [formData.sex] : []}
                   onSelectionChange={(keys) => {
                     const newSex = Array.from(keys)[0] as
-                      | "male"
-                      | "female"
-                      | "";
+                      GenderType;
                     setFormData((prev) => ({
                       ...prev,
                       sex: newSex,
                       // Clear category when sex changes to ensure proper filtering
-                      category: newSex !== prev.sex ? "" : prev.category,
+                      category: newSex !== prev.sex ? "empty" : prev.category,
                     }));
                   }}
                   placeholder="Ponechat beze změny"
