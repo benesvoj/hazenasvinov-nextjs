@@ -1,0 +1,203 @@
+import { createClient } from '@/utils/supabase/client';
+
+interface Standing {
+  team_id: string;
+  club_id?: string;
+  category_id: string;
+  season_id: string;
+  position: number;
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  points: number;
+}
+
+interface Match {
+  id: string;
+  home_team_id: string;
+  away_team_id: string;
+  home_score: number | null;
+  away_score: number | null;
+  status: string;
+}
+
+/**
+ * Calculates standings for a specific category and season
+ * @param categoryId - The category ID
+ * @param seasonId - The season ID
+ * @param isSeasonClosed - Function to check if season is closed
+ * @returns Promise<{ success: boolean; error?: string }>
+ */
+export async function calculateStandings(
+  categoryId: string,
+  seasonId: string,
+  isSeasonClosed: () => boolean
+): Promise<{ success: boolean; error?: string }> {
+  if (isSeasonClosed()) {
+    return { success: false, error: "Nelze přepočítat tabulku pro uzavřenou sezónu" };
+  }
+
+  try {
+    const supabase = createClient();
+
+    // Get completed matches for the selected category and season
+    let { data: completedMatches, error: matchesError } = await supabase
+      .from("matches")
+      .select("*")
+      .eq("category_id", categoryId)
+      .eq("season_id", seasonId)
+      .eq("status", "completed");
+
+    if (matchesError) throw matchesError;
+
+    // Note: We can generate standings even without completed matches
+    if (!completedMatches) {
+      completedMatches = [];
+    }
+
+    // Get teams for this category and season
+    let teamCategories;
+    let teamsError;
+
+    // Try club_categories first, fallback to team_categories
+    try {
+      const clubResult = await supabase
+        .from("club_categories")
+        .select(
+          `
+          club_id,
+          club:clubs(
+            id,
+            name
+          ),
+          club_category_teams(
+            id,
+            team_suffix
+          )
+        `
+        )
+        .eq("category_id", categoryId)
+        .eq("season_id", seasonId)
+        .eq("is_active", true);
+
+      if (clubResult.data && clubResult.data.length > 0) {
+        // New club-based system
+        teamCategories = clubResult.data.flatMap(
+          (cc: any) =>
+            cc.club_category_teams?.map((ct: any) => ({
+              team_id: ct.id,
+              club_id: cc.club_id,
+            })) || []
+        );
+      } else {
+        // Fallback to old system
+        const fallbackResult = await supabase
+          .from("team_categories")
+          .select("team_id")
+          .eq("category_id", categoryId)
+          .eq("season_id", seasonId)
+          .eq("is_active", true);
+
+        if (fallbackResult.error) throw fallbackResult.error;
+        teamCategories = fallbackResult.data;
+      }
+    } catch (error) {
+      teamsError = error;
+    }
+
+    if (teamsError) throw teamsError;
+
+    if (!teamCategories || teamCategories.length === 0) {
+      return { success: false, error: "Žádné týmy v této kategorii a sezóně" };
+    }
+
+    // Initialize standings for all teams
+    const standingsMap = new Map<string, Standing>();
+    teamCategories.forEach((tc: any) => {
+      standingsMap.set(tc.team_id, {
+        team_id: tc.team_id,
+        club_id: tc.club_id,
+        category_id: categoryId,
+        season_id: seasonId,
+        position: 0,
+        matches: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goals_for: 0,
+        goals_against: 0,
+        points: 0,
+      });
+    });
+
+    // Calculate standings from matches
+    completedMatches.forEach((match: Match) => {
+      if (!match.home_score || !match.away_score) return;
+
+      const homeStanding = standingsMap.get(match.home_team_id);
+      const awayStanding = standingsMap.get(match.away_team_id);
+
+      if (homeStanding && awayStanding) {
+        // Update matches played
+        homeStanding.matches++;
+        awayStanding.matches++;
+
+        // Update goals
+        homeStanding.goals_for += match.home_score;
+        homeStanding.goals_against += match.away_score;
+        awayStanding.goals_for += match.away_score;
+        awayStanding.goals_against += match.home_score;
+
+        // Update points and wins/draws/losses
+        if (match.home_score > match.away_score) {
+          // Home team wins
+          homeStanding.wins++;
+          homeStanding.points += 2;
+          awayStanding.losses++;
+        } else if (match.home_score < match.away_score) {
+          // Away team wins
+          awayStanding.wins++;
+          awayStanding.points += 2;
+          homeStanding.losses++;
+        } else {
+          // Draw
+          homeStanding.draws++;
+          homeStanding.points += 1;
+          awayStanding.draws++;
+          awayStanding.points += 1;
+        }
+      }
+    });
+
+    // Convert to array and sort by points, then goal difference
+    const standingsArray = Array.from(standingsMap.values()).sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      const aGoalDiff = a.goals_for - a.goals_against;
+      const bGoalDiff = b.goals_for - b.goals_against;
+      if (bGoalDiff !== aGoalDiff) return bGoalDiff - aGoalDiff;
+      return b.goals_for - a.goals_for;
+    });
+
+    // Update positions
+    standingsArray.forEach((standing, index) => {
+      standing.position = index + 1;
+    });
+
+    // Upsert standings to database
+    const { error: upsertError } = await supabase
+      .from("standings")
+      .upsert(standingsArray, {
+        onConflict: "category_id,season_id,team_id",
+      });
+
+    if (upsertError) throw upsertError;
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error calculating standings:", error);
+    return { success: false, error: "Chyba při výpočtu tabulky" };
+  }
+}

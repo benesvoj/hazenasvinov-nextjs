@@ -29,3 +29,4 @@ export * from './useOwnClubMatches';
 export * from './useFetchMatch';
 export * from './useAttendance';
 export * from './useMembers';
+export * from './useTeams';

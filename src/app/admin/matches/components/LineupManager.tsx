@@ -34,6 +34,7 @@ import { createClient } from "@/utils/supabase/client";
 import { DeleteConfirmationModal, showToast } from "@/components";
 import LineupManagerPlayerCard from "./LineupManagerPlayerCard";
 import { generateLineupId } from "@/utils/uuid";
+import { Alert } from "@heroui/react";
 
 interface LineupManagerProps {
   matchId: string;
@@ -58,7 +59,6 @@ export default function LineupManager({
   categoryCode,
   onClose,
 }: LineupManagerProps) {
-
   // Filter members by category
   const filteredMembers = useMemo(() => {
     if (!categoryId) {
@@ -82,7 +82,6 @@ export default function LineupManager({
 
     return filtered;
   }, [members, categoryId, categoryCode]);
-
 
   const [selectedTeam, setSelectedTeam] = useState<"home" | "away">("home");
   const [homeFormData, setHomeFormData] = useState<LineupFormData>({
@@ -149,6 +148,7 @@ export default function LineupManager({
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<ExternalPlayer[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -157,6 +157,11 @@ export default function LineupManager({
     onOpen: onEditModalOpen,
     onClose: onEditModalClose,
   } = useDisclosure();
+
+  const handleEditModalOpen = () => {
+    setValidationError(null); // Clear any previous validation errors
+    onEditModalOpen();
+  };
 
   const {
     isOpen: isDeleteModalOpen,
@@ -344,7 +349,8 @@ export default function LineupManager({
       }
 
       // Use existing ID or create a new deterministic UUID
-      const lineupId = existingLineup?.id || generateLineupId(matchId, currentTeamId, isHome);
+      const lineupId =
+        existingLineup?.id || generateLineupId(matchId, currentTeamId, isHome);
 
       // Debug: Verify the match exists in database
       console.log("Match ID being used:", matchId);
@@ -362,29 +368,32 @@ export default function LineupManager({
 
       // Show success message
       showToast.success("Sestava byla úspěšně uložena!");
+      
+      // Close the dialog only on successful save
+      if (onClose) {
+        onClose();
+      }
     } catch (error: any) {
       console.error("Error saving lineup:", error);
       const errorMessage =
         error?.message || error?.details || error?.hint || "Neznámá chyba";
 
-      // Check if it's a validation warning (lineup rules)
-      if (errorMessage.includes("VALIDATION_WARNING:")) {
-        const validationMessage = errorMessage.replace(
-          "VALIDATION_WARNING: ",
-          ""
-        );
+      // Check if it's a validation error (lineup rules)
+      if (errorMessage.includes("Musí být alespoň") || 
+          errorMessage.includes("Nemůže být více než") ||
+          errorMessage.includes("Celkem musí být")) {
+        // Set validation error state to show in modal
+        setValidationError(errorMessage);
+        // Also show toast for immediate feedback
         showToast.warning(
-          `⚠️ Pravidla sestavy:\n\n${validationMessage}\n\nPřidejte více hráčů do sestavy.`
+          `⚠️ Pravidla sestavy:\n\n${errorMessage}\n\nOpravte chyby a zkuste to znovu.`
         );
-        return;
+        return; // Don't close the modal
       }
 
+      // For other errors, show error message but keep modal open
       showToast.danger(`Chyba při ukládání sestavy: ${errorMessage}`);
-    } finally {
-      // Close the dialog regardless of success/failure
-      if (onClose) {
-        onClose();
-      }
+      // Don't close the modal for other errors either, let user retry
     }
   };
 
@@ -461,6 +470,11 @@ export default function LineupManager({
   };
 
   const addPlayer = () => {
+    // Clear validation error when user adds players
+    if (validationError) {
+      setValidationError(null);
+    }
+    
     const newPlayer: LineupPlayerFormData = {
       is_external: !isOwnClub, // External if not own club, internal if own club
       position: "field_player",
@@ -474,6 +488,11 @@ export default function LineupManager({
   };
 
   const removePlayer = (index: number) => {
+    // Clear validation error when user removes players
+    if (validationError) {
+      setValidationError(null);
+    }
+    
     setCurrentFormData((prev) => ({
       ...prev,
       players: prev.players.filter((_, i) => i !== index),
@@ -485,6 +504,11 @@ export default function LineupManager({
     field: keyof LineupPlayerFormData,
     value: any
   ) => {
+    // Clear validation error when user makes changes
+    if (validationError) {
+      setValidationError(null);
+    }
+    
     setCurrentFormData((prev) => ({
       ...prev,
       players: prev.players.map((player, i) =>
@@ -619,7 +643,7 @@ export default function LineupManager({
             <Button
               color="primary"
               startContent={<PencilIcon className="w-4 h-4" />}
-              onPress={onEditModalOpen}
+              onPress={handleEditModalOpen}
             >
               Upravit sestavu
             </Button>
@@ -721,15 +745,27 @@ export default function LineupManager({
         scrollBehavior="inside"
       >
         <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold">
-              Upravit sestavu: {currentTeamName}
-            </h2>
-            <p className="text-sm text-gray-600">
-              {isOwnClub
-                ? "Vlastní klub - výběr z členů"
-                : "Hostující klub - externí hráči"}
-            </p>
+          <ModalHeader className="flex justify-between items-center gap-1">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-bold">
+                Upravit sestavu: {currentTeamName}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {isOwnClub
+                  ? "Vlastní klub - výběr z členů"
+                  : "Hostující klub - externí hráči"}
+              </p>
+            </div>
+            <div>
+              <Button
+                color="primary"
+                startContent={<PlusIcon className="w-4 h-4" />}
+                onPress={addPlayer}
+                className="shrink-0"
+              >
+                Přidat hráče
+              </Button>
+            </div>
           </ModalHeader>
           <ModalBody className="max-h-[80vh] overflow-y-auto">
             <div className="space-y-8">
@@ -745,14 +781,6 @@ export default function LineupManager({
                       v poli
                     </p>
                   </div>
-                  <Button
-                    color="primary"
-                    startContent={<PlusIcon className="w-4 h-4" />}
-                    onPress={addPlayer}
-                    className="shrink-0"
-                  >
-                    Přidat hráče
-                  </Button>
                 </div>
 
                 {/* Players Grid */}
@@ -933,6 +961,17 @@ export default function LineupManager({
                 <div className="p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg">
                   <div className="font-medium">Chyba:</div>
                   <div className="text-sm">{error}</div>
+                </div>
+              )}
+
+              {/* Validation Error Display */}
+              {validationError && (
+                <div className="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg">
+                  <Alert
+                    color="warning"
+                    title="Pravidla sestavy"
+                    description={validationError}
+                  />
                 </div>
               )}
             </div>

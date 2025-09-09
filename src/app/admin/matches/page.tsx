@@ -36,20 +36,24 @@ import {
   useFilteredTeams,
   useStandings,
   useFetchMatches,
+  useCategories,
+  useMembers,
+  useTeams,
 } from "@/hooks";
 import { AdminContainer } from "../components/AdminContainer";
 import { ButtonWithTooltip } from "@/components";
+import { calculateStandings } from "@/utils/standingsCalculator";
+import { generateInitialStandings } from "@/utils/standingsGenerator";
 
 export default function MatchesAdminPage() {
-  const [teams, setTeams] = useState<any[]>([]);
-
-  const [categories, setCategories] = useState<CategoryNew[]>([]);
-
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [members, setMembers] = useState<any[]>([]);
+
+  // Use existing hooks instead of custom state and fetch functions
+  const { categories, loading: categoriesLoading, fetchCategoriesFull } = useCategories();
+  const { members, loading: membersLoading, fetchMembers } = useMembers();
+  const { teams, loading: allTeamsLoading, fetchTeams } = useTeams();
 
   // Modal states
   const {
@@ -184,68 +188,6 @@ export default function MatchesAdminPage() {
 
   const supabase = createClient();
 
-  // Fetch members for lineup management
-  const fetchMembers = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from("members")
-        .select("*")
-        .order("surname", { ascending: true })
-        .order("name", { ascending: true });
-
-      if (error) throw error;
-      setMembers(data || []);
-    } catch (error) {
-      console.error("Error fetching members:", error);
-      setMembers([]);
-    }
-  }, [supabase]);
-
-  // Fetch all teams
-  const fetchTeams = useCallback(async () => {
-    try {
-      // console.log('🔍 Fetching teams...');
-      const { data, error } = await supabase
-        .from("teams")
-        .select("*")
-        .eq("is_active", true)
-        .order("name");
-
-      if (error) throw error;
-      // console.log('✅ Teams fetched:', data?.length || 0, 'teams');
-      setTeams(data || []);
-    } catch (error) {
-      setError("Chyba při načítání týmů");
-      console.error("Error fetching teams:", error);
-    }
-  }, [supabase]);
-
-  // Fetch categories
-  const fetchCategories = useCallback(async () => {
-    try {
-      // console.log('🔍 Fetching categories...');
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order");
-
-      if (error) throw error;
-      // console.log('✅ Categories fetched:', data?.length || 0, 'categories');
-      // console.log('🔍 Categories data:', data);
-      setCategories(data || []);
-
-      // Set first category as default if categories are loaded and no category is selected
-      if (data && data.length > 0 && !selectedCategory) {
-        // console.log('🔍 Setting first category as default:', data[0]);
-        setSelectedCategory(data[0].id);
-      }
-    } catch (error) {
-      setError("Chyba při načítání kategorií");
-      // console.error('Error fetching categories:', error);
-    }
-  }, [supabase, selectedCategory]);
-
   // Use the enhanced seasons hook
   const {
     sortedSeasons,
@@ -258,7 +200,7 @@ export default function MatchesAdminPage() {
 
   // Use the matches hook - pass category code instead of ID, and show ALL matches (admin mode)
   const selectedCategoryCode =
-    categories.find((cat) => cat.id === selectedCategory)?.code || "";
+    categories.find((cat) => cat.id === selectedCategory)?.id || "";
   const {
     matches: seasonalMatches,
     loading: matchesLoading,
@@ -295,22 +237,12 @@ export default function MatchesAdminPage() {
 
   // Derive loading state from all async operations
   const loading =
-    categories.length === 0 ||
+    categoriesLoading ||
     seasonsLoading ||
-    teamsLoading ||
+    allTeamsLoading ||
+    membersLoading ||
+    categories.length === 0 ||
     members.length === 0;
-
-  // Debug loading state
-  // console.log('🔍 Loading state debug:', {
-  //   categoriesLength: categories.length,
-  //   seasonsLoading,
-  //   teamsLoading,
-  //   membersLength: members.length,
-  //   loading,
-  //   selectedCategory,
-  //   selectedCategoryCode,
-  //   categories: categories.map(c => ({ id: c.id, code: c.code, name: c.name }))
-  // });
 
   // Set active season as default when seasons are loaded
   useEffect(() => {
@@ -335,11 +267,18 @@ export default function MatchesAdminPage() {
   // Initial data fetch
   useEffect(() => {
     console.log("🔍 Initial data fetch started");
-    fetchCategories();
+    fetchCategoriesFull();
     fetchSeasonsWithActive();
     fetchTeams();
     fetchMembers();
-  }, [fetchCategories, fetchSeasonsWithActive, fetchTeams, fetchMembers]);
+  }, [fetchCategoriesFull, fetchSeasonsWithActive, fetchTeams, fetchMembers]);
+
+  // Set first category as default when categories are loaded
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0].id);
+    }
+  }, [categories, selectedCategory]);
 
   // Fetch team counts when category changes
   useEffect(() => {
@@ -355,174 +294,21 @@ export default function MatchesAdminPage() {
     }
   }, [fetchStandings, selectedCategory, selectedSeason]);
 
-  // TODO: extract to utils/supabase/calculateStandings.ts
   // Calculate standings
-  const calculateStandings = async () => {
-    if (isSeasonClosed()) {
-      setError("Nelze přepočítat tabulku pro uzavřenou sezónu");
+  const handleCalculateStandings = async () => {
+    if (!selectedCategory || !selectedSeason) {
+      setError("Vyberte kategorii a sezónu");
       return;
     }
 
-    try {
-      // Get completed matches for the selected category and season
-      let { data: completedMatches, error: matchesError } = await supabase
-        .from("matches")
-        .select("*")
-        .eq("category_id", selectedCategory)
-        .eq("season_id", selectedSeason)
-        .eq("status", "completed");
-
-      if (matchesError) throw matchesError;
-
-      // Note: We can generate standings even without completed matches
-      if (!completedMatches) {
-        completedMatches = [];
-      }
-
-      // Get teams for this category and season
-      let teamCategories;
-      let teamsError;
-
-      // Try club_categories first, fallback to team_categories
-      try {
-        const clubResult = await supabase
-          .from("club_categories")
-          .select(
-            `
-            club_id,
-            club:clubs(
-              id,
-              name
-            ),
-            club_category_teams(
-              id,
-              team_suffix
-            )
-          `
-          )
-          .eq("category_id", selectedCategory)
-          .eq("season_id", selectedSeason)
-          .eq("is_active", true);
-
-        if (clubResult.data && clubResult.data.length > 0) {
-          // New club-based system
-          teamCategories = clubResult.data.flatMap(
-            (cc: any) =>
-              cc.club_category_teams?.map((ct: any) => ({
-                team_id: ct.id,
-                club_id: cc.club_id,
-              })) || []
-          );
-        } else {
-          // Fallback to old system
-          const fallbackResult = await supabase
-            .from("team_categories")
-            .select("team_id")
-            .eq("category_id", selectedCategory)
-            .eq("season_id", selectedSeason)
-            .eq("is_active", true);
-
-          if (fallbackResult.error) throw fallbackResult.error;
-          teamCategories = fallbackResult.data;
-        }
-      } catch (error) {
-        teamsError = error;
-      }
-
-      if (teamsError) throw teamsError;
-
-      if (!teamCategories || teamCategories.length === 0) {
-        setError("Žádné týmy v této kategorii a sezóně");
-        return;
-      }
-
-      // Initialize standings for all teams
-      const standingsMap = new Map();
-      teamCategories.forEach((tc: any) => {
-        standingsMap.set(tc.team_id, {
-          team_id: tc.team_id,
-          club_id: tc.club_id,
-          category_id: selectedCategory,
-          season_id: selectedSeason,
-          position: 0,
-          matches: 0,
-          wins: 0,
-          draws: 0,
-          losses: 0,
-          goals_for: 0,
-          goals_against: 0,
-          points: 0,
-        });
-      });
-
-      // Calculate standings from matches
-      completedMatches.forEach((match: any) => {
-        if (!match.home_score || !match.away_score) return;
-
-        const homeStanding = standingsMap.get(match.home_team_id);
-        const awayStanding = standingsMap.get(match.away_team_id);
-
-        if (homeStanding && awayStanding) {
-          // Update matches played
-          homeStanding.matches++;
-          awayStanding.matches++;
-
-          // Update goals
-          homeStanding.goals_for += match.home_score;
-          homeStanding.goals_against += match.away_score;
-          awayStanding.goals_for += match.away_score;
-          awayStanding.goals_against += match.home_score;
-
-          // Update points and wins/draws/losses
-          if (match.home_score > match.away_score) {
-            // Home team wins
-            homeStanding.wins++;
-            homeStanding.points += 2;
-            awayStanding.losses++;
-          } else if (match.home_score < match.away_score) {
-            // Away team wins
-            awayStanding.wins++;
-            awayStanding.points += 2;
-            homeStanding.losses++;
-          } else {
-            // Draw
-            homeStanding.draws++;
-            homeStanding.points += 1;
-            awayStanding.draws++;
-            awayStanding.points += 1;
-          }
-        }
-      });
-
-      // Convert to array and sort by points, then goal difference
-      const standingsArray = Array.from(standingsMap.values()).sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        const aGoalDiff = a.goals_for - a.goals_against;
-        const bGoalDiff = b.goals_for - b.goals_against;
-        if (bGoalDiff !== aGoalDiff) return bGoalDiff - aGoalDiff;
-        return b.goals_for - a.goals_for;
-      });
-
-      // Update positions
-      standingsArray.forEach((standing: any, index) => {
-        standing.position = index + 1;
-      });
-
-      // Upsert standings to database
-      const { error: upsertError } = await supabase
-        .from("standings")
-        .upsert(standingsArray, {
-          onConflict: "category_id,season_id,team_id",
-        });
-
-      if (upsertError) throw upsertError;
-
+    const result = await calculateStandings(selectedCategory, selectedSeason, isSeasonClosed);
+    
+    if (result.success) {
       // Refresh standings
       fetchStandings(selectedCategory, selectedSeason);
       setError("");
-    } catch (error) {
-      setError("Chyba při výpočtu tabulky");
-      console.error("Error calculating standings:", error);
+    } else {
+      setError(result.error || "Chyba při výpočtu tabulky");
     }
   };
 
@@ -542,249 +328,31 @@ export default function MatchesAdminPage() {
 
       if (existingStandings.length === 0) {
         // No standings exist - generate initial ones
-        await generateInitialStandings();
+        await handleGenerateInitialStandings();
       } else {
         // Standings exist - recalculate them
-        await calculateStandings();
+        await handleCalculateStandings();
       }
     } catch (error) {
       console.error("Error in standings action:", error);
     }
   };
 
-  // TODO: extract to utils/supabase/generateInitialStandings.ts
   // Generate initial standings for teams without any matches
-  const generateInitialStandings = async () => {
-    if (isSeasonClosed()) {
-      setError("Nelze generovat tabulku pro uzavřenou sezónu");
+  const handleGenerateInitialStandings = async () => {
+    if (!selectedCategory || !selectedSeason) {
+      setError("Vyberte kategorii a sezónu");
       return;
     }
 
-    try {
-      console.log("🔍 Starting initial standings generation...", {
-        selectedCategory,
-        selectedSeason,
-      });
-
-      // Get teams for this category and season
-      let teamCategories;
-      let teamsError;
-
-      // Try club_categories first, fallback to team_categories
-      try {
-        const clubResult = await supabase
-          .from("club_categories")
-          .select(
-            `
-            club_id,
-            club:clubs(
-              id,
-              name
-            ),
-            club_category_teams(
-              id,
-              team_suffix
-            )
-          `
-          )
-          .eq("category_id", selectedCategory)
-          .eq("season_id", selectedSeason)
-          .eq("is_active", true);
-
-        if (clubResult.data && clubResult.data.length > 0) {
-          // New club-based system
-          teamCategories = clubResult.data.flatMap((cc: any) => {
-            // Check if this club has multiple teams in this category
-            const teamCount = cc.club_category_teams?.length || 0;
-
-            return (
-              cc.club_category_teams?.map((ct: any) => {
-                // Only show suffix if club has multiple teams in this category
-                const shouldShowSuffix = teamCount > 1;
-                const displayName = shouldShowSuffix
-                  ? `${cc.club.name} ${ct.team_suffix}`
-                  : cc.club.name;
-
-                return {
-                  team_id: ct.id,
-                  club_id: cc.club_id,
-                  team: { id: ct.id, name: displayName },
-                };
-              }) || []
-            );
-          });
-        } else {
-          // Fallback to old system
-          const fallbackResult = await supabase
-            .from("team_categories")
-            .select(
-              `
-              team_id,
-              team:team_id(id, name, short_name)
-            `
-            )
-            .eq("category_id", selectedCategory)
-            .eq("season_id", selectedSeason)
-            .eq("is_active", true);
-
-          if (fallbackResult.error) throw fallbackResult.error;
-          teamCategories = fallbackResult.data;
-        }
-      } catch (error) {
-        teamsError = error;
-      }
-
-      if (teamsError) throw teamsError;
-
-      console.log("🔍 Team categories found:", {
-        teamCategoriesCount: teamCategories?.length || 0,
-        teamCategories: teamCategories,
-      });
-
-      if (!teamCategories || teamCategories.length === 0) {
-        setError("Žádné týmy v této kategorii a sezóně");
-        return;
-      }
-
-      // Check if standings already exist
-      const { data: existingStandings, error: standingsError } = await supabase
-        .from("standings")
-        .select("id")
-        .eq("category_id", selectedCategory)
-        .eq("season_id", selectedSeason);
-
-      if (standingsError) throw standingsError;
-
-      console.log("🔍 Existing standings check:", {
-        existingStandingsCount: existingStandings?.length || 0,
-        existingStandings: existingStandings,
-      });
-
-      // If standings already exist, don't overwrite them
-      if (existingStandings && existingStandings.length > 0) {
-        setError(
-          'Tabulka již existuje. Použijte "Přepočítat tabulku" pro aktualizaci.'
-        );
-        return;
-      }
-
-      // Generate initial standings for all teams
-      const initialStandings = teamCategories.map((tc: any, index: number) => ({
-        team_id: tc.team_id,
-        club_id: tc.club_id,
-        category_id: selectedCategory,
-        season_id: selectedSeason,
-        position: index + 1,
-        matches: 0,
-        wins: 0,
-        draws: 0,
-        losses: 0,
-        goals_for: 0,
-        goals_against: 0,
-        points: 0,
-      }));
-
-      console.log("🔍 Generated initial standings:", {
-        initialStandingsCount: initialStandings.length,
-        initialStandings: initialStandings,
-      });
-
-      // Insert initial standings
-      console.log("🔍 Attempting to insert standings...");
-
-      // Try bulk insert first
-      let { data: insertResult, error: insertError } = await supabase
-        .from("standings")
-        .insert(initialStandings)
-        .select();
-
-      if (insertError) {
-        console.error(
-          "❌ Bulk insert failed, trying individual inserts...",
-          insertError
-        );
-
-        // Fallback: Insert teams one by one
-        const successfulInserts = [];
-        const failedInserts = [];
-
-        for (const standing of initialStandings) {
-          try {
-            const { data: singleResult, error: singleError } = await supabase
-              .from("standings")
-              .insert(standing)
-              .select();
-
-            if (singleError) {
-              console.error(
-                `❌ Failed to insert team ${standing.team_id}:`,
-                singleError
-              );
-              failedInserts.push({ standing, error: singleError });
-            } else {
-              console.log(
-                `✅ Successfully inserted team ${standing.team_id}:`,
-                singleResult
-              );
-              successfulInserts.push(singleResult[0]);
-            }
-          } catch (singleError) {
-            console.error(
-              `❌ Exception inserting team ${standing.team_id}:`,
-              singleError
-            );
-            failedInserts.push({ standing, error: singleError });
-          }
-        }
-
-        console.log("🔍 Individual insert results:", {
-          successfulInserts: successfulInserts.length,
-          failedInserts: failedInserts.length,
-          failedInsertDetails: failedInserts,
-        });
-
-        if (successfulInserts.length === 0) {
-          throw new Error(
-            `Failed to insert any standings. ${failedInserts.length} failures.`
-          );
-        }
-
-        // Use successful inserts as result
-        insertResult = successfulInserts;
-      }
-
-      console.log("🔍 Final insert result:", {
-        insertResultCount: insertResult?.length || 0,
-        insertResultData: insertResult,
-      });
-
+    const result = await generateInitialStandings(selectedCategory, selectedSeason, isSeasonClosed);
+    
+    if (result.success) {
       // Refresh standings
       await fetchStandings(selectedCategory, selectedSeason);
-
-      // Verify the standings were actually created
-      const { data: verifyStandings, error: verifyError } = await supabase
-        .from("standings")
-        .select("*")
-        .eq("category_id", selectedCategory)
-        .eq("season_id", selectedSeason);
-
-      if (verifyError) {
-        console.error("❌ Verification error:", verifyError);
-      } else {
-        console.log("🔍 Verification result:", {
-          verifyStandingsCount: verifyStandings?.length || 0,
-          verifyStandings: verifyStandings,
-        });
-      }
-
       setError("");
-    } catch (error) {
-      console.error("❌ Error in generateInitialStandings:", error);
-      setError(
-        `Chyba při generování počáteční tabulky: ${
-          error instanceof Error ? error.message : "Neznámá chyba"
-        }`
-      );
+    } else {
+      setError(result.error || "Chyba při generování počáteční tabulky");
     }
   };
 

@@ -508,21 +508,47 @@ export const useLineupData = () => {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    const goalkeepers = formData.players.filter(p => p.position === 'goalkeeper');
-    const fieldPlayers = formData.players.filter(p => p.position === 'field_player');
+    // Debug: Log all players and their positions
+    console.log('🔍 Validating lineup data:', {
+      totalPlayers: formData.players.length,
+      players: formData.players.map(p => ({ 
+        name: p.display_name || `${p.external_name} ${p.external_surname}`,
+        position: p.position,
+        isExternal: p.is_external
+      }))
+    });
+
+    // Filter out players with invalid positions
+    const validPlayers = formData.players.filter(p => p.position && p.position.trim() !== '');
+    const invalidPlayers = formData.players.filter(p => !p.position || p.position.trim() === '');
+    
+    if (invalidPlayers.length > 0) {
+      console.warn('⚠️ Found players with invalid positions:', invalidPlayers);
+    }
+
+    const goalkeepers = validPlayers.filter(p => p.position === 'goalkeeper');
+    const fieldPlayers = validPlayers.filter(p => p.position === 'field_player');
     const coaches = formData.coaches;
+
+    console.log('🔍 Position filtering results:', {
+      goalkeepers: goalkeepers.length,
+      fieldPlayers: fieldPlayers.length,
+      validPlayers: validPlayers.length,
+      totalPlayers: formData.players.length,
+      invalidPlayers: invalidPlayers.length
+    });
 
     // Minimum requirements
     if (goalkeepers.length < 1) {
-      errors.push('Musí být alespoň 1 brankář');
+      errors.push(`Musí být alespoň 1 brankář (aktuálně: ${goalkeepers.length})`);
     }
 
     if (fieldPlayers.length < 6) {
-      errors.push('Musí být alespoň 6 hráčů v poli');
+      errors.push(`Musí být alespoň 6 hráčů v poli (aktuálně: ${fieldPlayers.length})`);
     }
 
     if (goalkeepers.length + fieldPlayers.length < 7) {
-      errors.push('Celkem musí být alespoň 7 hráčů');
+      errors.push(`Celkem musí být alespoň 7 hráčů (aktuálně: ${goalkeepers.length + fieldPlayers.length})`);
     }
 
     // Maximum requirements
