@@ -78,3 +78,4 @@ export { showToast, useToast } from './Toast';
 
 export { default as MatchSchedule } from './match/MatchSchedule';
 export { default as MatchRow } from './match/MatchRow';
+export { default as UnifiedModal } from './UnifiedModal';

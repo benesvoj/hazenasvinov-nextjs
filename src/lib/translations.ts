@@ -232,6 +232,8 @@ export const translations = {
     actions: {
       addMatch: "Přidat zápas",
       addMatchDescription: "Přidat nový zápas do vybrané sezóny",
+      editMatch: "Upravit zápas",
+      editMatchDescription: "Upravit vybraný zápas",
       bulkUpdateMatchweek: "Hromadná úprava kol",
       bulkUpdateMatchweekDescription:
         "Hromadně nastavit nebo odebrat kola pro zápasy",

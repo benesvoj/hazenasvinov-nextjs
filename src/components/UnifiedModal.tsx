@@ -5,12 +5,15 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Button,
   useDisclosure,
-  ModalProps
+  ModalProps,
+  Button,
 } from "@heroui/react";
+import { Heading, HeadingLevel } from "./Headings";
+import { translations } from "@/lib/translations";
 
-interface CustomModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
+interface UnifiedModalProps
+  extends Omit<ModalProps, "isOpen" | "onOpenChange"> {
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -20,9 +23,14 @@ interface CustomModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
   showCloseButton?: boolean;
   closeOnOverlayClick?: boolean;
   scrollBehavior?: "inside" | "outside";
+  hSize?: HeadingLevel;
+  actions?: React.ReactNode;
+  isFooterWithActions?: boolean;
+  onPress?: () => void;
+  isDisabled?: boolean;
 }
 
-export default function CustomModal({
+export default function UnifiedModal({
   isOpen,
   onClose,
   title,
@@ -31,8 +39,15 @@ export default function CustomModal({
   size = "2xl",
   closeOnOverlayClick = true,
   scrollBehavior = "inside",
+  hSize = 2,
+  actions,
+  isFooterWithActions = false,
+  onPress,
+  isDisabled,
   ...props
-}: CustomModalProps) {
+}: UnifiedModalProps) {
+  const t = translations.button;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -41,30 +56,46 @@ export default function CustomModal({
       scrollBehavior={scrollBehavior}
       closeOnOverlayClick={closeOnOverlayClick}
       classNames={{
-        base: "max-w-[95vw] mx-2",
         wrapper: "items-center justify-center p-2 sm:p-4",
         body: "max-h-[80vh] overflow-y-auto",
         header: "pb-2",
-        footer: "pt-2"
+        footer: "pt-2",
       }}
       {...props}
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-              {title}
-            </h2>
+            <Heading size={hSize}>{title}</Heading>
           </div>
+          {actions && (
+            <div className="flex items-center justify-end">{actions}</div>
+          )}
         </ModalHeader>
-        
-        <ModalBody className="px-4 sm:px-6 py-4">
-          {children}
-        </ModalBody>
-        
+
+        <ModalBody className="px-4 sm:px-6 py-4">{children}</ModalBody>
+
         {footer && (
+          <ModalFooter className="px-4 sm:px-6 py-4">{footer}</ModalFooter>
+        )}
+        {isFooterWithActions && (
           <ModalFooter className="px-4 sm:px-6 py-4">
-            {footer}
+            <Button
+              color="danger"
+              variant="flat"
+              onPress={onClose}
+              aria-label={t.cancel}
+            >
+              {t.cancel}
+            </Button>
+            <Button
+              color="primary"
+              onPress={onPress}
+              isDisabled={isDisabled}
+              aria-label={t.save}
+            >
+              {t.save}
+            </Button>
           </ModalFooter>
         )}
       </ModalContent>
@@ -75,11 +106,11 @@ export default function CustomModal({
 // Hook for managing modal state
 export const useCustomModal = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
+
   return {
     isOpen,
     onOpen,
     onClose,
-    onToggle: () => isOpen ? onClose() : onOpen()
+    onToggle: () => (isOpen ? onClose() : onOpen()),
   };
 };
