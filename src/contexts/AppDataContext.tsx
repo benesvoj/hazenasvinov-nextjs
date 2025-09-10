@@ -2,30 +2,34 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Season, CategoryNew, Member } from '@/types';
+import { Season, CategoryNew, Member, Club } from '@/types';
 
 interface AppDataContextType {
   // Data
   seasons: Season[];
   categories: CategoryNew[];
   members: Member[];
+  clubs: Club[];
   
   // Loading states
   loading: boolean;
   seasonsLoading: boolean;
   categoriesLoading: boolean;
   membersLoading: boolean;
+  clubsLoading: boolean;
   
   // Error states
   error: string | null;
   seasonsError: string | null;
   categoriesError: string | null;
   membersError: string | null;
+  clubsError: string | null;
   
   // Actions
   refreshSeasons: () => Promise<void>;
   refreshCategories: () => Promise<void>;
   refreshMembers: () => Promise<void>;
+  refreshClubs: () => Promise<void>;
   refreshAll: () => Promise<void>;
   
   // Computed properties
@@ -84,16 +88,19 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [categories, setCategories] = useState<CategoryNew[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
   
   const [loading, setLoading] = useState(false);
   const [seasonsLoading, setSeasonsLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [membersLoading, setMembersLoading] = useState(false);
+  const [clubsLoading, setClubsLoading] = useState(false);
   
   const [error, setError] = useState<string | null>(null);
   const [seasonsError, setSeasonsError] = useState<string | null>(null);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [membersError, setMembersError] = useState<string | null>(null);
+  const [clubsError, setClubsError] = useState<string | null>(null);
 
   const supabase = useMemo(() => createClient(), []);
   const hasInitialized = useRef(false);
@@ -134,6 +141,20 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         .select('*')
         .order('surname', { ascending: true })
         .order('name', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    });
+  }, [supabase]);
+
+  // Fetch clubs
+  const fetchClubs = useCallback(async (): Promise<Club[]> => {
+    return getCachedData('clubs', async () => {
+      const { data, error } = await supabase
+        .from('clubs')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
 
       if (error) throw error;
       return data || [];
@@ -200,6 +221,26 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchMembers]);
 
+  // Refresh clubs
+  const refreshClubs = useCallback(async () => {
+    try {
+      setClubsLoading(true);
+      setClubsError(null);
+      
+      // Clear cache
+      requestCache.delete('clubs');
+      cacheTimestamps.delete('clubs');
+      
+      const data = await fetchClubs();
+      setClubs(data);
+    } catch (err) {
+      console.error('Error refreshing clubs:', err);
+      setClubsError(err instanceof Error ? err.message : 'Failed to refresh clubs');
+    } finally {
+      setClubsLoading(false);
+    }
+  }, [fetchClubs]);
+
   // Refresh all data
   const refreshAll = useCallback(async () => {
     try {
@@ -211,15 +252,17 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       cacheTimestamps.clear();
       
       // Fetch all data in parallel
-      const [seasonsData, categoriesData, membersData] = await Promise.all([
+      const [seasonsData, categoriesData, membersData, clubsData] = await Promise.all([
         fetchSeasons(),
         fetchCategories(),
-        fetchMembers()
+        fetchMembers(),
+        fetchClubs()
       ]);
       
       setSeasons(seasonsData);
       setCategories(categoriesData);
       setMembers(membersData);
+      setClubs(clubsData);
     } catch (err) {
       console.error('Error refreshing all data:', err);
       setError(err instanceof Error ? err.message : 'Failed to refresh data');
@@ -266,23 +309,27 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     seasons,
     categories,
     members,
+    clubs,
     
     // Loading states
     loading,
     seasonsLoading,
     categoriesLoading,
     membersLoading,
+    clubsLoading,
     
     // Error states
     error,
     seasonsError,
     categoriesError,
     membersError,
+    clubsError,
     
     // Actions
     refreshSeasons,
     refreshCategories,
     refreshMembers,
+    refreshClubs,
     refreshAll,
     
     // Computed properties
