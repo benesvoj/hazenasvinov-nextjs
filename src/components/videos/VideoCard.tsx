@@ -25,7 +25,7 @@ interface VideoCardProps {
   video: Video;
   onEdit: (video: Video) => void;
   onDelete: (video: Video) => void;
-  categories?: Array<{ id: string; name: string; code: string }>;
+  categories?: Array<{ id: string; name: string; slug: string }>;
   seasons?: Array<{
     id: string;
     name: string;

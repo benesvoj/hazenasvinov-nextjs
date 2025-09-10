@@ -156,11 +156,13 @@ export const sortMembers = (
 /**
  * Convert categories array to Record format for compatibility
  * Uses category code as key for backward compatibility with existing components
+ * 
+ * @deprecated Use convertCategoriesToRecordBySlug instead
  */
 export const convertCategoriesToRecord = (categoriesData: CategoryNew[] | null) => {
   if (!categoriesData) return {};
   return categoriesData.reduce((acc, category) => {
-    acc[category.code] = category.name;
+    acc[category.slug] = category.name;
     return acc;
   }, {} as Record<string, string>);
 };
@@ -177,17 +179,6 @@ export const createCategoryNameToIdMap = (categoriesData: CategoryNew[] | null) 
   }, {} as Record<string, string>);
 };
 
-/**
- * @deprecated Use createCategoryNameToIdMap instead
- * Legacy function for backward compatibility
- */
-export const createCategoryNameToCodeMap = (categoriesData: CategoryNew[] | null) => {
-  if (!categoriesData) return {};
-  return categoriesData.reduce((acc, category) => {
-    acc[category.name] = category.code;
-    return acc;
-  }, {} as Record<string, string>);
-};
 
 /**
  * Check if member has active functions

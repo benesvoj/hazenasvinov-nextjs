@@ -17,16 +17,24 @@ export default function BlogPostCard({
 }: BlogPostCardProps) {
   const isLandingVariant = variant === "landing";
 
-  // Try to use AppDataContext first, fallback to useCategories hook
-  let categories: CategoryNew[] = [];
+  // Always call both hooks to avoid conditional hook calls
+  let appDataCategories: CategoryNew[] = [];
+  let hookCategories: CategoryNew[] = [];
+  
   try {
     const appData = useAppData();
-    categories = appData.categories;
+    appDataCategories = appData.categories;
   } catch (error) {
-    // AppDataProvider not available, use useCategories hook as fallback
-    const { categories: hookCategories } = useCategories();
-    categories = hookCategories;
+    // AppDataProvider not available, will use hook categories
+    appDataCategories = [];
   }
+  
+  // Always call useCategories hook
+  const { categories: hookCategoriesData } = useCategories();
+  hookCategories = hookCategoriesData;
+  
+  // Use AppDataContext categories if available, otherwise fallback to hook categories
+  const categories = appDataCategories.length > 0 ? appDataCategories : hookCategories;
 
   const category = categories.find(
     (category) => category.id === post.category_id

@@ -16,18 +16,12 @@ import {
 import { AcademicCapIcon } from "@heroicons/react/24/outline";
 import { useAdminCategorySimulation } from "@/contexts/AdminCategorySimulationContext";
 import LoadingSpinner from "./LoadingSpinner";
-
+import { CategoryNew } from "@/types";
 interface CoachPortalCategoryDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
-
-type Category = {
-  id: string;
-  name: string;
-  code: string;
-};
 
 export function CoachPortalCategoryDialog({
   isOpen,
@@ -152,7 +146,7 @@ export function CoachPortalCategoryDialog({
               onSelectionChange={(items) => {
                 setTempSelectedCategories(Array.from(items as Set<string>));
               }}
-              renderValue={(items: SelectedItems<Category>) => {
+              renderValue={(items: SelectedItems<CategoryNew>) => {
                 return (
                   <div className="flex flex-wrap gap-2 py-2">
                     {items.map((item) => (

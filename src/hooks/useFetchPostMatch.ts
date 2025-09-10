@@ -137,7 +137,7 @@ export function useFetchPostMatch(postId: string | null): UseFetchPostMatchResul
               team_suffix: matchData.away_team?.team_suffix,
             },
             category: {
-              code: matchData.category?.code || '',
+              id: matchData.category?.id || '',
               name: matchData.category?.name || '',
               description: matchData.category?.description,
             },

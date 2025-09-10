@@ -30,7 +30,7 @@ interface ExcelImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImport: (matches: ExcelMatch[]) => Promise<void>;
-  categories: Array<{ id: string; name: string; code: string }>;
+  categories: Array<{ id: string; name: string; slug: string }>;
   teams: Array<{ id: string; name: string; short_name?: string }>;
   selectedSeason: string;
 }

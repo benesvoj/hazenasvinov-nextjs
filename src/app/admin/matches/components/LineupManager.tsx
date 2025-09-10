@@ -42,7 +42,6 @@ interface LineupManagerProps {
   awayTeamName: string;
   members: Member[];
   categoryId: string;
-  categoryCode: string;
   onClose?: () => void;
 }
 
@@ -54,7 +53,6 @@ export default function LineupManager({
   awayTeamName,
   members,
   categoryId,
-  categoryCode,
   onClose,
 }: LineupManagerProps) {
   // Filter members by category
@@ -79,7 +77,7 @@ export default function LineupManager({
     }
 
     return filtered;
-  }, [members, categoryId, categoryCode]);
+  }, [members, categoryId]);
 
   const [selectedTeam, setSelectedTeam] = useState<"home" | "away">("home");
   const [homeFormData, setHomeFormData] = useState<LineupFormData>({
