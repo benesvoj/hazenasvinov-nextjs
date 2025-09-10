@@ -6,7 +6,6 @@ import {
   ProcessedStanding,
   Season,
 } from "@/types";
-import { categoryTagMap } from "@/constants";
 
 export interface CategoryPageServerData {
   category: CategoryNew | null;
@@ -47,7 +46,7 @@ export async function getCategoryPageData(
     const [categoryResult, seasonResult] = await Promise.all([
       supabase
         .from("categories")
-        .select("id, code, name, description, is_active, sort_order, slug")
+        .select("id, name, description, is_active, sort_order, slug")
         .eq("slug", categorySlug)
         .single(),
       supabase
@@ -71,12 +70,13 @@ export async function getCategoryPageData(
     // Batch 2: Execute remaining queries in parallel
     const [postsResult, matchesResult, standingsResult, clubCategoriesResult] =
       await Promise.all([
-        // Posts query
+        // Posts query - filter by category
         includePosts
           ? supabase
               .from("blog_posts")
               .select("*")
               .eq("status", "published")
+              .eq("category_id", category.id)
               .order("created_at", { ascending: false })
               .limit(postsLimit)
           : Promise.resolve({ data: [], error: null }),
@@ -196,7 +196,7 @@ export async function getCategoryPageData(
     let posts: BlogPost[] = [];
     let matches: Match[] = [];
     let standings: ProcessedStanding[] = [];
-
+    
     // Get club categories to determine which clubs need suffixes (max_teams > 1)
     const clubsNeedingSuffixes = new Set<string>();
     if (!clubCategoriesResult.error && clubCategoriesResult.data) {
@@ -211,27 +211,8 @@ export async function getCategoryPageData(
     if (includePosts && !postsResult.error && postsResult.data) {
       const allPosts = postsResult.data;
 
-      const tagPatterns = categoryTagMap[categorySlug] || [];
-
-      // Filter posts by tag matching
-      let filteredPosts = allPosts;
-      if (tagPatterns.length > 0) {
-        filteredPosts = allPosts.filter((post: any) => {
-          if (!post.tags || !Array.isArray(post.tags)) return false;
-
-          return post.tags.some((tag: string) =>
-            tagPatterns.some(
-              (pattern) =>
-                tag.toLowerCase().includes(pattern.toLowerCase()) ||
-                pattern.toLowerCase().includes(tag.toLowerCase())
-            )
-          );
-        });
-      }
-
-      // Keep only category-specific posts (no fallback to all posts)
-
-      posts = filteredPosts.map((post: BlogPost) => ({
+      // Posts are already filtered by category_id at the database level
+      posts = allPosts.map((post: BlogPost) => ({
         ...post,
         content: post.content?.substring(0, 150) + "..." || "Bez popisu",
         image_url: post.image_url || undefined,

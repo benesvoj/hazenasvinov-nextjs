@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
 import { Card, Button, Chip } from "@heroui/react";
 import Link from "@/components/Link";
 import Image from "next/image";
 import { CalendarIcon } from "@heroicons/react/24/outline";
 import { BlogPostCard as BlogPostCardProps, CategoryNew } from "@/types";
-import { useCategories } from "@/hooks";
+import { useAppData } from "@/contexts/AppDataContext";
+import { useCategories } from "@/hooks/useCategories";
 import { formatDateString } from "@/helpers";
 
 export default function BlogPostCard({
@@ -17,11 +17,16 @@ export default function BlogPostCard({
 }: BlogPostCardProps) {
   const isLandingVariant = variant === "landing";
 
-  const { categories, fetchCategories } = useCategories();
-
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  // Try to use AppDataContext first, fallback to useCategories hook
+  let categories: CategoryNew[] = [];
+  try {
+    const appData = useAppData();
+    categories = appData.categories;
+  } catch (error) {
+    // AppDataProvider not available, use useCategories hook as fallback
+    const { categories: hookCategories } = useCategories();
+    categories = hookCategories;
+  }
 
   const category = categories.find(
     (category) => category.id === post.category_id

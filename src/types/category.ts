@@ -60,7 +60,7 @@ export interface Category {
  */
 export interface CategoryNew {
     id: string;
-    code: string;
+    code?: string;
     name: string;
     description?: string;
     age_group?: string;

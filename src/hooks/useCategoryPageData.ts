@@ -83,13 +83,14 @@ export function useCategoryPageData(
       // Batch 2: Prepare all remaining queries based on what we need
       const queries: Promise<any>[] = [];
 
-      // Posts query
+      // Posts query - filter by category
       if (includePosts) {
         queries.push(
           supabase
             .from('blog_posts')
             .select('*')
             .eq('status', 'published')
+            .eq('category_id', category.id)
             .order('created_at', { ascending: false })
             .limit(postsLimit)
         );
@@ -203,40 +204,8 @@ export function useCategoryPageData(
         } else {
           const allPosts = postsResult.data || [];
           
-          // Filter posts by category using tag-based matching
-          const categoryTagMap: { [key: string]: string[] } = {
-            'men': ['muži', 'mužský', 'dospělí', 'muž', 'mužů', 'mužská', 'mužské', 'mužský tým', 'mužský oddíl', 'muži', 'muž', 'dospělí', 'senior', 'senioři'],
-            'women': ['ženy', 'ženský', 'dospělé', 'žena', 'ženská', 'ženské', 'ženský tým', 'ženský oddíl', 'ženy', 'žena', 'dospělé', 'seniorky', 'seniorky'],
-            'youngerBoys': ['mladší žáci', 'mladší', 'žáci', 'mladší žák', 'dorostenci', 'dorostenec', 'žáci', 'mladší', 'dorostenci'],
-            'youngerGirls': ['mladší žačky', 'mladší', 'žačky', 'mladší žačka', 'dorostenky', 'dorostenka', 'žačky', 'mladší', 'dorostenky'],
-            'olderBoys': ['starší žáci', 'starší', 'žáci', 'starší žák', 'junioři', 'junior', 'žáci', 'starší', 'junioři'],
-            'olderGirls': ['starší žačky', 'starší', 'žačky', 'starší žačka', 'juniorky', 'juniorka', 'žačky', 'starší', 'juniorky'],
-            'prepKids': ['přípravka', 'přípravky', 'děti', 'dítě', 'přípravka', 'přípravka', 'přípravka', 'děti', 'přípravka']
-          };
-
-          const tagPatterns = categoryTagMap[categorySlug] || [];
-          
-          // Filter posts by tag matching
-          let filteredPosts = allPosts;
-          if (tagPatterns.length > 0) {
-            filteredPosts = allPosts.filter((post: any) => {
-              if (!post.tags || !Array.isArray(post.tags)) return false;
-              
-              return post.tags.some((tag: string) => 
-                tagPatterns.some(pattern => 
-                  tag.toLowerCase().includes(pattern.toLowerCase()) || 
-                  pattern.toLowerCase().includes(tag.toLowerCase())
-                )
-              );
-            });
-          }
-          
-          // If no category-specific posts found, show all posts as fallback
-          if (filteredPosts.length === 0) {
-            filteredPosts = allPosts;
-          }
-          
-          posts = filteredPosts.map((post: any) => ({
+          // Posts are already filtered by category_id at the database level
+          posts = allPosts.map((post: any) => ({
             ...post,
             excerpt: post.excerpt || post.content?.substring(0, 150) + '...' || 'Bez popisu',
             tags: post.tags || [],

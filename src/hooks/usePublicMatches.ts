@@ -12,7 +12,7 @@ interface PublicMatchesResult {
   debugInfo?: any;
 }
 
-export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
+export function usePublicMatches(categoryId?: string): PublicMatchesResult {
   const [matches, setMatches] = useState<{ autumn: Match[]; spring: Match[] }>({
     autumn: [],
     spring: []
@@ -29,11 +29,12 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
       
       // Step 1: Get category data (if specified)
       let categoryFilter = '';
-      if (categorySlug && categorySlug !== 'all') {
+
+      if (categoryId && categoryId !== 'all') {
         const { data: categoryData, error: categoryError } = await supabase
           .from('categories')
-          .select('id, code, name')
-          .eq('code', categorySlug)
+          .select('id, slug, name')
+          .eq('id', categoryId)
           .single();
         
         if (categoryError) {
@@ -74,7 +75,7 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
       
       const { data: matchesData, error: matchesError } = await query
         .order('date', { ascending: true });
-      
+
       if (matchesError) {
         throw new Error(`Failed to fetch matches: ${matchesError.message}`);
       }
@@ -112,7 +113,6 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
       if (teamError) {  
         throw new Error(`Failed to fetch team details: ${teamError.message}`);
       }
-      
       // Create a map for quick team lookup
       const teamMap = new Map();
       teamDetails?.forEach((team: any) => {
@@ -155,6 +155,7 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
         });
       }
       
+      // TODO: use proper types not ANY
       // Transform matches to include team names and club information
       const transformedMatches = matchesData?.map((match: any) => {
         // Get team details from the view
@@ -267,7 +268,7 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
       });
       
       setDebugInfo({
-        category: categorySlug,
+        category: categoryId,
         totalMatches: matchesData?.length || 0,
         filteredMatches: transformedMatches.length,
         autumnCount: autumnMatches.length,
@@ -279,7 +280,7 @@ export function usePublicMatches(categorySlug?: string): PublicMatchesResult {
     } finally {
       setLoading(false);
     }
-  }, [categorySlug]);
+  }, [categoryId]);
 
   useEffect(() => {
     fetchMatches();

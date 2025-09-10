@@ -37,7 +37,7 @@ export interface Match {
     result?: 'win' | 'loss' | 'draw';
     matchweek?: number;
     match_number?: number;
-    category: { code: string; name: string; description?: string };
+    category: { id: string; name: string; description?: string };
     season: { name: string };
     post_id?: string; // Optional reference to related blog post
     // Additional properties for transformed data

@@ -37,8 +37,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           {/* Posts - Desktop: 1st, Mobile: 3rd */}
           <div className="order-3 md:order-1">
             <CategoryPosts 
-              categoryName={category.name}
-              categorySlug={categorySlug}
+              categoryId={category.id}
               posts={posts}
             />
           </div>

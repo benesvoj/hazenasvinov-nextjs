@@ -82,6 +82,7 @@ export default function BlogPage() {
               onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
               className="w-full"
               size="lg"
+              aria-label="Vyberte kategorii"
             >
               {categories.map((category) => (
                 <SelectItem key={category}>{category}</SelectItem>

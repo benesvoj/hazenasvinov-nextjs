@@ -136,17 +136,6 @@ export default function MatchSchedule({
     return standings.filter(standing => standing.category_id === selectedCategoryData.id);
   }, [standings, selectedCategoryData?.id, fetchedCategoryId]);
 
-  // Debug logging
-  console.log('🔍 MatchSchedule Debug:', {
-    selectedCategory,
-    selectedCategoryData: selectedCategoryData ? { id: selectedCategoryData.id, slug: selectedCategoryData.slug, name: selectedCategoryData.name } : null,
-    fetchedCategoryId,
-    availableCategories: availableCategories.map(cat => ({ id: cat.id, slug: cat.slug, name: cat.name })),
-    matchesCount: matches.length,
-    standingsCount: standings.length,
-    categoryStandingsCount: categoryStandings.length
-  });
-
   const loading = matchesLoading || standingsLoading;
 
   return (
