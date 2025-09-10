@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Member } from "@/types/member";
-import { useFetchCategories } from "@/hooks/useFetchCategories";
 import { useFetchMemberFunctions } from "@/hooks/useFetchMemberFunctions";
 import { useAppData } from "@/contexts/AppDataContext";
 import { Tabs, Tab } from "@heroui/react";
@@ -20,6 +19,7 @@ export default function MembersAdminPage() {
     error: functionsError,
   } = useFetchMemberFunctions();
 
+  // TODO: remove this hardcoded fallback
   // Convert functions array to Record format for compatibility
   const functionOptions = useMemo(() => {
     // Only use data from the database, no hardcoded fallback
@@ -36,15 +36,8 @@ export default function MembersAdminPage() {
   // State for tabs
   const [activeTab, setActiveTab] = useState("members");
 
-  // Use AppDataContext for members data
-  const { members, membersLoading, membersError } = useAppData();
-
-  // Fetch categories from database
-  const {
-    data: categoriesData,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useFetchCategories();
+  // Use AppDataContext for members and categories data
+  const { members, membersLoading, membersError, categories, categoriesLoading, categoriesError } = useAppData();
 
   return (
     <div className="p-6">
@@ -57,7 +50,7 @@ export default function MembersAdminPage() {
         <Tab key="members" title="Seznam členů">
           <div className="flex flex-col gap-4">
             <MembersListTab 
-              categoriesData={categoriesData}
+              categoriesData={categories}
               functionOptions={functionOptions}
               sexOptions={genderOptions}
             />
@@ -67,7 +60,7 @@ export default function MembersAdminPage() {
           <div className="flex flex-col gap-4">
             <MembersStatisticTab 
               members={members}
-              categoriesData={categoriesData}
+              categoriesData={categories}
               functionOptions={functionOptions}
             />
           </div>

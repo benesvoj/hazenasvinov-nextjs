@@ -12,7 +12,8 @@ export const DEFAULT_MEMBER_FUNCTIONS = {
   'physio': 'Fyzioterapeut',
   'doctor': 'Lékař',
   'parent': 'Rodič',
-  'volunteer': 'Dobrovolník'
+  'volunteer': 'Dobrovolník',
+  'contributing_member': 'Přispívající'
 } as const;
 
 /**

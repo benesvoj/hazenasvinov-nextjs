@@ -15,6 +15,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Chip,
 } from "@heroui/react";
 import {
   PlusIcon,
@@ -426,37 +427,10 @@ export default function MembersListTab({
   };
 
   // Helper functions
-  const getCategoryName = (categoryId: string | undefined) => {
-    if (!categoryId) return "default";
-    return categories[categoryId] || categoryId;
-  };
-
-  const getCategoryBadgeColor = (category: string | undefined) => {
-    if (!category) return "default";
-    if (!categoriesData) return "default";
-
-    const categoryData = categoriesData.find((cat) => cat.code === category);
-    if (!categoryData) return "default";
-
-    if (categoryData.gender === "male") return "primary";
-    if (categoryData.gender === "female") return "secondary";
-    if (categoryData.gender === "mixed") return "success";
-
-    // Fallback for categories without gender
-    if (
-      category.toLowerCase().includes("kids") ||
-      category.toLowerCase().includes("prep")
-    )
-      return "warning";
-    if (category.toLowerCase().includes("boys")) return "primary";
-    if (category.toLowerCase().includes("girls")) return "secondary";
-
-    return "default";
-  };
-
-  const getSexBadgeColor = (sex: "male" | "female") => {
-    return sex === "male" ? "primary" : "secondary";
-  };
+    const getCategoryName = (categoryId: string | undefined) => {
+      if (!categoryId) return "default";
+      return categories[categoryId] || categoryId;
+    };
 
   // Render cell content based on column key
   const renderCell = (member: Member, columnKey: string) => {
@@ -497,17 +471,10 @@ export default function MembersListTab({
           </span>
         );
       case "category":
-        return (
-          <Badge color={getCategoryBadgeColor(member.category_id)} variant="flat">
-            {getCategoryName(member.category_id)}
-          </Badge>
+        return (getCategoryName(member.category_id)
         );
       case "sex":
-        return (
-          <Badge color={getSexBadgeColor(member.sex)} variant="flat">
-            {member.sex === "male" ? "Muž" : "Žena"}
-          </Badge>
-        );
+        return member.sex === "male" ? "Muž" : "Žena"
       case "functions":
         if (!member.functions || member.functions.length === 0) {
           return <span className="text-gray-500">Žádné funkce</span>;
@@ -515,9 +482,9 @@ export default function MembersListTab({
         return (
           <div className="flex flex-wrap gap-1">
             {member.functions.map((func) => (
-              <Badge key={func} color="secondary" variant="flat" size="sm">
+              <Chip key={func} color="primary" variant="solid" size="sm">
                 {functionOptions[func] || func}
-              </Badge>
+              </Chip>
             ))}
           </div>
         );
@@ -653,7 +620,7 @@ export default function MembersListTab({
                   }
                   className="w-full"
                   size="sm"
-                  area-label="Search"
+                  aria-label="Search members"
                 />
               </div>
 
@@ -662,15 +629,16 @@ export default function MembersListTab({
                 {/* Sex Filter */}
                 <div className="w-full sm:w-40">
                   <Select
-                    area-label="Sex selection"
+                    aria-label="Filter by gender"
                     placeholder="Všechna pohlaví"
-                    selectedKeys={filters.sex ? [filters.sex] : []}
-                    onSelectionChange={(keys) =>
+                    selectedKeys={filters.sex && filters.sex !== "empty" ? [filters.sex] : []}
+                    onSelectionChange={(keys) => {
+                      const selectedKey = Array.from(keys)[0] as GenderType;
                       setFilters((prev) => ({
                         ...prev,
-                        sex: Array.from(keys)[0] as GenderType,
-                      }))
-                    }
+                        sex: selectedKey || "empty",
+                      }));
+                    }}
                     className="w-full"
                     size="sm"
                   >
@@ -682,22 +650,23 @@ export default function MembersListTab({
                 {/* Category Filter */}
                 <div className="w-full sm:w-48">
                   <Select
-                    area-label="Category selection"
+                    aria-label="Filter by category"
                     placeholder="Všechny kategorie"
                     selectedKeys={filters.category_id ? [filters.category_id] : []}
-                    onSelectionChange={(keys) =>
+                    onSelectionChange={(keys) => {
+                      const selectedKey = Array.from(keys)[0] as string;
                       setFilters((prev) => ({
                         ...prev,
-                        category_id: Array.from(keys)[0] as string,
-                      }))
-                    }
+                        category_id: selectedKey || "",
+                      }));
+                    }}
                     className="w-full"
                     size="sm"
                   >
                     {categoriesData?.map((category) => (
                       <SelectItem
                         key={category.id}
-                        area-label="Category selection"
+                        aria-label={`Select category ${category.name}`}
                       >
                         {category.name}
                       </SelectItem>
@@ -708,20 +677,21 @@ export default function MembersListTab({
                 {/* Function Filter */}
                 <div className="w-full sm:w-48">
                   <Select
-                    area-label="Function selection"
+                    aria-label="Filter by function"
                     placeholder="Všechny funkce"
                     selectedKeys={filters.function ? [filters.function] : []}
-                    onSelectionChange={(keys) =>
+                    onSelectionChange={(keys) => {
+                      const selectedKey = Array.from(keys)[0] as string;
                       setFilters((prev) => ({
                         ...prev,
-                        function: Array.from(keys)[0] as string,
-                      }))
-                    }
+                        function: selectedKey || "",
+                      }));
+                    }}
                     className="w-full"
                     size="sm"
                   >
                     {Object.entries(functionOptions).map(([key, value]) => (
-                      <SelectItem key={key} area-label="Function selection">
+                      <SelectItem key={key} aria-label={`Select function ${value}`}>
                         {value}
                       </SelectItem>
                     ))}
@@ -738,7 +708,7 @@ export default function MembersListTab({
                         setFilters({ sex: "empty", category_id: "", function: "" })
                       }
                       className="w-full sm:w-auto"
-                      area-label="Clear filters"
+                      aria-label="Clear all filters"
                     >
                       <TrashIcon className="w-4 h-4" />
                       Vymazat filtry
@@ -773,7 +743,7 @@ export default function MembersListTab({
         bottomContent={
           <div className="flex w-full justify-center">
             <Pagination
-              area-label="Pagination"
+              aria-label="Pagination controls"
               isCompact
               showControls
               showShadow
