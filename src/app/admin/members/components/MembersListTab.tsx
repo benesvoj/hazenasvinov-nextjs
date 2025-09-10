@@ -105,12 +105,11 @@ export default function MembersListTab({
     functions: [],
   });
 
-  const supabase = createClient();
-
   // Fetch members
   const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("members")
         .select("*")
@@ -149,7 +148,7 @@ export default function MembersListTab({
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, []); // Remove supabase from dependencies
 
   // Convert categories array to Record format for compatibility
   const categories = useMemo(() => {
@@ -301,6 +300,7 @@ export default function MembersListTab({
 
       // Update all selected members
       const memberIds = Array.from(selectedMembers);
+      const supabase = createClient();
       const { error } = await supabase
         .from("members")
         .update(updateData)
@@ -384,6 +384,7 @@ export default function MembersListTab({
   const handleAddMember = async () => {
     try {
       setLoading(true);
+      const supabase = createClient();
 
       const { error } = await supabase.from("members").insert([
         {
@@ -418,6 +419,7 @@ export default function MembersListTab({
 
     try {
       setLoading(true);
+      const supabase = createClient();
 
       const { error } = await supabase
         .from("members")
@@ -453,6 +455,7 @@ export default function MembersListTab({
 
     try {
       setLoading(true);
+      const supabase = createClient();
 
       const { error } = await supabase
         .from("members")

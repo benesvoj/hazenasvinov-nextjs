@@ -34,8 +34,6 @@ export default function MembersAdminPage() {
     return result;
   }, [functionsData]);
 
-  const supabase = createClient();
-
   // State for tabs and basic data
   const [activeTab, setActiveTab] = useState("members");
   const [members, setMembers] = useState<Member[]>([]);
@@ -45,6 +43,7 @@ export default function MembersAdminPage() {
   const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("members")
         .select("*")
@@ -60,7 +59,7 @@ export default function MembersAdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, []); // Remove supabase from dependencies
 
   // Load members on component mount
   useEffect(() => {
