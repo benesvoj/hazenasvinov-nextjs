@@ -4,7 +4,7 @@ export * from './season';
 export * from './standing';
 
 export * from './clubs';
-export * from './member';
+
 export * from './lineup';
 export * from './video';
 export * from './userRoles';
@@ -21,3 +21,6 @@ export * from './blogPostCard';
 
 export * from './Nullish';
 export * from './ValueByDevice';
+
+export * from './member';
+export * from './memberFunction';

@@ -81,23 +81,6 @@ export interface PageVisibility {
 
 export type { CategoryProps, SeasonProps, SupabaseUser, ColumnType }
 
-
-
-// Member interface for lineup management
-export interface Member {
-  id: string;
-  registration_number: string;
-  name: string;
-  surname: string;
-  date_of_birth: string;
-  category: string; // Legacy field - kept for backward compatibility
-  category_id?: string; // New field - foreign key to categories table
-  sex: 'male' | 'female';
-  functions: string[];
-  created_at: string;
-  updated_at: string;
-}
-
 // Lineup Management Types
 export interface Lineup {
   id: string;
@@ -139,7 +122,7 @@ export interface LineupCoach {
   created_at: string;
   updated_at: string;
   // Extended fields for display
-  member?: Member;
+  member?: import("@/types/member").Member;
   member_name?: string;
   member_surname?: string;
 }
@@ -189,7 +172,6 @@ export interface LineupValidation {
   warnings: string[];
 }
 
-
 export interface MemberFunction {
 	id: string; // Can be either UUID or simple text ID like 'func_player'
 	name: string;
@@ -202,14 +184,14 @@ export interface MemberFunction {
 }
 
 export interface MembersListTabProps {
-  members: Member[];
+  members: import("@/types/member").Member[];
   categoriesData: CategoryNew[] | null;
   functionOptions: Record<string, string>;
   sexOptions: Record<string, string>;
 }
 
 export interface MembersStatisticTabProps {
-  members: Member[];  
+  members: import("@/types/member").Member[];  
   categoriesData: CategoryNew[] | null;
   functionOptions: Record<string, string>;
 }

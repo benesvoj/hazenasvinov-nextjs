@@ -68,7 +68,7 @@ export default function AddMemberModal({
   const filteredMembers = useMemo(() => {
     const filtered = members.filter(member => {
       // Filter by category
-      const memberCategory = member.category;
+      const memberCategory = member.category_id;
       
       if (memberCategory !== selectedCategoryCode) {
         return false;

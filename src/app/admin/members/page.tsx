@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { Member } from "@/types/types";
+import React, { useState, useEffect, useMemo } from "react";
+import { Member } from "@/types/member";
 import { useFetchCategories } from "@/hooks/useFetchCategories";
 import { useFetchMemberFunctions } from "@/hooks/useFetchMemberFunctions";
-import { showToast } from "@/components/Toast";
+import { useAppData } from "@/contexts/AppDataContext";
 import { Tabs, Tab } from "@heroui/react";
 import MembersStatisticTab from "./components/MembersStatisticTab";
 import MembersListTab from "./components/MembersListTab";
@@ -34,37 +33,11 @@ export default function MembersAdminPage() {
     return result;
   }, [functionsData]);
 
-  // State for tabs and basic data
+  // State for tabs
   const [activeTab, setActiveTab] = useState("members");
-  const [members, setMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  // Basic fetch function for statistics
-  const fetchMembers = useCallback(async () => {
-    try {
-      setLoading(true);
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("members")
-        .select("*")
-        .order("surname", { ascending: true })
-        .order("name", { ascending: true });
-
-      if (error) {
-        throw error;
-      }
-      setMembers(data || []);
-    } catch (error: any) {
-      showToast.danger("Chyba při načítání členů");
-    } finally {
-      setLoading(false);
-    }
-  }, []); // Remove supabase from dependencies
-
-  // Load members on component mount
-  useEffect(() => {
-    fetchMembers();
-  }, [fetchMembers]);
+  // Use AppDataContext for members data
+  const { members, membersLoading, membersError } = useAppData();
 
   // Fetch categories from database
   const {

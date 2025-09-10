@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Api } from "@/app/api/api";
-import { MemberFunction } from "@/types/types";
+import { MemberFunction } from "@/types";
 
 export function useFetchMemberFunctions() {
 	const [data, setData] = useState<MemberFunction[]>([]);

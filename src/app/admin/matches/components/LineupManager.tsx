@@ -69,8 +69,8 @@ export default function LineupManager({
     );
 
     // If no members found with category_id, fallback to legacy category code filtering
-    if (filtered.length === 0 && categoryCode) {
-      filtered = members.filter((member) => member.category === categoryCode);
+    if (filtered.length === 0 && categoryId) {
+      filtered = members.filter((member) => member.category_id === categoryId);
     }
 
     // If still no members found, show all members as fallback

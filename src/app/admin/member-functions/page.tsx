@@ -21,7 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useFetchMemberFunctions } from "@/hooks/useFetchMemberFunctions";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
-import { MemberFunction } from "@/types/types";
+import { MemberFunction } from "@/types";
 import FunctionFormModal from "./components/FunctionFormModal";
 import { showToast } from "@/components/Toast";
 import { translations } from "@/lib/translations";

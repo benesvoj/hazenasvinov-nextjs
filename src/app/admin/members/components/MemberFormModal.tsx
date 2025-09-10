@@ -13,25 +13,15 @@ import {
 } from "@heroui/react";
 import { translations } from "@/lib/translations";
 import { CategoryNew } from "@/types";
-import { GenderType } from "@/constants";
-
-interface MemberFormData {
-  registration_number: string;
-  name: string;
-  surname: string;
-  date_of_birth?: string; // Made optional
-  category: string;
-  sex: GenderType;
-  functions: string[];
-}
+import { Member } from "@/types/member";
 
 interface MemberFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
   title: string;
-  formData: MemberFormData;
-  setFormData: (data: MemberFormData) => void;
+  formData: Member;
+  setFormData: (data: Member) => void;
   categories: CategoryNew[];
   sexOptions: Record<string, string>;
   functionOptions: Record<string, string>;
@@ -111,7 +101,7 @@ export default function MemberFormModal({
                   setFormData({
                     ...formData,
                     sex: Array.from(keys)[0] as "male" | "female",
-                    category: "", // Clear category when sex changes
+                    category_id: "", // Clear category when sex changes
                   })
                 }
                 isRequired
@@ -126,11 +116,11 @@ export default function MemberFormModal({
             <div className="w-full">
               <Select
                 label="Kategorie"
-                selectedKeys={[formData.category]}
+                selectedKeys={formData.category_id ? [formData.category_id] : []}
                 onSelectionChange={(keys) =>
                   setFormData({
                     ...formData,
-                    category: Array.from(keys)[0] as string,
+                    category_id: Array.from(keys)[0] as string,
                   })
                 }
                 isRequired

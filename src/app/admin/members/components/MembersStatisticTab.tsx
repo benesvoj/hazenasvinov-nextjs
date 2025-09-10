@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/table";
 import { Badge } from "@heroui/badge";
-import { MembersStatisticTabProps } from "@/types/types";
+import { MembersStatisticTabProps } from "@/types";
 
 
 export default function MembersStatisticTab({ 
@@ -20,7 +20,7 @@ export default function MembersStatisticTab({
     
     // Category statistics
     const categoryStats = categoriesData?.reduce((acc, category) => {
-      const count = members.filter(m => m.category === category.code).length;
+      const count = members.filter(m => m.category_id === category.id).length;
       if (count > 0) {
         acc[category.name] = count;
       }
@@ -159,19 +159,22 @@ export default function MembersStatisticTab({
                   <TableColumn>Procento</TableColumn>
                 </TableHeader>
                 <TableBody>
-                  {Object.entries(statistics.categoryStats).map(([categoryName, count]) => (
-                    <TableRow key={categoryName}>
-                      <TableCell>
-                        <Badge color="primary" variant="flat">
-                          {categoryName}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-medium">{count}</TableCell>
-                      <TableCell className="text-gray-600">
-                        {Math.round((count / statistics.totalMembers) * 100)}%
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {Object.entries(statistics.categoryStats).map(([categoryName, count]) => {
+                    const countValue = count as number;
+                    return (
+                      <TableRow key={categoryName}>
+                        <TableCell>
+                          <Badge color="primary" variant="flat">
+                            {categoryName}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">{countValue}</TableCell>
+                        <TableCell className="text-gray-600">
+                          {Math.round((countValue / statistics.totalMembers) * 100)}%
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

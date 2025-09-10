@@ -24,7 +24,7 @@ export function useFetchMembers() {
 
       setMembers(data || []);
     } catch (err: any) {
-      console.error('Error fetching members:', err);
+      console.error('❌ Error fetching members:', err);
       setError(err?.message || 'Chyba při načítání členů');
     } finally {
       setLoading(false);

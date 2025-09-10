@@ -25,23 +25,12 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
 import { Member, CategoryNew } from "@/types";
-import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+import { useAppData } from "@/contexts/AppDataContext";
+import {DeleteConfirmationModal, showToast} from "@/components";
 import MemberFormModal from "./MemberFormModal";
 import MembersCsvImport from "./MembersCsvImport";
 import BulkEditModal from "./BulkEditModal";
-import { showToast } from "@/components/Toast";
 import { GenderType } from "@/constants";
-
-// Define the form data type to match MemberFormData interface
-interface FormData {
-  registration_number: string;
-  name: string;
-  surname: string;
-  date_of_birth?: string;
-  category: string;
-  sex: GenderType;
-  functions: string[];
-}
 
 interface MembersListTabProps {
   categoriesData: CategoryNew[] | null;
@@ -54,13 +43,13 @@ export default function MembersListTab({
   functionOptions,
   sexOptions,
 }: MembersListTabProps) {
-  const [members, setMembers] = useState<Member[]>([]);
+  // Use AppDataContext for members data
+  const { members, membersLoading, membersError, refreshMembers } = useAppData();
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     sex: "empty" as GenderType,
-    category: "",
+    category_id: "",
     function: "",
   });
 
@@ -95,60 +84,20 @@ export default function MembersListTab({
     category: "",
     functions: [] as string[],
   });
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<Member>({
     registration_number: "",
     name: "",
     surname: "",
     date_of_birth: undefined,
-    category: "",
+    category_id: "",
     sex: "male",
     functions: [],
+    id: "",
+    created_at: "",
+    updated_at: "",
   });
 
-  // Fetch members
-  const fetchMembers = useCallback(async () => {
-    try {
-      setLoading(true);
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("members")
-        .select("*")
-        .order("surname", { ascending: true })
-        .order("name", { ascending: true });
-
-      if (error) {
-        throw error;
-      }
-      setMembers(data || []);
-      setFilteredMembers(data || []);
-    } catch (error: any) {
-      // Extract detailed error information
-      let errorMessage = "Chyba při načítání členů";
-      let debugInfo = "";
-
-      if (error) {
-        if (error.code) {
-          debugInfo += `Kód chyby: ${error.code}. `;
-        }
-        if (error.message) {
-          errorMessage = error.message;
-        }
-        if (error.details) {
-          debugInfo += `Detaily: ${error.details}. `;
-        }
-        if (error.hint) {
-          debugInfo += `Nápověda: ${error.hint}. `;
-        }
-      }
-
-      const finalErrorMessage = debugInfo
-        ? `${errorMessage} ${debugInfo}`
-        : errorMessage;
-      showToast.danger(finalErrorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, []); // Remove supabase from dependencies
+  // Members are loaded by AppDataContext, no need for manual fetching
 
   // Convert categories array to Record format for compatibility
   const categories = useMemo(() => {
@@ -158,6 +107,11 @@ export default function MembersListTab({
       return acc;
     }, {} as Record<string, string>);
   }, [categoriesData]);
+
+  // Update filtered members when members data changes
+  useEffect(() => {
+    setFilteredMembers(members);
+  }, [members]);
 
   // Filter members based on search term and filters
   useEffect(() => {
@@ -177,14 +131,14 @@ export default function MembersListTab({
     }
 
     // Filter by sex
-    if (filters.sex) {
+    if (filters.sex && filters.sex !== "empty") {
       filtered = filtered.filter((member) => member.sex === filters.sex);
     }
 
     // Filter by category
-    if (filters.category) {
+    if (filters.category_id) {
       filtered = filtered.filter(
-        (member) => member.category === filters.category
+        (member) => member.category_id === filters.category_id
       );
     }
 
@@ -288,13 +242,11 @@ export default function MembersListTab({
     }
 
     try {
-      setLoading(true);
-
       // Prepare update data (only include fields that are being updated)
       const updateData: any = {};
       if (bulkEditFormData.sex) updateData.sex = bulkEditFormData.sex;
       if (bulkEditFormData.category)
-        updateData.category = bulkEditFormData.category;
+        updateData.category_id = bulkEditFormData.category;
       if (bulkEditFormData.functions.length > 0)
         updateData.functions = bulkEditFormData.functions;
 
@@ -319,14 +271,12 @@ export default function MembersListTab({
       });
 
       onBulkEditClose();
-      fetchMembers();
+      refreshMembers();
       showToast.success(`Úspěšně upraveno ${memberIds.length} členů`);
     } catch (error: any) {
       showToast.danger(
         `Chyba při hromadné úpravě: ${error.message || "Neznámá chyba"}`
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -355,9 +305,12 @@ export default function MembersListTab({
       name: "",
       surname: "",
       date_of_birth: undefined, // Changed to undefined for optional field
-      category: "",
+      category_id: "",
       sex: "male",
       functions: [],
+      id: "",
+      created_at: "",
+      updated_at: "",
     });
     onAddMemberOpen();
   };
@@ -369,9 +322,12 @@ export default function MembersListTab({
       name: member.name,
       surname: member.surname,
       date_of_birth: member.date_of_birth || "",
-      category: member.category,
+      category_id: member.category_id,
       sex: member.sex,
       functions: member.functions || [],
+      id: member.id,
+      created_at: member.created_at,
+      updated_at: member.updated_at,
     });
     onEditMemberOpen();
   };
@@ -383,7 +339,6 @@ export default function MembersListTab({
 
   const handleAddMember = async () => {
     try {
-      setLoading(true);
       const supabase = createClient();
 
       const { error } = await supabase.from("members").insert([
@@ -391,7 +346,7 @@ export default function MembersListTab({
           name: formData.name,
           surname: formData.surname,
           date_of_birth: formData.date_of_birth || null, // Handle optional birth date
-          category: formData.category,
+          category_id: formData.category_id,
           sex: formData.sex,
           functions: formData.functions,
           registration_number: formData.registration_number || undefined,
@@ -404,13 +359,11 @@ export default function MembersListTab({
 
       showToast.success("Člen byl úspěšně přidán");
       onAddMemberClose();
-      fetchMembers();
+      refreshMembers();
     } catch (error: any) {
       showToast.danger(
         `Chyba při přidávání člena: ${error.message || "Neznámá chyba"}`
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -418,7 +371,6 @@ export default function MembersListTab({
     if (!selectedMember) return;
 
     try {
-      setLoading(true);
       const supabase = createClient();
 
       const { error } = await supabase
@@ -427,7 +379,7 @@ export default function MembersListTab({
           name: formData.name,
           surname: formData.surname,
           date_of_birth: formData.date_of_birth || null, // Handle optional birth date
-          category: formData.category,
+          category_id: formData.category_id,
           sex: formData.sex,
           functions: formData.functions,
           registration_number: formData.registration_number || null,
@@ -440,13 +392,11 @@ export default function MembersListTab({
 
       showToast.success("Člen byl úspěšně upraven");
       onEditMemberClose();
-      fetchMembers();
+      refreshMembers();
     } catch (error: any) {
       showToast.danger(
         `Chyba při úpravě člena: ${error.message || "Neznámá chyba"}`
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -454,7 +404,6 @@ export default function MembersListTab({
     if (!selectedMember) return;
 
     try {
-      setLoading(true);
       const supabase = createClient();
 
       const { error } = await supabase
@@ -468,22 +417,22 @@ export default function MembersListTab({
 
       showToast.success("Člen byl úspěšně smazán");
       onDeleteMemberClose();
-      fetchMembers();
+      refreshMembers();
     } catch (error: any) {
       showToast.danger(
         `Chyba při mazání člena: ${error.message || "Neznámá chyba"}`
       );
-    } finally {
-      setLoading(false);
     }
   };
 
   // Helper functions
-  const getCategoryName = (categoryCode: string) => {
-    return categories[categoryCode] || categoryCode;
+  const getCategoryName = (categoryId: string | undefined) => {
+    if (!categoryId) return "default";
+    return categories[categoryId] || categoryId;
   };
 
-  const getCategoryBadgeColor = (category: string) => {
+  const getCategoryBadgeColor = (category: string | undefined) => {
+    if (!category) return "default";
     if (!categoriesData) return "default";
 
     const categoryData = categoriesData.find((cat) => cat.code === category);
@@ -549,8 +498,8 @@ export default function MembersListTab({
         );
       case "category":
         return (
-          <Badge color={getCategoryBadgeColor(member.category)} variant="flat">
-            {getCategoryName(member.category)}
+          <Badge color={getCategoryBadgeColor(member.category_id)} variant="flat">
+            {getCategoryName(member.category_id)}
           </Badge>
         );
       case "sex":
@@ -648,10 +597,7 @@ export default function MembersListTab({
     },
   ];
 
-  // Load members on component mount
-  useEffect(() => {
-    fetchMembers();
-  }, [fetchMembers]);
+  // Members are loaded by AppDataContext, no need for manual fetching
 
   return (
     <div className="flex flex-col gap-6">
@@ -669,7 +615,7 @@ export default function MembersListTab({
             Hromadná úprava ({selectedMembers.size})
           </Button>
           <MembersCsvImport
-            onImportComplete={fetchMembers}
+            onImportComplete={refreshMembers}
             categories={categories}
             sexOptions={sexOptions}
             functionOptions={functionOptions}
@@ -738,11 +684,11 @@ export default function MembersListTab({
                   <Select
                     area-label="Category selection"
                     placeholder="Všechny kategorie"
-                    selectedKeys={filters.category ? [filters.category] : []}
+                    selectedKeys={filters.category_id ? [filters.category_id] : []}
                     onSelectionChange={(keys) =>
                       setFilters((prev) => ({
                         ...prev,
-                        category: Array.from(keys)[0] as string,
+                        category_id: Array.from(keys)[0] as string,
                       }))
                     }
                     className="w-full"
@@ -783,13 +729,13 @@ export default function MembersListTab({
                 </div>
 
                 {/* Clear Filters Button */}
-                {(filters.sex || filters.category || filters.function) && (
+                {(filters.sex || filters.category_id || filters.function) && (
                   <div className="w-full sm:w-auto">
                     <Button
                       variant="light"
                       size="sm"
                       onPress={() =>
-                        setFilters({ sex: "empty", category: "", function: "" })
+                        setFilters({ sex: "empty", category_id: "", function: "" })
                       }
                       className="w-full sm:w-auto"
                       area-label="Clear filters"
@@ -852,8 +798,8 @@ export default function MembersListTab({
         </TableHeader>
         <TableBody
           items={items}
-          loadingContent={loading ? translations.loading : "Načítání dat..."}
-          loadingState={loading ? "loading" : "idle"}
+          loadingContent={membersLoading ? translations.loading : "Načítání dat..."}
+          loadingState={membersLoading ? "loading" : "idle"}
           emptyContent={
             searchTerm
               ? "Žádní členové nebyli nalezeni pro zadaný vyhledávací termín."
@@ -918,7 +864,7 @@ export default function MembersListTab({
         setFormData={setBulkEditFormData}
         categories={categoriesData || []}
         functionOptions={functionOptions}
-        isLoading={loading}
+        isLoading={membersLoading}
       />
     </div>
   );

@@ -91,7 +91,7 @@ export const filterMembers = (
 
   // Filter by category
   if (filters.category) {
-    filtered = filtered.filter((member) => member.category === filters.category);
+    filtered = filtered.filter((member) => member.category_id === filters.category);
   }
 
   // Filter by function
