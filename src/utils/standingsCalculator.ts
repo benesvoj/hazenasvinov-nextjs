@@ -1,28 +1,5 @@
 import { createClient } from '@/utils/supabase/client';
-
-interface Standing {
-  team_id: string;
-  club_id?: string;
-  category_id: string;
-  season_id: string;
-  position: number;
-  matches: number;
-  wins: number;
-  draws: number;
-  losses: number;
-  goals_for: number;
-  goals_against: number;
-  points: number;
-}
-
-interface Match {
-  id: string;
-  home_team_id: string;
-  away_team_id: string;
-  home_score: number | null;
-  away_score: number | null;
-  status: string;
-}
+import { Standing, Match } from '@/types';
 
 /**
  * Calculates standings for a specific category and season
@@ -135,29 +112,33 @@ export async function calculateStandings(
 
     // Calculate standings from matches
     completedMatches.forEach((match: Match) => {
-      if (!match.home_score || !match.away_score) return;
+      if (match.home_score === null || match.away_score === null) return;
 
       const homeStanding = standingsMap.get(match.home_team_id);
       const awayStanding = standingsMap.get(match.away_team_id);
 
       if (homeStanding && awayStanding) {
+        // Type assertion: we've already checked that scores are not null
+        const homeScore = match.home_score as number;
+        const awayScore = match.away_score as number;
+
         // Update matches played
         homeStanding.matches++;
         awayStanding.matches++;
 
         // Update goals
-        homeStanding.goals_for += match.home_score;
-        homeStanding.goals_against += match.away_score;
-        awayStanding.goals_for += match.away_score;
-        awayStanding.goals_against += match.home_score;
+        homeStanding.goals_for += homeScore;
+        homeStanding.goals_against += awayScore;
+        awayStanding.goals_for += awayScore;
+        awayStanding.goals_against += homeScore;
 
         // Update points and wins/draws/losses
-        if (match.home_score > match.away_score) {
+        if (homeScore > awayScore) {
           // Home team wins
           homeStanding.wins++;
           homeStanding.points += 2;
           awayStanding.losses++;
-        } else if (match.home_score < match.away_score) {
+        } else if (homeScore < awayScore) {
           // Away team wins
           awayStanding.wins++;
           awayStanding.points += 2;

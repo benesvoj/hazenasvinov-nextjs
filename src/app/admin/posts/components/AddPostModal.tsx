@@ -165,7 +165,7 @@ export default function AddPostModal({
                 isRequired
               >
                 {Object.values(postStatuses).map((status) => (
-                  <SelectItem key={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</SelectItem>
+                  <SelectItem key={status}>{status}</SelectItem>
                 ))}
               </Select>
               

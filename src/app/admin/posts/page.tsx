@@ -19,6 +19,8 @@ import { AdminContainer } from "../components/AdminContainer";
 import { translations } from "@/lib/translations";
 import { showToast, LoadingSpinner } from "@/components";
 import { adminStatusFilterOptions } from "@/constants";
+import { useDebounce } from "@/hooks/useDebounce";
+import { createSearchablePost, searchPosts } from "@/utils/contentSearch";
 
 interface User {
   id: string;
@@ -32,6 +34,9 @@ export default function BlogPostsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dbError, setDbError] = useState<string | null>(null);
+  
+  // Debounce search term to improve performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [userError, setUserError] = useState<string | null>(null);
 
   const t = translations.admin.posts;
@@ -559,11 +564,12 @@ export default function BlogPostsPage() {
     }
   };
 
-  // Filter posts based on search and status
-  const filteredPosts = posts.filter((post) => {
-    const matchesSearch =
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchTerm.toLowerCase());
+  // Create searchable posts with content excerpts
+  const searchablePosts = posts.map(createSearchablePost);
+  
+  // Filter posts based on debounced search and status
+  const filteredPosts = searchablePosts.filter((post) => {
+    const matchesSearch = searchPosts([post], debouncedSearchTerm).length > 0;
     const matchesStatus =
       statusFilter === "all" || post.status === statusFilter;
     return matchesSearch && matchesStatus;

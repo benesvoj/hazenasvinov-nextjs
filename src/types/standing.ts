@@ -1,7 +1,7 @@
 import { Club } from './clubs';
 
 export interface Standing {
-    id: string;
+    id?: string;
     team_id?: string;
     club_id?: string;
     category_id: string;

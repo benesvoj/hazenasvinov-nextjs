@@ -20,7 +20,7 @@ import {
   PencilIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import { useLineupData } from "@/hooks/useLineupData";
+import { useLineupData, classifyLineupError, LineupErrorType } from "@/hooks/useLineupData";
 import {
   LineupFormData,
   LineupPlayerFormData,
@@ -373,25 +373,39 @@ export default function LineupManager({
       }
     } catch (error: any) {
       console.error("Error saving lineup:", error);
-      const errorMessage =
-        error?.message || error?.details || error?.hint || "Neznámá chyba";
+      
+      // Use robust error classification
+      const classifiedError = classifyLineupError(error);
 
-      // Check if it's a validation error (lineup rules)
-      if (errorMessage.includes("Musí být alespoň") || 
-          errorMessage.includes("Nemůže být více než") ||
-          errorMessage.includes("Celkem musí být")) {
-        // Set validation error state to show in modal
-        setValidationError(errorMessage);
-        // Also show toast for immediate feedback
+      // Handle validation errors (keep modal open)
+      if (classifiedError.type === LineupErrorType.VALIDATION_ERROR) {
+        setValidationError(classifiedError.message);
         showToast.warning(
-          `⚠️ Pravidla sestavy:\n\n${errorMessage}\n\nOpravte chyby a zkuste to znovu.`
+          `⚠️ Pravidla sestavy:\n\n${classifiedError.message}\n\nOpravte chyby a zkuste to znovu.`
         );
         return; // Don't close the modal
       }
 
-      // For other errors, show error message but keep modal open
-      showToast.danger(`Chyba při ukládání sestavy: ${errorMessage}`);
-      // Don't close the modal for other errors either, let user retry
+      // Handle database errors
+      if (classifiedError.type === LineupErrorType.DATABASE_ERROR) {
+        showToast.danger(
+          `❌ Chyba databáze:\n\n${classifiedError.message}\n\nKontaktujte podporu.`
+        );
+        return;
+      }
+
+      // Handle network errors
+      if (classifiedError.type === LineupErrorType.NETWORK_ERROR) {
+        showToast.danger(
+          `❌ Problém se sítí:\n\n${classifiedError.message}\n\nZkontrolujte připojení a zkuste to znovu.`
+        );
+        return;
+      }
+
+      // Handle unknown errors
+      showToast.danger(
+        `❌ Neznámá chyba:\n\n${classifiedError.message}\n\nKontaktujte podporu.`
+      );
     }
   };
 

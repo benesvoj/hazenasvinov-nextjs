@@ -440,7 +440,7 @@ export default function MatchesAdminPage() {
     if (!selectedMatch) return;
 
     try {
-      if (!resultData.home_score || !resultData.away_score) {
+      if (resultData.home_score === null || resultData.away_score === null || resultData.home_score === undefined || resultData.away_score === undefined) {
         setError("Prosím vyplňte oba skóre");
         return;
       }
@@ -1244,30 +1244,7 @@ export default function MatchesAdminPage() {
         `}
       />
 
-      {/* Debug info */}
-      {isExcelImportOpen && (
-        <div style={{ display: "none" }}>
-          Debug: categories={categories.length}, teams={teams.length}, season=
-          {selectedSeason}
-        </div>
-      )}
 
-      {/* Console debug for modal props */}
-      {isExcelImportOpen && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            console.log('🔍 Modal Props Debug:', {
-              categoriesCount: ${categories.length},
-              teamsCount: ${teams.length},
-              selectedSeason: '${selectedSeason}',
-              categories: ${JSON.stringify(categories)},
-              teams: ${JSON.stringify(teams)}
-            });
-          `,
-          }}
-        />
-      )}
     </AdminContainer>
   );
 }

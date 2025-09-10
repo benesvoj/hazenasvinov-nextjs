@@ -8,10 +8,15 @@ import {
   MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
 import { useFetchBlogPosts } from "@/hooks";
+import { useDebounce } from "@/hooks/useDebounce";
+import { createSearchablePost, searchPosts } from "@/utils/contentSearch";
 
 export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Všechny");
+  
+  // Debounce search term to improve performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
   // Fetch all published blog posts
   const { posts: allPosts, loading, error } = useFetchBlogPosts(100); // Get more posts for filtering
@@ -22,20 +27,24 @@ export default function BlogPage() {
     return ["Všechny"];
   }, []);
 
-  // Filter posts based on search and category
+  // Filter posts based on debounced search and category
   const filteredPosts = useMemo(() => {
     if (!allPosts) return [];
     
-    return allPosts.filter(post => {
-      const matchesSearch = searchTerm === "" || 
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.content.toLowerCase().includes(searchTerm.toLowerCase());
-      
+    // Create searchable posts with content excerpts
+    const searchablePosts = allPosts.map(createSearchablePost);
+    
+    // Filter by search term using optimized search
+    const searchFiltered = debouncedSearchTerm === "" 
+      ? searchablePosts 
+      : searchPosts(searchablePosts, debouncedSearchTerm);
+    
+    // Filter by category
+    return searchFiltered.filter(post => {
       const matchesCategory = selectedCategory === "Všechny";
-      
-      return matchesSearch && matchesCategory;
+      return matchesCategory;
     });
-  }, [allPosts, searchTerm, selectedCategory]);
+  }, [allPosts, debouncedSearchTerm, selectedCategory]);
 
   return (
     <div className="space-y-8">

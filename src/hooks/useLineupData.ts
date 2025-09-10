@@ -7,6 +7,115 @@ import {
   ExternalPlayer
 } from '@/types/types';
 
+// Error types for robust error handling
+export enum LineupErrorType {
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  DATABASE_ERROR = 'DATABASE_ERROR',
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR'
+}
+
+export interface LineupError {
+  type: LineupErrorType;
+  message: string;
+  code?: string;
+}
+
+// Helper function to classify errors
+export const classifyLineupError = (error: any): LineupError => {
+  const message = error?.message || error?.details || error?.hint || "Neznámá chyba";
+  
+  // Primary classification based on error structure and codes
+  if (error?.code === 'VALIDATION_ERROR' || error?.type === 'validation') {
+    return {
+      type: LineupErrorType.VALIDATION_ERROR,
+      message,
+      code: error?.code
+    };
+  }
+  
+  // Database error classification
+  if (error?.code?.startsWith('23') || // PostgreSQL constraint violations
+      error?.code?.startsWith('42') || // PostgreSQL syntax errors
+      error?.code?.startsWith('22') || // PostgreSQL data type errors
+      error?.code?.startsWith('25') || // PostgreSQL invalid transaction state
+      error?.code?.startsWith('26') || // PostgreSQL invalid name
+      error?.code?.startsWith('27') || // PostgreSQL triggered data change violation
+      error?.code?.startsWith('28') || // PostgreSQL invalid authorization specification
+      error?.code?.startsWith('2D') || // PostgreSQL invalid transaction termination
+      error?.code?.startsWith('2F') || // PostgreSQL SQL routine exception
+      error?.code?.startsWith('34') || // PostgreSQL invalid cursor name
+      error?.code?.startsWith('38') || // PostgreSQL external routine exception
+      error?.code?.startsWith('39') || // PostgreSQL external routine invocation exception
+      error?.code?.startsWith('3B') || // PostgreSQL savepoint exception
+      error?.code?.startsWith('40') || // PostgreSQL transaction rollback
+      error?.code?.startsWith('42') || // PostgreSQL syntax error or access rule violation
+      error?.code?.startsWith('44') || // PostgreSQL with check option violation
+      error?.code?.startsWith('53') || // PostgreSQL insufficient resources
+      error?.code?.startsWith('54') || // PostgreSQL program limit exceeded
+      error?.code?.startsWith('55') || // PostgreSQL object not in prerequisite state
+      error?.code?.startsWith('57') || // PostgreSQL operator intervention
+      error?.code?.startsWith('58') || // PostgreSQL system error
+      error?.code?.startsWith('72') || // PostgreSQL snapshot too old
+      error?.code?.startsWith('F0') || // PostgreSQL configuration file error
+      error?.code?.startsWith('HV') || // PostgreSQL foreign data wrapper error
+      error?.code?.startsWith('P0') || // PostgreSQL PL/pgSQL error
+      error?.code?.startsWith('XX') || // PostgreSQL internal error
+      message.includes('duplicate key') ||
+      message.includes('constraint') ||
+      message.includes('violates') ||
+      message.includes('foreign key') ||
+      message.includes('unique constraint')) {
+    return {
+      type: LineupErrorType.DATABASE_ERROR,
+      message,
+      code: error?.code
+    };
+  }
+  
+  // Network error classification
+  if (error?.name === 'NetworkError' ||
+      error?.name === 'TypeError' && message.includes('fetch') ||
+      error?.code === 'NETWORK_ERROR' ||
+      error?.code === 'ECONNREFUSED' ||
+      error?.code === 'ETIMEDOUT' ||
+      error?.code === 'ENOTFOUND' ||
+      message.includes('network') ||
+      message.includes('timeout') ||
+      message.includes('fetch') ||
+      message.includes('connection') ||
+      message.includes('ECONNREFUSED') ||
+      message.includes('ETIMEDOUT') ||
+      message.includes('ENOTFOUND')) {
+    return {
+      type: LineupErrorType.NETWORK_ERROR,
+      message,
+      code: error?.code
+    };
+  }
+  
+  // Fallback: Check for validation patterns in message (less reliable but better than nothing)
+  if (message.includes('Musí být alespoň') ||
+      message.includes('Nemůže být více než') ||
+      message.includes('Celkem musí být') ||
+      message.includes('brankář') ||
+      message.includes('hráč') ||
+      message.includes('trenér')) {
+    return {
+      type: LineupErrorType.VALIDATION_ERROR,
+      message,
+      code: error?.code
+    };
+  }
+  
+  // Default to unknown error
+  return {
+    type: LineupErrorType.UNKNOWN_ERROR,
+    message,
+    code: error?.code
+  };
+};
+
 const supabase = createClient();
 
 export const useLineupData = () => {
@@ -255,7 +364,10 @@ export const useLineupData = () => {
       // Client-side validation before saving
       const validation = validateLineupData(formData);
       if (!validation.isValid) {
-        throw new Error(validation.errors.join(', '));
+        const validationError = new Error(validation.errors.join(', '));
+        (validationError as any).type = 'validation';
+        (validationError as any).code = 'VALIDATION_ERROR';
+        throw validationError;
       }
       
       // First verify that the match exists

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import DOMPurify from 'dompurify';
 
 interface BlogContentProps {
   content: string;
@@ -11,11 +12,17 @@ export default function BlogContent({ content, className = "" }: BlogContentProp
     const hasHtmlTags = /<[^>]*>/g.test(content);
     
     if (hasHtmlTags) {
-      // Content is HTML, render as-is
+      // Content is HTML, sanitize before rendering
+      const sanitizedContent = DOMPurify.sanitize(content, {
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'img'],
+        ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class'],
+        ALLOW_DATA_ATTR: false
+      });
+      
       return (
         <div 
           className={`prose prose-lg max-w-none dark:prose-invert ${className}`}
-          dangerouslySetInnerHTML={{ __html: content }} 
+          dangerouslySetInnerHTML={{ __html: sanitizedContent }} 
         />
       );
     } else {

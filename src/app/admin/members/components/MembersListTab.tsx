@@ -28,6 +28,7 @@ import { translations } from "@/lib/translations";
 import { Member, CategoryNew } from "@/types";
 import { useAppData } from "@/contexts/AppDataContext";
 import {DeleteConfirmationModal, showToast} from "@/components";
+import { useDebounce } from "@/hooks/useDebounce";
 import MemberFormModal from "./MemberFormModal";
 import MembersCsvImport from "./MembersCsvImport";
 import BulkEditModal from "./BulkEditModal";
@@ -48,6 +49,9 @@ export default function MembersListTab({
   const { members, membersLoading, membersError, refreshMembers } = useAppData();
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Debounce search term to improve performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [filters, setFilters] = useState({
     sex: "empty" as GenderType,
     category_id: "",
@@ -114,20 +118,20 @@ export default function MembersListTab({
     setFilteredMembers(members);
   }, [members]);
 
-  // Filter members based on search term and filters
+  // Filter members based on debounced search term and filters
   useEffect(() => {
     let filtered = members;
 
-    // Filter by search term (name, surname, or registration number)
-    if (searchTerm) {
+    // Filter by debounced search term (name, surname, or registration number)
+    if (debouncedSearchTerm) {
       filtered = filtered.filter(
         (member) =>
-          member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          member.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          member.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+          member.surname.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
           (member.registration_number &&
             member.registration_number
               .toLowerCase()
-              .includes(searchTerm.toLowerCase()))
+              .includes(debouncedSearchTerm.toLowerCase()))
       );
     }
 
@@ -153,7 +157,7 @@ export default function MembersListTab({
 
     setFilteredMembers(filtered);
     setPage(1); // Reset to first page when filters change
-  }, [members, searchTerm, filters]);
+  }, [members, debouncedSearchTerm, filters]);
 
   // Pagination
   const [page, setPage] = useState(1);
