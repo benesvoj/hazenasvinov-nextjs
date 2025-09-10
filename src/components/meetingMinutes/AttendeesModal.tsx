@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { useMembers } from "@/hooks/useMembers";
+import { useFetchMembers } from "@/hooks/useFetchMembers";
 import { MeetingAttendeeFormData } from "@/types";
 import {
   Modal,
@@ -48,7 +48,7 @@ export function AttendeesModal({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   
-  const { members, loading: membersLoading } = useMembers();
+  const { members, loading: membersLoading } = useFetchMembers();
   const t = translations.components.meetingMinutes;
 
   // Filter members based on search

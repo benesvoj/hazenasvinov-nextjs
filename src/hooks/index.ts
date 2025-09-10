@@ -28,5 +28,5 @@ export * from './usePublicMatches';
 export * from './useOwnClubMatches';
 export * from './useFetchMatch';
 export * from './useAttendance';
-export * from './useMembers';
+export * from './useFetchMembers';
 export * from './useTeams';

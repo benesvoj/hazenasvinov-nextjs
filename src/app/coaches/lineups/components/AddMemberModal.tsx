@@ -23,7 +23,7 @@ import {
   Card,
   CardBody
 } from '@heroui/react';
-import { useMembers } from '@/hooks/useMembers';
+import { useFetchMembers } from '@/hooks/useFetchMembers';
 import { AddMemberToLineupData } from '@/types/categoryLineup';
 import { MagnifyingGlassIcon as SearchIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 
@@ -55,7 +55,7 @@ export default function AddMemberModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { members, loading: membersLoading, fetchMembers } = useMembers();
+  const { members, loading: membersLoading, fetchMembers } = useFetchMembers();
 
   // Fetch members when modal opens
   useEffect(() => {

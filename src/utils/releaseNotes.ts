@@ -131,7 +131,7 @@ export const releaseNotes: ReleaseNote[] = [
     ],
     technical: [
       "🏗️ Created comprehensive meeting minutes database schema with proper relationships",
-      "🗄️ Implemented useMeetingMinutes and useMembers hooks for data management",
+      "🗄️ Implemented useMeetingMinutes and useFetchMembers hooks for data management",
       "🔌 Built AttendeesModal component with bulk selection and search capabilities",
       "🎭 Enhanced MeetingMinutesCard component with responsive 3-column layout",
       "📱 Optimized component rendering with proper memoization and state management",

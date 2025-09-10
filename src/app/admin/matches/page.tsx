@@ -37,7 +37,7 @@ import {
   useStandings,
   useFetchMatches,
   useCategories,
-  useMembers,
+  useFetchMembers,
   useTeams,
 } from "@/hooks";
 import { AdminContainer } from "../components/AdminContainer";
@@ -52,7 +52,7 @@ export default function MatchesAdminPage() {
 
   // Use existing hooks instead of custom state and fetch functions
   const { categories, loading: categoriesLoading, fetchCategoriesFull } = useCategories();
-  const { members, loading: membersLoading, fetchMembers } = useMembers();
+  const { members, loading: membersLoading, fetchMembers } = useFetchMembers();
   const { teams, loading: allTeamsLoading, fetchTeams } = useTeams();
 
   // Modal states
