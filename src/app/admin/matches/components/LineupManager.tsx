@@ -1,20 +1,18 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
 import {
+  Button,
+  Input,
+  Card, CardBody, CardHeader,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Select, SelectItem } from "@heroui/select";
-import { Checkbox } from "@heroui/checkbox";
-import { Badge } from "@heroui/badge";
+  Select, SelectItem, Alert
+} from "@heroui/react";
 import {
   UserGroupIcon,
   PlusIcon,
@@ -34,7 +32,7 @@ import { createClient } from "@/utils/supabase/client";
 import { DeleteConfirmationModal, showToast } from "@/components";
 import LineupManagerPlayerCard from "./LineupManagerPlayerCard";
 import { generateLineupId } from "@/utils/uuid";
-import { Alert } from "@heroui/react";
+import { Heading } from "@/components";
 
 interface LineupManagerProps {
   matchId: string;
@@ -587,7 +585,7 @@ export default function LineupManager({
       {/* Team Selection */}
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold">Výběr týmu</h3>
+          <Heading size={3}>Výběr týmu</Heading>
         </CardHeader>
         <CardBody>
           <div className="flex gap-4">
@@ -612,9 +610,9 @@ export default function LineupManager({
       {/* Lineup Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
-          <CardHeader>
-            <h4 className="text-md font-medium">Domácí tým</h4>
-          </CardHeader>
+            <CardHeader>
+              <Heading size={4}>Domácí tým</Heading>
+            </CardHeader>
           <CardBody>
             {getLineupSummaryDisplay(homeLineupSummary, homeTeamName)}
           </CardBody>
@@ -622,7 +620,7 @@ export default function LineupManager({
 
         <Card>
           <CardHeader>
-            <h4 className="text-md font-medium">Hostující tým</h4>
+            <Heading size={4}>Hostující tým</Heading>
           </CardHeader>
           <CardBody>
             {getLineupSummaryDisplay(awayLineupSummary, awayTeamName)}
@@ -635,9 +633,9 @@ export default function LineupManager({
         <CardHeader className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <UserGroupIcon className="w-5 h-5 text-blue-500" />
-            <h3 className="text-lg font-semibold">
+            <Heading size={3}>
               Sestava: {currentTeamName}
-            </h3>
+            </Heading>
           </div>
           <div className="flex gap-2">
             <Button
@@ -671,10 +669,10 @@ export default function LineupManager({
               {/* Players Section */}
               {currentFormData.players.length > 0 && (
                 <div>
-                  <h4 className="text-md font-medium mb-3 flex items-center gap-2">
+                  <Heading size={4}>
                     <UserIcon className="w-4 h-4" />
                     Hráči ({currentFormData.players.length})
-                  </h4>
+                  </Heading>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {currentFormData.players.map((player, index) => (
                       <div
@@ -686,16 +684,18 @@ export default function LineupManager({
                             ? getMemberName(player.member_id)
                             : `${player.external_name} ${player.external_surname}`}
                         </div>
+                        <div className="flex items-center justify-between gap-2">
                         <div className="text-xs text-gray-500">
                           {player.position === "goalkeeper"
                             ? "Brankář"
                             : "Hráč v poli"}
                         </div>
-                        {player.role && (
+                        {player.is_captain && (
                           <div className="text-xs text-gray-500">
-                            Role: {player.role}
+                            Kapitán
                           </div>
                         )}
+                        </div>
                       </div>
                     ))}
                   </div>

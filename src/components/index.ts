@@ -13,7 +13,6 @@ export { default as BlogContent } from './BlogContent';
 // UI Components
 export { default as DeleteConfirmationModal } from './DeleteConfirmationModal';
 export { default as DropdownMenu } from './DropdownMenu';
-export { default as ModalWithForm } from './ModalWithForm';
 export { default as MobileActionsMenu } from './MobileActionsMenu';
 
 // Error Boundaries
@@ -74,7 +73,7 @@ export { UnifiedSidebarProvider, useUnifiedSidebar } from './UnifiedSidebarConte
 export { CoachPortalCategoryDialog } from './CoachPortalCategoryDialog';
 
 // Headings
-export { Heading1, Heading2, Heading3, Heading4, Heading5, Heading6 } from './Headings';
+export { Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Heading } from './Headings';
 
 export { showToast, useToast } from './Toast';
 
