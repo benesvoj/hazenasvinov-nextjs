@@ -34,7 +34,7 @@ export interface UseFetchMatchesOptions {
 /**
  * Hook to fetch matches for a specific category and season
  * 
- * @param categorySlug - The category code (e.g., 'men', 'women')
+ * @param categoryId - The category id (UUID)
  * @param seasonId - Optional season ID. If not provided, uses active season
  * @param options - Configuration options for filtering and data inclusion
  * 

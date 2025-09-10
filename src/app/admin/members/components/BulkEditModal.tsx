@@ -70,7 +70,7 @@ export default function BulkEditModal({
                       ...prev,
                       sex: newSex,
                       // Clear category when sex changes to ensure proper filtering
-                      category: newSex !== prev.sex ? "empty" : prev.category,
+                      category: newSex !== prev.sex ? "" : prev.category,
                     }));
                   }}
                   placeholder="Ponechat beze změny"
