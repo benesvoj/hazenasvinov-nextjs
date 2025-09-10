@@ -21,7 +21,7 @@ export default function MatchSchedule({
   showOnlyAssignedCategories = false,
   redirectionLinks = true
 }: MatchScheduleProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>("men");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
   const lastFetchedRef = useRef<{ categoryId: string; seasonId: string } | null>(null);
 
@@ -44,7 +44,7 @@ export default function MatchSchedule({
 
   // Get the selected category data from available categories
   const selectedCategoryData = availableCategories.find(
-    (cat) => cat.code === selectedCategory
+    (cat) => cat.id === selectedCategory
   );
   
   const {
@@ -55,6 +55,7 @@ export default function MatchSchedule({
   
   // Use the standings hook
   const { standings, loading: standingsLoading, error: standingsError, fetchStandings } = useStandings();
+  const [fetchedCategoryId, setFetchedCategoryId] = useState<string | null>(null);
 
 
 
@@ -86,13 +87,9 @@ export default function MatchSchedule({
   // Update selected category when available categories change
   useEffect(() => {
     if (availableCategories.length > 0) {
-      // If current selected category is not available, select the first available one
-      const isCurrentCategoryAvailable = availableCategories.some(
-        cat => cat.code === selectedCategory
-      );
-      
-      if (!isCurrentCategoryAvailable) {
-        setSelectedCategory(availableCategories[0].code);
+      // If no category is selected or current selected category is not available, select the first available one
+      if (!selectedCategory || !availableCategories.some(cat => cat.id === selectedCategory)) {
+        setSelectedCategory(availableCategories[0].id);
       }
     }
   }, [availableCategories, selectedCategory]);
@@ -111,6 +108,7 @@ export default function MatchSchedule({
       
       // Update the ref and fetch
       lastFetchedRef.current = { categoryId, seasonId };
+      setFetchedCategoryId(categoryId);
       fetchStandings(categoryId, seasonId);
     }
   }, [selectedCategory, activeSeason?.id, selectedCategoryData?.id, activeSeason, availableCategories.length, fetchStandings, selectedCategoryData]);
@@ -127,6 +125,27 @@ export default function MatchSchedule({
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 3);
   }, [matches]);
+
+  // Filter standings by selected category - only show standings for the category we actually fetched
+  const categoryStandings = useMemo(() => {
+    if (!selectedCategoryData?.id || !fetchedCategoryId) return [];
+    
+    // Only show standings if we fetched them for this specific category
+    if (fetchedCategoryId !== selectedCategoryData.id) return [];
+    
+    return standings.filter(standing => standing.category_id === selectedCategoryData.id);
+  }, [standings, selectedCategoryData?.id, fetchedCategoryId]);
+
+  // Debug logging
+  console.log('🔍 MatchSchedule Debug:', {
+    selectedCategory,
+    selectedCategoryData: selectedCategoryData ? { id: selectedCategoryData.id, slug: selectedCategoryData.slug, name: selectedCategoryData.name } : null,
+    fetchedCategoryId,
+    availableCategories: availableCategories.map(cat => ({ id: cat.id, slug: cat.slug, name: cat.name })),
+    matchesCount: matches.length,
+    standingsCount: standings.length,
+    categoryStandingsCount: categoryStandings.length
+  });
 
   const loading = matchesLoading || standingsLoading;
 
@@ -174,7 +193,7 @@ export default function MatchSchedule({
             variant="underlined"
           >
             {availableCategories.map((category) => (
-              <Tab key={category.code} title={category.name} />
+              <Tab key={category.id} title={category.name} />
             ))}
           </Tabs>
         ) : showOnlyAssignedCategories ? (
@@ -205,7 +224,7 @@ export default function MatchSchedule({
 
             {/* Right Column - Standings */}
             <CategoryStandingsTable
-              standings={standings}
+              standings={categoryStandings}
               standingsLoading={standingsLoading}
             />
           </div>
