@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Button, Input, Card, CardBody, CardHeader } from '@heroui/react';
 import { LockClosedIcon, EyeIcon, EyeSlashIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import { Heading1 } from '@/components';
+import { Heading } from '@/components';
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -288,9 +288,9 @@ function ResetPasswordContent() {
             <LockClosedIcon className="w-8 h-8 text-white" />
           </div>
           <div>
-          <Heading1>
+          <Heading size={1}>
             {!user && !supabaseError ? 'Obnovit heslo' : 'Nastavit nové heslo'}
-          </Heading1>
+          </Heading>
           <p className="text-gray-600 dark:text-gray-300 text-sm">
             {!user && !supabaseError 
               ? 'Zadejte svou emailovou adresu a my vám pošleme odkaz pro obnovení hesla'

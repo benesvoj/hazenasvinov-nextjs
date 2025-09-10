@@ -72,8 +72,7 @@ export { UnifiedSidebar } from './UnifiedSidebar';
 export { UnifiedSidebarProvider, useUnifiedSidebar } from './UnifiedSidebarContext';
 export { CoachPortalCategoryDialog } from './CoachPortalCategoryDialog';
 
-// Headings
-export { Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Heading } from './Headings';
+export { Heading } from './Headings';
 
 export { showToast, useToast } from './Toast';
 

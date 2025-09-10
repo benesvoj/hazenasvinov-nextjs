@@ -1,59 +1,18 @@
-import { Nullish } from "@/types";
-import { useMemo } from "react";
-
 /**
- * @description Headings component, NEEDS to be analysed
- * @param param0 { children: React.ReactNode }
+ * @description Heading component
+ * @param param0 { size: HeadingLevel, children: React.ReactNode }
  * @returns React.ReactNode
+ * @example
+ * <Heading size={1}>Heading 1</Heading>
+ * <Heading size={2}>Heading 2</Heading>
+ * <Heading size={3}>Heading 3</Heading>
+ * <Heading size={4}>Heading 4</Heading>
+ * <Heading size={5}>Heading 5</Heading>
+ * <Heading size={6}>Heading 6</Heading>
  */
 
-export const Heading1 = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-      {children}
-    </h1>
-  );
-};
-
-export const Heading2 = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 my-4">
-      {children}
-    </h2>
-  );
-};
-
-export const Heading3 = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-      {children}
-    </h3>
-  );
-};
-
-export const Heading4 = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <h4 className="text-base font-bold text-gray-900 dark:text-gray-100 py-4">
-      {children}
-    </h4>
-  );
-};
-
-export const Heading5 = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <h5 className="text-sm font-bold text-gray-900 dark:text-gray-100">
-      {children}
-    </h5>
-  );
-};
-
-export const Heading6 = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <h6 className="text-xs font-bold text-gray-900 dark:text-gray-100">
-      {children}
-    </h6>
-  );
-};
+import { Nullish } from "@/types";
+import { useMemo } from "react";
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type HeadingAlign = "start" | "center" | "end";

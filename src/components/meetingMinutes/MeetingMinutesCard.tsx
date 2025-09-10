@@ -13,7 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button, Card, CardBody, Chip, User } from "@heroui/react";
 import { translations } from "@/lib/translations";
-import { Heading3, Heading4 } from "@/components";
+import { Heading } from "@/components";
 import { formatDateString } from "@/helpers";
 interface MeetingMinutesCardProps {
   meeting: MeetingMinutes;
@@ -61,10 +61,10 @@ export function MeetingMinutesCard({
     <Card key={meeting.id} className="hover:shadow-lg transition-shadow">
       <CardBody>
         <div className="flex justify-between items-start mb-4">
-          <div>
-            <Heading3>
+          <div> 
+            <Heading size={3}>
               {t.meetingNumber} #{meeting.meeting_number}
-            </Heading3>
+            </Heading>
             <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
               <div className="flex items-center gap-1">
                 <CalendarIcon className="w-4 h-4" />
@@ -114,9 +114,9 @@ export function MeetingMinutesCard({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <Heading4>
+            <Heading size={4}>
               {t.meetingDetails}
-            </Heading4>
+            </Heading>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <UserIcon className="w-4 h-4 text-gray-400" />
@@ -158,9 +158,9 @@ export function MeetingMinutesCard({
           </div>
 
           <div>
-            <Heading4>
+            <Heading size={4}>
               {t.attendanceList}
-            </Heading4>
+            </Heading>
             {meeting.attendees && meeting.attendees.length > 0 ? (
               <div className="space-y-3">
                 <div className="overflow-y-auto">

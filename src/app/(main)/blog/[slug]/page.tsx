@@ -15,10 +15,9 @@ import {
   ArrowLeftIcon,
   ShareIcon,
   BookmarkIcon,
-  PhotoIcon,
 } from "@heroicons/react/24/outline";
 import { translations } from "@/lib/translations";
-import { BlogPostCard, Heading2, MatchInfo } from "@/components";
+import { BlogPostCard, Heading, MatchInfo } from "@/components";
 import BlogContent from "@/components/BlogContent";
 
 export default function BlogPostPage() {
@@ -183,7 +182,7 @@ export default function BlogPostPage() {
       {/* Related Posts */}
       {relatedPosts.length > 0 && (
         <section>
-          <Heading2>Související články</Heading2>
+          <Heading size={2}>Související články</Heading>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {relatedPosts.map((relatedPost) => (
               <BlogPostCard key={relatedPost.id} post={relatedPost} />

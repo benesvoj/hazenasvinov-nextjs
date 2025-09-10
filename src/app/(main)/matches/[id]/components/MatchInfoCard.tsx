@@ -4,7 +4,7 @@ import { translations } from "@/lib/translations";
 import { formatTime } from "@/helpers/formatTime";
 import { CalendarIcon, ClockIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { Match } from "@/types";
-import { Heading2 } from "@/components";
+import { Heading } from "@/components";
 import { formatDateWithWeekday } from "@/helpers/formatDate";
 
 interface MatchInfoCardProps {
@@ -16,7 +16,7 @@ export default function MatchInfoCard({ match }: MatchInfoCardProps) {
     <Card>
       <CardHeader className="items-center flex flex-col gap-2">
         {/* Competition Info */}
-        <Heading2>{match.category.name}</Heading2>
+        <Heading size={2}>{match.category.name}</Heading>
         <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
           {match.category.description}
           {match.matchweek && ` - ${match.matchweek}. kolo`}
