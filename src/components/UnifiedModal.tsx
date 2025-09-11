@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Modal,
   ModalContent,
@@ -8,20 +8,20 @@ import {
   useDisclosure,
   ModalProps,
   Button,
-} from "@heroui/react";
-import { Heading, HeadingLevel } from "./Headings";
-import { translations } from "@/lib/translations";
+} from '@heroui/react';
+import { Heading, HeadingLevel } from './Headings';
+import { translations } from '@/lib/translations';
 
 interface UnifiedModalProps
-  extends Omit<ModalProps, "isOpen" | "onOpenChange"> {
+  extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "full";
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
   showCloseButton?: boolean;
-  scrollBehavior?: "inside" | "outside";
+  scrollBehavior?: 'inside' | 'outside';
   hSize?: HeadingLevel;
   actions?: React.ReactNode;
   isFooterWithActions?: boolean;
@@ -35,8 +35,8 @@ export default function UnifiedModal({
   title,
   children,
   footer,
-  size = "2xl",
-  scrollBehavior = "inside",
+  size = '2xl',
+  scrollBehavior = 'inside',
   hSize = 2,
   actions,
   isFooterWithActions = false,
@@ -53,10 +53,10 @@ export default function UnifiedModal({
       size={size}
       scrollBehavior={scrollBehavior}
       classNames={{
-        wrapper: "items-center justify-center p-2 sm:p-4",
-        body: "max-h-[80vh] overflow-y-auto",
-        header: "pb-2",
-        footer: "pt-2",
+        wrapper: 'items-center justify-center p-2 sm:p-4',
+        body: 'max-h-[80vh] overflow-y-auto',
+        header: 'pb-2',
+        footer: 'pt-2',
       }}
       {...props}
     >
@@ -110,3 +110,4 @@ export const useCustomModal = () => {
     onToggle: () => (isOpen ? onClose() : onOpen()),
   };
 };
+// Test comment

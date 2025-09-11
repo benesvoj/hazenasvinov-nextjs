@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Run lint-staged (runs ESLint, Prettier, and TypeScript on staged files)
 echo "🔍 Running pre-commit checks on staged files..."
 npx lint-staged
