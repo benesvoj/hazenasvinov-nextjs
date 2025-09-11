@@ -1,20 +1,28 @@
 'use client';
 
-import React from "react";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Match } from "@/types";
+import React, {ChangeEvent} from 'react';
+import {Button} from '@heroui/button';
+import {Input} from '@heroui/input';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+import {Match} from '@/types';
+import {NumberInput} from '@heroui/react';
 
 interface AddResultModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedMatch: Match | null;
   resultData: {
-    home_score: string;
-    away_score: string;
+    home_score: number;
+    away_score: number;
+    home_score_halftime: number;
+    away_score_halftime: number;
   };
-  onResultDataChange: (data: { home_score: string; away_score: string }) => void;
+  onResultDataChange: (data: {
+    home_score: number;
+    away_score: number;
+    home_score_halftime: number;
+    away_score_halftime: number;
+  }) => void;
   onUpdateResult: () => void;
   isSeasonClosed: boolean;
 }
@@ -26,26 +34,29 @@ export default function AddResultModal({
   resultData,
   onResultDataChange,
   onUpdateResult,
-  isSeasonClosed
+  isSeasonClosed,
 }: AddResultModalProps) {
-  const handleScoreChange = (field: 'home_score' | 'away_score', value: string) => {
+  const handleScoreChange = (
+    field: 'home_score' | 'away_score' | 'home_score_halftime' | 'away_score_halftime',
+    value: number | ChangeEvent<HTMLInputElement>
+  ) => {
     onResultDataChange({
       ...resultData,
-      [field]: value
+      [field]: value,
     });
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
+    <Modal
+      isOpen={isOpen}
       onClose={onClose}
       size="sm"
       classNames={{
-        base: "max-w-[95vw] sm:max-w-xl mx-2",
-        wrapper: "items-center justify-center p-2 sm:p-4",
-        body: "px-4 py-4",
-        header: "px-4 py-4",
-        footer: "px-4 py-4"
+        base: 'max-w-[95vw] sm:max-w-xl mx-2',
+        wrapper: 'items-center justify-center p-2 sm:p-4',
+        body: 'px-4 py-4',
+        header: 'px-4 py-4',
+        footer: 'px-4 py-4',
       }}
       placement="center"
       scrollBehavior="inside"
@@ -59,7 +70,8 @@ export default function AddResultModal({
             <div className="space-y-4">
               <div className="text-center">
                 <h3 className="font-semibold mb-2 text-sm sm:text-base">
-                  {selectedMatch.home_team?.name || 'Neznámý tým'} vs {selectedMatch.away_team?.name || 'Neznámý tým'}
+                  {selectedMatch.home_team?.name || 'Neznámý tým'} vs{' '}
+                  {selectedMatch.away_team?.name || 'Neznámý tým'}
                 </h3>
                 <p className="text-sm text-gray-600">
                   {new Date(selectedMatch.date).toLocaleDateString('cs-CZ')}
@@ -67,11 +79,10 @@ export default function AddResultModal({
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
                 <div className="flex-1 w-full">
-                  <Input
+                  <NumberInput
                     label={`Skóre ${selectedMatch.home_team?.name || 'Domácí tým'}`}
-                    type="number"
                     value={resultData.home_score}
-                    onChange={(e) => handleScoreChange('home_score', e.target.value)}
+                    onChange={(value) => handleScoreChange('home_score', value)}
                     isDisabled={isSeasonClosed}
                     className="w-full"
                     size="lg"
@@ -79,11 +90,34 @@ export default function AddResultModal({
                 </div>
                 <span className="text-2xl font-bold text-center">:</span>
                 <div className="flex-1 w-full">
-                  <Input
+                  <NumberInput
                     label={`Skóre ${selectedMatch.away_team?.name || 'Hostující tým'}`}
-                    type="number"
                     value={resultData.away_score}
-                    onChange={(e) => handleScoreChange('away_score', e.target.value)}
+                    onChange={(value) => handleScoreChange('away_score', value)}
+                    isDisabled={isSeasonClosed}
+                    className="w-full"
+                    size="lg"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+                <div className="flex-1 w-full">
+                  <NumberInput
+                    label={`Skóre ${selectedMatch.home_team?.name || 'Domácí tým'}`}
+                    value={resultData.home_score_halftime}
+                    onChange={(value) => handleScoreChange('home_score_halftime', value)}
+                    isDisabled={isSeasonClosed}
+                    className="w-full"
+                    size="lg"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+                <div className="flex-1 w-full">
+                  <NumberInput
+                    label={`Skóre ${selectedMatch.away_team?.name || 'Hostující tým'}`}
+                    value={resultData.away_score_halftime}
+                    onChange={(value) => handleScoreChange('away_score_halftime', value)}
                     isDisabled={isSeasonClosed}
                     className="w-full"
                     size="lg"
@@ -94,17 +128,17 @@ export default function AddResultModal({
           )}
         </ModalBody>
         <ModalFooter className="flex flex-col sm:flex-row gap-2">
-          <Button 
-            color="danger" 
-            variant="flat" 
+          <Button
+            color="danger"
+            variant="flat"
             onPress={onClose}
             className="w-full sm:w-auto"
             size="lg"
           >
             Zrušit
           </Button>
-          <Button 
-            color="primary" 
+          <Button
+            color="primary"
             onPress={onUpdateResult}
             isDisabled={isSeasonClosed}
             className="w-full sm:w-auto"

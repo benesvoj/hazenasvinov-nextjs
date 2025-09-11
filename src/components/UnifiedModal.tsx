@@ -51,6 +51,7 @@ export default function UnifiedModal({
       onClose={onClose}
       size={size}
       scrollBehavior={scrollBehavior}
+      backdrop="blur"
       classNames={{
         wrapper: 'items-center justify-center p-2 sm:p-4',
         body: 'max-h-[80vh] overflow-y-auto',

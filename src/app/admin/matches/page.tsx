@@ -167,8 +167,10 @@ export default function MatchesAdminPage() {
   });
 
   const [resultData, setResultData] = useState({
-    home_score: '',
-    away_score: '',
+    home_score: 0,
+    away_score: 0,
+    home_score_halftime: 0,
+    away_score_halftime: 0,
   });
 
   const [editData, setEditData] = useState({
@@ -177,8 +179,10 @@ export default function MatchesAdminPage() {
     home_team_id: '',
     away_team_id: '',
     venue: '',
-    home_score: '',
-    away_score: '',
+    home_score: 0,
+    away_score: 0,
+    home_score_halftime: 0,
+    away_score_halftime: 0,
     status: 'completed' as 'upcoming' | 'completed',
     matchweek: '',
     match_number: '',
@@ -451,14 +455,13 @@ export default function MatchesAdminPage() {
         return;
       }
 
-      const homeScore = parseInt(resultData.home_score);
-      const awayScore = parseInt(resultData.away_score);
-
       const {error} = await supabase
         .from('matches')
         .update({
-          home_score: homeScore,
-          away_score: awayScore,
+          home_score: resultData.home_score,
+          away_score: resultData.away_score,
+          home_score_halftime: resultData.home_score_halftime,
+          away_score_halftime: resultData.away_score_halftime,
           status: matchStatusesKeys[1],
         })
         .eq('id', selectedMatch.id);
@@ -466,7 +469,7 @@ export default function MatchesAdminPage() {
       if (error) throw error;
 
       onAddResultClose();
-      setResultData({home_score: '', away_score: ''});
+      setResultData({home_score: 0, away_score: 0, home_score_halftime: 0, away_score_halftime: 0});
       setSelectedMatch(null);
       // Refresh matches to show updated data
       refreshMatches();
@@ -539,8 +542,10 @@ export default function MatchesAdminPage() {
       home_team_id: match.home_team_id,
       away_team_id: match.away_team_id,
       venue: match.venue,
-      home_score: match.home_score?.toString() || '',
-      away_score: match.away_score?.toString() || '',
+      home_score: match.home_score ?? 0,
+      away_score: match.away_score ?? 0,
+      home_score_halftime: match.home_score_halftime ?? 0,
+      away_score_halftime: match.away_score_halftime ?? 0,
       status: match.status,
       matchweek: match.matchweek ? match.matchweek.toString() : '',
       match_number: match.match_number ? match.match_number.toString() : '',
@@ -604,8 +609,12 @@ export default function MatchesAdminPage() {
 
       // Only update scores if they are provided
       if (editData.home_score && editData.away_score) {
-        updateData.home_score = parseInt(editData.home_score);
-        updateData.away_score = parseInt(editData.away_score);
+        updateData.home_score = editData.home_score;
+        updateData.away_score = editData.away_score;
+      }
+      if (editData.home_score_halftime && editData.away_score_halftime) {
+        updateData.home_score_halftime = editData.home_score_halftime;
+        updateData.away_score_halftime = editData.away_score_halftime;
       }
 
       const {error} = await supabase.from('matches').update(updateData).eq('id', selectedMatch.id);
@@ -622,8 +631,10 @@ export default function MatchesAdminPage() {
         home_team_id: '',
         away_team_id: '',
         venue: '',
-        home_score: '',
-        away_score: '',
+        home_score: 0,
+        away_score: 0,
+        home_score_halftime: 0,
+        away_score_halftime: 0,
         status: 'completed',
         matchweek: '',
         match_number: '',
@@ -898,7 +909,7 @@ export default function MatchesAdminPage() {
               ariaLabel={t.actions.deleteAllMatches}
               isIconOnly
               isDanger
-              variant="solid"
+              variant="ghost"
             >
               <TrashIcon className="w-4 h-4" />
             </ButtonWithTooltip>

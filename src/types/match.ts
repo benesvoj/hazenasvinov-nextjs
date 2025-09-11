@@ -1,7 +1,7 @@
 import {Category} from './category';
 import {Season} from './season';
 import {Team} from './team';
-import {matchStatusesKeys} from '@/constants';
+import {Nullish} from './Nullish';
 
 export type MatchStatus = 'upcoming' | 'completed';
 export interface Match {
@@ -18,10 +18,10 @@ export interface Match {
   competition: string;
   is_home: boolean;
   status: MatchStatus;
-  home_score?: number;
-  away_score?: number;
-  home_score_halftime?: number;
-  away_score_halftime?: number;
+  home_score?: number | Nullish;
+  away_score?: number | Nullish;
+  home_score_halftime?: number | Nullish;
+  away_score_halftime?: number | Nullish;
   matchweek?: number;
   match_number?: number;
   category: Category;
