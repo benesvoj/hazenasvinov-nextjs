@@ -20,8 +20,8 @@ export interface Match {
   status: MatchStatus;
   home_score?: number;
   away_score?: number;
-  home_team_halftime_score?: number;
-  away_team_halftime_score?: number;
+  home_score_halftime?: number;
+  away_score_halftime?: number;
   matchweek?: number;
   match_number?: number;
   category: Category;
