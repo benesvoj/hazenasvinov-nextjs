@@ -260,10 +260,6 @@ export default function MatchesAdminPage() {
 
   // Update filtered teams when category or season changes
   useEffect(() => {
-    console.log('Category/Season changed:', {
-      selectedCategory,
-      selectedSeason,
-    });
     if (selectedCategory && selectedSeason) {
       fetchFilteredTeams(selectedCategory, selectedSeason);
     } else {
@@ -273,7 +269,6 @@ export default function MatchesAdminPage() {
 
   // Initial data fetch
   useEffect(() => {
-    console.log('🔍 Initial data fetch started');
     fetchCategoriesFull();
     fetchSeasonsWithActive();
     fetchTeams();
@@ -537,14 +532,6 @@ export default function MatchesAdminPage() {
 
   // Open edit match modal
   const handleEditMatch = (match: Match) => {
-    console.log('🔍 handleEditMatch called with match:', match);
-    console.log('🔍 Current filteredTeams state:', {
-      count: filteredTeams.length,
-      teams: filteredTeams.map((t) => ({id: t.id, name: t.name})),
-    });
-    console.log('🔍 Match category_id:', match.category_id);
-    console.log('🔍 Selected category:', selectedCategory);
-
     setSelectedMatch(match);
     setEditData({
       date: match.date,
@@ -562,7 +549,6 @@ export default function MatchesAdminPage() {
 
     // Ensure filteredTeams is loaded for this category
     if (match.category_id && selectedSeason && filteredTeams.length === 0) {
-      console.log('🔄 filteredTeams is empty, forcing refresh...');
       fetchFilteredTeams(match.category_id, selectedSeason);
     }
 
@@ -942,7 +928,6 @@ export default function MatchesAdminPage() {
             selectedKeys={selectedSeason ? [selectedSeason] : []}
             onSelectionChange={(keys) => {
               const selectedKey = Array.from(keys)[0] as string;
-              // console.log('Season selection changed:', { keys, selectedKey });
               setSelectedSeason(selectedKey || '');
             }}
             className="w-full"
@@ -970,7 +955,6 @@ export default function MatchesAdminPage() {
                   aria-label="Categories"
                   selectedKey={selectedCategory}
                   onSelectionChange={(key) => {
-                    // console.log('Category selected:', key);
                     setSelectedCategory(key as string);
                   }}
                 >

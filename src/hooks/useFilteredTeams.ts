@@ -1,33 +1,33 @@
-import { useState, useCallback } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import {useState, useCallback} from 'react';
+import {createClient} from '@/utils/supabase/client';
 interface FilteredTeam {
   id: string;
   name: string;
   display_name?: string;
   venue?: string;
 }
-import { getTeamDisplayNameSafe } from '@/utils/teamDisplay';
+import {getTeamDisplayNameSafe} from '@/utils/teamDisplay';
 
 /**
  * Hook for fetching and filtering teams for a specific category and season
- * 
+ *
  * @returns {Object} Object containing:
  *   - filteredTeams: Array of teams filtered by category and season
  *   - loading: Loading state
  *   - error: Error state
  *   - fetchFilteredTeams: Function to fetch teams for a category/season
  *   - clearTeams: Function to clear teams and reset state
- * 
+ *
  * @example
  * ```tsx
  * const { filteredTeams, loading, error, fetchFilteredTeams, clearTeams } = useFilteredTeams();
- * 
+ *
  * useEffect(() => {
  *   if (categoryId && seasonId) {
  *     fetchFilteredTeams(categoryId, seasonId);
  *   }
  * }, [categoryId, seasonId, fetchFilteredTeams]);
- * 
+ *
  * return (
  *   <Select>
  *     {filteredTeams.map(team => (
@@ -52,13 +52,12 @@ export function useFilteredTeams() {
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('🔍 Fetching teams for category:', categoryId, 'season:', seasonId);
-      
+
       const supabase = createClient();
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('club_categories')
-        .select(`
+        .select(
+          `
           club_id,
           club:clubs(
             id,
@@ -72,7 +71,8 @@ export function useFilteredTeams() {
             team_suffix,
             is_active
           )
-        `)
+        `
+        )
         .eq('category_id', categoryId)
         .eq('season_id', seasonId)
         .eq('is_active', true);
@@ -84,35 +84,35 @@ export function useFilteredTeams() {
         return;
       }
 
-      console.log('✅ Club categories data:', data);
-      
-      const teamsData = data?.flatMap((item: any) => {
-        // Check if this club has multiple teams in this category
-        const teamCount = item.club_category_teams?.length || 0;
-        
-        return item.club_category_teams?.map((ct: any) => {
-          // Use the utility function for consistent team name logic
-          const displayName = getTeamDisplayNameSafe(
-            item.club.name, 
-            ct.team_suffix, 
-            teamCount, 
-            "Neznámý tým"
-          );
-          
-          return {
-            id: ct.id,
-            name: displayName,
-            club_id: item.club.id,
-            club_name: item.club.name,
-            team_suffix: ct.team_suffix,
-            display_name: displayName,
-            is_active: ct.is_active,
-            venue: item.club.venue
-          };
-        }) || [];
-      }) || [];
+      const teamsData =
+        data?.flatMap((item: any) => {
+          // Check if this club has multiple teams in this category
+          const teamCount = item.club_category_teams?.length || 0;
 
-      console.log('🔄 Transformed teams data:', teamsData);
+          return (
+            item.club_category_teams?.map((ct: any) => {
+              // Use the utility function for consistent team name logic
+              const displayName = getTeamDisplayNameSafe(
+                item.club.name,
+                ct.team_suffix,
+                teamCount,
+                'Neznámý tým'
+              );
+
+              return {
+                id: ct.id,
+                name: displayName,
+                club_id: item.club.id,
+                club_name: item.club.name,
+                team_suffix: ct.team_suffix,
+                display_name: displayName,
+                is_active: ct.is_active,
+                venue: item.club.venue,
+              };
+            }) || []
+          );
+        }) || [];
+
       setFilteredTeams(teamsData);
       setError(null);
     } catch (error) {
@@ -134,6 +134,6 @@ export function useFilteredTeams() {
     loading,
     error,
     fetchFilteredTeams,
-    clearTeams
+    clearTeams,
   };
 }
