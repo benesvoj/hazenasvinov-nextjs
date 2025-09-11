@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Select, SelectItem, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@heroui/react";
-import { CategoryNew, Match } from "@/types";
+import { Category, Match } from "@/types";
 
 interface BulkUpdateMatchweekModalProps {
   isOpen: boolean;
@@ -14,7 +14,7 @@ interface BulkUpdateMatchweekModalProps {
   };
   onBulkUpdateDataChange: (data: { categoryId: string; matchweek: string; action: 'set' | 'remove' }) => void;
   onBulkUpdate: () => void;
-  categories: CategoryNew[];
+  categories: Category[];
   matches: Match[];
   getMatchweekOptions: () => Array<{ value: string; label: string }>;
   isSeasonClosed: boolean;

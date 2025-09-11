@@ -30,7 +30,7 @@ import { useExcelImport } from "@/hooks/useExcelImport";
 // TODO: use proper types
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
 import { useTeamDisplayLogic } from "@/hooks/useTeamDisplayLogic";
-import { Match, CategoryNew } from "@/types";
+import { Match, Category } from "@/types";
 import {
   useSeasons,
   useFilteredTeams,

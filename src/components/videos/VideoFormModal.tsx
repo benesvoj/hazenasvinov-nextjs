@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Video, VideoFormData, CategoryNew, Club } from "@/types";
+import { Video, VideoFormData, Category, Club } from "@/types";
 import { useCategories } from "@/hooks/useCategories";
 import { useSeasons } from "@/hooks/useSeasons";
 import {
@@ -24,7 +24,7 @@ interface VideoFormModalProps {
   onSubmit: (formData: VideoFormData) => void;
   video?: Video | null;
   clubs: Club[];
-  availableCategories?: CategoryNew[]; // For coaches - only show assigned categories
+  availableCategories?: Category[]; // For coaches - only show assigned categories
 }
 
 export function VideoFormModal({

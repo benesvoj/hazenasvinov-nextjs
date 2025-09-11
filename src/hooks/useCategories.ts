@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { CategoryNew } from '@/types';
+import { Category } from '@/types';
 
 export function useCategories() {
-  const [categories, setCategories] = useState<CategoryNew[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

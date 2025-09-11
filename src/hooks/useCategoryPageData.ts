@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { CategoryNew, Match, BlogPost } from '@/types';
+import { Category, Match, BlogPost } from '@/types';
 
 export interface CategoryPageData {
-  category: CategoryNew | null;
+  category: Category | null;
   matches: {
     autumn: Match[];
     spring: Match[];

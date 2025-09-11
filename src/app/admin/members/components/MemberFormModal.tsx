@@ -12,7 +12,7 @@ import {
   Chip,
 } from "@heroui/react";
 import { translations } from "@/lib/translations";
-import { CategoryNew } from "@/types";
+import { Category } from "@/types";
 import { Member } from "@/types/member";
 
 interface MemberFormModalProps {
@@ -22,7 +22,7 @@ interface MemberFormModalProps {
   title: string;
   formData: Member;
   setFormData: (data: Member) => void;
-  categories: CategoryNew[];
+  categories: Category[];
   sexOptions: Record<string, string>;
   functionOptions: Record<string, string>;
   submitButtonText: string;

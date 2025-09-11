@@ -1,4 +1,4 @@
-import { CategoryNew } from "@/types";
+import { Category } from "@/types";
 import { GenderType } from "@/constants";
 
 /**
@@ -13,7 +13,7 @@ export const getCategoryName = (categoryCode: string, categories: Record<string,
  * Get the display name for a category by ID
  * Updated for the new category system using IDs
  */
-export const getCategoryNameById = (categoryId: string, categories: CategoryNew[] | null) => {
+export const getCategoryNameById = (categoryId: string, categories: Category[] | null) => {
   if (!categories) return categoryId;
   const category = categories.find(cat => cat.id === categoryId);
   return category?.name || categoryId;
@@ -22,7 +22,7 @@ export const getCategoryNameById = (categoryId: string, categories: CategoryNew[
 /**
  * Get the appropriate badge color for a category based on gender and name
  */
-export const getCategoryBadgeColor = (categoryId: string, categoriesData: CategoryNew[] | null) => {
+export const getCategoryBadgeColor = (categoryId: string, categoriesData: Category[] | null) => {
   if (!categoriesData) return "default";
   
   const categoryData = categoriesData.find(cat => cat.id === categoryId);
@@ -159,7 +159,7 @@ export const sortMembers = (
  * 
  * @deprecated Use convertCategoriesToRecordBySlug instead
  */
-export const convertCategoriesToRecord = (categoriesData: CategoryNew[] | null) => {
+export const convertCategoriesToRecord = (categoriesData: Category[] | null) => {
   if (!categoriesData) return {};
   return categoriesData.reduce((acc, category) => {
     acc[category.slug] = category.name;
@@ -171,7 +171,7 @@ export const convertCategoriesToRecord = (categoriesData: CategoryNew[] | null) 
  * Create reverse mapping from name to ID for form submission
  * Updated to use category ID instead of code for the new system
  */
-export const createCategoryNameToIdMap = (categoriesData: CategoryNew[] | null) => {
+export const createCategoryNameToIdMap = (categoriesData: Category[] | null) => {
   if (!categoriesData) return {};
   return categoriesData.reduce((acc, category) => {
     acc[category.name] = category.id;

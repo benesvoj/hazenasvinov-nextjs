@@ -25,7 +25,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
-import { Member, CategoryNew } from "@/types";
+import { Member, Category } from "@/types";
 import { useAppData } from "@/contexts/AppDataContext";
 import {DeleteConfirmationModal, showToast} from "@/components";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -35,7 +35,7 @@ import BulkEditModal from "./BulkEditModal";
 import { GenderType } from "@/constants";
 
 interface MembersListTabProps {
-  categoriesData: CategoryNew[] | null;
+  categoriesData: Category[] | null;
   functionOptions: Record<string, string>;
   sexOptions: Record<string, string>;
 }

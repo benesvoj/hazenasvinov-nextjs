@@ -2,10 +2,10 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAppData } from '@/contexts/AppDataContext';
-import { CategoryNew } from '@/types';
+import { Category } from '@/types';
 interface AdminCategorySimulationContextType {
   selectedCategories: string[];
-  availableCategories: Array<CategoryNew>;
+  availableCategories: Array<Category>;
   selectCategory: (categoryId: string) => void;
   deselectCategory: (categoryId: string) => void;
   clearSelection: () => void;

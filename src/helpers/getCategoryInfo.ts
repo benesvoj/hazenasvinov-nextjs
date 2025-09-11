@@ -1,6 +1,6 @@
-import { CategoryNew } from "@/types";
+import { Category } from "@/types";
 
-export const getCategoryInfo = (categoryId: string, categories: CategoryNew[]) => {
+export const getCategoryInfo = (categoryId: string, categories: Category[]) => {
     const category = categories.find(c => c.id === categoryId);
     if (!category) return { name: "Neznámá kategorie", competition: "Neznámá soutěž" };
     

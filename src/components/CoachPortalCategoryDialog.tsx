@@ -16,7 +16,7 @@ import {
 import { AcademicCapIcon } from "@heroicons/react/24/outline";
 import { useAdminCategorySimulation } from "@/contexts/AdminCategorySimulationContext";
 import LoadingSpinner from "./LoadingSpinner";
-import { CategoryNew } from "@/types";
+import { Category } from "@/types";
 interface CoachPortalCategoryDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -146,7 +146,7 @@ export function CoachPortalCategoryDialog({
               onSelectionChange={(items) => {
                 setTempSelectedCategories(Array.from(items as Set<string>));
               }}
-              renderValue={(items: SelectedItems<CategoryNew>) => {
+              renderValue={(items: SelectedItems<Category>) => {
                 return (
                   <div className="flex flex-wrap gap-2 py-2">
                     {items.map((item) => (

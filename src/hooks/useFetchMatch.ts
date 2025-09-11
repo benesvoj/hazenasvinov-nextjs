@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { translations } from '@/lib/translations';
-import { CategoryNew, Season } from '@/types';
+import { Category, Season } from '@/types';
 
 /**
  * TransformedMatch interface for the match data
@@ -39,7 +39,7 @@ interface TransformedMatch {
     logo_url?: string;
     is_own_club: boolean;
   };
-  category: CategoryNew;
+  category: Category;
   season: Season;
 }
 

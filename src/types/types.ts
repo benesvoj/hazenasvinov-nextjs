@@ -1,4 +1,4 @@
-import { CategoryNew } from "./category";
+import { Category } from "./category";
 
 type CategoryProps = {
 	id: string;
@@ -185,13 +185,13 @@ export interface MemberFunction {
 
 export interface MembersListTabProps {
   members: import("@/types/member").Member[];
-  categoriesData: CategoryNew[] | null;
+  categoriesData: Category[] | null;
   functionOptions: Record<string, string>;
   sexOptions: Record<string, string>;
 }
 
 export interface MembersStatisticTabProps {
   members: import("@/types/member").Member[];  
-  categoriesData: CategoryNew[] | null;
+  categoriesData: Category[] | null;
   functionOptions: Record<string, string>;
 }

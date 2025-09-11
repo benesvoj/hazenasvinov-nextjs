@@ -9,13 +9,13 @@ import {
   UserGroupIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Match, CategoryNew } from "@/types";
+import { Match, Category } from "@/types";
 import { formatTime, formatDateString } from "@/helpers";
 import { translations } from "@/lib/translations";
 
 interface CategoryMatchesProps {
   matches: Match[];
-  category: CategoryNew;
+  category: Category;
   expandedMatchweeks: Set<string>;
   toggleMatchweek: (categoryId: string, matchweek: number) => void;
   isMatchweekExpanded: (categoryId: string, matchweek: number) => boolean;

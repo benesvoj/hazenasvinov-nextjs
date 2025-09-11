@@ -13,7 +13,7 @@ import {
   Input,
 } from "@heroui/react";
 import { createClient } from "@/utils/supabase/client";
-import { CategoryNew, Season } from "@/types";
+import { Category, Season } from "@/types";
 
 interface AssignCategoryModalProps {
   isOpen: boolean;
@@ -34,7 +34,7 @@ export default function AssignCategoryModal({
   clubId,
   assignedCategoryIds,
 }: AssignCategoryModalProps) {
-  const [categories, setCategories] = useState<CategoryNew[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

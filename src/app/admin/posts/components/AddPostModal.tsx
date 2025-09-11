@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, Image } from "@heroui/react";
 import { PhotoIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { CategoryNew, Match } from "@/types";
+import { Category, Match } from "@/types";
 import { postStatuses } from "@/constants";
 import { generateSlug } from "@/utils/slugGenerator";
 import { formatDateString } from "@/helpers";
@@ -20,7 +20,7 @@ interface AddPostModalProps {
   onClose: () => void;
   onSubmit: (formData: any, imageFile: File | null) => Promise<void>;
   users: User[];
-  categories: CategoryNew[];
+  categories: Category[];
   categoriesLoading: boolean;
 }
 

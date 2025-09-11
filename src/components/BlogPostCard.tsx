@@ -4,7 +4,7 @@ import { Card, Button, Chip } from "@heroui/react";
 import Link from "@/components/Link";
 import Image from "next/image";
 import { CalendarIcon } from "@heroicons/react/24/outline";
-import { BlogPostCard as BlogPostCardProps, CategoryNew } from "@/types";
+import { BlogPostCard as BlogPostCardProps, Category } from "@/types";
 import { useAppData } from "@/contexts/AppDataContext";
 import { useCategories } from "@/hooks/useCategories";
 import { formatDateString } from "@/helpers";
@@ -18,8 +18,8 @@ export default function BlogPostCard({
   const isLandingVariant = variant === "landing";
 
   // Always call both hooks to avoid conditional hook calls
-  let appDataCategories: CategoryNew[] = [];
-  let hookCategories: CategoryNew[] = [];
+  let appDataCategories: Category[] = [];
+  let hookCategories: Category[] = [];
   
   try {
     const appData = useAppData();
@@ -40,7 +40,7 @@ export default function BlogPostCard({
     (category) => category.id === post.category_id
   );
 
-  const CategoryChip = ({ category }: { category: CategoryNew }) => {
+  const CategoryChip = ({ category }: { category: Category }) => {
     return (
       <Chip
         size="sm"

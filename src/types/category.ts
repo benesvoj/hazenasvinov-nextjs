@@ -17,7 +17,7 @@ import { GenderType } from "@/constants";
  * @property updated_at - Last update timestamp
  * @property slug - URL-friendly identifier for routing (e.g., 'men', 'women', 'junior-boys')
  */
-export interface CategoryNew {
+export interface Category {
     id: string;
     name: string;
     description?: string;

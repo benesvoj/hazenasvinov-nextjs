@@ -10,7 +10,7 @@ import { Select, SelectItem, Card, CardBody, Button } from "@heroui/react";
 import MatchCard from "@/app/(main)/matches/components/MatchCard";
 import ClubSelector from "@/app/(main)/matches/components/ClubSelector";
 import { formatMonth } from "@/helpers";
-import { Match, CategoryNew } from "@/types";
+import { Match, Category } from "@/types";
 import { translations } from "@/lib/translations";
 import { months as monthsConstants } from "@/constants";
 
@@ -67,7 +67,7 @@ export default function MatchesPage() {
   }, [selectedCategory]);
 
   // Helper function to get all teams from a club in a specific category
-  const getClubTeamsInCategory = useCallback((clubId: string, categoryCode: string, allCategories: CategoryNew[]) => {
+  const getClubTeamsInCategory = useCallback((clubId: string, categoryCode: string, allCategories: Category[]) => {
     // The ClubSelector now properly handles both "all" and specific category cases
     // Just return the teams for the selected club
     return clubTeamMap[clubId] || [];

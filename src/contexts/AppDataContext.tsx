@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Season, CategoryNew, Member, Club } from '@/types';
+import { Season, Category, Member, Club } from '@/types';
 
 interface AppDataContextType {
   // Data
   seasons: Season[];
-  categories: CategoryNew[];
+  categories: Category[];
   members: Member[];
   clubs: Club[];
   
@@ -86,7 +86,7 @@ const getCachedData = async <T,>(
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [seasons, setSeasons] = useState<Season[]>([]);
-  const [categories, setCategories] = useState<CategoryNew[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   
@@ -120,7 +120,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   // Fetch categories
-  const fetchCategories = useCallback(async (): Promise<CategoryNew[]> => {
+  const fetchCategories = useCallback(async (): Promise<Category[]> => {
     return getCachedData('categories', async () => {
       const { data, error } = await supabase
         .from('categories')

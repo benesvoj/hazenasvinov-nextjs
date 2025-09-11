@@ -10,7 +10,7 @@ import {
   SelectItem,
   Checkbox,
 } from "@heroui/react";
-import { CategoryNew } from "@/types";
+import { Category } from "@/types";
 import { GenderType } from "@/constants";
 interface BulkEditFormData {
   sex: GenderType;
@@ -25,7 +25,7 @@ interface BulkEditModalProps {
   selectedCount: number;
   formData: BulkEditFormData;
   setFormData: React.Dispatch<React.SetStateAction<BulkEditFormData>>;
-  categories: CategoryNew[];
+  categories: Category[];
   functionOptions: Record<string, string>;
   isLoading: boolean;
 }

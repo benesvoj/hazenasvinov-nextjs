@@ -7,7 +7,7 @@ import { Input, Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { PhotoIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
-import { BlogPost, CategoryNew, Match } from "@/types";
+import { BlogPost, Category, Match } from "@/types";
 import { generateSlug } from "@/utils/slugGenerator";
 import { formatDateString } from "@/helpers";
 import MatchSelectionModal from "./MatchSelectionModal";
@@ -23,7 +23,7 @@ interface EditPostModalProps {
   onSubmit: (formData: any, imageFile: File | null) => Promise<void>;
   post: BlogPost | null;
   users: User[];
-  categories: CategoryNew[];
+  categories: Category[];
   categoriesLoading: boolean;
 }
 

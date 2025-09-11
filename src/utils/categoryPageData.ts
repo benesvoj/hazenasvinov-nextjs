@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import {
-  CategoryNew,
+  Category,
   Match,
   BlogPost,
   ProcessedStanding,
@@ -8,7 +8,7 @@ import {
 } from "@/types";
 
 export interface CategoryPageServerData {
-  category: CategoryNew | null;
+  category: Category | null;
   matches: {
     autumn: Match[];
     spring: Match[];
