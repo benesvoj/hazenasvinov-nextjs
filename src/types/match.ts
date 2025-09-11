@@ -1,7 +1,9 @@
 import {Category} from './category';
 import {Season} from './season';
 import {Team} from './team';
+import {matchStatusesKeys} from '@/constants';
 
+export type MatchStatus = 'upcoming' | 'completed';
 export interface Match {
   id: string;
   category_id: string;
@@ -15,18 +17,18 @@ export interface Match {
   venue: string;
   competition: string;
   is_home: boolean;
-  status: 'upcoming' | 'completed';
+  status: MatchStatus;
   home_score?: number;
   away_score?: number;
   home_team_halftime_score?: number;
   away_team_halftime_score?: number;
-  result?: 'win' | 'loss' | 'draw';
   matchweek?: number;
   match_number?: number;
   category: Category;
   season: Season;
-  post_id?: string; // Optional reference to related blog post
-  // Additional properties for transformed data
+  /** Optional reference to related blog post */
+  post_id?: string;
+  /** Additional properties for transformed data */
   home_team_is_own_club?: boolean;
   away_team_is_own_club?: boolean;
   home_team_logo?: string;

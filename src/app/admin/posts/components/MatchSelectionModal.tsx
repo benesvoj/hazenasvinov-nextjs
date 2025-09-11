@@ -44,6 +44,8 @@ export default function MatchSelectionModal({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
+  const statusFilterOptions = matchStatuses;
+
   // Use the existing hook to fetch matches (only when modal is open and categoryId is provided)
   const {
     matches: seasonalMatches,
@@ -177,9 +179,12 @@ export default function MatchSelectionModal({
               onSelectionChange={(keys) => setStatusFilter(Array.from(keys)[0] as string)}
               className="w-48"
             >
-              <SelectItem key="all">Všechny stavy</SelectItem>
-              <SelectItem key="upcoming">Nadcházející</SelectItem>
-              <SelectItem key="completed">Dokončené</SelectItem>
+              <>
+                <SelectItem key="all">Všechny stavy</SelectItem>
+                {Object.entries(matchStatuses).map(([key, value]) => (
+                  <SelectItem key={key}>{value}</SelectItem>
+                ))}
+              </>
             </Select>
           </div>
 

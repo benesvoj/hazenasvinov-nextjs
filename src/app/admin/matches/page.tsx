@@ -591,20 +591,7 @@ export default function MatchesAdminPage() {
         return;
       }
 
-      // Calculate result if scores are provided
-      let result = selectedMatch.result;
-      if (editData.home_score && editData.away_score) {
-        const homeScore = parseInt(editData.home_score);
-        const awayScore = parseInt(editData.away_score);
-
-        if (homeScore > awayScore) {
-          result = 'win';
-        } else if (homeScore < awayScore) {
-          result = 'loss';
-        } else {
-          result = 'draw';
-        }
-      }
+      // Result is now computed from scores when needed, no need to store it
 
       const updateData: any = {
         date: editData.date,
@@ -633,7 +620,6 @@ export default function MatchesAdminPage() {
       if (editData.home_score && editData.away_score) {
         updateData.home_score = parseInt(editData.home_score);
         updateData.away_score = parseInt(editData.away_score);
-        updateData.result = result;
       }
 
       const {error} = await supabase.from('matches').update(updateData).eq('id', selectedMatch.id);
