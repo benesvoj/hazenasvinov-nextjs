@@ -284,12 +284,15 @@ export default function BlogPostsPage() {
   };
 
   // Validation function for blog posts
-  const validatePostData = (formData: any, isUpdate: boolean = false) => {
+  const validatePostData = (
+    formData: Omit<BlogPost, 'id' | 'updated_at'>,
+    isUpdate: boolean = false
+  ) => {
     const requiredFields = isUpdate
       ? ['title', 'slug', 'content']
       : ['title', 'slug', 'content', 'status', 'category_id'];
 
-    const missingFields = requiredFields.filter((field) => !formData[field]);
+    const missingFields = requiredFields.filter((field) => !(formData as any)[field]);
 
     if (missingFields.length > 0) {
       const message = isUpdate
@@ -304,7 +307,7 @@ export default function BlogPostsPage() {
   };
 
   // Add new post
-  const addPost = async (formData: any, imageFile: File | null) => {
+  const addPost = async (formData: Omit<BlogPost, 'id' | 'updated_at'>, imageFile: File | null) => {
     try {
       // Validate required fields
       if (!validatePostData(formData, false)) {
@@ -423,7 +426,10 @@ export default function BlogPostsPage() {
   };
 
   // Update existing post
-  const updatePost = async (formData: any, imageFile: File | null) => {
+  const updatePost = async (
+    formData: Omit<BlogPost, 'id' | 'updated_at'>,
+    imageFile: File | null
+  ) => {
     if (!selectedPost) return;
 
     try {

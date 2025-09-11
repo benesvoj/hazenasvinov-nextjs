@@ -1,24 +1,37 @@
 'use client';
 
-import React, { useState } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, Image } from "@heroui/react";
-import { PhotoIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Category, Match } from "@/types";
-import { postStatuses } from "@/constants";
-import { generateSlug } from "@/utils/slugGenerator";
-import { formatDateString } from "@/helpers";
-import MatchSelectionModal from "./MatchSelectionModal";
+import React, {useState} from 'react';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Input,
+  Textarea,
+  Select,
+  SelectItem,
+  Image,
+} from '@heroui/react';
+import {PhotoIcon, XMarkIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
+import {Category, Match, BlogPost} from '@/types';
+import {postStatuses} from '@/constants';
+import {generateSlug} from '@/utils/slugGenerator';
+import {formatDateString} from '@/helpers';
+import MatchSelectionModal from './MatchSelectionModal';
 
 interface User {
   id: string;
   email: string;
 }
-
-// TODO: remove any
 interface AddPostModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (formData: any, imageFile: File | null) => Promise<void>;
+  onSubmit: (
+    formData: Omit<BlogPost, 'id' | 'updated_at'>,
+    imageFile: File | null
+  ) => Promise<void>;
   users: User[];
   categories: Category[];
   categoriesLoading: boolean;
@@ -30,21 +43,21 @@ export default function AddPostModal({
   onSubmit,
   users,
   categories,
-  categoriesLoading
+  categoriesLoading,
 }: AddPostModalProps) {
-  const [formData, setFormData] = useState({
-    title: "",
-    slug: "",
-    content: "",
-    author_id: "",
+  const [formData, setFormData] = useState<Omit<BlogPost, 'id' | 'updated_at'>>({
+    title: '',
+    slug: '',
+    content: '',
+    author_id: '',
     status: postStatuses.draft,
-    image_url: "",
-    category_id: "",
-    match_id: "",
-    created_at: ""
+    image_url: '',
+    category_id: '',
+    match_id: '',
+    created_at: '',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
@@ -56,19 +69,18 @@ export default function AddPostModal({
 
   // Handle form input changes
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({...prev, [field]: value}));
     // Auto-generate slug when title changes
     if (field === 'title') {
-      setFormData(prev => ({ ...prev, slug: generateSlugFromTitle(value) }));
+      setFormData((prev) => ({...prev, slug: generateSlugFromTitle(value)}));
     }
   };
 
   // Handle match selection
   const handleMatchSelect = (match: Match | null) => {
     setSelectedMatch(match);
-    setFormData(prev => ({ ...prev, match_id: match?.id || "" }));
+    setFormData((prev) => ({...prev, match_id: match?.id || ''}));
   };
-
 
   // Handle image file selection
   const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,32 +94,32 @@ export default function AddPostModal({
       reader.readAsDataURL(file);
     } else {
       setImageFile(null);
-      setImagePreview("");
+      setImagePreview('');
     }
   };
 
   // Handle image removal
   const handleRemoveImage = () => {
     setImageFile(null);
-    setImagePreview("");
-    setFormData(prev => ({ ...prev, image_url: "" }));
+    setImagePreview('');
+    setFormData((prev) => ({...prev, image_url: ''}));
   };
 
   // Reset form data
   const resetForm = () => {
     setFormData({
-      title: "",
-      slug: "",
-      content: "",
-      author_id: "default-user",
+      title: '',
+      slug: '',
+      content: '',
+      author_id: 'default-user',
       status: postStatuses.draft,
-      image_url: "",
-      category_id: "",
-      match_id: "",
-      created_at: ""
+      image_url: '',
+      category_id: '',
+      match_id: '',
+      created_at: '',
     });
     setImageFile(null);
-    setImagePreview("");
+    setImagePreview('');
     setSelectedMatch(null);
   };
 
@@ -148,27 +160,29 @@ export default function AddPostModal({
                 label="Autor"
                 placeholder="Vyberte autora"
                 selectedKeys={formData.author_id ? [formData.author_id] : []}
-                onSelectionChange={(keys) => handleInputChange('author_id', Array.from(keys)[0] as string)}
+                onSelectionChange={(keys) =>
+                  handleInputChange('author_id', Array.from(keys)[0] as string)
+                }
                 isRequired
               >
                 {users.map((user) => (
-                  <SelectItem key={user.id}>
-                    {user.email}
-                  </SelectItem>
+                  <SelectItem key={user.id}>{user.email}</SelectItem>
                 ))}
               </Select>
               <Select
                 label="Stav"
                 placeholder="Vyberte stav"
                 selectedKeys={[formData.status]}
-                onSelectionChange={(keys) => handleInputChange('status', Array.from(keys)[0] as string)}
+                onSelectionChange={(keys) =>
+                  handleInputChange('status', Array.from(keys)[0] as string)
+                }
                 isRequired
               >
                 {Object.values(postStatuses).map((status) => (
                   <SelectItem key={status}>{status}</SelectItem>
                 ))}
               </Select>
-              
+
               <Input
                 label="Datum vytvoření"
                 type="datetime-local"
@@ -176,21 +190,21 @@ export default function AddPostModal({
                 onChange={(e) => handleInputChange('created_at', e.target.value)}
                 description="Nechte prázdné pro aktuální datum"
               />
-              
+
               {/* Category Selection */}
               <Select
                 label="Kategorie"
                 placeholder="Vyberte kategorii"
                 selectedKeys={formData.category_id ? [formData.category_id] : []}
-                onSelectionChange={(keys) => handleInputChange('category_id', Array.from(keys)[0] as string)}
+                onSelectionChange={(keys) =>
+                  handleInputChange('category_id', Array.from(keys)[0] as string)
+                }
                 isDisabled={categoriesLoading}
                 isRequired
               >
                 {categories.length > 0 ? (
                   categories.map((category) => (
-                    <SelectItem key={category.id}>
-                      {category.name}
-                    </SelectItem>
+                    <SelectItem key={category.id}>{category.name}</SelectItem>
                   ))
                 ) : (
                   <SelectItem key="no-categories" isDisabled>
@@ -235,9 +249,7 @@ export default function AddPostModal({
                     Vybrat zápas
                   </Button>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
-                  Vyberte zápas pro propojení s článkem
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Vyberte zápas pro propojení s článkem</p>
               </div>
 
               {/* Image Upload */}
@@ -245,7 +257,7 @@ export default function AddPostModal({
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Obrázek článku
                 </label>
-                
+
                 {imagePreview ? (
                   <div className="space-y-3">
                     <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center">
@@ -269,9 +281,7 @@ export default function AddPostModal({
                         startContent={<XMarkIcon className="h-4 w-4" />}
                       />
                     </div>
-                    <p className="text-xs text-gray-500">
-                      Obrázek bude nahrán při uložení článku
-                    </p>
+                    <p className="text-xs text-gray-500">Obrázek bude nahrán při uložení článku</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -293,9 +303,7 @@ export default function AddPostModal({
                           disabled={uploadingImage}
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        PNG, JPG, GIF do 5MB
-                      </p>
+                      <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF do 5MB</p>
                     </div>
                   </div>
                 )}
@@ -327,7 +335,7 @@ export default function AddPostModal({
           </Button>
         </ModalFooter>
       </ModalContent>
-      
+
       {/* Match Selection Modal */}
       <MatchSelectionModal
         isOpen={isMatchModalOpen}

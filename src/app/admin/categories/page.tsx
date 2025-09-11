@@ -1,21 +1,23 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
-import { Badge } from "@heroui/badge";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/react";
-import { 
-  TagIcon,
-  PlusIcon,
-  PencilIcon,
-  TrashIcon
-} from "@heroicons/react/24/outline";
-import { Tabs, Tab } from "@heroui/tabs";
-import { createClient } from "@/utils/supabase/client";
-import { translations } from "@/lib/translations";
+import React, {useState, useEffect, useCallback} from 'react';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Button} from '@heroui/button';
+import {Input} from '@heroui/input';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from '@heroui/modal';
+import {Badge} from '@heroui/badge';
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@heroui/react';
+import {TagIcon, PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {Tabs, Tab} from '@heroui/tabs';
+import {createClient} from '@/utils/supabase/client';
+import {translations} from '@/lib/translations';
 import AddCategoryModal from './components/AddCategoryModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import AddSeasonModal from './components/AddSeasonModal';
@@ -54,40 +56,60 @@ interface Category {
 }
 
 const ageGroups = {
-  adults: "Dospělí",
-  juniors: "Junioři",
-  youth: "Mládež",
-  kids: "Děti"
+  adults: 'Dospělí',
+  juniors: 'Junioři',
+  youth: 'Mládež',
+  kids: 'Děti',
 };
 
 const genders = {
-  male: "Muži",
-  female: "Ženy",
-  mixed: "Smíšené"
+  male: 'Muži',
+  female: 'Ženy',
+  mixed: 'Smíšené',
 };
 
 const competitionTypes = {
-  league: "Liga",
-  league_playoff: "Liga s playoff",
-  tournament: "Turnaj"
+  league: 'Liga',
+  league_playoff: 'Liga s playoff',
+  tournament: 'Turnaj',
 };
 
 export default function CategoriesAdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [seasons, setSeasons] = useState<{id: string; name: string}[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  
+  const [error, setError] = useState('');
+
   // Modal states
-  const { isOpen: isAddCategoryOpen, onOpen: onAddCategoryOpen, onClose: onAddCategoryClose } = useDisclosure();
-  const { isOpen: isEditCategoryOpen, onOpen: onEditCategoryOpen, onClose: onEditCategoryClose } = useDisclosure();
-  const { isOpen: isDeleteCategoryOpen, onOpen: onDeleteCategoryOpen, onClose: onDeleteCategoryClose } = useDisclosure();
-  
+  const {
+    isOpen: isAddCategoryOpen,
+    onOpen: onAddCategoryOpen,
+    onClose: onAddCategoryClose,
+  } = useDisclosure();
+  const {
+    isOpen: isEditCategoryOpen,
+    onOpen: onEditCategoryOpen,
+    onClose: onEditCategoryClose,
+  } = useDisclosure();
+  const {
+    isOpen: isDeleteCategoryOpen,
+    onOpen: onDeleteCategoryOpen,
+    onClose: onDeleteCategoryClose,
+  } = useDisclosure();
+
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  
+
   // Category seasons management
-  const { isOpen: isAddSeasonOpen, onOpen: onAddSeasonOpen, onClose: onAddSeasonClose } = useDisclosure();
-  const { isOpen: isEditSeasonOpen, onOpen: onEditSeasonOpen, onClose: onEditSeasonClose } = useDisclosure();
+  const {
+    isOpen: isAddSeasonOpen,
+    onOpen: onAddSeasonOpen,
+    onClose: onAddSeasonClose,
+  } = useDisclosure();
+  const {
+    isOpen: isEditSeasonOpen,
+    onOpen: onEditSeasonOpen,
+    onClose: onEditSeasonClose,
+  } = useDisclosure();
   const [categorySeasons, setCategorySeasons] = useState<CategorySeason[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<CategorySeason | null>(null);
   const [seasonFormData, setSeasonFormData] = useState({
@@ -96,23 +118,22 @@ export default function CategoriesAdminPage() {
     competition_type: 'league' as 'league' | 'league_playoff' | 'tournament',
     team_count: 0,
     allow_team_duplicates: false,
-    is_active: true
+    is_active: true,
   });
   const [editSeasonFormData, setEditSeasonFormData] = useState({
     matchweek_count: 0,
     competition_type: 'league' as 'league' | 'league_playoff' | 'tournament',
     team_count: 0,
     allow_team_duplicates: false,
-    is_active: true
+    is_active: true,
   });
   const [formData, setFormData] = useState({
-    code: '',
     name: '',
     description: '',
     age_group: '',
     gender: '',
     is_active: true,
-    sort_order: 0
+    sort_order: 0,
   });
 
   const supabase = createClient();
@@ -120,10 +141,10 @@ export default function CategoriesAdminPage() {
   // Fetch seasons
   const fetchSeasons = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('seasons')
         .select('id, name')
-        .order('name', { ascending: true });
+        .order('name', {ascending: true});
 
       if (error) throw error;
       setSeasons(data || []);
@@ -136,11 +157,11 @@ export default function CategoriesAdminPage() {
   const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('categories')
         .select('*')
-        .order('sort_order', { ascending: true })
-        .order('name', { ascending: true });
+        .order('sort_order', {ascending: true})
+        .order('name', {ascending: true});
 
       if (error) throw error;
       setCategories(data || []);
@@ -158,40 +179,43 @@ export default function CategoriesAdminPage() {
   }, [fetchSeasons, fetchCategories]);
 
   // Fetch category seasons
-  const fetchCategorySeasons = useCallback(async (categoryId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('category_seasons')
-        .select(`
+  const fetchCategorySeasons = useCallback(
+    async (categoryId: string) => {
+      try {
+        const {data, error} = await supabase
+          .from('category_seasons')
+          .select(
+            `
           *,
           season:seasons(id, name)
-        `)
-        .eq('category_id', categoryId)
-        .order('created_at', { ascending: false });
+        `
+          )
+          .eq('category_id', categoryId)
+          .order('created_at', {ascending: false});
 
-      if (error) throw error;
-      setCategorySeasons(data || []);
-    } catch (error) {
-      console.error('Error fetching category seasons:', error);
-    }
-  }, [supabase]);
+        if (error) throw error;
+        setCategorySeasons(data || []);
+      } catch (error) {
+        console.error('Error fetching category seasons:', error);
+      }
+    },
+    [supabase]
+  );
 
   // Add season to category
   const handleAddSeason = async () => {
     if (!selectedCategory) return;
 
     try {
-      const { error } = await supabase
-        .from('category_seasons')
-        .insert({
-          category_id: selectedCategory.id,
-          season_id: seasonFormData.season_id,
-          matchweek_count: seasonFormData.matchweek_count,
-          competition_type: seasonFormData.competition_type,
-          team_count: seasonFormData.team_count,
-          allow_team_duplicates: seasonFormData.allow_team_duplicates,
-          is_active: seasonFormData.is_active
-        });
+      const {error} = await supabase.from('category_seasons').insert({
+        category_id: selectedCategory.id,
+        season_id: seasonFormData.season_id,
+        matchweek_count: seasonFormData.matchweek_count,
+        competition_type: seasonFormData.competition_type,
+        team_count: seasonFormData.team_count,
+        allow_team_duplicates: seasonFormData.allow_team_duplicates,
+        is_active: seasonFormData.is_active,
+      });
 
       if (error) throw error;
 
@@ -202,9 +226,9 @@ export default function CategoriesAdminPage() {
         competition_type: 'league',
         team_count: 0,
         allow_team_duplicates: false,
-        is_active: true
+        is_active: true,
       });
-      
+
       fetchCategorySeasons(selectedCategory.id);
     } catch (error) {
       setError('Chyba při přidávání sezóny');
@@ -217,13 +241,10 @@ export default function CategoriesAdminPage() {
     if (!selectedCategory) return;
 
     try {
-      const { error } = await supabase
-        .from('category_seasons')
-        .delete()
-        .eq('id', seasonId);
+      const {error} = await supabase.from('category_seasons').delete().eq('id', seasonId);
 
       if (error) throw error;
-      
+
       fetchCategorySeasons(selectedCategory.id);
     } catch (error) {
       setError('Chyba při odstraňování sezóny');
@@ -239,7 +260,7 @@ export default function CategoriesAdminPage() {
       competition_type: categorySeason.competition_type,
       team_count: categorySeason.team_count,
       allow_team_duplicates: categorySeason.allow_team_duplicates,
-      is_active: categorySeason.is_active
+      is_active: categorySeason.is_active,
     });
     onEditSeasonOpen();
   };
@@ -249,14 +270,14 @@ export default function CategoriesAdminPage() {
     if (!selectedSeason || !selectedCategory) return;
 
     try {
-      const { error } = await supabase
+      const {error} = await supabase
         .from('category_seasons')
         .update({
           matchweek_count: editSeasonFormData.matchweek_count,
           competition_type: editSeasonFormData.competition_type,
           team_count: editSeasonFormData.team_count,
           allow_team_duplicates: editSeasonFormData.allow_team_duplicates,
-          is_active: editSeasonFormData.is_active
+          is_active: editSeasonFormData.is_active,
         })
         .eq('id', selectedSeason.id);
 
@@ -274,35 +295,31 @@ export default function CategoriesAdminPage() {
   // Add new category
   const handleAddCategory = async () => {
     try {
-      const { data: newCategory, error } = await supabase
+      const {data: newCategory, error} = await supabase
         .from('categories')
         .insert({
-          code: formData.code,
           name: formData.name,
           description: formData.description,
           age_group: formData.age_group || null,
           gender: formData.gender || null,
           is_active: formData.is_active,
-          sort_order: formData.sort_order
+          sort_order: formData.sort_order,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-
-
       if (error) throw error;
-      
+
       onAddCategoryClose();
       setFormData({
-        code: '',
         name: '',
         description: '',
         age_group: '',
         gender: '',
         is_active: true,
-        sort_order: 0
+        sort_order: 0,
       });
 
       fetchCategories();
@@ -317,31 +334,29 @@ export default function CategoriesAdminPage() {
     if (!selectedCategory) return;
 
     try {
-      const { error } = await supabase
+      const {error} = await supabase
         .from('categories')
         .update({
-          code: formData.code,
           name: formData.name,
           description: formData.description,
           age_group: formData.age_group || null,
           gender: formData.gender || null,
           is_active: formData.is_active,
-          sort_order: formData.sort_order
+          sort_order: formData.sort_order,
         })
         .eq('id', selectedCategory.id);
 
       if (error) throw error;
-      
+
       onEditCategoryClose();
       setSelectedCategory(null);
       setFormData({
-        code: '',
         name: '',
         description: '',
         age_group: '',
         gender: '',
         is_active: true,
-        sort_order: 0
+        sort_order: 0,
       });
       fetchCategories();
     } catch (error) {
@@ -355,13 +370,10 @@ export default function CategoriesAdminPage() {
     if (!selectedCategory) return;
 
     try {
-      const { error } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', selectedCategory.id);
+      const {error} = await supabase.from('categories').delete().eq('id', selectedCategory.id);
 
       if (error) throw error;
-      
+
       onDeleteCategoryClose();
       setSelectedCategory(null);
       fetchCategories();
@@ -375,18 +387,17 @@ export default function CategoriesAdminPage() {
   const openEditModal = (category: Category) => {
     setSelectedCategory(category);
     setFormData({
-      code: category.code,
       name: category.name,
       description: category.description || '',
       age_group: category.age_group || '',
       gender: category.gender || '',
       is_active: category.is_active,
-      sort_order: category.sort_order
+      sort_order: category.sort_order,
     });
-    
+
     // Fetch category seasons
     fetchCategorySeasons(category.id);
-    
+
     onEditCategoryOpen();
   };
 
@@ -399,27 +410,35 @@ export default function CategoriesAdminPage() {
   // Get age group badge color
   const getAgeGroupBadgeColor = (ageGroup: string) => {
     switch (ageGroup) {
-      case 'adults': return 'primary';
-      case 'juniors': return 'secondary';
-      case 'youth': return 'success';
-      case 'kids': return 'warning';
-      default: return 'default';
+      case 'adults':
+        return 'primary';
+      case 'juniors':
+        return 'secondary';
+      case 'youth':
+        return 'success';
+      case 'kids':
+        return 'warning';
+      default:
+        return 'default';
     }
   };
 
   // Get gender badge color
   const getGenderBadgeColor = (gender: string) => {
     switch (gender) {
-      case 'male': return 'primary';
-      case 'female': return 'secondary';
-      case 'mixed': return 'success';
-      default: return 'default';
+      case 'male':
+        return 'primary';
+      case 'female':
+        return 'secondary';
+      case 'mixed':
+        return 'success';
+      default:
+        return 'default';
     }
   };
 
   return (
     <div className="p-6">
-
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
@@ -432,8 +451,8 @@ export default function CategoriesAdminPage() {
             <TagIcon className="w-5 h-5 text-blue-500" />
             <h2 className="text-xl font-semibold">Seznam kategorií</h2>
           </div>
-          <Button 
-            color="primary" 
+          <Button
+            color="primary"
             startContent={<PlusIcon className="w-4 h-4" />}
             onPress={onAddCategoryOpen}
             aria-label="Přidat novou kategorii"
@@ -447,7 +466,6 @@ export default function CategoriesAdminPage() {
           ) : (
             <Table aria-label="Categories table">
               <TableHeader>
-                <TableColumn>KÓD</TableColumn>
                 <TableColumn>NÁZEV</TableColumn>
                 <TableColumn>POPIS</TableColumn>
                 <TableColumn>VĚKOVÁ SKUPINA</TableColumn>
@@ -459,14 +477,17 @@ export default function CategoriesAdminPage() {
               <TableBody emptyContent="Žádné kategorie nebyly nalezeny">
                 {categories.map((category) => (
                   <TableRow key={category.id}>
-                    <TableCell className="font-mono text-sm">{category.code}</TableCell>
                     <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell className="text-sm text-gray-600 dark:text-gray-400">
                       {category.description || '-'}
                     </TableCell>
                     <TableCell>
                       {category.age_group ? (
-                        <Badge color={getAgeGroupBadgeColor(category.age_group)} variant="flat" size="sm">
+                        <Badge
+                          color={getAgeGroupBadgeColor(category.age_group)}
+                          variant="flat"
+                          size="sm"
+                        >
                           {ageGroups[category.age_group as keyof typeof ageGroups]}
                         </Badge>
                       ) : (
@@ -475,7 +496,11 @@ export default function CategoriesAdminPage() {
                     </TableCell>
                     <TableCell>
                       {category.gender ? (
-                        <Badge color={getGenderBadgeColor(category.gender)} variant="flat" size="sm">
+                        <Badge
+                          color={getGenderBadgeColor(category.gender)}
+                          variant="flat"
+                          size="sm"
+                        >
                           {genders[category.gender as keyof typeof genders]}
                         </Badge>
                       ) : (
@@ -483,7 +508,11 @@ export default function CategoriesAdminPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge color={category.is_active ? 'success' : 'default'} variant="flat" size="sm">
+                      <Badge
+                        color={category.is_active ? 'success' : 'default'}
+                        variant="flat"
+                        size="sm"
+                      >
                         {category.is_active ? 'Aktivní' : 'Neaktivní'}
                       </Badge>
                     </TableCell>
@@ -514,8 +543,8 @@ export default function CategoriesAdminPage() {
                     </TableCell>
                   </TableRow>
                 ))}
-                              </TableBody>
-              </Table>
+              </TableBody>
+            </Table>
           )}
         </CardBody>
       </Card>
@@ -531,7 +560,7 @@ export default function CategoriesAdminPage() {
         genders={genders}
       />
 
-            {/* Edit Category Modal */}
+      {/* Edit Category Modal */}
       <EditCategoryModal
         isOpen={isEditCategoryOpen}
         onClose={onEditCategoryClose}

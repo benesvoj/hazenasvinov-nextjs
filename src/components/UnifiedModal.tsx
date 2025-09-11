@@ -9,11 +9,10 @@ import {
   ModalProps,
   Button,
 } from '@heroui/react';
-import { Heading, HeadingLevel } from './Headings';
-import { translations } from '@/lib/translations';
+import {Heading, HeadingLevel} from './Headings';
+import {translations} from '@/lib/translations';
 
-interface UnifiedModalProps
-  extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
+interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -65,31 +64,17 @@ export default function UnifiedModal({
           <div className="flex items-center justify-between">
             <Heading size={hSize}>{title}</Heading>
           </div>
-          {actions && (
-            <div className="flex items-center justify-end">{actions}</div>
-          )}
+          {actions && <div className="flex items-center justify-end">{actions}</div>}
         </ModalHeader>
         <ModalBody className="px-4 sm:px-6 py-4">{children}</ModalBody>
 
-        {footer && (
-          <ModalFooter className="px-4 sm:px-6 py-4">{footer}</ModalFooter>
-        )}
+        {footer && <ModalFooter className="px-4 sm:px-6 py-4">{footer}</ModalFooter>}
         {isFooterWithActions && (
           <ModalFooter className="px-4 sm:px-6 py-4">
-            <Button
-              color="danger"
-              variant="flat"
-              onPress={onClose}
-              aria-label={t.cancel}
-            >
+            <Button color="danger" variant="flat" onPress={onClose} aria-label={t.cancel}>
               {t.cancel}
             </Button>
-            <Button
-              color="primary"
-              onPress={onPress}
-              isDisabled={isDisabled}
-              aria-label={t.save}
-            >
+            <Button color="primary" onPress={onPress} isDisabled={isDisabled} aria-label={t.save}>
               {t.save}
             </Button>
           </ModalFooter>
@@ -101,7 +86,7 @@ export default function UnifiedModal({
 
 // Hook for managing modal state
 export const useCustomModal = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {isOpen, onOpen, onClose} = useDisclosure();
 
   return {
     isOpen,
@@ -110,5 +95,3 @@ export const useCustomModal = () => {
     onToggle: () => (isOpen ? onClose() : onOpen()),
   };
 };
-// Test comment
-// Test TypeScript check
