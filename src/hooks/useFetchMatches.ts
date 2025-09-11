@@ -84,7 +84,7 @@ export function useFetchMatches(
         // First, get the category ID
         const { data: categoryData, error: categoryError } = await supabase
           .from('categories')
-          .select('id, code, name')
+          .select('id, name')
           .eq('id', categoryId)
           .single();
         

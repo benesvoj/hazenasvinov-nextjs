@@ -9,9 +9,7 @@ import {
   DocumentArrowUpIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { createClient } from "@/utils/supabase/client";
 import { translations } from "@/lib/translations";
-import { showToast } from "@/components/Toast";
 import {
   AddMatchModal,
   AddResultModal,
@@ -24,13 +22,9 @@ import {
   StandingsTable,
   CategoryMatches,
 } from "./components";
-import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
-import MobileActionsMenu from "@/components/MobileActionsMenu";
-import { useExcelImport } from "@/hooks/useExcelImport";
-// TODO: use proper types
+import {DeleteConfirmationModal, MobileActionsMenu, showToast, ButtonWithTooltip} from "@/components";
 import { getCategoryInfo } from "@/helpers/getCategoryInfo";
-import { useTeamDisplayLogic } from "@/hooks/useTeamDisplayLogic";
-import { Match, Category } from "@/types";
+import { Match } from "@/types";
 import {
   useSeasons,
   useFilteredTeams,
@@ -39,11 +33,10 @@ import {
   useCategories,
   useFetchMembers,
   useTeams,
+  useExcelImport, useTeamDisplayLogic 
 } from "@/hooks";
 import { AdminContainer } from "../components/AdminContainer";
-import { ButtonWithTooltip } from "@/components";
-import { calculateStandings } from "@/utils/standingsCalculator";
-import { generateInitialStandings } from "@/utils/standingsGenerator";
+import { calculateStandings, generateInitialStandings, createClient } from "@/utils";
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState("");
@@ -199,7 +192,7 @@ export default function MatchesAdminPage() {
   const [selectedSeason, setSelectedSeason] = useState<string>("");
 
   // Use the matches hook - pass category code instead of ID, and show ALL matches (admin mode)
-  const selectedCategoryCode =
+  const selectedCategoryId =
     categories.find((cat) => cat.id === selectedCategory)?.id || "";
   const {
     matches: seasonalMatches,
@@ -207,13 +200,13 @@ export default function MatchesAdminPage() {
     error: matchesError,
     refreshMatches,
   } = useFetchMatches(
-    selectedCategoryCode,
+    selectedCategoryId,
     selectedSeason, // Pass the selected season ID
     { ownClubOnly: false } // Show all matches, not just own club
   );
 
   // Create a flat array of all matches for components that expect Match[]
-  const matches = selectedCategoryCode
+  const matches = selectedCategoryId
     ? [...(seasonalMatches.autumn || []), ...(seasonalMatches.spring || [])]
     : [];
 
@@ -1027,7 +1020,7 @@ export default function MatchesAdminPage() {
                         </h3>
 
                         {/* Show loading or no category message */}
-                        {!selectedCategoryCode && (
+                        {!selectedCategoryId && (
                           <div className="text-center py-8 text-gray-500">
                             {categories.length === 0
                               ? "Načítání kategorií..."
@@ -1036,14 +1029,14 @@ export default function MatchesAdminPage() {
                         )}
 
                         {/* Show error if matches hook failed */}
-                        {selectedCategoryCode && matchesError && (
+                        {selectedCategoryId && matchesError && (
                           <div className="text-center py-8 text-red-500">
                             Chyba při načítání zápasů: {matchesError.message}
                           </div>
                         )}
 
                         {/* Matches for this category grouped by matchweek */}
-                        {selectedCategoryCode && !matchesError && (
+                        {selectedCategoryId && !matchesError && (
                           <CategoryMatches
                             matches={matches}
                             category={category}

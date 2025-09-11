@@ -21,7 +21,6 @@ interface UnifiedModalProps
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "full";
   showCloseButton?: boolean;
-  closeOnOverlayClick?: boolean;
   scrollBehavior?: "inside" | "outside";
   hSize?: HeadingLevel;
   actions?: React.ReactNode;
@@ -37,7 +36,6 @@ export default function UnifiedModal({
   children,
   footer,
   size = "2xl",
-  closeOnOverlayClick = true,
   scrollBehavior = "inside",
   hSize = 2,
   actions,
@@ -54,7 +52,6 @@ export default function UnifiedModal({
       onClose={onClose}
       size={size}
       scrollBehavior={scrollBehavior}
-      closeOnOverlayClick={closeOnOverlayClick}
       classNames={{
         wrapper: "items-center justify-center p-2 sm:p-4",
         body: "max-h-[80vh] overflow-y-auto",
@@ -72,7 +69,6 @@ export default function UnifiedModal({
             <div className="flex items-center justify-end">{actions}</div>
           )}
         </ModalHeader>
-
         <ModalBody className="px-4 sm:px-6 py-4">{children}</ModalBody>
 
         {footer && (

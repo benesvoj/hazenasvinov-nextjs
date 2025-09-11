@@ -124,7 +124,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     return getCachedData('categories', async () => {
       const { data, error } = await supabase
         .from('categories')
-        .select('id, code, name')
+        .select('*')
         .eq('is_active', true)
         .order('sort_order');
 

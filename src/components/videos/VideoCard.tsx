@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Video } from "@/types";
+import { Category, Season, Video } from "@/types";
 import {
   PlayIcon,
   PencilIcon,
@@ -12,12 +12,10 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Button,
   Chip,
   Image,
-  Tooltip,
 } from "@heroui/react";
-import { showToast } from "@/components/Toast";
+import { showToast } from "@/components";
 import { translations } from "@/lib/translations";
 import { ButtonWithTooltip, ButtonWithTooltipProps } from "../ButtonWithTooltip";
 
@@ -25,13 +23,8 @@ interface VideoCardProps {
   video: Video;
   onEdit: (video: Video) => void;
   onDelete: (video: Video) => void;
-  categories?: Array<{ id: string; name: string; slug: string }>;
-  seasons?: Array<{
-    id: string;
-    name: string;
-    start_date: string;
-    end_date: string;
-  }>;
+  categories?: Array<Category>;
+  seasons?: Array<Season>;
 }
 
 export function VideoCard({
@@ -107,7 +100,8 @@ export function VideoCard({
               src={video.thumbnail_url}
               alt={video.title}
               className="w-full h-full object-cover"
-              fallbackSrc="/placeholder-video.jpg"
+              fallbackSrc="/placeholder-video.jpg" 
+              // TODO: Add placeholder image instead of placeholder-video.jpg
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
