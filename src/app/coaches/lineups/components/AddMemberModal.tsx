@@ -32,7 +32,7 @@ interface AddMemberModalProps {
   onClose: () => void;
   onAddMember: (memberData: AddMemberToLineupData) => Promise<void>;
   selectedCategory: string; // Category ID
-  selectedCategoryCode: string; // Category code (e.g., "U15", "U17")
+  selectedCategoryId: string; // Category code (e.g., "U15", "U17")
   existingMembers: string[]; // Array of member IDs already in the lineup
   existingJerseyNumbers: number[]; // Array of jersey numbers already used
 }
@@ -40,9 +40,10 @@ interface AddMemberModalProps {
 export default function AddMemberModal({
   isOpen,
   onClose,
+  
   onAddMember,
   selectedCategory,
-  selectedCategoryCode,
+  selectedCategoryId,
   existingMembers,
   existingJerseyNumbers
 }: AddMemberModalProps) {
@@ -70,7 +71,7 @@ export default function AddMemberModal({
       // Filter by category
       const memberCategory = member.category_id;
       
-      if (memberCategory !== selectedCategoryCode) {
+      if (memberCategory !== selectedCategoryId) {
         return false;
       }
 
@@ -93,7 +94,7 @@ export default function AddMemberModal({
     });
 
     return filtered;
-  }, [members, selectedCategoryCode, existingMembers, searchTerm]);
+  }, [members, selectedCategoryId, existingMembers, searchTerm]);
 
   // Get available jersey numbers
   const availableJerseyNumbers = useMemo(() => {

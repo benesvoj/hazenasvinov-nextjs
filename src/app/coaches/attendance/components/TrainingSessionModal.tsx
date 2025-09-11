@@ -35,7 +35,7 @@ export default function TrainingSessionModal({
     description: "",
     session_date: "",
     session_time: "",
-    category: selectedCategory,
+    category_id: selectedCategory,
     season_id: selectedSeason,
     location: "",
   });
@@ -48,7 +48,7 @@ export default function TrainingSessionModal({
         description: session.description || "",
         session_date: session.session_date,
         session_time: session.session_time || "",
-        category: session.category_id,
+        category_id: session.category_id,
         season_id: session.season_id,
         location: session.location || ""
       });
@@ -59,7 +59,7 @@ export default function TrainingSessionModal({
         description: "",
         session_date: "",
         session_time: "",
-        category: selectedCategory,
+        category_id: selectedCategory,
         season_id: selectedSeason,
         location: ""
       });
@@ -74,7 +74,7 @@ export default function TrainingSessionModal({
         description: "",
         session_date: "",
         session_time: "",
-        category: selectedCategory,
+        category_id: selectedCategory,
         season_id: selectedSeason,
         location: ""
       });
@@ -92,7 +92,7 @@ export default function TrainingSessionModal({
       description: "",
       session_date: "",
       session_time: "",
-      category: selectedCategory,
+      category_id: selectedCategory,
       season_id: selectedSeason,
       location: ""
     });

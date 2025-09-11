@@ -83,7 +83,7 @@ export default function MatchDetailPage() {
           <Button
             as={Link}
             href={`/matches${
-              match?.category?.code ? `?category=${match.category.code}` : ""
+              match?.category?.id ? `?category=${match.category.id}` : ""
             }`}
             color="primary"
             startContent={<ArrowLeftIcon className="w-4 h-4" />}
@@ -102,7 +102,7 @@ export default function MatchDetailPage() {
         <Button
           as={Link}
           href={`/matches${
-            match?.category?.code ? `?category=${match.category.code}` : ""
+            match?.category?.id ? `?category=${match.category.id}` : ""
           }`}
           variant="light"
           color="primary"

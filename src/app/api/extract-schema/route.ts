@@ -9,7 +9,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'SQL query is required' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Execute the custom SQL query
     const { data, error } = await supabase.rpc('exec_sql', { sql_query: sql });
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Get all tables and their columns
     const { data: tables, error: tablesError } = await supabase
