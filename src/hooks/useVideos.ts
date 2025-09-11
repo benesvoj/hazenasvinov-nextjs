@@ -60,8 +60,7 @@ export function useVideos(options: UseVideosOptions = {}) {
           *,
           categories (
             id,
-            name,
-            code
+            name
           ),
           clubs (
             id,
