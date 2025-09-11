@@ -182,9 +182,7 @@ export default function CoachesAttendancePage() {
     
     // Fallback: if no lineup members, filter all members by category
     const fallbackMembers = members.filter((member) => {
-      const selectedCategoryData = categories.find((c) => c.id === effectiveSelectedCategory);
-      const selectedCategoryCode = selectedCategoryData?.code;
-      return member.category_id === selectedCategoryCode;
+      return member.category_id === effectiveSelectedCategory;
     });
 
     // Use lineup members if available, otherwise use filtered members
@@ -343,9 +341,7 @@ export default function CoachesAttendancePage() {
 
       if (memberIds.length === 0) {
         // Fallback to filtered members if no lineup members
-        const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
-        const selectedCategoryCode = selectedCategoryData?.code;
-        const fallbackMembers = members.filter((member) => member.category_id === selectedCategoryCode);
+        const fallbackMembers = members.filter((member) => member.category_id === selectedCategory);
         const fallbackMemberIds = fallbackMembers.map(m => m.id);
         
         if (fallbackMemberIds.length === 0) {
