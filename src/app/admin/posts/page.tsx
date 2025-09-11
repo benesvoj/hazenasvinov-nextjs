@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
 import {
   Card,
   CardBody,
@@ -534,6 +534,15 @@ export default function BlogPostsPage() {
   // Create searchable posts with content excerpts
   const searchablePosts = posts.map(createSearchablePost);
 
+  // Memoized category lookup map for performance
+  const categoryLookupMap = useMemo(() => {
+    const map = new Map();
+    categories.forEach((category) => {
+      map.set(category.id, category.name);
+    });
+    return map;
+  }, [categories]);
+
   // Filter posts based on debounced search and status
   const filteredPosts = searchablePosts.filter((post) => {
     const matchesSearch = searchPosts([post], debouncedSearchTerm).length > 0;
@@ -666,7 +675,7 @@ export default function BlogPostsPage() {
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {post.category_id !== null
-                            ? categories.find((category) => category.id === post.category_id)?.name
+                            ? categoryLookupMap.get(post.category_id) || '-'
                             : '-'}
                         </div>
                       </td>

@@ -1,26 +1,27 @@
-"use client";
+'use client';
 
-import { Card, Button, Chip } from "@heroui/react";
-import Link from "@/components/Link";
-import Image from "next/image";
-import { CalendarIcon } from "@heroicons/react/24/outline";
-import { BlogPostCard as BlogPostCardProps, Category } from "@/types";
-import { useAppData } from "@/contexts/AppDataContext";
-import { useCategories } from "@/hooks/useCategories";
-import { formatDateString } from "@/helpers";
+import {useMemo} from 'react';
+import {Card, Button, Chip} from '@heroui/react';
+import Link from '@/components/Link';
+import Image from 'next/image';
+import {CalendarIcon} from '@heroicons/react/24/outline';
+import {BlogPostCard as BlogPostCardProps, Category} from '@/types';
+import {useAppData} from '@/contexts/AppDataContext';
+import {useCategories} from '@/hooks/useCategories';
+import {formatDateString} from '@/helpers';
 
 export default function BlogPostCard({
   post,
   index = 0,
-  variant = "landing",
-  className = "",
+  variant = 'landing',
+  className = '',
 }: BlogPostCardProps) {
-  const isLandingVariant = variant === "landing";
+  const isLandingVariant = variant === 'landing';
 
   // Always call both hooks to avoid conditional hook calls
   let appDataCategories: Category[] = [];
   let hookCategories: Category[] = [];
-  
+
   try {
     const appData = useAppData();
     appDataCategories = appData.categories;
@@ -28,32 +29,28 @@ export default function BlogPostCard({
     // AppDataProvider not available, will use hook categories
     appDataCategories = [];
   }
-  
+
   // Always call useCategories hook
-  const { categories: hookCategoriesData } = useCategories();
+  const {categories: hookCategoriesData} = useCategories();
   hookCategories = hookCategoriesData;
-  
+
   // Use AppDataContext categories if available, otherwise fallback to hook categories
   const categories = appDataCategories.length > 0 ? appDataCategories : hookCategories;
 
-  const category = categories.find(
-    (category) => category.id === post.category_id
-  );
+  // Memoized category lookup for performance
+  const category = useMemo(() => {
+    return categories.find((category) => category.id === post.category_id);
+  }, [categories, post.category_id]);
 
-  const CategoryChip = ({ category }: { category: Category }) => {
+  const CategoryChip = ({category}: {category: Category}) => {
     return (
-      <Chip
-        size="sm"
-        variant="solid"
-        color="primary"
-        className="text-xs px-2 py-1"
-      >
+      <Chip size="sm" variant="solid" color="primary" className="text-xs px-2 py-1">
         {category.name}
       </Chip>
     );
   };
 
-  const DateChip = ({ date }: { date: string }) => {
+  const DateChip = ({date}: {date: string}) => {
     return <span>{formatDateString(date)}</span>;
   };
 
@@ -64,7 +61,7 @@ export default function BlogPostCard({
         className={`group overflow-hidden hover:shadow-xl transition-all duration-300 ease-out border-0 bg-white dark:bg-gray-800 h-64 relative ${className}`}
         style={{
           animationDelay: `${index * 100}ms`,
-          animation: "fadeInUp 0.6s ease-out forwards",
+          animation: 'fadeInUp 0.6s ease-out forwards',
         }}
       >
         {/* Background Image */}
@@ -85,9 +82,7 @@ export default function BlogPostCard({
         {/* Content Overlay - Always Visible */}
         <div className="relative z-10 h-full flex flex-col justify-end p-6 text-white">
           {/* Title - Always Visible */}
-          <h3 className="text-xl font-bold mb-3 line-clamp-2 leading-tight">
-            {post.title}
-          </h3>
+          <h3 className="text-xl font-bold mb-3 line-clamp-2 leading-tight">{post.title}</h3>
 
           {/* Bottom Row - Category and Date */}
           <div className="flex items-center justify-between">
@@ -153,9 +148,7 @@ export default function BlogPostCard({
 
         {/* Post Content Preview */}
         <div className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 leading-relaxed">
-          <div className="whitespace-pre-wrap">
-            {post.content.substring(0, 150)}...
-          </div>
+          <div className="whitespace-pre-wrap">{post.content.substring(0, 150)}...</div>
         </div>
 
         {/* Post Meta */}
@@ -191,17 +184,15 @@ export default function BlogPostCard({
  */
 // Loading skeleton component
 export function BlogPostCardSkeleton({
-  variant = "landing",
-  className = "",
+  variant = 'landing',
+  className = '',
 }: {
-  variant?: "landing" | "blog";
+  variant?: 'landing' | 'blog';
   className?: string;
 }) {
-  if (variant === "landing") {
+  if (variant === 'landing') {
     return (
-      <Card
-        className={`animate-pulse overflow-hidden h-64 relative ${className}`}
-      >
+      <Card className={`animate-pulse overflow-hidden h-64 relative ${className}`}>
         <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
         <div className="relative z-10 h-full flex flex-col justify-end p-6">
