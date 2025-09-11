@@ -25,7 +25,8 @@
     "fix:admin-dashboard": "node scripts/fix-admin-dashboard-access.js",
     "setup:user-profiles": "node scripts/setup-user-profiles.js",
     "setup:meeting-minutes": "node scripts/building-app/setup-meeting-minutes-table.js",
-    "fix:meeting-attendees-fk": "node scripts/building-app/fix-meeting-attendees-fk.js"
+    "fix:meeting-attendees-fk": "node scripts/building-app/fix-meeting-attendees-fk.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",
@@ -81,8 +82,20 @@
     "@types/react-dom": "^18",
     "eslint": "^9.27.0",
     "eslint-config-next": "^15.4.0-canary.51",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
     "postcss": "^8",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{ts,tsx}": [
+      "tsc --noEmit"
+    ]
   }
 }
