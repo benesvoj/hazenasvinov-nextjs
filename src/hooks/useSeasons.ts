@@ -1,6 +1,6 @@
-import { useState, useCallback, useMemo } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { Season } from '@/types';
+import {useState, useCallback, useMemo} from 'react';
+import {createClient} from '@/utils/supabase/client';
+import {Season} from '@/types';
 
 export function useSeasons() {
   const [activeSeason, setActiveSeason] = useState<Season | null>(null);
@@ -10,9 +10,13 @@ export function useSeasons() {
 
   // Sort seasons from newest to oldest
   const sortedSeasons = useMemo(() => {
-    return seasons?.sort((a, b) => {
-      return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
-    }) || [];
+    return (
+      seasons?.sort((a, b) => {
+        if (!a.start_date) return 1;
+        if (!b.start_date) return -1;
+        return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+      }) || []
+    );
   }, [seasons]);
 
   // Fetch active season only
@@ -20,9 +24,9 @@ export function useSeasons() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const supabase = createClient();
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('seasons')
         .select('id, name')
         .eq('is_active', true)
@@ -43,9 +47,9 @@ export function useSeasons() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const supabase = createClient();
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('seasons')
         .select('*')
         .eq('is_active', true)
@@ -66,14 +70,14 @@ export function useSeasons() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const startTime = Date.now();
-      
+
       const supabase = createClient();
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('seasons')
         .select('id, name, start_date, end_date, is_active, is_closed')
-        .order('start_date', { ascending: false })
+        .order('start_date', {ascending: false})
         .limit(50);
 
       const endTime = Date.now();
@@ -93,18 +97,18 @@ export function useSeasons() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const supabase = createClient();
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('seasons')
         .select('id, name, start_date, end_date, is_active, is_closed')
-        .order('start_date', { ascending: false })
+        .order('start_date', {ascending: false})
         .limit(50);
 
       if (error) throw error;
-      
+
       setSeasons(data || []);
-      
+
       // Set active season as default
       const active = data?.find((season: Season) => season.is_active);
       if (active) {
@@ -128,6 +132,6 @@ export function useSeasons() {
     fetchActiveSeasonFull,
     fetchAllSeasons,
     fetchSeasonsWithActive,
-    setActiveSeason
+    setActiveSeason,
   };
 }

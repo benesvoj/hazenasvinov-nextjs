@@ -1,8 +1,16 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { Season, Category, Member, Club } from '@/types';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
+import {createClient} from '@/utils/supabase/client';
+import {Season, Category, Member, Club} from '@/types';
 
 interface AppDataContextType {
   // Data
@@ -10,28 +18,28 @@ interface AppDataContextType {
   categories: Category[];
   members: Member[];
   clubs: Club[];
-  
+
   // Loading states
   loading: boolean;
   seasonsLoading: boolean;
   categoriesLoading: boolean;
   membersLoading: boolean;
   clubsLoading: boolean;
-  
+
   // Error states
   error: string | null;
   seasonsError: string | null;
   categoriesError: string | null;
   membersError: string | null;
   clubsError: string | null;
-  
+
   // Actions
   refreshSeasons: () => Promise<void>;
   refreshCategories: () => Promise<void>;
   refreshMembers: () => Promise<void>;
   refreshClubs: () => Promise<void>;
   refreshAll: () => Promise<void>;
-  
+
   // Computed properties
   activeSeason: Season | null;
   sortedSeasons: Season[];
@@ -52,10 +60,7 @@ const isCacheValid = (key: string): boolean => {
 };
 
 // Helper function to get cached data or fetch new
-const getCachedData = async <T,>(
-  key: string,
-  fetchFn: () => Promise<T>
-): Promise<T> => {
+const getCachedData = async <T,>(key: string, fetchFn: () => Promise<T>): Promise<T> => {
   // Check if we have valid cached data
   if (isCacheValid(key)) {
     const cached = requestCache.get(key);
@@ -68,34 +73,36 @@ const getCachedData = async <T,>(
   }
 
   // Create new request
-  const request = fetchFn().then((data) => {
-    // Cache the result
-    requestCache.set(key, Promise.resolve(data));
-    cacheTimestamps.set(key, Date.now());
-    return data;
-  }).catch((error) => {
-    // Remove failed request from cache
-    requestCache.delete(key);
-    throw error;
-  });
+  const request = fetchFn()
+    .then((data) => {
+      // Cache the result
+      requestCache.set(key, Promise.resolve(data));
+      cacheTimestamps.set(key, Date.now());
+      return data;
+    })
+    .catch((error) => {
+      // Remove failed request from cache
+      requestCache.delete(key);
+      throw error;
+    });
 
   // Cache the promise
   requestCache.set(key, request);
   return request;
 };
 
-export function AppDataProvider({ children }: { children: React.ReactNode }) {
+export function AppDataProvider({children}: {children: React.ReactNode}) {
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
-  
+
   const [loading, setLoading] = useState(false);
   const [seasonsLoading, setSeasonsLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [membersLoading, setMembersLoading] = useState(false);
   const [clubsLoading, setClubsLoading] = useState(false);
-  
+
   const [error, setError] = useState<string | null>(null);
   const [seasonsError, setSeasonsError] = useState<string | null>(null);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
@@ -108,10 +115,10 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   // Fetch seasons
   const fetchSeasons = useCallback(async (): Promise<Season[]> => {
     return getCachedData('seasons', async () => {
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('seasons')
         .select('id, name, start_date, end_date, is_active, is_closed')
-        .order('start_date', { ascending: false })
+        .order('start_date', {ascending: false})
         .limit(50);
 
       if (error) throw error;
@@ -122,7 +129,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   // Fetch categories
   const fetchCategories = useCallback(async (): Promise<Category[]> => {
     return getCachedData('categories', async () => {
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('categories')
         .select('*')
         .eq('is_active', true)
@@ -136,11 +143,11 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   // Fetch members
   const fetchMembers = useCallback(async (): Promise<Member[]> => {
     return getCachedData('members', async () => {
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('members')
         .select('*')
-        .order('surname', { ascending: true })
-        .order('name', { ascending: true });
+        .order('surname', {ascending: true})
+        .order('name', {ascending: true});
 
       if (error) throw error;
       return data || [];
@@ -150,7 +157,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   // Fetch clubs
   const fetchClubs = useCallback(async (): Promise<Club[]> => {
     return getCachedData('clubs', async () => {
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('clubs')
         .select('*')
         .eq('is_active', true)
@@ -166,11 +173,11 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     try {
       setSeasonsLoading(true);
       setSeasonsError(null);
-      
+
       // Clear cache
       requestCache.delete('seasons');
       cacheTimestamps.delete('seasons');
-      
+
       const data = await fetchSeasons();
       setSeasons(data);
     } catch (err) {
@@ -186,11 +193,11 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     try {
       setCategoriesLoading(true);
       setCategoriesError(null);
-      
+
       // Clear cache
       requestCache.delete('categories');
       cacheTimestamps.delete('categories');
-      
+
       const data = await fetchCategories();
       setCategories(data);
     } catch (err) {
@@ -206,11 +213,11 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     try {
       setMembersLoading(true);
       setMembersError(null);
-      
+
       // Clear cache
       requestCache.delete('members');
       cacheTimestamps.delete('members');
-      
+
       const data = await fetchMembers();
       setMembers(data);
     } catch (err) {
@@ -226,11 +233,11 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     try {
       setClubsLoading(true);
       setClubsError(null);
-      
+
       // Clear cache
       requestCache.delete('clubs');
       cacheTimestamps.delete('clubs');
-      
+
       const data = await fetchClubs();
       setClubs(data);
     } catch (err) {
@@ -246,19 +253,19 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Clear all caches
       requestCache.clear();
       cacheTimestamps.clear();
-      
+
       // Fetch all data in parallel
       const [seasonsData, categoriesData, membersData, clubsData] = await Promise.all([
         fetchSeasons(),
         fetchCategories(),
         fetchMembers(),
-        fetchClubs()
+        fetchClubs(),
       ]);
-      
+
       setSeasons(seasonsData);
       setCategories(categoriesData);
       setMembers(membersData);
@@ -269,15 +276,17 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [fetchSeasons, fetchCategories, fetchMembers]);
+  }, [fetchSeasons, fetchCategories, fetchMembers, fetchClubs]);
 
   // Computed properties
   const activeSeason = useMemo(() => {
-    return seasons.find(season => season.is_active) || null;
+    return seasons.find((season) => season.is_active) || null;
   }, [seasons]);
 
   const sortedSeasons = useMemo(() => {
     return [...seasons].sort((a, b) => {
+      if (!a.start_date) return 1;
+      if (!b.start_date) return -1;
       return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
     });
   }, [seasons]);
@@ -288,7 +297,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       if (hasInitialized.current) {
         return;
       }
-      
+
       try {
         setLoading(true);
         await refreshAll();
@@ -310,38 +319,34 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     categories,
     members,
     clubs,
-    
+
     // Loading states
     loading,
     seasonsLoading,
     categoriesLoading,
     membersLoading,
     clubsLoading,
-    
+
     // Error states
     error,
     seasonsError,
     categoriesError,
     membersError,
     clubsError,
-    
+
     // Actions
     refreshSeasons,
     refreshCategories,
     refreshMembers,
     refreshClubs,
     refreshAll,
-    
+
     // Computed properties
     activeSeason,
     sortedSeasons,
   };
 
-  return (
-    <AppDataContext.Provider value={value}>
-      {children}
-    </AppDataContext.Provider>
-  );
+  return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
 }
 
 // Custom hook to use app data context

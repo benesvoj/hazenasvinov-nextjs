@@ -10,8 +10,7 @@ export * from './video';
 export * from './userRoles';
 export * from './meetingMinutes';
 export * from './attendance';
-export * from './teamData';
-
+export * from './team';
 
 /**
  * @description Blog types
@@ -24,3 +23,5 @@ export * from './ValueByDevice';
 
 export * from './member';
 export * from './memberFunction';
+
+export * from './releaseNote';

@@ -1,13 +1,6 @@
-import { useState, useCallback } from 'react';
-import { createClient } from '@/utils/supabase/client';
-
-interface Team {
-  id: string;
-  name: string;
-  display_name?: string;
-  venue?: string;
-  is_active: boolean;
-}
+import {useState, useCallback} from 'react';
+import {createClient} from '@/utils/supabase/client';
+import {Team} from '@/types';
 
 export function useTeams() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -18,9 +11,9 @@ export function useTeams() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const supabase = createClient();
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('teams')
         .select('*')
         .eq('is_active', true)
@@ -41,6 +34,6 @@ export function useTeams() {
     teams,
     loading,
     error,
-    fetchTeams
+    fetchTeams,
   };
 }

@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { translations } from '@/lib/translations';
-import { Category, Season } from '@/types';
+import {useState, useEffect, useCallback} from 'react';
+import {createClient} from '@/utils/supabase/client';
+import {translations} from '@/lib/translations';
+import {Category, Season, Team} from '@/types';
 
 /**
  * TransformedMatch interface for the match data
@@ -25,20 +25,8 @@ interface TransformedMatch {
   matchweek?: number;
   result?: 'win' | 'loss' | 'draw';
   is_home: boolean;
-  home_team: {
-    id: string;
-    name: string;
-    short_name?: string;
-    logo_url?: string;
-    is_own_club: boolean;
-  };
-  away_team: {
-    id: string;
-    name: string;
-    short_name?: string;
-    logo_url?: string;
-    is_own_club: boolean;
-  };
+  home_team: Team;
+  away_team: Team;
   category: Category;
   season: Season;
 }
@@ -51,12 +39,12 @@ function getTeamDisplayNameSafe(
   fallbackName: string
 ): string {
   if (!clubName) return fallbackName;
-  
+
   // Only show suffix if club has multiple teams in this category
   if (teamCount > 1) {
     return `${clubName} ${teamSuffix}`;
   }
-  
+
   return clubName;
 }
 
@@ -73,9 +61,10 @@ export function useFetchMatch(matchId: string | null) {
       setError(null);
 
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("matches")
-        .select(`
+      const {data, error} = await supabase
+        .from('matches')
+        .select(
+          `
           *,
           home_team:home_team_id(
             id,
@@ -93,52 +82,55 @@ export function useFetchMatch(matchId: string | null) {
           ),
           category:categories(id, name, description),
           season:seasons(name)
-        `)
-        .eq("id", matchId)
+        `
+        )
+        .eq('id', matchId)
         .single();
 
       if (error) {
         if (error.code === 'PGRST116') {
           // Match not found - this is a valid case
-          setError("Zápas nebyl nalezen");
+          setError('Zápas nebyl nalezen');
           setMatch(null);
           return;
         }
-        setError("Chyba při načítání zápasu");
+        setError('Chyba při načítání zápasu');
         return;
       }
 
       // Get team counts for both clubs to determine if suffixes should be shown
       let homeTeamCount = 1;
       let awayTeamCount = 1;
-      
+
       if (data.category_id) {
         try {
           // Fetch team counts for the clubs in this category
-          const { data: teamCountsData, error: teamCountsError } = await supabase
+          const {data: teamCountsData, error: teamCountsError} = await supabase
             .from('club_categories')
-            .select(`
+            .select(
+              `
               club_id,
               club_category_teams(id)
-            `)
+            `
+            )
             .eq('category_id', data.category_id)
             .eq('is_active', true);
-          
+
           if (teamCountsError) {
             console.warn('Error fetching team counts:', teamCountsError);
             // Continue with default values
           }
-          
+
           if (teamCountsData) {
             const clubTeamCounts = new Map<string, number>();
             teamCountsData.forEach((cc: any) => {
               clubTeamCounts.set(cc.club_id, cc.club_category_teams?.length || 0);
             });
-            
+
             // Get team counts for home and away clubs
             const homeClubId = data.home_team?.club_category?.club?.id;
             const awayClubId = data.away_team?.club_category?.club?.id;
-            
+
             if (homeClubId) {
               homeTeamCount = clubTeamCounts.get(homeClubId) || 1;
             }
@@ -150,7 +142,7 @@ export function useFetchMatch(matchId: string | null) {
           console.warn('Could not fetch team counts, using default values:', countError);
         }
       }
-      
+
       // Transform match data to use centralized team display logic
       const transformedMatch: TransformedMatch = {
         ...data,
@@ -167,7 +159,7 @@ export function useFetchMatch(matchId: string | null) {
           ),
           short_name: data.home_team?.club_category?.club?.short_name,
           logo_url: data.home_team?.club_category?.club?.logo_url,
-          is_own_club: data.home_team?.club_category?.club?.is_own_club || false
+          is_own_club: data.home_team?.club_category?.club?.is_own_club || false,
         },
         away_team: {
           id: data.away_team?.id,
@@ -179,13 +171,13 @@ export function useFetchMatch(matchId: string | null) {
           ),
           short_name: data.away_team?.club_category?.club?.short_name,
           logo_url: data.away_team?.club_category?.club?.logo_url,
-          is_own_club: data.away_team?.club_category?.club?.is_own_club || false
-        }
+          is_own_club: data.away_team?.club_category?.club?.is_own_club || false,
+        },
       };
 
       setMatch(transformedMatch);
     } catch (error) {
-      setError("Chyba při načítání zápasu");
+      setError('Chyba při načítání zápasu');
     } finally {
       setLoading(false);
     }
@@ -209,6 +201,6 @@ export function useFetchMatch(matchId: string | null) {
     match,
     loading,
     error,
-    refetch
+    refetch,
   };
 }

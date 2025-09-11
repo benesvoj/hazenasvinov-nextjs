@@ -1,18 +1,11 @@
-import { translations } from "@/lib/translations";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-} from "@heroui/react";
-import { useFetchSeasons } from "@/hooks/useFetchSeasons";
-import { formatDateString } from "@/helpers/formatDate";
-import { LoadingSpinner } from "@/components";
+import {translations} from '@/lib/translations';
+import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/react';
+import {useFetchSeasons} from '@/hooks/useFetchSeasons';
+import {formatDateString} from '@/helpers/formatDate';
+import {LoadingSpinner} from '@/components';
 
 export const SeasonsTable = () => {
-  const { data, loading, error } = useFetchSeasons();
+  const {data, loading, error} = useFetchSeasons();
 
   return (
     <>
@@ -30,8 +23,8 @@ export const SeasonsTable = () => {
             <TableRow key={item.id}>
               <TableCell>{item.id}</TableCell>
               <TableCell>{item.name}</TableCell>
-              <TableCell>{formatDateString(item.start_date)}</TableCell>
-              <TableCell>{formatDateString(item.end_date)}</TableCell>
+              <TableCell>{item.start_date ? formatDateString(item.start_date) : ''}</TableCell>
+              <TableCell>{item.end_date ? formatDateString(item.end_date) : ''}</TableCell>
             </TableRow>
           )}
         </TableBody>

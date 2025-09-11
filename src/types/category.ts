@@ -1,10 +1,10 @@
-import { GenderType } from "@/constants";
+import {GenderType} from '@/constants';
 /**
  * Enhanced Category interface for the new category system with URL-friendly routing.
- * 
+ *
  * This interface extends the base Category with a slug field for better URL handling
  * and removes some optional fields to simplify the core category structure.
- * 
+ *
  * @property id - Unique UUID identifier (primary key)
  * @property code - Legacy string code for backward compatibility (e.g., 'men', 'women')
  * @property name - Display name in Czech (e.g., 'Muži', 'Ženy')
@@ -18,14 +18,14 @@ import { GenderType } from "@/constants";
  * @property slug - URL-friendly identifier for routing (e.g., 'men', 'women', 'junior-boys')
  */
 export interface Category {
-    id: string;
-    name: string;
-    description?: string;
-    age_group?: string;
-    gender?: GenderType;
-    is_active: boolean;
-    sort_order: number;
-    created_at?: string;
-    updated_at?: string;
-    slug: string;
+  id: string;
+  name: string;
+  description?: string;
+  age_group?: string;
+  gender?: GenderType;
+  is_active?: boolean;
+  sort_order?: number;
+  created_at?: string;
+  updated_at?: string;
+  slug?: string;
 }

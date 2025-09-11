@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { Match } from '@/types';
+import {useState, useEffect} from 'react';
+import {createClient} from '@/utils/supabase/client';
+import {Match} from '@/types';
 
 interface UseFetchPostMatchResult {
   match: Match | null;
@@ -34,7 +34,7 @@ export function useFetchPostMatch(postId: string | null): UseFetchPostMatchResul
         const supabase = createClient();
 
         // First, get the match_id from the blog post
-        const { data: postData, error: postError } = await supabase
+        const {data: postData, error: postError} = await supabase
           .from('blog_posts')
           .select('match_id')
           .eq('id', postId)
@@ -50,9 +50,10 @@ export function useFetchPostMatch(postId: string | null): UseFetchPostMatchResul
         }
 
         // Fetch the match data with team details
-        const { data: matchData, error: matchError } = await supabase
+        const {data: matchData, error: matchError} = await supabase
           .from('matches')
-          .select(`
+          .select(
+            `
             id,
             category_id,
             season_id,
@@ -95,7 +96,8 @@ export function useFetchPostMatch(postId: string | null): UseFetchPostMatchResul
             ),
             category:categories(id, name, description),
             season:seasons(id, name)
-          `)
+          `
+          )
           .eq('id', postData.match_id)
           .single();
 
@@ -137,18 +139,23 @@ export function useFetchPostMatch(postId: string | null): UseFetchPostMatchResul
               team_suffix: matchData.away_team?.team_suffix,
             },
             category: {
-              id: matchData.category?.id || '',
-              name: matchData.category?.name || '',
+              id: matchData.category?.id,
+              name: matchData.category?.name,
               description: matchData.category?.description,
             },
             season: {
-              name: matchData.season?.name || '',
+              id: matchData.season?.id,
+              name: matchData.season?.name,
             },
             is_home: matchData.home_team?.club_category?.club?.is_own_club || false,
-            result: matchData.home_score !== null && matchData.away_score !== null 
-              ? (matchData.home_score > matchData.away_score ? 'win' : 
-                 matchData.home_score < matchData.away_score ? 'loss' : 'draw')
-              : undefined,
+            result:
+              matchData.home_score !== null && matchData.away_score !== null
+                ? matchData.home_score > matchData.away_score
+                  ? 'win'
+                  : matchData.home_score < matchData.away_score
+                    ? 'loss'
+                    : 'draw'
+                : undefined,
           };
 
           setMatch(transformedMatch);
@@ -167,6 +174,6 @@ export function useFetchPostMatch(postId: string | null): UseFetchPostMatchResul
   return {
     match,
     loading,
-    error
+    error,
   };
 }
