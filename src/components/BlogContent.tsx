@@ -1,5 +1,6 @@
-import {useMemo, useEffect, useState} from 'react';
+'use client';
 
+import {useMemo, useEffect, useState} from 'react';
 interface BlogContentProps {
   content: string;
   className?: string;
