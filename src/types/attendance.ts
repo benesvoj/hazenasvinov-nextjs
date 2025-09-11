@@ -4,7 +4,7 @@ export interface TrainingSession {
   description?: string;
   session_date: string;
   session_time?: string;
-  category: string;
+  category_id: string;
   season_id: string;
   location?: string;
   coach_id: string;
@@ -37,14 +37,14 @@ export interface RawAttendanceRecord {
     id: string;
     name: string;
     surname: string;
-    category: string;
+    category_id: string;
   };
   training_sessions: {
     id: string;
     title: string;
     session_date: string;
     session_time?: string;
-    category: string;
+    category_id: string;
   };
 }
 
@@ -54,14 +54,14 @@ export interface AttendanceRecord {
     id: string;
     name: string;
     surname: string;
-    category: string;
+    category_id: string;
   };
   training_session: {
     id: string;
     title: string;
     session_date: string;
     session_time?: string;
-    category: string;
+    category_id: string;
   };
   attendance_status: 'present' | 'absent' | 'late' | 'excused';
   notes?: string;
@@ -86,13 +86,13 @@ export interface TrainingSessionFormData {
   description?: string;
   session_date: string;
   session_time?: string;
-  category: string;
+  category_id: string;
   season_id: string;
   location?: string;
 }
 
 export interface AttendanceFilters {
-  category?: string;
+  category_id?: string;
   season_id?: string;
   member_id?: string;
   attendance_status?: 'present' | 'absent' | 'late' | 'excused';

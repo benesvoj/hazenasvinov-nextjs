@@ -68,8 +68,7 @@ export function useUpcomingBirthdays(limit: number = 3, filterByAssignedCategori
               console.error('Error fetching category codes:', error);
               setAssignedCategoryCodes([]);
             } else {
-              const codes = categories?.map((cat: any) => cat.code) || [];
-              console.log('🎂 Assigned category codes:', codes);
+              const codes = categories?.map((cat: any) => cat.id) || [];
               setAssignedCategoryCodes(codes);
             }
           } else {
@@ -100,8 +99,7 @@ export function useUpcomingBirthdays(limit: number = 3, filterByAssignedCategori
       
       // Filter by assigned categories if needed
       if (filterByAssignedCategories && assignedCategoryCodes.length > 0) {
-        console.log('🎂 Filtering members by category codes:', assignedCategoryCodes);
-        query = query.in('category', assignedCategoryCodes);
+        query = query.in('category_id', assignedCategoryCodes);
       }
       
       const { data, error } = await query
@@ -109,13 +107,11 @@ export function useUpcomingBirthdays(limit: number = 3, filterByAssignedCategori
         .order('name', { ascending: true });
 
       if (error) throw error;
-      
-      console.log('🎂 Fetched members for birthdays:', data?.length || 0, 'members');
 
       // Filter and calculate birthdays
       const membersWithBirthdays: BirthdayMember[] = (data || [])
-        .filter((member: any) => member.date_of_birth)
-        .map((member: any) => {
+        .filter((member: Member) => member.date_of_birth)
+        .map((member: Member) => {
           const birthdayInfo = calculateDaysUntilBirthday(member.date_of_birth!);
           return {
             ...member,

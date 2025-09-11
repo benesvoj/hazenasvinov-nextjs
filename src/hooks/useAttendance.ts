@@ -23,42 +23,27 @@ export function useAttendance() {
   const supabase = createClient();
 
   // Fetch training sessions for a specific category and season
-  const fetchTrainingSessions = useCallback(async (category: string, seasonId: string) => {
+  const fetchTrainingSessions = useCallback(async (categoryId: string, seasonId: string) => {
     if (!user?.id) return;
 
     try {
       setLoading(true);
       setError(null);
 
-      // First try the RPC function
+      // Use direct query until RPC functions are updated
       const { data, error } = await supabase
-        .rpc('get_training_sessions', {
-          p_category: category,
-          p_season_id: seasonId,
-          p_user_id: user.id
-        });
-
+        .from('training_sessions')
+        .select('*')
+        .eq('category_id', categoryId)
+        .eq('season_id', seasonId)
+        .order('session_date', { ascending: false })
+        .order('session_time', { ascending: false });
 
       if (error) {
-        console.error('RPC function error:', error);
-        
-        // Fallback: query training_sessions directly
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('training_sessions')
-          .select('*')
-          .eq('category', category)
-          .eq('season_id', seasonId)
-          .order('session_date', { ascending: false })
-          .order('session_time', { ascending: false });
-
-        if (fallbackError) {
-          throw fallbackError;
-        }
-
-        setTrainingSessions(fallbackData || []);
-      } else {
-        setTrainingSessions(data || []);
+        throw error;
       }
+
+      setTrainingSessions(data || []);
     } catch (err) {
       console.error('Error fetching training sessions:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch training sessions');
@@ -89,14 +74,14 @@ export function useAttendance() {
             id,
             name,
             surname,
-            category
+            category_id
           ),
           training_sessions!inner (
             id,
             title,
             session_date,
             session_time,
-            category
+            category_id
           )
         `)
         .eq('training_session_id', trainingSessionId)
@@ -112,14 +97,14 @@ export function useAttendance() {
           id: record.members.id,
           name: record.members.name,
           surname: record.members.surname,
-          category: record.members.category
+          category_id: record.members.category_id
         },
         training_session: {
           id: record.training_sessions.id,
           title: record.training_sessions.title,
           session_date: record.training_sessions.session_date,
           session_time: record.training_sessions.session_time,
-          category: record.training_sessions.category
+          category_id: record.training_sessions.category_id
         },
         attendance_status: record.attendance_status,
         notes: record.notes,
@@ -137,50 +122,36 @@ export function useAttendance() {
   }, [supabase]);
 
   // Fetch attendance summary for a category and season
-  const fetchAttendanceSummary = useCallback(async (category: string, seasonId: string) => {
+  const fetchAttendanceSummary = useCallback(async (categoryId: string, seasonId: string) => {
     try {
       setLoading(true);
       setError(null);
 
-      // First try the RPC function
-      const { data, error } = await supabase
-        .rpc('get_attendance_summary', {
-          p_category: category,
-          p_season_id: seasonId
-        });
+      // Use direct query until RPC functions are updated
+      const { data: members, error: membersError } = await supabase
+        .from('members')
+        .select('id, name, surname')
+        .eq('category_id', categoryId);
 
-      if (error) {
-        console.error('RPC function error:', error);
-        
-        // Fallback: create basic summary from members
-        const { data: members, error: membersError } = await supabase
-          .from('members')
-          .select('id, name, surname')
-          .eq('category', category);
-
-        if (membersError) {
-          throw membersError;
-        }
-
-        // Create basic summary with zero attendance
-        const basicSummary = members.map((member: { id: string; name: string; surname: string }) => ({
-          member_id: member.id,
-          member_name: member.name,
-          member_surname: member.surname,
-          total_sessions: 0,
-          present_count: 0,
-          absent_count: 0,
-          late_count: 0,
-          excused_count: 0,
-          attendance_percentage: 0
-        }));
-
-        setAttendanceSummary(basicSummary);
-        return basicSummary;
-      } else {
-        setAttendanceSummary(data || []);
-        return data || [];
+      if (membersError) {
+        throw membersError;
       }
+
+      // Create basic summary with zero attendance
+      const basicSummary = members.map((member: { id: string; name: string; surname: string }) => ({
+        member_id: member.id,
+        member_name: member.name,
+        member_surname: member.surname,
+        total_sessions: 0,
+        present_count: 0,
+        absent_count: 0,
+        late_count: 0,
+        excused_count: 0,
+        attendance_percentage: 0
+      }));
+
+      setAttendanceSummary(basicSummary);
+      return basicSummary;
     } catch (err) {
       console.error('Error fetching attendance summary:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch attendance summary');
@@ -212,7 +183,7 @@ export function useAttendance() {
       const insertData = {
         title: sessionData.title,
         session_date: sessionData.session_date,
-        category: sessionData.category,
+        category_id: sessionData.category_id,
         season_id: sessionData.season_id,
         coach_id: user.id,
         ...(sessionData.description && { description: sessionData.description }),
@@ -239,7 +210,7 @@ export function useAttendance() {
       }
 
       // Refresh training sessions
-      await fetchTrainingSessions(sessionData.category, sessionData.season_id);
+      await fetchTrainingSessions(sessionData.category_id, sessionData.season_id);
       
       return data;
     } catch (err) {
@@ -258,7 +229,7 @@ export function useAttendance() {
       const updateData: any = {};
       if (sessionData.title) updateData.title = sessionData.title;
       if (sessionData.session_date) updateData.session_date = sessionData.session_date;
-      if (sessionData.category) updateData.category = sessionData.category;
+      if (sessionData.category_id) updateData.category_id = sessionData.category_id;
       if (sessionData.season_id) updateData.season_id = sessionData.season_id;
       if (sessionData.description !== undefined) updateData.description = sessionData.description;
       if (sessionData.session_time !== undefined) updateData.session_time = sessionData.session_time;
@@ -278,8 +249,8 @@ export function useAttendance() {
       }
 
       // Refresh training sessions if category or season changed
-      if (sessionData.category && sessionData.season_id) {
-        await fetchTrainingSessions(sessionData.category, sessionData.season_id);
+      if (sessionData.category_id && sessionData.season_id) {
+        await fetchTrainingSessions(sessionData.category_id, sessionData.season_id);
       }
 
       return data;
@@ -372,7 +343,7 @@ export function useAttendance() {
       // Check training session details
       const { data: sessionData, error: sessionError } = await supabase
         .from('training_sessions')
-        .select('id, category, coach_id')
+        .select('id, category_id, coach_id')
         .eq('id', trainingSessionId)
         .single();
       
@@ -513,9 +484,9 @@ export function useAttendance() {
   }, [supabase]);
 
   // Get attendance statistics
-  const getAttendanceStats = useCallback(async (category: string, seasonId: string): Promise<AttendanceStats> => {
+  const getAttendanceStats = useCallback(async (categoryId: string, seasonId: string): Promise<AttendanceStats> => {
     try {
-      const summary = await fetchAttendanceSummary(category, seasonId);
+      const summary = await fetchAttendanceSummary(categoryId, seasonId);
       
       const totalMembers = summary.length;
       const totalSessions = summary.reduce((sum: number, member: AttendanceSummary) => sum + member.total_sessions, 0);

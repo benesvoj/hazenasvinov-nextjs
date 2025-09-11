@@ -48,7 +48,7 @@ export default function TrainingSessionModal({
         description: session.description || "",
         session_date: session.session_date,
         session_time: session.session_time || "",
-        category: session.category,
+        category: session.category_id,
         season_id: session.season_id,
         location: session.location || ""
       });

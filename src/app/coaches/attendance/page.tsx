@@ -30,7 +30,7 @@ import {
   Tab,
   Spinner,
 } from "@heroui/react";
-import { TrainingSessionFormData, AttendanceRecord } from "@/types/attendance";
+import { TrainingSessionFormData, AttendanceRecord } from "@/types";
 import { formatDateString, formatTime } from "@/helpers";
 import TrainingSessionModal from "./components/TrainingSessionModal";
 import TrainingSessionGenerator from "./components/TrainingSessionGenerator";
@@ -139,14 +139,9 @@ export default function CoachesAttendancePage() {
   // Fetch data when category and season change
   useEffect(() => {
     if (selectedCategory && selectedSeason && categories.length > 0) {
-      // Convert category ID to category code
-      const selectedCategoryData = categories.find(
-        (c) => c.id === selectedCategory
-      );
-      const categoryCode = selectedCategoryData?.code || selectedCategory;
-      
-      fetchTrainingSessions(categoryCode, selectedSeason);
-      fetchAttendanceSummary(categoryCode, selectedSeason);
+      // Use category ID directly (no need to convert to code)
+      fetchTrainingSessions(selectedCategory, selectedSeason);
+      fetchAttendanceSummary(selectedCategory, selectedSeason);
     }
   }, [selectedCategory, selectedSeason, categories, fetchTrainingSessions, fetchAttendanceSummary]);
 
@@ -190,15 +185,10 @@ export default function CoachesAttendancePage() {
 
   const handleSessionSubmit = async (sessionData: TrainingSessionFormData) => {
     try {
-      // Convert category ID to category code
-      const selectedCategoryData = categories.find(
-        (c) => c.id === selectedCategory
-      );
-      const categoryCode = selectedCategoryData?.code || selectedCategory;
-      
+      // Use category ID directly
       const dataWithCategory = {
         ...sessionData,
-        category: categoryCode,
+        category_id: selectedCategory,
         season_id: selectedSeason,
       };
 
@@ -237,7 +227,7 @@ export default function CoachesAttendancePage() {
                     id,
                     name,
                     surname,
-                    category
+                    category_id
                   )
                 `)
                 .eq('lineup_id', lineupData.id)
@@ -253,7 +243,7 @@ export default function CoachesAttendancePage() {
 
           if (memberIds.length === 0) {
             // Fallback to filtered members if no lineup members
-            const fallbackMembers = members.filter((member) => member.category_id === categoryCode);
+            const fallbackMembers = members.filter((member) => member.category_id === selectedCategory);
             const fallbackMemberIds = fallbackMembers.map(m => m.id);
             
             if (fallbackMemberIds.length > 0) {
@@ -687,11 +677,8 @@ export default function CoachesAttendancePage() {
         onSuccess={() => {
           // Refresh training sessions after successful generation
           if (selectedCategory && selectedSeason) {
-            const categoryCode = categories.find(
-              (c) => c.id === selectedCategory
-            )?.code;
-            if (categoryCode) {
-              fetchTrainingSessions(categoryCode, selectedSeason);
+            if (selectedCategory) {
+              fetchTrainingSessions(selectedCategory, selectedSeason);
             }
           }
         }}
