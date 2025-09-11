@@ -1,28 +1,28 @@
-import { Club } from './clubs';
+import {Club} from './clubs';
 
 export interface Standing {
-    id?: string;
-    team_id?: string;
-    club_id?: string;
-    category_id: string;
-    season_id: string;
-    position: number;
-    matches: number;
-    wins: number;
-    draws: number;
-    losses: number;
-    goals_for: number;
-    goals_against: number;
-    points: number;
-    club?: Club;
-    team?: {
-      id: string;
-      name: string;
-      short_name?: string;
-      logo_url?: string;
-      team_suffix?: string;
-    };
-  }
+  id: string;
+  team_id?: string;
+  club_id?: string;
+  category_id: string;
+  season_id: string;
+  position: number;
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  points: number;
+  club?: Club;
+  team?: {
+    id: string;
+    name: string;
+    short_name?: string;
+    logo_url?: string;
+    team_suffix?: string;
+  };
+}
 
 // Types for the Supabase query results
 export interface ClubCategoryTeam {

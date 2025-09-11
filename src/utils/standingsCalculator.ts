@@ -1,5 +1,5 @@
-import { createClient } from '@/utils/supabase/client';
-import { Standing, Match } from '@/types';
+import {createClient} from '@/utils/supabase/client';
+import {Standing, Match} from '@/types';
 
 /**
  * Calculates standings for a specific category and season
@@ -12,21 +12,21 @@ export async function calculateStandings(
   categoryId: string,
   seasonId: string,
   isSeasonClosed: () => boolean
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{success: boolean; error?: string}> {
   if (isSeasonClosed()) {
-    return { success: false, error: "Nelze přepočítat tabulku pro uzavřenou sezónu" };
+    return {success: false, error: 'Nelze přepočítat tabulku pro uzavřenou sezónu'};
   }
 
   try {
     const supabase = createClient();
 
     // Get completed matches for the selected category and season
-    let { data: completedMatches, error: matchesError } = await supabase
-      .from("matches")
-      .select("*")
-      .eq("category_id", categoryId)
-      .eq("season_id", seasonId)
-      .eq("status", "completed");
+    let {data: completedMatches, error: matchesError} = await supabase
+      .from('matches')
+      .select('*')
+      .eq('category_id', categoryId)
+      .eq('season_id', seasonId)
+      .eq('status', 'completed');
 
     if (matchesError) throw matchesError;
 
@@ -42,7 +42,7 @@ export async function calculateStandings(
     // Try club_categories first, fallback to team_categories
     try {
       const clubResult = await supabase
-        .from("club_categories")
+        .from('club_categories')
         .select(
           `
           club_id,
@@ -56,9 +56,9 @@ export async function calculateStandings(
           )
         `
         )
-        .eq("category_id", categoryId)
-        .eq("season_id", seasonId)
-        .eq("is_active", true);
+        .eq('category_id', categoryId)
+        .eq('season_id', seasonId)
+        .eq('is_active', true);
 
       if (clubResult.data && clubResult.data.length > 0) {
         // New club-based system
@@ -72,11 +72,11 @@ export async function calculateStandings(
       } else {
         // Fallback to old system
         const fallbackResult = await supabase
-          .from("team_categories")
-          .select("team_id")
-          .eq("category_id", categoryId)
-          .eq("season_id", seasonId)
-          .eq("is_active", true);
+          .from('team_categories')
+          .select('team_id')
+          .eq('category_id', categoryId)
+          .eq('season_id', seasonId)
+          .eq('is_active', true);
 
         if (fallbackResult.error) throw fallbackResult.error;
         teamCategories = fallbackResult.data;
@@ -88,13 +88,14 @@ export async function calculateStandings(
     if (teamsError) throw teamsError;
 
     if (!teamCategories || teamCategories.length === 0) {
-      return { success: false, error: "Žádné týmy v této kategorii a sezóně" };
+      return {success: false, error: 'Žádné týmy v této kategorii a sezóně'};
     }
 
     // Initialize standings for all teams
     const standingsMap = new Map<string, Standing>();
     teamCategories.forEach((tc: any) => {
       standingsMap.set(tc.team_id, {
+        id: '',
         team_id: tc.team_id,
         club_id: tc.club_id,
         category_id: categoryId,
@@ -168,17 +169,15 @@ export async function calculateStandings(
     });
 
     // Upsert standings to database
-    const { error: upsertError } = await supabase
-      .from("standings")
-      .upsert(standingsArray, {
-        onConflict: "category_id,season_id,team_id",
-      });
+    const {error: upsertError} = await supabase.from('standings').upsert(standingsArray, {
+      onConflict: 'category_id,season_id,team_id',
+    });
 
     if (upsertError) throw upsertError;
 
-    return { success: true };
+    return {success: true};
   } catch (error) {
-    console.error("Error calculating standings:", error);
-    return { success: false, error: "Chyba při výpočtu tabulky" };
+    console.error('Error calculating standings:', error);
+    return {success: false, error: 'Chyba při výpočtu tabulky'};
   }
 }
