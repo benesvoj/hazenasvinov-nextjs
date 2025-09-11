@@ -71,7 +71,6 @@ export function useOwnClubMatches(categoryId?: string) {
             updated_at,
             category:categories(
               id,
-              code,
               name,
               description
             ),

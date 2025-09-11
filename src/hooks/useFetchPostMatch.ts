@@ -93,7 +93,7 @@ export function useFetchPostMatch(postId: string | null): UseFetchPostMatchResul
                 )
               )
             ),
-            category:categories(id, code, name, description),
+            category:categories(id, name, description),
             season:seasons(id, name)
           `)
           .eq('id', postData.match_id)

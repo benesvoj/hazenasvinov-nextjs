@@ -119,7 +119,7 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       console.log('🔍 Validating match:', {
         match,
         availableTeams: teamsData.map(t => ({ name: t.name, short_name: t.short_name })),
-        availableCategories: categoriesData.map(c => ({ name: c.name, code: c.code }))
+        availableCategories: categoriesData.map(c => ({ name: c.name, id: c.id }))
       });
       
       // Also log the raw arrays to see if they're actually empty
@@ -243,21 +243,16 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       const searchTerm = match.category.trim().toLowerCase();
       const foundCategory = categoriesData.find(cat => {
         const catNameLower = cat.name.trim().toLowerCase();
-        const catCodeLower = cat.code.trim().toLowerCase();
         
         const isMatch = catNameLower === searchTerm || 
-               catCodeLower === searchTerm ||
                catNameLower.includes(searchTerm) ||
-               searchTerm.includes(catNameLower) ||
-               catCodeLower.includes(searchTerm) ||
-               searchTerm.includes(catCodeLower);
+               searchTerm.includes(catNameLower);
         
         // Debug: Log each category check (only for first few categories to avoid spam)
         if (categoriesData.indexOf(cat) < 3) {
           console.log(`🏷️ Checking category "${match.category}":`, {
             searchTerm,
             catName: cat.name,
-            catCode: cat.code,
             isMatch
           });
         }

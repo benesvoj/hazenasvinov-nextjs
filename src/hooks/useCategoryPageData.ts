@@ -59,8 +59,8 @@ export function useCategoryPageData(
       const [categoryResult, seasonResult] = await Promise.all([
         supabase
           .from('categories')
-          .select('id, code, name, description, is_active, sort_order')
-          .eq('code', categorySlug)
+          .select('id, name, description, is_active, sort_order')
+          .eq('id', categorySlug)
           .single(),
         supabase
           .from('seasons')
