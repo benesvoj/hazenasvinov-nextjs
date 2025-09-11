@@ -1,29 +1,30 @@
 'use client';
 
-import React, { useState, useMemo } from "react";
-import { 
-  Modal, 
-  ModalContent, 
-  ModalHeader, 
-  ModalBody, 
-  ModalFooter, 
-  Button, 
-  Table, 
-  TableHeader, 
-  TableColumn, 
-  TableBody, 
-  TableRow, 
+import React, {useState, useMemo} from 'react';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
   TableCell,
   Chip,
   Input,
   Select,
   SelectItem,
-  Spinner
-} from "@heroui/react";
-import { Match } from "@/types";
-import { useFetchMatches } from "@/hooks";
-import { formatDateString } from "@/helpers";
-import { formatTime } from "@/helpers/formatTime";
+  Spinner,
+} from '@heroui/react';
+import {Match} from '@/types';
+import {useFetchMatches} from '@/hooks';
+import {formatDateString} from '@/helpers';
+import {formatTime} from '@/helpers/formatTime';
+import {matchStatuses} from '@/constants';
 
 interface MatchSelectionModalProps {
   isOpen: boolean;
@@ -38,18 +39,22 @@ export default function MatchSelectionModal({
   onClose,
   onSelect,
   selectedMatchId,
-  categoryId
+  categoryId,
 }: MatchSelectionModalProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   // Use the existing hook to fetch matches (only when modal is open and categoryId is provided)
-  const { matches: seasonalMatches, loading, error } = useFetchMatches(
-    isOpen && categoryId ? categoryId : '', 
+  const {
+    matches: seasonalMatches,
+    loading,
+    error,
+  } = useFetchMatches(
+    isOpen && categoryId ? categoryId : '',
     undefined, // Use active season
-    { 
+    {
       ownClubOnly: true, // Only show own club matches
-      includeTeamDetails: true 
+      includeTeamDetails: true,
     }
   );
 
@@ -65,9 +70,9 @@ export default function MatchSelectionModal({
           return 0;
         }
       });
-      
+
       // Debug logging removed - component now has proper error handling
-      
+
       return sorted;
     } catch (error) {
       console.error('Error processing matches:', error);
@@ -78,19 +83,20 @@ export default function MatchSelectionModal({
   // Filter matches based on search and status
   const filteredMatches = useMemo(() => {
     try {
-      return allMatches.filter(match => {
+      return allMatches.filter((match) => {
         // Ensure match has required data
         if (!match || !match.home_team || !match.away_team) {
           return false;
         }
 
-        const matchesSearch = !searchTerm || 
+        const matchesSearch =
+          !searchTerm ||
           match.home_team?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           match.away_team?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           match.competition?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           match.venue?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesStatus = statusFilter === "all" || match.status === statusFilter;
+        const matchesStatus = statusFilter === 'all' || match.status === statusFilter;
 
         return matchesSearch && matchesStatus;
       });
@@ -109,9 +115,7 @@ export default function MatchSelectionModal({
             <h2 className="text-xl font-semibold">Vyberte zápas</h2>
           </ModalHeader>
           <ModalBody>
-            <div className="text-center py-8 text-gray-500">
-              Nejdříve vyberte kategorii článku
-            </div>
+            <div className="text-center py-8 text-gray-500">Nejdříve vyberte kategorii článku</div>
           </ModalBody>
           <ModalFooter>
             <Button variant="light" onPress={onClose}>
@@ -135,35 +139,12 @@ export default function MatchSelectionModal({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'success';
-      case 'upcoming': return 'primary';
-      default: return 'default';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed': return 'Dokončeno';
-      case 'upcoming': return 'Nadcházející';
-      default: return status;
-    }
-  };
-
-  const getResultColor = (result?: string) => {
-    switch (result) {
-      case 'win': return 'success';
-      case 'loss': return 'danger';
-      case 'draw': return 'warning';
-      default: return 'default';
-    }
-  };
-
-  const getResultText = (result?: string) => {
-    switch (result) {
-      case 'win': return 'Výhra';
-      case 'loss': return 'Prohra';
-      case 'draw': return 'Remíza';
-      default: return '-';
+      case matchStatuses.completed:
+        return 'success';
+      case matchStatuses.upcoming:
+        return 'primary';
+      default:
+        return 'default';
     }
   };
 
@@ -174,17 +155,13 @@ export default function MatchSelectionModal({
           <div className="flex items-center justify-between w-full">
             <h2 className="text-xl font-semibold">Vyberte zápas</h2>
             <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="bordered"
-                onPress={handleClear}
-              >
+              <Button size="sm" variant="bordered" onPress={handleClear}>
                 Zrušit výběr
               </Button>
             </div>
           </div>
         </ModalHeader>
-        
+
         <ModalBody>
           {/* Filters */}
           <div className="flex gap-4 mb-4">
@@ -216,9 +193,7 @@ export default function MatchSelectionModal({
               {error.message || 'Chyba při načítání zápasů'}
             </div>
           ) : filteredMatches.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              Žádné zápasy nenalezeny
-            </div>
+            <div className="text-center py-8 text-gray-500">Žádné zápasy nenalezeny</div>
           ) : (
             <Table aria-label="Matches table">
               <TableHeader>
@@ -231,72 +206,61 @@ export default function MatchSelectionModal({
               </TableHeader>
               <TableBody>
                 {filteredMatches
-                  .filter(match => match && match.id) // Filter out invalid matches
+                  .filter((match) => match && match.id) // Filter out invalid matches
                   .map((match) => (
-                  <TableRow key={match.id}>
-                    <TableCell>
-                      {formatDateString(match.date)}
-                    </TableCell>
-                    <TableCell>
-                      {formatTime(match.time)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="font-medium">
-                          {match.home_team?.name || 'Neznámý tým'} vs {match.away_team?.name || 'Neznámý tým'}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {match.competition || 'Neznámá soutěž'} • {match.venue || 'Neznámé místo'}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          {match.category?.name || 'Neznámá kategorie'}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {match.status === 'completed' && match.home_score !== null && match.away_score !== null ? (
+                    <TableRow key={match.id}>
+                      <TableCell>{formatDateString(match.date)}</TableCell>
+                      <TableCell>{formatTime(match.time)}</TableCell>
+                      <TableCell>
                         <div className="space-y-1">
-                          <div className="text-lg font-bold">
-                            {match.home_score} : {match.away_score}
+                          <div className="font-medium">
+                            {match.home_team?.name || 'Neznámý tým'} vs{' '}
+                            {match.away_team?.name || 'Neznámý tým'}
                           </div>
-                          <Chip
-                            size="sm"
-                            color={getResultColor(match.result)}
-                            variant="flat"
-                          >
-                            {getResultText(match.result)}
-                          </Chip>
+                          <div className="text-sm text-gray-500">
+                            {match.competition || 'Neznámá soutěž'} •{' '}
+                            {match.venue || 'Neznámé místo'}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {match.category?.name || 'Neznámá kategorie'}
+                          </div>
                         </div>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        size="sm"
-                        color={getStatusColor(match.status)}
-                        variant="flat"
-                      >
-                        {getStatusText(match.status)}
-                      </Chip>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        color="primary"
-                        variant={selectedMatchId === match.id ? "solid" : "bordered"}
-                        onPress={() => handleSelect(match)}
-                      >
-                        {selectedMatchId === match.id ? "Vybraný" : "Vybrat"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                      </TableCell>
+                      <TableCell>
+                        {match.status === 'completed' &&
+                        match.home_score !== null &&
+                        match.away_score !== null ? (
+                          <div className="space-y-1">
+                            <div className="text-lg font-bold">
+                              {match.home_score} : {match.away_score}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Chip size="sm" color={getStatusColor(match.status)} variant="flat">
+                          {matchStatuses[match.status]}
+                        </Chip>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          color="primary"
+                          variant={selectedMatchId === match.id ? 'solid' : 'bordered'}
+                          onPress={() => handleSelect(match)}
+                        >
+                          {selectedMatchId === match.id ? 'Vybraný' : 'Vybrat'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))}
               </TableBody>
             </Table>
           )}
         </ModalBody>
-        
+
         <ModalFooter>
           <Button variant="light" onPress={onClose}>
             Zavřít

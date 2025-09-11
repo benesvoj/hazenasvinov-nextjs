@@ -18,6 +18,8 @@ export interface Match {
   status: 'upcoming' | 'completed';
   home_score?: number;
   away_score?: number;
+  home_team_halftime_score?: number;
+  away_team_halftime_score?: number;
   result?: 'win' | 'loss' | 'draw';
   matchweek?: number;
   match_number?: number;

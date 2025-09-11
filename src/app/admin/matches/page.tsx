@@ -53,6 +53,7 @@ import {
 } from '@/hooks';
 import {AdminContainer} from '../components/AdminContainer';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
+import {matchStatuses, matchStatusesKeys} from '@/constants';
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');
@@ -396,7 +397,7 @@ export default function MatchesAdminPage() {
         venue: formData.venue,
         competition: getCategoryInfo(selectedCategory, categories).competition,
         is_home: true,
-        status: 'upcoming',
+        status: matchStatusesKeys[0],
       };
 
       // Handle matchweek - allow setting to null if empty, or parse the value
@@ -458,20 +459,12 @@ export default function MatchesAdminPage() {
       const homeScore = parseInt(resultData.home_score);
       const awayScore = parseInt(resultData.away_score);
 
-      let result = 'draw';
-      if (homeScore > awayScore) {
-        result = 'win';
-      } else if (homeScore < awayScore) {
-        result = 'loss';
-      }
-
       const {error} = await supabase
         .from('matches')
         .update({
           home_score: homeScore,
           away_score: awayScore,
-          result: result,
-          status: 'completed',
+          status: matchStatusesKeys[1],
         })
         .eq('id', selectedMatch.id);
 
