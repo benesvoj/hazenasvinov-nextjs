@@ -2,18 +2,18 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import {
+  Select,
+  SelectItem,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/react";
+  Button,
+  Input,
+} from "@heroui/react";
 import { createClient } from "@/utils/supabase/client";
-import { Category } from "@/types";
-import { Season } from "@/types";
+import { Category, Season } from "@/types";
 
 interface AssignCategoryModalProps {
   isOpen: boolean;
@@ -159,7 +159,9 @@ export default function AssignCategoryModal({
                 isRequired
               >
                 {(() => {
-                  const availableCategories = categories.filter(category => !assignedCategoryIds.includes(category.id));
+                  const availableCategories = categories.filter(
+                    (category) => !assignedCategoryIds.includes(category.id)
+                  );
                   if (availableCategories.length === 0) {
                     return (
                       <SelectItem key="no-categories" isDisabled>
@@ -191,7 +193,12 @@ export default function AssignCategoryModal({
           )}
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="flat" onPress={handleClose} aria-label="Zrušit přiřazení kategorie">
+          <Button
+            color="danger"
+            variant="flat"
+            onPress={handleClose}
+            aria-label="Zrušit přiřazení kategorie"
+          >
             {loading ? "Načítání..." : "Zrušit"}
           </Button>
           <Button

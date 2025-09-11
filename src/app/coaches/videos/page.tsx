@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Video, VideoFormData, VideoFilters } from '@/types';
-import { useClubs, useSeasons, useAuth, useCategories, useUserRoles } from '@/hooks';
+import { useAuth, useUserRoles } from '@/hooks';
 import { useVideos } from '@/hooks/useVideos';
+import { useAppData } from '@/contexts/AppDataContext';
 import { VideoCameraIcon } from '@heroicons/react/24/outline';
 import { Button } from '@heroui/react';
 import { DeleteConfirmationModal, VideoPageLayout } from '@/components';
@@ -17,9 +18,16 @@ export default function CoachesVideosPage() {
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
   const [assignedCategories, setAssignedCategories] = useState<string[]>([]);
 
-  const { categories, loading: categoriesLoading, fetchCategories } = useCategories();
-  const { clubs, loading: clubsLoading } = useClubs();
-  const { seasons, loading: seasonsLoading, fetchAllSeasons } = useSeasons();
+  // Use AppDataContext for common data
+  const {
+    categories,
+    clubs,
+    seasons,
+    categoriesLoading,
+    clubsLoading,
+    seasonsLoading,
+  } = useAppData();
+  
   const { user, loading: authLoading } = useAuth();
   const { getCurrentUserCategories } = useUserRoles();
 
@@ -60,21 +68,17 @@ export default function CoachesVideosPage() {
     if (user?.id && !authLoading) {
       fetchAssignedCategories();
     }
-  }, [user?.id, authLoading, fetchAssignedCategories]);
+  }, [user?.id, authLoading]); // Remove fetchAssignedCategories from dependencies
 
-  useEffect(() => {
-    if (assignedCategories.length > 0) {
-      fetchCategories();
-      fetchAllSeasons();
-    }
-  }, [assignedCategories, fetchCategories, fetchAllSeasons]);
+  // Categories, clubs, and seasons are now provided by AppDataContext
+  // No need for individual fetching
 
   // Fetch videos when filters or assigned categories change
   useEffect(() => {
     if (assignedCategories.length > 0) {
       fetchVideos(filters);
     }
-  }, [filters, assignedCategories, fetchVideos]);
+  }, [filters, assignedCategories]); // Remove fetchVideos from dependencies
 
   // Handle video operations
   const handleCreateVideo = async (formData: VideoFormData) => {

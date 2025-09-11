@@ -9,6 +9,8 @@ import {
 import { Button } from "@heroui/button";
 import { translations } from "@/lib/translations";
 
+// TODO: Add showToas about success deletion
+
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;

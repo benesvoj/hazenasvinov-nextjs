@@ -1,9 +1,7 @@
 'use client';
 
 import React from "react";
-import { Button } from "@heroui/button";
-import { Select, SelectItem } from "@heroui/react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import { Select, SelectItem, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@heroui/react";
 import { Category, Match } from "@/types";
 
 interface BulkUpdateMatchweekModalProps {

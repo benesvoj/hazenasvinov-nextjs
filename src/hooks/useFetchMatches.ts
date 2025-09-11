@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Match } from '@/types';
-import { translations } from '@/lib/translations';
 import { transformMatchWithTeamNames } from '@/utils/teamDisplay';
 
 export interface SeasonalMatches {
@@ -35,7 +34,7 @@ export interface UseFetchMatchesOptions {
 /**
  * Hook to fetch matches for a specific category and season
  * 
- * @param categorySlug - The category code (e.g., 'men', 'women')
+ * @param categoryId - The category id (UUID)
  * @param seasonId - Optional season ID. If not provided, uses active season
  * @param options - Configuration options for filtering and data inclusion
  * 
@@ -53,7 +52,7 @@ export interface UseFetchMatchesOptions {
  * });
  */
 export function useFetchMatches(
-  categorySlug: string, 
+  categoryId: string, 
   seasonId?: string, 
   options: UseFetchMatchesOptions = {}
 ) {
@@ -71,7 +70,7 @@ export function useFetchMatches(
 
   useEffect(() => {
     const fetchMatches = async () => {
-      if (!categorySlug) {
+      if (!categoryId) {
         setLoading(false);
         setError(null);
         return;
@@ -85,8 +84,8 @@ export function useFetchMatches(
         // First, get the category ID
         const { data: categoryData, error: categoryError } = await supabase
           .from('categories')
-          .select('id, code, name')
-          .eq('code', categorySlug)
+          .select('id, name')
+          .eq('id', categoryId)
           .single();
         
         if (categoryError) {
@@ -244,18 +243,6 @@ export function useFetchMatches(
         
         setError(null);
         
-        // Store debug info for troubleshooting
-        setDebugInfo({
-          categorySlug,
-          categoryId: categoryData.id,
-          seasonId: seasonData.id,
-          totalMatches: filteredMatches.length,
-          autumnCount: autumnMatches.length,
-          springCount: springMatches.length,
-          ownClubOnly,
-          timestamp: new Date().toISOString()
-        });
-        
       } catch (error) {
         setError(error instanceof Error ? error : new Error('Unknown error occurred'));
         setMatches({ autumn: [], spring: [] });
@@ -266,7 +253,7 @@ export function useFetchMatches(
     };
     
     fetchMatches();
-  }, [categorySlug, seasonId, ownClubOnly, includeTeamDetails, includeStandings, refreshTrigger]);
+  }, [categoryId, seasonId, ownClubOnly, includeTeamDetails, includeStandings, refreshTrigger]);
   
   // Function to manually refresh matches
   const refreshMatches = () => {

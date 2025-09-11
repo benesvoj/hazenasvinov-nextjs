@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Input, Textarea, Checkbox, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/react';
-import { MemberFunction } from '@/types/types';
+import { MemberFunction } from '@/types';
 import { translations } from '@/lib/translations';
 
 interface FunctionFormModalProps {

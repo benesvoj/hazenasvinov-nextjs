@@ -57,11 +57,13 @@ export function useStandings() {
   const [standings, setStandings] = useState<EnhancedStanding[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastFetchedCategoryId, setLastFetchedCategoryId] = useState<string | null>(null);
 
   const fetchStandings = useCallback(async (categoryId?: string, seasonId?: string) => {
     try {
       setLoading(true);
       setError(null);
+      setStandings([]); // Clear previous standings when fetching new ones
       
       // console.log('🔍 Fetching standings...', {
       //   categoryId,
@@ -138,11 +140,13 @@ export function useStandings() {
       // });
 
       setStandings(enhancedStandings);
+      setLastFetchedCategoryId(categoryId || null);
       setError(null);
     } catch (error) {
       setError('Chyba při načítání tabulky');
       console.error('Error fetching standings:', error);
       setStandings([]);
+      setLastFetchedCategoryId(null);
     } finally {
       setLoading(false);
     }

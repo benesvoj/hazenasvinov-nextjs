@@ -259,7 +259,7 @@ async function main() {
   try {
     console.log('🚀 Starting video import...');
     
-    const htmlFile = path.join(__dirname, '..', 'docs', 'video-mens-html.md');
+    const htmlFile = path.join(__dirname, '..', 'docs', 'buildingAppDocs', 'video-mens-html.md');
     
     if (!fs.existsSync(htmlFile)) {
       console.error(`❌ File not found: ${htmlFile}`);

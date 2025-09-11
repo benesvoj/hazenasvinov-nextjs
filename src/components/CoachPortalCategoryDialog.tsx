@@ -16,18 +16,12 @@ import {
 import { AcademicCapIcon } from "@heroicons/react/24/outline";
 import { useAdminCategorySimulation } from "@/contexts/AdminCategorySimulationContext";
 import LoadingSpinner from "./LoadingSpinner";
-
+import { Category } from "@/types";
 interface CoachPortalCategoryDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
-
-type Category = {
-  id: string;
-  name: string;
-  code: string;
-};
 
 export function CoachPortalCategoryDialog({
   isOpen,

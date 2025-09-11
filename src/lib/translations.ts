@@ -15,6 +15,7 @@ export const translations = {
         viewAllPostsDescription: 'Zobrazit všechny aktuality',
         viewAllPostsButton: 'Zobrazit všechny aktuality',
         viewAllPostsButtonDescription: 'Zobrazit všechny aktuality',
+        backToPosts: 'Zpět na aktuality',
     }
   },
   footer: {
@@ -231,6 +232,8 @@ export const translations = {
     actions: {
       addMatch: "Přidat zápas",
       addMatchDescription: "Přidat nový zápas do vybrané sezóny",
+      editMatch: "Upravit zápas",
+      editMatchDescription: "Upravit vybraný zápas",
       bulkUpdateMatchweek: "Hromadná úprava kol",
       bulkUpdateMatchweekDescription:
         "Hromadně nastavit nebo odebrat kola pro zápasy",

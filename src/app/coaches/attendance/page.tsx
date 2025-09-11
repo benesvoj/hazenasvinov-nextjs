@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useAttendance } from "@/hooks/useAttendance";
-import { useUser } from "@/contexts/UserContext";
-import { useAppData } from "@/contexts/AppDataContext";
-import { useCategoryLineups } from "@/hooks/useCategoryLineups";
-import { 
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
+import {useAttendance} from '@/hooks/useAttendance';
+import {useUser} from '@/contexts/UserContext';
+import {useAppData} from '@/contexts/AppDataContext';
+import {useCategoryLineups} from '@/hooks/useCategoryLineups';
+import {
   ClipboardDocumentListIcon,
   PlusIcon,
   CalendarIcon,
   PencilIcon,
   TrashIcon,
-} from "@heroicons/react/24/outline";
+} from '@heroicons/react/24/outline';
 import {
   Button,
   Card,
@@ -29,30 +29,30 @@ import {
   Tabs,
   Tab,
   Spinner,
-} from "@heroui/react";
-import { TrainingSessionFormData, AttendanceRecord } from "@/types/attendance";
-import { formatDateString, formatTime } from "@/helpers";
-import TrainingSessionModal from "./components/TrainingSessionModal";
-import TrainingSessionGenerator from "./components/TrainingSessionGenerator";
-import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+} from '@heroui/react';
+import {TrainingSessionFormData, AttendanceRecord} from '@/types';
+import {formatDateString, formatTime} from '@/helpers';
+import TrainingSessionModal from './components/TrainingSessionModal';
+import TrainingSessionGenerator from './components/TrainingSessionGenerator';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 export default function CoachesAttendancePage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedSeason, setSelectedSeason] = useState<string>("");
-  const [selectedSession, setSelectedSession] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedSeason, setSelectedSeason] = useState<string>('');
+  const [selectedSession, setSelectedSession] = useState<string>('');
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [editingSession, setEditingSession] = useState<any>(null);
 
-  const { 
-    trainingSessions, 
-    attendanceRecords, 
+  const {
+    trainingSessions,
+    attendanceRecords,
     attendanceSummary,
-    loading, 
-    error, 
-    fetchTrainingSessions, 
+    loading,
+    error,
+    fetchTrainingSessions,
     fetchAttendanceRecords,
     fetchAttendanceSummary,
     createTrainingSession,
@@ -62,34 +62,34 @@ export default function CoachesAttendancePage() {
     createAttendanceForLineupMembers,
   } = useAttendance();
 
-  const { 
-    seasons, 
-    categories, 
-    members, 
+  const {
+    seasons,
+    categories,
+    members,
     activeSeason,
     loading: appDataLoading,
-    seasonsLoading, 
-    categoriesLoading, 
-    membersLoading 
+    seasonsLoading,
+    categoriesLoading,
+    membersLoading,
   } = useAppData();
-  const { userCategories, getCurrentUserCategories, isAdmin } = useUser();
-  const { 
-    lineups, 
-    loading: lineupsLoading, 
-    fetchLineups, 
+  const {userCategories, getCurrentUserCategories, isAdmin} = useUser();
+  const {
+    lineups,
+    loading: lineupsLoading,
+    fetchLineups,
     lineupMembers,
-    fetchLineupMembers 
+    fetchLineupMembers,
   } = useCategoryLineups();
 
   // Get admin category simulation from localStorage (for admin users testing coach portal)
   const [adminSimulationCategories, setAdminSimulationCategories] = useState<string[]>([]);
-  
+
   useEffect(() => {
     if (isAdmin && typeof window !== 'undefined') {
       const simulationData = localStorage.getItem('adminCategorySimulation');
       if (simulationData) {
         try {
-          const { selectedCategories } = JSON.parse(simulationData);
+          const {selectedCategories} = JSON.parse(simulationData);
           if (selectedCategories && selectedCategories.length > 0) {
             setAdminSimulationCategories(selectedCategories);
           }
@@ -100,11 +100,42 @@ export default function CoachesAttendancePage() {
     }
   }, [isAdmin]);
 
-
   // Get user's assigned categories from UserContext
   // const [userCategories, setUserCategories] = useState<string[]>([]);
 
   // No need to fetch initial data - AppDataContext handles this
+
+  // Compute available categories for this user
+  const availableCategories = useMemo(() => {
+    if (adminSimulationCategories.length > 0) {
+      // Admin simulation mode - show only selected categories from localStorage
+      return adminSimulationCategories
+        .map((categoryId: string) => categories.find((c) => c.id === categoryId))
+        .filter(Boolean);
+    } else if (isAdmin) {
+      // Admin users can access all categories
+      return categories;
+    } else {
+      // Regular coaches use their assigned categories
+      return userCategories
+        .map((categoryId: string) => categories.find((c) => c.id === categoryId))
+        .filter(Boolean);
+    }
+  }, [adminSimulationCategories, categories, isAdmin, userCategories]);
+
+  // Compute the effective selected category (auto-select if only one available)
+  const effectiveSelectedCategory = useMemo(() => {
+    if (selectedCategory) {
+      return selectedCategory;
+    }
+
+    // Auto-select if only one category available
+    if (availableCategories.length === 1) {
+      return availableCategories[0]?.id || '';
+    }
+
+    return '';
+  }, [selectedCategory, availableCategories]);
 
   // Fetch lineups when category and season change
   useEffect(() => {
@@ -113,21 +144,12 @@ export default function CoachesAttendancePage() {
     }
   }, [selectedCategory, selectedSeason, fetchLineups]);
 
-  // Set initial category from UserContext, admin simulation, or all categories for admin
+  // Update selectedCategory when effectiveSelectedCategory changes
   useEffect(() => {
-    if (!selectedCategory && categories.length > 0) {
-      if (adminSimulationCategories.length > 0) {
-        // Admin simulation mode - use selected categories from localStorage
-        setSelectedCategory(adminSimulationCategories[0]);
-      } else if (isAdmin) {
-        // Admin users can access all categories - select first one
-        setSelectedCategory(categories[0].id);
-      } else if (userCategories.length > 0) {
-        // Regular coaches use their assigned categories
-        setSelectedCategory(userCategories[0]);
-      }
+    if (effectiveSelectedCategory && effectiveSelectedCategory !== selectedCategory) {
+      setSelectedCategory(effectiveSelectedCategory);
     }
-  }, [userCategories, selectedCategory, categories, isAdmin, adminSimulationCategories]);
+  }, [effectiveSelectedCategory, selectedCategory]);
 
   // Set initial season from AppDataContext
   useEffect(() => {
@@ -138,17 +160,18 @@ export default function CoachesAttendancePage() {
 
   // Fetch data when category and season change
   useEffect(() => {
-    if (selectedCategory && selectedSeason && categories.length > 0) {
-      // Convert category ID to category code
-      const selectedCategoryData = categories.find(
-        (c) => c.id === selectedCategory
-      );
-      const categoryCode = selectedCategoryData?.code || selectedCategory;
-      
-      fetchTrainingSessions(categoryCode, selectedSeason);
-      fetchAttendanceSummary(categoryCode, selectedSeason);
+    if (effectiveSelectedCategory && selectedSeason && categories.length > 0) {
+      // Use category ID directly (no need to convert to code)
+      fetchTrainingSessions(effectiveSelectedCategory, selectedSeason);
+      fetchAttendanceSummary(effectiveSelectedCategory, selectedSeason);
     }
-  }, [selectedCategory, selectedSeason, categories, fetchTrainingSessions, fetchAttendanceSummary]);
+  }, [
+    effectiveSelectedCategory,
+    selectedSeason,
+    categories,
+    fetchTrainingSessions,
+    fetchAttendanceSummary,
+  ]);
 
   // Fetch attendance records when session changes
   useEffect(() => {
@@ -160,13 +183,13 @@ export default function CoachesAttendancePage() {
   // Memoize filtered members calculation
   const filteredMembers = useMemo(() => {
     // Get lineup members for the selected category, fallback to filtered members if no lineups
-    const lineupMembersList = lineupMembers.map(lineupMember => lineupMember.member).filter(Boolean);
-    
+    const lineupMembersList = lineupMembers
+      .map((lineupMember) => lineupMember.member)
+      .filter(Boolean);
+
     // Fallback: if no lineup members, filter all members by category
     const fallbackMembers = members.filter((member) => {
-      const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
-      const selectedCategoryCode = selectedCategoryData?.code;
-      return member.category === selectedCategoryCode;
+      return member.category_id === effectiveSelectedCategory;
     });
 
     // Use lineup members if available, otherwise use filtered members
@@ -176,7 +199,7 @@ export default function CoachesAttendancePage() {
     return unsortedMembers.sort((a, b) => {
       // Type guard to ensure both members exist
       if (!a || !b) return 0;
-      
+
       // First sort by surname
       const surnameComparison = (a.surname || '').localeCompare(b.surname || '');
       if (surnameComparison !== 0) {
@@ -185,20 +208,14 @@ export default function CoachesAttendancePage() {
       // If surnames are the same, sort by name
       return (a.name || '').localeCompare(b.name || '');
     });
-  }, [lineupMembers, members, categories, selectedCategory]);
-
+  }, [lineupMembers, members, effectiveSelectedCategory]);
 
   const handleSessionSubmit = async (sessionData: TrainingSessionFormData) => {
     try {
-      // Convert category ID to category code
-      const selectedCategoryData = categories.find(
-        (c) => c.id === selectedCategory
-      );
-      const categoryCode = selectedCategoryData?.code || selectedCategory;
-      
+      // Use category ID directly
       const dataWithCategory = {
         ...sessionData,
-        category: categoryCode,
+        category_id: selectedCategory,
         season_id: selectedSeason,
       };
 
@@ -208,18 +225,18 @@ export default function CoachesAttendancePage() {
       } else {
         // Create new training session
         const createdSession = await createTrainingSession(dataWithCategory);
-        
+
         // Create attendance records for the new session
         try {
           let memberIds: string[] = [];
-          
+
           // Try to get lineup members first
           try {
-            const { createClient } = await import('@/utils/supabase/client');
+            const {createClient} = await import('@/utils/supabase/client');
             const supabase = createClient();
-            
+
             // First get the lineup for this category and season
-            const { data: lineupData, error: lineupError } = await supabase
+            const {data: lineupData, error: lineupError} = await supabase
               .from('category_lineups')
               .select('id')
               .eq('category_id', selectedCategory)
@@ -229,17 +246,19 @@ export default function CoachesAttendancePage() {
 
             if (!lineupError && lineupData) {
               // Then get the lineup members
-              const { data: membersData, error: membersError } = await supabase
+              const {data: membersData, error: membersError} = await supabase
                 .from('category_lineup_members')
-                .select(`
+                .select(
+                  `
                   member_id,
                   members!inner (
                     id,
                     name,
                     surname,
-                    category
+                    category_id
                   )
-                `)
+                `
+                )
                 .eq('lineup_id', lineupData.id)
                 .eq('is_active', true);
 
@@ -253,11 +272,17 @@ export default function CoachesAttendancePage() {
 
           if (memberIds.length === 0) {
             // Fallback to filtered members if no lineup members
-            const fallbackMembers = members.filter((member) => member.category === categoryCode);
-            const fallbackMemberIds = fallbackMembers.map(m => m.id);
-            
+            const fallbackMembers = members.filter(
+              (member) => member.category_id === selectedCategory
+            );
+            const fallbackMemberIds = fallbackMembers.map((m) => m.id);
+
             if (fallbackMemberIds.length > 0) {
-              await createAttendanceForLineupMembers(createdSession.id, fallbackMemberIds, 'present');
+              await createAttendanceForLineupMembers(
+                createdSession.id,
+                fallbackMemberIds,
+                'present'
+              );
             }
           } else {
             await createAttendanceForLineupMembers(createdSession.id, memberIds, 'present');
@@ -269,11 +294,11 @@ export default function CoachesAttendancePage() {
 
       setIsSessionModalOpen(false);
     } catch (err) {
-      console.error("Error saving session:", err);
-      console.error("Error details:", {
-        message: err instanceof Error ? err.message : "Unknown error",
+      console.error('Error saving session:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
         stack: err instanceof Error ? err.stack : undefined,
-        name: err instanceof Error ? err.name : "Unknown",
+        name: err instanceof Error ? err.name : 'Unknown',
       });
     }
   };
@@ -294,27 +319,27 @@ export default function CoachesAttendancePage() {
     try {
       await deleteTrainingSession(sessionToDelete);
       if (selectedSession === sessionToDelete) {
-        setSelectedSession("");
+        setSelectedSession('');
       }
       setIsDeleteModalOpen(false);
       setSessionToDelete(null);
     } catch (err) {
-      console.error("Error deleting session:", err);
+      console.error('Error deleting session:', err);
     }
   };
 
   const handleRecordAttendance = async (
     memberId: string,
-    status: "present" | "absent" | "late" | "excused"
+    status: 'present' | 'absent' | 'late' | 'excused'
   ) => {
     if (!selectedSession) return;
 
     try {
       await recordAttendance(memberId, selectedSession, status);
     } catch (err) {
-      console.error("Error recording attendance:", err);
+      console.error('Error recording attendance:', err);
       // Show error to user - you might want to add a toast notification here
-      alert(err instanceof Error ? err.message : "Chyba při zaznamenávání docházky");
+      alert(err instanceof Error ? err.message : 'Chyba při zaznamenávání docházky');
     }
   };
 
@@ -324,64 +349,62 @@ export default function CoachesAttendancePage() {
     try {
       // Get lineup members for the selected category and season
       await fetchLineups(selectedCategory, selectedSeason);
-      const memberIds = lineupMembers
-        .map(lm => lm.member?.id)
-        .filter(Boolean) as string[];
+      const memberIds = lineupMembers.map((lm) => lm.member?.id).filter(Boolean) as string[];
 
       if (memberIds.length === 0) {
         // Fallback to filtered members if no lineup members
-        const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
-        const selectedCategoryCode = selectedCategoryData?.code;
-        const fallbackMembers = members.filter((member) => member.category === selectedCategoryCode);
-        const fallbackMemberIds = fallbackMembers.map(m => m.id);
-        
+        const fallbackMembers = members.filter((member) => member.category_id === selectedCategory);
+        const fallbackMemberIds = fallbackMembers.map((m) => m.id);
+
         if (fallbackMemberIds.length === 0) {
-          alert("Žádní členové nejsou k dispozici pro vybranou kategorii");
+          alert('Žádní členové nejsou k dispozici pro vybranou kategorii');
           return;
         }
-        
+
         await createAttendanceForLineupMembers(selectedSession, fallbackMemberIds, 'present');
         await fetchAttendanceRecords(selectedSession);
-        alert(`Vytvořeno ${fallbackMemberIds.length} záznamů docházky pro tento trénink (použiti všichni členové kategorie)`);
+        alert(
+          `Vytvořeno ${fallbackMemberIds.length} záznamů docházky pro tento trénink (použiti všichni členové kategorie)`
+        );
         return;
       }
-      
+
       await createAttendanceForLineupMembers(selectedSession, memberIds, 'present');
-      
+
       // Refresh attendance records
       await fetchAttendanceRecords(selectedSession);
-      
+
       alert(`Vytvořeno ${memberIds.length} záznamů docházky pro tento trénink`);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Chyba při vytváření záznamů docházky");
+      alert(err instanceof Error ? err.message : 'Chyba při vytváření záznamů docházky');
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "present":
-        return "success";
-      case "absent":
-        return "danger";
-      case "late":
-        return "warning";
-      case "excused":
-        return "default";
+      case 'present':
+        return 'success';
+      case 'absent':
+        return 'danger';
+      case 'late':
+        return 'warning';
+      case 'excused':
+        return 'default';
       default:
-        return "default";
+        return 'default';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "present":
-        return "Přítomen";
-      case "absent":
-        return "Nepřítomen";
-      case "late":
-        return "Pozdní příchod";
-      case "excused":
-        return "Omluven";
+      case 'present':
+        return 'Přítomen';
+      case 'absent':
+        return 'Nepřítomen';
+      case 'late':
+        return 'Pozdní příchod';
+      case 'excused':
+        return 'Omluven';
       default:
         return status;
     }
@@ -405,9 +428,7 @@ export default function CoachesAttendancePage() {
           <ClipboardDocumentListIcon className="w-8 h-8 text-blue-600" />
           <h1 className="text-2xl font-bold text-gray-900">Docházka členů</h1>
         </div>
-        <p className="text-gray-600">
-          Sledování docházky členů na tréninkové jednotky
-        </p>
+        <p className="text-gray-600">Sledování docházky členů na tréninkové jednotky</p>
       </div>
 
       {/* Filters */}
@@ -415,55 +436,30 @@ export default function CoachesAttendancePage() {
         <CardBody>
           <div className="flex gap-4 justify-between">
             <div className="flex items-end gap-2 w-[400px]">
-            <Select
-              label="Kategorie"
-              placeholder="Vyberte kategorii"
-              selectedKeys={selectedCategory ? [selectedCategory] : []}
-                onSelectionChange={(keys) =>
-                  setSelectedCategory(Array.from(keys)[0] as string)
-                }
-                isDisabled={categoriesLoading || categories.length === 1}
-            >
-              {(() => {
-                // Determine which categories to show
-                let categoriesToShow = [];
-                
-                if (adminSimulationCategories.length > 0) {
-                  // Admin simulation mode - show only selected categories from localStorage
-                  categoriesToShow = adminSimulationCategories.map((categoryId: string) => 
-                    categories.find((c) => c.id === categoryId)
-                  ).filter(Boolean);
-                } else if (isAdmin) {
-                  // Admin users can access all categories
-                  categoriesToShow = categories;
-                } else {
-                  // Regular coaches use their assigned categories
-                  categoriesToShow = userCategories.map((categoryId: string) => 
-                    categories.find((c) => c.id === categoryId)
-                  ).filter(Boolean);
-                }
-                
-                return categoriesToShow.map((category: any) => (
-                  <SelectItem key={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ));
-              })()}
-            </Select>
+              <Select
+                label="Kategorie"
+                placeholder="Vyberte kategorii"
+                selectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
+                onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
+                isDisabled={categoriesLoading || availableCategories.length === 1}
+                defaultSelectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
+              >
+                {availableCategories.map((category: any) => (
+                  <SelectItem key={category.id}>{category.name}</SelectItem>
+                ))}
+              </Select>
 
-            <Select
-              label="Sezóna"
-              placeholder="Vyberte sezónu"
-              selectedKeys={selectedSeason ? [selectedSeason] : []}
-                onSelectionChange={(keys) =>
-                  setSelectedSeason(Array.from(keys)[0] as string)
-                }
-              isDisabled={seasonsLoading}
-            >
-              {seasons.map((season) => (
+              <Select
+                label="Sezóna"
+                placeholder="Vyberte sezónu"
+                selectedKeys={selectedSeason ? [selectedSeason] : []}
+                onSelectionChange={(keys) => setSelectedSeason(Array.from(keys)[0] as string)}
+                isDisabled={seasonsLoading}
+              >
+                {seasons.map((season) => (
                   <SelectItem key={season.id}>{season.name}</SelectItem>
-              ))}
-            </Select>
+                ))}
+              </Select>
             </div>
 
             <div className="flex items-end gap-2">
@@ -519,21 +515,17 @@ export default function CoachesAttendancePage() {
                       key={session.id}
                       className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                         selectedSession === session.id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
                       }`}
                       onClick={() => setSelectedSession(session.id)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <h4 className="font-medium text-sm">
-                            {session.title}
-                          </h4>
+                          <h4 className="font-medium text-sm">{session.title}</h4>
                           <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                             <div>{formatDateString(session.session_date)}</div>
-                            {session.session_time && (
-                              <div>{formatTime(session.session_time)}</div>
-                            )}
+                            {session.session_time && <div>{formatTime(session.session_time)}</div>}
                           </div>
                           {session.location && (
                             <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
@@ -574,7 +566,9 @@ export default function CoachesAttendancePage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between w-full">
-                <h3 className="text-lg font-semibold">Docházka {attendanceRecords ? `(${attendanceRecords.length})` : ''}</h3>
+                <h3 className="text-lg font-semibold">
+                  Docházka {attendanceRecords ? `(${attendanceRecords.length})` : ''}
+                </h3>
                 {selectedSession && attendanceRecords.length === 0 && (
                   <Button
                     size="sm"
@@ -613,49 +607,40 @@ export default function CoachesAttendancePage() {
                       .sort((a, b) => {
                         // Sort by surname, then by name
                         if (!a.member || !b.member) return 0;
-                        const surnameComparison = (a.member.surname || '').localeCompare(b.member.surname || '');
+                        const surnameComparison = (a.member.surname || '').localeCompare(
+                          b.member.surname || ''
+                        );
                         if (surnameComparison !== 0) {
                           return surnameComparison;
                         }
                         return (a.member.name || '').localeCompare(b.member.name || '');
                       })
                       .map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {record.member.surname} {record.member.name}
+                        <TableRow key={record.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">
+                                {record.member.surname} {record.member.name}
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            {(
-                              ["present", "absent", "late", "excused"] as const
-                            ).map((status) => (
-                              <Button
-                                key={status}
-                                size="sm"
-                                variant={
-                                  record.attendance_status === status
-                                    ? "solid"
-                                    : "light"
-                                }
-                                color={getStatusColor(status)}
-                                onPress={() =>
-                                  handleRecordAttendance(
-                                    record.member.id,
-                                    status
-                                  )
-                                }
-                              >
-                                {getStatusText(status)}
-                              </Button>
-                            ))}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              {(['present', 'absent', 'late', 'excused'] as const).map((status) => (
+                                <Button
+                                  key={status}
+                                  size="sm"
+                                  variant={record.attendance_status === status ? 'solid' : 'light'}
+                                  color={getStatusColor(status)}
+                                  onPress={() => handleRecordAttendance(record.member.id, status)}
+                                >
+                                  {getStatusText(status)}
+                                </Button>
+                              ))}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               )}
@@ -673,10 +658,9 @@ export default function CoachesAttendancePage() {
         }}
         onSubmit={handleSessionSubmit}
         session={editingSession}
-        selectedCategory={selectedCategory}
+        selectedCategoryId={selectedCategory}
         selectedSeason={selectedSeason}
       />
-
 
       {/* Training Session Generator Modal */}
       <TrainingSessionGenerator
@@ -687,11 +671,8 @@ export default function CoachesAttendancePage() {
         onSuccess={() => {
           // Refresh training sessions after successful generation
           if (selectedCategory && selectedSeason) {
-            const categoryCode = categories.find(
-              (c) => c.id === selectedCategory
-            )?.code;
-            if (categoryCode) {
-              fetchTrainingSessions(categoryCode, selectedSeason);
+            if (selectedCategory) {
+              fetchTrainingSessions(selectedCategory, selectedSeason);
             }
           }
         }}

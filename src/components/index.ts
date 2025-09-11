@@ -7,11 +7,12 @@ export { default as Toast } from './Toast';
 
 // Blog Components
 export { default as BlogPostCard, BlogPostCardSkeleton } from './BlogPostCard';
+export { default as MatchInfo } from './MatchInfo';
+export { default as BlogContent } from './BlogContent';
 
 // UI Components
 export { default as DeleteConfirmationModal } from './DeleteConfirmationModal';
 export { default as DropdownMenu } from './DropdownMenu';
-export { default as ModalWithForm } from './ModalWithForm';
 export { default as MobileActionsMenu } from './MobileActionsMenu';
 
 // Error Boundaries
@@ -71,10 +72,10 @@ export { UnifiedSidebar } from './UnifiedSidebar';
 export { UnifiedSidebarProvider, useUnifiedSidebar } from './UnifiedSidebarContext';
 export { CoachPortalCategoryDialog } from './CoachPortalCategoryDialog';
 
-// Headings
-export { Heading1, Heading2, Heading3, Heading4, Heading5, Heading6 } from './Headings';
+export { Heading } from './Headings';
 
 export { showToast, useToast } from './Toast';
 
 export { default as MatchSchedule } from './match/MatchSchedule';
 export { default as MatchRow } from './match/MatchRow';
+export { default as UnifiedModal } from './UnifiedModal';

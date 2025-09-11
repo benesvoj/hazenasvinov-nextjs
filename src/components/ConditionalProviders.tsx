@@ -50,8 +50,11 @@ export function ConditionalProviders({ children }: ConditionalProvidersProps) {
     basePath.startsWith(publicPath)
   );
   
+  // Check if this is an admin page
+  const isAdminPage = basePath.startsWith('/admin');
+  
   const shouldLoadUserContext = !EXCLUDED_PAGES.includes(basePath) && !isPublicPage;
-  const shouldLoadAppDataContext = !NO_APP_DATA_PAGES.includes(basePath) && shouldLoadUserContext && !isPublicPage;
+  const shouldLoadAppDataContext = !NO_APP_DATA_PAGES.includes(basePath) && shouldLoadUserContext && (!isPublicPage || isAdminPage);
 
   // If this is a page that doesn't need any contexts, just render the children
   if (!shouldLoadUserContext) {

@@ -1,0 +1,9 @@
+# Run lint-staged (runs ESLint, Prettier, and TypeScript on staged files)
+echo "🔍 Running pre-commit checks on staged files..."
+npx lint-staged
+if [ $? -ne 0 ]; then
+  echo "❌ Pre-commit checks failed. Please fix the errors before committing."
+  exit 1
+fi
+
+echo "✅ All checks passed! Proceeding with commit..."

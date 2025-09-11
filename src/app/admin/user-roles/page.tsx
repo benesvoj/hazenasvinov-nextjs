@@ -289,7 +289,7 @@ export default function UserRolesPage() {
                   >
                     {(categories || []).map((category) => (
                       <Checkbox key={category.id} value={category.id}>
-                        {category.name} ({category.code})
+                        {category.name}
                       </Checkbox>
                     ))}
                   </CheckboxGroup>

@@ -10,6 +10,13 @@ export interface MenuItem {
 	group?: string;
 }
 
+/**
+ * Public routes
+ * @deprecated Use dynamic routes instead
+ * @see dynamicRoutes.ts
+ * @see routes.ts
+ * @todo: remove this after migration
+ */
 export const publicRoutes = {
 	home: '/',
 	error: '/error',
@@ -23,16 +30,16 @@ export const publicRoutes = {
 	setPassword: '/set-password',
 	matches: '/matches',
 	photoGallery: '/photo-gallery',
-	youngestKids: '/categories/youngest-kids',
-	prepKids: '/categories/prep-kids',
-	youngerBoys: '/categories/younger-boys',
-	youngerGirls: '/categories/younger-girls',
-	olderBoys: '/categories/older-boys',
-	olderGirls: '/categories/older-girls',
-	juniorBoys: '/categories/junior-boys',
-	juniorGirls: '/categories/junior-girls',
-	men: '/categories/men',
-	women: '/categories/women',
+	youngestKids: '/categories/[id]',
+	prepKids: '/categories/[id]',
+	youngerBoys: '/categories/[id]',
+	youngerGirls: '/categories/[id]',
+	olderBoys: '/categories/[id]',
+	olderGirls: '/categories/[id]',
+	juniorBoys: '/categories/[id]',
+	juniorGirls: '/categories/[id]',
+	men: '/categories/[id]',
+	women: '/categories/[id]',
 } as const;
 
 

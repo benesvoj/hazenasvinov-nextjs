@@ -1,13 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import React, {useState, useEffect} from 'react';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+import {Button} from '@heroui/button';
+import {Input, Textarea} from '@heroui/input';
+import {Select, SelectItem} from '@heroui/select';
+import {PhotoIcon, XMarkIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { BlogPost, Category } from "@/types";
+import {BlogPost, Category, Match} from '@/types';
+import {generateSlug} from '@/utils/slugGenerator';
+import {formatDateString} from '@/helpers';
+import MatchSelectionModal from './MatchSelectionModal';
+import {postStatuses} from '@/constants';
 
 interface User {
   id: string;
@@ -17,7 +21,10 @@ interface User {
 interface EditPostModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (formData: any, imageFile: File | null) => Promise<void>;
+  onSubmit: (
+    formData: Omit<BlogPost, 'id' | 'updated_at'>,
+    imageFile: File | null
+  ) => Promise<void>;
   post: BlogPost | null;
   users: User[];
   categories: Category[];
@@ -31,48 +38,44 @@ export default function EditPostModal({
   post,
   users,
   categories,
-  categoriesLoading
+  categoriesLoading,
 }: EditPostModalProps) {
-  const [formData, setFormData] = useState({
-    title: "",
-    slug: "",
-    content: "",
-    excerpt: "",
-    author_id: "",
-    status: "draft" as 'draft' | 'published' | 'archived',
-    tags: [] as string[],
-    image_url: "",
-    category_id: "",
-    created_at: ""
+  const [formData, setFormData] = useState<Omit<BlogPost, 'id' | 'updated_at'>>({
+    title: '',
+    slug: '',
+    content: '',
+    author_id: '',
+    status: postStatuses.draft,
+    image_url: '',
+    category_id: '',
+    match_id: '',
+    created_at: '',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
 
-  // Generate slug from title
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
+  // Generate slug from title using the utility function
+  const generateSlugFromTitle = (title: string) => {
+    return generateSlug(title);
   };
 
   // Handle form input changes
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
+    setFormData((prev) => ({...prev, [field]: value}));
+
     // Auto-generate slug when title changes
     if (field === 'title') {
-      setFormData(prev => ({ ...prev, slug: generateSlug(value) }));
+      setFormData((prev) => ({...prev, slug: generateSlugFromTitle(value)}));
     }
   };
 
-  // Handle tag input changes
-  const handleTagInputChange = (value: string) => {
-    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-    setFormData(prev => ({ ...prev, tags: tags }));
+  // Handle match selection
+  const handleMatchSelect = (match: Match | null) => {
+    setSelectedMatch(match);
+    setFormData((prev) => ({...prev, match_id: match?.id || ''}));
   };
 
   // Handle image file selection
@@ -87,33 +90,33 @@ export default function EditPostModal({
       reader.readAsDataURL(file);
     } else {
       setImageFile(null);
-      setImagePreview("");
+      setImagePreview('');
     }
   };
 
   // Handle image removal
   const handleRemoveImage = () => {
     setImageFile(null);
-    setImagePreview("");
-    setFormData(prev => ({ ...prev, image_url: "" }));
+    setImagePreview('');
+    setFormData((prev) => ({...prev, image_url: ''}));
   };
 
   // Reset form data
   const resetForm = () => {
     setFormData({
-      title: "",
-      slug: "",
-      content: "",
-      excerpt: "",
-      author_id: "default-user",
-      status: "draft",
-      tags: [],
-      image_url: "",
-      category_id: "",
-      created_at: ""
+      title: '',
+      slug: '',
+      content: '',
+      author_id: 'default-user',
+      status: postStatuses.draft,
+      image_url: '',
+      category_id: '',
+      match_id: '',
+      created_at: '',
     });
     setImageFile(null);
-    setImagePreview("");
+    setImagePreview('');
+    setSelectedMatch(null);
   };
 
   // Handle modal close
@@ -132,29 +135,33 @@ export default function EditPostModal({
   useEffect(() => {
     if (post) {
       // Format created_at for datetime-local input
-      const createdDate = post.created_at ? new Date(post.created_at).toISOString().slice(0, 16) : "";
-      
+      const createdDate = post.created_at
+        ? new Date(post.created_at).toISOString().slice(0, 16)
+        : '';
+
       setFormData({
         title: post.title,
         slug: post.slug,
         content: post.content,
-        excerpt: post.excerpt,
         author_id: post.author_id,
-        status: post.status,
-        tags: post.tags || [],
-        image_url: post.image_url || "",
-        category_id: post.category_id || "",
-        created_at: createdDate
+        status: post.status || postStatuses.draft,
+        image_url: post.image_url || '',
+        category_id: post.category_id || '',
+        match_id: post.match_id || '',
+        created_at: createdDate,
       });
-      
+
       // Set image preview if post has an image
       if (post.image_url) {
         setImagePreview(post.image_url);
         setImageFile(null); // No file selected when editing
       } else {
-        setImagePreview("");
+        setImagePreview('');
         setImageFile(null);
       }
+
+      // Reset selected match - will be loaded separately if needed
+      setSelectedMatch(null);
     }
   }, [post]);
 
@@ -183,27 +190,29 @@ export default function EditPostModal({
                 label="Autor"
                 placeholder="Vyberte autora"
                 selectedKeys={formData.author_id ? [formData.author_id] : []}
-                onSelectionChange={(keys) => handleInputChange('author_id', Array.from(keys)[0] as string)}
+                onSelectionChange={(keys) =>
+                  handleInputChange('author_id', Array.from(keys)[0] as string)
+                }
                 isRequired
               >
                 {users.map((user) => (
-                  <SelectItem key={user.id}>
-                    {user.email}
-                  </SelectItem>
+                  <SelectItem key={user.id}>{user.email}</SelectItem>
                 ))}
               </Select>
               <Select
                 label="Stav"
                 placeholder="Vyberte stav"
                 selectedKeys={[formData.status]}
-                onSelectionChange={(keys) => handleInputChange('status', Array.from(keys)[0] as string)}
+                onSelectionChange={(keys) =>
+                  handleInputChange('status', Array.from(keys)[0] as string)
+                }
                 isRequired
               >
-                <SelectItem key="draft">Koncept</SelectItem>
-                <SelectItem key="published">Publikováno</SelectItem>
-                <SelectItem key="archived">Archivováno</SelectItem>
+                {Object.values(postStatuses).map((status) => (
+                  <SelectItem key={status}>{status}</SelectItem>
+                ))}
               </Select>
-              
+
               <Input
                 label="Datum vytvoření"
                 type="datetime-local"
@@ -211,20 +220,20 @@ export default function EditPostModal({
                 onChange={(e) => handleInputChange('created_at', e.target.value)}
                 description="Nechte prázdné pro aktuální datum"
               />
-              
+
               {/* Category Selection */}
               <Select
                 label="Kategorie"
                 placeholder="Vyberte kategorii"
                 selectedKeys={formData.category_id ? [formData.category_id] : []}
-                onSelectionChange={(keys) => handleInputChange('category_id', Array.from(keys)[0] as string)}
+                onSelectionChange={(keys) =>
+                  handleInputChange('category_id', Array.from(keys)[0] as string)
+                }
                 isDisabled={categoriesLoading}
               >
                 {categories.length > 0 ? (
                   categories.map((category) => (
-                    <SelectItem key={category.id}>
-                      {category.name}
-                    </SelectItem>
+                    <SelectItem key={category.id}>{category.name}</SelectItem>
                   ))
                 ) : (
                   <SelectItem key="no-categories" isDisabled>
@@ -232,30 +241,56 @@ export default function EditPostModal({
                   </SelectItem>
                 )}
               </Select>
-              
-              <Input
-                label="Tagy"
-                placeholder="tag1, tag2, tag3"
-                value={formData.tags.join(', ')}
-                onChange={(e) => handleTagInputChange(e.target.value)}
-                description="Tagy oddělené čárkami"
-              />
+
+              {/* Match Selection (Optional) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Související zápas (volitelné)
+                </label>
+                {selectedMatch ? (
+                  <div className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          {selectedMatch.home_team.name} vs {selectedMatch.away_team.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {selectedMatch.competition} • {formatDateString(selectedMatch.date)}
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        color="danger"
+                        onPress={() => handleMatchSelect(null)}
+                      >
+                        Odstranit
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    variant="bordered"
+                    startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
+                    onPress={() => setIsMatchModalOpen(true)}
+                    className="w-full justify-start"
+                  >
+                    {formData.match_id ? 'Změnit zápas' : 'Vybrat zápas'}
+                  </Button>
+                )}
+                <p className="text-xs text-gray-500 mt-1">Vyberte zápas pro propojení s článkem</p>
+              </div>
 
               {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Obrázek článku
                 </label>
-                
+
                 {imagePreview ? (
                   <div className="space-y-3">
                     <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                      <Image
-                        src={imagePreview}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                      />
+                      <Image src={imagePreview} alt="Preview" fill className="object-cover" />
                       <button
                         type="button"
                         onClick={handleRemoveImage}
@@ -265,9 +300,7 @@ export default function EditPostModal({
                         <XMarkIcon className="h-4 w-4" />
                       </button>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      Obrázek bude nahrán při uložení článku
-                    </p>
+                    <p className="text-xs text-gray-500">Obrázek bude nahrán při uložení článku</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -289,27 +322,13 @@ export default function EditPostModal({
                           disabled={uploadingImage}
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        PNG, JPG, GIF do 5MB
-                      </p>
+                      <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF do 5MB</p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Perex
-                </label>
-                <Textarea
-                  placeholder="Krátký popis článku"
-                  value={formData.excerpt}
-                  onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                  rows={3}
-                  className="w-full"
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Obsah článku <span className="text-red-500">*</span>
@@ -335,6 +354,15 @@ export default function EditPostModal({
           </Button>
         </ModalFooter>
       </ModalContent>
+
+      {/* Match Selection Modal */}
+      <MatchSelectionModal
+        isOpen={isMatchModalOpen}
+        onClose={() => setIsMatchModalOpen(false)}
+        onSelect={handleMatchSelect}
+        selectedMatchId={selectedMatch?.id || formData.match_id}
+        categoryId={formData.category_id || undefined}
+      />
     </Modal>
   );
 }

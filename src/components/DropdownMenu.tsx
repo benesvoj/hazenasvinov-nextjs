@@ -6,10 +6,11 @@ import {MenuItem} from "@/routes/routes";
 
 interface Props {
 	item: MenuItem
+	className?: string
 }
 
 export default function DropdownMenu(props: Props) {
-	const {item} = props;
+	const {item, className} = props;
 	const menuItems = item?.children || []
 
 	if (!menuItems.length) {
@@ -18,7 +19,7 @@ export default function DropdownMenu(props: Props) {
 
 	return (
 		<Popover className="relative inline-block text-left">
-			<PopoverButton className="inline-flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900">
+			<PopoverButton className={`inline-flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 ${className || ''}`}>
 				<span>{item.title}</span>
 				<ChevronDownIcon aria-hidden="true" className="size-5"/>
 			</PopoverButton>

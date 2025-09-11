@@ -1,61 +1,50 @@
 'use client';
 
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Chip } from "@heroui/chip";
-import BlogPostCard, { BlogPostCardSkeleton } from "@/components/BlogPostCard";
-import Link from "@/components/Link";
-import Image from "next/image";
+import { useState, useMemo } from "react";
+import { Card, CardBody, Button, Input, Select, SelectItem } from "@heroui/react";
+import { BlogPostCard, BlogPostCardSkeleton } from "@/components";
 import { 
-  CalendarIcon, 
-  UserIcon, 
   TagIcon,
-  ArrowRightIcon,
-  PhotoIcon,
   MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-import { useFetchBlogPosts } from "@/hooks/useFetchBlogPosts";
-import { useState, useMemo } from "react";
+import { useFetchBlogPosts } from "@/hooks";
+import { useDebounce } from "@/hooks/useDebounce";
+import { createSearchablePost, searchPosts } from "@/utils/contentSearch";
 
 export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Všechny");
+  
+  // Debounce search term to improve performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
   // Fetch all published blog posts
   const { posts: allPosts, loading, error } = useFetchBlogPosts(100); // Get more posts for filtering
   
   // Get unique categories from posts
   const categories = useMemo(() => {
-    if (!allPosts) return ["Všechny"];
-    
-    const uniqueCategories = new Set<string>();
-    allPosts.forEach(post => {
-      if (post.tags) {
-        post.tags.forEach(tag => uniqueCategories.add(tag));
-      }
-    });
-    
-    return ["Všechny", ...Array.from(uniqueCategories).sort()];
-  }, [allPosts]);
+    // Since we removed tags, just return a simple category list
+    return ["Všechny"];
+  }, []);
 
-  // Filter posts based on search and category
+  // Filter posts based on debounced search and category
   const filteredPosts = useMemo(() => {
     if (!allPosts) return [];
     
-    return allPosts.filter(post => {
-      const matchesSearch = searchTerm === "" || 
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
-      
-      const matchesCategory = selectedCategory === "Všechny" || 
-        (post.tags && post.tags.includes(selectedCategory));
-      
-      return matchesSearch && matchesCategory;
+    // Create searchable posts with content excerpts
+    const searchablePosts = allPosts.map(createSearchablePost);
+    
+    // Filter by search term using optimized search
+    const searchFiltered = debouncedSearchTerm === "" 
+      ? searchablePosts 
+      : searchPosts(searchablePosts, debouncedSearchTerm);
+    
+    // Filter by category
+    return searchFiltered.filter(post => {
+      const matchesCategory = selectedCategory === "Všechny";
+      return matchesCategory;
     });
-  }, [allPosts, searchTerm, selectedCategory]);
+  }, [allPosts, debouncedSearchTerm, selectedCategory]);
 
   return (
     <div className="space-y-8">
@@ -93,6 +82,7 @@ export default function BlogPage() {
               onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
               className="w-full"
               size="lg"
+              aria-label="Vyberte kategorii"
             >
               {categories.map((category) => (
                 <SelectItem key={category}>{category}</SelectItem>

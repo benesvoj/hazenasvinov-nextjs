@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Video, VideoFormData, Category, Club, Season } from "@/types";
+import { Video, VideoFormData, Category, Club } from "@/types";
 import { useCategories } from "@/hooks/useCategories";
 import { useSeasons } from "@/hooks/useSeasons";
 import {

@@ -7,10 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "tsc": "tsc --noEmit",
+    "tsc:watch": "tsc --noEmit --watch",
+    "tsc:strict": "tsc --noEmit --strict",
     "setup:page-visibility": "node scripts/setup-page-visibility.js",
     "setup:landing-sections": "node scripts/setup-landing-sections.js",
     "setup:team-suffix-view": "node scripts/setup-team-suffix-view.js",
-    "setup:videos-table": "node scripts/setup-videos-table.js",
+    "setup:videos-table": "node scripts/building-app/setup-videos-table.js",
     "setup:coach-categories": "node scripts/setup-coach-categories.js",
     "setup:user-roles": "node scripts/setup-user-roles.js",
     "setup:initial-admin": "node scripts/setup-initial-admin.js",
@@ -22,7 +25,8 @@
     "fix:admin-dashboard": "node scripts/fix-admin-dashboard-access.js",
     "setup:user-profiles": "node scripts/setup-user-profiles.js",
     "setup:meeting-minutes": "node scripts/building-app/setup-meeting-minutes-table.js",
-    "fix:meeting-attendees-fk": "node scripts/building-app/fix-meeting-attendees-fk.js"
+    "fix:meeting-attendees-fk": "node scripts/building-app/fix-meeting-attendees-fk.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",
@@ -49,8 +53,11 @@
     "@react-stately/data": "^3.13.2",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.5",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/dompurify": "^3.2.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "dompurify": "^3.2.6",
     "dotenv": "^17.2.1",
     "framer-motion": "^12.23.12",
     "jsonwebtoken": "^9.0.2",
@@ -67,6 +74,8 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.35.0",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
@@ -75,8 +84,20 @@
     "@types/react-dom": "^18",
     "eslint": "^9.27.0",
     "eslint-config-next": "^15.4.0-canary.51",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
     "postcss": "^8",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "src/**/*.{ts,tsx}": [
+      "bash -c 'npx tsc --noEmit --skipLibCheck'"
+    ]
   }
 }

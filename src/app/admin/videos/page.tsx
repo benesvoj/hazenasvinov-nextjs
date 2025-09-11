@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Video, VideoFormData, VideoFilters } from "@/types";
-import { useCategories } from "@/hooks/useCategories";
-import { useClubs } from "@/hooks/useClubs";
-import { useSeasons } from "@/hooks/useSeasons";
 import { useVideos } from "@/hooks/useVideos";
+import { useAppData } from "@/contexts/AppDataContext";
 import { VideoCameraIcon } from "@heroicons/react/24/outline";
 import { DeleteConfirmationModal, VideoPageLayout } from "@/components";
 import { AdminContainer } from "../components/AdminContainer";
@@ -20,13 +18,15 @@ export default function VideosPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
 
+  // Use AppDataContext for common data
   const {
     categories,
-    loading: categoriesLoading,
-    fetchCategories,
-  } = useCategories();
-  const { clubs, loading: clubsLoading } = useClubs();
-  const { seasons, loading: seasonsLoading, fetchAllSeasons } = useSeasons();
+    clubs,
+    seasons,
+    categoriesLoading,
+    clubsLoading,
+    seasonsLoading,
+  } = useAppData();
   
   const {
     videos,
@@ -49,12 +49,10 @@ export default function VideosPage() {
   // Fetch videos when filters change
   useEffect(() => {
     fetchVideos(filters);
-  }, [filters, fetchVideos]);
+  }, [filters]); // Remove fetchVideos from dependencies to prevent infinite loop
 
-  useEffect(() => {
-    fetchCategories();
-    fetchAllSeasons();
-  }, [fetchCategories, fetchAllSeasons]);
+  // Categories, clubs, and seasons are now provided by AppDataContext
+  // No need for individual fetching
 
   // Handle video operations
   const handleCreateVideo = async (formData: VideoFormData) => {

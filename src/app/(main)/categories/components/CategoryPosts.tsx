@@ -10,13 +10,13 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { BlogPost } from "@/types";
 
 interface CategoryPostsProps {
-  categoryName: string;
-  categorySlug: string;
+  categoryId: string;
   posts?: BlogPost[];
 }
 
-export function CategoryPosts({ categoryName, categorySlug, posts = [] }: CategoryPostsProps) {
-  const latestPosts = posts;
+export function CategoryPosts({ categoryId, posts = [] }: CategoryPostsProps) {
+  const latestPosts = posts.filter((post) => post.category_id === categoryId);
+  
   const postsLoading = false;
   const postsError = null;
   return (

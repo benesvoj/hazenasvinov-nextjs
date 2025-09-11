@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Club } from '@/types/types';
+import { Club } from '@/types';
 
 export interface ClubsNavigationData {
   clubs: Club[];

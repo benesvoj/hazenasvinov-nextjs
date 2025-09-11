@@ -8,7 +8,7 @@ import {
 } from "@/types";
 import { useSeasons } from "@/hooks/useSeasons";
 import { useAuth } from "@/hooks/useAuthNew";
-import { useMembers } from "@/hooks/useMembers";
+import { useFetchMembers } from "@/hooks/useFetchMembers";
 import {
   Modal,
   ModalContent,
@@ -70,7 +70,7 @@ export function MeetingMinutesFormModal({
     activeSeason,
   } = useSeasons();
   const { user } = useAuth();
-  const { members, loading: membersLoading } = useMembers();
+  const { members, loading: membersLoading } = useFetchMembers();
 
   const t = translations.components.meetingMinutes;
 

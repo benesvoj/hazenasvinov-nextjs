@@ -55,8 +55,8 @@ export default function ClubSelector({
         const { createClient } = await import('@/utils/supabase/client');
         const supabase = createClient();
 
-        // Fetch clubs that have teams in the selected category
-        const { data: clubData, error: clubError } = await supabase
+        // Build query based on whether we have a selected category
+        let clubQuery = supabase
           .from('clubs')
           .select(`
             id,
@@ -64,15 +64,44 @@ export default function ClubSelector({
             short_name,
             logo_url
           `)
-          .eq('is_active', true)
-          .order('name');
+          .eq('is_active', true);
+
+        // If a specific category is selected, only fetch clubs that have teams in that category
+        if (selectedCategory && selectedCategory !== 'all') {
+          const selectedCategoryData = categories.find(cat => cat.id === selectedCategory);
+          if (selectedCategoryData) {
+            // First get club IDs that have teams in the selected category
+            const { data: clubIdsInCategory, error: clubIdsError } = await supabase
+              .from('club_categories')
+              .select('club_id')
+              .eq('category_id', selectedCategoryData.id)
+              .eq('is_active', true);
+
+            if (clubIdsError) {
+              throw new Error(`Failed to fetch clubs in category: ${clubIdsError.message}`);
+            }
+
+            if (clubIdsInCategory && clubIdsInCategory.length > 0) {
+              const uniqueClubIds = [...new Set(clubIdsInCategory.map((cc: any) => cc.club_id))];
+              clubQuery = clubQuery.in('id', uniqueClubIds);
+            } else {
+              // No clubs in this category, return empty result
+              setClubs([]);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+
+        const { data: clubData, error: clubError } = await clubQuery.order('name');
 
         if (clubError) {
           throw new Error(`Failed to fetch clubs: ${clubError.message}`);
         }
 
-        // Fetch club categories and teams separately for better control
-        const { data: clubCategoriesData, error: clubCategoriesError } = await supabase
+        // Fetch club categories and teams for the fetched clubs
+        const clubIds = clubData?.map((club: any) => club.id) || [];
+        let clubCategoriesQuery = supabase
           .from('club_categories')
           .select(`
             id,
@@ -84,6 +113,21 @@ export default function ClubSelector({
             )
           `)
           .eq('is_active', true);
+
+        // If a specific category is selected, only fetch teams from that category
+        if (selectedCategory && selectedCategory !== 'all') {
+          const selectedCategoryData = categories.find(cat => cat.id === selectedCategory);
+          if (selectedCategoryData) {
+            clubCategoriesQuery = clubCategoriesQuery.eq('category_id', selectedCategoryData.id);
+          }
+        }
+
+        // Only fetch categories for the clubs we're interested in
+        if (clubIds.length > 0) {
+          clubCategoriesQuery = clubCategoriesQuery.in('club_id', clubIds);
+        }
+
+        const { data: clubCategoriesData, error: clubCategoriesError } = await clubCategoriesQuery;
 
         if (clubCategoriesError) {
           throw new Error(`Failed to fetch club categories: ${clubCategoriesError.message}`);
@@ -99,7 +143,7 @@ export default function ClubSelector({
           // Find all club categories for this club
           const clubCategories = clubCategoriesData?.filter((cc: any) => cc.club_id === club.id) || [];
           
-          // Get all teams from all categories for this club
+          // Get teams from the filtered categories (already filtered by selected category if applicable)
           const teams = clubCategories.flatMap((cc: any) => 
             cc.club_category_teams?.map((team: any) => ({
               id: team.id,
@@ -127,7 +171,7 @@ export default function ClubSelector({
     };
 
     fetchClubs();
-  }, [activeSeason, categories]);
+  }, [activeSeason, categories, selectedCategory]);
 
   // Update club-team mapping whenever category or clubs change
   useEffect(() => {
@@ -139,7 +183,7 @@ export default function ClubSelector({
           // Filter teams by selected category
           const categoryTeams = club.teams.filter(team => {
             const category = categories.find(cat => cat.id === team.club_category_id);
-            return category?.code === selectedCategory;
+            return category?.id === selectedCategory;
           });
           clubTeamMap[club.id] = categoryTeams.map(team => team.id);
         } else {
@@ -152,24 +196,8 @@ export default function ClubSelector({
     }
   }, [clubs, selectedCategory, categories, onClubDataChange]);
 
-  // Filter clubs based on selected category
-  const filteredClubs = useMemo(() => {
-    if (!selectedCategory || selectedCategory === 'all') {
-      return clubs;
-    }
-
-    // Find the category ID that matches the selected category code
-    const selectedCategoryData = categories.find(cat => cat.code === selectedCategory);
-    if (!selectedCategoryData) {
-      return [];
-    }
-
-    const filtered = clubs.filter(club => 
-      club.teams.some(team => team.club_category_id === selectedCategoryData.id)
-    );
-
-    return filtered;
-  }, [clubs, selectedCategory, categories]);
+  // Clubs are already filtered by category at the database level
+  const filteredClubs = clubs;
 
   // Handle club selection
   const handleClubSelect = (clubId: string) => {

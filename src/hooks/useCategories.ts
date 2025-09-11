@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Category } from '@/types';
 
@@ -16,7 +16,7 @@ export function useCategories() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('categories')
-        .select('id, code, name')
+        .select('id, slug, name')
         .eq('is_active', true)
         .order('sort_order');
 
@@ -46,7 +46,6 @@ export function useCategories() {
       if (error) throw error;
       setCategories(data || []);
     } catch (error) {
-      console.error('Error fetching categories:', error);
       setError('Chyba při načítání kategorií');
     } finally {
       setLoading(false);
@@ -62,7 +61,7 @@ export function useCategories() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('categories')
-        .select('id, code, name, description, sort_order')
+        .select('id, slug, name, description, sort_order')
         .eq('season_id', seasonId)
         .eq('is_active', true)
         .order('sort_order');
@@ -70,7 +69,6 @@ export function useCategories() {
       if (error) throw error;
       setCategories(data || []);
     } catch (error) {
-      console.error('Error fetching categories for season:', error);
       setError('Chyba při načítání kategorií pro sezónu');
     } finally {
       setLoading(false);

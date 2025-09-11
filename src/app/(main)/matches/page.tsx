@@ -1,19 +1,18 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Card, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
 import { 
   TrophyIcon,
   FunnelIcon
 } from "@heroicons/react/24/outline";
 import { usePublicMatches, useSeasons, useCategories } from "@/hooks";
-import { Select, SelectItem } from "@heroui/react";
+import { Select, SelectItem, Card, CardBody, Button } from "@heroui/react";
 import MatchCard from "@/app/(main)/matches/components/MatchCard";
 import ClubSelector from "@/app/(main)/matches/components/ClubSelector";
 import { formatMonth } from "@/helpers";
-import { Match } from "@/types";
+import { Match, Category } from "@/types";
 import { translations } from "@/lib/translations";
+import { months as monthsConstants } from "@/constants";
 
 export default function MatchesPage() {
   const [filterType, setFilterType] = useState("all");
@@ -22,7 +21,6 @@ export default function MatchesPage() {
   const [clubTeamMap, setClubTeamMap] = useState<{ [clubId: string]: string[] }>({});
 
 
-  
   // Use the new public matches hook
   const { matches, loading, error } = usePublicMatches(selectedCategory);
   const { activeSeason, fetchActiveSeason, error: seasonError } = useSeasons();
@@ -69,7 +67,7 @@ export default function MatchesPage() {
   }, [selectedCategory]);
 
   // Helper function to get all teams from a club in a specific category
-  const getClubTeamsInCategory = useCallback((clubId: string, categoryCode: string, allCategories: any[]) => {
+  const getClubTeamsInCategory = useCallback((clubId: string, categoryCode: string, allCategories: Category[]) => {
     // The ClubSelector now properly handles both "all" and specific category cases
     // Just return the teams for the selected club
     return clubTeamMap[clubId] || [];
@@ -94,11 +92,11 @@ export default function MatchesPage() {
       return {
         ...match,
         category: categoryInfo ? {
-          code: categoryInfo.code,
+          id: categoryInfo.id,
           name: categoryInfo.name,
           description: categoryInfo.description
         } : {
-          code: 'unknown',
+          id: 'unknown',
           name: 'Neznámá kategorie',
           description: undefined
         }
@@ -129,7 +127,7 @@ export default function MatchesPage() {
       // Filter by selected category (if not "all") - apply this first
       if (selectedCategory !== 'all') {
         filteredMonthMatches = filteredMonthMatches.filter(match => 
-          match.category?.code === selectedCategory
+          match.category?.id === selectedCategory
         );
       }
 
@@ -176,6 +174,7 @@ export default function MatchesPage() {
     return filtered;
   }, [groupedMatches, filterType, selectedClub, selectedCategory, categories, getClubTeamsInCategory, clubTeamMap]);
 
+
   return (
     <div className="max-w-6xl mx-auto md:space-y-8 space-y-4">
       {/* Header */}
@@ -210,7 +209,7 @@ export default function MatchesPage() {
               </SelectItem>
               <>
                 {categories.map((category) => (
-                  <SelectItem key={category.code}>
+                  <SelectItem key={category.id}>
                     {category.name}
                   </SelectItem>
                 ))}
@@ -280,6 +279,7 @@ export default function MatchesPage() {
         className="mb-2 md:mb-6"
       />
 
+
       {/* Error Display */}
       {(error || seasonError || categoryError) && (
         <div className="text-center py-8">
@@ -320,7 +320,7 @@ export default function MatchesPage() {
         <div className="space-y-8">
           {Object.entries(filteredGroupedMatches)
             .sort(([a], [b]) => {
-              const months = ['srpen', 'září', 'říjen', 'listopad', 'prosinec', 'leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec'];
+              const months = monthsConstants;
               const aParts = a.split(' ');
               const bParts = b.split(' ');
               

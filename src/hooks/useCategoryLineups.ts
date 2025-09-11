@@ -81,7 +81,7 @@ export function useCategoryLineups() {
             name,
             surname,
             registration_number,
-            category
+            category_id
           )
         `)
         .eq('lineup_id', lineupId)
@@ -106,7 +106,7 @@ export function useCategoryLineups() {
           name: record.members.name,
           surname: record.members.surname,
           registration_number: record.members.registration_number,
-          category: record.members.category
+          category_id: record.members.category_id
         }
       }));
 

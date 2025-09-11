@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { Member } from "@/types/types";
-import { useFetchCategories } from "@/hooks/useFetchCategories";
+import React, { useState, useEffect, useMemo } from "react";
+import { Member } from "@/types/member";
 import { useFetchMemberFunctions } from "@/hooks/useFetchMemberFunctions";
-import { showToast } from "@/components/Toast";
+import { useAppData } from "@/contexts/AppDataContext";
 import { Tabs, Tab } from "@heroui/react";
 import MembersStatisticTab from "./components/MembersStatisticTab";
 import MembersListTab from "./components/MembersListTab";
@@ -21,6 +19,7 @@ export default function MembersAdminPage() {
     error: functionsError,
   } = useFetchMemberFunctions();
 
+  // TODO: remove this hardcoded fallback
   // Convert functions array to Record format for compatibility
   const functionOptions = useMemo(() => {
     // Only use data from the database, no hardcoded fallback
@@ -34,45 +33,11 @@ export default function MembersAdminPage() {
     return result;
   }, [functionsData]);
 
-  const supabase = createClient();
-
-  // State for tabs and basic data
+  // State for tabs
   const [activeTab, setActiveTab] = useState("members");
-  const [members, setMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  // Basic fetch function for statistics
-  const fetchMembers = useCallback(async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("members")
-        .select("*")
-        .order("surname", { ascending: true })
-        .order("name", { ascending: true });
-
-      if (error) {
-        throw error;
-      }
-      setMembers(data || []);
-    } catch (error: any) {
-      showToast.danger("Chyba při načítání členů");
-    } finally {
-      setLoading(false);
-    }
-  }, [supabase]);
-
-  // Load members on component mount
-  useEffect(() => {
-    fetchMembers();
-  }, [fetchMembers]);
-
-  // Fetch categories from database
-  const {
-    data: categoriesData,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useFetchCategories();
+  // Use AppDataContext for members and categories data
+  const { members, membersLoading, membersError, categories, categoriesLoading, categoriesError } = useAppData();
 
   return (
     <div className="p-6">
@@ -85,7 +50,7 @@ export default function MembersAdminPage() {
         <Tab key="members" title="Seznam členů">
           <div className="flex flex-col gap-4">
             <MembersListTab 
-              categoriesData={categoriesData}
+              categoriesData={categories}
               functionOptions={functionOptions}
               sexOptions={genderOptions}
             />
@@ -95,7 +60,7 @@ export default function MembersAdminPage() {
           <div className="flex flex-col gap-4">
             <MembersStatisticTab 
               members={members}
-              categoriesData={categoriesData}
+              categoriesData={categories}
               functionOptions={functionOptions}
             />
           </div>

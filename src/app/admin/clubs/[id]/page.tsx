@@ -1,57 +1,72 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Tabs, Tab, Input, Button, Image } from "@heroui/react";
-import { 
-  PencilIcon, 
-  UserGroupIcon,
-  TrophyIcon,
-} from "@heroicons/react/24/outline";
-import { createClient } from "@/utils/supabase/client";
-import { Category, Season, Club, TeamData } from "@/types";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import { AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation } from './components';
+import React, {useState, useEffect, useCallback} from 'react';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Tabs,
+  Tab,
+  Input,
+  Button,
+  Image,
+} from '@heroui/react';
+import {PencilIcon, UserGroupIcon, TrophyIcon} from '@heroicons/react/24/outline';
+import {createClient} from '@/utils/supabase/client';
+import {Category, Season, Club, Team} from '@/types';
+import {useParams} from 'next/navigation';
+import Link from 'next/link';
+import {AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation} from './components';
 
 export default function ClubDetailPage() {
   const params = useParams();
   const clubId = params.id as string;
-  
+
   // Memoize clubId to prevent unnecessary re-renders
   const memoizedClubId = React.useMemo(() => clubId, [clubId]);
-  
-  
+
   const [club, setClub] = useState<Club | null>(null);
   const [teams, setTeams] = useState<any[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [clubCategories, setClubCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  
+  const [error, setError] = useState('');
+
   // Modal states
-  const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
-  const { isOpen: isDeleteTeamOpen, onOpen: onDeleteTeamOpen, onClose: onDeleteTeamClose } = useDisclosure();
-  const { isOpen: isAssignCategoryOpen, onOpen: onAssignCategoryOpen, onClose: onAssignCategoryClose } = useDisclosure();
-  
+  const {isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose} = useDisclosure();
+  const {
+    isOpen: isDeleteTeamOpen,
+    onOpen: onDeleteTeamOpen,
+    onClose: onDeleteTeamClose,
+  } = useDisclosure();
+  const {
+    isOpen: isAssignCategoryOpen,
+    onOpen: onAssignCategoryOpen,
+    onClose: onAssignCategoryClose,
+  } = useDisclosure();
+
   // Form states
   const [editForm, setEditForm] = useState({
     name: '',
     short_name: '',
     city: '',
     founded_year: '',
-    logo_url: ''
+    logo_url: '',
   });
-  
-  const [teamToDelete, setTeamToDelete] = useState<TeamData | null>(null);
-  
+
+  const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
+
   const supabase = createClient();
 
   // Fetch club data
   const fetchClub = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('clubs')
         .select('*')
         .eq('id', memoizedClubId)
@@ -59,14 +74,14 @@ export default function ClubDetailPage() {
 
       if (error) throw error;
       setClub(data);
-      
+
       // Set edit form
       setEditForm({
         name: data.name,
         short_name: data.short_name || '',
         city: data.city || '',
         founded_year: data.founded_year?.toString() || '',
-        logo_url: data.logo_url || ''
+        logo_url: data.logo_url || '',
       });
     } catch (error) {
       setError('Chyba při načítání klubu');
@@ -79,9 +94,8 @@ export default function ClubDetailPage() {
   // Fetch club teams from new structure
   const fetchClubTeams = useCallback(async () => {
     try {
-      
       // First, get all club_categories for this specific club
-      const { data: clubCategoriesData, error: clubCategoriesError } = await supabase
+      const {data: clubCategoriesData, error: clubCategoriesError} = await supabase
         .from('club_categories')
         .select('id, category_id, season_id')
         .eq('club_id', memoizedClubId)
@@ -100,35 +114,37 @@ export default function ClubDetailPage() {
       const clubCategoryIds = clubCategoriesData.map((cc: any) => cc.id);
 
       // Now fetch teams that belong to these club_categories
-      const { data: teamsData, error: teamsError } = await supabase
+      const {data: teamsData, error: teamsError} = await supabase
         .from('club_category_teams')
-        .select(`
+        .select(
+          `
           *,
           club_category:club_categories!inner(
             id,
             category:categories(name, sort_order),
             season:seasons(name)
           )
-        `)
+        `
+        )
         .in('club_category_id', clubCategoryIds);
 
       if (teamsError) {
         throw teamsError;
       }
-      
-      
+
       // Transform data to show teams with category and season info
-      const transformedTeams = teamsData?.map((item: any) => ({
-        id: item.id,
-        name: `${item.club_category?.category?.name || 'Neznámá kategorie'} ${item.team_suffix}`,
-        team_suffix: item.team_suffix,
-        category_name: item.club_category?.category?.name,
-        category_sort_order: item.club_category?.category?.sort_order || 0,
-        season_name: item.club_category?.season?.name,
-        is_active: item.is_active,
-        club_category_id: item.club_category_id
-      })) || [];
-      
+      const transformedTeams =
+        teamsData?.map((item: any) => ({
+          id: item.id,
+          name: `${item.club_category?.category?.name || 'Neznámá kategorie'} ${item.team_suffix}`,
+          team_suffix: item.team_suffix,
+          category_name: item.club_category?.category?.name,
+          category_sort_order: item.club_category?.category?.sort_order || 0,
+          season_name: item.club_category?.season?.name,
+          is_active: item.is_active,
+          club_category_id: item.club_category_id,
+        })) || [];
+
       // Sort by category sort_order first, then by team_suffix
       const sortedTeamsData = transformedTeams.sort((a: any, b: any) => {
         if (a.category_sort_order !== b.category_sort_order) {
@@ -136,18 +152,18 @@ export default function ClubDetailPage() {
         }
         return a.team_suffix.localeCompare(b.team_suffix);
       });
-      
-      
+
       // Additional validation: ensure all teams belong to the correct club
       const validatedTeams = sortedTeamsData.filter((team: any) => {
-        const isValid = team.club_category_id && 
+        const isValid =
+          team.club_category_id &&
           clubCategoriesData.some((cc: any) => cc.id === team.club_category_id);
         if (!isValid) {
           console.warn('⚠️ Team with invalid club_category_id:', team);
         }
         return isValid;
       });
-      
+
       setTeams(validatedTeams);
     } catch (error) {
       console.error('Error fetching club teams:', error);
@@ -159,7 +175,7 @@ export default function ClubDetailPage() {
     try {
       const [categoriesResult, seasonsResult] = await Promise.all([
         supabase.from('categories').select('*').eq('is_active', true).order('name'),
-        supabase.from('seasons').select('*').order('name', { ascending: false })
+        supabase.from('seasons').select('*').order('name', {ascending: false}),
       ]);
 
       if (categoriesResult.error) throw categoriesResult.error;
@@ -175,45 +191,47 @@ export default function ClubDetailPage() {
   // Fetch club categories
   const fetchClubCategories = useCallback(async () => {
     try {
-      
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('club_categories')
-        .select(`
+        .select(
+          `
           *,
           category:categories(name),
           season:seasons(name)
-        `)
+        `
+        )
         .eq('club_id', memoizedClubId)
         .eq('is_active', true);
 
       if (error) {
         throw error;
       }
-      
-      
+
       // Get team counts for each club category
       const categoriesWithTeamCounts = await Promise.all(
         (data || []).map(async (clubCategory: any) => {
-          const { count: teamCount } = await supabase
+          const {count: teamCount} = await supabase
             .from('club_category_teams')
-            .select('*', { count: 'exact', head: true })
+            .select('*', {count: 'exact', head: true})
             .eq('club_category_id', clubCategory.id);
-          
+
           return {
             ...clubCategory,
-            team_count: teamCount || 0
+            team_count: teamCount || 0,
           };
         })
       );
-      
+
       // Sort by category name in JavaScript
-      const sortedData = categoriesWithTeamCounts.sort((a, b) => 
+      const sortedData = categoriesWithTeamCounts.sort((a, b) =>
         (a.category?.name || '').localeCompare(b.category?.name || '')
       );
 
       setClubCategories(sortedData);
     } catch (error) {
-      setError(`Chyba při načítání kategorií: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
+      setError(
+        `Chyba při načítání kategorií: ${error instanceof Error ? error.message : 'Neznámá chyba'}`
+      );
     }
   }, [supabase, memoizedClubId]);
 
@@ -225,14 +243,14 @@ export default function ClubDetailPage() {
         return;
       }
 
-      const { error } = await supabase
+      const {error} = await supabase
         .from('clubs')
         .update({
           name: editForm.name.trim(),
           short_name: editForm.short_name.trim() || null,
           city: editForm.city.trim() || null,
           founded_year: editForm.founded_year ? parseInt(editForm.founded_year) : null,
-          logo_url: editForm.logo_url.trim() || null
+          logo_url: editForm.logo_url.trim() || null,
         })
         .eq('id', memoizedClubId);
 
@@ -256,10 +274,7 @@ export default function ClubDetailPage() {
 
     try {
       // Delete from club_category_teams (this is the new structure)
-      const { error } = await supabase
-        .from('club_category_teams')
-        .delete()
-        .eq('id', teamToDelete.id);
+      const {error} = await supabase.from('club_category_teams').delete().eq('id', teamToDelete.id);
 
       if (error) throw error;
 
@@ -286,14 +301,12 @@ export default function ClubDetailPage() {
         return;
       }
 
-      const { error } = await supabase
-        .from('club_categories')
-        .insert({
-          club_id: memoizedClubId,
-          category_id: formData.category_id,
-          season_id: formData.season_id,
-          max_teams: formData.max_teams
-        });
+      const {error} = await supabase.from('club_categories').insert({
+        club_id: memoizedClubId,
+        category_id: formData.category_id,
+        season_id: formData.season_id,
+        max_teams: formData.max_teams,
+      });
 
       if (error) throw error;
 
@@ -310,8 +323,8 @@ export default function ClubDetailPage() {
   const handleGenerateTeams = async (clubCategoryId: string) => {
     try {
       // Call the function to generate teams
-      const { error } = await supabase.rpc('generate_teams_for_club_category', {
-        p_club_category_id: clubCategoryId
+      const {error} = await supabase.rpc('generate_teams_for_club_category', {
+        p_club_category_id: clubCategoryId,
       });
 
       if (error) throw error;
@@ -330,10 +343,7 @@ export default function ClubDetailPage() {
   const handleDeleteClubCategory = async (clubCategoryId: string) => {
     try {
       // Delete the club category (this will cascade delete teams)
-      const { error } = await supabase
-        .from('club_categories')
-        .delete()
-        .eq('id', clubCategoryId);
+      const {error} = await supabase.from('club_categories').delete().eq('id', clubCategoryId);
 
       if (error) throw error;
 
@@ -350,27 +360,26 @@ export default function ClubDetailPage() {
   // Initial fetch
   useEffect(() => {
     if (memoizedClubId && memoizedClubId.length > 0) {
-      
       // Validate that the clubId looks like a valid UUID
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(memoizedClubId)) {
         setError('Neplatné ID klubu');
         return;
       }
-      
+
       const loadData = async () => {
         try {
           await Promise.all([
             fetchClub(),
             fetchClubTeams(),
             fetchCategoriesAndSeasons(),
-            fetchClubCategories()
+            fetchClubCategories(),
           ]);
         } catch (error) {
           console.error('Error loading club data:', error);
         }
       };
-      
+
       loadData();
     } else {
       setError('Chybí ID klubu');
@@ -396,18 +405,13 @@ export default function ClubDetailPage() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-4">
-          <Link 
-            href="/admin/clubs" 
-            prefetch={true} 
-            scroll={false}
-            replace={false}
-          >
+          <Link href="/admin/clubs" prefetch={true} scroll={false} replace={false}>
             <Button variant="light" size="sm">
               ← Zpět na kluby
             </Button>
           </Link>
-          <Button 
-            color="primary" 
+          <Button
+            color="primary"
             startContent={<PencilIcon className="w-4 h-4" />}
             onPress={onEditOpen}
             size="sm"
@@ -415,11 +419,11 @@ export default function ClubDetailPage() {
             Upravit klub
           </Button>
         </div>
-        
+
         <div className="flex items-center gap-4">
           {club.logo_url && (
-            <Image 
-              src={club.logo_url} 
+            <Image
+              src={club.logo_url}
               alt={`${club.name} logo`}
               className="object-contain rounded"
               width={64}
@@ -444,13 +448,16 @@ export default function ClubDetailPage() {
 
       {/* Tabs */}
       <Tabs aria-label="Club management">
-        <Tab key="teams" title={
-          <div className="flex items-center gap-2">
-            <UserGroupIcon className="w-4 h-4" />
-            Týmy ({teams.length})
-          </div>
-        }>
-          <TeamsTab 
+        <Tab
+          key="teams"
+          title={
+            <div className="flex items-center gap-2">
+              <UserGroupIcon className="w-4 h-4" />
+              Týmy ({teams.length})
+            </div>
+          }
+        >
+          <TeamsTab
             teams={teams}
             onDeleteTeam={(team) => {
               setTeamToDelete(team);
@@ -459,12 +466,15 @@ export default function ClubDetailPage() {
           />
         </Tab>
 
-        <Tab key="categories" title={
-          <div className="flex items-center gap-2">
-            <TrophyIcon className="w-4 h-4" />
-            Kategorie ({clubCategories.length})
-          </div>
-        }>
+        <Tab
+          key="categories"
+          title={
+            <div className="flex items-center gap-2">
+              <TrophyIcon className="w-4 h-4" />
+              Kategorie ({clubCategories.length})
+            </div>
+          }
+        >
           <CategoriesTab
             clubCategories={clubCategories}
             categories={categories}
@@ -525,8 +535,6 @@ export default function ClubDetailPage() {
         </ModalContent>
       </Modal>
 
-
-
       {/* Delete Team Modal */}
       <Modal isOpen={isDeleteTeamOpen} onClose={onDeleteTeamClose} size="md">
         <ModalContent>
@@ -536,7 +544,8 @@ export default function ClubDetailPage() {
               Opravdu chcete smazat tým <strong>{teamToDelete?.name}</strong>?
             </p>
             <p className="text-sm text-gray-600 mt-2">
-              Tato akce je nevratná. Tým můžete znovu vygenerovat pomocí tlačítka &quot;Generovat týmy&quot; v kategorii.
+              Tato akce je nevratná. Tým můžete znovu vygenerovat pomocí tlačítka &quot;Generovat
+              týmy&quot; v kategorii.
             </p>
           </ModalBody>
           <ModalFooter>
@@ -556,7 +565,7 @@ export default function ClubDetailPage() {
         onClose={onAssignCategoryClose}
         onAssignCategory={handleAssignCategory}
         clubId={memoizedClubId}
-        assignedCategoryIds={clubCategories.map(cc => cc.category_id)}
+        assignedCategoryIds={clubCategories.map((cc) => cc.category_id)}
       />
     </div>
   );

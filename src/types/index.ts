@@ -2,12 +2,26 @@ export * from './match';
 export * from './category';
 export * from './season';
 export * from './standing';
-export * from './blogPost';
+
 export * from './clubs';
-export * from './member';
+
 export * from './lineup';
 export * from './video';
 export * from './userRoles';
 export * from './meetingMinutes';
 export * from './attendance';
-export * from './teamData';
+export * from './team';
+
+/**
+ * @description Blog types
+ */
+export * from './blogPost';
+export * from './blogPostCard';
+
+export * from './Nullish';
+export * from './ValueByDevice';
+
+export * from './member';
+export * from './memberFunction';
+
+export * from './releaseNote';

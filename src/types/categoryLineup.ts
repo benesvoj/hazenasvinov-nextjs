@@ -30,7 +30,7 @@ export interface RawCategoryLineupMember {
     name: string;
     surname: string;
     registration_number: string;
-    category: string;
+    category_id: string;
   };
 }
 
@@ -50,7 +50,7 @@ export interface CategoryLineupMember {
     name: string;
     surname: string;
     registration_number: string;
-    category: string;
+    category_id: string;
   };
 }
 

@@ -1,49 +1,67 @@
 'use client';
 
-import { Card } from "@heroui/card";
-import { Button } from "@heroui/button";
-import Link from "@/components/Link";
-import Image from "next/image";
-import { CalendarIcon } from "@heroicons/react/24/outline";
+import {useMemo} from 'react';
+import {Card, Button, Chip} from '@heroui/react';
+import Link from '@/components/Link';
+import Image from 'next/image';
+import {CalendarIcon} from '@heroicons/react/24/outline';
+import {BlogPostCard as BlogPostCardProps, Category} from '@/types';
+import {useAppData} from '@/contexts/AppDataContext';
+import {useCategories} from '@/hooks/useCategories';
+import {formatDateString} from '@/helpers';
 
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  author_id: string;
-  status: 'draft' | 'published' | 'archived';
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-  image_url?: string;
-}
-
-interface BlogPostCardProps {
-  post: BlogPost;
-  index?: number;
-  variant?: 'landing' | 'blog';
-  className?: string;
-}
-
-export default function BlogPostCard({ 
-  post, 
-  index = 0, 
+export default function BlogPostCard({
+  post,
+  index = 0,
   variant = 'landing',
-  className = ''
+  className = '',
 }: BlogPostCardProps) {
   const isLandingVariant = variant === 'landing';
-  
+
+  // Always call both hooks to avoid conditional hook calls
+  let appDataCategories: Category[] = [];
+  let hookCategories: Category[] = [];
+
+  try {
+    const appData = useAppData();
+    appDataCategories = appData.categories;
+  } catch (error) {
+    // AppDataProvider not available, will use hook categories
+    appDataCategories = [];
+  }
+
+  // Always call useCategories hook
+  const {categories: hookCategoriesData} = useCategories();
+  hookCategories = hookCategoriesData;
+
+  // Use AppDataContext categories if available, otherwise fallback to hook categories
+  const categories = appDataCategories.length > 0 ? appDataCategories : hookCategories;
+
+  // Memoized category lookup for performance
+  const category = useMemo(() => {
+    return categories.find((category) => category.id === post.category_id);
+  }, [categories, post.category_id]);
+
+  const CategoryChip = ({category}: {category: Category}) => {
+    return (
+      <Chip size="sm" variant="solid" color="primary" className="text-xs px-2 py-1">
+        {category.name}
+      </Chip>
+    );
+  };
+
+  const DateChip = ({date}: {date: string}) => {
+    return <span>{formatDateString(date)}</span>;
+  };
+
   if (isLandingVariant) {
     // Landing page variant - background image with overlay text
     return (
-      <Card 
+      <Card
         className={`group overflow-hidden hover:shadow-xl transition-all duration-300 ease-out border-0 bg-white dark:bg-gray-800 h-64 relative ${className}`}
         style={{
           animationDelay: `${index * 100}ms`,
-          animation: 'fadeInUp 0.6s ease-out forwards'
+          animation: 'fadeInUp 0.6s ease-out forwards',
         }}
       >
         {/* Background Image */}
@@ -57,45 +75,33 @@ export default function BlogPostCard({
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800" />
         )}
-        
+
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-        
+
         {/* Content Overlay - Always Visible */}
         <div className="relative z-10 h-full flex flex-col justify-end p-6 text-white">
           {/* Title - Always Visible */}
-          <h3 className="text-xl font-bold mb-3 line-clamp-2 leading-tight">
-            {post.title}
-          </h3>
-          
+          <h3 className="text-xl font-bold mb-3 line-clamp-2 leading-tight">{post.title}</h3>
+
           {/* Bottom Row - Category and Date */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Category/Tags */}
-              {post.tags && post.tags.length > 0 && (
-                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30">
-                  {post.tags[0]}
-                </span>
-              )}
-              
+              {category && <CategoryChip category={category} />}
+
               {/* Date */}
               <div className="flex items-center gap-1 text-xs text-gray-300">
                 <CalendarIcon className="w-3 h-3" />
-                <span>
-                  {new Date(post.created_at).toLocaleDateString('cs-CZ', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric'
-                  })}
-                </span>
+                <DateChip date={post.created_at} />
               </div>
             </div>
-            
+
             {/* Read Button */}
-            <Button 
-              as={Link} 
+            <Button
+              as={Link}
               href={`/blog/${post.slug}`}
-              size="sm" 
+              size="sm"
               color="primary"
               variant="solid"
               className="bg-white text-gray-900 hover:bg-gray-100 text-xs px-3 py-1 h-7"
@@ -127,55 +133,37 @@ export default function BlogPostCard({
             <div className="text-gray-400 text-4xl">📰</div>
           </div>
         )}
-        
+
         {/* Post Tags */}
-        {post.tags && post.tags.length > 0 && (
+        {category && (
           <div className="flex flex-wrap gap-2 mb-3">
-            {post.tags.slice(0, 3).map((tag, tagIndex) => (
-              <span
-                key={tagIndex}
-                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-              >
-                {tag}
-              </span>
-            ))}
-            {post.tags.length > 3 && (
-              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                +{post.tags.length - 3}
-              </span>
-            )}
+            <CategoryChip category={category} />
           </div>
         )}
-        
+
         {/* Post Title */}
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white line-clamp-2 mb-3">
           {post.title}
         </h2>
-        
-        {/* Post Excerpt */}
-        <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 leading-relaxed">
-          {post.excerpt}
-        </p>
-        
+
+        {/* Post Content Preview */}
+        <div className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 leading-relaxed">
+          <div className="whitespace-pre-wrap">{post.content.substring(0, 150)}...</div>
+        </div>
+
         {/* Post Meta */}
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
           <div className="flex items-center gap-1">
             <CalendarIcon className="w-4 h-4" />
-            <span>
-              {new Date(post.created_at).toLocaleDateString('cs-CZ', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </span>
+            <DateChip date={post.created_at} />
           </div>
         </div>
 
         {/* Read More Button */}
-        <Button 
-          as={Link} 
+        <Button
+          as={Link}
           href={`/blog/${post.slug}`}
-          size="sm" 
+          size="sm"
           color="primary"
           variant="solid"
           className="w-full"
@@ -187,8 +175,21 @@ export default function BlogPostCard({
   );
 }
 
+/**
+ * @description Loading skeleton component for BlogPostCard
+ * @param variant - variant of the card
+ * @param className - class name for the card
+ * @returns Loading skeleton component for BlogPostCard
+ * @todo - add loading skeleteon from Heroui
+ */
 // Loading skeleton component
-export function BlogPostCardSkeleton({ variant = 'landing', className = '' }: { variant?: 'landing' | 'blog', className?: string }) {
+export function BlogPostCardSkeleton({
+  variant = 'landing',
+  className = '',
+}: {
+  variant?: 'landing' | 'blog';
+  className?: string;
+}) {
   if (variant === 'landing') {
     return (
       <Card className={`animate-pulse overflow-hidden h-64 relative ${className}`}>

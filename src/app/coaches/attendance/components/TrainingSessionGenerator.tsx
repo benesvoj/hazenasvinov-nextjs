@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Modal,
   ModalContent,
@@ -18,9 +18,6 @@ import {
 } from "@heroui/react";
 import { CalendarIcon, ClockIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useAttendance } from "@/hooks/useAttendance";
-import { useUser } from "@/contexts/UserContext";
-import { useAppData } from "@/contexts/AppDataContext";
-import { useCategoryLineups } from "@/hooks/useCategoryLineups";
 import { formatDateString, formatTime } from "@/helpers";
 
 interface TrainingSessionGeneratorProps {
@@ -35,7 +32,7 @@ interface GeneratedSession {
   date: string;
   time: string;
   title: string;
-  category: string;
+  category_id: string;
 }
 
 export default function TrainingSessionGenerator({
@@ -59,12 +56,8 @@ export default function TrainingSessionGenerator({
   const [createAttendanceRecords, setCreateAttendanceRecords] = useState(true);
 
   const { createTrainingSession, createAttendanceForLineupMembers } = useAttendance();
-  const { userCategories } = useUser();
-  const { categories } = useAppData();
-  const { fetchLineups } = useCategoryLineups();
 
   // Use userCategories from UserContext instead of local state
-  const assignedCategories = userCategories;
 
   // Function to fetch lineup members directly
   const fetchLineupMembersForCategory = async (categoryId: string, seasonId: string) => {
@@ -94,7 +87,7 @@ export default function TrainingSessionGenerator({
             id,
             name,
             surname,
-            category
+            category_id
           )
         `)
         .eq('lineup_id', lineupData.id)
@@ -133,16 +126,6 @@ export default function TrainingSessionGenerator({
     sunday: 0,
   };
 
-  // Time options (every 30 minutes from 6:00 to 22:00)
-  const timeOptions = Array.from({ length: 33 }, (_, i) => {
-    const hour = Math.floor(i / 2) + 6;
-    const minute = (i % 2) * 30;
-    const timeString = `${hour.toString().padStart(2, "0")}:${minute
-      .toString()
-      .padStart(2, "0")}`;
-    return { value: timeString, label: timeString };
-  });
-
   // assignedCategories is now provided by UserContext
 
   // Generate sessions based on criteria
@@ -176,16 +159,12 @@ export default function TrainingSessionGenerator({
           ? `${titleTemplate} ${sessionNumber}`
           : titleTemplate;
 
-        // Get category code from selected category ID
-        const categoryCode = selectedCategory 
-          ? categories.find(c => c.id === selectedCategory)?.code || "men"
-          : "men";
-
+        // Use category ID directly
         sessions.push({
           date: currentDate.toISOString().split("T")[0],
           time: trainingTime,
           title,
-          category: categoryCode,
+          category_id: selectedCategory || "",
         });
       }
 
@@ -219,14 +198,11 @@ export default function TrainingSessionGenerator({
             const { createClient } = await import('@/utils/supabase/client');
             const supabase = createClient();
             
-            const selectedCategoryData = categories.find(c => c.id === selectedCategory);
-            const categoryCode = selectedCategoryData?.code;
-            
-            if (categoryCode) {
+            if (selectedCategory) {
               const { data: membersData, error: membersError } = await supabase
                 .from('members')
                 .select('id')
-                .eq('category', categoryCode);
+                .eq('category_id', selectedCategory);
                 
               if (!membersError && membersData) {
                 memberIds = membersData.map((m: any) => m.id);
@@ -244,7 +220,7 @@ export default function TrainingSessionGenerator({
             title: session.title,
             session_date: session.date,
             session_time: session.time,
-            category: session.category,
+            category_id: session.category_id,
             season_id: selectedSeason || "", // Use the selected season ID
             description: `Automaticky vygenerovaný trénink - ${session.title}`,
           });

@@ -1,6 +1,11 @@
-import { createClient } from '@/utils/supabase/server';
-import { Category, Match, BlogPost, ProcessedStanding } from '@/types';
-import { categoryTagMap } from '@/constants';
+import { createClient } from "@/utils/supabase/server";
+import {
+  Category,
+  Match,
+  BlogPost,
+  ProcessedStanding,
+  Season,
+} from "@/types";
 
 export interface CategoryPageServerData {
   category: Category | null;
@@ -10,7 +15,7 @@ export interface CategoryPageServerData {
   };
   posts: BlogPost[];
   standings: ProcessedStanding[];
-  season: any;
+  season: Season;
 }
 
 /**
@@ -31,24 +36,24 @@ export async function getCategoryPageData(
     includePosts = true,
     includeMatches = true,
     includeStandings = true,
-    postsLimit = 3
+    postsLimit = 3,
   } = options;
 
   const supabase = await createClient();
 
   try {
-      // Batch 1: Get category and active season in parallel
-      const [categoryResult, seasonResult] = await Promise.all([
-        supabase
-          .from('categories')
-          .select('id, code, name, description, is_active, sort_order')
-          .eq('code', categorySlug)
-          .single(),
+    // Batch 1: Get category and active season in parallel
+    const [categoryResult, seasonResult] = await Promise.all([
       supabase
-        .from('seasons')
-        .select('id, name, is_active')
-        .eq('is_active', true)
-        .single()
+        .from("categories")
+        .select("id, name, description, is_active, sort_order, slug")
+        .eq("slug", categorySlug)
+        .single(),
+      supabase
+        .from("seasons")
+        .select("id, name, is_active, start_date, end_date")
+        .eq("is_active", true)
+        .single(),
     ]);
 
     if (categoryResult.error) {
@@ -63,19 +68,25 @@ export async function getCategoryPageData(
     const season = seasonResult.data;
 
     // Batch 2: Execute remaining queries in parallel
-    const [postsResult, matchesResult, standingsResult, clubCategoriesResult] = await Promise.all([
-      // Posts query
-      includePosts ? supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(postsLimit) : Promise.resolve({ data: [], error: null }),
-      
-      // Matches query with team details
-      includeMatches ? supabase
-        .from('matches')
-        .select(`
+    const [postsResult, matchesResult, standingsResult, clubCategoriesResult] =
+      await Promise.all([
+        // Posts query - filter by category
+        includePosts
+          ? supabase
+              .from("blog_posts")
+              .select("*")
+              .eq("status", "published")
+              .eq("category_id", category.id)
+              .order("created_at", { ascending: false })
+              .limit(postsLimit)
+          : Promise.resolve({ data: [], error: null }),
+
+        // Matches query with team details
+        includeMatches
+          ? supabase
+              .from("matches")
+              .select(
+                `
           id,
           date,
           time,
@@ -118,15 +129,19 @@ export async function getCategoryPageData(
               )
             )
           )
-        `)
-        .eq('category_id', category.id)
-        .eq('season_id', season.id)
-        .order('date', { ascending: true }) : Promise.resolve({ data: [], error: null }),
-      
-      // Standings query with team details
-      includeStandings ? supabase
-        .from('standings')
-        .select(`
+        `
+              )
+              .eq("category_id", category.id)
+              .eq("season_id", season.id)
+              .order("date", { ascending: true })
+          : Promise.resolve({ data: [], error: null }),
+
+        // Standings query with team details
+        includeStandings
+          ? supabase
+              .from("standings")
+              .select(
+                `
           id,
           team_id,
           matches,
@@ -150,15 +165,18 @@ export async function getCategoryPageData(
               )
             )
           )
-        `)
-        .eq('category_id', category.id)
-        .eq('season_id', season.id)
-        .order('position', { ascending: true }) : Promise.resolve({ data: [], error: null }),
-      
-      // Club categories query - moved from separate execution
-      supabase
-        .from('club_categories')
-        .select(`
+        `
+              )
+              .eq("category_id", category.id)
+              .eq("season_id", season.id)
+              .order("position", { ascending: true })
+          : Promise.resolve({ data: [], error: null }),
+
+        // Club categories query - moved from separate execution
+        supabase
+          .from("club_categories")
+          .select(
+            `
           id,
           max_teams,
           club:clubs(
@@ -168,10 +186,11 @@ export async function getCategoryPageData(
             logo_url,
             is_own_club
           )
-        `)
-        .eq('category_id', category.id)
-        .eq('season_id', season.id)
-    ]);
+        `
+          )
+          .eq("category_id", category.id)
+          .eq("season_id", season.id),
+      ]);
 
     // Process results
     let posts: BlogPost[] = [];
@@ -192,92 +211,77 @@ export async function getCategoryPageData(
     if (includePosts && !postsResult.error && postsResult.data) {
       const allPosts = postsResult.data;
 
-      const tagPatterns = categoryTagMap[categorySlug] || [];
-      
-      // Filter posts by tag matching
-      let filteredPosts = allPosts;
-      if (tagPatterns.length > 0) {
-        filteredPosts = allPosts.filter((post: any) => {
-          if (!post.tags || !Array.isArray(post.tags)) return false;
-          
-          return post.tags.some((tag: string) => 
-            tagPatterns.some(pattern => 
-              tag.toLowerCase().includes(pattern.toLowerCase()) || 
-              pattern.toLowerCase().includes(tag.toLowerCase())
-            )
-          );
-        });
-      }
-      
-      // Keep only category-specific posts (no fallback to all posts)
-      
-      posts = filteredPosts.map((post: BlogPost) => ({
+      // Posts are already filtered by category_id at the database level
+      posts = allPosts.map((post: BlogPost) => ({
         ...post,
-        excerpt: post.excerpt || post.content?.substring(0, 150) + '...' || 'Bez popisu',
-        tags: post.tags || [],
-        image_url: post.image_url || undefined
+        content: post.content?.substring(0, 150) + "..." || "Bez popisu",
+        image_url: post.image_url || undefined,
       }));
     }
 
     if (includeMatches && !matchesResult.error && matchesResult.data) {
       const allMatches = matchesResult.data;
-      
+
       // Process team names for each match using the same suffix logic as standings
       const processedMatches = allMatches.map((match: any) => {
         // Process home team
         const homeTeamDetails = match.home_team;
         const homeClub = homeTeamDetails?.club_category?.club;
-        
+
         let homeTeamName: string;
         let homeShortName: string;
-        
+
         if (!homeClub || !homeClub.name) {
-          homeTeamName = 'Neznámý tým';
-          homeShortName = 'Neznámý tým';
+          homeTeamName = "Neznámý tým";
+          homeShortName = "Neznámý tým";
         } else {
           const clubName = homeClub.name;
           const teamSuffix = homeTeamDetails.team_suffix;
           const thisClubNeedsSuffixes = clubsNeedingSuffixes.has(clubName);
-          
+
           if (thisClubNeedsSuffixes) {
             // Club has max_teams > 1 - include suffix
             homeTeamName = `${clubName} ${teamSuffix}`;
-            homeShortName = homeClub.short_name ? `${homeClub.short_name} ${teamSuffix}` : homeTeamName;
+            homeShortName = homeClub.short_name
+              ? `${homeClub.short_name} ${teamSuffix}`
+              : homeTeamName;
           } else {
             // Club has max_teams = 1 - no suffix needed
             homeTeamName = clubName;
             homeShortName = homeClub.short_name || clubName;
           }
         }
-        
+
         const homeIsOwnClub = homeClub?.is_own_club === true;
 
         // Process away team
         const awayTeamDetails = match.away_team;
         const awayClub = awayTeamDetails?.club_category?.club;
-        
+
         let awayTeamName: string;
         let awayShortName: string;
-        
+
         if (!awayClub || !awayClub.name) {
-          awayTeamName = 'Neznámý tým';
-          awayShortName = 'Neznámý tým';
+          awayTeamName = "Neznámý tým";
+          awayShortName = "Neznámý tým";
         } else {
           const clubName = awayClub.name;
           const teamSuffix = awayTeamDetails.team_suffix;
           const thisClubNeedsSuffixes = clubsNeedingSuffixes.has(clubName);
-          
+
           if (thisClubNeedsSuffixes) {
             // Club has max_teams > 1 - include suffix
             awayTeamName = `${clubName} ${teamSuffix}`;
-            awayShortName = awayClub.short_name ? `${awayClub.short_name} ${teamSuffix}` : awayTeamName;
+            awayShortName = awayClub.short_name
+              ? `${awayClub.short_name} ${teamSuffix}`
+              : awayTeamName;
           } else {
             // Club has max_teams = 1 - no suffix needed
             awayTeamName = clubName;
             awayShortName = awayClub.short_name || clubName;
           }
         }
-        
+
         const awayIsOwnClub = awayClub?.is_own_club === true;
 
         return {
@@ -287,35 +291,80 @@ export async function getCategoryPageData(
             name: homeTeamName,
             short_name: homeShortName,
             logo_url: homeClub?.logo_url,
-            is_own_club: homeIsOwnClub
+            is_own_club: homeIsOwnClub,
           },
           away_team: {
             id: awayTeamDetails?.id,
             name: awayTeamName,
             short_name: awayShortName,
             logo_url: awayClub?.logo_url,
-            is_own_club: awayIsOwnClub
-          }
+            is_own_club: awayIsOwnClub,
+          },
         };
       });
 
       // Filter matches to only show those where the user's club is playing
-      matches = processedMatches.filter((match: any) => 
-        match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
+      matches = processedMatches.filter(
+        (match: any) =>
+          match.home_team?.is_own_club === true ||
+          match.away_team?.is_own_club === true
       ) as Match[];
     }
 
     if (includeStandings && !standingsResult.error && standingsResult.data) {
       const allStandings = standingsResult.data;
-      
+
       // Club analysis already done above
-      
+
       // Process standings to include team names and club information
-      const transformedStandings = allStandings.map((standing: any): ProcessedStanding => {
-        const team = standing.team;
-        const club = team?.club_category?.club;
-        
-        if (!club || !club.name) {
+      const transformedStandings = allStandings.map(
+        (standing: any): ProcessedStanding => {
+          const team = standing.team;
+          const club = team?.club_category?.club;
+
+          if (!club || !club.name) {
+            return {
+              id: standing.id,
+              team_id: standing.team_id,
+              matches: standing.matches,
+              wins: standing.wins,
+              draws: standing.draws,
+              losses: standing.losses,
+              goals_for: standing.goals_for,
+              goals_against: standing.goals_against,
+              points: standing.points,
+              position: standing.position,
+              team: {
+                id: team?.id,
+                name: "Neznámý tým",
+                shortName: "Neznámý tým",
+                displayName: "Neznámý tým",
+                shortDisplayName: "Neznámý tým",
+                logo_url: undefined,
+              },
+            };
+          }
+
+          const clubName = club.name;
+          const teamSuffix = team.team_suffix;
+          const thisClubNeedsSuffixes = clubsNeedingSuffixes.has(clubName);
+
+          // Create team names based on whether this club needs suffixes
+          let teamName: string;
+          let shortTeamName: string;
+
+          if (thisClubNeedsSuffixes) {
+            // Club has max_teams > 1 - include suffix
+            teamName = `${clubName} ${teamSuffix}`;
+            shortTeamName = club.short_name
+              ? `${club.short_name} ${teamSuffix}`
+              : teamName;
+          } else {
+            // Club has max_teams = 1 - no suffix needed
+            teamName = clubName;
+            shortTeamName = club.short_name || clubName;
+          }
+
           return {
             id: standing.id,
             team_id: standing.team_id,
@@ -329,57 +378,17 @@ export async function getCategoryPageData(
             position: standing.position,
             team: {
               id: team?.id,
-              name: 'Neznámý tým',
-              shortName: 'Neznámý tým',
-              displayName: 'Neznámý tým',
-              shortDisplayName: 'Neznámý tým',
-              logo_url: undefined
-            }
+              name: teamName,
+              shortName: shortTeamName,
+              displayName: teamName,
+              shortDisplayName: shortTeamName,
+              logo_url: club?.logo_url,
+            },
           };
         }
-        
-        const clubName = club.name;
-        const teamSuffix = team.team_suffix;
-        const thisClubNeedsSuffixes = clubsNeedingSuffixes.has(clubName);
-        
-        // Create team names based on whether this club needs suffixes
-        let teamName: string;
-        let shortTeamName: string;
-        
-        if (thisClubNeedsSuffixes) {
-          // Club has max_teams > 1 - include suffix
-          teamName = `${clubName} ${teamSuffix}`;
-          shortTeamName = club.short_name ? `${club.short_name} ${teamSuffix}` : teamName;
-        } else {
-          // Club has max_teams = 1 - no suffix needed
-          teamName = clubName;
-          shortTeamName = club.short_name || clubName;
-        }
-        
-        return {
-          id: standing.id,
-          team_id: standing.team_id,
-          matches: standing.matches,
-          wins: standing.wins,
-          draws: standing.draws,
-          losses: standing.losses,
-          goals_for: standing.goals_for,
-          goals_against: standing.goals_against,
-          points: standing.points,
-          position: standing.position,
-          team: {
-            id: team?.id,
-            name: teamName,
-            shortName: shortTeamName,
-            displayName: teamName,
-            shortDisplayName: shortTeamName,
-            logo_url: club?.logo_url
-          }
-        };
-      });
-      
+      );
+
       standings = transformedStandings;
-      
     }
 
     // Process matches into seasonal groups
@@ -398,23 +407,24 @@ export async function getCategoryPageData(
     });
 
     // Sort matches by date
-    autumnMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
+    autumnMatches.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    springMatches.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
 
     return {
       category,
       matches: {
         autumn: autumnMatches,
-        spring: springMatches
+        spring: springMatches,
       },
       posts,
       standings: standings,
-      season
+      season,
     };
-
   } catch (error) {
-    console.error('Error fetching category page data:', error);
     throw error;
   }
 }

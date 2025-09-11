@@ -23,7 +23,7 @@ import {
   Card,
   CardBody
 } from '@heroui/react';
-import { useMembers } from '@/hooks/useMembers';
+import { useFetchMembers } from '@/hooks/useFetchMembers';
 import { AddMemberToLineupData } from '@/types/categoryLineup';
 import { MagnifyingGlassIcon as SearchIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 
@@ -32,7 +32,7 @@ interface AddMemberModalProps {
   onClose: () => void;
   onAddMember: (memberData: AddMemberToLineupData) => Promise<void>;
   selectedCategory: string; // Category ID
-  selectedCategoryCode: string; // Category code (e.g., "U15", "U17")
+  selectedCategoryId: string; // Category code (e.g., "U15", "U17")
   existingMembers: string[]; // Array of member IDs already in the lineup
   existingJerseyNumbers: number[]; // Array of jersey numbers already used
 }
@@ -40,9 +40,10 @@ interface AddMemberModalProps {
 export default function AddMemberModal({
   isOpen,
   onClose,
+  
   onAddMember,
   selectedCategory,
-  selectedCategoryCode,
+  selectedCategoryId,
   existingMembers,
   existingJerseyNumbers
 }: AddMemberModalProps) {
@@ -55,7 +56,7 @@ export default function AddMemberModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { members, loading: membersLoading, fetchMembers } = useMembers();
+  const { members, loading: membersLoading, fetchMembers } = useFetchMembers();
 
   // Fetch members when modal opens
   useEffect(() => {
@@ -68,9 +69,9 @@ export default function AddMemberModal({
   const filteredMembers = useMemo(() => {
     const filtered = members.filter(member => {
       // Filter by category
-      const memberCategory = member.category;
+      const memberCategory = member.category_id;
       
-      if (memberCategory !== selectedCategoryCode) {
+      if (memberCategory !== selectedCategoryId) {
         return false;
       }
 
@@ -93,7 +94,7 @@ export default function AddMemberModal({
     });
 
     return filtered;
-  }, [members, selectedCategoryCode, existingMembers, searchTerm]);
+  }, [members, selectedCategoryId, existingMembers, searchTerm]);
 
   // Get available jersey numbers
   const availableJerseyNumbers = useMemo(() => {

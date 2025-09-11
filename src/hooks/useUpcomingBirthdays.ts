@@ -14,7 +14,6 @@ export function useUpcomingBirthdays(limit: number = 3, filterByAssignedCategori
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
-  const [assignedCategoryCodes, setAssignedCategoryCodes] = useState<string[]>([]);
   
   const { getCurrentUserCategories } = useUserRoles();
 
@@ -56,29 +55,10 @@ export function useUpcomingBirthdays(limit: number = 3, filterByAssignedCategori
           const categoryIds = await getCurrentUserCategories();
           setAssignedCategoryIds(categoryIds);
           
-          // Convert category IDs to category codes
-          if (categoryIds.length > 0) {
-            const supabase = createClient();
-            const { data: categories, error } = await supabase
-              .from('categories')
-              .select('id, code')
-              .in('id', categoryIds);
-            
-            if (error) {
-              console.error('Error fetching category codes:', error);
-              setAssignedCategoryCodes([]);
-            } else {
-              const codes = categories?.map((cat: any) => cat.code) || [];
-              console.log('🎂 Assigned category codes:', codes);
-              setAssignedCategoryCodes(codes);
-            }
-          } else {
-            setAssignedCategoryCodes([]);
-          }
+          // No need to convert - we already have category IDs
         } catch (error) {
           console.error('Error fetching assigned categories:', error);
           setAssignedCategoryIds([]);
-          setAssignedCategoryCodes([]);
         }
       };
       fetchAssignedCategories();
@@ -99,9 +79,8 @@ export function useUpcomingBirthdays(limit: number = 3, filterByAssignedCategori
         .not('date_of_birth', 'is', null);
       
       // Filter by assigned categories if needed
-      if (filterByAssignedCategories && assignedCategoryCodes.length > 0) {
-        console.log('🎂 Filtering members by category codes:', assignedCategoryCodes);
-        query = query.in('category', assignedCategoryCodes);
+      if (filterByAssignedCategories && assignedCategoryIds.length > 0) {
+        query = query.in('category_id', assignedCategoryIds);
       }
       
       const { data, error } = await query
@@ -109,13 +88,11 @@ export function useUpcomingBirthdays(limit: number = 3, filterByAssignedCategori
         .order('name', { ascending: true });
 
       if (error) throw error;
-      
-      console.log('🎂 Fetched members for birthdays:', data?.length || 0, 'members');
 
       // Filter and calculate birthdays
       const membersWithBirthdays: BirthdayMember[] = (data || [])
-        .filter((member: any) => member.date_of_birth)
-        .map((member: any) => {
+        .filter((member: Member) => member.date_of_birth)
+        .map((member: Member) => {
           const birthdayInfo = calculateDaysUntilBirthday(member.date_of_birth!);
           return {
             ...member,
@@ -134,14 +111,14 @@ export function useUpcomingBirthdays(limit: number = 3, filterByAssignedCategori
     } finally {
       setLoading(false);
     }
-  }, [limit, filterByAssignedCategories, assignedCategoryCodes]);
+  }, [limit, filterByAssignedCategories, assignedCategoryIds]);
 
   useEffect(() => {
     // Only fetch if we're not filtering by categories or if we have assigned categories
-    if (!filterByAssignedCategories || assignedCategoryCodes.length > 0) {
+    if (!filterByAssignedCategories || assignedCategoryIds.length > 0) {
       fetchUpcomingBirthdays();
     }
-  }, [fetchUpcomingBirthdays, filterByAssignedCategories, assignedCategoryCodes]);
+  }, [fetchUpcomingBirthdays, filterByAssignedCategories, assignedCategoryIds]);
 
   return {
     birthdays,

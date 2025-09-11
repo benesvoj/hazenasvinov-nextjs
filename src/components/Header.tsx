@@ -57,12 +57,16 @@ const Header = () => {
           <nav className="hidden lg:flex items-center space-x-6">
             {displayMenuItems.map((item: MenuItem) => {
               return item.children ? (
-                <DropdownMenu key={item.title} item={item} />
+                <DropdownMenu 
+                  key={item.title} 
+                  item={item} 
+                  className="text-sm text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
+                />
               ) : (
                 <Link
                   key={item.route}
                   href={item.route || ""}
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
+                  className="text-sm font-semibold text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
                 >
                   {item.title}
                 </Link>
