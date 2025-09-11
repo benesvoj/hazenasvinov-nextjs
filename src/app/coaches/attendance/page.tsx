@@ -106,6 +106,38 @@ export default function CoachesAttendancePage() {
 
   // No need to fetch initial data - AppDataContext handles this
 
+  // Compute available categories for this user
+  const availableCategories = useMemo(() => {
+    if (adminSimulationCategories.length > 0) {
+      // Admin simulation mode - show only selected categories from localStorage
+      return adminSimulationCategories.map((categoryId: string) => 
+        categories.find((c) => c.id === categoryId)
+      ).filter(Boolean);
+    } else if (isAdmin) {
+      // Admin users can access all categories
+      return categories;
+    } else {
+      // Regular coaches use their assigned categories
+      return userCategories.map((categoryId: string) => 
+        categories.find((c) => c.id === categoryId)
+      ).filter(Boolean);
+    }
+  }, [adminSimulationCategories, categories, isAdmin, userCategories]);
+
+  // Compute the effective selected category (auto-select if only one available)
+  const effectiveSelectedCategory = useMemo(() => {
+    if (selectedCategory) {
+      return selectedCategory;
+    }
+    
+    // Auto-select if only one category available
+    if (availableCategories.length === 1) {
+      return availableCategories[0]?.id || "";
+    }
+    
+    return "";
+  }, [selectedCategory, availableCategories]);
+
   // Fetch lineups when category and season change
   useEffect(() => {
     if (selectedCategory && selectedSeason) {
@@ -113,21 +145,12 @@ export default function CoachesAttendancePage() {
     }
   }, [selectedCategory, selectedSeason, fetchLineups]);
 
-  // Set initial category from UserContext, admin simulation, or all categories for admin
+  // Update selectedCategory when effectiveSelectedCategory changes
   useEffect(() => {
-    if (!selectedCategory && categories.length > 0) {
-      if (adminSimulationCategories.length > 0) {
-        // Admin simulation mode - use selected categories from localStorage
-        setSelectedCategory(adminSimulationCategories[0]);
-      } else if (isAdmin) {
-        // Admin users can access all categories - select first one
-        setSelectedCategory(categories[0].id);
-      } else if (userCategories.length > 0) {
-        // Regular coaches use their assigned categories
-        setSelectedCategory(userCategories[0]);
-      }
+    if (effectiveSelectedCategory && effectiveSelectedCategory !== selectedCategory) {
+      setSelectedCategory(effectiveSelectedCategory);
     }
-  }, [userCategories, selectedCategory, categories, isAdmin, adminSimulationCategories]);
+  }, [effectiveSelectedCategory, selectedCategory]);
 
   // Set initial season from AppDataContext
   useEffect(() => {
@@ -138,12 +161,12 @@ export default function CoachesAttendancePage() {
 
   // Fetch data when category and season change
   useEffect(() => {
-    if (selectedCategory && selectedSeason && categories.length > 0) {
+    if (effectiveSelectedCategory && selectedSeason && categories.length > 0) {
       // Use category ID directly (no need to convert to code)
-      fetchTrainingSessions(selectedCategory, selectedSeason);
-      fetchAttendanceSummary(selectedCategory, selectedSeason);
+      fetchTrainingSessions(effectiveSelectedCategory, selectedSeason);
+      fetchAttendanceSummary(effectiveSelectedCategory, selectedSeason);
     }
-  }, [selectedCategory, selectedSeason, categories, fetchTrainingSessions, fetchAttendanceSummary]);
+  }, [effectiveSelectedCategory, selectedSeason, categories, fetchTrainingSessions, fetchAttendanceSummary]);
 
   // Fetch attendance records when session changes
   useEffect(() => {
@@ -159,7 +182,7 @@ export default function CoachesAttendancePage() {
     
     // Fallback: if no lineup members, filter all members by category
     const fallbackMembers = members.filter((member) => {
-      const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
+      const selectedCategoryData = categories.find((c) => c.id === effectiveSelectedCategory);
       const selectedCategoryCode = selectedCategoryData?.code;
       return member.category_id === selectedCategoryCode;
     });
@@ -180,7 +203,7 @@ export default function CoachesAttendancePage() {
       // If surnames are the same, sort by name
       return (a.name || '').localeCompare(b.name || '');
     });
-  }, [lineupMembers, members, categories, selectedCategory]);
+  }, [lineupMembers, members, categories, effectiveSelectedCategory]);
 
 
   const handleSessionSubmit = async (sessionData: TrainingSessionFormData) => {
@@ -408,37 +431,18 @@ export default function CoachesAttendancePage() {
             <Select
               label="Kategorie"
               placeholder="Vyberte kategorii"
-              selectedKeys={selectedCategory ? [selectedCategory] : []}
+              selectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
                 onSelectionChange={(keys) =>
                   setSelectedCategory(Array.from(keys)[0] as string)
                 }
-                isDisabled={categoriesLoading || categories.length === 1}
+                isDisabled={categoriesLoading || availableCategories.length === 1}
+                defaultSelectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
             >
-              {(() => {
-                // Determine which categories to show
-                let categoriesToShow = [];
-                
-                if (adminSimulationCategories.length > 0) {
-                  // Admin simulation mode - show only selected categories from localStorage
-                  categoriesToShow = adminSimulationCategories.map((categoryId: string) => 
-                    categories.find((c) => c.id === categoryId)
-                  ).filter(Boolean);
-                } else if (isAdmin) {
-                  // Admin users can access all categories
-                  categoriesToShow = categories;
-                } else {
-                  // Regular coaches use their assigned categories
-                  categoriesToShow = userCategories.map((categoryId: string) => 
-                    categories.find((c) => c.id === categoryId)
-                  ).filter(Boolean);
-                }
-                
-                return categoriesToShow.map((category: any) => (
-                  <SelectItem key={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ));
-              })()}
+              {availableCategories.map((category: any) => (
+                <SelectItem key={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
             </Select>
 
             <Select
