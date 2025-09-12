@@ -437,12 +437,33 @@ export class MatchQueryBuilder {
       if (this.options.includeTeamDetails) {
         // Get team counts for proper suffix display
         let clubTeamCounts = new Map<string, number>();
-        if (this.options.categoryId && this.options.seasonId) {
+
+        if (this.options.seasonId) {
           try {
-            clubTeamCounts = await getClubTeamCounts(
-              this.options.categoryId,
-              this.options.seasonId
-            );
+            if (this.options.categoryId) {
+              // Single category - get team counts for that category
+              clubTeamCounts = await getClubTeamCounts(
+                this.options.categoryId,
+                this.options.seasonId
+              );
+            } else {
+              // All categories - get team counts for all categories that have matches
+              const categoryIds = [
+                ...new Set(matches.map((match: any) => match.category_id)),
+              ].filter((id): id is string => typeof id === 'string');
+              const allTeamCounts = await Promise.all(
+                categoryIds.map((categoryId: string) =>
+                  getClubTeamCounts(categoryId, this.options.seasonId!)
+                )
+              );
+
+              // Merge all team counts into one map
+              allTeamCounts.forEach((counts) => {
+                counts.forEach((count, clubId) => {
+                  clubTeamCounts.set(clubId, count);
+                });
+              });
+            }
           } catch (error) {
             console.warn('Failed to get team counts for suffix logic:', error);
           }
@@ -550,12 +571,19 @@ export class MatchQueryBuilder {
       if (this.options.includeTeamDetails) {
         // Get team counts for proper suffix display
         let clubTeamCounts = new Map<string, number>();
-        if (this.options.categoryId && this.options.seasonId) {
+
+        if (this.options.seasonId) {
           try {
-            clubTeamCounts = await getClubTeamCounts(
-              this.options.categoryId,
-              this.options.seasonId
-            );
+            if (this.options.categoryId) {
+              // Single category - get team counts for that category
+              clubTeamCounts = await getClubTeamCounts(
+                this.options.categoryId,
+                this.options.seasonId
+              );
+            } else {
+              // All categories - get team counts for the match's category
+              clubTeamCounts = await getClubTeamCounts(data.category_id, this.options.seasonId);
+            }
           } catch (error) {
             console.warn('Failed to get team counts for suffix logic:', error);
           }

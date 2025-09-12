@@ -23,7 +23,6 @@ export function useOwnClubMatches(categoryId?: string, seasonId?: string) {
   const [matches, setMatches] = useState<SeasonalMatches>({autumn: [], spring: []});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   useEffect(() => {
     const fetchOwnClubMatches = async () => {
@@ -67,7 +66,6 @@ export function useOwnClubMatches(categoryId?: string, seasonId?: string) {
       } catch (error) {
         setError(error instanceof Error ? error : new Error('Unknown error occurred'));
         setMatches({autumn: [], spring: []});
-        setDebugInfo(null);
       } finally {
         setLoading(false);
       }
@@ -83,6 +81,5 @@ export function useOwnClubMatches(categoryId?: string, seasonId?: string) {
     matches,
     loading,
     error: finalError,
-    debugInfo,
   };
 }

@@ -226,18 +226,45 @@ export async function getMatchesWithTeamsOptimized(
 
       // Get team counts for proper suffix display
       let clubTeamCounts = new Map<string, number>();
-      if (options.categoryId && options.seasonId) {
-        clubTeamCounts = await getClubTeamCounts(options.categoryId, options.seasonId);
+      let categoryTeamCounts = new Map<string, Map<string, number>>();
+
+      if (options.seasonId) {
+        if (options.categoryId) {
+          // Single category - get team counts for that category
+          clubTeamCounts = await getClubTeamCounts(options.categoryId, options.seasonId);
+        } else {
+          // All categories - get team counts for each category separately
+          const categoryIds = [...new Set(matches.map((match: any) => match.category_id))].filter(
+            (id): id is string => typeof id === 'string'
+          );
+
+          // Get team counts for each category in parallel
+          const teamCountPromises = categoryIds.map(async (categoryId: string) => {
+            const counts = await getClubTeamCounts(categoryId, options.seasonId!);
+            return {categoryId, counts};
+          });
+
+          const teamCountResults = await Promise.all(teamCountPromises);
+          teamCountResults.forEach(({categoryId, counts}) => {
+            categoryTeamCounts.set(categoryId, counts);
+          });
+        }
       }
 
       // Transform team names with proper team counting
-      const transformedMatches = matches.map((match: any) =>
-        transformMatchWithTeamNames(match, matches, {
+      const transformedMatches = matches.map((match: any) => {
+        // For "all categories", use the team counts from the match's specific category
+        let matchClubTeamCounts = clubTeamCounts;
+        if (!options.categoryId && options.seasonId) {
+          matchClubTeamCounts = categoryTeamCounts.get(match.category_id) || new Map();
+        }
+
+        return transformMatchWithTeamNames(match, matches, {
           useTeamMap: false,
           teamDetails: matches,
-          clubTeamCounts: clubTeamCounts,
-        })
-      );
+          clubTeamCounts: matchClubTeamCounts,
+        });
+      });
 
       // Apply own club filter if requested
       let filteredMatches = transformedMatches;

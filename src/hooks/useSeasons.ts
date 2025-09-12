@@ -35,7 +35,6 @@ export function useSeasons() {
         .single();
 
       if (error) throw error;
-      console.log('I got this season from useSeasons hook', data);
       setActiveSeason(data);
     } catch (error) {
       console.error('Error fetching active season:', error);
@@ -70,9 +69,7 @@ export function useSeasons() {
 
   // Automatically fetch active season when hook is first used
   useEffect(() => {
-    console.log('useSeasons useEffect - activeSeason:', activeSeason, 'loading:', loading);
     if (!activeSeason && !loading) {
-      console.log('useSeasons: Fetching active season...');
       fetchActiveSeason();
     }
   }, [activeSeason, loading, fetchActiveSeason]);
@@ -80,7 +77,10 @@ export function useSeasons() {
   return {
     activeSeason,
     seasons,
-    sortedSeasons, // seasons sorted from newest to oldest
+    /**
+     * @description seasons sorted from newest to oldest
+     */
+    sortedSeasons,
     loading,
     error,
     fetchActiveSeason,

@@ -1,6 +1,6 @@
 import {useState, useEffect, useCallback} from 'react';
 import {Match} from '@/types';
-import {createMatchQuery} from '@/utils';
+import {getMatchesWithTeamsOptimized} from '@/services/optimizedMatchQueries';
 import {useSeasons} from '@/hooks';
 
 interface PublicMatchesResult {
@@ -24,13 +24,9 @@ export function usePublicMatches(categoryId?: string): PublicMatchesResult {
   // Get active season for suffix logic
   const {activeSeason, loading: seasonLoading, error: seasonError} = useSeasons();
 
-  console.log('I got this season from useSeasons hook', activeSeason);
-  console.log('I got this error from useSeasons hook', seasonError);
-
   const fetchMatches = useCallback(async () => {
     // Don't fetch if we don't have an active season yet
     if (!activeSeason?.id) {
-      console.log('I HAVE No active season');
       return;
     }
 
@@ -38,26 +34,36 @@ export function usePublicMatches(categoryId?: string): PublicMatchesResult {
       setLoading(true);
       setError(null);
 
-      // Use the new query builder for public matches
-      const query = createMatchQuery({
+      // Use optimized query for public matches
+      const result = await getMatchesWithTeamsOptimized({
         categoryId: categoryId && categoryId !== 'all' ? categoryId : undefined,
-        seasonId: activeSeason.id, // Required for suffix logic
+        seasonId: activeSeason.id,
         includeTeamDetails: true,
-        includeCategory: true,
       });
-
-      // Execute query with seasonal split
-      const result = await query.executeSeasonal();
 
       if (result.error) {
         throw new Error(result.error);
       }
 
-      setMatches({
-        autumn: result.autumn,
-        spring: result.spring,
+      // Split matches into autumn and spring seasons
+      const autumn: Match[] = [];
+      const spring: Match[] = [];
+
+      result.data.forEach((match: Match) => {
+        const month = new Date(match.date).getMonth() + 1; // 1-12
+        if (month >= 9 || month <= 2) {
+          // September (9) to February (2)
+          autumn.push(match);
+        } else if (month >= 3 && month <= 5) {
+          // March (3) to May (5)
+          spring.push(match);
+        }
       });
-      console.log('I have matches');
+
+      setMatches({
+        autumn,
+        spring,
+      });
       setError(null);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
