@@ -33,3 +33,5 @@ export * from './useTeams';
 export * from './useFetchMembers';
 export * from './useDebounce';
 export * from './useOptimizedMatches';
+export * from './useCategoryLineups';
+export * from './useVideos';

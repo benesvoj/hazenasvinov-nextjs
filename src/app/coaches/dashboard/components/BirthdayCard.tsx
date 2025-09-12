@@ -1,31 +1,31 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Card, CardBody, CardHeader, Chip, Avatar } from "@heroui/react";
-import { GiftIcon, CalendarIcon } from "@heroicons/react/24/outline";
-import { useUpcomingBirthdays } from "@/hooks/useUpcomingBirthdays";
-import { formatDateString } from "@/helpers";
+import React from 'react';
+import {Card, CardBody, CardHeader, Chip, Avatar} from '@heroui/react';
+import {GiftIcon, CalendarIcon} from '@heroicons/react/24/outline';
+import {useUpcomingBirthdays} from '@/hooks/useUpcomingBirthdays';
+import {formatDateString} from '@/helpers';
 
 export default function BirthdayCard() {
-  const { birthdays, loading, error } = useUpcomingBirthdays(3, true);
+  const {birthdays, loading, error} = useUpcomingBirthdays(3, true);
 
   const getDaysUntilText = (days: number) => {
-    if (days === 0) return "Dnes!";
-    if (days === 1) return "Zítra";
+    if (days === 0) return 'Dnes!';
+    if (days === 1) return 'Zítra';
     if (days <= 7) return `Za ${days} dní`;
     if (days <= 30) return `Za ${days} dní`;
     return `Za ${days} dní`;
   };
 
   const getDaysUntilColor = (days: number) => {
-    if (days === 0) return "danger"; // Today
-    if (days <= 3) return "warning"; // This week
-    if (days <= 7) return "primary"; // Next week
-    return "default"; // Later
+    if (days === 0) return 'danger'; // Today
+    if (days <= 3) return 'warning'; // This week
+    if (days <= 7) return 'primary'; // Next week
+    return 'primary'; // Later
   };
 
   const getAgeText = (age: number) => {
-    if (age === 1) return "1 rok";
+    if (age === 1) return '1 rok';
     if (age >= 2 && age <= 4) return `${age} roky`;
     return `${age} let`;
   };
@@ -53,9 +53,7 @@ export default function BirthdayCard() {
         </CardHeader>
         <CardBody>
           <div className="text-center py-8">
-            <p className="text-red-600 mb-4">
-              Chyba při načítání narozenin: {error}
-            </p>
+            <p className="text-red-600 mb-4">Chyba při načítání narozenin: {error}</p>
           </div>
         </CardBody>
       </Card>
@@ -72,9 +70,7 @@ export default function BirthdayCard() {
           <div className="text-center py-8">
             <GiftIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600">Žádné nadcházející narozeniny</p>
-            <p className="text-sm text-gray-500 mt-2">
-              v přiřazených kategoriích
-            </p>
+            <p className="text-sm text-gray-500 mt-2">v přiřazených kategoriích</p>
           </div>
         </CardBody>
       </Card>
@@ -102,24 +98,14 @@ export default function BirthdayCard() {
                 </div>
                 <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
                   <CalendarIcon className="w-3 h-3" />
-                  <span>
-                    {formatDateString(
-                      member.nextBirthday.toISOString().split("T")[0]
-                    )}
-                  </span>
+                  <span>{formatDateString(member.nextBirthday.toISOString().split('T')[0])}</span>
                 </div>
               </div>
               <div className="text-right">
-                <Chip
-                  size="sm"
-                  color={getDaysUntilColor(member.daysUntilBirthday)}
-                  variant="flat"
-                >
+                <Chip size="sm" color={getDaysUntilColor(member.daysUntilBirthday)} variant="flat">
                   {getDaysUntilText(member.daysUntilBirthday)}
                 </Chip>
-                <p className="text-xs text-gray-500 mt-1">
-                  {getAgeText(member.age + 1)}
-                </p>
+                <p className="text-xs text-gray-500 mt-1">{getAgeText(member.age + 1)}</p>
               </div>
             </div>
           ))}

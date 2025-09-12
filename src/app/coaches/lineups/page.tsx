@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useCategoryLineups } from '@/hooks/useCategoryLineups';
-import { useSeasons } from '@/hooks/useSeasons';
-import { useCategories } from '@/hooks/useCategories';
-import { useUserRoles } from '@/hooks/useUserRoles';
-import { 
+import React, {useState, useEffect} from 'react';
+import {useCategoryLineups} from '@/hooks/useCategoryLineups';
+import {useSeasons} from '@/hooks/useSeasons';
+import {useCategories} from '@/hooks/useCategories';
+import {useUserRoles} from '@/hooks/useUserRoles';
+import {
   UserGroupIcon,
   PlusIcon,
   PencilIcon,
   TrashIcon,
-  UserPlusIcon
+  UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import {
   Button,
@@ -34,10 +34,11 @@ import {
   TableColumn,
   TableBody,
   TableRow,
-  TableCell
+  TableCell,
 } from '@heroui/react';
-import { CategoryLineupFormData, AddMemberToLineupData } from '@/types/categoryLineup';
+import {CategoryLineupFormData, AddMemberToLineupData} from '@/types/categoryLineup';
 import AddMemberModal from './components/AddMemberModal';
+import {PageContainer} from '@/components';
 
 export default function CoachesLineupsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -50,27 +51,27 @@ export default function CoachesLineupsPage() {
     name: '',
     description: '',
     category_id: '',
-    season_id: ''
+    season_id: '',
   });
 
-  const { 
-    lineups, 
-    lineupMembers, 
-    loading, 
-    error, 
-    fetchLineups, 
+  const {
+    lineups,
+    lineupMembers,
+    loading,
+    error,
+    fetchLineups,
     fetchLineupMembers,
     createLineup,
     updateLineup,
     deleteLineup,
     addMemberToLineup,
     removeMemberFromLineup,
-    updateLineupMember
+    updateLineupMember,
   } = useCategoryLineups();
 
-  const { seasons, loading: seasonsLoading, fetchAllSeasons } = useSeasons();
-  const { categories, loading: categoriesLoading, fetchCategories } = useCategories();
-  const { getCurrentUserCategories } = useUserRoles();
+  const {seasons, loading: seasonsLoading, fetchAllSeasons} = useSeasons();
+  const {categories, loading: categoriesLoading, fetchCategories} = useCategories();
+  const {getCurrentUserCategories} = useUserRoles();
 
   // Get user's assigned categories
   const [userCategories, setUserCategories] = useState<string[]>([]);
@@ -98,7 +99,7 @@ export default function CoachesLineupsPage() {
   }, [getCurrentUserCategories, selectedCategory]);
 
   // Get active season
-  const activeSeason = seasons.find(season => season.is_active);
+  const activeSeason = seasons.find((season) => season.is_active);
 
   useEffect(() => {
     if (activeSeason && !selectedSeason) {
@@ -125,16 +126,16 @@ export default function CoachesLineupsPage() {
       const lineupData = {
         ...lineupFormData,
         category_id: selectedCategory,
-        season_id: selectedSeason
+        season_id: selectedSeason,
       };
-      
+
       await createLineup(lineupData);
       setIsLineupModalOpen(false);
       setLineupFormData({
         name: '',
         description: '',
         category_id: selectedCategory,
-        season_id: selectedSeason
+        season_id: selectedSeason,
       });
     } catch (err) {
       console.error('Error creating lineup:', err);
@@ -148,9 +149,9 @@ export default function CoachesLineupsPage() {
       const lineupData = {
         ...lineupFormData,
         category_id: selectedCategory,
-        season_id: selectedSeason
+        season_id: selectedSeason,
       };
-      
+
       await updateLineup(editingLineup.id, lineupData);
       setIsLineupModalOpen(false);
       setEditingLineup(null);
@@ -158,7 +159,7 @@ export default function CoachesLineupsPage() {
         name: '',
         description: '',
         category_id: selectedCategory,
-        season_id: selectedSeason
+        season_id: selectedSeason,
       });
     } catch (err) {
       console.error('Error updating lineup:', err);
@@ -171,7 +172,7 @@ export default function CoachesLineupsPage() {
       name: lineup.name,
       description: lineup.description || '',
       category_id: lineup.category_id,
-      season_id: lineup.season_id
+      season_id: lineup.season_id,
     });
     setIsLineupModalOpen(true);
   };
@@ -203,7 +204,7 @@ export default function CoachesLineupsPage() {
     if (!selectedLineup) {
       throw new Error('Není vybrána žádná soupiska. Prosím vyberte soupisku před přidáním člena.');
     }
-    
+
     try {
       await addMemberToLineup(selectedLineup, memberData);
     } catch (err) {
@@ -214,30 +215,38 @@ export default function CoachesLineupsPage() {
 
   const handleEditMember = (member: any) => {
     // For now, just show an alert. In the future, this could open an edit modal
-    alert(`Edit functionality for ${member.member?.name} ${member.member?.surname} will be implemented in the next step.`);
+    alert(
+      `Edit functionality for ${member.member?.name} ${member.member?.surname} will be implemented in the next step.`
+    );
   };
 
   const getPositionColor = (position: string) => {
     switch (position) {
-      case 'goalkeeper': return 'primary';
-      case 'field_player': return 'success';
-      default: return 'default';
+      case 'goalkeeper':
+        return 'primary';
+      case 'field_player':
+        return 'success';
+      default:
+        return 'default';
     }
   };
 
   const getPositionText = (position: string) => {
     switch (position) {
-      case 'goalkeeper': return 'Brankář';
-      case 'field_player': return 'Hráč v poli';
-      default: return position;
+      case 'goalkeeper':
+        return 'Brankář';
+      case 'field_player':
+        return 'Hráč v poli';
+      default:
+        return position;
     }
   };
 
   // Get existing member IDs and jersey numbers for the modal
-  const existingMemberIds = lineupMembers.map(member => member.member_id);
+  const existingMemberIds = lineupMembers.map((member) => member.member_id);
   const existingJerseyNumbers = lineupMembers
-    .map(member => member.jersey_number)
-    .filter(num => num !== null && num !== undefined) as number[];
+    .map((member) => member.jersey_number)
+    .filter((num) => num !== null && num !== undefined) as number[];
 
   if (loading && !lineups.length) {
     return (
@@ -250,31 +259,22 @@ export default function CoachesLineupsPage() {
   }
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <UserGroupIcon className="w-8 h-8 text-green-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Soupisky týmů</h1>
-        </div>
-        <p className="text-gray-600">Správa soupisek pro jednotlivé kategorie</p>
-      </div>
-
+    <PageContainer>
       {/* Category Tabs */}
       <Card className="mb-6">
         <CardBody>
-          <Tabs
-            selectedKey={selectedCategory}
-            onSelectionChange={(key) => setSelectedCategory(key as string)}
-            className="w-full"
-          >
-            {userCategories.map((categoryId) => {
-              const category = categories.find(c => c.id === categoryId);
-              return (
-                <Tab key={categoryId} title={category?.name || categoryId} />
-              );
-            })}
-          </Tabs>
+          <div className="overflow-x-auto">
+            <Tabs
+              selectedKey={selectedCategory}
+              onSelectionChange={(key) => setSelectedCategory(key as string)}
+              className="w-full min-w-max"
+            >
+              {userCategories.map((categoryId) => {
+                const category = categories.find((c) => c.id === categoryId);
+                return <Tab key={categoryId} title={category?.name || categoryId} />;
+              })}
+            </Tabs>
+          </div>
         </CardBody>
       </Card>
 
@@ -296,7 +296,7 @@ export default function CoachesLineupsPage() {
                       name: '',
                       description: '',
                       category_id: selectedCategory,
-                      season_id: selectedSeason
+                      season_id: selectedSeason,
                     });
                     setIsLineupModalOpen(true);
                   }}
@@ -367,7 +367,9 @@ export default function CoachesLineupsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between w-full">
-                <h3 className="text-lg font-semibold">Členové soupisky {selectedLineup ? `(${lineupMembers.length})` : ''}</h3>
+                <h3 className="text-lg font-semibold">
+                  Členové soupisky {selectedLineup ? `(${lineupMembers.length})` : ''}
+                </h3>
                 {selectedLineup && (
                   <Button
                     size="sm"
@@ -392,83 +394,113 @@ export default function CoachesLineupsPage() {
                   ))}
                 </div>
               ) : lineupMembers.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  Žádní členové v této soupisce
-                </p>
+                <p className="text-gray-500 text-center py-8">Žádní členové v této soupisce</p>
               ) : (
-                <Table aria-label="Lineup members">
-                  <TableHeader>
-                    <TableColumn>ČLEN</TableColumn>
-                    <TableColumn>POZICE</TableColumn>
-                    <TableColumn>DRES</TableColumn>
-                    <TableColumn>FUNKCE</TableColumn>
-                    <TableColumn>AKCE</TableColumn>
-                  </TableHeader>
-                  <TableBody>
-                    {lineupMembers.map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {member.member?.name} {member.member?.surname}
+                <div className="overflow-x-auto">
+                  <Table aria-label="Lineup members">
+                    <TableHeader>
+                      <TableColumn>ČLEN</TableColumn>
+                      <TableColumn className="hidden sm:table-cell">POZICE</TableColumn>
+                      <TableColumn className="hidden md:table-cell">DRES</TableColumn>
+                      <TableColumn className="hidden lg:table-cell">FUNKCE</TableColumn>
+                      <TableColumn>AKCE</TableColumn>
+                    </TableHeader>
+                    <TableBody>
+                      {lineupMembers.map((member) => (
+                        <TableRow key={member.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-sm sm:text-base">
+                                {member.member?.name} {member.member?.surname}
+                              </div>
+                              <div className="text-xs sm:text-sm text-gray-500">
+                                {member.member?.registration_number}
+                              </div>
+                              <div className="flex gap-1 mt-1 sm:hidden">
+                                <Chip
+                                  color={getPositionColor(member.position)}
+                                  size="sm"
+                                  className="text-xs"
+                                >
+                                  {getPositionText(member.position)}
+                                </Chip>
+                                {member.jersey_number && (
+                                  <Chip
+                                    size="sm"
+                                    color="primary"
+                                    variant="flat"
+                                    className="text-xs"
+                                  >
+                                    #{member.jersey_number}
+                                  </Chip>
+                                )}
+                                {member.is_captain && (
+                                  <Chip size="sm" color="warning" className="text-xs">
+                                    K
+                                  </Chip>
+                                )}
+                                {member.is_vice_captain && (
+                                  <Chip size="sm" color="secondary" className="text-xs">
+                                    Z
+                                  </Chip>
+                                )}
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {member.member?.registration_number}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            color={getPositionColor(member.position)}
-                            size="sm"
-                          >
-                            {getPositionText(member.position)}
-                          </Chip>
-                        </TableCell>
-                        <TableCell>
-                          {member.jersey_number ? (
-                            <Chip size="sm" color="primary" variant="flat">
-                              {member.jersey_number}
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell">
+                            <Chip color={getPositionColor(member.position)} size="sm">
+                              {getPositionText(member.position)}
                             </Chip>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            {member.is_captain && (
-                              <Chip size="sm" color="warning">Kapitán</Chip>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {member.jersey_number ? (
+                              <Chip size="sm" color="primary" variant="flat">
+                                {member.jersey_number}
+                              </Chip>
+                            ) : (
+                              <span className="text-gray-400">-</span>
                             )}
-                            {member.is_vice_captain && (
-                              <Chip size="sm" color="secondary">Zástupce</Chip>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="light"
-                              onPress={() => handleEditMember(member)}
-                              isIconOnly
-                              aria-label={`Upravit ${member.member?.name} ${member.member?.surname}`}
-                              startContent={<PencilIcon className="w-4 h-4" />}
-                            />
-                            <Button
-                              size="sm"
-                              color="danger"
-                              variant="light"
-                              onPress={() => handleRemoveMember(member.id)}
-                              isIconOnly
-                              aria-label={`Odebrat ${member.member?.name} ${member.member?.surname}`}
-                              startContent={<TrashIcon className="w-4 h-4" />}
-                            />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            <div className="flex gap-1">
+                              {member.is_captain && (
+                                <Chip size="sm" color="warning">
+                                  Kapitán
+                                </Chip>
+                              )}
+                              {member.is_vice_captain && (
+                                <Chip size="sm" color="secondary">
+                                  Zástupce
+                                </Chip>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="light"
+                                onPress={() => handleEditMember(member)}
+                                isIconOnly
+                                aria-label={`Upravit ${member.member?.name} ${member.member?.surname}`}
+                                startContent={<PencilIcon className="w-4 h-4" />}
+                              />
+                              <Button
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => handleRemoveMember(member.id)}
+                                isIconOnly
+                                aria-label={`Odebrat ${member.member?.name} ${member.member?.surname}`}
+                                startContent={<TrashIcon className="w-4 h-4" />}
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardBody>
           </Card>
@@ -476,38 +508,31 @@ export default function CoachesLineupsPage() {
       </div>
 
       {/* Lineup Modal */}
-      <Modal
-        isOpen={isLineupModalOpen}
-        onClose={() => setIsLineupModalOpen(false)}
-        size="2xl"
-      >
+      <Modal isOpen={isLineupModalOpen} onClose={() => setIsLineupModalOpen(false)} size="2xl">
         <ModalContent>
-          <ModalHeader>
-            {editingLineup ? 'Upravit soupisku' : 'Nová soupiska'}
-          </ModalHeader>
+          <ModalHeader>{editingLineup ? 'Upravit soupisku' : 'Nová soupiska'}</ModalHeader>
           <ModalBody>
             <div className="space-y-4">
               <Input
                 label="Název soupisky"
                 placeholder="Zadejte název soupisky"
                 value={lineupFormData.name}
-                onChange={(e) => setLineupFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setLineupFormData((prev) => ({...prev, name: e.target.value}))}
                 isRequired
               />
-              
+
               <Textarea
                 label="Popis"
                 placeholder="Zadejte popis soupisky"
                 value={lineupFormData.description}
-                onChange={(e) => setLineupFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setLineupFormData((prev) => ({...prev, description: e.target.value}))
+                }
               />
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button
-              variant="light"
-              onPress={() => setIsLineupModalOpen(false)}
-            >
+            <Button variant="light" onPress={() => setIsLineupModalOpen(false)}>
               Zrušit
             </Button>
             <Button
@@ -527,10 +552,10 @@ export default function CoachesLineupsPage() {
         onClose={() => setIsAddMemberModalOpen(false)}
         onAddMember={handleAddMember}
         selectedCategory={selectedCategory}
-        selectedCategoryId={categories.find(c => c.id === selectedCategory)?.id || ''}
+        selectedCategoryId={categories.find((c) => c.id === selectedCategory)?.id || ''}
         existingMembers={existingMemberIds}
         existingJerseyNumbers={existingJerseyNumbers}
       />
-    </div>
+    </PageContainer>
   );
 }
