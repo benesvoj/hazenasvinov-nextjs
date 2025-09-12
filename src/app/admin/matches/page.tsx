@@ -202,12 +202,13 @@ export default function MatchesAdminPage() {
 
   // Use the enhanced seasons hook
   const {
-    sortedSeasons,
     activeSeason,
+    sortedSeasons,
     loading: seasonsLoading,
     error: seasonsError,
-    fetchActiveSeason,
+    fetchAllSeasons,
   } = useSeasons();
+
   const [selectedSeason, setSelectedSeason] = useState<string>('');
 
   // Use the matches hook - pass category code instead of ID, and show ALL matches (admin mode)
@@ -274,10 +275,10 @@ export default function MatchesAdminPage() {
   // Initial data fetch
   useEffect(() => {
     fetchCategoriesFull();
-    fetchActiveSeason();
+    fetchAllSeasons();
     fetchTeams();
     fetchMembers();
-  }, [fetchCategoriesFull, fetchActiveSeason, fetchTeams, fetchMembers]);
+  }, [fetchCategoriesFull, fetchAllSeasons, fetchTeams, fetchMembers]);
 
   // Set first category as default when categories are loaded
   useEffect(() => {
@@ -785,6 +786,8 @@ export default function MatchesAdminPage() {
     },
     [selectedSeason, importMatches, fetchStandings, selectedCategory]
   );
+
+  console.log('matches', matches);
 
   return (
     <AdminContainer

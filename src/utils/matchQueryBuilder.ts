@@ -520,10 +520,10 @@ export class MatchQueryBuilder {
       result.data.forEach((match: Match) => {
         const month = new Date(match.date).getMonth() + 1; // 1-12
 
-        if (month >= 9 || month <= 2) {
+        if (month >= 8 || month <= 2) {
           // September (9) to February (2)
           autumn.push(match);
-        } else if (month >= 3 && month <= 5) {
+        } else if (month >= 3 && month <= 6) {
           // March (3) to May (5)
           spring.push(match);
         }
