@@ -1,13 +1,8 @@
-import { Button,Card, CardHeader, CardBody } from "@heroui/react";
-import {
-  ArrowRightIcon,
-  CalendarIcon,
-  TrophyIcon,
-} from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { translations } from "@/lib/translations";
-import {LoadingSpinner, MatchRow} from "@/components";
-
+import {Button, Card, CardHeader, CardBody} from '@heroui/react';
+import {ArrowRightIcon, CalendarIcon, TrophyIcon} from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import {translations} from '@/lib/translations';
+import {LoadingSpinner, MatchRow} from '@/components';
 
 interface CategoryMatchesAndResultsProps {
   loading: boolean;
@@ -36,20 +31,20 @@ export default function CategoryMatchesAndResults({
             <h3 className="text-xl font-semibold">{translations.matchSchedule.upcomingMatches}</h3>
           </div>
           {redirectionLinks && (
-          <Button
-            as={Link}
-            href={`/matches${
-              selectedCategory && selectedCategory !== "all"
-                ? `?category=${selectedCategory}`
-                : ""
-            }`}
-            variant="light"
-            size="sm"
-            color="primary"
-            endContent={<ArrowRightIcon className="w-4 h-4" />}
-          >
-            {translations.matchSchedule.allMatches}
-          </Button>
+            <Button
+              as={Link}
+              href={`/matches${
+                selectedCategory && selectedCategory !== 'all'
+                  ? `?category=${selectedCategory}`
+                  : ''
+              }`}
+              variant="light"
+              size="sm"
+              color="primary"
+              endContent={<ArrowRightIcon className="w-4 h-4" />}
+            >
+              {translations.matchSchedule.allMatches}
+            </Button>
           )}
         </CardHeader>
         <CardBody>
@@ -63,7 +58,7 @@ export default function CategoryMatchesAndResults({
               {upcomingMatches.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   <div className="mb-2">
-                    {allMatches.length === 0
+                    {Array.isArray(allMatches) && allMatches.length === 0
                       ? translations.matches.noMatches
                       : translations.matchSchedule.noUpcomingMatches}
                   </div>
@@ -82,20 +77,20 @@ export default function CategoryMatchesAndResults({
             <h3 className="text-xl font-semibold">{translations.matchSchedule.recentResults}</h3>
           </div>
           {redirectionLinks && (
-          <Button
-            as={Link}
-            href={`/matches${
-              selectedCategory && selectedCategory !== "all"
-                ? `?category=${selectedCategory}`
-                : ""
-            }`}
-            variant="light"
-            size="sm"
-            color="primary"
-            endContent={<ArrowRightIcon className="w-4 h-4" />}
-          >
-            {translations.matchSchedule.allMatches}
-          </Button>
+            <Button
+              as={Link}
+              href={`/matches${
+                selectedCategory && selectedCategory !== 'all'
+                  ? `?category=${selectedCategory}`
+                  : ''
+              }`}
+              variant="light"
+              size="sm"
+              color="primary"
+              endContent={<ArrowRightIcon className="w-4 h-4" />}
+            >
+              {translations.matchSchedule.allMatches}
+            </Button>
           )}
         </CardHeader>
         <CardBody>
@@ -109,7 +104,7 @@ export default function CategoryMatchesAndResults({
               {recentResults.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   <div className="mb-2">
-                    {allMatches.length === 0
+                    {Array.isArray(allMatches) && allMatches.length === 0
                       ? translations.matches.noMatches
                       : translations.matchSchedule.noRecentResults}
                   </div>

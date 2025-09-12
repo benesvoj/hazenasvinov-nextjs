@@ -55,13 +55,7 @@ const MatchRow: React.FC<MatchRowProps> = ({match, compact = true, redirectionLi
                     />
                   </div>
                 )}
-                <span
-                  className={`font-medium text-sm lg:text-sm ${
-                    match.home_team_is_own_club
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-900 dark:text-white'
-                  }`}
-                >
+                <span className={'font-medium text-sm lg:text-sm text-gray-900 dark:text-white'}>
                   {/* Mobile: Short name, Desktop: Full name */}
                   <span className="lg:hidden">
                     {match.home_team?.short_name || match.home_team?.name || 'Neznámý tým'}
@@ -74,13 +68,7 @@ const MatchRow: React.FC<MatchRowProps> = ({match, compact = true, redirectionLi
 
               {/* Away Team */}
               <div className="flex items-center gap-2">
-                <span
-                  className={`font-medium text-sm lg:text-sm ${
-                    match.away_team_is_own_club
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-900 dark:text-white'
-                  }`}
-                >
+                <span className={'font-medium text-sm lg:text-sm text-gray-900 dark:text-white'}>
                   {/* Mobile: Short name, Desktop: Full name */}
                   <span className="lg:hidden">
                     {match.away_team?.short_name || match.away_team?.name || 'Neznámý tým'}

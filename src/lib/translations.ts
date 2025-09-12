@@ -215,7 +215,7 @@ export const translations = {
   error: {
     fetchCategories: 'Chyba při načítání kategorií',
   },
-  loading: 'Načítání...',
+  loading: 'Načítání ...',
   matches: {
     title: 'Zápasy',
     description: 'Správa zápasů, které se konají v rámci systému.',

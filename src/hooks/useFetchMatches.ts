@@ -1,7 +1,6 @@
 import {useState, useEffect} from 'react';
-import {createClient} from '@/utils/supabase/client';
 import {Match} from '@/types';
-import {transformMatchWithTeamNames} from '@/utils/teamDisplay';
+import {createMatchQuery} from '@/utils';
 
 export interface SeasonalMatches {
   autumn: Match[];
@@ -79,153 +78,25 @@ export function useFetchMatches(
       try {
         setLoading(true);
         setError(null);
-        const supabase = createClient();
 
-        // First, get the category ID
-        const {data: categoryData, error: categoryError} = await supabase
-          .from('categories')
-          .select('id, name')
-          .eq('id', categoryId)
-          .single();
-
-        if (categoryError) {
-          throw new Error(`Category not found: ${categoryError.message}`);
-        }
-
-        // Second, get the season ID (either provided or active season)
-        let seasonData;
-        if (seasonId) {
-          seasonData = {id: seasonId};
-        } else {
-          // Get active season
-          const {data: activeSeason, error: seasonError} = await supabase
-            .from('seasons')
-            .select('id, name, is_active')
-            .eq('is_active', true)
-            .single();
-
-          if (seasonError) {
-            throw new Error(`Active season not found: ${seasonError.message}`);
-          }
-
-          seasonData = activeSeason;
-        }
-
-        // Third, fetch matches with basic team IDs first
-        const {data: matchesData, error: matchesError} = await supabase
-          .from('matches')
-          .select('*')
-          .eq('category_id', categoryData.id)
-          .eq('season_id', seasonData.id)
-          .order('date', {ascending: true});
-
-        if (matchesError) {
-          throw new Error(`Failed to fetch matches: ${matchesError.message}`);
-        }
-
-        // Fourth, fetch team details from club_category_teams table
-        const teamIds = new Set<string>();
-        matchesData?.forEach((match: any) => {
-          if (match.home_team_id) teamIds.add(match.home_team_id);
-          if (match.away_team_id) teamIds.add(match.away_team_id);
+        // Use the new query builder
+        const query = createMatchQuery({
+          categoryId,
+          seasonId,
+          ownClubOnly,
+          includeTeamDetails,
         });
 
-        // Fetch team details with club information
-        const {data: teamDetails, error: teamError} = await supabase
-          .from('club_category_teams')
-          .select(
-            `
-            id,
-            team_suffix,
-            club_category:club_categories(
-              club:clubs(
-                id,
-                name,
-                short_name,
-                logo_url,
-                is_own_club
-              )
-            )
-          `
-          )
-          .in('id', Array.from(teamIds));
+        // Execute query with seasonal split
+        const result = await query.executeSeasonal();
 
-        if (teamError) {
-          throw new Error(`Failed to fetch team details: ${teamError.message}`);
+        if (result.error) {
+          throw new Error(result.error);
         }
-
-        // Create a map for quick team lookup
-        const teamMap = new Map();
-        teamDetails?.forEach((team: any) => {
-          teamMap.set(team.id, team);
-        });
-
-        // Transform matches to include team names and club information
-        const transformedMatches =
-          matchesData?.map((match: any) => {
-            // Check if each team belongs to our club individually
-            const homeTeamDetails = teamMap.get(match.home_team_id);
-            const awayTeamDetails = teamMap.get(match.away_team_id);
-            const homeTeamIsOwnClub = homeTeamDetails?.club_category?.club?.is_own_club === true;
-            const awayTeamIsOwnClub = awayTeamDetails?.club_category?.club?.is_own_club === true;
-
-            // Use centralized team display utility with smart suffix logic
-            const transformedMatch = transformMatchWithTeamNames(match, [], {
-              useTeamMap: true,
-              teamMap,
-              teamDetails,
-            });
-
-            // Add the is_own_club flags that are specific to this hook
-            return {
-              ...transformedMatch,
-              home_team: {
-                ...transformedMatch.home_team,
-                is_own_club: homeTeamIsOwnClub,
-              },
-              away_team: {
-                ...transformedMatch.away_team,
-                is_own_club: awayTeamIsOwnClub,
-              },
-            };
-          }) || [];
-
-        // Apply filtering based on options
-        let filteredMatches = transformedMatches;
-        if (ownClubOnly) {
-          // Filter matches to only show those where our club is playing
-          filteredMatches = transformedMatches.filter(
-            (match: any) =>
-              match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
-          );
-        } else {
-          // Show all matches (admin mode)
-        }
-
-        // Group matches by season (autumn/spring)
-        const autumnMatches: Match[] = [];
-        const springMatches: Match[] = [];
-
-        filteredMatches.forEach((match: any) => {
-          const matchDate = new Date(match.date);
-          const month = matchDate.getMonth() + 1; // getMonth() returns 0-11
-
-          if (month >= 8 || month <= 1) {
-            // August to January = Autumn season
-            autumnMatches.push(match);
-          } else {
-            // February to July = Spring season
-            springMatches.push(match);
-          }
-        });
-
-        // Sort matches within each season by date
-        autumnMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
         setMatches({
-          autumn: autumnMatches,
-          spring: springMatches,
+          autumn: result.autumn,
+          spring: result.spring,
         });
 
         setError(null);

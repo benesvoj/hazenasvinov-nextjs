@@ -165,7 +165,8 @@ export async function getMatchesWithTeams(
     }
 
     // Transform team names if needed
-    const transformedData = data?.map(transformMatchWithTeamNames) || [];
+    const transformedData =
+      data?.map((match: any) => transformMatchWithTeamNames(match, data)) || [];
 
     // Filter for own club matches if requested
     let filteredData = transformedData;
@@ -250,7 +251,7 @@ export async function getMatchById(matchId: string): Promise<MatchQueryResult> {
       return {data: [], error: 'Match not found'};
     }
 
-    const transformedData = transformMatchWithTeamNames(data);
+    const transformedData = transformMatchWithTeamNames(data, [data]);
     return {data: [transformedData], error: null};
   } catch (error) {
     return {
