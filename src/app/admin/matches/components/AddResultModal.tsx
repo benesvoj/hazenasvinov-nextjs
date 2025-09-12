@@ -39,13 +39,43 @@ export default function AddResultModal({
     field: 'home_score' | 'away_score' | 'home_score_halftime' | 'away_score_halftime',
     value: number | ChangeEvent<HTMLInputElement>
   ) => {
+    // Handle NumberInput which can return either a number or ChangeEvent
+    const actualValue =
+      typeof value === 'object' && value !== null && 'target' in value ? value.target.value : value;
+
     onResultDataChange({
       ...resultData,
-      [field]: value,
+      [field]: actualValue,
     });
   };
 
   const t = translations.match;
+
+  const ResultInput = ({
+    label,
+    value,
+    onChange,
+    isDisabled,
+  }: {
+    label: string;
+    value: number;
+    onChange: (value: number) => void;
+    isDisabled: boolean;
+  }) => {
+    return (
+      <div className="flex-1 w-full">
+        <NumberInput
+          label={label}
+          value={value}
+          onChange={(value) => onChange(value as number)}
+          isDisabled={isDisabled}
+          classNames={{
+            base: 'w-[180px]',
+          }}
+        />
+      </div>
+    );
+  };
 
   return (
     <UnifiedModal
@@ -68,48 +98,38 @@ export default function AddResultModal({
           <div className="flex justify-center items-center space-y-2">
             <Heading size={4}>{t.result}</Heading>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-            <div className="flex-1 w-full">
-              <NumberInput
-                label={`Skóre ${selectedMatch.home_team?.name || t.homeTeam}`}
-                value={resultData.home_score}
-                onChange={(value) => handleScoreChange('home_score', value)}
-                isDisabled={isSeasonClosed}
-              />
-            </div>
-            <span className="text-2xl font-bold text-center">:</span>
-            <div className="flex-1 w-full">
-              <NumberInput
-                label={`Skóre ${selectedMatch.away_team?.name || t.awayTeam}`}
-                value={resultData.away_score}
-                onChange={(value) => handleScoreChange('away_score', value)}
-                isDisabled={isSeasonClosed}
-              />
-            </div>
+          <div className="flex flex-row items-center gap-2 sm:gap-4">
+            <ResultInput
+              label={`${selectedMatch.home_team?.name || t.homeTeam}`}
+              value={resultData.home_score}
+              onChange={(value) => handleScoreChange('home_score', value)}
+              isDisabled={isSeasonClosed}
+            />
+            <span className="hidden sm:block text-2xl font-bold text-center">:</span>
+            <ResultInput
+              label={`${selectedMatch.away_team?.name || t.awayTeam}`}
+              value={resultData.away_score}
+              onChange={(value) => handleScoreChange('away_score', value)}
+              isDisabled={isSeasonClosed}
+            />
           </div>
           <div className="flex justify-center items-center space-y-2">
             <Heading size={5}>{t.halftime}</Heading>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-            <div className="flex-1 w-full">
-              <NumberInput
-                label={`${t.halftime} ${selectedMatch.home_team?.name || t.homeTeam}`}
-                value={resultData.home_score_halftime}
-                onChange={(value) => handleScoreChange('home_score_halftime', value)}
-                isDisabled={isSeasonClosed}
-              />
-            </div>
-            <span className="text-2xl font-bold text-center">:</span>
-            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-              <div className="flex-1 w-full">
-                <NumberInput
-                  label={`${t.halftime} ${selectedMatch.away_team?.name || t.awayTeam}`}
-                  value={resultData.away_score_halftime}
-                  onChange={(value) => handleScoreChange('away_score_halftime', value)}
-                  isDisabled={isSeasonClosed}
-                />
-              </div>
-            </div>
+          <div className="flex flex-row items-center gap-2 sm:gap-4">
+            <ResultInput
+              label={`${selectedMatch.home_team?.name || t.homeTeam}`}
+              value={resultData.home_score_halftime}
+              onChange={(value) => handleScoreChange('home_score_halftime', value)}
+              isDisabled={isSeasonClosed}
+            />
+            <span className="text-2xl hidden sm:block font-bold text-center">:</span>
+            <ResultInput
+              label={`${selectedMatch.away_team?.name || t.awayTeam}`}
+              value={resultData.away_score_halftime}
+              onChange={(value) => handleScoreChange('away_score_halftime', value)}
+              isDisabled={isSeasonClosed}
+            />
           </div>
         </div>
       )}
