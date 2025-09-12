@@ -1,14 +1,14 @@
 'use client';
 
-import { createClient } from "@/utils/supabase/client";
-import { redirect } from "next/navigation";
-import { logout } from "@/utils/supabase/actions";
-import { useUser } from "@/contexts/UserContext";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { 
-  CheckCircleIcon, 
-  ClockIcon, 
+import {createClient} from '@/utils/supabase/client';
+import {redirect} from 'next/navigation';
+import {logout} from '@/utils/supabase/actions';
+import {useUser} from '@/contexts/UserContext';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Button} from '@heroui/button';
+import {
+  CheckCircleIcon,
+  ClockIcon,
   ExclamationTriangleIcon,
   DocumentTextIcon,
   PlusIcon,
@@ -23,22 +23,21 @@ import {
   SparklesIcon,
   Cog6ToothIcon,
   InformationCircleIcon,
-} from "@heroicons/react/24/outline";
-import { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
-import { Input } from "@heroui/input";
-import { 
-  TodoItem, 
-  getPriorityLabel,
-  getStatusLabel,
-  getCategoryLabel
-} from "@/utils/todos";
-import { 
-  ReleaseNote,
-  getReleaseNotes
-} from "@/utils/releaseNotes";
-import { Chip } from "@heroui/react";
-import { showToast } from "@/components";
+} from '@heroicons/react/24/outline';
+import {useState, useEffect} from 'react';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from '@heroui/modal';
+import {Input} from '@heroui/input';
+import {TodoItem, getPriorityLabel, getStatusLabel, getCategoryLabel} from '@/utils/todos';
+import {ReleaseNote, getReleaseNotes} from '@/utils/releaseNotes';
+import {Chip} from '@heroui/react';
+import {LoadingSpinner, showToast} from '@/components';
 
 interface Comment {
   id: string;
@@ -50,18 +49,30 @@ interface Comment {
 }
 
 export default function AdminDashboard() {
-  const { user, userProfile, loading, isAuthenticated, isAdmin } = useUser();
+  const {user, userProfile, loading, isAuthenticated, isAdmin} = useUser();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [todosLoading, setTodosLoading] = useState(true);
-  
+
   // Modal states
-  const { isOpen: isAddTodoOpen, onOpen: onAddTodoOpen, onClose: onAddTodoClose } = useDisclosure();
-  const { isOpen: isEditTodoOpen, onOpen: onEditTodoOpen, onClose: onEditTodoClose } = useDisclosure();
-  const { isOpen: isAddCommentOpen, onOpen: onAddCommentOpen, onClose: onAddCommentClose } = useDisclosure();
-  const { isOpen: isEditCommentOpen, onOpen: onEditCommentOpen, onClose: onEditCommentClose } = useDisclosure();
-  
+  const {isOpen: isAddTodoOpen, onOpen: onAddTodoOpen, onClose: onAddTodoClose} = useDisclosure();
+  const {
+    isOpen: isEditTodoOpen,
+    onOpen: onEditTodoOpen,
+    onClose: onEditTodoClose,
+  } = useDisclosure();
+  const {
+    isOpen: isAddCommentOpen,
+    onOpen: onAddCommentOpen,
+    onClose: onAddCommentClose,
+  } = useDisclosure();
+  const {
+    isOpen: isEditCommentOpen,
+    onOpen: onEditCommentOpen,
+    onClose: onEditCommentClose,
+  } = useDisclosure();
+
   const [selectedTodo, setSelectedTodo] = useState<TodoItem | null>(null);
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
   const [todoFormData, setTodoFormData] = useState({
@@ -70,15 +81,15 @@ export default function AdminDashboard() {
     priority: 'medium' as TodoItem['priority'],
     status: 'todo' as TodoItem['status'],
     category: 'improvement' as TodoItem['category'],
-    due_date: ''
+    due_date: '',
   });
   const [commentFormData, setCommentFormData] = useState({
     content: '',
-    type: 'general' as Comment['type']
+    type: 'general' as Comment['type'],
   });
   const [editCommentFormData, setEditCommentFormData] = useState({
     content: '',
-    type: 'general' as Comment['type']
+    type: 'general' as Comment['type'],
   });
 
   useEffect(() => {
@@ -103,9 +114,9 @@ export default function AdminDashboard() {
     try {
       setTodosLoading(true);
       const supabase = createClient();
-      
+
       // First check if the todos table exists
-      const { data: tableCheck, error: tableError } = await supabase
+      const {data: tableCheck, error: tableError} = await supabase
         .from('todos')
         .select('id')
         .limit(1);
@@ -118,10 +129,10 @@ export default function AdminDashboard() {
         throw tableError;
       }
 
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('todos')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', {ascending: false});
 
       if (error) throw error;
       setTodos(data || []);
@@ -152,7 +163,7 @@ export default function AdminDashboard() {
       priority: 'medium',
       status: 'todo',
       category: 'improvement',
-      due_date: ''
+      due_date: '',
     });
     onAddTodoOpen();
   };
@@ -160,17 +171,15 @@ export default function AdminDashboard() {
   const addTodo = async () => {
     try {
       const supabase = createClient();
-      const { error } = await supabase
-        .from('todos')
-        .insert({
-          title: todoFormData.title,
-          description: todoFormData.description,
-          priority: todoFormData.priority,
-          status: todoFormData.status,
-          category: todoFormData.category,
-          due_date: todoFormData.due_date || null,
-          user_email: user?.email || 'unknown@hazenasvinov.cz'
-        });
+      const {error} = await supabase.from('todos').insert({
+        title: todoFormData.title,
+        description: todoFormData.description,
+        priority: todoFormData.priority,
+        status: todoFormData.status,
+        category: todoFormData.category,
+        due_date: todoFormData.due_date || null,
+        user_email: user?.email || 'unknown@hazenasvinov.cz',
+      });
 
       if (error) {
         if (error.message.includes('relation "todos" does not exist')) {
@@ -178,11 +187,10 @@ export default function AdminDashboard() {
         }
         throw error;
       }
-      
+
       onAddTodoClose();
       loadTodos();
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const handleEditTodo = (todo: TodoItem) => {
@@ -193,7 +201,7 @@ export default function AdminDashboard() {
       priority: todo.priority,
       status: todo.status,
       category: todo.category,
-      due_date: todo.due_date || ''
+      due_date: todo.due_date || '',
     });
     onEditTodoOpen();
   };
@@ -203,7 +211,7 @@ export default function AdminDashboard() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase
+      const {error} = await supabase
         .from('todos')
         .update({
           title: todoFormData.title,
@@ -211,12 +219,12 @@ export default function AdminDashboard() {
           priority: todoFormData.priority,
           status: todoFormData.status,
           category: todoFormData.category,
-          due_date: todoFormData.due_date || null
+          due_date: todoFormData.due_date || null,
         })
         .eq('id', selectedTodo.id);
 
       if (error) throw error;
-      
+
       onEditTodoClose();
       setSelectedTodo(null);
       loadTodos();
@@ -228,10 +236,7 @@ export default function AdminDashboard() {
   const deleteTodo = async (id: string) => {
     try {
       const supabase = createClient();
-      const { error } = await supabase
-        .from('todos')
-        .delete()
-        .eq('id', id);
+      const {error} = await supabase.from('todos').delete().eq('id', id);
 
       if (error) throw error;
       loadTodos(); // Reload todos from database
@@ -243,10 +248,7 @@ export default function AdminDashboard() {
   const updateTodoStatus = async (id: string, status: TodoItem['status']) => {
     try {
       const supabase = createClient();
-      const { error } = await supabase
-        .from('todos')
-        .update({ status })
-        .eq('id', id);
+      const {error} = await supabase.from('todos').update({status}).eq('id', id);
 
       if (error) throw error;
       loadTodos(); // Reload todos from database
@@ -257,64 +259,86 @@ export default function AdminDashboard() {
 
   const getStatusIcon = (status: TodoItem['status']) => {
     switch (status) {
-      case 'done': return <CheckCircleIcon className="w-4 h-4" />;
-      case 'in-progress': return <ClockIcon className="w-4 h-4" />;
-      case 'todo': return <ExclamationTriangleIcon className="w-4 h-4" />;
-      default: return <ExclamationTriangleIcon className="w-4 h-4" />;
+      case 'done':
+        return <CheckCircleIcon className="w-4 h-4" />;
+      case 'in-progress':
+        return <ClockIcon className="w-4 h-4" />;
+      case 'todo':
+        return <ExclamationTriangleIcon className="w-4 h-4" />;
+      default:
+        return <ExclamationTriangleIcon className="w-4 h-4" />;
     }
   };
 
   const getPriorityIcon = (priority: TodoItem['priority']) => {
     switch (priority) {
-      case 'urgent': return <FireIcon className="w-4 h-4" />;
-      case 'high': return <FlagIcon className="w-4 h-4" />;
-      case 'medium': return <BoltIcon className="w-4 h-4" />;
-      case 'low': return <ExclamationTriangleIcon className="w-4 h-4" />;
-      default: return <BoltIcon className="w-4 h-4" />;
+      case 'urgent':
+        return <FireIcon className="w-4 h-4" />;
+      case 'high':
+        return <FlagIcon className="w-4 h-4" />;
+      case 'medium':
+        return <BoltIcon className="w-4 h-4" />;
+      case 'low':
+        return <ExclamationTriangleIcon className="w-4 h-4" />;
+      default:
+        return <BoltIcon className="w-4 h-4" />;
     }
   };
 
   const getCategoryIcon = (category: TodoItem['category']) => {
     switch (category) {
-      case 'feature': return <SparklesIcon className="w-4 h-4" />;
-      case 'bug': return <BugAntIcon className="w-4 h-4" />;
-      case 'improvement': return <WrenchScrewdriverIcon className="w-4 h-4" />;
-      case 'technical': return <Cog6ToothIcon className="w-4 h-4" />;
-      default: return <WrenchScrewdriverIcon className="w-4 h-4" />;
+      case 'feature':
+        return <SparklesIcon className="w-4 h-4" />;
+      case 'bug':
+        return <BugAntIcon className="w-4 h-4" />;
+      case 'improvement':
+        return <WrenchScrewdriverIcon className="w-4 h-4" />;
+      case 'technical':
+        return <Cog6ToothIcon className="w-4 h-4" />;
+      default:
+        return <WrenchScrewdriverIcon className="w-4 h-4" />;
     }
   };
 
   const getCommentTypeIcon = (type: Comment['type']) => {
     switch (type) {
-      case 'general': return <InformationCircleIcon className="w-4 h-4" />;
-      case 'bug': return <BugAntIcon className="w-4 h-4" />;
-      case 'feature': return <SparklesIcon className="w-4 h-4" />;
-      case 'improvement': return <WrenchScrewdriverIcon className="w-4 h-4" />;
-      default: return <InformationCircleIcon className="w-4 h-4" />;
+      case 'general':
+        return <InformationCircleIcon className="w-4 h-4" />;
+      case 'bug':
+        return <BugAntIcon className="w-4 h-4" />;
+      case 'feature':
+        return <SparklesIcon className="w-4 h-4" />;
+      case 'improvement':
+        return <WrenchScrewdriverIcon className="w-4 h-4" />;
+      default:
+        return <InformationCircleIcon className="w-4 h-4" />;
     }
   };
 
   const getCommentTypeLabel = (type: Comment['type']) => {
     switch (type) {
-      case 'general': return 'General';
-      case 'bug': return 'Bug Report';
-      case 'feature': return 'Feature Request';
-      case 'improvement': return 'Improvement';
-      default: return 'General';
+      case 'general':
+        return 'General';
+      case 'bug':
+        return 'Bug Report';
+      case 'feature':
+        return 'Feature Request';
+      case 'improvement':
+        return 'Improvement';
+      default:
+        return 'General';
     }
   };
 
   const addComment = async () => {
     try {
       const supabase = createClient();
-      const { error } = await supabase
-        .from('comments')
-        .insert({
-          content: commentFormData.content,
-          type: commentFormData.type,
-          author: user?.email || 'Unknown',
-          user_email: user?.email || 'unknown@hazenasvinov.cz'
-        });
+      const {error} = await supabase.from('comments').insert({
+        content: commentFormData.content,
+        type: commentFormData.type,
+        author: user?.email || 'Unknown',
+        user_email: user?.email || 'unknown@hazenasvinov.cz',
+      });
 
       if (error) {
         if (error.message.includes('relation "comments" does not exist')) {
@@ -322,9 +346,9 @@ export default function AdminDashboard() {
         }
         throw error;
       }
-      
+
       onAddCommentClose();
-      setCommentFormData({ content: '', type: 'general' });
+      setCommentFormData({content: '', type: 'general'});
       loadComments();
     } catch (error) {
       showToast.danger(`Error adding comment:${error}`);
@@ -335,7 +359,7 @@ export default function AdminDashboard() {
     setSelectedComment(comment);
     setEditCommentFormData({
       content: comment.content,
-      type: comment.type
+      type: comment.type,
     });
     onEditCommentOpen();
   };
@@ -345,16 +369,16 @@ export default function AdminDashboard() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase
+      const {error} = await supabase
         .from('comments')
         .update({
           content: editCommentFormData.content,
-          type: editCommentFormData.type
+          type: editCommentFormData.type,
         })
         .eq('id', selectedComment.id);
 
       if (error) throw error;
-      
+
       onEditCommentClose();
       setSelectedComment(null);
       loadComments();
@@ -366,10 +390,7 @@ export default function AdminDashboard() {
   const deleteComment = async (id: string) => {
     try {
       const supabase = createClient();
-      const { error } = await supabase
-        .from('comments')
-        .delete()
-        .eq('id', id);
+      const {error} = await supabase.from('comments').delete().eq('id', id);
 
       if (error) throw error;
       loadComments();
@@ -381,16 +402,19 @@ export default function AdminDashboard() {
   const loadComments = async () => {
     try {
       const supabase = createClient();
-      
+
       // First check if the comments table exists
-      const { data: tableCheck, error: tableError } = await supabase
+      const {data: tableCheck, error: tableError} = await supabase
         .from('comments')
         .select('id')
         .limit(1);
 
       if (tableError) {
         showToast.danger(`Comments table error:${tableError}`);
-        if (tableError.message && tableError.message.includes('relation "comments" does not exist')) {
+        if (
+          tableError.message &&
+          tableError.message.includes('relation "comments" does not exist')
+        ) {
           showToast.danger('Comments table does not exist. Run: npm run setup:missing-tables');
           setComments([]);
           return;
@@ -398,10 +422,10 @@ export default function AdminDashboard() {
         throw tableError;
       }
 
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('comments')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', {ascending: false});
 
       if (error) throw error;
       setComments(data || []);
@@ -424,22 +448,10 @@ export default function AdminDashboard() {
         </div>
       </div>
     );
-	}
+  }
 
-	return (
+  return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Admin Dashboard
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Welcome back, {user?.email}
-          </p>
-        </div>
-      </div>
-
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
@@ -448,7 +460,7 @@ export default function AdminDashboard() {
               <ExclamationTriangleIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div className="text-2xl font-bold text-blue-600">
-              {todos.filter(t => t.status === 'todo').length}
+              {todos.filter((t) => t.status === 'todo').length}
             </div>
             <div className="text-sm text-gray-600">To Do</div>
           </CardBody>
@@ -459,7 +471,7 @@ export default function AdminDashboard() {
               <ClockIcon className="w-6 h-6 text-orange-600" />
             </div>
             <div className="text-2xl font-bold text-orange-600">
-              {todos.filter(t => t.status === 'in-progress').length}
+              {todos.filter((t) => t.status === 'in-progress').length}
             </div>
             <div className="text-sm text-gray-600">In Progress</div>
           </CardBody>
@@ -470,7 +482,7 @@ export default function AdminDashboard() {
               <CheckCircleIcon className="w-6 h-6 text-green-600" />
             </div>
             <div className="text-2xl font-bold text-green-600">
-              {todos.filter(t => t.status === 'done').length}
+              {todos.filter((t) => t.status === 'done').length}
             </div>
             <div className="text-sm text-gray-600">Completed</div>
           </CardBody>
@@ -481,7 +493,7 @@ export default function AdminDashboard() {
               <FireIcon className="w-6 h-6 text-red-600" />
             </div>
             <div className="text-2xl font-bold text-red-600">
-              {todos.filter(t => t.priority === 'urgent').length}
+              {todos.filter((t) => t.priority === 'urgent').length}
             </div>
             <div className="text-sm text-gray-600">High Priority</div>
           </CardBody>
@@ -490,7 +502,6 @@ export default function AdminDashboard() {
 
       {/* Two Zones Layout - 50:50 Split */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
         {/* Todo List Zone */}
         <div>
           <Card>
@@ -499,26 +510,29 @@ export default function AdminDashboard() {
                 <ExclamationTriangleIcon className="w-5 h-5 text-blue-500" />
                 <h2 className="text-xl font-semibold">Todo List ({todos.length})</h2>
               </div>
-              <Button 
-                color="primary" 
+              <Button
+                color="primary"
+                size="sm"
+                isIconOnly
+                aria-label="Add Todo"
                 startContent={<PlusIcon className="w-4 h-4" />}
                 onPress={handleAddTodo}
-              >
-                Add Todo
-              </Button>
+              />
             </CardHeader>
             <CardBody>
               {todosLoading ? (
-                <div className="text-center py-8">Loading todos...</div>
+                <div className="text-center py-8">
+                  <LoadingSpinner />
+                </div>
               ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto">
+                <div className="space-y-4 max-h-96 overflow-y-auto px-2">
                   {todos
                     .sort((a, b) => {
                       // First sort by priority (urgent > high > medium > low)
-                      const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+                      const priorityOrder = {urgent: 0, high: 1, medium: 2, low: 3};
                       const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
                       if (priorityDiff !== 0) return priorityDiff;
-                      
+
                       // Then sort by due date (earliest first, null dates last)
                       if (!a.due_date && !b.due_date) return 0;
                       if (!a.due_date) return 1;
@@ -526,86 +540,113 @@ export default function AdminDashboard() {
                       return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
                     })
                     .map((todo) => (
-                    <Card key={todo.id} className="hover:shadow-md transition-shadow">
-                      <CardBody>
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-2">
-                          <div className="flex items-center gap-1" title={`Priority: ${getPriorityLabel(todo.priority)}`}>
-                            {getPriorityIcon(todo.priority)}
-                            <span className="text-xs text-gray-500">{getPriorityLabel(todo.priority)}</span>
-                          </div>
-                          <div className="flex items-center gap-1" title={`Status: ${getStatusLabel(todo.status)}`}>
-                            {getStatusIcon(todo.status)}
-                            <span className="text-xs text-gray-500">{getStatusLabel(todo.status)}</span>
-                          </div>
-                          <div className="flex items-center gap-1" title={`Category: ${getCategoryLabel(todo.category)}`}>
-                            {getCategoryIcon(todo.category)}
-                            <span className="text-xs text-gray-500">{getCategoryLabel(todo.category)}</span>
-                          </div>
-                        </div>
-                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                              {todo.title}
-                            </h3>
-                            {todo.description && (
-                              <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                                {todo.description}
-                              </p>
-                            )}
-                            <div className="grid gap-4 text-xs text-gray-500 mt-3 grid-cols-1 md:grid-cols-12">
-                              {todo.due_date && (
-                                <div className="md:col-span-3 min-w-0">
-                                  <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</div>
-                                  <div className="truncate">{todo.due_date}</div>
+                      <Card key={todo.id} className="hover:shadow-md transition-shadow">
+                        <CardBody>
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div
+                                  className="flex items-center gap-1"
+                                  title={`Priority: ${getPriorityLabel(todo.priority)}`}
+                                >
+                                  {getPriorityIcon(todo.priority)}
+                                  <span className="text-xs text-gray-500">
+                                    {getPriorityLabel(todo.priority)}
+                                  </span>
                                 </div>
-                              )}
-                              <div className={`min-w-0 ${todo.due_date ? 'md:col-span-6' : 'md:col-span-8'}`}>
-                                <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Created by</div>
-                                <div className="truncate">{todo.user_email}</div>
+                                <div
+                                  className="flex items-center gap-1"
+                                  title={`Status: ${getStatusLabel(todo.status)}`}
+                                >
+                                  {getStatusIcon(todo.status)}
+                                  <span className="text-xs text-gray-500">
+                                    {getStatusLabel(todo.status)}
+                                  </span>
+                                </div>
+                                <div
+                                  className="flex items-center gap-1"
+                                  title={`Category: ${getCategoryLabel(todo.category)}`}
+                                >
+                                  {getCategoryIcon(todo.category)}
+                                  <span className="text-xs text-gray-500">
+                                    {getCategoryLabel(todo.category)}
+                                  </span>
+                                </div>
                               </div>
-                              <div className={`min-w-0 ${todo.due_date ? 'md:col-span-3' : 'md:col-span-4'}`}>
-                                <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Created</div>
-                                <div className="truncate">{new Date(todo.created_at).toLocaleDateString('en-CA', {
-                                  year: 'numeric',
-                                  month: '2-digit',
-                                  day: '2-digit'
-                                })}</div>
+                              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                {todo.title}
+                              </h3>
+                              {todo.description && (
+                                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                                  {todo.description}
+                                </p>
+                              )}
+                              <div className="grid gap-4 text-xs text-gray-500 mt-3 grid-cols-1 md:grid-cols-12">
+                                {todo.due_date && (
+                                  <div className="md:col-span-3 min-w-0">
+                                    <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                      Due Date
+                                    </div>
+                                    <div className="truncate">{todo.due_date}</div>
+                                  </div>
+                                )}
+                                <div
+                                  className={`min-w-0 ${todo.due_date ? 'md:col-span-6' : 'md:col-span-8'}`}
+                                >
+                                  <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Created by
+                                  </div>
+                                  <div className="truncate">{todo.user_email}</div>
+                                </div>
+                                <div
+                                  className={`min-w-0 ${todo.due_date ? 'md:col-span-3' : 'md:col-span-4'}`}
+                                >
+                                  <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Created
+                                  </div>
+                                  <div className="truncate">
+                                    {new Date(todo.created_at).toLocaleDateString('en-CA', {
+                                      year: 'numeric',
+                                      month: '2-digit',
+                                      day: '2-digit',
+                                    })}
+                                  </div>
+                                </div>
                               </div>
                             </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="light"
+                                color="primary"
+                                isIconOnly
+                                onPress={() => handleEditTodo(todo)}
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="light"
+                                color="success"
+                                isIconOnly
+                                onPress={() => updateTodoStatus(todo.id, 'done')}
+                              >
+                                <CheckCircleIcon className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="light"
+                                color="danger"
+                                isIconOnly
+                                onPress={() => deleteTodo(todo.id)}
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="light"
-                              color="primary"
-                              isIconOnly
-                              onPress={() => handleEditTodo(todo)}
-                            >
-                              <PencilIcon className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="light"
-                              color="success"
-                              isIconOnly
-                              onPress={() => updateTodoStatus(todo.id, 'done')}
-                            >
-                              <CheckCircleIcon className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="light"
-                              color="danger"
-                              isIconOnly
-                              onPress={() => deleteTodo(todo.id)}
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  ))}
+                        </CardBody>
+                      </Card>
+                    ))}
                   {todos.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       No todos found. Create your first todo!
@@ -625,8 +666,8 @@ export default function AdminDashboard() {
                 <ChatBubbleLeftRightIcon className="w-5 h-5 text-purple-500" />
                 <h2 className="text-xl font-semibold">Comments ({comments.length})</h2>
               </div>
-              <Button 
-                color="primary" 
+              <Button
+                color="primary"
                 startContent={<PlusIcon className="w-4 h-4" />}
                 onPress={onAddCommentOpen}
               >
@@ -641,9 +682,14 @@ export default function AdminDashboard() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="flex items-center gap-1" title={`Type: ${getCommentTypeLabel(comment.type)}`}>
+                            <div
+                              className="flex items-center gap-1"
+                              title={`Type: ${getCommentTypeLabel(comment.type)}`}
+                            >
                               {getCommentTypeIcon(comment.type)}
-                              <span className="text-xs text-gray-500">{getCommentTypeLabel(comment.type)}</span>
+                              <span className="text-xs text-gray-500">
+                                {getCommentTypeLabel(comment.type)}
+                              </span>
                             </div>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -651,16 +697,22 @@ export default function AdminDashboard() {
                           </p>
                           <div className="grid gap-4 text-xs text-gray-500 mt-3 grid-cols-1 md:grid-cols-12">
                             <div className="md:col-span-6 min-w-0">
-                              <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Created by</div>
+                              <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Created by
+                              </div>
                               <div className="truncate">{comment.user_email}</div>
                             </div>
                             <div className="md:col-span-6 min-w-0">
-                              <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Created</div>
-                              <div className="truncate">{new Date(comment.created_at).toLocaleDateString('en-CA', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit'
-                              })}</div>
+                              <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Created
+                              </div>
+                              <div className="truncate">
+                                {new Date(comment.created_at).toLocaleDateString('en-CA', {
+                                  year: 'numeric',
+                                  month: '2-digit',
+                                  day: '2-digit',
+                                })}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -699,7 +751,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-
       {/* Modals */}
       {/* Add Todo Modal */}
       <Modal isOpen={isAddTodoOpen} onClose={onAddTodoClose} size="2xl">
@@ -710,7 +761,7 @@ export default function AdminDashboard() {
               <Input
                 label="Title"
                 value={todoFormData.title}
-                onChange={(e) => setTodoFormData({ ...todoFormData, title: e.target.value })}
+                onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
                 isRequired
                 placeholder="Enter todo title"
               />
@@ -721,7 +772,7 @@ export default function AdminDashboard() {
                 <textarea
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
                   value={todoFormData.description}
-                  onChange={(e) => setTodoFormData({ ...todoFormData, description: e.target.value })}
+                  onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
                   placeholder="Enter description (optional)"
                 />
               </div>
@@ -729,7 +780,12 @@ export default function AdminDashboard() {
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                   value={todoFormData.priority}
-                  onChange={(e) => setTodoFormData({ ...todoFormData, priority: e.target.value as TodoItem['priority'] })}
+                  onChange={(e) =>
+                    setTodoFormData({
+                      ...todoFormData,
+                      priority: e.target.value as TodoItem['priority'],
+                    })
+                  }
                 >
                   <option value="low">Low Priority</option>
                   <option value="medium">Medium Priority</option>
@@ -739,7 +795,12 @@ export default function AdminDashboard() {
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                   value={todoFormData.category}
-                  onChange={(e) => setTodoFormData({ ...todoFormData, category: e.target.value as TodoItem['category'] })}
+                  onChange={(e) =>
+                    setTodoFormData({
+                      ...todoFormData,
+                      category: e.target.value as TodoItem['category'],
+                    })
+                  }
                 >
                   <option value="feature">Feature</option>
                   <option value="bug">Bug</option>
@@ -751,7 +812,7 @@ export default function AdminDashboard() {
                 label="Due Date"
                 type="date"
                 value={todoFormData.due_date}
-                onChange={(e) => setTodoFormData({ ...todoFormData, due_date: e.target.value })}
+                onChange={(e) => setTodoFormData({...todoFormData, due_date: e.target.value})}
               />
             </div>
           </ModalBody>
@@ -775,7 +836,7 @@ export default function AdminDashboard() {
               <Input
                 label="Title"
                 value={todoFormData.title}
-                onChange={(e) => setTodoFormData({ ...todoFormData, title: e.target.value })}
+                onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
                 isRequired
                 placeholder="Enter todo title"
               />
@@ -786,7 +847,7 @@ export default function AdminDashboard() {
                 <textarea
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
                   value={todoFormData.description}
-                  onChange={(e) => setTodoFormData({ ...todoFormData, description: e.target.value })}
+                  onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
                   placeholder="Enter description (optional)"
                 />
               </div>
@@ -794,7 +855,12 @@ export default function AdminDashboard() {
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                   value={todoFormData.priority}
-                  onChange={(e) => setTodoFormData({ ...todoFormData, priority: e.target.value as TodoItem['priority'] })}
+                  onChange={(e) =>
+                    setTodoFormData({
+                      ...todoFormData,
+                      priority: e.target.value as TodoItem['priority'],
+                    })
+                  }
                 >
                   <option value="low">Low Priority</option>
                   <option value="medium">Medium Priority</option>
@@ -804,7 +870,9 @@ export default function AdminDashboard() {
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                   value={todoFormData.status}
-                  onChange={(e) => setTodoFormData({ ...todoFormData, status: e.target.value as TodoItem['status'] })}
+                  onChange={(e) =>
+                    setTodoFormData({...todoFormData, status: e.target.value as TodoItem['status']})
+                  }
                 >
                   <option value="todo">To Do</option>
                   <option value="in-progress">In Progress</option>
@@ -814,7 +882,12 @@ export default function AdminDashboard() {
               <select
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                 value={todoFormData.category}
-                onChange={(e) => setTodoFormData({ ...todoFormData, category: e.target.value as TodoItem['category'] })}
+                onChange={(e) =>
+                  setTodoFormData({
+                    ...todoFormData,
+                    category: e.target.value as TodoItem['category'],
+                  })
+                }
               >
                 <option value="feature">Feature</option>
                 <option value="bug">Bug</option>
@@ -825,7 +898,7 @@ export default function AdminDashboard() {
                 label="Due Date"
                 type="date"
                 value={todoFormData.due_date}
-                onChange={(e) => setTodoFormData({ ...todoFormData, due_date: e.target.value })}
+                onChange={(e) => setTodoFormData({...todoFormData, due_date: e.target.value})}
               />
             </div>
           </ModalBody>
@@ -853,7 +926,12 @@ export default function AdminDashboard() {
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                   value={commentFormData.type}
-                  onChange={(e) => setCommentFormData({ ...commentFormData, type: e.target.value as Comment['type'] })}
+                  onChange={(e) =>
+                    setCommentFormData({
+                      ...commentFormData,
+                      type: e.target.value as Comment['type'],
+                    })
+                  }
                 >
                   <option value="general">ℹ️ General</option>
                   <option value="bug">🐛 Bug Report</option>
@@ -864,7 +942,7 @@ export default function AdminDashboard() {
               <textarea
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
                 value={commentFormData.content}
-                onChange={(e) => setCommentFormData({ ...commentFormData, content: e.target.value })}
+                onChange={(e) => setCommentFormData({...commentFormData, content: e.target.value})}
                 placeholder="Enter your comment..."
               />
             </div>
@@ -891,7 +969,10 @@ export default function AdminDashboard() {
                   <strong>Author:</strong> {selectedComment?.user_email}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Created:</strong> {selectedComment?.created_at ? new Date(selectedComment.created_at).toLocaleDateString() : 'N/A'}
+                  <strong>Created:</strong>{' '}
+                  {selectedComment?.created_at
+                    ? new Date(selectedComment.created_at).toLocaleDateString()
+                    : 'N/A'}
                 </p>
               </div>
               <div>
@@ -901,7 +982,12 @@ export default function AdminDashboard() {
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                   value={editCommentFormData.type}
-                  onChange={(e) => setEditCommentFormData({ ...editCommentFormData, type: e.target.value as Comment['type'] })}
+                  onChange={(e) =>
+                    setEditCommentFormData({
+                      ...editCommentFormData,
+                      type: e.target.value as Comment['type'],
+                    })
+                  }
                 >
                   <option value="general">ℹ️ General</option>
                   <option value="bug">🐛 Bug Report</option>
@@ -912,7 +998,9 @@ export default function AdminDashboard() {
               <textarea
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
                 value={editCommentFormData.content}
-                onChange={(e) => setEditCommentFormData({ ...editCommentFormData, content: e.target.value })}
+                onChange={(e) =>
+                  setEditCommentFormData({...editCommentFormData, content: e.target.value})
+                }
                 placeholder="Enter your comment..."
               />
             </div>
@@ -927,6 +1015,6 @@ export default function AdminDashboard() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-		</div>
+    </div>
   );
 }
