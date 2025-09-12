@@ -173,7 +173,6 @@ export function transformMatchWithTeamNames(
           finalClubTeamCounts.set(clubId, (finalClubTeamCounts.get(clubId) || 0) + 1);
         }
       });
-      // console.log('🔍 [teamDisplay] Using team details for counting. Club team counts:', Object.fromEntries(finalClubTeamCounts));
     } else if (useTeamMap) {
       // Fallback: Count from team details (useFetchMatches approach)
       teamDetails?.forEach((team: any) => {
@@ -198,16 +197,19 @@ export function transformMatchWithTeamNames(
   }
 
   // Use centralized team display utility with smart suffix logic
+  const homeTeamCount = finalClubTeamCounts.get(homeClubId || '') || 1;
+  const awayTeamCount = finalClubTeamCounts.get(awayClubId || '') || 1;
+
   const homeTeamName = getTeamDisplayNameSafe(
     homeTeamDetails?.club_category?.club?.name,
     homeTeamDetails?.team_suffix || 'A',
-    finalClubTeamCounts.get(homeClubId || '') || 1,
+    homeTeamCount,
     'Home team'
   );
   const awayTeamName = getTeamDisplayNameSafe(
     awayTeamDetails?.club_category?.club?.name,
     awayTeamDetails?.team_suffix || 'A',
-    finalClubTeamCounts.get(awayClubId || '') || 1,
+    awayTeamCount,
     'Away team'
   );
 

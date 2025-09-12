@@ -1,6 +1,7 @@
 import {useState, useEffect, useCallback} from 'react';
 import {Match} from '@/types';
 import {createMatchQuery} from '@/utils';
+import {useSeasons} from '@/hooks';
 
 interface PublicMatchesResult {
   matches: {
@@ -19,9 +20,20 @@ export function usePublicMatches(categoryId?: string): PublicMatchesResult {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
+
+  // Get active season for suffix logic
+  const {activeSeason, loading: seasonLoading, error: seasonError} = useSeasons();
+
+  console.log('I got this season from useSeasons hook', activeSeason);
+  console.log('I got this error from useSeasons hook', seasonError);
 
   const fetchMatches = useCallback(async () => {
+    // Don't fetch if we don't have an active season yet
+    if (!activeSeason?.id) {
+      console.log('I HAVE No active season');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -29,6 +41,7 @@ export function usePublicMatches(categoryId?: string): PublicMatchesResult {
       // Use the new query builder for public matches
       const query = createMatchQuery({
         categoryId: categoryId && categoryId !== 'all' ? categoryId : undefined,
+        seasonId: activeSeason.id, // Required for suffix logic
         includeTeamDetails: true,
         includeCategory: true,
       });
@@ -44,32 +57,26 @@ export function usePublicMatches(categoryId?: string): PublicMatchesResult {
         autumn: result.autumn,
         spring: result.spring,
       });
-
-      setDebugInfo({
-        category: categoryId,
-        totalMatches: result.autumn.length + result.spring.length,
-        autumnCount: result.autumn.length,
-        springCount: result.spring.length,
-      });
-
+      console.log('I have matches');
       setError(null);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
       setMatches({autumn: [], spring: []});
-      setDebugInfo(null);
     } finally {
       setLoading(false);
     }
-  }, [categoryId]);
+  }, [categoryId, activeSeason?.id]);
 
   useEffect(() => {
     fetchMatches();
   }, [fetchMatches]);
 
+  // Update loading state based on season loading
+  const isLoading = loading || seasonLoading;
+
   return {
     matches,
-    loading,
+    loading: isLoading,
     error,
-    debugInfo,
   };
 }

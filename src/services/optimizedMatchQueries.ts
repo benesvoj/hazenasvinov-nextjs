@@ -377,7 +377,7 @@ export async function getOwnClubMatchesOptimized(
       }
 
       // Check if we have category information in the materialized view data
-      const hasCategoryInfo = data && data.length > 0 && data[0].category;
+      const hasCategoryInfo = data && data.length > 0 && data[0].category_name;
 
       if (!hasCategoryInfo) {
         // Materialized view doesn't include category info, fall back to regular query

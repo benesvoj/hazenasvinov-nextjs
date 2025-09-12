@@ -204,6 +204,8 @@ export const translations = {
   seasons: {
     title: 'Sezóny',
     description: 'Správa sezón pro organizaci soutěží a týmů.',
+    fetchActiveSeasonError: 'Chyba při načítání aktivní sezóny',
+    fetchAllSeasonsError: 'Chyba při načítání sezón',
   },
   season: {
     title: 'Sezóna',

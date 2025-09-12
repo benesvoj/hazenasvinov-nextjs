@@ -1,30 +1,26 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { 
-  TrophyIcon,
-  FunnelIcon
-} from "@heroicons/react/24/outline";
-import { usePublicMatches, useSeasons, useCategories } from "@/hooks";
-import { Select, SelectItem, Card, CardBody, Button } from "@heroui/react";
-import MatchCard from "@/app/(main)/matches/components/MatchCard";
-import ClubSelector from "@/app/(main)/matches/components/ClubSelector";
-import { formatMonth } from "@/helpers";
-import { Match, Category } from "@/types";
-import { translations } from "@/lib/translations";
-import { months as monthsConstants } from "@/constants";
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import {TrophyIcon, FunnelIcon} from '@heroicons/react/24/outline';
+import {usePublicMatches, useSeasons, useCategories} from '@/hooks';
+import {Select, SelectItem, Card, CardBody, Button} from '@heroui/react';
+import MatchCard from '@/app/(main)/matches/components/MatchCard';
+import ClubSelector from '@/app/(main)/matches/components/ClubSelector';
+import {formatMonth} from '@/helpers';
+import {Match, Category} from '@/types';
+import {translations} from '@/lib/translations';
+import {months as monthsConstants} from '@/constants';
 
 export default function MatchesPage() {
-  const [filterType, setFilterType] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [filterType, setFilterType] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedClub, setSelectedClub] = useState<string | undefined>(undefined);
-  const [clubTeamMap, setClubTeamMap] = useState<{ [clubId: string]: string[] }>({});
-
+  const [clubTeamMap, setClubTeamMap] = useState<{[clubId: string]: string[]}>({});
 
   // Use the new public matches hook
-  const { matches, loading, error } = usePublicMatches(selectedCategory);
-  const { activeSeason, fetchActiveSeason, error: seasonError } = useSeasons();
-  const { categories, fetchCategories, error: categoryError } = useCategories();
+  const {matches, loading, error} = usePublicMatches(selectedCategory);
+
+  const {categories, fetchCategories, error: categoryError} = useCategories();
 
   // Check for category parameter in URL
   useEffect(() => {
@@ -37,19 +33,17 @@ export default function MatchesPage() {
     }
   }, []);
 
-
   // Initial data fetch
   useEffect(() => {
-    fetchActiveSeason();
     fetchCategories();
-  }, [fetchActiveSeason, fetchCategories]);
+  }, [fetchCategories]);
 
   // Reset club selection and filter type when category changes
   useEffect(() => {
     setSelectedClub(undefined);
     // Reset filter type to "all" when category changes to avoid invalid filter states
-    if (filterType === "home" || filterType === "away") {
-      setFilterType("all");
+    if (filterType === 'home' || filterType === 'away') {
+      setFilterType('all');
     }
   }, [selectedCategory, filterType]);
 
@@ -67,46 +61,51 @@ export default function MatchesPage() {
   }, [selectedCategory]);
 
   // Helper function to get all teams from a club in a specific category
-  const getClubTeamsInCategory = useCallback((clubId: string, categoryCode: string, allCategories: Category[]) => {
-    // The ClubSelector now properly handles both "all" and specific category cases
-    // Just return the teams for the selected club
-    return clubTeamMap[clubId] || [];
-  }, [clubTeamMap]);
+  const getClubTeamsInCategory = useCallback(
+    (clubId: string, categoryCode: string, allCategories: Category[]) => {
+      // The ClubSelector now properly handles both "all" and specific category cases
+      // Just return the teams for the selected club
+      return clubTeamMap[clubId] || [];
+    },
+    [clubTeamMap]
+  );
 
   // Group matches by month and enrich with category information
   const groupedMatches = useMemo(() => {
-    const grouped: { [key: string]: Match[] } = {};
-    
+    const grouped: {[key: string]: Match[]} = {};
+
     // Combine autumn and spring matches
     const allMatches = [...matches.autumn, ...matches.spring];
-    
+
     // Create a map for quick category lookup
     const categoryMap = new Map();
-    categories.forEach(category => {
+    categories.forEach((category) => {
       categoryMap.set(category.id, category);
     });
-    
+
     // Enrich matches with category information
-    const enrichedMatches = allMatches.map(match => {
+    const enrichedMatches = allMatches.map((match) => {
       const categoryInfo = categoryMap.get(match.category_id);
       return {
         ...match,
-        category: categoryInfo ? {
-          id: categoryInfo.id,
-          name: categoryInfo.name,
-          description: categoryInfo.description
-        } : {
-          id: 'unknown',
-          name: 'Neznámá kategorie',
-          description: undefined
-        }
+        category: categoryInfo
+          ? {
+              id: categoryInfo.id,
+              name: categoryInfo.name,
+              description: categoryInfo.description,
+            }
+          : {
+              id: 'unknown',
+              name: 'Neznámá kategorie',
+              description: undefined,
+            },
       };
     });
-    
-    enrichedMatches.forEach(match => {
+
+    enrichedMatches.forEach((match) => {
       const date = new Date(match.date);
-      const monthKey = `${date.toLocaleDateString('cs-CZ', { month: 'long' }).toLowerCase()} ${date.getFullYear()}`;
-      
+      const monthKey = `${date.toLocaleDateString('cs-CZ', {month: 'long'}).toLowerCase()} ${date.getFullYear()}`;
+
       if (!grouped[monthKey]) {
         grouped[monthKey] = [];
       }
@@ -116,37 +115,54 @@ export default function MatchesPage() {
     return grouped;
   }, [matches, categories]);
 
-
   // Filter grouped matches
   const filteredGroupedMatches = useMemo(() => {
-    const filtered: { [key: string]: Match[] } = {};
-    
+    const filtered: {[key: string]: Match[]} = {};
+
     Object.entries(groupedMatches).forEach(([month, monthMatches]) => {
       let filteredMonthMatches = monthMatches;
 
       // Filter by selected category (if not "all") - apply this first
       if (selectedCategory !== 'all') {
-        filteredMonthMatches = filteredMonthMatches.filter(match => 
-          match.category?.id === selectedCategory
+        filteredMonthMatches = filteredMonthMatches.filter(
+          (match) => match.category?.id === selectedCategory
         );
       }
 
       // Apply filter type (past, future, home, away)
-      filteredMonthMatches = filteredMonthMatches.filter(match => {
+      filteredMonthMatches = filteredMonthMatches.filter((match) => {
         switch (filterType) {
-          case "past":
-            return match.status === "completed";
-          case "future":
-            return match.status === "upcoming";
-          case "home":
+          case 'past':
+            return match.status === 'completed';
+          case 'future':
+            return match.status === 'upcoming';
+          case 'home':
             // Filter for home matches (club must be selected)
-            if (!selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0) return false;
-            const homeClubTeams = getClubTeamsInCategory(selectedClub, selectedCategory, categories);
+            if (
+              !selectedClub ||
+              !clubTeamMap[selectedClub] ||
+              clubTeamMap[selectedClub].length === 0
+            )
+              return false;
+            const homeClubTeams = getClubTeamsInCategory(
+              selectedClub,
+              selectedCategory,
+              categories
+            );
             return homeClubTeams.some((teamId: string) => match.home_team_id === teamId);
-          case "away":
+          case 'away':
             // Filter for away matches (club must be selected)
-            if (!selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0) return false;
-            const awayClubTeams = getClubTeamsInCategory(selectedClub, selectedCategory, categories);
+            if (
+              !selectedClub ||
+              !clubTeamMap[selectedClub] ||
+              clubTeamMap[selectedClub].length === 0
+            )
+              return false;
+            const awayClubTeams = getClubTeamsInCategory(
+              selectedClub,
+              selectedCategory,
+              categories
+            );
             return awayClubTeams.some((teamId: string) => match.away_team_id === teamId);
           default:
             return true;
@@ -154,37 +170,40 @@ export default function MatchesPage() {
       });
 
       // Filter by selected club if one is selected (for non-home/away filters)
-      if (selectedClub && filterType !== "home" && filterType !== "away") {
+      if (selectedClub && filterType !== 'home' && filterType !== 'away') {
         // Get all teams from the selected club in the selected category
         const clubTeams = getClubTeamsInCategory(selectedClub, selectedCategory, categories);
-        
-        filteredMonthMatches = filteredMonthMatches.filter(match => {
+
+        filteredMonthMatches = filteredMonthMatches.filter((match) => {
           // Check if the match involves any team from the selected club
-          return clubTeams.some((teamId: string) => 
-            match.home_team_id === teamId || match.away_team_id === teamId
+          return clubTeams.some(
+            (teamId: string) => match.home_team_id === teamId || match.away_team_id === teamId
           );
         });
       }
-      
+
       if (filteredMonthMatches.length > 0) {
         filtered[month] = filteredMonthMatches;
       }
     });
 
     return filtered;
-  }, [groupedMatches, filterType, selectedClub, selectedCategory, categories, getClubTeamsInCategory, clubTeamMap]);
-
+  }, [
+    groupedMatches,
+    filterType,
+    selectedClub,
+    selectedCategory,
+    categories,
+    getClubTeamsInCategory,
+    clubTeamMap,
+  ]);
 
   return (
     <div className="max-w-6xl mx-auto md:space-y-8 space-y-4">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          Všechny zápasy
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Kompletní přehled všech zápasů
-        </p>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Všechny zápasy</h1>
+        <p className="text-gray-600 dark:text-gray-400">Kompletní přehled všech zápasů</p>
       </div>
 
       {/* Filter Controls */}
@@ -193,9 +212,7 @@ export default function MatchesPage() {
         <div className="flex items-center gap-2">
           <FunnelIcon className="w-5 h-5 text-gray-500" />
           {categoryError ? (
-            <div className="text-red-600 dark:text-red-400 text-sm">
-              Chyba: {categoryError}
-            </div>
+            <div className="text-red-600 dark:text-red-400 text-sm">Chyba: {categoryError}</div>
           ) : (
             <Select
               selectedKeys={[selectedCategory]}
@@ -204,14 +221,10 @@ export default function MatchesPage() {
               placeholder="Vyberte kategorii"
               aria-label="Vyberte kategorii zápasů"
             >
-              <SelectItem key="all">
-                {translations.matches.allCategories}
-              </SelectItem>
+              <SelectItem key="all">{translations.matches.allCategories}</SelectItem>
               <>
                 {categories.map((category) => (
-                  <SelectItem key={category.id}>
-                    {category.name}
-                  </SelectItem>
+                  <SelectItem key={category.id}>{category.name}</SelectItem>
                 ))}
               </>
             </Select>
@@ -221,49 +234,53 @@ export default function MatchesPage() {
         {/* Status Filter */}
         <div className="flex flex-wrap justify-center gap-2">
           <Button
-            variant={filterType === "all" ? "solid" : "bordered"}
+            variant={filterType === 'all' ? 'solid' : 'bordered'}
             color="primary"
             size="sm"
-            onPress={() => setFilterType("all")}
+            onPress={() => setFilterType('all')}
             aria-label={translations.matches.allMatchesButtonDescription}
           >
             {translations.matches.allMatches}
           </Button>
           <Button
-            variant={filterType === "past" ? "solid" : "bordered"}
+            variant={filterType === 'past' ? 'solid' : 'bordered'}
             color="primary"
             size="sm"
-            onPress={() => setFilterType("past")}
+            onPress={() => setFilterType('past')}
             aria-label={translations.matches.recentResultsButtonDescription}
           >
             {translations.matches.recentResultsButton}
           </Button>
           <Button
-            variant={filterType === "future" ? "solid" : "bordered"}
+            variant={filterType === 'future' ? 'solid' : 'bordered'}
             color="primary"
             size="sm"
-            onPress={() => setFilterType("future")}
+            onPress={() => setFilterType('future')}
             aria-label={translations.matches.upcomingMatchesButtonDescription}
           >
             {translations.matches.upcomingMatchesButton}
           </Button>
           <Button
-            variant={filterType === "home" ? "solid" : "bordered"}
+            variant={filterType === 'home' ? 'solid' : 'bordered'}
             color="primary"
             size="sm"
-            onPress={() => setFilterType("home")}
+            onPress={() => setFilterType('home')}
             aria-label={translations.matches.homeMatchesButtonDescription}
-            isDisabled={!selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0}
+            isDisabled={
+              !selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0
+            }
           >
             {translations.matches.homeMatchesButton}
           </Button>
           <Button
-            variant={filterType === "away" ? "solid" : "bordered"}
+            variant={filterType === 'away' ? 'solid' : 'bordered'}
             color="primary"
             size="sm"
-            onPress={() => setFilterType("away")}
+            onPress={() => setFilterType('away')}
             aria-label={translations.matches.awayMatchesButtonDescription}
-            isDisabled={!selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0}
+            isDisabled={
+              !selectedClub || !clubTeamMap[selectedClub] || clubTeamMap[selectedClub].length === 0
+            }
           >
             {translations.matches.awayMatchesButton}
           </Button>
@@ -279,9 +296,8 @@ export default function MatchesPage() {
         className="mb-2 md:mb-6"
       />
 
-
       {/* Error Display */}
-      {(error || seasonError || categoryError) && (
+      {(error || categoryError) && (
         <div className="text-center py-8">
           <div className="mb-4">
             <TrophyIcon className="w-16 h-16 text-red-400 mx-auto" />
@@ -291,7 +307,6 @@ export default function MatchesPage() {
           </h3>
           <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
             {error && <p>Zápasy: {String(error)}</p>}
-            {seasonError && <p>Sezóna: {String(seasonError)}</p>}
             {categoryError && <p>Kategorie: {String(categoryError)}</p>}
           </div>
           <div className="flex gap-2 justify-center">
@@ -300,7 +315,6 @@ export default function MatchesPage() {
               size="sm"
               onPress={() => {
                 if (error) window.location.reload();
-                if (seasonError) fetchActiveSeason();
                 if (categoryError) fetchCategories();
               }}
             >
@@ -323,27 +337,27 @@ export default function MatchesPage() {
               const months = monthsConstants;
               const aParts = a.split(' ');
               const bParts = b.split(' ');
-              
+
               if (aParts.length < 2 || bParts.length < 2) return 0;
-              
+
               const aMonth = aParts[0];
               const bMonth = bParts[0];
               const aYear = parseInt(aParts[1]);
               const bYear = parseInt(bParts[1]);
-              
+
               // Handle invalid years
               if (isNaN(aYear) || isNaN(bYear)) return 0;
-              
+
               // First sort by year
               if (aYear !== bYear) return aYear - bYear;
-              
+
               // Then sort by month within the same year
               const aMonthIndex = months.indexOf(aMonth);
               const bMonthIndex = months.indexOf(bMonth);
-              
+
               // Handle unknown months
               if (aMonthIndex === -1 || bMonthIndex === -1) return 0;
-              
+
               return aMonthIndex - bMonthIndex;
             })
             .map(([month, matches]) => (
@@ -358,14 +372,14 @@ export default function MatchesPage() {
                       const dateA = new Date(a.date);
                       const dateB = new Date(b.date);
                       const dateComparison = dateA.getTime() - dateB.getTime();
-                      
+
                       // If dates are the same, sort by time
                       if (dateComparison === 0 && a.time && b.time) {
                         const timeA = new Date(`2000-01-01T${a.time}`);
                         const timeB = new Date(`2000-01-01T${b.time}`);
                         return timeA.getTime() - timeB.getTime();
                       }
-                      
+
                       return dateComparison;
                     })
                     .map((match) => {

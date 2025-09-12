@@ -206,7 +206,7 @@ export default function MatchesAdminPage() {
     activeSeason,
     loading: seasonsLoading,
     error: seasonsError,
-    fetchSeasonsWithActive,
+    fetchActiveSeason,
   } = useSeasons();
   const [selectedSeason, setSelectedSeason] = useState<string>('');
 
@@ -274,10 +274,10 @@ export default function MatchesAdminPage() {
   // Initial data fetch
   useEffect(() => {
     fetchCategoriesFull();
-    fetchSeasonsWithActive();
+    fetchActiveSeason();
     fetchTeams();
     fetchMembers();
-  }, [fetchCategoriesFull, fetchSeasonsWithActive, fetchTeams, fetchMembers]);
+  }, [fetchCategoriesFull, fetchActiveSeason, fetchTeams, fetchMembers]);
 
   // Set first category as default when categories are loaded
   useEffect(() => {
