@@ -162,8 +162,8 @@ export default function EditMatchModal({
                       className="w-full"
                       isDisabled={isSeasonClosed}
                     >
-                      {Object.values(matchStatuses).map((status) => (
-                        <SelectItem key={status}>{status}</SelectItem>
+                      {Object.entries(matchStatuses).map(([key, value]) => (
+                        <SelectItem key={key}>{value}</SelectItem>
                       ))}
                     </Select>
                   </div>

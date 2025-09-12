@@ -787,8 +787,6 @@ export default function MatchesAdminPage() {
     [selectedSeason, importMatches, fetchStandings, selectedCategory]
   );
 
-  console.log('matches', matches);
-
   return (
     <AdminContainer
       title={t.title}
