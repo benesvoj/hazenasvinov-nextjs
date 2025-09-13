@@ -247,10 +247,8 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
               <Heading size={4}>Konečné skóre</Heading>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t.homeTeam}
-                  </label>
                   <Input
+                    label={t.homeTeam}
                     type="number"
                     placeholder="0"
                     value={formData.homeScore.toString()}
@@ -262,10 +260,8 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t.awayTeam}
-                  </label>
                   <Input
+                    label={t.awayTeam}
                     type="number"
                     placeholder="0"
                     value={formData.awayScore.toString()}
@@ -284,10 +280,8 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
               <Heading size={4}>Poločasové skóre</Heading>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t.homeTeam}
-                  </label>
                   <Input
+                    label={t.homeTeam}
                     type="number"
                     placeholder="0"
                     value={formData.homeScoreHalftime.toString()}
@@ -301,10 +295,8 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t.awayTeam}
-                  </label>
                   <Input
+                    label={t.awayTeam}
                     type="number"
                     placeholder="0"
                     value={formData.awayScoreHalftime.toString()}
