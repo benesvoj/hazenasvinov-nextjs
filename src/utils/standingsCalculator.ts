@@ -13,6 +13,15 @@ export async function calculateStandings(
   seasonId: string,
   isSeasonClosed: () => boolean
 ): Promise<{success: boolean; error?: string}> {
+  // Validate input parameters FIRST - before any database operations
+  if (!categoryId || categoryId.trim() === '') {
+    return {success: false, error: 'Neplatné ID kategorie'};
+  }
+
+  if (!seasonId || seasonId.trim() === '') {
+    return {success: false, error: 'Neplatné ID sezóny'};
+  }
+
   if (isSeasonClosed()) {
     return {success: false, error: 'Nelze přepočítat tabulku pro uzavřenou sezónu'};
   }
@@ -92,10 +101,10 @@ export async function calculateStandings(
     }
 
     // Initialize standings for all teams
-    const standingsMap = new Map<string, Standing>();
+    const standingsMap = new Map<string, any>();
     teamCategories.forEach((tc: any) => {
       standingsMap.set(tc.team_id, {
-        id: '',
+        // Omit id field - let database generate it
         team_id: tc.team_id,
         club_id: tc.club_id,
         category_id: categoryId,

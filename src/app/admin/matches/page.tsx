@@ -303,7 +303,12 @@ export default function MatchesAdminPage() {
 
   // Calculate standings
   const handleCalculateStandings = async () => {
-    if (!selectedCategory || !selectedSeason) {
+    if (
+      !selectedCategory ||
+      !selectedSeason ||
+      selectedCategory.trim() === '' ||
+      selectedSeason.trim() === ''
+    ) {
       setError('Vyberte kategorii a sezónu');
       return;
     }
@@ -346,7 +351,12 @@ export default function MatchesAdminPage() {
 
   // Generate initial standings for teams without any matches
   const handleGenerateInitialStandings = async () => {
-    if (!selectedCategory || !selectedSeason) {
+    if (
+      !selectedCategory ||
+      !selectedSeason ||
+      selectedCategory.trim() === '' ||
+      selectedSeason.trim() === ''
+    ) {
       setError('Vyberte kategorii a sezónu');
       return;
     }
@@ -738,8 +748,6 @@ export default function MatchesAdminPage() {
     // Add "No matchweek" option
     options.push({value: '', label: 'Bez kola'});
 
-    // Find the category to get its matchweek_count
-    const category = categories.find((cat) => cat.id === categoryId);
     const maxMatchweeks = 20; // Default to 20 matchweeks since column doesn't exist
 
     // Add matchweek numbers based on category setting
