@@ -46,10 +46,29 @@ export default function CoachesMatchesPage() {
     allMatches,
     loading: matchesLoading,
     error: matchesError,
+    refetch: refetchMatches,
   } = useOptimizedOwnClubMatches(
     selectedCategoryData?.id || undefined,
     activeSeason?.id || undefined
   );
+
+  // Debug: Log all matches to see their status
+  useEffect(() => {
+    if (allMatches.length > 0) {
+      console.log(
+        'All matches:',
+        allMatches.map((m) => ({
+          id: m.id,
+          status: m.status,
+          date: m.date,
+          home_score: m.home_score,
+          away_score: m.away_score,
+          home_team: m.home_team?.name,
+          away_team: m.away_team?.name,
+        }))
+      );
+    }
+  }, [allMatches]);
 
   // Fetch data on mount
   useEffect(() => {
@@ -73,14 +92,36 @@ export default function CoachesMatchesPage() {
 
   // Process matches
   const upcomingMatches = useMemo(() => {
-    return allMatches.filter((match) => match.status === 'upcoming').slice(0, 3);
+    const now = new Date();
+    const upcoming = allMatches
+      .filter((match) => match.status === 'upcoming' && new Date(match.date) >= now)
+      .slice(0, 3);
+
+    console.log(
+      'Upcoming matches:',
+      upcoming.map((m) => ({id: m.id, status: m.status, date: m.date}))
+    );
+    return upcoming;
   }, [allMatches]);
 
   const recentResults = useMemo(() => {
-    return allMatches
-      .filter((match) => match.status === 'completed')
+    const now = new Date();
+    const recent = allMatches
+      .filter((match) => match.status === 'completed' && new Date(match.date) <= now)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 3);
+
+    console.log(
+      'Recent results:',
+      recent.map((m) => ({
+        id: m.id,
+        status: m.status,
+        date: m.date,
+        home_score: m.home_score,
+        away_score: m.away_score,
+      }))
+    );
+    return recent;
   }, [allMatches]);
 
   // Filter standings by selected category
@@ -109,7 +150,8 @@ export default function CoachesMatchesPage() {
 
   const handleResultSaved = () => {
     // Refresh matches data
-    window.location.reload();
+    console.log('Refreshing matches data after result saved');
+    refetchMatches();
   };
 
   const loading = matchesLoading || standingsLoading;

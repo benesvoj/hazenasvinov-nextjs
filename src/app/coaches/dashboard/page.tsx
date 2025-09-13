@@ -28,8 +28,8 @@ export default function CoachesDashboard() {
   };
 
   const handleResultSaved = () => {
-    // Refresh matches data
-    window.location.reload();
+    // Refresh matches data - the MatchSchedule component will handle its own refresh
+    // No need to reload the entire page
   };
 
   if (loading) {

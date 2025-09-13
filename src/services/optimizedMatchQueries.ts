@@ -403,6 +403,24 @@ export async function getOwnClubMatchesOptimized(
         });
       }
 
+      // Check if materialized view has stale data (recently updated matches still showing as upcoming)
+      const hasStaleData =
+        data &&
+        data.some((match: any) => {
+          // If a match has scores but status is still 'upcoming', it's stale
+          return (
+            match.status === 'upcoming' && (match.home_score !== null || match.away_score !== null)
+          );
+        });
+
+      if (hasStaleData) {
+        console.warn('Materialized view has stale data, falling back to original query');
+        return getMatchesSeasonalOptimized(categoryId, seasonId, {
+          ...options,
+          ownClubOnly: true,
+        });
+      }
+
       // Check if we have category information in the materialized view data
       const hasCategoryInfo = data && data.length > 0 && data[0].category_name;
 

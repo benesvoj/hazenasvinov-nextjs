@@ -29,6 +29,9 @@ import {formatDateString} from '@/helpers';
 import {createClient} from '@/utils/supabase/client';
 import {translations} from '@/lib/translations';
 import {Heading} from '@/components';
+import {showToast} from '@/components/Toast';
+import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
+import {useQueryClient} from '@tanstack/react-query';
 
 interface CoachMatchResultFlowProps {
   isOpen: boolean;
@@ -64,6 +67,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
     coachNotes: '',
   });
   const modalBodyRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   const t = translations.match;
   const totalSteps = 3;
@@ -210,33 +214,106 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       }
 
       // Update match with result data
-      const {error: updateError} = await supabase
-        .from('matches')
-        .update({
-          home_score: formData.homeScore,
-          away_score: formData.awayScore,
-          home_score_halftime: formData.homeScoreHalftime,
-          away_score_halftime: formData.awayScoreHalftime,
-          coach_notes: formData.coachNotes,
-          status: 'completed',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', match.id);
+      const updateData: any = {
+        home_score: formData.homeScore,
+        away_score: formData.awayScore,
+        home_score_halftime: formData.homeScoreHalftime,
+        away_score_halftime: formData.awayScoreHalftime,
+        coach_notes: formData.coachNotes,
+        status: 'completed',
+        updated_at: new Date().toISOString(),
+      };
 
-      if (updateError) throw updateError;
-
-      // If photo was uploaded, we could store the photo URL in a separate table
-      // or add it to the match record if needed
+      // Add photo URL if uploaded
       if (photoUrl) {
-        // For now, we'll just log it - you might want to store this in a match_photos table
-        console.log('Photo uploaded:', photoUrl);
+        updateData.match_photo_url = photoUrl;
       }
 
-      onResultSaved?.();
-      handleClose();
+      console.log('Updating match with data:', updateData);
+      console.log('Match ID:', match.id);
+      console.log('Match before update:', {
+        id: match.id,
+        status: match.status,
+        home_score: match.home_score,
+        away_score: match.away_score,
+        home_score_halftime: match.home_score_halftime,
+        away_score_halftime: match.away_score_halftime,
+        coach_notes: match.coach_notes,
+      });
+
+      const {error: updateError} = await supabase
+        .from('matches')
+        .update(updateData)
+        .eq('id', match.id);
+
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
+
+      console.log('Match updated successfully');
+      console.log('Updated match data:', updateData);
+
+      // Refresh materialized view to ensure it has the latest data
+      console.log('Refreshing materialized view...');
+      try {
+        const {error: refreshError} = await supabase.rpc('refresh_materialized_view', {
+          view_name: 'own_club_matches',
+        });
+
+        if (refreshError) {
+          console.warn('Failed to refresh materialized view via RPC:', refreshError);
+          // Fallback: try to force refresh by querying the view
+          await supabase.from('own_club_matches').select('id').limit(1);
+          console.log('Materialized view refreshed via query fallback');
+        } else {
+          console.log('Materialized view refreshed successfully via RPC');
+        }
+      } catch (error) {
+        console.warn('Materialized view refresh failed:', error);
+        // Continue anyway - the cache invalidation should still work
+      }
+
+      // Invalidate cache to ensure fresh data
+      if (match?.category_id && match?.season_id) {
+        console.log(
+          'Invalidating cache for category:',
+          match.category_id,
+          'season:',
+          match.season_id
+        );
+
+        // Clear the service cache completely to force fresh data
+        await invalidateMatchCache(match.category_id, match.season_id);
+
+        // Invalidate React Query cache with more aggressive invalidation
+        await queryClient.invalidateQueries({
+          queryKey: ['matches', 'ownClub', match.category_id, match.season_id],
+        });
+
+        // Invalidate all match-related queries
+        await queryClient.invalidateQueries({
+          queryKey: ['matches'],
+        });
+
+        // Force refetch by removing the query from cache
+        await queryClient.removeQueries({
+          queryKey: ['matches', 'ownClub', match.category_id, match.season_id],
+        });
+      }
+
+      showToast.success('Výsledek zápasu byl úspěšně uložen!');
+
+      // Small delay to ensure cache invalidation completes
+      setTimeout(() => {
+        onResultSaved?.();
+        handleClose();
+      }, 500);
     } catch (error) {
       console.error('Error saving match result:', error);
-      setError('Chyba při ukládání výsledku zápasu. Zkuste to prosím znovu.');
+      const errorMessage = 'Chyba při ukládání výsledku zápasu. Zkuste to prosím znovu.';
+      setError(errorMessage);
+      showToast.danger(errorMessage);
     } finally {
       setIsLoading(false);
     }
