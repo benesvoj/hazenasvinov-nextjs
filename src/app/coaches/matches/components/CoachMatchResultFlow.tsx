@@ -317,12 +317,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       case 2:
         return (
           <div className="space-y-6">
-            <div className="text-center">
-              <CameraIcon className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Fotografie ze zápasu</h3>
-              <p className="text-sm text-gray-600">Pořiďte nebo nahrajte fotografii ze zápasu</p>
-            </div>
-
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
               <input
                 type="file"
@@ -330,7 +324,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                 onChange={handlePhotoUpload}
                 className="hidden"
                 id="matchPhoto"
-                capture="environment"
               />
               <label htmlFor="matchPhoto" className="cursor-pointer">
                 <div className="space-y-4">
@@ -339,9 +332,9 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                   </div>
                   <div className="text-sm text-gray-600">
                     <span className="font-medium text-blue-600 hover:text-blue-500">
-                      Klikněte pro nahrání
+                      Klikněte pro výběr
                     </span>{' '}
-                    nebo pořiďte fotografii
+                    z galerie nebo pořiďte novou fotografii
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG až 5MB</p>
                 </div>
