@@ -1,7 +1,9 @@
 import {Category} from './category';
 import {Season} from './season';
 import {Team} from './team';
+import {Nullish} from './Nullish';
 
+export type MatchStatus = 'upcoming' | 'completed';
 export interface Match {
   id: string;
   category_id: string;
@@ -15,16 +17,19 @@ export interface Match {
   venue: string;
   competition: string;
   is_home: boolean;
-  status: 'upcoming' | 'completed';
-  home_score?: number;
-  away_score?: number;
-  result?: 'win' | 'loss' | 'draw';
+  status: MatchStatus;
+  home_score?: number | Nullish;
+  away_score?: number | Nullish;
+  home_score_halftime?: number | Nullish;
+  away_score_halftime?: number | Nullish;
+  coach_notes?: string | Nullish;
   matchweek?: number;
   match_number?: number;
   category: Category;
   season: Season;
-  post_id?: string; // Optional reference to related blog post
-  // Additional properties for transformed data
+  /** Optional reference to related blog post */
+  post_id?: string;
+  /** Additional properties for transformed data */
   home_team_is_own_club?: boolean;
   away_team_is_own_club?: boolean;
   home_team_logo?: string;

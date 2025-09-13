@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { useAuth } from "@/hooks/useAuthNew";
-import { usePortalAccess } from "@/hooks/usePortalAccess";
-import { 
+import React, {useState, useEffect} from 'react';
+import {usePathname} from 'next/navigation';
+import {useAuth} from '@/hooks/useAuthNew';
+import {usePortalAccess} from '@/hooks/usePortalAccess';
+import {
   UserIcon,
   ArrowRightEndOnRectangleIcon,
   BellIcon,
@@ -12,20 +12,25 @@ import {
   DocumentTextIcon,
   Bars3Icon,
   AcademicCapIcon,
-  ShieldCheckIcon
-} from "@heroicons/react/24/outline";
-import { 
-  Dropdown, 
-  DropdownTrigger, 
-  DropdownMenu, 
+  ShieldCheckIcon,
+} from '@heroicons/react/24/outline';
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
   DropdownItem,
   Button,
   Badge,
   Avatar,
-} from "@heroui/react";
-import { ReleaseNote, getReleaseNotes } from "@/utils/releaseNotes";
-import { ReleaseNotesModal, UserProfileModal, ThemeSwitch, CoachPortalCategoryDialog } from "@/components";
-import { logLogout } from "@/utils/loginLogger";
+} from '@heroui/react';
+import {ReleaseNote, getReleaseNotes} from '@/utils/releaseNotes';
+import {
+  ReleaseNotesModal,
+  UserProfileModal,
+  ThemeSwitch,
+  CoachPortalCategoryDialog,
+} from '@/components';
+import {logLogout} from '@/utils/loginLogger';
 
 interface UnifiedTopBarProps {
   variant: 'admin' | 'coach';
@@ -40,22 +45,21 @@ interface UnifiedTopBarProps {
   pageDescription?: string;
   userProfile?: {
     role?: string;
-    clubs?: { name?: string };
+    clubs?: {name?: string};
   };
 }
 
-export const UnifiedTopBar = ({ 
-  variant, 
-  sidebarContext, 
-  pageTitle, 
+export const UnifiedTopBar = ({
+  variant,
+  sidebarContext,
+  pageTitle,
   pageDescription,
-  userProfile 
+  userProfile,
 }: UnifiedTopBarProps) => {
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
-  const { hasCoachAccess, hasBothAccess, hasAdminAccess, loading } = usePortalAccess();
-  
-  
+  const {user, signOut} = useAuth();
+  const {hasCoachAccess, hasBothAccess, hasAdminAccess, loading} = usePortalAccess();
+
   // State
   const [notifications, setNotifications] = useState(3);
   const [showReleaseNotes, setShowReleaseNotes] = useState(false);
@@ -124,7 +128,7 @@ export const UnifiedTopBar = ({
   // User display helpers
   const getUserInitials = () => {
     if (!user?.email) return 'U';
-    
+
     if (user.user_metadata?.full_name) {
       const names = user.user_metadata.full_name.split(' ');
       if (names.length >= 2) {
@@ -132,7 +136,7 @@ export const UnifiedTopBar = ({
       }
       return names[0][0].toUpperCase();
     }
-    
+
     const emailParts = user.email.split('@')[0];
     if (emailParts.includes('.')) {
       const parts = emailParts.split('.');
@@ -203,7 +207,7 @@ export const UnifiedTopBar = ({
           isIconOnly
           variant="light"
           className="lg:hidden"
-          onPress={sidebarContext.toggleSidebar}
+          onPress={() => sidebarContext.setIsMobileOpen?.(true)}
         >
           <Bars3Icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </Button>
@@ -217,13 +221,11 @@ export const UnifiedTopBar = ({
   const getHeaderClasses = () => {
     if (variant === 'admin') {
       return `fixed top-0 right-0 bg-white h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300 ease-in-out ${
-        sidebarContext?.isMobile ? 'left-0' : 
-        sidebarContext?.isCollapsed ? 'left-16' : 'left-64'
+        sidebarContext?.isMobile ? 'left-0' : sidebarContext?.isCollapsed ? 'left-16' : 'left-64'
       }`;
     } else {
       return `fixed top-0 right-0 bg-white h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-30 transition-all duration-300 ease-in-out ${
-        sidebarContext?.isMobile ? 'left-0' : 
-        sidebarContext?.isCollapsed ? 'left-16' : 'left-64'
+        sidebarContext?.isMobile ? 'left-0' : sidebarContext?.isCollapsed ? 'left-16' : 'left-64'
       }`;
     }
   };
@@ -231,9 +233,9 @@ export const UnifiedTopBar = ({
   // Get the appropriate content classes
   const getContentClasses = () => {
     if (variant === 'admin') {
-      return "flex items-center justify-between h-full px-4 sm:px-6";
+      return 'flex items-center justify-between h-full px-4 sm:px-6';
     } else {
-      return "flex items-center justify-between px-4 py-3";
+      return 'flex items-center justify-between px-4 py-3';
     }
   };
 
@@ -243,7 +245,7 @@ export const UnifiedTopBar = ({
         {/* Left side - Mobile menu button and Section info */}
         <div className="flex items-center space-x-3 sm:space-x-4">
           {getSidebarButton()}
-          
+
           <div className="min-w-0 flex-1">
             <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">
               {pageTitle || (variant === 'admin' ? 'Dashboard' : 'Trenérský Portal')}
@@ -251,11 +253,6 @@ export const UnifiedTopBar = ({
             {pageDescription && (
               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 hidden sm:block">
                 {pageDescription}
-              </p>
-            )}
-            {variant === 'coach' && (
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                {getRoleDisplay()} • {getClubDisplay()}
               </p>
             )}
           </div>
@@ -277,8 +274,8 @@ export const UnifiedTopBar = ({
           >
             <DocumentTextIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             {releaseNotes.length > 0 && (
-              <Badge 
-                color="primary" 
+              <Badge
+                color="primary"
                 size="sm"
                 className={variant === 'admin' ? '' : 'absolute -top-1 -right-1'}
               >
@@ -298,11 +295,7 @@ export const UnifiedTopBar = ({
             >
               <BellIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               {notifications > 0 && (
-                <Badge 
-                  color="danger" 
-                  size="sm"
-                  className="absolute -top-1 -right-1"
-                >
+                <Badge color="danger" size="sm" className="absolute -top-1 -right-1">
                   {notifications}
                 </Badge>
               )}
@@ -321,8 +314,8 @@ export const UnifiedTopBar = ({
                 <Avatar
                   name={getUserInitials()}
                   className={`${
-                    variant === 'coach' 
-                      ? 'bg-green-100 text-green-700' 
+                    variant === 'coach'
+                      ? 'bg-green-100 text-green-700'
                       : 'w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-medium'
                   }`}
                   size={variant === 'coach' ? 'sm' : undefined}
@@ -332,10 +325,7 @@ export const UnifiedTopBar = ({
                     {variant === 'coach' ? user?.email : getDisplayName()}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {variant === 'coach' 
-                      ? getRoleDisplay()
-                      : (user?.email || 'Načítání...')
-                    }
+                    {variant === 'coach' ? getRoleDisplay() : user?.email || 'Načítání...'}
                   </p>
                 </div>
               </Button>
@@ -343,46 +333,83 @@ export const UnifiedTopBar = ({
             <DropdownMenu aria-label="User actions">
               {variant === 'admin' ? (
                 <>
-                  <DropdownItem key="profile-header" className="py-3" onPress={handleProfileOpen} aria-label="Otevřít profil">
+                  <DropdownItem
+                    key="profile-header"
+                    className="py-3"
+                    onPress={handleProfileOpen}
+                    aria-label="Otevřít profil"
+                  >
                     <div className="flex items-center space-x-3">
                       <Avatar
                         name={getUserInitials()}
                         className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white text-base font-medium"
                       />
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{getDisplayName()}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {getDisplayName()}
+                        </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
                       </div>
                     </div>
                   </DropdownItem>
-                  <DropdownItem key="divider-1" className="h-px bg-gray-200 dark:bg-gray-600 my-2" isReadOnly aria-label="Oddělovač">
+                  <DropdownItem
+                    key="divider-1"
+                    className="h-px bg-gray-200 dark:bg-gray-600 my-2"
+                    isReadOnly
+                    aria-label="Oddělovač"
+                  >
                     <div className="h-px bg-gray-200 dark:bg-gray-600"></div>
                   </DropdownItem>
                 </>
               ) : null}
-              <DropdownItem key="profile-action" startContent={<UserIcon className="w-4 h-4" />} onPress={handleProfileOpen} aria-label="Otevřít profil">
+              <DropdownItem
+                key="profile-action"
+                startContent={<UserIcon className="w-4 h-4" />}
+                onPress={handleProfileOpen}
+                aria-label="Otevřít profil"
+              >
                 <span>Profil</span>
               </DropdownItem>
               {shouldShowPortalSwitch() ? (
-                <DropdownItem 
-                  key="switch-portal" 
-                  startContent={variant === 'admin' ? <AcademicCapIcon className="w-4 h-4" /> : <ShieldCheckIcon className="w-4 h-4" />} 
-                  onPress={variant === 'admin' ? handleSwitchToCoachPortal : handleSwitchToAdminPortal}
-                  aria-label={variant === 'admin' ? 'Přepnout na trenérský portál' : 'Přepnout na admin portál'}
+                <DropdownItem
+                  key="switch-portal"
+                  startContent={
+                    variant === 'admin' ? (
+                      <AcademicCapIcon className="w-4 h-4" />
+                    ) : (
+                      <ShieldCheckIcon className="w-4 h-4" />
+                    )
+                  }
+                  onPress={
+                    variant === 'admin' ? handleSwitchToCoachPortal : handleSwitchToAdminPortal
+                  }
+                  aria-label={
+                    variant === 'admin'
+                      ? 'Přepnout na trenérský portál'
+                      : 'Přepnout na admin portál'
+                  }
                 >
-                  <span>{variant === 'admin' ? 'Přepnout na trenérský portál' : 'Přepnout na admin portál'}</span>
+                  <span>
+                    {variant === 'admin'
+                      ? 'Přepnout na trenérský portál'
+                      : 'Přepnout na admin portál'}
+                  </span>
                 </DropdownItem>
               ) : null}
               {variant === 'admin' ? (
-                <DropdownItem key="settings" startContent={<Cog6ToothIcon className="w-4 h-4" />} aria-label="Nastavení">
+                <DropdownItem
+                  key="settings"
+                  startContent={<Cog6ToothIcon className="w-4 h-4" />}
+                  aria-label="Nastavení"
+                >
                   <span>Nastavení</span>
                 </DropdownItem>
               ) : null}
-              <DropdownItem 
-                key="logout" 
-                color="danger" 
-                startContent={<ArrowRightEndOnRectangleIcon className="w-4 h-4" />} 
-                onPress={handleLogout} 
+              <DropdownItem
+                key="logout"
+                color="danger"
+                startContent={<ArrowRightEndOnRectangleIcon className="w-4 h-4" />}
+                onPress={handleLogout}
                 aria-label="Odhlásit se"
                 className={variant === 'coach' ? 'text-danger' : ''}
               >
@@ -394,12 +421,15 @@ export const UnifiedTopBar = ({
       </div>
 
       {/* Modals */}
-      <UserProfileModal 
+      <UserProfileModal
         showProfileDialog={showProfileDialog}
         setShowProfileDialog={setShowProfileDialog}
         user={user}
       />
-      <ReleaseNotesModal showReleaseNotes={showReleaseNotes} setShowReleaseNotes={setShowReleaseNotes} />
+      <ReleaseNotesModal
+        showReleaseNotes={showReleaseNotes}
+        setShowReleaseNotes={setShowReleaseNotes}
+      />
       {variant === 'admin' && (
         <CoachPortalCategoryDialog
           isOpen={showCoachPortalDialog}

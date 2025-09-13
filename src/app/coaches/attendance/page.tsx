@@ -1,10 +1,9 @@
 'use client';
 
-import React, {useState, useEffect, useCallback, useMemo} from 'react';
-import {useAttendance} from '@/hooks/useAttendance';
+import React, {useState, useEffect, useMemo} from 'react';
+import {useAttendance, useCategoryLineups} from '@/hooks';
 import {useUser} from '@/contexts/UserContext';
 import {useAppData} from '@/contexts/AppDataContext';
-import {useCategoryLineups} from '@/hooks/useCategoryLineups';
 import {
   ClipboardDocumentListIcon,
   PlusIcon,
@@ -30,11 +29,10 @@ import {
   Tab,
   Spinner,
 } from '@heroui/react';
-import {TrainingSessionFormData, AttendanceRecord} from '@/types';
+import {TrainingSessionFormData} from '@/types';
 import {formatDateString, formatTime} from '@/helpers';
-import TrainingSessionModal from './components/TrainingSessionModal';
-import TrainingSessionGenerator from './components/TrainingSessionGenerator';
-import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import {TrainingSessionModal, TrainingSessionGenerator} from './components';
+import {DeleteConfirmationModal, PageContainer} from '@/components';
 
 export default function CoachesAttendancePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -421,21 +419,12 @@ export default function CoachesAttendancePage() {
   }
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <ClipboardDocumentListIcon className="w-8 h-8 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Docházka členů</h1>
-        </div>
-        <p className="text-gray-600">Sledování docházky členů na tréninkové jednotky</p>
-      </div>
-
+    <PageContainer>
       {/* Filters */}
       <Card className="mb-6">
         <CardBody>
-          <div className="flex gap-4 justify-between">
-            <div className="flex items-end gap-2 w-[400px]">
+          <div className="flex flex-col lg:flex-row gap-4 justify-between">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 flex-1 lg:w-auto">
               <Select
                 label="Kategorie"
                 placeholder="Vyberte kategorii"
@@ -443,6 +432,7 @@ export default function CoachesAttendancePage() {
                 onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
                 isDisabled={categoriesLoading || availableCategories.length === 1}
                 defaultSelectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
+                className="min-w-0"
               >
                 {availableCategories.map((category: any) => (
                   <SelectItem key={category.id}>{category.name}</SelectItem>
@@ -455,6 +445,7 @@ export default function CoachesAttendancePage() {
                 selectedKeys={selectedSeason ? [selectedSeason] : []}
                 onSelectionChange={(keys) => setSelectedSeason(Array.from(keys)[0] as string)}
                 isDisabled={seasonsLoading}
+                className="min-w-0"
               >
                 {seasons.map((season) => (
                   <SelectItem key={season.id}>{season.name}</SelectItem>
@@ -462,7 +453,7 @@ export default function CoachesAttendancePage() {
               </Select>
             </div>
 
-            <div className="flex items-end gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
               <Button
                 color="primary"
                 startContent={<PlusIcon className="w-4 h-4" />}
@@ -474,8 +465,10 @@ export default function CoachesAttendancePage() {
                   }, 0);
                 }}
                 isDisabled={!selectedCategory || !selectedSeason}
+                className="w-full sm:w-auto"
               >
-                Nový trénink
+                <span className="hidden sm:inline">Nový trénink</span>
+                <span className="sm:hidden">Nový</span>
               </Button>
               <Button
                 color="primary"
@@ -485,6 +478,7 @@ export default function CoachesAttendancePage() {
                 isDisabled={!selectedCategory || !selectedSeason}
                 isIconOnly
                 aria-label="Generovat tréninky"
+                className="w-full sm:w-auto"
               />
             </div>
           </div>
@@ -597,52 +591,72 @@ export default function CoachesAttendancePage() {
                   Žádné záznamy docházky pro tento trénink
                 </p>
               ) : (
-                <Table aria-label="Attendance records">
-                  <TableHeader>
-                    <TableColumn>ČLEN</TableColumn>
-                    <TableColumn>STATUS</TableColumn>
-                  </TableHeader>
-                  <TableBody>
-                    {attendanceRecords
-                      .sort((a, b) => {
-                        // Sort by surname, then by name
-                        if (!a.member || !b.member) return 0;
-                        const surnameComparison = (a.member.surname || '').localeCompare(
-                          b.member.surname || ''
-                        );
-                        if (surnameComparison !== 0) {
-                          return surnameComparison;
-                        }
-                        return (a.member.name || '').localeCompare(b.member.name || '');
-                      })
-                      .map((record) => (
-                        <TableRow key={record.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">
-                                {record.member.surname} {record.member.name}
+                <div className="overflow-x-auto">
+                  <Table aria-label="Attendance records">
+                    <TableHeader>
+                      <TableColumn>ČLEN</TableColumn>
+                      <TableColumn>STATUS</TableColumn>
+                    </TableHeader>
+                    <TableBody>
+                      {attendanceRecords
+                        .sort((a, b) => {
+                          // Sort by surname, then by name
+                          if (!a.member || !b.member) return 0;
+                          const surnameComparison = (a.member.surname || '').localeCompare(
+                            b.member.surname || ''
+                          );
+                          if (surnameComparison !== 0) {
+                            return surnameComparison;
+                          }
+                          return (a.member.name || '').localeCompare(b.member.name || '');
+                        })
+                        .map((record) => (
+                          <TableRow key={record.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium text-sm sm:text-base">
+                                  {record.member.surname} {record.member.name}
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              {(['present', 'absent', 'late', 'excused'] as const).map((status) => (
-                                <Button
-                                  key={status}
-                                  size="sm"
-                                  variant={record.attendance_status === status ? 'solid' : 'light'}
-                                  color={getStatusColor(status)}
-                                  onPress={() => handleRecordAttendance(record.member.id, status)}
-                                >
-                                  {getStatusText(status)}
-                                </Button>
-                              ))}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {(['present', 'absent', 'late', 'excused'] as const).map(
+                                  (status) => (
+                                    <Button
+                                      key={status}
+                                      size="sm"
+                                      variant={
+                                        record.attendance_status === status ? 'solid' : 'light'
+                                      }
+                                      color={getStatusColor(status)}
+                                      onPress={() =>
+                                        handleRecordAttendance(record.member.id, status)
+                                      }
+                                      className="text-xs sm:text-sm"
+                                    >
+                                      <span className="hidden sm:inline">
+                                        {getStatusText(status)}
+                                      </span>
+                                      <span className="sm:hidden">
+                                        {status === 'present'
+                                          ? 'P'
+                                          : status === 'absent'
+                                            ? 'N'
+                                            : status === 'late'
+                                              ? 'L'
+                                              : 'O'}
+                                      </span>
+                                    </Button>
+                                  )
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardBody>
           </Card>
@@ -689,6 +703,6 @@ export default function CoachesAttendancePage() {
         title="Smazat trénink"
         message="Opravdu chcete smazat tento trénink? Tato akce je nevratná a smaže také všechny záznamy o docházce."
       />
-    </div>
+    </PageContainer>
   );
 }

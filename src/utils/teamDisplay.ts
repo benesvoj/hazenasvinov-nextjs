@@ -2,6 +2,8 @@
  * Utility functions for consistent team display logic across the application
  */
 
+import {Match} from '@/types';
+
 export interface TeamDisplayInfo {
   displayName: string;
   shouldShowSuffix: boolean;
@@ -15,11 +17,11 @@ export interface TeamDisplayInfo {
  */
 export function getTeamSuffixLogic(teamCount: number): TeamDisplayInfo {
   const shouldShowSuffix = teamCount > 1;
-  
+
   return {
     displayName: shouldShowSuffix ? 'suffix' : 'no-suffix',
     shouldShowSuffix,
-    teamCount
+    teamCount,
   };
 }
 
@@ -30,13 +32,17 @@ export function getTeamSuffixLogic(teamCount: number): TeamDisplayInfo {
  * @param teamCount - Number of teams the club has in the current category
  * @returns Formatted team display name
  */
-export function getTeamDisplayName(clubName: string, teamSuffix: string, teamCount: number): string {
-  const { shouldShowSuffix } = getTeamSuffixLogic(teamCount);
-  
+export function getTeamDisplayName(
+  clubName: string,
+  teamSuffix: string,
+  teamCount: number
+): string {
+  const {shouldShowSuffix} = getTeamSuffixLogic(teamCount);
+
   if (shouldShowSuffix && teamSuffix) {
     return `${clubName} ${teamSuffix}`;
   }
-  
+
   return clubName;
 }
 
@@ -49,15 +55,15 @@ export function getTeamDisplayName(clubName: string, teamSuffix: string, teamCou
  * @returns Formatted team display name
  */
 export function getTeamDisplayNameSafe(
-  clubName?: string, 
-  teamSuffix?: string, 
-  teamCount: number = 1, 
-  fallbackName: string = "Neznámý tým"
+  clubName?: string,
+  teamSuffix?: string,
+  teamCount: number = 1,
+  fallbackName: string = 'Neznámý tým'
 ): string {
   if (!clubName) {
     return fallbackName;
   }
-  
+
   return getTeamDisplayName(clubName, teamSuffix || 'A', teamCount);
 }
 
@@ -68,8 +74,8 @@ export function getTeamDisplayNameSafe(
  * @param clubId - ID of the club to count teams for
  * @returns Number of teams the club has in the category
  */
-export function calculateClubTeamCount(teams: Array<{ club_id: string }>, clubId: string): number {
-  return teams.filter(team => team.club_id === clubId).length;
+export function calculateClubTeamCount(teams: Array<{club_id: string}>, clubId: string): number {
+  return teams.filter((team) => team.club_id === clubId).length;
 }
 
 /**
@@ -78,16 +84,18 @@ export function calculateClubTeamCount(teams: Array<{ club_id: string }>, clubId
  * @param standings - Array of standings with club information
  * @returns Map where key is club ID and value is number of teams
  */
-export function createClubTeamCountsMap(standings: Array<{ club?: { id: string } | null }>): Map<string, number> {
+export function createClubTeamCountsMap(
+  standings: Array<{club?: {id: string} | null}>
+): Map<string, number> {
   const clubTeamCounts = new Map<string, number>();
-  
+
   standings.forEach((standing) => {
     const clubId = standing.club?.id;
     if (clubId) {
       clubTeamCounts.set(clubId, (clubTeamCounts.get(clubId) || 0) + 1);
     }
   });
-  
+
   return clubTeamCounts;
 }
 
@@ -98,18 +106,18 @@ export function createClubTeamCountsMap(standings: Array<{ club?: { id: string }
  * @returns Map where key is club ID and value is number of teams
  */
 export function createGenericClubTeamCountsMap<T>(
-  data: T[], 
+  data: T[],
   clubIdExtractor: (item: T) => string | undefined | null
 ): Map<string, number> {
   const clubTeamCounts = new Map<string, number>();
-  
+
   data.forEach((item) => {
     const clubId = clubIdExtractor(item);
     if (clubId) {
       clubTeamCounts.set(clubId, (clubTeamCounts.get(clubId) || 0) + 1);
     }
   });
-  
+
   return clubTeamCounts;
 }
 
@@ -122,21 +130,22 @@ export function createGenericClubTeamCountsMap<T>(
  * @returns Transformed match with formatted team names
  */
 export function transformMatchWithTeamNames(
-  match: any, 
-  allMatches: any[] = [], 
+  match: any,
+  allMatches: any[] = [],
   options: {
     useTeamMap?: boolean;
     teamMap?: Map<string, any>;
     teamDetails?: any[];
+    clubTeamCounts?: Map<string, number>;
   } = {}
 ): any {
-  const { useTeamMap = false, teamMap, teamDetails } = options;
-  
+  const {useTeamMap = false, teamMap, teamDetails, clubTeamCounts} = options;
+
   let homeTeamDetails: any;
   let awayTeamDetails: any;
   let homeClubId: string | undefined;
   let awayClubId: string | undefined;
-  
+
   if (useTeamMap && teamMap) {
     // For useFetchMatches structure
     homeTeamDetails = teamMap.get(match.home_team_id);
@@ -150,55 +159,68 @@ export function transformMatchWithTeamNames(
     homeClubId = match.home_team?.club_category?.club?.id;
     awayClubId = match.away_team?.club_category?.club?.id;
   }
-  
+
   // Count teams per club in this category
-  const clubTeamCounts = new Map<string, number>();
-  
-  if (teamDetails && teamDetails.length > 0) {
-    // Count from team details (most accurate approach)
-    teamDetails.forEach((team: any) => {
-      const clubId = team.club_category?.club?.id;
-      if (clubId) {
-        clubTeamCounts.set(clubId, (clubTeamCounts.get(clubId) || 0) + 1);
-      }
-    });
-    // console.log('🔍 [teamDisplay] Using team details for counting. Club team counts:', Object.fromEntries(clubTeamCounts));
-  } else if (useTeamMap) {
-    // Fallback: Count from team details (useFetchMatches approach)
-    teamDetails?.forEach((team: any) => {
-      const clubId = team.club_category?.club?.id;
-      if (clubId) {
-        clubTeamCounts.set(clubId, (clubTeamCounts.get(clubId) || 0) + 1);
-      }
-    });
-  } else {
-    // Fallback: Count from all matches (useOwnClubMatches approach)
-    allMatches.forEach((matchData: any) => {
-      const homeClubId = matchData.home_team?.club_category?.club?.id;
-      if (homeClubId) {
-        clubTeamCounts.set(homeClubId, (clubTeamCounts.get(homeClubId) || 0) + 1);
-      }
-      const awayClubId = matchData.away_team?.club_category?.club?.id;
-      if (awayClubId) {
-        clubTeamCounts.set(awayClubId, (clubTeamCounts.get(awayClubId) || 0) + 1);
-      }
-    });
+  let finalClubTeamCounts = clubTeamCounts || new Map<string, number>();
+
+  if (!clubTeamCounts) {
+    // Only calculate if not provided
+    if (teamDetails && teamDetails.length > 0) {
+      // Count from team details (most accurate approach)
+      teamDetails.forEach((team: any) => {
+        const clubId = team.club_category?.club?.id;
+        if (clubId) {
+          finalClubTeamCounts.set(clubId, (finalClubTeamCounts.get(clubId) || 0) + 1);
+        }
+      });
+    } else if (useTeamMap) {
+      // Fallback: Count from team details (useFetchMatches approach)
+      teamDetails?.forEach((team: any) => {
+        const clubId = team.club_category?.club?.id;
+        if (clubId) {
+          finalClubTeamCounts.set(clubId, (finalClubTeamCounts.get(clubId) || 0) + 1);
+        }
+      });
+    } else {
+      // Fallback: Count from all matches (useOwnClubMatches approach)
+      allMatches.forEach((matchData: any) => {
+        const homeClubId = matchData.home_team?.club_category?.club?.id;
+        if (homeClubId) {
+          finalClubTeamCounts.set(homeClubId, (finalClubTeamCounts.get(homeClubId) || 0) + 1);
+        }
+        const awayClubId = matchData.away_team?.club_category?.club?.id;
+        if (awayClubId) {
+          finalClubTeamCounts.set(awayClubId, (finalClubTeamCounts.get(awayClubId) || 0) + 1);
+        }
+      });
+    }
   }
-  
+
   // Use centralized team display utility with smart suffix logic
+  const homeTeamCount = finalClubTeamCounts.get(homeClubId || '') || 1;
+  const awayTeamCount = finalClubTeamCounts.get(awayClubId || '') || 1;
+
   const homeTeamName = getTeamDisplayNameSafe(
     homeTeamDetails?.club_category?.club?.name,
     homeTeamDetails?.team_suffix || 'A',
-    clubTeamCounts.get(homeClubId || '') || 1,
+    homeTeamCount,
     'Home team'
   );
   const awayTeamName = getTeamDisplayNameSafe(
     awayTeamDetails?.club_category?.club?.name,
     awayTeamDetails?.team_suffix || 'A',
-    clubTeamCounts.get(awayClubId || '') || 1,
+    awayTeamCount,
     'Away team'
   );
-  
+
+  // Determine if teams are own club
+  const homeIsOwnClub = useTeamMap
+    ? homeTeamDetails?.club_category?.club?.is_own_club === true
+    : match.home_team?.club_category?.club?.is_own_club === true;
+  const awayIsOwnClub = useTeamMap
+    ? awayTeamDetails?.club_category?.club?.is_own_club === true
+    : match.away_team?.club_category?.club?.is_own_club === true;
+
   if (useTeamMap) {
     // Return structure for useFetchMatches
     return {
@@ -207,16 +229,19 @@ export function transformMatchWithTeamNames(
         id: match.home_team_id,
         name: homeTeamName,
         short_name: homeTeamDetails?.club_category?.club?.short_name,
-        is_own_club: homeTeamDetails?.club_category?.club?.is_own_club === true,
-        logo_url: homeTeamDetails?.club_category?.club?.logo_url
+        is_own_club: homeIsOwnClub,
+        logo_url: homeTeamDetails?.club_category?.club?.logo_url,
       },
       away_team: {
         id: match.away_team_id,
         name: awayTeamName,
         short_name: awayTeamDetails?.club_category?.club?.short_name,
-        is_own_club: awayTeamDetails?.club_category?.club?.is_own_club === true,
-        logo_url: awayTeamDetails?.club_category?.club?.logo_url
-      }
+        is_own_club: awayIsOwnClub,
+        logo_url: awayTeamDetails?.club_category?.club?.logo_url,
+      },
+      // Add top-level properties for filtering
+      home_team_is_own_club: homeIsOwnClub,
+      away_team_is_own_club: awayIsOwnClub,
     };
   } else {
     // Return structure for useOwnClubMatches
@@ -226,16 +251,19 @@ export function transformMatchWithTeamNames(
         id: match.home_team?.id,
         name: homeTeamName,
         short_name: match.home_team?.club_category?.club?.short_name,
-        is_own_club: match.home_team?.club_category?.club?.is_own_club === true,
-        logo_url: match.home_team?.club_category?.club?.logo_url
+        is_own_club: homeIsOwnClub,
+        logo_url: match.home_team?.club_category?.club?.logo_url,
       },
       away_team: {
         id: match.away_team?.id,
         name: awayTeamName,
         short_name: match.away_team?.club_category?.club?.short_name,
-        is_own_club: match.away_team?.club_category?.club?.is_own_club === true,
-        logo_url: match.away_team?.club_category?.club?.logo_url
-      }
+        is_own_club: awayIsOwnClub,
+        logo_url: match.away_team?.club_category?.club?.logo_url,
+      },
+      // Add top-level properties for filtering
+      home_team_is_own_club: homeIsOwnClub,
+      away_team_is_own_club: awayIsOwnClub,
     };
   }
 }

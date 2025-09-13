@@ -1,30 +1,22 @@
-"use client";
+'use client';
 
-import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Input,
-  Select,
-  SelectItem,
-  Button,
-} from "@heroui/react";
+import {useEffect, useState, forwardRef, useImperativeHandle} from 'react';
+import {Card, CardHeader, CardBody, Input, Select, SelectItem, Button} from '@heroui/react';
 import {
   DocumentTextIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
   PlusIcon,
-} from "@heroicons/react/24/outline";
-import { MeetingMinutes, MeetingMinutesFilters } from "@/types";
-import { translations } from "@/lib/translations";
-import { MeetingMinutesCard } from "./MeetingMinutesCard";
-import { useSeasons } from "@/hooks/useSeasons";
-import { useMeetingMinutes } from "@/hooks/useMeetingMinutes";
-import { showToast } from "../Toast";
-import { AttendeesModal } from "./AttendeesModal";
-import { DeleteConfirmationModal, MeetingMinutesFormModal } from "..";
-import { LoadingSpinner } from "@/components";
+} from '@heroicons/react/24/outline';
+import {MeetingMinutes, MeetingMinutesFilters} from '@/types';
+import {translations} from '@/lib/translations';
+import {MeetingMinutesCard} from './MeetingMinutesCard';
+import {useSeasons} from '@/hooks/useSeasons';
+import {useMeetingMinutes} from '@/hooks/useMeetingMinutes';
+import {showToast} from '../Toast';
+import {AttendeesModal} from './AttendeesModal';
+import {DeleteConfirmationModal, MeetingMinutesFormModal} from '..';
+import {LoadingSpinner} from '@/components';
 
 interface MeetingMinutesContainerProps {
   onAddMeetingMinutes?: () => void;
@@ -37,17 +29,16 @@ export interface MeetingMinutesContainerRef {
 export const MeetingMinutesContainer = forwardRef<
   MeetingMinutesContainerRef,
   MeetingMinutesContainerProps
->(({ onAddMeetingMinutes }, ref) => {
+>(({onAddMeetingMinutes}, ref) => {
   const [filters, setFilters] = useState<MeetingMinutesFilters>({});
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingMeetingMinutes, setEditingMeetingMinutes] =
-    useState<MeetingMinutes | null>(null);
+  const [editingMeetingMinutes, setEditingMeetingMinutes] = useState<MeetingMinutes | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [meetingMinutesToDelete, setMeetingMinutesToDelete] =
-    useState<MeetingMinutes | null>(null);
+  const [meetingMinutesToDelete, setMeetingMinutesToDelete] = useState<MeetingMinutes | null>(null);
   const [isAttendeesModalOpen, setIsAttendeesModalOpen] = useState(false);
-  const [editingAttendeesMeeting, setEditingAttendeesMeeting] =
-    useState<MeetingMinutes | null>(null);
+  const [editingAttendeesMeeting, setEditingAttendeesMeeting] = useState<MeetingMinutes | null>(
+    null
+  );
 
   const {
     meetingMinutes,
@@ -59,11 +50,7 @@ export const MeetingMinutesContainer = forwardRef<
     deleteMeetingMinutes,
     getNextMeetingNumber,
   } = useMeetingMinutes();
-  const {
-    seasons,
-    loading: seasonsLoading,
-    fetchSeasonsWithActive,
-  } = useSeasons();
+  const {seasons, loading: seasonsLoading, fetchAllSeasons} = useSeasons();
 
   const [users, setUsers] = useState<any[]>([]);
   const t = translations.components.meetingMinutes;
@@ -76,19 +63,19 @@ export const MeetingMinutesContainer = forwardRef<
   // Fetch data on mount
   useEffect(() => {
     fetchMeetingMinutes(filters);
-    fetchSeasonsWithActive();
-  }, [fetchMeetingMinutes, fetchSeasonsWithActive, filters]);
+    fetchAllSeasons();
+  }, [fetchMeetingMinutes, fetchAllSeasons, filters]);
 
   //   TODO: typizovat users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("/api/get-users");
+        const response = await fetch('/api/get-users');
         const data = await response.json();
         // The API returns users directly, not wrapped in a users property
         setUsers(Array.isArray(data) ? data : data.users || []);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error('Error fetching users:', error);
       }
     };
     fetchUsers();
@@ -97,7 +84,7 @@ export const MeetingMinutesContainer = forwardRef<
   const handleFilterChange = (key: keyof MeetingMinutesFilters, value: any) => {
     setFilters((prev) => ({
       ...prev,
-      [key]: value === "all" ? undefined : value,
+      [key]: value === 'all' ? undefined : value,
     }));
   };
 
@@ -150,7 +137,7 @@ export const MeetingMinutesContainer = forwardRef<
       }
       closeModals();
     } catch (error) {
-      showToast.danger("Chyba při ukládání zápisu");
+      showToast.danger('Chyba při ukládání zápisu');
     }
   };
 
@@ -162,7 +149,7 @@ export const MeetingMinutesContainer = forwardRef<
       showToast.success(t.success.deleted);
       closeModals();
     } catch (error) {
-      showToast.danger("Chyba při mazání zápisu");
+      showToast.danger('Chyba při mazání zápisu');
     }
   };
 
@@ -174,17 +161,17 @@ export const MeetingMinutesContainer = forwardRef<
       const attendeesData = attendees.map((attendee) => ({
         user_id: attendee.user_id,
         status: attendee.status,
-        notes: attendee.notes || "",
+        notes: attendee.notes || '',
       }));
 
       await updateMeetingMinutes(editingAttendeesMeeting.id, {
         attendees: attendeesData,
       });
 
-      showToast.success("Účastníci byli úspěšně aktualizováni");
+      showToast.success('Účastníci byli úspěšně aktualizováni');
       closeModals();
     } catch (error) {
-      showToast.danger("Chyba při aktualizaci účastníků");
+      showToast.danger('Chyba při aktualizaci účastníků');
     }
   };
 
@@ -202,22 +189,20 @@ export const MeetingMinutesContainer = forwardRef<
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Input
               placeholder={t.filters.search}
-              startContent={
-                <MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />
-              }
-              value={filters.search || ""}
-              onValueChange={(value) => handleFilterChange("search", value)}
+              startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
+              value={filters.search || ''}
+              onValueChange={(value) => handleFilterChange('search', value)}
             />
 
             <Select
               placeholder={t.filters.season}
-              selectedKeys={filters.season_id ? [filters.season_id] : ["all"]}
+              selectedKeys={filters.season_id ? [filters.season_id] : ['all']}
               onSelectionChange={(keys) => {
                 const selected = Array.from(keys)[0] as string;
-                handleFilterChange("season_id", selected);
+                handleFilterChange('season_id', selected);
               }}
               items={[
-                { key: "all", label: t.filters.allSeasons },
+                {key: 'all', label: t.filters.allSeasons},
                 ...seasons.map((season) => ({
                   key: season.id,
                   label: season.name,
@@ -229,13 +214,13 @@ export const MeetingMinutesContainer = forwardRef<
 
             <Select
               placeholder={t.filters.wroteBy}
-              selectedKeys={filters.wrote_by ? [filters.wrote_by] : ["all"]}
+              selectedKeys={filters.wrote_by ? [filters.wrote_by] : ['all']}
               onSelectionChange={(keys) => {
                 const selected = Array.from(keys)[0] as string;
-                handleFilterChange("wrote_by", selected);
+                handleFilterChange('wrote_by', selected);
               }}
               items={[
-                { key: "all", label: t.filters.allUsers },
+                {key: 'all', label: t.filters.allUsers},
                 ...users.map((user) => ({
                   key: user.id,
                   label: user.user_metadata?.full_name || user.email,
@@ -291,12 +276,8 @@ export const MeetingMinutesContainer = forwardRef<
           <CardBody>
             <div className="text-center py-8">
               <DocumentTextIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {t.noMeetingMinutes}
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {t.noMeetingMinutesDescription}
-              </p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t.noMeetingMinutes}</h3>
+              <p className="text-gray-600 mb-4">{t.noMeetingMinutesDescription}</p>
               <Button
                 color="primary"
                 startContent={<PlusIcon className="w-5 h-5" />}
@@ -336,7 +317,7 @@ export const MeetingMinutesContainer = forwardRef<
             editingAttendeesMeeting.attendees?.map((attendee) => ({
               user_id: attendee.member?.id || attendee.user_id,
               status: attendee.status,
-              notes: attendee.notes || "",
+              notes: attendee.notes || '',
             })) || []
           }
           onAttendeesChange={handleAttendeesUpdate}
@@ -346,4 +327,4 @@ export const MeetingMinutesContainer = forwardRef<
   );
 });
 
-MeetingMinutesContainer.displayName = "MeetingMinutesContainer";
+MeetingMinutesContainer.displayName = 'MeetingMinutesContainer';

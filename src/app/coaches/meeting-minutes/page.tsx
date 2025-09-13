@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useMeetingMinutes } from "@/hooks/useMeetingMinutes";
-import { useSeasons } from "@/hooks/useSeasons";
-import { MeetingMinutes, MeetingMinutesFilters } from "@/types";
+import React from 'react';
+import {useMeetingMinutes} from '@/hooks/useMeetingMinutes';
+import {useSeasons} from '@/hooks/useSeasons';
+import {MeetingMinutes, MeetingMinutesFilters} from '@/types';
 import {
   DocumentTextIcon,
   MagnifyingGlassIcon,
@@ -13,7 +13,7 @@ import {
   DocumentArrowDownIcon,
   EyeIcon,
   ArrowDownTrayIcon,
-} from "@heroicons/react/24/outline";
+} from '@heroicons/react/24/outline';
 import {
   Button,
   Card,
@@ -25,15 +25,15 @@ import {
   Chip,
   Badge,
   Skeleton,
-} from "@heroui/react";
-import { translations } from "@/lib/translations";
-import { MeetingMinutesContainer } from "@/components";
+} from '@heroui/react';
+import {translations} from '@/lib/translations';
+import {MeetingMinutesContainer, PageContainer} from '@/components';
 
 export default function CoachMeetingMinutesPage() {
   const t = translations.components.meetingMinutes;
 
   return (
-    <div className="p-6">
+    <PageContainer>
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
@@ -44,7 +44,6 @@ export default function CoachMeetingMinutesPage() {
       </div>
 
       <MeetingMinutesContainer />
-    </div>
+    </PageContainer>
   );
 }
-

@@ -70,6 +70,8 @@ export default function BlogPostCard({
             src={post.image_url}
             alt={post.title}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={false}
             className="object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
           />
         ) : (
@@ -125,7 +127,9 @@ export default function BlogPostCard({
               src={post.image_url}
               alt={post.title}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover group-hover:scale-105 transition-transform duration-300"
+              priority={false}
             />
           </div>
         ) : (

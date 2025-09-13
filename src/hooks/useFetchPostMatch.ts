@@ -148,14 +148,6 @@ export function useFetchPostMatch(postId: string | null): UseFetchPostMatchResul
               name: matchData.season?.name,
             },
             is_home: matchData.home_team?.club_category?.club?.is_own_club || false,
-            result:
-              matchData.home_score !== null && matchData.away_score !== null
-                ? matchData.home_score > matchData.away_score
-                  ? 'win'
-                  : matchData.home_score < matchData.away_score
-                    ? 'loss'
-                    : 'draw'
-                : undefined,
           };
 
           setMatch(transformedMatch);

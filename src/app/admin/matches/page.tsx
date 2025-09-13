@@ -53,6 +53,7 @@ import {
 } from '@/hooks';
 import {AdminContainer} from '../components/AdminContainer';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
+import {matchStatuses, matchStatusesKeys} from '@/constants';
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');
@@ -166,8 +167,10 @@ export default function MatchesAdminPage() {
   });
 
   const [resultData, setResultData] = useState({
-    home_score: '',
-    away_score: '',
+    home_score: 0,
+    away_score: 0,
+    home_score_halftime: 0,
+    away_score_halftime: 0,
   });
 
   const [editData, setEditData] = useState({
@@ -176,8 +179,10 @@ export default function MatchesAdminPage() {
     home_team_id: '',
     away_team_id: '',
     venue: '',
-    home_score: '',
-    away_score: '',
+    home_score: 0,
+    away_score: 0,
+    home_score_halftime: 0,
+    away_score_halftime: 0,
     status: 'completed' as 'upcoming' | 'completed',
     matchweek: '',
     match_number: '',
@@ -197,12 +202,13 @@ export default function MatchesAdminPage() {
 
   // Use the enhanced seasons hook
   const {
-    sortedSeasons,
     activeSeason,
+    sortedSeasons,
     loading: seasonsLoading,
     error: seasonsError,
-    fetchSeasonsWithActive,
+    fetchAllSeasons,
   } = useSeasons();
+
   const [selectedSeason, setSelectedSeason] = useState<string>('');
 
   // Use the matches hook - pass category code instead of ID, and show ALL matches (admin mode)
@@ -259,10 +265,6 @@ export default function MatchesAdminPage() {
 
   // Update filtered teams when category or season changes
   useEffect(() => {
-    console.log('Category/Season changed:', {
-      selectedCategory,
-      selectedSeason,
-    });
     if (selectedCategory && selectedSeason) {
       fetchFilteredTeams(selectedCategory, selectedSeason);
     } else {
@@ -272,12 +274,11 @@ export default function MatchesAdminPage() {
 
   // Initial data fetch
   useEffect(() => {
-    console.log('🔍 Initial data fetch started');
     fetchCategoriesFull();
-    fetchSeasonsWithActive();
+    fetchAllSeasons();
     fetchTeams();
     fetchMembers();
-  }, [fetchCategoriesFull, fetchSeasonsWithActive, fetchTeams, fetchMembers]);
+  }, [fetchCategoriesFull, fetchAllSeasons, fetchTeams, fetchMembers]);
 
   // Set first category as default when categories are loaded
   useEffect(() => {
@@ -396,7 +397,7 @@ export default function MatchesAdminPage() {
         venue: formData.venue,
         competition: getCategoryInfo(selectedCategory, categories).competition,
         is_home: true,
-        status: 'upcoming',
+        status: matchStatusesKeys[0],
       };
 
       // Handle matchweek - allow setting to null if empty, or parse the value
@@ -455,30 +456,21 @@ export default function MatchesAdminPage() {
         return;
       }
 
-      const homeScore = parseInt(resultData.home_score);
-      const awayScore = parseInt(resultData.away_score);
-
-      let result = 'draw';
-      if (homeScore > awayScore) {
-        result = 'win';
-      } else if (homeScore < awayScore) {
-        result = 'loss';
-      }
-
       const {error} = await supabase
         .from('matches')
         .update({
-          home_score: homeScore,
-          away_score: awayScore,
-          result: result,
-          status: 'completed',
+          home_score: resultData.home_score,
+          away_score: resultData.away_score,
+          home_score_halftime: resultData.home_score_halftime,
+          away_score_halftime: resultData.away_score_halftime,
+          status: matchStatusesKeys[1],
         })
         .eq('id', selectedMatch.id);
 
       if (error) throw error;
 
       onAddResultClose();
-      setResultData({home_score: '', away_score: ''});
+      setResultData({home_score: 0, away_score: 0, home_score_halftime: 0, away_score_halftime: 0});
       setSelectedMatch(null);
       // Refresh matches to show updated data
       refreshMatches();
@@ -544,14 +536,6 @@ export default function MatchesAdminPage() {
 
   // Open edit match modal
   const handleEditMatch = (match: Match) => {
-    console.log('🔍 handleEditMatch called with match:', match);
-    console.log('🔍 Current filteredTeams state:', {
-      count: filteredTeams.length,
-      teams: filteredTeams.map((t) => ({id: t.id, name: t.name})),
-    });
-    console.log('🔍 Match category_id:', match.category_id);
-    console.log('🔍 Selected category:', selectedCategory);
-
     setSelectedMatch(match);
     setEditData({
       date: match.date,
@@ -559,8 +543,10 @@ export default function MatchesAdminPage() {
       home_team_id: match.home_team_id,
       away_team_id: match.away_team_id,
       venue: match.venue,
-      home_score: match.home_score?.toString() || '',
-      away_score: match.away_score?.toString() || '',
+      home_score: match.home_score ?? 0,
+      away_score: match.away_score ?? 0,
+      home_score_halftime: match.home_score_halftime ?? 0,
+      away_score_halftime: match.away_score_halftime ?? 0,
       status: match.status,
       matchweek: match.matchweek ? match.matchweek.toString() : '',
       match_number: match.match_number ? match.match_number.toString() : '',
@@ -569,7 +555,6 @@ export default function MatchesAdminPage() {
 
     // Ensure filteredTeams is loaded for this category
     if (match.category_id && selectedSeason && filteredTeams.length === 0) {
-      console.log('🔄 filteredTeams is empty, forcing refresh...');
       fetchFilteredTeams(match.category_id, selectedSeason);
     }
 
@@ -598,20 +583,7 @@ export default function MatchesAdminPage() {
         return;
       }
 
-      // Calculate result if scores are provided
-      let result = selectedMatch.result;
-      if (editData.home_score && editData.away_score) {
-        const homeScore = parseInt(editData.home_score);
-        const awayScore = parseInt(editData.away_score);
-
-        if (homeScore > awayScore) {
-          result = 'win';
-        } else if (homeScore < awayScore) {
-          result = 'loss';
-        } else {
-          result = 'draw';
-        }
-      }
+      // Result is now computed from scores when needed, no need to store it
 
       const updateData: any = {
         date: editData.date,
@@ -638,9 +610,12 @@ export default function MatchesAdminPage() {
 
       // Only update scores if they are provided
       if (editData.home_score && editData.away_score) {
-        updateData.home_score = parseInt(editData.home_score);
-        updateData.away_score = parseInt(editData.away_score);
-        updateData.result = result;
+        updateData.home_score = editData.home_score;
+        updateData.away_score = editData.away_score;
+      }
+      if (editData.home_score_halftime && editData.away_score_halftime) {
+        updateData.home_score_halftime = editData.home_score_halftime;
+        updateData.away_score_halftime = editData.away_score_halftime;
       }
 
       const {error} = await supabase.from('matches').update(updateData).eq('id', selectedMatch.id);
@@ -657,8 +632,10 @@ export default function MatchesAdminPage() {
         home_team_id: '',
         away_team_id: '',
         venue: '',
-        home_score: '',
-        away_score: '',
+        home_score: 0,
+        away_score: 0,
+        home_score_halftime: 0,
+        away_score_halftime: 0,
         status: 'completed',
         matchweek: '',
         match_number: '',
@@ -933,7 +910,7 @@ export default function MatchesAdminPage() {
               ariaLabel={t.actions.deleteAllMatches}
               isIconOnly
               isDanger
-              variant="solid"
+              variant="ghost"
             >
               <TrashIcon className="w-4 h-4" />
             </ButtonWithTooltip>
@@ -963,7 +940,6 @@ export default function MatchesAdminPage() {
             selectedKeys={selectedSeason ? [selectedSeason] : []}
             onSelectionChange={(keys) => {
               const selectedKey = Array.from(keys)[0] as string;
-              // console.log('Season selection changed:', { keys, selectedKey });
               setSelectedSeason(selectedKey || '');
             }}
             className="w-full"
@@ -991,7 +967,6 @@ export default function MatchesAdminPage() {
                   aria-label="Categories"
                   selectedKey={selectedCategory}
                   onSelectionChange={(key) => {
-                    // console.log('Category selected:', key);
                     setSelectedCategory(key as string);
                   }}
                 >

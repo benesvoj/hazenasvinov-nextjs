@@ -1,19 +1,24 @@
 'use client';
 
-import React from "react";
-import { Card, CardBody } from "@heroui/card";
-import Link from "@/components/Link";
-import { Match } from "@/types";
-import { MapPinIcon } from "@heroicons/react/24/outline";
-import { formatDateToDayAndMonth, formatDateToWeekday, formatDateString, formatTime } from "@/helpers";
-import TeamDisplay from "./TeamDisplay";
-import TeamDisplayMobile from "./TeamDisplayMobile";
-
+import React from 'react';
+import {Card, CardBody} from '@heroui/card';
+import Link from '@/components/Link';
+import {Match} from '@/types';
+import {MapPinIcon} from '@heroicons/react/24/outline';
+import {
+  formatDateToDayAndMonth,
+  formatDateToWeekday,
+  formatDateString,
+  formatTime,
+} from '@/helpers';
+import TeamDisplay from './TeamDisplay';
+import TeamDisplayMobile from './TeamDisplayMobile';
+import {MatchScore} from '@/components';
 interface MatchCardProps {
   match: Match;
 }
 
-export default function MatchCard({ match }: MatchCardProps) {
+export default function MatchCard({match}: MatchCardProps) {
   return (
     <Link href={`/matches/${match.id}`} className="block">
       <Card className="hover:shadow-lg transition-shadow cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -44,7 +49,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                 <div className="space-y-2">
                   {/* Home Team */}
                   <TeamDisplay team={match.home_team} fallbackName="Home team" />
-                  
+
                   {/* Away Team */}
                   <TeamDisplay team={match.away_team} fallbackName="Away team" />
                 </div>
@@ -52,14 +57,14 @@ export default function MatchCard({ match }: MatchCardProps) {
 
               {/* Score - Right Side */}
               <div className="flex-shrink-0 ml-4">
-                {match.status === "completed" ? (
+                {match.status === 'completed' ? (
                   <div className="flex items-center gap-1">
                     <span className="text-xl font-bold text-gray-900 dark:text-white">
-                      {match.home_score !== undefined ? match.home_score : "-"}
+                      {match.home_score !== undefined ? match.home_score : '-'}
                     </span>
                     <span className="text-gray-400">:</span>
                     <span className="text-xl font-bold text-gray-900 dark:text-white">
-                      {match.away_score !== undefined ? match.away_score : "-"}
+                      {match.away_score !== undefined ? match.away_score : '-'}
                     </span>
                   </div>
                 ) : (
@@ -73,7 +78,7 @@ export default function MatchCard({ match }: MatchCardProps) {
             {/* Category and Venue - Bottom */}
             <div className="mt-2 space-y-1 flex justify-between">
               <div className="text-xs text-gray-600 dark:text-gray-400">
-                {match.category?.name} {match.matchweek && (`- ${match.matchweek}. kolo`)}
+                {match.category?.name} {match.matchweek && `- ${match.matchweek}. kolo`}
               </div>
               <div className="text-xs text-gray-600 dark:text-gray-400 flex">
                 <MapPinIcon className="w-3 h-3 mr-1" />
@@ -102,18 +107,26 @@ export default function MatchCard({ match }: MatchCardProps) {
               {/* Teams Row */}
               <div className="flex items-center gap-4 mb-2">
                 {/* Home Team */}
-                <TeamDisplayMobile team={match.home_team} fallbackName="Home team" isHomeTeam={true} />
-                
+                <TeamDisplayMobile
+                  team={match.home_team}
+                  fallbackName="Home team"
+                  isHomeTeam={true}
+                />
+
                 <span className="text-gray-400 text-sm">x</span>
-                
+
                 {/* Away Team */}
-                <TeamDisplayMobile team={match.away_team} fallbackName="Away team" isHomeTeam={false} />
+                <TeamDisplayMobile
+                  team={match.away_team}
+                  fallbackName="Away team"
+                  isHomeTeam={false}
+                />
               </div>
-              
+
               {/* Venue and League Info */}
               <div className="text-center">
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {match.category?.name} {match.matchweek && (`- ${match.matchweek}. kolo`)} 
+                  {match.category?.name} {match.matchweek && `- ${match.matchweek}. kolo`}
                   <MapPinIcon className="w-3 h-3 inline ml-1" /> {match.venue || 'Venue'}
                 </div>
               </div>
@@ -121,7 +134,8 @@ export default function MatchCard({ match }: MatchCardProps) {
 
             {/* Score - Right Side */}
             <div className="flex flex-col items-end min-w-[100px]">
-              {match.status === "completed" ? (
+              <MatchScore match={match} />
+              {/* {match.status === matchStatusesKeys[1] ? (
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-bold text-gray-900 dark:text-white">
                     {match.home_score !== undefined ? match.home_score : "-"}
@@ -135,7 +149,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-bold text-gray-400">-:-</span>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </CardBody>

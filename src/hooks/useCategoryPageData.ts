@@ -1,6 +1,7 @@
 import {useState, useEffect, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
 import {Category, Match, BlogPost} from '@/types';
+import {createMatchQuery} from '@/utils';
 
 export interface CategoryPageData {
   category: Category | null;
@@ -92,60 +93,19 @@ export function useCategoryPageData(
         );
       }
 
-      // Matches query with team details
+      // Matches query with team details - use new query system
       if (includeMatches) {
         queries.push(
-          supabase
-            .from('matches')
-            .select(
-              `
-              id,
-              date,
-              time,
-              venue,
-              competition,
-              status,
-              home_score,
-              away_score,
-              matchweek,
-              match_number,
-              category_id,
-              season_id,
-              created_at,
-              updated_at,
-              home_team_id,
-              away_team_id,
-              home_team:home_team_id(
-                id,
-                team_suffix,
-                club_category:club_categories(
-                  club:clubs(
-                    id,
-                    name,
-                    short_name,
-                    logo_url,
-                    is_own_club
-                  )
-                )
-              ),
-              away_team:away_team_id(
-                id,
-                team_suffix,
-                club_category:club_categories(
-                  club:clubs(
-                    id,
-                    name,
-                    short_name,
-                    logo_url,
-                    is_own_club
-                  )
-                )
-              )
-            `
-            )
-            .eq('category_id', category.id)
-            .eq('season_id', season.id)
-            .order('date', {ascending: true})
+          (async () => {
+            const query = createMatchQuery({
+              categoryId: category.id,
+              seasonId: season.id,
+              includeTeamDetails: true,
+              includeCategory: true,
+            });
+            const result = await query.executeSeasonal();
+            return {data: result, error: result.error};
+          })()
         );
       }
 
@@ -192,7 +152,7 @@ export function useCategoryPageData(
 
       // Process results
       let posts: BlogPost[] = [];
-      let matches: Match[] = [];
+      let matches: {autumn: Match[]; spring: Match[]} = {autumn: [], spring: []};
       let standings: any[] = [];
 
       let resultIndex = 0;
@@ -219,56 +179,12 @@ export function useCategoryPageData(
         if (matchesResult.error) {
           console.warn('Failed to fetch matches:', matchesResult.error);
         } else {
-          const allMatches = matchesResult.data || [];
-
-          // Process team names for each match using the already fetched team data
-          const processedMatches = allMatches.map((match: any) => {
-            // Process home team
-            const homeTeamDetails = match.home_team;
-            const homeClub = homeTeamDetails?.club_category?.club;
-            const homeTeamName = homeClub
-              ? `${homeClub.name} ${homeTeamDetails.team_suffix}`
-              : 'Neznámý tým';
-            const homeShortName = homeClub?.short_name
-              ? `${homeClub.short_name} ${homeTeamDetails.team_suffix}`
-              : homeTeamName;
-            const homeIsOwnClub = homeClub?.is_own_club === true;
-
-            // Process away team
-            const awayTeamDetails = match.away_team;
-            const awayClub = awayTeamDetails?.club_category?.club;
-            const awayTeamName = awayClub
-              ? `${awayClub.name} ${awayTeamDetails.team_suffix}`
-              : 'Neznámý tým';
-            const awayShortName = awayClub?.short_name
-              ? `${awayClub.short_name} ${awayTeamDetails.team_suffix}`
-              : awayTeamName;
-            const awayIsOwnClub = awayClub?.is_own_club === true;
-
-            return {
-              ...match,
-              home_team: {
-                id: homeTeamDetails?.id,
-                name: homeTeamName,
-                short_name: homeShortName,
-                logo_url: homeClub?.logo_url,
-                is_own_club: homeIsOwnClub,
-              },
-              away_team: {
-                id: awayTeamDetails?.id,
-                name: awayTeamName,
-                short_name: awayShortName,
-                logo_url: awayClub?.logo_url,
-                is_own_club: awayIsOwnClub,
-              },
-            };
-          });
-
-          // Filter matches to only show those where the user's club is playing
-          matches = processedMatches.filter(
-            (match: any) =>
-              match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
-          ) as Match[];
+          // The new query system already returns processed matches with seasonal split
+          const seasonalMatches = matchesResult.data;
+          matches = {
+            autumn: seasonalMatches.autumn || [],
+            spring: seasonalMatches.spring || [],
+          };
         }
       }
 
@@ -283,13 +199,6 @@ export function useCategoryPageData(
           const transformedStandings = allStandings.map((standing: any) => {
             const team = standing.club_category_teams;
             const club = team?.club_category?.club;
-
-            // Debug logging
-            if (!team || !club) {
-              console.warn('Missing team or club data for standing:', standing);
-              console.log('Team data:', team);
-              console.log('Club data:', club);
-            }
 
             // Create team name from club + suffix
             const teamName = club ? `${club.name} ${team.team_suffix}` : 'Neznámý tým';
@@ -385,24 +294,7 @@ export function useCategoryPageData(
         }
       }
 
-      // Process matches into seasonal groups
-      const autumnMatches: Match[] = [];
-      const springMatches: Match[] = [];
-
-      matches.forEach((match: any) => {
-        const matchDate = new Date(match.date);
-        const month = matchDate.getMonth() + 1;
-
-        if (month >= 8 || month <= 1) {
-          autumnMatches.push(match);
-        } else {
-          springMatches.push(match);
-        }
-      });
-
-      // Sort matches by date
-      autumnMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      // Matches are already processed by the query system with seasonal split
 
       // Process standings to include team names
       const processedStandings = standings.map((standing: any) => {
@@ -428,10 +320,7 @@ export function useCategoryPageData(
 
       setData({
         category,
-        matches: {
-          autumn: autumnMatches,
-          spring: springMatches,
-        },
+        matches,
         posts,
         standings: processedStandings,
         loading: false,

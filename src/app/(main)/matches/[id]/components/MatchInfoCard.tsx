@@ -1,17 +1,18 @@
-import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
-import { TeamDisplay } from "./";
-import { translations } from "@/lib/translations";
-import { formatTime } from "@/helpers/formatTime";
-import { CalendarIcon, ClockIcon, MapPinIcon } from "@heroicons/react/24/outline";
-import { Match } from "@/types";
-import { Heading } from "@/components";
-import { formatDateWithWeekday } from "@/helpers/formatDate";
+import {Card, CardBody, CardFooter, CardHeader} from '@heroui/card';
+import {TeamDisplay} from './';
+import {translations} from '@/lib/translations';
+import {formatTime} from '@/helpers/formatTime';
+import {CalendarIcon, ClockIcon, MapPinIcon} from '@heroicons/react/24/outline';
+import {Match} from '@/types';
+import {Heading} from '@/components';
+import {formatDateWithWeekday} from '@/helpers/formatDate';
+import {MatchScore} from '@/components';
 
 interface MatchInfoCardProps {
   match: Match;
 }
 
-export default function MatchInfoCard({ match }: MatchInfoCardProps) {
+export default function MatchInfoCard({match}: MatchInfoCardProps) {
   return (
     <Card>
       <CardHeader className="items-center flex flex-col gap-2">
@@ -34,16 +35,7 @@ export default function MatchInfoCard({ match }: MatchInfoCardProps) {
 
             {/* Score */}
             <div className="order-2 sm:order-2 flex flex-col items-center space-y-2">
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
-                {match.status === "completed"
-                  ? `${match.home_score || 0} : ${match.away_score || 0}`
-                  : "vs"}
-              </div>
-              {match.status === "upcoming" && (
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  {translations.matchDetail.matchNotStarted}
-                </div>
-              )}
+              <MatchScore match={match} desktopSize="2xl" />
             </div>
 
             {/* Away Team */}
@@ -58,23 +50,21 @@ export default function MatchInfoCard({ match }: MatchInfoCardProps) {
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-gray-500" />
             <div className="font-semibold text-sm sm:text-base">
-                {formatDateWithWeekday(match.date)}
+              {formatDateWithWeekday(match.date)}
             </div>
           </div>
           <div className="flex items-center gap-2">
             <ClockIcon className="w-5 h-5 text-gray-500" />
-            <div className="font-semibold text-sm sm:text-base">
-              {formatTime(match.time)}
-            </div>
+            <div className="font-semibold text-sm sm:text-base">{formatTime(match.time)}</div>
           </div>
         </div>
         <div className="flex items-center justify-center nowrap gap-2 text-sm text-gray-600 dark:text-gray-400">
-        {match.venue && (
-          <>
-            <MapPinIcon className="w-5 h-5 text-gray-500" />
-            {match.venue}
-          </>
-        )}  
+          {match.venue && (
+            <>
+              <MapPinIcon className="w-5 h-5 text-gray-500" />
+              {match.venue}
+            </>
+          )}
         </div>
       </CardFooter>
     </Card>
