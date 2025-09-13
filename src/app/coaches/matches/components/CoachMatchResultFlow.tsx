@@ -151,7 +151,9 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
           formData.homeScore >= 0 &&
           formData.awayScore >= 0 &&
           formData.homeScoreHalftime >= 0 &&
-          formData.awayScoreHalftime >= 0
+          formData.awayScoreHalftime >= 0 &&
+          formData.homeScoreHalftime <= formData.homeScore &&
+          formData.awayScoreHalftime <= formData.awayScore
         );
       case 2:
         return formData.matchPhoto !== null;
@@ -290,8 +292,15 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                     }
                     className="w-full"
                     min="0"
+                    max={formData.homeScore}
                     inputMode="numeric"
                     pattern="[0-9]*"
+                    color={formData.homeScoreHalftime > formData.homeScore ? 'danger' : 'default'}
+                    errorMessage={
+                      formData.homeScoreHalftime > formData.homeScore
+                        ? 'Poločasové skóre nemůže být vyšší než konečné skóre'
+                        : undefined
+                    }
                   />
                 </div>
                 <div>
@@ -305,11 +314,21 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                     }
                     className="w-full"
                     min="0"
+                    max={formData.awayScore}
                     inputMode="numeric"
                     pattern="[0-9]*"
+                    color={formData.awayScoreHalftime > formData.awayScore ? 'danger' : 'default'}
+                    errorMessage={
+                      formData.awayScoreHalftime > formData.awayScore
+                        ? 'Poločasové skóre nemůže být vyšší než konečné skóre'
+                        : undefined
+                    }
                   />
                 </div>
               </div>
+              <p className="text-xs text-gray-500 text-center">
+                Poločasové skóre musí být menší nebo rovno konečnému skóre pro každý tým
+              </p>
             </div>
           </div>
         );
@@ -361,12 +380,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       case 3:
         return (
           <div className="space-y-6">
-            <div className="text-center">
-              <DocumentTextIcon className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Poznámky trenéra</h3>
-              <p className="text-sm text-gray-600">Zadejte své poznámky a pozorování ze zápasu</p>
-            </div>
-
             <div className="space-y-4">
               <Textarea
                 placeholder="Zadejte své poznámky o zápase, výkonu hráčů, taktice, atd..."
@@ -398,7 +411,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={undefined}
       size="2xl"
       classNames={{
         base: 'max-w-[95vw] mx-2 max-h-[90vh]',
@@ -406,10 +419,22 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         backdrop: 'bg-black/50',
       }}
       scrollBehavior="inside"
+      isDismissable={false}
+      hideCloseButton={false}
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          <Heading size={2}>Záznam výsledku zápasu</Heading>
+          <div className="flex justify-between items-start w-full">
+            <Heading size={2}>Záznam výsledku zápasu</Heading>
+            <Button
+              isIconOnly
+              variant="light"
+              onPress={handleClose}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </Button>
+          </div>
           <div className="w-full">
             <Progress value={(currentStep / totalSteps) * 100} className="w-full" color="primary" />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -434,6 +459,9 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
 
         <ModalFooter className="flex justify-between">
           <div className="flex gap-2">
+            <Button variant="light" onPress={handleClose} isDisabled={isLoading}>
+              Zrušit
+            </Button>
             {currentStep > 1 && (
               <Button
                 variant="bordered"
