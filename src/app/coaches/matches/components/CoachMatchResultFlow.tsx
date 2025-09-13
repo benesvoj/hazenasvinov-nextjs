@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   Modal,
   ModalContent,
@@ -63,9 +63,30 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
     matchPhoto: null,
     coachNotes: '',
   });
+  const modalBodyRef = useRef<HTMLDivElement>(null);
 
   const t = translations.match;
   const totalSteps = 3;
+
+  // Handle keyboard events and scroll to active input
+  useEffect(() => {
+    const handleFocus = (event: FocusEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'INPUT' && modalBodyRef.current) {
+        // Small delay to ensure keyboard is shown
+        setTimeout(() => {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest',
+          });
+        }, 300);
+      }
+    };
+
+    document.addEventListener('focusin', handleFocus);
+    return () => document.removeEventListener('focusin', handleFocus);
+  }, []);
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -259,7 +280,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
             </div>
 
             {/* Halftime Score */}
-            <div className="space-y-4">
+            <div className="space-y-4 mt-8">
               <Heading size={4}>Poločasové skóre</Heading>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -395,10 +416,11 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       onClose={handleClose}
       size="2xl"
       classNames={{
-        base: 'max-w-[95vw] mx-2',
-        wrapper: 'items-start justify-center p-2 sm:p-4 pt-20',
+        base: 'max-w-[95vw] mx-2 max-h-[90vh]',
+        wrapper: 'items-start justify-center p-2 sm:p-4 pt-4 pb-4',
         backdrop: 'bg-black/50',
       }}
+      scrollBehavior="inside"
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
@@ -414,13 +436,15 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
           </div>
         </ModalHeader>
 
-        <ModalBody>
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-          {renderStep()}
+        <ModalBody className="max-h-[60vh] overflow-y-auto">
+          <div ref={modalBodyRef}>
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+            {renderStep()}
+          </div>
         </ModalBody>
 
         <ModalFooter className="flex justify-between">
