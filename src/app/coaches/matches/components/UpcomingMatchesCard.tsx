@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import {Card, CardHeader, CardBody} from '@heroui/react';
-import {CalendarIcon} from '@heroicons/react/24/outline';
+import {Card, CardHeader, CardBody, Button} from '@heroui/react';
+import {CalendarIcon, TrophyIcon} from '@heroicons/react/24/outline';
 import {MatchRow} from '@/components';
 import {LoadingSpinner} from '@/components';
 
@@ -11,6 +11,7 @@ interface UpcomingMatchesCardProps {
   loading: boolean;
   onMatchSelect?: (match: any) => void;
   selectedMatchId?: string;
+  onStartResultFlow?: (match: any) => void;
 }
 
 export default function UpcomingMatchesCard({
@@ -18,6 +19,7 @@ export default function UpcomingMatchesCard({
   loading,
   onMatchSelect,
   selectedMatchId,
+  onStartResultFlow,
 }: UpcomingMatchesCardProps) {
   return (
     <Card className="h-full">
@@ -36,14 +38,27 @@ export default function UpcomingMatchesCard({
               {upcomingMatches.map((match) => (
                 <div
                   key={match.id}
-                  className={`p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                  className={`p-4 border-b border-gray-200 dark:border-gray-700 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
                     selectedMatchId === match.id
                       ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
                       : ''
                   }`}
-                  onClick={() => onMatchSelect?.(match)}
                 >
-                  <MatchRow match={match} redirectionLinks={false} />
+                  <div className="cursor-pointer" onClick={() => onMatchSelect?.(match)}>
+                    <MatchRow match={match} redirectionLinks={false} />
+                  </div>
+                  <div className="mt-3 flex justify-end">
+                    <Button
+                      size="sm"
+                      color="success"
+                      variant="flat"
+                      startContent={<TrophyIcon className="w-4 h-4" />}
+                      onPress={() => onStartResultFlow?.(match)}
+                      className="text-xs"
+                    >
+                      Zaznamenat výsledek
+                    </Button>
+                  </div>
                 </div>
               ))}
               {upcomingMatches.length === 0 && (

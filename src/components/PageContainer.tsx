@@ -10,7 +10,7 @@ export interface PageContainerProps {
 
 export default function PageContainer({children, isUnderConstruction = false}: PageContainerProps) {
   return (
-    <div className="space-y-6 max-w-7xl mt-18">
+    <div className="space-y-2 sm:space-y-6 max-w-7xl mt-4 sm:mt-18">
       {isUnderConstruction && (
         <Alert
           color="warning"

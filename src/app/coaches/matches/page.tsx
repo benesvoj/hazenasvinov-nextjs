@@ -15,11 +15,14 @@ import {
   StandingsCard,
   StrategyPreparationZone,
 } from './components';
+import CoachMatchResultFlow from './components/CoachMatchResultFlow';
 import {Alert} from '@heroui/react';
 
 export default function CoachesMatchesPage() {
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
+  const [resultFlowMatch, setResultFlowMatch] = useState<any>(null);
+  const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
 
   const {activeSeason, fetchActiveSeason} = useSeasons();
   const {categories, fetchCategories} = useCategories();
@@ -94,6 +97,21 @@ export default function CoachesMatchesPage() {
     setSelectedMatch(null);
   };
 
+  const handleStartResultFlow = (match: any) => {
+    setResultFlowMatch(match);
+    setIsResultFlowOpen(true);
+  };
+
+  const handleCloseResultFlow = () => {
+    setIsResultFlowOpen(false);
+    setResultFlowMatch(null);
+  };
+
+  const handleResultSaved = () => {
+    // Refresh matches data
+    window.location.reload();
+  };
+
   const loading = matchesLoading || standingsLoading;
 
   if (!selectedCategoryData || !activeSeason) {
@@ -118,6 +136,7 @@ export default function CoachesMatchesPage() {
               loading={loading}
               onMatchSelect={handleMatchSelect}
               selectedMatchId={selectedMatch?.id}
+              onStartResultFlow={handleStartResultFlow}
             />
 
             {/* Recent Results */}
@@ -137,6 +156,14 @@ export default function CoachesMatchesPage() {
             <StrategyPreparationZone selectedMatch={selectedMatch} onClose={handleCloseStrategy} />
           </div>
         </div>
+
+        {/* Match Result Flow Modal */}
+        <CoachMatchResultFlow
+          isOpen={isResultFlowOpen}
+          onClose={handleCloseResultFlow}
+          match={resultFlowMatch}
+          onResultSaved={handleResultSaved}
+        />
       </div>
     </PageContainer>
   );

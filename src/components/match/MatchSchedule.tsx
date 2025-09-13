@@ -21,6 +21,8 @@ interface MatchScheduleProps {
   description?: string;
   showOnlyAssignedCategories?: boolean; // New prop to control category filtering
   redirectionLinks?: boolean;
+  onStartResultFlow?: (match: any) => void;
+  showResultButton?: boolean;
 }
 
 export default function MatchSchedule({
@@ -28,6 +30,8 @@ export default function MatchSchedule({
   description,
   showOnlyAssignedCategories = false,
   redirectionLinks = true,
+  onStartResultFlow,
+  showResultButton = false,
 }: MatchScheduleProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
@@ -243,6 +247,8 @@ export default function MatchSchedule({
               upcomingMatches={upcomingMatches}
               recentResults={recentResults}
               redirectionLinks={redirectionLinks}
+              onStartResultFlow={onStartResultFlow}
+              showResultButton={showResultButton}
             />
 
             {/* Right Column - Standings */}

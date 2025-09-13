@@ -1,21 +1,34 @@
 import React from 'react';
 import Link from '@/components/Link';
-import {MapPinIcon} from '@heroicons/react/24/outline';
+import {MapPinIcon, TrophyIcon} from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import {formatDateToDayAndMonth, formatDateToWeekday, formatTime} from '@/helpers';
 import {Match} from '@/types';
 import {MatchScore} from '@/components';
+import {Button} from '@heroui/react';
 
 interface MatchRowProps {
   match: Match;
   compact?: boolean;
   redirectionLinks: boolean;
+  onStartResultFlow?: (match: Match) => void;
+  showResultButton?: boolean;
 }
 
-const MatchRow: React.FC<MatchRowProps> = ({match, compact = true, redirectionLinks = true}) => {
+const MatchRow: React.FC<MatchRowProps> = ({
+  match,
+  compact = true,
+  redirectionLinks = true,
+  onStartResultFlow,
+  showResultButton = false,
+}) => {
+  const handleResultButtonClick = () => {
+    onStartResultFlow?.(match);
+  };
+
   return (
-    <Link href={redirectionLinks ? `/matches/${match.id}` : '#'} className="block">
-      <div className="border rounded-lg p-3 lg:p-2 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
+    <div className="border rounded-lg p-3 lg:p-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+      <Link href={redirectionLinks ? `/matches/${match.id}` : '#'} className="block">
         <div className="flex items-center justify-between">
           {/* Date and Time - Left Side */}
           <div
@@ -123,8 +136,24 @@ const MatchRow: React.FC<MatchRowProps> = ({match, compact = true, redirectionLi
             <MatchScore match={match} />
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+
+      {/* Result Flow Button - Only show for upcoming matches when enabled */}
+      {showResultButton && match.status === 'upcoming' && onStartResultFlow && (
+        <div className="mt-3 flex justify-end">
+          <Button
+            size="sm"
+            color="success"
+            variant="flat"
+            startContent={<TrophyIcon className="w-4 h-4" />}
+            onPress={handleResultButtonClick}
+            className="text-xs"
+          >
+            Zaznamenat výsledek
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 

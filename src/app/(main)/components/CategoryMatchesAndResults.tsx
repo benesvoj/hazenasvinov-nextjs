@@ -11,6 +11,8 @@ interface CategoryMatchesAndResultsProps {
   upcomingMatches: any[];
   recentResults: any[];
   redirectionLinks: boolean;
+  onStartResultFlow?: (match: any) => void;
+  showResultButton?: boolean;
 }
 
 export default function CategoryMatchesAndResults({
@@ -20,6 +22,8 @@ export default function CategoryMatchesAndResults({
   upcomingMatches,
   recentResults,
   redirectionLinks,
+  onStartResultFlow,
+  showResultButton = false,
 }: CategoryMatchesAndResultsProps) {
   return (
     <div className="space-y-6">
@@ -53,7 +57,13 @@ export default function CategoryMatchesAndResults({
           ) : (
             <div className="space-y-4">
               {upcomingMatches.map((match) => (
-                <MatchRow key={match.id} match={match} redirectionLinks={redirectionLinks} />
+                <MatchRow
+                  key={match.id}
+                  match={match}
+                  redirectionLinks={redirectionLinks}
+                  onStartResultFlow={onStartResultFlow}
+                  showResultButton={showResultButton}
+                />
               ))}
               {upcomingMatches.length === 0 && (
                 <div className="text-center py-8 text-gray-500">

@@ -8,11 +8,29 @@ import {Button, Card, CardBody, CardHeader} from '@heroui/react';
 import MatchSchedule from '@/components/match/MatchSchedule';
 import {BirthdayCard} from './components';
 import {PageContainer, LoadingSpinner} from '@/components';
+import CoachMatchResultFlow from '../matches/components/CoachMatchResultFlow';
 
 export default function CoachesDashboard() {
   const {user, userProfile, loading, error} = useUser();
+  const [resultFlowMatch, setResultFlowMatch] = useState<any>(null);
+  const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
 
   // Authentication is handled by ProtectedCoachRoute
+
+  const handleStartResultFlow = (match: any) => {
+    setResultFlowMatch(match);
+    setIsResultFlowOpen(true);
+  };
+
+  const handleCloseResultFlow = () => {
+    setIsResultFlowOpen(false);
+    setResultFlowMatch(null);
+  };
+
+  const handleResultSaved = () => {
+    // Refresh matches data
+    window.location.reload();
+  };
 
   if (loading) {
     return (
@@ -42,13 +60,13 @@ export default function CoachesDashboard() {
   return (
     <PageContainer>
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-6">
         {/* Birthday Card */}
-        <div className="sm:col-span-2 xl:col-span-1">
+        <div className=" hidden sm:block m:col-span-2 xl:col-span-1">
           <BirthdayCard />
         </div>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer hidden sm:block">
           <CardBody className="text-center p-4 sm:p-6">
             <AcademicCapIcon className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 mx-auto mb-3 sm:mb-4" />
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Zápasy</h3>
@@ -62,7 +80,7 @@ export default function CoachesDashboard() {
         </Card>
 
         <Link href="/coaches/videos" className="block">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer hidden sm:block">
             <CardBody className="text-center p-4 sm:p-6">
               <VideoCameraIcon className="w-10 h-10 sm:w-12 sm:h-12 text-purple-600 mx-auto mb-3 sm:mb-4" />
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Videa</h3>
@@ -82,7 +100,7 @@ export default function CoachesDashboard() {
           </Card>
         </Link>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer hidden sm:block">
           <CardBody className="text-center p-4 sm:p-6">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <span className="text-xl sm:text-2xl">📊</span>
@@ -96,9 +114,14 @@ export default function CoachesDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
         <div className="lg:col-span-2">
-          <MatchSchedule showOnlyAssignedCategories={true} redirectionLinks={false} />
+          <MatchSchedule
+            showOnlyAssignedCategories={true}
+            redirectionLinks={false}
+            onStartResultFlow={handleStartResultFlow}
+            showResultButton={true}
+          />
         </div>
       </div>
 
@@ -107,6 +130,14 @@ export default function CoachesDashboard() {
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Více funkcí brzy k dispozici</h3>
         <p className="text-gray-600">Průběžně přidáváme nové možnosti pro trenéry</p>
       </div>
+
+      {/* Match Result Flow Modal */}
+      <CoachMatchResultFlow
+        isOpen={isResultFlowOpen}
+        onClose={handleCloseResultFlow}
+        match={resultFlowMatch}
+        onResultSaved={handleResultSaved}
+      />
     </PageContainer>
   );
 }
