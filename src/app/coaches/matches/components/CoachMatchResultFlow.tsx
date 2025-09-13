@@ -13,7 +13,7 @@ import {
   Card,
   CardBody,
   Image,
-  NumberInput,
+  Input,
 } from '@heroui/react';
 import {
   XMarkIcon,
@@ -225,22 +225,36 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
             <div className="space-y-4">
               <Heading size={4}>Konečné skóre</Heading>
               <div className="grid grid-cols-2 gap-4">
-                <NumberInput
-                  label={t.homeTeam}
-                  placeholder="0"
-                  value={formData.homeScore}
-                  onChange={(value) => handleInputChange('homeScore', value as number)}
-                  className="w-full"
-                  min={0}
-                />
-                <NumberInput
-                  label={t.awayTeam}
-                  placeholder="0"
-                  value={formData.awayScore}
-                  onChange={(value) => handleInputChange('awayScore', value as number)}
-                  className="w-full"
-                  min={0}
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t.homeTeam}
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={formData.homeScore.toString()}
+                    onChange={(e) => handleInputChange('homeScore', parseInt(e.target.value) || 0)}
+                    className="w-full"
+                    min="0"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t.awayTeam}
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={formData.awayScore.toString()}
+                    onChange={(e) => handleInputChange('awayScore', parseInt(e.target.value) || 0)}
+                    className="w-full"
+                    min="0"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                  />
+                </div>
               </div>
             </div>
 
@@ -248,22 +262,40 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
             <div className="space-y-4">
               <Heading size={4}>Poločasové skóre</Heading>
               <div className="grid grid-cols-2 gap-4">
-                <NumberInput
-                  label={t.homeTeam}
-                  placeholder="0"
-                  value={formData.homeScoreHalftime}
-                  onChange={(value) => handleInputChange('homeScoreHalftime', value as number)}
-                  className="w-full"
-                  min={0}
-                />
-                <NumberInput
-                  label={t.awayTeam}
-                  placeholder="0"
-                  value={formData.awayScoreHalftime}
-                  onChange={(value) => handleInputChange('awayScoreHalftime', value as number)}
-                  className="w-full"
-                  min={0}
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t.homeTeam}
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={formData.homeScoreHalftime.toString()}
+                    onChange={(e) =>
+                      handleInputChange('homeScoreHalftime', parseInt(e.target.value) || 0)
+                    }
+                    className="w-full"
+                    min="0"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t.awayTeam}
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={formData.awayScoreHalftime.toString()}
+                    onChange={(e) =>
+                      handleInputChange('awayScoreHalftime', parseInt(e.target.value) || 0)
+                    }
+                    className="w-full"
+                    min="0"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                  />
+                </div>
               </div>
             </div>
           </div>
