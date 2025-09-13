@@ -73,14 +73,30 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
     const handleFocus = (event: FocusEvent) => {
       const target = event.target as HTMLElement;
       if (target.tagName === 'INPUT' && modalBodyRef.current) {
-        // Small delay to ensure keyboard is shown
-        setTimeout(() => {
+        // Multiple attempts to ensure proper scrolling
+        const scrollToInput = () => {
           target.scrollIntoView({
             behavior: 'smooth',
             block: 'center',
             inline: 'nearest',
           });
-        }, 300);
+        };
+
+        // Immediate scroll
+        scrollToInput();
+
+        // Delayed scrolls to handle keyboard animation
+        setTimeout(scrollToInput, 100);
+        setTimeout(scrollToInput, 300);
+        setTimeout(scrollToInput, 600);
+        setTimeout(scrollToInput, 1000);
+
+        // Also scroll the modal body to ensure visibility
+        setTimeout(() => {
+          if (modalBodyRef.current) {
+            modalBodyRef.current.scrollTop = modalBodyRef.current.scrollHeight;
+          }
+        }, 500);
       }
     };
 
@@ -414,8 +430,8 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       onClose={undefined}
       size="2xl"
       classNames={{
-        base: 'max-w-[95vw] mx-2 max-h-[90vh]',
-        wrapper: 'items-start justify-center p-2 sm:p-4 pt-4 pb-4',
+        base: 'max-w-[95vw] mx-2 max-h-[85vh]',
+        wrapper: 'items-start justify-start p-2 sm:p-4 pt-4 pb-4',
         backdrop: 'bg-black/50',
       }}
       scrollBehavior="inside"
@@ -426,14 +442,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         <ModalHeader className="flex flex-col gap-1">
           <div className="flex justify-between items-start w-full">
             <Heading size={2}>Záznam výsledku zápasu</Heading>
-            <Button
-              isIconOnly
-              variant="light"
-              onPress={handleClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </Button>
           </div>
           <div className="w-full">
             <Progress value={(currentStep / totalSteps) * 100} className="w-full" color="primary" />
@@ -446,7 +454,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
           </div>
         </ModalHeader>
 
-        <ModalBody className="max-h-[60vh] overflow-y-auto">
+        <ModalBody className="max-h-[70vh] overflow-y-auto">
           <div ref={modalBodyRef}>
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
@@ -459,7 +467,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
 
         <ModalFooter className="flex justify-between">
           <div className="flex gap-2">
-            <Button variant="light" onPress={handleClose} isDisabled={isLoading}>
+            <Button color="secondary" variant="light" onPress={handleClose} isDisabled={isLoading}>
               Zrušit
             </Button>
             {currentStep > 1 && (
