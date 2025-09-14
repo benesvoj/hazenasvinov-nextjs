@@ -85,5 +85,6 @@ export {showToast, useToast} from './Toast';
 export {default as MatchSchedule} from './match/MatchSchedule';
 export {default as MatchRow} from './match/MatchRow';
 export {default as MatchScore} from './match/MatchScore';
+export {MatchResultInput} from './match/MatchResultInput';
 export {default as UnifiedModal} from './UnifiedModal';
 export {default as PageContainer} from './PageContainer';

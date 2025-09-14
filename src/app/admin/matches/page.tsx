@@ -56,6 +56,7 @@ import {calculateStandings, generateInitialStandings, createClient} from '@/util
 import {matchStatuses, matchStatusesKeys} from '@/constants';
 import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
 import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
+import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');
@@ -488,6 +489,26 @@ export default function MatchesAdminPage() {
       // Refresh materialized view to ensure it has the latest data
       await refreshMaterializedViewWithCallback('admin result update');
 
+      // Automatically recalculate standings for this match's category and season
+      try {
+        console.log('Recalculating standings after admin match result update...');
+        const standingsResult = await autoRecalculateStandings(selectedMatch.id);
+
+        if (standingsResult.success && standingsResult.recalculated) {
+          console.log('Standings recalculated successfully');
+          showToast.success('Výsledek zápasu byl uložen a tabulka byla automaticky přepočítána!');
+        } else if (standingsResult.success && !standingsResult.recalculated) {
+          console.log('Standings recalculation skipped (no standings exist or season closed)');
+          showToast.success('Výsledek zápasu byl úspěšně uložen!');
+        } else {
+          console.warn('Standings recalculation failed:', standingsResult.error);
+          showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
+        }
+      } catch (standingsError) {
+        console.error('Error during standings recalculation:', standingsError);
+        showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
+      }
+
       onAddResultClose();
       setResultData({home_score: 0, away_score: 0, home_score_halftime: 0, away_score_halftime: 0});
       setSelectedMatch(null);
@@ -649,6 +670,34 @@ export default function MatchesAdminPage() {
 
       // Refresh materialized view to ensure it has the latest data
       await refreshMaterializedViewWithCallback('admin match update');
+
+      // Check if scores were updated and trigger standings recalculation
+      const scoresWereUpdated =
+        editData.home_score !== selectedMatch.home_score ||
+        editData.away_score !== selectedMatch.away_score ||
+        editData.home_score_halftime !== selectedMatch.home_score_halftime ||
+        editData.away_score_halftime !== selectedMatch.away_score_halftime;
+
+      if (scoresWereUpdated) {
+        try {
+          console.log('Scores were updated, recalculating standings...');
+          const standingsResult = await autoRecalculateStandings(selectedMatch.id);
+
+          if (standingsResult.success && standingsResult.recalculated) {
+            console.log('Standings recalculated successfully');
+            showToast.success('Zápas byl upraven a tabulka byla automaticky přepočítána!');
+          } else if (standingsResult.success && !standingsResult.recalculated) {
+            console.log('Standings recalculation skipped (no standings exist or season closed)');
+            showToast.success('Zápas byl úspěšně upraven!');
+          } else {
+            console.warn('Standings recalculation failed:', standingsResult.error);
+            showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
+          }
+        } catch (standingsError) {
+          console.error('Error during standings recalculation:', standingsError);
+          showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
+        }
+      }
 
       onEditMatchClose();
       setEditData({

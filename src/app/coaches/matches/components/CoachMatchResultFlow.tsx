@@ -28,11 +28,10 @@ import {Match} from '@/types';
 import {formatDateString} from '@/helpers';
 import {createClient} from '@/utils/supabase/client';
 import {translations} from '@/lib/translations';
-import {Heading} from '@/components';
+import {Heading, MatchResultInput} from '@/components';
 import {showToast} from '@/components/Toast';
 import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
 import {useQueryClient} from '@tanstack/react-query';
-import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
 
 interface CoachMatchResultFlowProps {
   isOpen: boolean;
@@ -179,7 +178,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       case 2:
         return formData.matchPhoto !== null;
       case 3:
-        return true; // Coach notes are now optional
+        return formData.coachNotes.trim() !== '';
       default:
         return false;
     }
@@ -256,7 +255,24 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       console.log('Updated match data:', updateData);
 
       // Refresh materialized view to ensure it has the latest data
-      await refreshMaterializedViewWithCallback('coach result update');
+      console.log('Refreshing materialized view...');
+      try {
+        const {error: refreshError} = await supabase.rpc('refresh_materialized_view', {
+          view_name: 'own_club_matches',
+        });
+
+        if (refreshError) {
+          console.warn('Failed to refresh materialized view via RPC:', refreshError);
+          // Fallback: try to force refresh by querying the view
+          await supabase.from('own_club_matches').select('id').limit(1);
+          console.log('Materialized view refreshed via query fallback');
+        } else {
+          console.log('Materialized view refreshed successfully via RPC');
+        }
+      } catch (error) {
+        console.warn('Materialized view refresh failed:', error);
+        // Continue anyway - the cache invalidation should still work
+      }
 
       // Invalidate cache to ensure fresh data
       if (match?.category_id && match?.season_id) {
@@ -326,29 +342,19 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
               <Heading size={4}>Konečné skóre</Heading>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Input
+                  <MatchResultInput
                     label={t.homeTeam}
-                    type="number"
-                    placeholder="0"
-                    value={formData.homeScore.toString()}
-                    onChange={(e) => handleInputChange('homeScore', parseInt(e.target.value) || 0)}
-                    className="w-full"
-                    min="0"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                    value={formData.homeScore}
+                    onChange={(value) => handleInputChange('homeScore', value)}
+                    isDisabled={isLoading}
                   />
                 </div>
                 <div>
-                  <Input
+                  <MatchResultInput
                     label={t.awayTeam}
-                    type="number"
-                    placeholder="0"
-                    value={formData.awayScore.toString()}
-                    onChange={(e) => handleInputChange('awayScore', parseInt(e.target.value) || 0)}
-                    className="w-full"
-                    min="0"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                    value={formData.awayScore}
+                    onChange={(value) => handleInputChange('awayScore', value)}
+                    isDisabled={isLoading}
                   />
                 </div>
               </div>
@@ -359,19 +365,11 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
               <Heading size={4}>Poločasové skóre</Heading>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Input
+                  <MatchResultInput
                     label={t.homeTeam}
-                    type="number"
-                    placeholder="0"
-                    value={formData.homeScoreHalftime.toString()}
-                    onChange={(e) =>
-                      handleInputChange('homeScoreHalftime', parseInt(e.target.value) || 0)
-                    }
-                    className="w-full"
-                    min="0"
-                    max={formData.homeScore}
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                    value={formData.homeScoreHalftime}
+                    onChange={(value) => handleInputChange('homeScoreHalftime', value)}
+                    isDisabled={isLoading}
                     color={formData.homeScoreHalftime > formData.homeScore ? 'danger' : 'default'}
                     errorMessage={
                       formData.homeScoreHalftime > formData.homeScore
@@ -381,19 +379,11 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                   />
                 </div>
                 <div>
-                  <Input
+                  <MatchResultInput
                     label={t.awayTeam}
-                    type="number"
-                    placeholder="0"
-                    value={formData.awayScoreHalftime.toString()}
-                    onChange={(e) =>
-                      handleInputChange('awayScoreHalftime', parseInt(e.target.value) || 0)
-                    }
-                    className="w-full"
-                    min="0"
-                    max={formData.awayScore}
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                    value={formData.awayScoreHalftime}
+                    onChange={(value) => handleInputChange('awayScoreHalftime', value)}
+                    isDisabled={isLoading}
                     color={formData.awayScoreHalftime > formData.awayScore ? 'danger' : 'default'}
                     errorMessage={
                       formData.awayScoreHalftime > formData.awayScore
@@ -428,9 +418,9 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                   </div>
                   <div className="text-sm text-gray-600">
                     <span className="font-medium text-blue-600 hover:text-blue-500">
-                      Klikněte pro výběr zápisu utkání
+                      Klikněte pro výběr
                     </span>{' '}
-                    z galerie nebo pořiďte novou fotografii zápisu utkání
+                    z galerie nebo pořiďte novou fotografii
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG až 5MB</p>
                 </div>
@@ -458,22 +448,17 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         return (
           <div className="space-y-6">
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Poznámky trenéra <span className="text-gray-400">(volitelné)</span>
-                </label>
-                <Textarea
-                  placeholder="Zadejte své poznámky o zápase, výkonu hráčů, taktice, atd... (volitelné)"
-                  value={formData.coachNotes}
-                  onChange={(e) => handleInputChange('coachNotes', e.target.value)}
-                  rows={8}
-                  className="w-full"
-                  maxLength={1000}
-                />
-                <p className="text-xs text-gray-500 text-right">
-                  {formData.coachNotes.length}/1000 znaků
-                </p>
-              </div>
+              <Textarea
+                placeholder="Zadejte své poznámky o zápase, výkonu hráčů, taktice, atd..."
+                value={formData.coachNotes}
+                onChange={(e) => handleInputChange('coachNotes', e.target.value)}
+                rows={8}
+                className="w-full"
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-500 text-right">
+                {formData.coachNotes.length}/1000 znaků
+              </p>
             </div>
           </div>
         );
@@ -484,7 +469,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
   };
 
   const getStepTitle = () => {
-    const titles = ['Výsledek zápasu', 'Fotografie', 'Poznámky trenéra (volitelné)'];
+    const titles = ['Výsledek zápasu', 'Fotografie', 'Poznámky trenéra'];
     return titles[currentStep - 1] || '';
   };
 

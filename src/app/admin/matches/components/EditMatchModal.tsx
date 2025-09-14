@@ -57,8 +57,13 @@ export default function EditMatchModal({
     value: string | number | React.ChangeEvent<HTMLInputElement>
   ) => {
     // Handle NumberInput which can return either a number or ChangeEvent
-    const actualValue =
-      typeof value === 'object' && value !== null && 'target' in value ? value.target.value : value;
+    let actualValue: string | number;
+
+    if (typeof value === 'object' && value !== null && 'target' in value) {
+      actualValue = value.target.value;
+    } else {
+      actualValue = value;
+    }
 
     onEditDataChange({
       ...editData,
