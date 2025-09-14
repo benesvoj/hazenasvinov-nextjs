@@ -6,6 +6,7 @@ import {
   SponsorsSection,
   ClubHighlightSection,
   PostSection,
+  LatestResultsSection,
 } from './components';
 import {useSectionVisibility} from '@/hooks/useSectionVisibility';
 import AuthHandler from './components/AuthHandler';
@@ -19,6 +20,7 @@ export default function Page() {
   return (
     <div className="space-y-8">
       <AuthHandler />
+      <LatestResultsSection />
       <PostSection />
       <MatchSchedule title={t.title} description={t.description} />
       {/* <OptimizedMatchSchedule /> */}

@@ -232,3 +232,12 @@ html {
 .admin-sidebar-nav::-webkit-scrollbar-thumb:hover {
   background: #6B7280;
 }
+
+/* Hide scrollbar for horizontal scrolling sections */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
