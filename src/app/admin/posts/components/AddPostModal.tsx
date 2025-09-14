@@ -16,7 +16,7 @@ import {
 } from '@heroui/react';
 import {PhotoIcon, XMarkIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
 import {Category, Match, BlogPost} from '@/types';
-import {postStatuses} from '@/constants';
+import {postStatuses, postStatusLabels} from '@/constants';
 import {generateSlug} from '@/utils/slugGenerator';
 import {formatDateString} from '@/helpers';
 import MatchSelectionModal from './MatchSelectionModal';
@@ -178,8 +178,10 @@ export default function AddPostModal({
                 }
                 isRequired
               >
-                {Object.values(postStatuses).map((status) => (
-                  <SelectItem key={status}>{status}</SelectItem>
+                {Object.entries(postStatuses).map(([key, value]) => (
+                  <SelectItem key={value}>
+                    {postStatusLabels[key as keyof typeof postStatusLabels]}
+                  </SelectItem>
                 ))}
               </Select>
 
