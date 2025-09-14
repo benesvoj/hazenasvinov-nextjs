@@ -32,6 +32,7 @@ import {Heading, MatchResultInput} from '@/components';
 import {showToast} from '@/components/Toast';
 import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
 import {useQueryClient} from '@tanstack/react-query';
+import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
 
 interface CoachMatchResultFlowProps {
   isOpen: boolean;
@@ -254,6 +255,26 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       console.log('Match updated successfully');
       console.log('Updated match data:', updateData);
 
+      // Automatically recalculate standings for this match's category and season
+      try {
+        console.log('Recalculating standings after coach match result update...');
+        const standingsResult = await autoRecalculateStandings(match.id);
+
+        if (standingsResult.success && standingsResult.recalculated) {
+          console.log('Standings recalculated successfully');
+          showToast.success('Výsledek zápasu byl uložen a tabulka byla automaticky přepočítána!');
+        } else if (standingsResult.success && !standingsResult.recalculated) {
+          console.log('Standings recalculation skipped (no standings exist or season closed)');
+          showToast.success('Výsledek zápasu byl úspěšně uložen!');
+        } else {
+          console.warn('Standings recalculation failed:', standingsResult.error);
+          showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
+        }
+      } catch (standingsError) {
+        console.error('Error during standings recalculation:', standingsError);
+        showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
+      }
+
       // Refresh materialized view to ensure it has the latest data
       console.log('Refreshing materialized view...');
       try {
@@ -301,8 +322,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
           queryKey: ['matches', 'ownClub', match.category_id, match.season_id],
         });
       }
-
-      showToast.success('Výsledek zápasu byl úspěšně uložen!');
 
       // Small delay to ensure cache invalidation completes
       setTimeout(() => {

@@ -496,6 +496,10 @@ export default function MatchesAdminPage() {
 
         if (standingsResult.success && standingsResult.recalculated) {
           console.log('Standings recalculated successfully');
+          // Refresh standings to show updated data
+          if (selectedCategory && selectedSeason) {
+            await fetchStandings(selectedCategory, selectedSeason);
+          }
           showToast.success('Výsledek zápasu byl uložen a tabulka byla automaticky přepočítána!');
         } else if (standingsResult.success && !standingsResult.recalculated) {
           console.log('Standings recalculation skipped (no standings exist or season closed)');
@@ -685,6 +689,10 @@ export default function MatchesAdminPage() {
 
           if (standingsResult.success && standingsResult.recalculated) {
             console.log('Standings recalculated successfully');
+            // Refresh standings to show updated data
+            if (selectedCategory && selectedSeason) {
+              await fetchStandings(selectedCategory, selectedSeason);
+            }
             showToast.success('Zápas byl upraven a tabulka byla automaticky přepočítána!');
           } else if (standingsResult.success && !standingsResult.recalculated) {
             console.log('Standings recalculation skipped (no standings exist or season closed)');
