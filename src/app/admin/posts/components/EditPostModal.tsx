@@ -11,7 +11,7 @@ import {BlogPost, Category, Match} from '@/types';
 import {generateSlug} from '@/utils/slugGenerator';
 import {formatDateString} from '@/helpers';
 import MatchSelectionModal from './MatchSelectionModal';
-import {postStatuses} from '@/constants';
+import {postStatuses, postStatusLabels} from '@/constants';
 
 interface User {
   id: string;
@@ -208,8 +208,10 @@ export default function EditPostModal({
                 }
                 isRequired
               >
-                {Object.values(postStatuses).map((status) => (
-                  <SelectItem key={status}>{status}</SelectItem>
+                {Object.entries(postStatuses).map(([key, value]) => (
+                  <SelectItem key={value}>
+                    {postStatusLabels[key as keyof typeof postStatusLabels]}
+                  </SelectItem>
                 ))}
               </Select>
 

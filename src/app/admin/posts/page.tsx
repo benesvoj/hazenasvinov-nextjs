@@ -28,7 +28,7 @@ import {formatDateString} from '@/helpers';
 import {AdminContainer} from '../components/AdminContainer';
 import {translations} from '@/lib/translations';
 import {showToast, LoadingSpinner} from '@/components';
-import {adminStatusFilterOptions} from '@/constants';
+import {adminStatusFilterOptions, statusFilterToDbValue} from '@/constants';
 import {useDebounce} from '@/hooks/useDebounce';
 import {createSearchablePost, searchPosts} from '@/utils/contentSearch';
 
@@ -552,7 +552,8 @@ export default function BlogPostsPage() {
   // Filter posts based on debounced search and status
   const filteredPosts = searchablePosts.filter((post) => {
     const matchesSearch = searchPosts([post], debouncedSearchTerm).length > 0;
-    const matchesStatus = statusFilter === 'all' || post.status === statusFilter;
+    const dbStatusValue = statusFilterToDbValue[statusFilter as keyof typeof statusFilterToDbValue];
+    const matchesStatus = statusFilter === 'all' || post.status === dbStatusValue;
     return matchesSearch && matchesStatus;
   });
 
