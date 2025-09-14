@@ -54,6 +54,8 @@ import {
 import {AdminContainer} from '../components/AdminContainer';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
 import {matchStatuses, matchStatusesKeys} from '@/constants';
+import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
+import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');
@@ -426,6 +428,9 @@ export default function MatchesAdminPage() {
 
       if (error) throw error;
 
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin match insert');
+
       onAddMatchClose();
       setFormData({
         date: '',
@@ -474,10 +479,14 @@ export default function MatchesAdminPage() {
           home_score_halftime: resultData.home_score_halftime,
           away_score_halftime: resultData.away_score_halftime,
           status: matchStatusesKeys[1],
+          updated_at: new Date().toISOString(),
         })
         .eq('id', selectedMatch.id);
 
       if (error) throw error;
+
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin result update');
 
       onAddResultClose();
       setResultData({home_score: 0, away_score: 0, home_score_halftime: 0, away_score_halftime: 0});
@@ -510,6 +519,9 @@ export default function MatchesAdminPage() {
       const {error} = await supabase.from('matches').delete().eq('id', matchToDelete.id);
 
       if (error) throw error;
+
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin match delete');
 
       // Refresh matches to show updated data
       refreshMatches();
@@ -635,6 +647,9 @@ export default function MatchesAdminPage() {
         throw error;
       }
 
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin match update');
+
       onEditMatchClose();
       setEditData({
         date: '',
@@ -727,6 +742,9 @@ export default function MatchesAdminPage() {
         console.error('Supabase error details:', error);
         throw error;
       }
+
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin bulk update');
 
       setError('');
       onBulkUpdateClose();
@@ -922,6 +940,14 @@ export default function MatchesAdminPage() {
             >
               <TrashIcon className="w-4 h-4" />
             </ButtonWithTooltip>
+            <Button
+              color="primary"
+              onPress={testMaterializedViewRefresh}
+              size="sm"
+              aria-label="Test materialized view refresh"
+            >
+              🔍 Test MV Refresh
+            </Button>
           </div>
         </>
       }

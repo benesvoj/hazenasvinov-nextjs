@@ -32,6 +32,7 @@ import {Heading} from '@/components';
 import {showToast} from '@/components/Toast';
 import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
 import {useQueryClient} from '@tanstack/react-query';
+import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
 
 interface CoachMatchResultFlowProps {
   isOpen: boolean;
@@ -255,24 +256,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       console.log('Updated match data:', updateData);
 
       // Refresh materialized view to ensure it has the latest data
-      console.log('Refreshing materialized view...');
-      try {
-        const {error: refreshError} = await supabase.rpc('refresh_materialized_view', {
-          view_name: 'own_club_matches',
-        });
-
-        if (refreshError) {
-          console.warn('Failed to refresh materialized view via RPC:', refreshError);
-          // Fallback: try to force refresh by querying the view
-          await supabase.from('own_club_matches').select('id').limit(1);
-          console.log('Materialized view refreshed via query fallback');
-        } else {
-          console.log('Materialized view refreshed successfully via RPC');
-        }
-      } catch (error) {
-        console.warn('Materialized view refresh failed:', error);
-        // Continue anyway - the cache invalidation should still work
-      }
+      await refreshMaterializedViewWithCallback('coach result update');
 
       // Invalidate cache to ensure fresh data
       if (match?.category_id && match?.season_id) {
