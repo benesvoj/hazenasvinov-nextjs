@@ -10,11 +10,11 @@ export default function MatchResultCard({match, categoryName}: MatchResultCardPr
   return (
     <Card className="w-full min-w-[200px] max-w-[230px] hover:shadow-lg transition-shadow duration-200 flex-shrink-0">
       <CardBody className="p-2">
+        <div className="text-xs text-center w-full">{categoryName}</div>
         <div className="flex gap-2 justify-between px-2">
           <div className="flex align-center text-xs gap-4">
             <div className="flex flex-col justify-center">
               <span>{formatDateToDayAndMonth(match.date)}</span>
-              <div className="text-xs text-blue-600 dark:text-blue-400">{categoryName}</div>
             </div>
             <div className="flex flex-col">
               <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -30,7 +30,7 @@ export default function MatchResultCard({match, categoryName}: MatchResultCardPr
             <div className="flex items-center justify-between">
               <div className="text-lg font-bold text-gray-900 dark:text-white flex flex-col">
                 {match.home_score} : {match.away_score}
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-center w-full text-gray-500 dark:text-gray-400">
                   ( {match.home_score_halftime} : {match.away_score_halftime} )
                 </span>
               </div>

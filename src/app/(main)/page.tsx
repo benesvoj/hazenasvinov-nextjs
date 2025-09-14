@@ -18,7 +18,7 @@ export default function Page() {
   const t = translations.matchSchedule;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <AuthHandler />
       <LatestResultsSection />
       <PostSection />

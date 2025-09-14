@@ -23,16 +23,22 @@ export default function LatestResultsSection() {
   }
 
   return (
-    <section className="py-8">
-      {/* Horizontal scrolling container */}
-      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide px-4 sm:p-2">
-        {latestMatches.map((match) => (
-          <MatchResultCard
-            key={match.id}
-            match={match}
-            categoryName={match.category?.name || 'Neznámá kategorie'}
-          />
-        ))}
+    <section className="py-2">
+      {/* Horizontal scrolling container with auto-scroll */}
+      <div className="px-4 sm:p-2 animate-scroll">
+        <div className="flex gap-2 pb-4">
+          {latestMatches.map((match) => (
+            <MatchResultCard key={match.id} match={match} categoryName={match.category?.name} />
+          ))}
+          {/* Duplicate cards for seamless loop */}
+          {latestMatches.map((match) => (
+            <MatchResultCard
+              key={`duplicate-${match.id}`}
+              match={match}
+              categoryName={match.category?.name}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

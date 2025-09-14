@@ -68,13 +68,22 @@ export function useAllCategoriesMatches() {
           .eq('season_id', activeSeason.id)
           .eq('status', 'completed')
           .order('date', {ascending: false})
-          .limit(10);
+          .limit(50); // Get more matches to filter from
 
         if (fetchError) {
           throw fetchError;
         }
 
-        setMatches(data || []);
+        // Filter for own club matches and limit to 10
+        const ownClubMatches = (data || [])
+          .filter(
+            (match: any) =>
+              match.home_team?.club_category?.club?.is_own_club === true ||
+              match.away_team?.club_category?.club?.is_own_club === true
+          )
+          .slice(0, 10);
+
+        setMatches(ownClubMatches);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch matches'));
         setMatches([]);
