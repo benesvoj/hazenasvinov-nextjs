@@ -178,7 +178,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       case 2:
         return formData.matchPhoto !== null;
       case 3:
-        return formData.coachNotes.trim() !== '';
+        return true; // Coach notes are now optional
       default:
         return false;
     }
@@ -444,9 +444,9 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                   </div>
                   <div className="text-sm text-gray-600">
                     <span className="font-medium text-blue-600 hover:text-blue-500">
-                      Klikněte pro výběr
+                      Klikněte pro výběr zápisu utkání
                     </span>{' '}
-                    z galerie nebo pořiďte novou fotografii
+                    z galerie nebo pořiďte novou fotografii zápisu utkání
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG až 5MB</p>
                 </div>
@@ -474,17 +474,22 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         return (
           <div className="space-y-6">
             <div className="space-y-4">
-              <Textarea
-                placeholder="Zadejte své poznámky o zápase, výkonu hráčů, taktice, atd..."
-                value={formData.coachNotes}
-                onChange={(e) => handleInputChange('coachNotes', e.target.value)}
-                rows={8}
-                className="w-full"
-                maxLength={1000}
-              />
-              <p className="text-xs text-gray-500 text-right">
-                {formData.coachNotes.length}/1000 znaků
-              </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Poznámky trenéra <span className="text-gray-400">(volitelné)</span>
+                </label>
+                <Textarea
+                  placeholder="Zadejte své poznámky o zápase, výkonu hráčů, taktice, atd... (volitelné)"
+                  value={formData.coachNotes}
+                  onChange={(e) => handleInputChange('coachNotes', e.target.value)}
+                  rows={8}
+                  className="w-full"
+                  maxLength={1000}
+                />
+                <p className="text-xs text-gray-500 text-right">
+                  {formData.coachNotes.length}/1000 znaků
+                </p>
+              </div>
             </div>
           </div>
         );
@@ -495,7 +500,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
   };
 
   const getStepTitle = () => {
-    const titles = ['Výsledek zápasu', 'Fotografie', 'Poznámky trenéra'];
+    const titles = ['Výsledek zápasu', 'Fotografie', 'Poznámky trenéra (volitelné)'];
     return titles[currentStep - 1] || '';
   };
 

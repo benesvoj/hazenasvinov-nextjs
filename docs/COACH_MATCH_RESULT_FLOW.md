@@ -10,7 +10,7 @@ A mobile-friendly 3-step process for coaches to record match results, photos, an
 
 1. **Result Entry** - Enter final score and halftime score
 2. **Photo Capture** - Take or upload a photo from the match
-3. **Coach Notes** - Add observations and notes about the match
+3. **Coach Notes** - Add observations and notes about the match (optional)
 
 ### Key Features
 
@@ -83,7 +83,7 @@ The flow is implemented as a modal with three distinct steps:
 3. **Step 3 - Coach Notes**:
    - Textarea for coach observations
    - Character limit (1000 characters)
-   - Required field validation
+   - Optional field (no validation required)
 
 ## Storage
 
