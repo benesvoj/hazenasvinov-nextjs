@@ -32,7 +32,6 @@ interface UserProfile {
   id: string;
   user_id: string;
   role: string;
-  club_id?: string;
   assigned_categories: string[] | null;
   created_at: string;
   updated_at: string;

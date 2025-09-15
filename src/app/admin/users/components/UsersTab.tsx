@@ -113,7 +113,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
           email: responseData.userEmail,
         });
         setShowRoleAssignment(true);
-        showToast.success('Uživatel byl úspěšně vytvořen! Nyní přiřaďte roli.');
+        showToast.success('Pozvánka byla úspěšně odeslána! Nyní přiřaďte roli.');
       } else {
         // For updates, refresh the users list
         showToast.success('Uživatel byl úspěšně aktualizován!');

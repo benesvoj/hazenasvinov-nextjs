@@ -133,23 +133,23 @@ export async function POST(request: NextRequest) {
           console.log('Database tables accessible:', dbInfo?.length || 0);
         }
 
-        // Try creating user with createUser (revert to original method)
-        console.log('Attempting user creation with createUser:', userData.email);
+        // Try creating user with inviteUserByEmail (invitation flow)
+        console.log('Attempting user creation with inviteUserByEmail:', userData.email);
 
-        const {data: createData, error: createError} = await supabase.auth.admin.createUser({
-          email: userData.email,
-          password: 'TempPassword123!',
-          email_confirm: true,
-          user_metadata: {
-            full_name: userData.full_name || '',
-            phone: userData.phone || '',
-            bio: userData.bio || '',
-            position: userData.position || '',
-          },
-        });
+        const {data: createData, error: createError} = await supabase.auth.admin.inviteUserByEmail(
+          userData.email,
+          {
+            data: {
+              full_name: userData.full_name || '',
+              phone: userData.phone || '',
+              bio: userData.bio || '',
+              position: userData.position || '',
+            },
+          }
+        );
 
         if (createError) {
-          console.error('Supabase createUser error:', createError);
+          console.error('Supabase inviteUserByEmail error:', createError);
           console.error('Error details:', {
             message: createError.message,
             code: createError.code,
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
           // Return more specific error with guidance
           return NextResponse.json(
             {
-              error: 'Nepodařilo se vytvořit uživatele - problém s konfigurací databáze',
+              error: 'Nepodařilo se pozvat uživatele - problém s konfigurací databáze',
               details:
                 'Zkuste vytvořit uživatele ručně přes Supabase dashboard a pak ho upravit zde.',
               code: createError.code,
@@ -192,13 +192,13 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // If user creation successful, the metadata is already set via user_metadata parameter
-        console.log('User created successfully');
+        // If user invitation successful, the metadata is already set via data parameter
+        console.log('User invitation sent successfully');
         console.log('User data:', createData);
 
         return NextResponse.json({
           success: true,
-          message: 'User created successfully',
+          message: 'Pozvánka byla úspěšně odeslána',
           userId: createData.user?.id,
           userEmail: createData.user?.email,
         });
