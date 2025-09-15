@@ -24,16 +24,17 @@ export default function LatestResultsSection() {
 
   return (
     <section className="py-2">
-      {/* Horizontal scrolling container with auto-scroll */}
+      {/* Horizontal scrolling container with infinite loop */}
       <div className="px-4 sm:p-2 animate-scroll">
         <div className="flex gap-2 pb-4">
+          {/* First set of cards */}
           {latestMatches.map((match) => (
             <MatchResultCard key={match.id} match={match} categoryName={match.category?.name} />
           ))}
-          {/* Duplicate cards for seamless loop */}
+          {/* Duplicate set for seamless loop */}
           {latestMatches.map((match) => (
             <MatchResultCard
-              key={`duplicate-${match.id}`}
+              key={`loop-${match.id}`}
               match={match}
               categoryName={match.category?.name}
             />

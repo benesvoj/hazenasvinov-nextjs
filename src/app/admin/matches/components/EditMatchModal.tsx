@@ -59,11 +59,8 @@ export default function EditMatchModal({
     // Handle NumberInput which can return either a number or ChangeEvent
     let actualValue: string | number;
 
-    if (typeof value === 'object' && value !== null && 'target' in value) {
-      actualValue = value.target.value;
-    } else {
-      actualValue = value;
-    }
+    actualValue =
+      typeof value === 'object' && value !== null && 'target' in value ? value.target.value : value;
 
     onEditDataChange({
       ...editData,

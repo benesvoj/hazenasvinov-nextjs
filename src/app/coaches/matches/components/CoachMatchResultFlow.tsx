@@ -179,7 +179,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
       case 2:
         return formData.matchPhoto !== null;
       case 3:
-        return formData.coachNotes.trim() !== '';
+        return true;
       default:
         return false;
     }

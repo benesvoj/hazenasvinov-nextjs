@@ -242,7 +242,7 @@ html {
   display: none;  /* Safari and Chrome */
 }
 
-/* Auto-scroll animation for latest results */
+/* Auto-scroll animation for latest results with infinite loop */
 @keyframes scroll {
   0% {
     transform: translateX(0);
@@ -254,10 +254,11 @@ html {
 
 .animate-scroll {
   overflow: hidden;
+  position: relative;
 }
 
 .animate-scroll > * {
-  animation: scroll 30s linear infinite;
+  animation: scroll 60s linear infinite;
   display: flex;
   width: max-content;
 }
