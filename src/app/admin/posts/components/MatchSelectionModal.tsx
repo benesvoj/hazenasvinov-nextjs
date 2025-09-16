@@ -21,7 +21,7 @@ import {
   Spinner,
 } from '@heroui/react';
 import {Match} from '@/types';
-import {useFetchMatches} from '@/hooks';
+import {useFetchMatches, useSeasons} from '@/hooks';
 import {formatDateString} from '@/helpers';
 import {formatTime} from '@/helpers/formatTime';
 import {matchStatuses} from '@/constants';
@@ -46,14 +46,17 @@ export default function MatchSelectionModal({
 
   const statusFilterOptions = matchStatuses;
 
-  // Use the existing hook to fetch matches (only when modal is open and categoryId is provided)
+  // Get active season
+  const {activeSeason} = useSeasons();
+
+  // Use the existing hook to fetch matches (only when modal is open, categoryId is provided, and active season exists)
   const {
     matches: seasonalMatches,
     loading,
     error,
   } = useFetchMatches(
-    isOpen && categoryId ? categoryId : '',
-    undefined, // Use active season
+    isOpen && categoryId && activeSeason?.id ? categoryId : '',
+    activeSeason?.id, // Use active season ID explicitly
     {
       ownClubOnly: true, // Only show own club matches
       includeTeamDetails: true,
@@ -118,6 +121,27 @@ export default function MatchSelectionModal({
           </ModalHeader>
           <ModalBody>
             <div className="text-center py-8 text-gray-500">Nejdříve vyberte kategorii článku</div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={onClose}>
+              Zavřít
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    );
+  }
+
+  // Don't render if no active season is available
+  if (!activeSeason) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} size="5xl" scrollBehavior="inside">
+        <ModalContent>
+          <ModalHeader>
+            <h2 className="text-xl font-semibold">Vyberte zápas</h2>
+          </ModalHeader>
+          <ModalBody>
+            <div className="text-center py-8 text-gray-500">Není k dispozici aktivní sezóna</div>
           </ModalBody>
           <ModalFooter>
             <Button variant="light" onPress={onClose}>
@@ -219,15 +243,8 @@ export default function MatchSelectionModal({
                       <TableCell>
                         <div className="space-y-1">
                           <div className="font-medium">
-                            {match.home_team?.name || 'Neznámý tým'} vs{' '}
+                            {match.home_team?.name || 'Neznámý tým'} -{' '}
                             {match.away_team?.name || 'Neznámý tým'}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {match.competition || 'Neznámá soutěž'} •{' '}
-                            {match.venue || 'Neznámé místo'}
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            {match.category?.name || 'Neznámá kategorie'}
                           </div>
                         </div>
                       </TableCell>

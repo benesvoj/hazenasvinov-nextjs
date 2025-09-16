@@ -1,7 +1,7 @@
-import React from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
+import React from 'react';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+import {Button} from '@heroui/button';
+import {Input} from '@heroui/input';
 
 interface AddSeasonModalProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ export default function AddSeasonModal({
   seasonFormData,
   setSeasonFormData,
   seasons,
-  competitionTypes
+  competitionTypes,
 }: AddSeasonModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
@@ -43,7 +43,7 @@ export default function AddSeasonModal({
               <select
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                 value={seasonFormData.season_id}
-                onChange={(e) => setSeasonFormData({ ...seasonFormData, season_id: e.target.value })}
+                onChange={(e) => setSeasonFormData({...seasonFormData, season_id: e.target.value})}
               >
                 <option value="">Vyberte sezónu</option>
                 {seasons.map((season) => (
@@ -62,10 +62,17 @@ export default function AddSeasonModal({
               <select
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                 value={seasonFormData.competition_type}
-                onChange={(e) => setSeasonFormData({ ...seasonFormData, competition_type: e.target.value as 'league' | 'league_playoff' | 'tournament' })}
+                onChange={(e) =>
+                  setSeasonFormData({
+                    ...seasonFormData,
+                    competition_type: e.target.value as 'league' | 'league_playoff' | 'tournament',
+                  })
+                }
               >
                 {Object.entries(competitionTypes).map(([key, value]) => (
-                  <option key={key} value={key}>{value}</option>
+                  <option key={key} value={key}>
+                    {value}
+                  </option>
                 ))}
               </select>
             </div>
@@ -74,8 +81,16 @@ export default function AddSeasonModal({
             <Input
               label="Počet kol"
               type="number"
-              value={seasonFormData.matchweek_count.toString()}
-              onChange={(e) => setSeasonFormData({ ...seasonFormData, matchweek_count: parseInt(e.target.value) || 0 })}
+              value={
+                seasonFormData.matchweek_count === 0
+                  ? ''
+                  : seasonFormData.matchweek_count.toString()
+              }
+              onChange={(e) => {
+                const value = e.target.value;
+                const numValue = value === '' ? 0 : isNaN(Number(value)) ? 0 : Number(value);
+                setSeasonFormData({...seasonFormData, matchweek_count: numValue});
+              }}
               placeholder="Např. 10 pro 10 kol"
               min="0"
             />
@@ -84,8 +99,12 @@ export default function AddSeasonModal({
             <Input
               label="Počet týmů"
               type="number"
-              value={seasonFormData.team_count.toString()}
-              onChange={(e) => setSeasonFormData({ ...seasonFormData, team_count: parseInt(e.target.value) || 0 })}
+              value={seasonFormData.team_count === 0 ? '' : seasonFormData.team_count.toString()}
+              onChange={(e) => {
+                const value = e.target.value;
+                const numValue = value === '' ? 0 : isNaN(Number(value)) ? 0 : Number(value);
+                setSeasonFormData({...seasonFormData, team_count: numValue});
+              }}
               placeholder="Očekávaný počet týmů"
               min="0"
             />
@@ -96,10 +115,15 @@ export default function AddSeasonModal({
                 type="checkbox"
                 id="add_allow_team_duplicates"
                 checked={seasonFormData.allow_team_duplicates}
-                onChange={(e) => setSeasonFormData({ ...seasonFormData, allow_team_duplicates: e.target.checked })}
+                onChange={(e) =>
+                  setSeasonFormData({...seasonFormData, allow_team_duplicates: e.target.checked})
+                }
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <label htmlFor="add_allow_team_duplicates" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="add_allow_team_duplicates"
+                className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Povolit A/B týmy stejného klubu
               </label>
             </div>
@@ -110,10 +134,15 @@ export default function AddSeasonModal({
                 type="checkbox"
                 id="add_season_active"
                 checked={seasonFormData.is_active}
-                onChange={(e) => setSeasonFormData({ ...seasonFormData, is_active: e.target.checked })}
+                onChange={(e) =>
+                  setSeasonFormData({...seasonFormData, is_active: e.target.checked})
+                }
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <label htmlFor="add_season_active" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="add_season_active"
+                className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Aktivní
               </label>
             </div>
