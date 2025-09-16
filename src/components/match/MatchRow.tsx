@@ -110,9 +110,9 @@ const MatchRow: React.FC<MatchRowProps> = ({
             <div className="text-center">
               <div className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-1">
                 {/* Mobile: Shorter text, Desktop: Full text */}
-                <span className="lg:hidden">
-                  {match.category?.name} <MapPinIcon className="w-3 h-3 inline ml-1" />{' '}
-                  {match.venue}
+                <span className="lg:hidden flex flex-col items-start">
+                  <div>{match.category?.name}</div>
+                  <div>{match.venue}</div>
                 </span>
                 <span className="hidden lg:inline">
                   {`${match.category?.name} - ${match.category?.description}`}

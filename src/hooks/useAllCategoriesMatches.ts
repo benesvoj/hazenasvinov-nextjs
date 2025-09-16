@@ -1,6 +1,7 @@
 import {useState, useEffect} from 'react';
 import {useSeasons} from '@/hooks';
 import {createClient} from '@/utils/supabase/client';
+import {transformMatchWithTeamNames} from '@/utils/teamDisplay';
 
 export function useAllCategoriesMatches() {
   const {activeSeason} = useSeasons();
@@ -83,7 +84,30 @@ export function useAllCategoriesMatches() {
           )
           .slice(0, 10);
 
-        setMatches(ownClubMatches);
+        // Calculate team counts for proper suffix display
+        const clubTeamCounts = new Map<string, number>();
+        ownClubMatches.forEach((match: any) => {
+          const homeClubId = match.home_team?.club_category?.club?.id;
+          const awayClubId = match.away_team?.club_category?.club?.id;
+
+          if (homeClubId) {
+            clubTeamCounts.set(homeClubId, (clubTeamCounts.get(homeClubId) || 0) + 1);
+          }
+          if (awayClubId) {
+            clubTeamCounts.set(awayClubId, (clubTeamCounts.get(awayClubId) || 0) + 1);
+          }
+        });
+
+        // Transform matches with proper team names and suffixes
+        const transformedMatches = ownClubMatches.map((match: any) =>
+          transformMatchWithTeamNames(match, ownClubMatches, {
+            useTeamMap: false,
+            teamDetails: ownClubMatches,
+            clubTeamCounts,
+          })
+        );
+
+        setMatches(transformedMatches);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch matches'));
         setMatches([]);

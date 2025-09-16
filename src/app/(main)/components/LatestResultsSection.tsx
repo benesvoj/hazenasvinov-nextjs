@@ -3,10 +3,10 @@
 import {translations} from '@/lib/translations';
 import {MatchResultCard} from './';
 import {LoadingSpinner} from '@/components';
-import {useAllCategoriesMatches} from '@/hooks/useAllCategoriesMatches';
+import {useAllCategoriesOwnClubMatches} from '@/hooks/useAllCategoriesOwnClubMatches';
 
 export default function LatestResultsSection() {
-  const {matches: latestMatches, loading, error} = useAllCategoriesMatches();
+  const {matches: latestMatches, loading, error} = useAllCategoriesOwnClubMatches();
 
   if (loading) {
     return (
