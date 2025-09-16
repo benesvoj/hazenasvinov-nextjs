@@ -69,11 +69,11 @@ const MatchRow: React.FC<MatchRowProps> = ({
                   </div>
                 )}
                 <span className={'font-medium text-sm lg:text-sm text-gray-900 dark:text-white'}>
-                  {/* Mobile: Short name, Desktop: Full name */}
+                  {/* Mobile: Short name with suffix, Desktop: Full name */}
                   <span className="lg:hidden">
-                    {match.home_team?.short_name || match.home_team?.name || 'Neznámý tým'}
+                    {match.home_team?.short_name || match.home_team?.name}
                   </span>
-                  <span className="hidden lg:inline">{match.home_team?.name || 'Neznámý tým'}</span>
+                  <span className="hidden lg:inline">{match.home_team?.name}</span>
                 </span>
               </div>
 
@@ -82,11 +82,11 @@ const MatchRow: React.FC<MatchRowProps> = ({
               {/* Away Team */}
               <div className="flex items-center gap-2">
                 <span className={'font-medium text-sm lg:text-sm text-gray-900 dark:text-white'}>
-                  {/* Mobile: Short name, Desktop: Full name */}
+                  {/* Mobile: Short name with suffix, Desktop: Full name */}
                   <span className="lg:hidden">
-                    {match.away_team?.short_name || match.away_team?.name || 'Neznámý tým'}
+                    {match.away_team?.short_name || match.away_team?.name}
                   </span>
-                  <span className="hidden lg:inline">{match.away_team?.name || 'Neznámý tým'}</span>
+                  <span className="hidden lg:inline">{match.away_team?.name}</span>
                 </span>
                 {/* Logo - Hidden on mobile */}
                 {(match.away_team_logo || match.away_team?.logo_url) && (
@@ -110,9 +110,9 @@ const MatchRow: React.FC<MatchRowProps> = ({
             <div className="text-center">
               <div className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-1">
                 {/* Mobile: Shorter text, Desktop: Full text */}
-                <span className="lg:hidden">
-                  {match.category?.name} <MapPinIcon className="w-3 h-3 inline ml-1" />{' '}
-                  {match.venue}
+                <span className="lg:hidden flex flex-col items-start">
+                  <div>{match.category?.name}</div>
+                  <div>{match.venue}</div>
                 </span>
                 <span className="hidden lg:inline">
                   {`${match.category?.name} - ${match.category?.description}`}

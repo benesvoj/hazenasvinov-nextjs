@@ -18,10 +18,10 @@ export default function MatchResultCard({match, categoryName}: MatchResultCardPr
             </div>
             <div className="flex flex-col">
               <div className="text-sm font-medium text-gray-900 dark:text-white">
-                {match.home_team?.club_category?.club?.short_name}
+                {match.home_team?.short_name || match.home_team?.name}
               </div>
               <div className="text-sm font-medium text-gray-900 dark:text-white">
-                {match.away_team?.club_category?.club?.short_name}
+                {match.away_team?.short_name || match.away_team?.name}
               </div>
             </div>
           </div>
