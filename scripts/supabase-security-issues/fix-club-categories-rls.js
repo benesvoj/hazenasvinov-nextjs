@@ -2,18 +2,18 @@
 
 /**
  * Fix club_categories RLS security warning
- * 
+ *
  * This script enables Row Level Security on the club_categories table
  * to resolve the security warning about tables without RLS.
  */
 
-const { createClient } = require('@supabase/supabase-js');
+const {createClient} = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
 // Load environment variables
-dotenv.config({ path: '.env.local' });
+dotenv.config({path: '.env.local'});
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -36,13 +36,18 @@ async function fixClubCategoriesRLS() {
 
   try {
     // Read the SQL script
-    const sqlPath = path.join(process.cwd(), 'scripts', 'fix_club_categories_rls.sql');
+    const sqlPath = path.join(
+      process.cwd(),
+      'scripts',
+      'supabase-security-issues',
+      'fix_club_categories_rls.sql'
+    );
     const sqlScript = fs.readFileSync(sqlPath, 'utf8');
 
     console.log('📋 Executing SQL script...');
-    
+
     // Execute the SQL script
-    const { data, error } = await supabase.rpc('exec_sql', { sql: sqlScript });
+    const {data, error} = await supabase.rpc('exec_sql', {sql: sqlScript});
 
     if (error) {
       console.error('❌ Error executing SQL script:', error.message);
@@ -56,8 +61,8 @@ async function fixClubCategoriesRLS() {
 
     // Verify the fix by checking RLS status
     console.log('🔍 Verifying the fix...');
-    
-    const { data: rlsData, error: rlsError } = await supabase
+
+    const {data: rlsData, error: rlsError} = await supabase
       .from('pg_tables')
       .select('tablename, rowsecurity')
       .eq('tablename', 'club_categories')
@@ -70,13 +75,16 @@ async function fixClubCategoriesRLS() {
 
     if (rlsData && rlsData.length > 0) {
       const rlsEnabled = rlsData[0].rowsecurity;
-      console.log('✅ club_categories table RLS status:', rlsEnabled ? '✅ Enabled' : '❌ Disabled');
+      console.log(
+        '✅ club_categories table RLS status:',
+        rlsEnabled ? '✅ Enabled' : '❌ Disabled'
+      );
     } else {
       console.log('⚠️  club_categories table not found');
     }
 
     // Check policies
-    const { data: policyData, error: policyError } = await supabase
+    const {data: policyData, error: policyError} = await supabase
       .from('pg_policies')
       .select('policyname, cmd')
       .eq('tablename', 'club_categories')
@@ -89,7 +97,7 @@ async function fixClubCategoriesRLS() {
 
     if (policyData && policyData.length > 0) {
       console.log('✅ RLS policies created:');
-      policyData.forEach(policy => {
+      policyData.forEach((policy) => {
         console.log(`   • ${policy.policyname} (${policy.cmd})`);
       });
     } else {
@@ -112,7 +120,6 @@ async function fixClubCategoriesRLS() {
     console.log('   • Follows principle of least privilege');
     console.log('');
     console.log('✅ The security warning should now be resolved!');
-
   } catch (error) {
     console.error('❌ Unexpected error:', error.message);
     console.error('');

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   Select,
   SelectItem,
@@ -11,10 +11,11 @@ import {
   ModalFooter,
   Button,
   Input,
-} from "@heroui/react";
-import { createClient } from "@/utils/supabase/client";
-import { Category, Season } from "@/types";
-
+} from '@heroui/react';
+import {LoadingSpinner} from '@/components';
+import {useAppData} from '@/contexts/AppDataContext';
+import {Category, Season} from '@/types';
+import {createClient} from '@/utils/supabase/client';
 interface AssignCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,6 +26,7 @@ interface AssignCategoryModalProps {
   }) => Promise<void>;
   clubId: string;
   assignedCategoryIds: string[];
+  selectedSeasonId?: string;
 }
 
 export default function AssignCategoryModal({
@@ -33,83 +35,102 @@ export default function AssignCategoryModal({
   onAssignCategory,
   clubId,
   assignedCategoryIds,
+  selectedSeasonId,
 }: AssignCategoryModalProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [seasons, setSeasons] = useState<Season[]>([]);
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    category_id: "",
-    season_id: "",
+    category_id: '',
+    season_id: '',
     max_teams: 1,
   });
+  const [assignedCategoriesForSeason, setAssignedCategoriesForSeason] = useState<string[]>([]);
 
+  // Use AppDataContext for data fetching
+  const {
+    categories,
+    seasons,
+    seasonsLoading,
+    categoriesLoading,
+    activeSeason,
+    refreshSeasons,
+    refreshCategories,
+  } = useAppData();
+
+  const loading = categoriesLoading || seasonsLoading;
   const supabase = createClient();
 
-  const fetchCategoriesAndSeasons = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      const [categoriesResult, seasonsResult] = await Promise.all([
-        supabase
-          .from("categories")
-          .select("*")
-          .eq("is_active", true)
-          .order("sort_order"),
-        supabase
-          .from("seasons")
-          .select("*")
-          .order("name", { ascending: false }),
-      ]);
-
-      if (categoriesResult.error) throw categoriesResult.error;
-      if (seasonsResult.error) throw seasonsResult.error;
-
-      setCategories(categoriesResult.data || []);
-      setSeasons(seasonsResult.data || []);
-
-      // Auto-select active season
-      const activeSeason = seasonsResult.data?.find(
-        (season: any) => season.is_active
-      );
-      if (activeSeason) {
-        setFormData((prev) => ({
-          ...prev,
-          season_id: activeSeason.id,
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching categories and seasons:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [supabase, setCategories, setSeasons, setFormData]);
-
-  // Fetch categories and seasons
+  // Fetch data when modal opens
   useEffect(() => {
     if (isOpen) {
-      fetchCategoriesAndSeasons();
+      refreshCategories();
+      refreshSeasons();
     }
-  }, [isOpen, fetchCategoriesAndSeasons]);
+  }, [isOpen, refreshCategories, refreshSeasons]);
+
+  // Auto-select active season when it becomes available
+  useEffect(() => {
+    if (activeSeason && !formData.season_id) {
+      setFormData((prev) => ({
+        ...prev,
+        season_id: activeSeason.id,
+      }));
+    }
+  }, [activeSeason, formData.season_id]);
+
+  // Fetch assigned categories for the selected season
+  const fetchAssignedCategoriesForSeason = useCallback(
+    async (seasonId: string) => {
+      if (!seasonId || !clubId) return;
+
+      try {
+        const {data, error} = await supabase
+          .from('club_categories')
+          .select('category_id')
+          .eq('club_id', clubId)
+          .eq('season_id', seasonId)
+          .eq('is_active', true);
+
+        if (error) throw error;
+
+        const categoryIds = data?.map((item: any) => item.category_id) || [];
+        setAssignedCategoriesForSeason(categoryIds);
+      } catch (error) {
+        console.error('Error fetching assigned categories for season:', error);
+        setAssignedCategoriesForSeason([]);
+      }
+    },
+    [clubId, supabase]
+  );
+
+  // Update assigned categories when season changes
+  useEffect(() => {
+    if (formData.season_id) {
+      fetchAssignedCategoriesForSeason(formData.season_id);
+      // Clear selected category when season changes since available categories will change
+      setFormData((prev) => ({...prev, category_id: ''}));
+    } else {
+      setAssignedCategoriesForSeason([]);
+    }
+  }, [formData.season_id, clubId, fetchAssignedCategoriesForSeason]);
 
   const handleSubmit = async () => {
     try {
       await onAssignCategory(formData);
       // Reset form
       setFormData({
-        category_id: "",
+        category_id: '',
         season_id: formData.season_id, // Keep the selected season
         max_teams: 1,
       });
     } catch (error) {
       // Error handling is done in the parent component
-      console.error("Error in AssignCategoryModal:", error);
+      console.error('Error in AssignCategoryModal:', error);
     }
   };
 
   const handleClose = () => {
     // Reset form when closing
     setFormData({
-      category_id: "",
+      category_id: '',
       season_id: formData.season_id, // Keep the selected season
       max_teams: 1,
     });
@@ -123,27 +144,23 @@ export default function AssignCategoryModal({
         <ModalBody>
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="mt-2 text-gray-600">Načítání...</p>
+              <LoadingSpinner />
             </div>
           ) : (
             <div className="space-y-4">
-              {/* TODO: select component doesn't show label of the selected season */}
               <Select
                 label="Sezóna"
                 placeholder="Vyberte sezónu"
-                defaultSelectedKeys={
-                  formData.season_id ? [formData.season_id] : []
-                }
+                selectedKeys={formData.season_id ? [formData.season_id] : []}
                 onSelectionChange={(keys) => {
                   const seasonId = Array.from(keys)[0] as string;
-                  setFormData((prev) => ({ ...prev, season_id: seasonId }));
+                  setFormData((prev) => ({...prev, season_id: seasonId}));
                 }}
                 isRequired
               >
-                {seasons.map((season) => (
-                  <SelectItem key={season.id}>
-                    {season.name} {season.is_active ? "(Aktivní)" : ""}
+                {seasons.map((season: Season) => (
+                  <SelectItem key={season.id} textValue={season.name}>
+                    {season.name} {season.is_active ? '(Aktivní)' : ''}
                   </SelectItem>
                 ))}
               </Select>
@@ -151,26 +168,39 @@ export default function AssignCategoryModal({
               <Select
                 label="Kategorie"
                 placeholder="Vyberte kategorii"
-                value={formData.category_id}
+                selectedKeys={formData.category_id ? [formData.category_id] : []}
                 onSelectionChange={(keys) => {
                   const categoryId = Array.from(keys)[0] as string;
-                  setFormData((prev) => ({ ...prev, category_id: categoryId }));
+                  setFormData((prev) => ({...prev, category_id: categoryId}));
                 }}
                 isRequired
               >
                 {(() => {
-                  const availableCategories = categories.filter(
-                    (category) => !assignedCategoryIds.includes(category.id)
-                  );
+                  // Filter categories based on the selected season
+                  // Only show categories that are NOT already assigned to this club in the selected season
+                  const availableCategories = categories.filter((category) => {
+                    // If no season is selected yet, show all categories
+                    if (!formData.season_id) {
+                      return true;
+                    }
+                    // Check if this category is already assigned to this club in the selected season
+                    return !assignedCategoriesForSeason.includes(category.id);
+                  });
+
                   if (availableCategories.length === 0) {
                     return (
-                      <SelectItem key="no-categories" isDisabled>
-                        Všechny kategorie jsou již přiřazeny
+                      <SelectItem
+                        key="no-categories"
+                        textValue="Všechny kategorie jsou již přiřazeny pro tuto sezónu"
+                      >
+                        Všechny kategorie jsou již přiřazeny pro tuto sezónu
                       </SelectItem>
                     );
                   }
-                  return availableCategories.map((category) => (
-                    <SelectItem key={category.id}>{category.name}</SelectItem>
+                  return availableCategories.map((category: Category) => (
+                    <SelectItem key={category.id} textValue={category.name}>
+                      {category.name}
+                    </SelectItem>
                   ));
                 })()}
               </Select>
@@ -199,7 +229,7 @@ export default function AssignCategoryModal({
             onPress={handleClose}
             aria-label="Zrušit přiřazení kategorie"
           >
-            {loading ? "Načítání..." : "Zrušit"}
+            {loading ? 'Načítání...' : 'Zrušit'}
           </Button>
           <Button
             color="primary"
@@ -207,7 +237,7 @@ export default function AssignCategoryModal({
             isDisabled={!formData.category_id || !formData.season_id || loading}
             aria-label="Přiřadit klub ke kategorii"
           >
-            {loading ? "Přiřazuji..." : "Přiřadit"}
+            {loading ? 'Přiřazuji...' : 'Přiřadit'}
           </Button>
         </ModalFooter>
       </ModalContent>

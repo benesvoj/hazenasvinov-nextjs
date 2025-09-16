@@ -6,9 +6,12 @@ import {Tabs, Tab} from '@heroui/tabs';
 import {ClipboardDocumentListIcon, XMarkIcon, VideoCameraIcon} from '@heroicons/react/24/outline';
 import {useVideos} from '@/hooks/useVideos';
 import CompactVideoList from './CompactVideoList';
-
+import MatchRow from '@/components/match/MatchRow';
+import {createClient} from '@/utils/supabase/client';
+import {LoadingSpinner} from '@/components';
+import {Match} from '@/types';
 interface StrategyPreparationZoneProps {
-  selectedMatch: any | null;
+  selectedMatch: Match;
   onClose: () => void;
 }
 
@@ -17,31 +20,192 @@ export default function StrategyPreparationZone({
   onClose,
 }: StrategyPreparationZoneProps) {
   const [activeTab, setActiveTab] = useState('strategy');
+  const [previousMatches, setPreviousMatches] = useState<any[]>([]);
+  const [previousMatchesLoading, setPreviousMatchesLoading] = useState(false);
+  const [previousMatchesError, setPreviousMatchesError] = useState<string | null>(null);
   const fetchedForRef = useRef<string | null>(null);
 
   // Reset fetch tracking when match changes
   useEffect(() => {
     fetchedForRef.current = null;
+    setPreviousMatches([]);
+    setPreviousMatchesError(null);
   }, [selectedMatch?.id]);
+
+  // Function to fetch opponent's previous matches
+  const fetchOpponentPreviousMatches = useCallback(
+    async (opponentClubId: string, categoryId: string) => {
+      try {
+        setPreviousMatchesLoading(true);
+        setPreviousMatchesError(null);
+
+        // Validate input parameters
+        if (!opponentClubId || opponentClubId === 'undefined' || opponentClubId === 'null') {
+          console.log('Invalid opponentClubId, skipping previous matches fetch:', opponentClubId);
+          setPreviousMatches([]);
+          return;
+        }
+
+        if (!categoryId || categoryId === 'undefined' || categoryId === 'null') {
+          console.log('Invalid categoryId, skipping previous matches fetch:', categoryId);
+          setPreviousMatches([]);
+          return;
+        }
+
+        const supabase = createClient();
+
+        console.log('🔍 Fetching previous matches for:', {
+          opponentClubId,
+          categoryId,
+          step: 'Step 1: Finding club_categories',
+        });
+
+        // Get all teams for the opponent club in this category
+        // Step 1: Find club_categories for the opponent club in this category
+        const {data: clubCategories, error: clubCategoriesError} = await supabase
+          .from('club_categories')
+          .select('id')
+          .eq('club_id', opponentClubId)
+          .eq('category_id', categoryId);
+
+        if (clubCategoriesError) {
+          console.error('❌ Error fetching club_categories:', clubCategoriesError);
+          throw clubCategoriesError;
+        }
+
+        console.log('📊 Found club_categories:', clubCategories?.length || 0, clubCategories);
+
+        if (!clubCategories || clubCategories.length === 0) {
+          console.log('⚠️ No club_categories found for opponent club and category');
+          setPreviousMatches([]);
+          return;
+        }
+
+        const clubCategoryIds = clubCategories.map((cc: any) => cc.id);
+        console.log('🔗 Club category IDs:', clubCategoryIds);
+
+        // Step 2: Get teams from club_category_teams
+        console.log('🔍 Step 2: Finding teams for club_categories');
+        const {data: teams, error: teamsError} = await supabase
+          .from('club_category_teams')
+          .select(
+            `
+          id,
+          team_suffix,
+          club_category:club_categories(
+            club:clubs(id, name, short_name, logo_url, is_own_club)
+          )
+        `
+          )
+          .in('club_category_id', clubCategoryIds)
+          .eq('is_active', true);
+
+        if (teamsError) {
+          console.error('❌ Error fetching teams:', teamsError);
+          throw teamsError;
+        }
+
+        console.log('📊 Found teams:', teams?.length || 0, teams);
+
+        if (!teams || teams.length === 0) {
+          console.log('⚠️ No teams found for club_categories');
+          setPreviousMatches([]);
+          return;
+        }
+
+        const teamIds = teams.map((team: any) => team.id);
+        console.log('🔗 Team IDs for match search:', teamIds);
+
+        // Get previous matches for these teams (completed matches only)
+        console.log('🔍 Step 3: Finding matches for teams');
+        const {data: matches, error: matchesError} = await supabase
+          .from('matches')
+          .select(
+            `
+          *,
+          home_team:home_team_id(
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url, is_own_club)
+            )
+          ),
+          away_team:away_team_id(
+            id,
+            team_suffix,
+            club_category:club_categories(
+              club:clubs(id, name, short_name, logo_url, is_own_club)
+            )
+          ),
+          category:category_id(id, name, description)
+        `
+          )
+          .or(`home_team_id.in.(${teamIds.join(',')}),away_team_id.in.(${teamIds.join(',')})`)
+          .eq('status', 'completed')
+          .order('date', {ascending: false})
+          .limit(10); // Limit to 10 most recent matches
+
+        if (matchesError) {
+          console.error('❌ Error fetching matches:', matchesError);
+          throw matchesError;
+        }
+
+        console.log('📊 Found matches:', matches?.length || 0, matches);
+
+        // Transform matches with team names (similar to other match queries)
+        const transformedMatches =
+          matches?.map((match: any) => {
+            const homeTeam = match.home_team;
+            const awayTeam = match.away_team;
+
+            // Simple team name transformation (without complex suffix logic for now)
+            const homeTeamName = homeTeam?.club_category?.club?.name || 'Unknown team';
+            const awayTeamName = awayTeam?.club_category?.club?.name || 'Unknown team';
+
+            return {
+              ...match,
+              home_team: {
+                id: homeTeam?.id,
+                name: homeTeamName,
+                short_name: homeTeam?.club_category?.club?.short_name,
+                is_own_club: homeTeam?.club_category?.club?.is_own_club,
+                logo_url: homeTeam?.club_category?.club?.logo_url,
+              },
+              away_team: {
+                id: awayTeam?.id,
+                name: awayTeamName,
+                short_name: awayTeam?.club_category?.club?.short_name,
+                is_own_club: awayTeam?.club_category?.club?.is_own_club,
+                logo_url: awayTeam?.club_category?.club?.logo_url,
+              },
+            };
+          }) || [];
+
+        console.log(
+          '✅ Successfully fetched and transformed matches:',
+          transformedMatches?.length || 0
+        );
+        setPreviousMatches(transformedMatches);
+      } catch (error) {
+        console.error('❌ Error fetching opponent previous matches:', error);
+        setPreviousMatchesError(
+          error instanceof Error ? error.message : 'Failed to fetch previous matches'
+        );
+        setPreviousMatches([]);
+      } finally {
+        setPreviousMatchesLoading(false);
+      }
+    },
+    []
+  );
 
   // Get opponent team info
   const opponentTeam = useMemo(() => {
     if (!selectedMatch) return null;
 
     // Determine which team is the opponent (not our club)
-    const homeIsOwnClub =
-      selectedMatch.home_team?.is_own_club || selectedMatch.home_team_is_own_club;
-    const awayIsOwnClub =
-      selectedMatch.away_team?.is_own_club || selectedMatch.away_team_is_own_club;
-
-    console.log('Opponent team detection:', {
-      homeTeam: selectedMatch.home_team?.name,
-      awayTeam: selectedMatch.away_team?.name,
-      homeIsOwnClub,
-      awayIsOwnClub,
-      homeTeamData: selectedMatch.home_team,
-      awayTeamData: selectedMatch.away_team,
-    });
+    const homeIsOwnClub = selectedMatch.home_team_is_own_club;
+    const awayIsOwnClub = selectedMatch.away_team_is_own_club;
 
     if (homeIsOwnClub && !awayIsOwnClub) {
       return selectedMatch.away_team;
@@ -53,52 +217,121 @@ export default function StrategyPreparationZone({
   }, [selectedMatch]);
 
   // Get opponent club ID for video filtering
-  // Relationship: match.home_team/away_team → team.club_category.club.id = videos.club_id
-  const opponentClubId = useMemo(() => {
-    if (!opponentTeam) return null;
+  // Relationship: opponentTeam.club_category_id → club_categories.club_id
+  const [opponentClubId, setOpponentClubId] = useState<string | null>(null);
+  const [clubIdLoading, setClubIdLoading] = useState(false);
 
-    // Try multiple possible paths for club ID
-    const clubId =
-      opponentTeam.club_category?.club?.id ||
-      opponentTeam.club_id ||
-      opponentTeam.club?.id ||
-      opponentTeam.id; // Fallback to team ID
+  // Fetch club ID from club_category_id
+  useEffect(() => {
+    const fetchClubId = async () => {
+      // Validate that we have a valid club_category_id
+      if (
+        !opponentTeam?.club_category_id ||
+        opponentTeam.club_category_id === 'undefined' ||
+        opponentTeam.club_category_id === 'null'
+      ) {
+        console.log('No valid club_category_id found:', opponentTeam?.club_category_id);
+        setOpponentClubId(null);
+        return;
+      }
 
-    console.log('Opponent club ID detection:', {
-      opponentTeam: opponentTeam.name,
-      clubId,
-      opponentTeamData: opponentTeam,
-      possiblePaths: {
-        'team.club_category.club.id': opponentTeam.club_category?.club?.id,
-        'team.club_id': opponentTeam.club_id,
-        'team.club.id': opponentTeam.club?.id,
-        'team.id': opponentTeam.id,
-      },
-      allKeys: Object.keys(opponentTeam),
-      fullStructure: JSON.stringify(opponentTeam, null, 2),
-    });
-    return clubId;
-  }, [opponentTeam]);
+      try {
+        setClubIdLoading(true);
+        const supabase = createClient();
 
-  // Fetch videos for the opponent club
-  const {
-    videos: opponentVideos,
-    loading: videosLoading,
-    error: videosError,
-    fetchVideos: fetchOpponentVideos,
-  } = useVideos({
-    assignedCategories: [],
-    enableAccessControl: false,
-    itemsPerPage: 50,
-  });
+        console.log('Fetching club ID for club_category_id:', opponentTeam.club_category_id);
 
-  // Memoized fetch function to prevent re-creation
-  const fetchVideosMemoized = useCallback(
-    (filters: any) => {
-      fetchOpponentVideos(filters);
-    },
-    [fetchOpponentVideos]
-  );
+        const {data: clubCategory, error} = await supabase
+          .from('club_categories')
+          .select('club_id')
+          .eq('id', opponentTeam.club_category_id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching club ID:', error);
+          setOpponentClubId(null);
+        } else {
+          console.log('Successfully fetched club ID:', clubCategory?.club_id);
+          setOpponentClubId(clubCategory?.club_id || null);
+        }
+      } catch (error) {
+        console.error('Error fetching club ID:', error);
+        setOpponentClubId(null);
+      } finally {
+        setClubIdLoading(false);
+      }
+    };
+
+    fetchClubId();
+  }, [opponentTeam?.club_category_id]);
+
+  // State for videos
+  const [opponentVideos, setOpponentVideos] = useState<any[]>([]);
+  const [videosLoading, setVideosLoading] = useState(false);
+  const [videosError, setVideosError] = useState<string | null>(null);
+
+  // Fetch videos for opponent club (fallback)
+  const fetchOpponentVideos = useCallback(async (filters: any) => {
+    try {
+      setVideosLoading(true);
+      setVideosError(null);
+
+      const supabase = createClient();
+
+      // Validate filters before querying
+      if (filters.club_id && (filters.club_id === 'undefined' || filters.club_id === 'null')) {
+        console.log('Invalid club_id, skipping video fetch:', filters.club_id);
+        setOpponentVideos([]);
+        return;
+      }
+
+      if (
+        filters.category_id &&
+        (filters.category_id === 'undefined' || filters.category_id === 'null')
+      ) {
+        console.log('Invalid category_id, skipping video fetch:', filters.category_id);
+        setOpponentVideos([]);
+        return;
+      }
+
+      console.log('Fetching videos with filters:', filters);
+
+      // Build query based on available filters
+      let query = supabase
+        .from('videos')
+        .select(
+          `
+          *,
+          categories(id, name),
+          clubs(id, name, short_name)
+        `
+        )
+        .eq('is_active', true);
+
+      if (filters.club_id) {
+        query = query.eq('club_id', filters.club_id);
+      }
+
+      if (filters.category_id) {
+        query = query.eq('category_id', filters.category_id);
+      }
+
+      const {data: videos, error} = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Successfully fetched videos:', videos?.length || 0);
+      setOpponentVideos(videos || []);
+    } catch (error) {
+      console.error('Error fetching opponent videos:', error);
+      setVideosError(error instanceof Error ? error.message : 'Failed to fetch videos');
+      setOpponentVideos([]);
+    } finally {
+      setVideosLoading(false);
+    }
+  }, []);
 
   // Filter videos by opponent team name if no club ID is available
   const filteredOpponentVideos = useMemo(() => {
@@ -129,52 +362,33 @@ export default function StrategyPreparationZone({
     return filtered;
   }, [opponentVideos, opponentTeam?.name, opponentClubId]);
 
-  // Debug video loading state
+  // Fetch videos when match is selected and club ID is available
   useEffect(() => {
-    console.log('Video loading state:', {
-      videosLoading,
-      videosError,
-      videosCount: opponentVideos.length,
-      filteredCount: filteredOpponentVideos.length,
-      opponentClubId,
-      categoryId: selectedMatch?.category_id,
-    });
-  }, [
-    videosLoading,
-    videosError,
-    opponentVideos.length,
-    filteredOpponentVideos.length,
-    opponentClubId,
-    selectedMatch?.category_id,
-  ]);
-
-  // Fetch opponent videos when opponent club is identified
-  useEffect(() => {
-    if (selectedMatch?.category_id) {
+    if (selectedMatch?.category_id && selectedMatch?.id && !clubIdLoading) {
       const fetchKey = `${opponentClubId || 'no-club'}-${selectedMatch.category_id}`;
 
       // Prevent duplicate fetches
       if (fetchedForRef.current === fetchKey) {
-        console.log('Already fetched videos for this opponent, skipping...');
+        console.log('Already fetched videos for this match, skipping...');
         return;
       }
 
-      console.log('Fetching opponent videos for:', {
+      console.log('Fetching videos for:', {
         opponentClubId,
         categoryId: selectedMatch.category_id,
+        matchId: selectedMatch.id,
         opponentTeam: opponentTeam?.name,
         hasClubId: !!opponentClubId,
         fetchKey,
-        relationship:
-          'match.category_id = videos.category_id AND team.club_category.club.id = videos.club_id',
       });
 
       // Mark as fetched
       fetchedForRef.current = fetchKey;
 
       if (opponentClubId) {
-        // Fetch videos by club_id and category_id (correct relationship)
-        fetchVideosMemoized({
+        // Fetch videos by club_id and category_id (opponent videos)
+        console.log('Fetching opponent videos by club_id and category_id');
+        fetchOpponentVideos({
           club_id: opponentClubId,
           category_id: selectedMatch.category_id,
           is_active: true,
@@ -184,13 +398,48 @@ export default function StrategyPreparationZone({
         console.log(
           'No club ID found, fetching all videos for category and filtering by team name'
         );
-        fetchVideosMemoized({
+        fetchOpponentVideos({
           category_id: selectedMatch.category_id,
           is_active: true,
         });
       }
     }
-  }, [opponentClubId, selectedMatch?.category_id, opponentTeam?.name, fetchVideosMemoized]);
+  }, [
+    selectedMatch?.category_id,
+    selectedMatch?.id,
+    opponentClubId,
+    opponentTeam?.name,
+    clubIdLoading,
+    fetchOpponentVideos,
+  ]);
+
+  // Fetch opponent's previous matches when opponent club is identified
+  useEffect(() => {
+    console.log('🔄 Previous matches effect triggered:', {
+      opponentClubId,
+      categoryId: selectedMatch?.category_id,
+      opponentTeam: opponentTeam?.name,
+      hasOpponentClubId: !!opponentClubId,
+      hasCategoryId: !!selectedMatch?.category_id,
+    });
+
+    if (opponentClubId && selectedMatch?.category_id) {
+      console.log('🚀 Starting previous matches fetch for:', {
+        opponentClubId,
+        categoryId: selectedMatch.category_id,
+        opponentTeam: opponentTeam?.name,
+      });
+
+      fetchOpponentPreviousMatches(opponentClubId, selectedMatch.category_id);
+    } else {
+      console.log('⏸️ Skipping previous matches fetch - missing required data');
+    }
+  }, [
+    opponentClubId,
+    selectedMatch?.category_id,
+    opponentTeam?.name,
+    fetchOpponentPreviousMatches,
+  ]);
 
   if (!selectedMatch) {
     return null;
@@ -307,6 +556,39 @@ export default function StrategyPreparationZone({
                 title={`Videa týmu ${opponentTeam?.name || 'soupeře'}`}
                 emptyMessage={`Žádná videa týmu ${opponentTeam?.name || 'soupeře'} nejsou k dispozici`}
               />
+            </div>
+          </Tab>
+          <Tab key="previousMatches" title="Předchozí zápasy">
+            <div className="py-4">
+              {previousMatchesError && (
+                <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700 mb-4">
+                  <p className="text-xs sm:text-sm text-red-700 dark:text-red-300">
+                    Chyba při načítání předchozích zápasů: {previousMatchesError}
+                  </p>
+                </div>
+              )}
+
+              {previousMatchesLoading ? (
+                <div className="flex justify-center py-8">
+                  <LoadingSpinner />
+                </div>
+              ) : previousMatches.length > 0 ? (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Posledních {previousMatches.length} zápasů týmu{' '}
+                    {opponentTeam?.name || 'soupeře'}:
+                  </p>
+                  {previousMatches.map((match) => (
+                    <MatchRow key={match.id} match={match} redirectionLinks={false} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p className="text-sm">
+                    Žádné předchozí zápasy týmu {opponentTeam?.name || 'soupeře'} nejsou k dispozici
+                  </p>
+                </div>
+              )}
             </div>
           </Tab>
         </Tabs>

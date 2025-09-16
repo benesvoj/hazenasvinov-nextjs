@@ -52,9 +52,7 @@ II.poločas – <a href="https://youtu.be/Uej-fP7SSd4">https://youtu.be/Uej-fP
 <span style="font-size: small;">I.poločas – <a href="https://youtu.be/o5csrsKR3xE">https://youtu.be/o5csrsKR3xE</a></span><br />
 <span style="font-size: small;">II.poločas – <a href="https://youtu.be/thbaBpMBmBM">https://youtu.be/thbaBpMBmBM</a></span></p>
 
-<p><span style="font-size: small;"><strong>Baník Most NH – TJ Sokol Svinov 22.9.2023</strong> – Výsledek 20:19 (10:12) </span><br />
-<span style="font-size: small;">I.poločas – <a href="https://youtu.be/zQR7kq7S954">https://youtu.be/zQR7kq7S954</a></span><br />
-<span style="font-size: small;">II.poločas – <a href="https://youtu.be/sN0gICWVuUk">https://youtu.be/sN0gICWVuUk</a></span></p>
+
 
 <p><strong><span style="font-size: small;">Přípravák Čechy junioři x Čechy muži 7.9.2024</span></strong><br />
 <span style="font-size: small;">I.poločas – <a href="https://youtu.be/f-JIWeQLwo8">https://youtu.be/f-JIWeQLwo8</a></span><br />
@@ -86,11 +84,6 @@ II.poločas – <a href="https://youtu.be/YwNNEOu2Mhw">https://youtu.be/YwNNEO
 I.poločas – <a href="https://youtu.be/fTHeVwN65S8">https://youtu.be/fTHeVwN65S8</a><br />
 II.poločas – <a href="https://youtu.be/zfeB_p2mK3o">https://youtu.be/zfeB_p2mK3o</a></p>
 
-<p><strong>Baník Most x TJ Sokol Svinov 28.4.2024</strong> – Výsledek 21:22 (11:11)<br />
-I.poločas 1.čast – <a href="https://youtu.be/Sz96_lqK22A">https://youtu.be/Sz96_lqK22A</a><br />
-I.poločas 2.čast – <a href="https://youtu.be/D9IzNjwl6rc">https://youtu.be/D9IzNjwl6rc</a><br />
-II.poločas 1.čast – <a href="https://youtu.be/eSpvdu_Y-Q4">https://youtu.be/eSpvdu_Y-Q4</a><br />
-II.poločas 2.čast – <a href="https://youtu.be/zXt56PYD4ng">https://youtu.be/zXt56PYD4ng</a></p>
 
 <p><span style="font-size: small;"><strong>TJ Nýřany X TJ Sokol Svinov 27.4.2024</strong></span> – Výsledek 12:12 (4:5)<br />
 I.poločas 1.část – <a href="https://youtu.be/cHiDqusDu9g">https://youtu.be/cHiDqusDu9g</a><br />
@@ -136,10 +129,6 @@ II polocas – <a href="https://youtu.be/q9VsX4lyMnE">https://youtu.be/q9VsX4l
 I.poločas – <a href="https://youtu.be/8m3-yofjBUM">https://youtu.be/8m3-yofjBUM</a><br />
 II.poločas – <a href="https://youtu.be/yQaRw0fVE4c">https://youtu.be/yQaRw0fVE4c</a></p>
 
-<p><span style="font-size: small;"><strong>TJ Sokol Svinov X Baník Most NH – 1.10.2023</strong></span> – Výsledek 20:16 (9:8)<br />
-I.poločas 1.část – <a href="https://youtu.be/XvOEjkMpEGs">https://youtu.be/XvOEjkMpEGs</a><br />
-I.poločas 2.část – <a href="https://youtu.be/48SGF813mYY">https://youtu.be/48SGF813mYY</a><br />
-II.poločas – <a href="https://youtu.be/9_MR0o6UjBs">https://youtu.be/9_MR0o6UjBs</a></p>
 
 <p><strong><span style="font-size: small;">TJ Sokol Podlázky – TJ Sokol Svinov – 24.9.2023</span></strong> – Výsledek 17:12 (11:6)<br />
 I.poločas – <a href="https://youtu.be/3aLG8Qh8NEw">https://youtu.be/3aLG8Qh8NEw</a><br />
@@ -150,7 +139,7 @@ I.poločas – <a href="https://youtu.be/SvMrqehZYVU">https://youtu.be/SvMrqehZ
 II.poločas – <a href="https://youtu.be/MB63P1xizSg">https://youtu.be/MB63P1×izSg</a></p>
 
 <p><span style="font-size: small;"><strong><strong>TJ Přeštice – TJ Sokol Svinov 10.9.2023</strong> </strong>– Výsledek 19:21 (9:9)<br />
-I.poločas – <a href="https://youtu.be/Cnhnj__eTYs">https://youtu.be/Cnhnj__eTYs</a><br />
+
 II.poločas – <a href="https://youtu.be/0X-RYAPbkmA">https://youtu.be/0X-RYAPbkmA</a> </span></p>
 
 <p><span style="font-size: small;"><strong>TJ Příchovice – TJ Sokol Svinov 9.9.2023</strong></span> – Výsledek 20:17 (12:7)<br />

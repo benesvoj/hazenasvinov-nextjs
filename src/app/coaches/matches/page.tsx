@@ -16,7 +16,8 @@ import {
   StrategyPreparationZone,
 } from './components';
 import CoachMatchResultFlow from './components/CoachMatchResultFlow';
-import {Alert} from '@heroui/react';
+import {Tab, Tabs} from '@heroui/react';
+import {Match} from '@/types';
 
 export default function CoachesMatchesPage() {
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
@@ -93,9 +94,9 @@ export default function CoachesMatchesPage() {
   // Process matches
   const upcomingMatches = useMemo(() => {
     const now = new Date();
-    const upcoming = allMatches
-      .filter((match) => match.status === 'upcoming' && new Date(match.date) >= now)
-      .slice(0, 3);
+    const upcoming = allMatches.filter(
+      (match) => match.status === 'upcoming' && new Date(match.date) >= now
+    );
 
     console.log(
       'Upcoming matches:',
@@ -108,8 +109,7 @@ export default function CoachesMatchesPage() {
     const now = new Date();
     const recent = allMatches
       .filter((match) => match.status === 'completed' && new Date(match.date) <= now)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 3);
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     console.log(
       'Recent results:',
@@ -130,8 +130,9 @@ export default function CoachesMatchesPage() {
     return standings.filter((standing) => standing.category_id === selectedCategoryData.id);
   }, [standings, selectedCategoryData?.id]);
 
-  const handleMatchSelect = (match: any) => {
+  const handleMatchSelect = (match: Match) => {
     setSelectedMatch(match);
+    console.log('Selected match:', match);
   };
 
   const handleCloseStrategy = () => {
@@ -172,30 +173,56 @@ export default function CoachesMatchesPage() {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Left column - Matches and Standings */}
           <div className="xl:col-span-1 space-y-6 order-2 xl:order-1">
-            {/* Upcoming Matches */}
-            <UpcomingMatchesCard
-              upcomingMatches={upcomingMatches}
-              loading={loading}
-              onMatchSelect={handleMatchSelect}
-              selectedMatchId={selectedMatch?.id}
-              onStartResultFlow={handleStartResultFlow}
-            />
-
-            {/* Recent Results */}
-            <RecentResultsCard
-              recentResults={recentResults}
-              loading={loading}
-              onMatchSelect={handleMatchSelect}
-              selectedMatchId={selectedMatch?.id}
-            />
-
-            {/* Standings */}
-            <StandingsCard standings={categoryStandings} loading={standingsLoading} />
+            <Tabs>
+              <Tab key="upcoming" title="Upcoming">
+                <UpcomingMatchesCard
+                  upcomingMatches={upcomingMatches}
+                  loading={loading}
+                  onMatchSelect={handleMatchSelect}
+                  selectedMatchId={selectedMatch?.id}
+                  onStartResultFlow={handleStartResultFlow}
+                />
+              </Tab>
+              <Tab key="recent" title="Recent">
+                <RecentResultsCard
+                  recentResults={recentResults}
+                  loading={loading}
+                  onMatchSelect={handleMatchSelect}
+                  selectedMatchId={selectedMatch?.id}
+                />
+              </Tab>
+              <Tab key="standings" title="Standings">
+                <StandingsCard standings={categoryStandings} loading={standingsLoading} />
+              </Tab>
+            </Tabs>
           </div>
 
-          {/* Right column - Strategy Zone */}
+          {/* Right column - Strategy Zone (only for upcoming matches) */}
           <div className="xl:col-span-2 order-1 xl:order-2">
-            <StrategyPreparationZone selectedMatch={selectedMatch} onClose={handleCloseStrategy} />
+            {selectedMatch && selectedMatch.status === 'upcoming' ? (
+              <StrategyPreparationZone
+                selectedMatch={selectedMatch}
+                onClose={handleCloseStrategy}
+              />
+            ) : selectedMatch ? (
+              <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="text-center text-gray-500 dark:text-gray-400">
+                  <p className="text-lg font-medium mb-2">Zápas již byl odehrán</p>
+                  <p className="text-sm">
+                    Strategie a příprava jsou dostupné pouze pro nadcházející zápasy.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="text-center text-gray-500 dark:text-gray-400">
+                  <p className="text-lg font-medium mb-2">Vyberte zápas</p>
+                  <p className="text-sm">
+                    Klikněte na zápas v seznamu vlevo pro zobrazení strategie a přípravy.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

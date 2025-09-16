@@ -29,7 +29,7 @@ const getPageInfo = (pathname: string) => {
   // Fallback for unknown routes
   return {
     title: translations.coaches.title,
-    description: translations.coaches.descriptions,
+    description: translations.coaches.description,
   };
 };
 

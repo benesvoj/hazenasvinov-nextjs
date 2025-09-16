@@ -4,6 +4,7 @@ import React from 'react';
 import {Card, CardHeader, CardBody} from '@heroui/react';
 import {TrophyIcon} from '@heroicons/react/24/outline';
 import {LoadingSpinner} from '@/components';
+import Image from 'next/image';
 
 interface StandingsCardProps {
   standings: any[];
@@ -47,7 +48,7 @@ export default function StandingsCard({standings, loading}: StandingsCardProps) 
                     <td className="py-3 px-2 text-sm">
                       <div className="flex items-center gap-2">
                         {standing.club?.logo_url && (
-                          <img
+                          <Image
                             src={standing.club.logo_url}
                             alt={standing.club.name}
                             className="w-6 h-6 rounded-full object-cover"

@@ -31,7 +31,7 @@ export default function RecentResultsCard({
             <LoadingSpinner />
           </div>
         ) : (
-          <div className="max-h-96 overflow-y-auto scrollbar-hide">
+          <div className="overflow-y-auto scrollbar-hide">
             <div className="space-y-0">
               {recentResults.map((match) => (
                 <div
