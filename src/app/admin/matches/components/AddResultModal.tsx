@@ -1,11 +1,11 @@
 'use client';
 
-import React, {ChangeEvent} from 'react';
+import React, {ChangeEvent, useCallback} from 'react';
 import {Match} from '@/types';
-import {NumberInput} from '@heroui/react';
-import {Heading, UnifiedModal} from '@/components';
+import {Heading, UnifiedModal, MatchResultInput} from '@/components';
 import {translations} from '@/lib/translations';
 import {formatDateString} from '@/helpers';
+
 interface AddResultModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,47 +35,20 @@ export default function AddResultModal({
   onUpdateResult,
   isSeasonClosed,
 }: AddResultModalProps) {
-  const handleScoreChange = (
-    field: 'home_score' | 'away_score' | 'home_score_halftime' | 'away_score_halftime',
-    value: number | ChangeEvent<HTMLInputElement>
-  ) => {
-    // Handle NumberInput which can return either a number or ChangeEvent
-    const actualValue =
-      typeof value === 'object' && value !== null && 'target' in value ? value.target.value : value;
-
-    onResultDataChange({
-      ...resultData,
-      [field]: actualValue,
-    });
-  };
+  const handleScoreChange = useCallback(
+    (
+      field: 'home_score' | 'away_score' | 'home_score_halftime' | 'away_score_halftime',
+      value: number
+    ) => {
+      onResultDataChange({
+        ...resultData,
+        [field]: value,
+      });
+    },
+    [resultData, onResultDataChange]
+  );
 
   const t = translations.match;
-
-  const ResultInput = ({
-    label,
-    value,
-    onChange,
-    isDisabled,
-  }: {
-    label: string;
-    value: number;
-    onChange: (value: number) => void;
-    isDisabled: boolean;
-  }) => {
-    return (
-      <div className="flex-1 w-full">
-        <NumberInput
-          label={label}
-          value={value}
-          onChange={(value) => onChange(value as number)}
-          isDisabled={isDisabled}
-          classNames={{
-            base: 'w-[180px]',
-          }}
-        />
-      </div>
-    );
-  };
 
   return (
     <UnifiedModal
@@ -85,6 +58,7 @@ export default function AddResultModal({
       isFooterWithActions
       onPress={onUpdateResult}
       isDisabled={isSeasonClosed}
+      size="sm"
     >
       {selectedMatch && (
         <div className="space-y-4">
@@ -99,14 +73,14 @@ export default function AddResultModal({
             <Heading size={4}>{t.result}</Heading>
           </div>
           <div className="flex flex-row items-center gap-2 sm:gap-4">
-            <ResultInput
+            <MatchResultInput
               label={`${selectedMatch.home_team?.name || t.homeTeam}`}
               value={resultData.home_score}
               onChange={(value) => handleScoreChange('home_score', value)}
               isDisabled={isSeasonClosed}
             />
             <span className="hidden sm:block text-2xl font-bold text-center">:</span>
-            <ResultInput
+            <MatchResultInput
               label={`${selectedMatch.away_team?.name || t.awayTeam}`}
               value={resultData.away_score}
               onChange={(value) => handleScoreChange('away_score', value)}
@@ -117,14 +91,14 @@ export default function AddResultModal({
             <Heading size={5}>{t.halftime}</Heading>
           </div>
           <div className="flex flex-row items-center gap-2 sm:gap-4">
-            <ResultInput
+            <MatchResultInput
               label={`${selectedMatch.home_team?.name || t.homeTeam}`}
               value={resultData.home_score_halftime}
               onChange={(value) => handleScoreChange('home_score_halftime', value)}
               isDisabled={isSeasonClosed}
             />
             <span className="text-2xl hidden sm:block font-bold text-center">:</span>
-            <ResultInput
+            <MatchResultInput
               label={`${selectedMatch.away_team?.name || t.awayTeam}`}
               value={resultData.away_score_halftime}
               onChange={(value) => handleScoreChange('away_score_halftime', value)}

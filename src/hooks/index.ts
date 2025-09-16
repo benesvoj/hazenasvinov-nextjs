@@ -11,6 +11,7 @@ export {useFetchMatchPosts} from './useFetchMatchPosts';
 export * from './useFetchCategories';
 export {useFetchCategoryPosts} from './useFetchCategoryPosts';
 export * from './useFetchMatches';
+export * from './useAllCategoriesMatches';
 export * from './useFetchMemberFunctions';
 export * from './useFetchSeasons';
 export * from './useFetchUsers';

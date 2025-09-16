@@ -232,3 +232,37 @@ html {
 .admin-sidebar-nav::-webkit-scrollbar-thumb:hover {
   background: #6B7280;
 }
+
+/* Hide scrollbar for horizontal scrolling sections */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Auto-scroll animation for latest results with infinite loop */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  overflow: hidden;
+  position: relative;
+}
+
+.animate-scroll > * {
+  animation: scroll 60s linear infinite;
+  display: flex;
+  width: max-content;
+}
+
+.animate-scroll:hover > * {
+  animation-play-state: paused;
+}

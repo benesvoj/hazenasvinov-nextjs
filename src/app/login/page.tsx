@@ -1,41 +1,41 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, Suspense } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { publicRoutes } from "@/routes/routes";
-import { createClient } from "@/utils/supabase/client";
-import { logSuccessfulLogin, logFailedLogin } from "@/utils/loginLogger";
+import React, {useState, useEffect, Suspense} from 'react';
+import Link from 'next/link';
+import {useSearchParams} from 'next/navigation';
+import {publicRoutes} from '@/routes/routes';
+import {createClient} from '@/utils/supabase/client';
+import {logSuccessfulLogin, logFailedLogin} from '@/utils/loginLogger';
 import {
   LockClosedIcon,
   UserIcon,
   AcademicCapIcon,
   ShieldCheckIcon,
-} from "@heroicons/react/24/outline";
-import { Button, Input, Tabs, Tab, Alert } from "@heroui/react";
-import { LoadingSpinner } from "@/components";
-import { PasswordInput } from "@/components/PasswordInput";
+} from '@heroicons/react/24/outline';
+import {Button, Input, Tabs, Tab, Alert} from '@heroui/react';
+import {LoadingSpinner} from '@/components';
+import {PasswordInput} from '@/components/PasswordInput';
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState("admin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState('admin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Handle URL tab parameter and error messages
   useEffect(() => {
-    const tab = searchParams.get("tab");
-    if (tab === "coach") {
-      setActiveTab("coach");
+    const tab = searchParams.get('tab');
+    if (tab === 'coach') {
+      setActiveTab('coach');
     }
 
     // Check for error parameters
-    const errorParam = searchParams.get("error");
-    const messageParam = searchParams.get("message");
+    const errorParam = searchParams.get('error');
+    const messageParam = searchParams.get('message');
 
-    if (errorParam === "no_role" && messageParam) {
+    if (errorParam === 'no_role' && messageParam) {
       setError(decodeURIComponent(messageParam));
     }
   }, [searchParams]);
@@ -43,32 +43,32 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
       const supabase = createClient();
-      const { error, data } = await supabase.auth.signInWithPassword({
+      const {error, data} = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
         // Log failed login attempt
-        let errorMessage = "Přihlášení se nezdařilo. Zkuste to znovu.";
-        let logReason = "Unknown error";
+        let errorMessage = 'Přihlášení se nezdařilo. Zkuste to znovu.';
+        let logReason = 'Unknown error';
 
         switch (error.message) {
-          case "Invalid login credentials":
-            errorMessage = "Nesprávný email nebo heslo";
-            logReason = "Invalid credentials";
+          case 'Invalid login credentials':
+            errorMessage = 'Nesprávný email nebo heslo';
+            logReason = 'Invalid credentials';
             break;
-          case "Email not confirmed":
-            errorMessage = "Email není potvrzen. Zkontrolujte svůj email.";
-            logReason = "Email not confirmed";
+          case 'Email not confirmed':
+            errorMessage = 'Email není potvrzen. Zkontrolujte svůj email.';
+            logReason = 'Email not confirmed';
             break;
-          case "Too many requests":
-            errorMessage = "Příliš mnoho pokusů. Zkuste to znovu později.";
-            logReason = "Too many requests";
+          case 'Too many requests':
+            errorMessage = 'Příliš mnoho pokusů. Zkuste to znovu později.';
+            logReason = 'Too many requests';
             break;
           default:
             logReason = error.message;
@@ -87,34 +87,33 @@ function LoginForm() {
         let profileError;
 
         // First try to get existing profile
-        const { data: existingProfiles, error: existingError } = await supabase
-          .from("user_profiles")
-          .select("role, club_id")
-          .eq("user_id", data.user.id);
+        const {data: existingProfiles, error: existingError} = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('user_id', data.user.id);
 
         if (existingError || !existingProfiles || existingProfiles.length === 0) {
           // No profile found, try to create one using the safe function
           try {
-            const { data: safeProfiles, error: safeError } = await supabase
-              .rpc('get_user_profile_safe', { user_uuid: data.user.id });
+            const {data: safeProfiles, error: safeError} = await supabase.rpc(
+              'get_user_profile_safe',
+              {user_uuid: data.user.id}
+            );
 
             if (safeError || !safeProfiles || safeProfiles.length === 0) {
-              setError(
-                "Uživatelský profil nebyl nalezen. Kontaktujte administrátora."
-              );
+              setError('Uživatelský profil nebyl nalezen. Kontaktujte administrátora.');
               return;
             }
 
             // Convert the safe profile result to the expected format
-            userProfiles = [{
-              role: safeProfiles[0].role,
-              club_id: safeProfiles[0].club_id
-            }];
+            userProfiles = [
+              {
+                role: safeProfiles[0].role,
+              },
+            ];
             profileError = null;
           } catch (err) {
-            setError(
-              "Uživatelský profil nebyl nalezen. Kontaktujte administrátora."
-            );
+            setError('Uživatelský profil nebyl nalezen. Kontaktujte administrátora.');
             return;
           }
         } else {
@@ -122,19 +121,15 @@ function LoginForm() {
           profileError = existingError;
         }
 
-        if (activeTab === "admin") {
+        if (activeTab === 'admin') {
           // Check if user has admin role
-          const hasAdminRole = userProfiles.some(
-            (profile: any) => profile.role === "admin"
-          );
+          const hasAdminRole = userProfiles.some((profile: any) => profile.role === 'admin');
 
           if (hasAdminRole) {
             // Redirect to admin panel
-            window.location.href = "/admin";
+            window.location.href = '/admin';
           } else {
-            setError(
-              "Nemáte oprávnění pro přístup do administrátorského portálu."
-            );
+            setError('Nemáte oprávnění pro přístup do administrátorského portálu.');
             // Sign out the user since they don't have admin access
             await supabase.auth.signOut();
           }
@@ -142,26 +137,24 @@ function LoginForm() {
           // Check if user has coach role or admin role in any of their profiles
           const hasCoachRole = userProfiles.some(
             (profile: any) =>
-              profile.role === "coach" || 
-              profile.role === "head_coach" ||
-              profile.role === "admin"
+              profile.role === 'coach' || profile.role === 'head_coach' || profile.role === 'admin'
           );
 
           if (hasCoachRole) {
             // Redirect to coaches dashboard
-            window.location.href = "/coaches/dashboard";
+            window.location.href = '/coaches/dashboard';
           } else {
-            setError("Nemáte oprávnění pro přístup do trenérského portálu.");
+            setError('Nemáte oprávnění pro přístup do trenérského portálu.');
             // Sign out the user since they don't have coach access
             await supabase.auth.signOut();
           }
         }
       }
     } catch (err) {
-      setError("Došlo k neočekávané chybě. Zkuste to znovu.");
+      setError('Došlo k neočekávané chybě. Zkuste to znovu.');
 
       // Log the error
-      await logFailedLogin(email, "Unexpected error");
+      await logFailedLogin(email, 'Unexpected error');
     } finally {
       setLoading(false);
     }
@@ -169,42 +162,42 @@ function LoginForm() {
 
   const handleTabChange = (key: React.Key) => {
     setActiveTab(key as string);
-    setError(""); // Clear error when switching tabs
+    setError(''); // Clear error when switching tabs
   };
 
   const getTabIcon = (tabKey: string) => {
-    if (tabKey === "admin") {
+    if (tabKey === 'admin') {
       return <ShieldCheckIcon className="w-5 h-5" />;
     }
     return <AcademicCapIcon className="w-5 h-5" />;
   };
 
   const getTabTitle = (tabKey: string) => {
-    if (tabKey === "admin") {
-      return "Admin Portal";
+    if (tabKey === 'admin') {
+      return 'Admin Portal';
     }
-    return "Trenérský Portal";
+    return 'Trenérský Portal';
   };
 
   const getTabDescription = (tabKey: string) => {
-    if (tabKey === "admin") {
-      return "Přihlaste se do administračního rozhraní";
+    if (tabKey === 'admin') {
+      return 'Přihlaste se do administračního rozhraní';
     }
-    return "Přihlaste se do trenérského rozhraní";
+    return 'Přihlaste se do trenérského rozhraní';
   };
 
   const getHeaderIcon = () => {
-    if (activeTab === "admin") {
+    if (activeTab === 'admin') {
       return <ShieldCheckIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />;
     }
     return <AcademicCapIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />;
   };
 
   const getHeaderGradient = () => {
-    if (activeTab === "admin") {
-      return "from-sky-600 to-blue-600";
+    if (activeTab === 'admin') {
+      return 'from-sky-600 to-blue-600';
     }
-    return "from-green-600 to-emerald-600";
+    return 'from-green-600 to-emerald-600';
   };
 
   return (
@@ -220,9 +213,7 @@ function LoginForm() {
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
             {getTabTitle(activeTab)}
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">
-            {getTabDescription(activeTab)}
-          </p>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">{getTabDescription(activeTab)}</p>
         </div>
 
         {/* Login Form Card */}
@@ -232,14 +223,14 @@ function LoginForm() {
             selectedKey={activeTab}
             onSelectionChange={handleTabChange}
             className="mb-6"
-            color={activeTab === "admin" ? "primary" : "success"}
+            color={activeTab === 'admin' ? 'primary' : 'success'}
             variant="underlined"
           >
             <Tab
               key="admin"
               title={
                 <div className="flex items-center space-x-2">
-                  {getTabIcon("admin")}
+                  {getTabIcon('admin')}
                   <span>Admin</span>
                 </div>
               }
@@ -248,7 +239,7 @@ function LoginForm() {
               key="coach"
               title={
                 <div className="flex items-center space-x-2">
-                  {getTabIcon("coach")}
+                  {getTabIcon('coach')}
                   <span>Trenér</span>
                 </div>
               }
@@ -287,11 +278,7 @@ function LoginForm() {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                   <LockClosedIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
-                <PasswordInput
-                  password={password}
-                  setPassword={setPassword}
-                  loading={loading}
-                />
+                <PasswordInput password={password} setPassword={setPassword} loading={loading} />
               </div>
             </div>
 
@@ -302,12 +289,12 @@ function LoginForm() {
             <Button
               type="submit"
               className="w-full"
-              color={activeTab === "admin" ? "primary" : "success"}
+              color={activeTab === 'admin' ? 'primary' : 'success'}
               size="lg"
               disabled={loading}
               isLoading={loading}
             >
-              {loading ? "Přihlašování..." : "Přihlásit se"}
+              {loading ? 'Přihlašování...' : 'Přihlásit se'}
             </Button>
           </form>
 
@@ -335,9 +322,9 @@ function LoginForm() {
         {/* Additional Info */}
         <div className="mt-6 text-center px-4">
           <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-            {activeTab === "admin"
-              ? "Pro přístup k administračnímu rozhraní kontaktujte správce systému"
-              : "Pro přístup k trenérskému portálu kontaktujte administrátora klubu"}
+            {activeTab === 'admin'
+              ? 'Pro přístup k administračnímu rozhraní kontaktujte správce systému'
+              : 'Pro přístup k trenérskému portálu kontaktujte administrátora klubu'}
           </p>
         </div>
       </div>

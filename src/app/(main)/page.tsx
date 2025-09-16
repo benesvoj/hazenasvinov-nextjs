@@ -6,6 +6,7 @@ import {
   SponsorsSection,
   ClubHighlightSection,
   PostSection,
+  LatestResultsSection,
 } from './components';
 import {useSectionVisibility} from '@/hooks/useSectionVisibility';
 import AuthHandler from './components/AuthHandler';
@@ -17,8 +18,9 @@ export default function Page() {
   const t = translations.matchSchedule;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <AuthHandler />
+      <LatestResultsSection />
       <PostSection />
       <MatchSchedule title={t.title} description={t.description} />
       {/* <OptimizedMatchSchedule /> */}

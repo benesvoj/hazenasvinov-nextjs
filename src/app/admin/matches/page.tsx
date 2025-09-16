@@ -54,6 +54,9 @@ import {
 import {AdminContainer} from '../components/AdminContainer';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
 import {matchStatuses, matchStatusesKeys} from '@/constants';
+import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
+import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
+import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');
@@ -426,6 +429,9 @@ export default function MatchesAdminPage() {
 
       if (error) throw error;
 
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin match insert');
+
       onAddMatchClose();
       setFormData({
         date: '',
@@ -474,10 +480,38 @@ export default function MatchesAdminPage() {
           home_score_halftime: resultData.home_score_halftime,
           away_score_halftime: resultData.away_score_halftime,
           status: matchStatusesKeys[1],
+          updated_at: new Date().toISOString(),
         })
         .eq('id', selectedMatch.id);
 
       if (error) throw error;
+
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin result update');
+
+      // Automatically recalculate standings for this match's category and season
+      try {
+        console.log('Recalculating standings after admin match result update...');
+        const standingsResult = await autoRecalculateStandings(selectedMatch.id);
+
+        if (standingsResult.success && standingsResult.recalculated) {
+          console.log('Standings recalculated successfully');
+          // Refresh standings to show updated data
+          if (selectedCategory && selectedSeason) {
+            await fetchStandings(selectedCategory, selectedSeason);
+          }
+          showToast.success('Výsledek zápasu byl uložen a tabulka byla automaticky přepočítána!');
+        } else if (standingsResult.success && !standingsResult.recalculated) {
+          console.log('Standings recalculation skipped (no standings exist or season closed)');
+          showToast.success('Výsledek zápasu byl úspěšně uložen!');
+        } else {
+          console.warn('Standings recalculation failed:', standingsResult.error);
+          showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
+        }
+      } catch (standingsError) {
+        console.error('Error during standings recalculation:', standingsError);
+        showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
+      }
 
       onAddResultClose();
       setResultData({home_score: 0, away_score: 0, home_score_halftime: 0, away_score_halftime: 0});
@@ -510,6 +544,9 @@ export default function MatchesAdminPage() {
       const {error} = await supabase.from('matches').delete().eq('id', matchToDelete.id);
 
       if (error) throw error;
+
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin match delete');
 
       // Refresh matches to show updated data
       refreshMatches();
@@ -635,6 +672,41 @@ export default function MatchesAdminPage() {
         throw error;
       }
 
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin match update');
+
+      // Check if scores were updated and trigger standings recalculation
+      const scoresWereUpdated =
+        editData.home_score !== selectedMatch.home_score ||
+        editData.away_score !== selectedMatch.away_score ||
+        editData.home_score_halftime !== selectedMatch.home_score_halftime ||
+        editData.away_score_halftime !== selectedMatch.away_score_halftime;
+
+      if (scoresWereUpdated) {
+        try {
+          console.log('Scores were updated, recalculating standings...');
+          const standingsResult = await autoRecalculateStandings(selectedMatch.id);
+
+          if (standingsResult.success && standingsResult.recalculated) {
+            console.log('Standings recalculated successfully');
+            // Refresh standings to show updated data
+            if (selectedCategory && selectedSeason) {
+              await fetchStandings(selectedCategory, selectedSeason);
+            }
+            showToast.success('Zápas byl upraven a tabulka byla automaticky přepočítána!');
+          } else if (standingsResult.success && !standingsResult.recalculated) {
+            console.log('Standings recalculation skipped (no standings exist or season closed)');
+            showToast.success('Zápas byl úspěšně upraven!');
+          } else {
+            console.warn('Standings recalculation failed:', standingsResult.error);
+            showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
+          }
+        } catch (standingsError) {
+          console.error('Error during standings recalculation:', standingsError);
+          showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
+        }
+      }
+
       onEditMatchClose();
       setEditData({
         date: '',
@@ -727,6 +799,9 @@ export default function MatchesAdminPage() {
         console.error('Supabase error details:', error);
         throw error;
       }
+
+      // Refresh materialized view to ensure it has the latest data
+      await refreshMaterializedViewWithCallback('admin bulk update');
 
       setError('');
       onBulkUpdateClose();
@@ -922,6 +997,14 @@ export default function MatchesAdminPage() {
             >
               <TrashIcon className="w-4 h-4" />
             </ButtonWithTooltip>
+            <Button
+              color="primary"
+              onPress={testMaterializedViewRefresh}
+              size="sm"
+              aria-label="Test materialized view refresh"
+            >
+              🔍 Test MV Refresh
+            </Button>
           </div>
         </>
       }
