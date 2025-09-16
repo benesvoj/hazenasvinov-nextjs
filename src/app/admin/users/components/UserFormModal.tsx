@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import {useState, useEffect} from 'react';
 import {
   Modal,
   ModalContent,
@@ -8,17 +8,17 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
-import { Select, SelectItem } from "@heroui/select";
-import { Badge } from "@heroui/badge";
-import { showToast } from "@/components/Toast";
-import { Tab, Tabs } from "@heroui/tabs";
-import { createClient } from "@/utils/supabase/client";
-import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { ROLE_OPTIONS } from "@/constants";
+} from '@heroui/modal';
+import {Button} from '@heroui/button';
+import {Input, Textarea} from '@heroui/input';
+import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
+import {Select, SelectItem} from '@heroui/select';
+import {Badge} from '@heroui/badge';
+import {showToast} from '@/components/Toast';
+import {Tab, Tabs} from '@heroui/tabs';
+import {createClient} from '@/utils/supabase/client';
+import {TrashIcon, PlusIcon} from '@heroicons/react/24/outline';
+import {ROLE_OPTIONS} from '@/constants';
 
 interface UserFormData {
   email: string;
@@ -32,7 +32,6 @@ interface UserProfile {
   id: string;
   user_id: string;
   role: string;
-  club_id?: string;
   assigned_categories: string[] | null;
   created_at: string;
   updated_at: string;
@@ -55,37 +54,37 @@ export default function UserFormModal({
   onSuccess,
 }: UserFormModalProps) {
   const [formData, setFormData] = useState<UserFormData>({
-    email: "",
-    full_name: "",
-    phone: "",
-    bio: "",
-    position: "",
+    email: '',
+    full_name: '',
+    phone: '',
+    bio: '',
+    position: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Role management state
   const [userProfiles, setUserProfiles] = useState<UserProfile[]>([]);
   const [profilesLoading, setProfilesLoading] = useState(false);
-  const [newRole, setNewRole] = useState("");
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  
+  const [newRole, setNewRole] = useState('');
+  const [categories, setCategories] = useState<{id: string; name: string}[]>([]);
+
   // Category selection modal state
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [pendingRole, setPendingRole] = useState("");
+  const [pendingRole, setPendingRole] = useState('');
 
   // Load user profiles
   const loadUserProfiles = async (userId: string) => {
     if (!userId) return;
-    
+
     setProfilesLoading(true);
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+        .order('created_at', {ascending: false});
 
       if (error) throw error;
       setUserProfiles(data || []);
@@ -101,10 +100,7 @@ export default function UserFormModal({
   const loadCategories = async () => {
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from('categories')
-        .select('id, name')
-        .order('name');
+      const {data, error} = await supabase.from('categories').select('id, name').order('name');
 
       if (error) throw error;
       setCategories(data || []);
@@ -140,20 +136,17 @@ export default function UserFormModal({
 
     try {
       const supabase = createClient();
-      const { error } = await supabase
-        .from('user_profiles')
-        .insert({
-          user_id: selectedUser.id,
-          role: role,
-          assigned_categories: categories,
-          club_id: null // Default to null, can be set later
-        });
+      const {error} = await supabase.from('user_profiles').insert({
+        user_id: selectedUser.id,
+        role: role,
+        assigned_categories: categories,
+      });
 
       if (error) throw error;
-      
+
       showToast.success('Role byla úspěšně přidána!');
       setNewRole('');
-      
+
       // Only reload profiles if the component is still mounted and selectedUser exists
       if (selectedUser && selectedUser.id) {
         loadUserProfiles(selectedUser.id);
@@ -167,7 +160,7 @@ export default function UserFormModal({
   // Handle category selection confirmation
   const handleCategorySelectionConfirm = async () => {
     if (!pendingRole || !selectedUser) return;
-    
+
     try {
       await addRoleToDatabase(pendingRole, selectedCategories);
       setShowCategoryModal(false);
@@ -192,13 +185,10 @@ export default function UserFormModal({
 
     try {
       const supabase = createClient();
-      const { error } = await supabase
-        .from('user_profiles')
-        .delete()
-        .eq('id', profileId);
+      const {error} = await supabase.from('user_profiles').delete().eq('id', profileId);
 
       if (error) throw error;
-      
+
       showToast.success('Role byla úspěšně smazána!');
       loadUserProfiles(selectedUser.id);
     } catch (error: any) {
@@ -210,17 +200,22 @@ export default function UserFormModal({
   // Get role badge color
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'danger';
-      case 'head_coach': return 'warning';
-      case 'coach': return 'primary';
-      case 'member': return 'default';
-      default: return 'default';
+      case 'admin':
+        return 'danger';
+      case 'head_coach':
+        return 'warning';
+      case 'coach':
+        return 'primary';
+      case 'member':
+        return 'default';
+      default:
+        return 'default';
     }
   };
 
   // Get role label
   const getRoleLabel = (role: string) => {
-    const roleOption = ROLE_OPTIONS.find(r => r.value === role);
+    const roleOption = ROLE_OPTIONS.find((r) => r.value === role);
     return roleOption?.label || role;
   };
 
@@ -228,21 +223,21 @@ export default function UserFormModal({
   useEffect(() => {
     if (selectedUser) {
       setFormData({
-        email: selectedUser.email || "",
-        full_name: selectedUser.user_metadata?.full_name || "",
-        phone: selectedUser.user_metadata?.phone || "",
-        bio: selectedUser.user_metadata?.bio || "",
-        position: selectedUser.user_metadata?.position || "",
+        email: selectedUser.email || '',
+        full_name: selectedUser.user_metadata?.full_name || '',
+        phone: selectedUser.user_metadata?.phone || '',
+        bio: selectedUser.user_metadata?.bio || '',
+        position: selectedUser.user_metadata?.position || '',
       });
       // Load user profiles when editing existing user
       loadUserProfiles(selectedUser.id);
     } else {
       setFormData({
-        email: "",
-        full_name: "",
-        phone: "",
-        bio: "",
-        position: "",
+        email: '',
+        full_name: '',
+        phone: '',
+        bio: '',
+        position: '',
       });
       setUserProfiles([]);
     }
@@ -257,14 +252,14 @@ export default function UserFormModal({
   useEffect(() => {
     if (isOpen && !selectedUser) {
       setFormData({
-        email: "",
-        full_name: "",
-        phone: "",
-        bio: "",
-        position: "",
+        email: '',
+        full_name: '',
+        phone: '',
+        bio: '',
+        position: '',
       });
       setUserProfiles([]);
-      setNewRole("");
+      setNewRole('');
     }
   }, [isOpen, selectedUser]);
 
@@ -274,18 +269,16 @@ export default function UserFormModal({
 
     try {
       await onSubmit(formData, !!selectedUser);
-      
+
       // Only call onSuccess for edit operations
       // For new user creation, the parent component handles the flow
       if (selectedUser) {
         onSuccess?.();
       }
     } catch (error) {
-      console.error("Error in user form:", error);
+      console.error('Error in user form:', error);
       showToast.danger(
-        `Chyba při ukládání uživatele: ${
-          error instanceof Error ? error.message : "Neznámá chyba"
-        }`
+        `Chyba při ukládání uživatele: ${error instanceof Error ? error.message : 'Neznámá chyba'}`
       );
     } finally {
       setIsSubmitting(false);
@@ -297,8 +290,8 @@ export default function UserFormModal({
   };
 
   const TABS = [
-    { key: "basic", title: "Základní údaje" },
-    { key: "roles", title: "Role a přístup" },
+    {key: 'basic', title: 'Základní údaje'},
+    {key: 'roles', title: 'Role a přístup'},
   ];
 
   return (
@@ -308,13 +301,10 @@ export default function UserFormModal({
           {(onClose) => (
             <form onSubmit={handleSubmit}>
               <ModalHeader className="flex flex-col gap-1">
-                {selectedUser ? "Upravit uživatele" : "Přidat nového uživatele"}
+                {selectedUser ? 'Upravit uživatele' : 'Přidat nového uživatele'}
               </ModalHeader>
               <ModalBody className="gap-4">
-                <Tabs
-                  aria-label="User form tabs"
-                  disabledKeys={!selectedUser ? [TABS[1].key] : []}
-                >
+                <Tabs aria-label="User form tabs" disabledKeys={!selectedUser ? [TABS[1].key] : []}>
                   <Tab key="basic" title="Základní údaje">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Input
@@ -324,13 +314,9 @@ export default function UserFormModal({
                         placeholder="uzivatel@example.cz"
                         type="email"
                         value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
                         isReadOnly={!!selectedUser} // Read-only for existing users
-                        description={
-                          selectedUser ? "Email nelze změnit" : undefined
-                        }
+                        description={selectedUser ? 'Email nelze změnit' : undefined}
                       />
                       <Input
                         isRequired
@@ -352,9 +338,7 @@ export default function UserFormModal({
                         placeholder="+420 123 456 789"
                         type="tel"
                         value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       />
                       <Input
                         label="Pozice"
@@ -362,9 +346,7 @@ export default function UserFormModal({
                         placeholder="Administrátor"
                         type="text"
                         value={formData.position}
-                        onChange={(e) =>
-                          setFormData({ ...formData, position: e.target.value })
-                        }
+                        onChange={(e) => setFormData({...formData, position: e.target.value})}
                       />
                     </div>
                     <Textarea
@@ -372,21 +354,18 @@ export default function UserFormModal({
                       name="bio"
                       placeholder="Krátký popis uživatele..."
                       value={formData.bio}
-                      onChange={(e) =>
-                        setFormData({ ...formData, bio: e.target.value })
-                      }
+                      onChange={(e) => setFormData({...formData, bio: e.target.value})}
                       className="mt-4"
                     />
                     {!selectedUser && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
                         <p className="text-sm text-blue-800">
-                          Novému uživateli bude odeslán email s pozvánkou do
-                          systému.
+                          Novému uživateli bude odeslán email s pozvánkou do systému.
                         </p>
                       </div>
                     )}
                   </Tab>
-                  
+
                   <Tab key="roles" title="Role a přístup">
                     {selectedUser ? (
                       <div className="space-y-4">
@@ -403,11 +382,7 @@ export default function UserFormModal({
                             items={ROLE_OPTIONS}
                             className="flex-1"
                           >
-                            {(role) => (
-                              <SelectItem key={role.value}>
-                                {role.label}
-                              </SelectItem>
-                            )}
+                            {(role) => <SelectItem key={role.value}>{role.label}</SelectItem>}
                           </Select>
                           <Button
                             color="primary"
@@ -421,9 +396,7 @@ export default function UserFormModal({
 
                         {/* Roles table */}
                         <div>
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">
-                            Přiřazené role
-                          </h4>
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">Přiřazené role</h4>
                           <Table aria-label="User roles table">
                             <TableHeader>
                               <TableColumn>ROLE</TableColumn>
@@ -431,57 +404,68 @@ export default function UserFormModal({
                               <TableColumn>VYTVOŘENO</TableColumn>
                               <TableColumn>AKCE</TableColumn>
                             </TableHeader>
-                                                      <TableBody
-                            isLoading={profilesLoading}
-                            loadingContent="Načítání profilů..."
-                            emptyContent="Žádné profily nenalezeny"
-                          >
-                            {userProfiles.map((userProfile) => (
-                              <TableRow key={userProfile.id}>
-                                <TableCell>
-                                  <Badge color={getRoleBadgeColor(userProfile.role)} variant="flat">
-                                    {getRoleLabel(userProfile.role)}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  {userProfile.assigned_categories && userProfile.assigned_categories.length > 0 ? (
-                                    <div className="flex flex-wrap gap-1">
-                                      {userProfile.assigned_categories.slice(0, 2).map((catId) => {
-                                        const category = categories.find(c => c.id === catId);
-                                        return (
-                                          <Badge key={catId} size="sm" variant="flat" color="secondary">
-                                            {category?.name || catId}
+                            <TableBody
+                              isLoading={profilesLoading}
+                              loadingContent="Načítání profilů..."
+                              emptyContent="Žádné profily nenalezeny"
+                            >
+                              {userProfiles.map((userProfile) => (
+                                <TableRow key={userProfile.id}>
+                                  <TableCell>
+                                    <Badge
+                                      color={getRoleBadgeColor(userProfile.role)}
+                                      variant="flat"
+                                    >
+                                      {getRoleLabel(userProfile.role)}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    {userProfile.assigned_categories &&
+                                    userProfile.assigned_categories.length > 0 ? (
+                                      <div className="flex flex-wrap gap-1">
+                                        {userProfile.assigned_categories
+                                          .slice(0, 2)
+                                          .map((catId) => {
+                                            const category = categories.find((c) => c.id === catId);
+                                            return (
+                                              <Badge
+                                                key={catId}
+                                                size="sm"
+                                                variant="flat"
+                                                color="secondary"
+                                              >
+                                                {category?.name || catId}
+                                              </Badge>
+                                            );
+                                          })}
+                                        {userProfile.assigned_categories.length > 2 && (
+                                          <Badge size="sm" variant="flat" color="default">
+                                            +{userProfile.assigned_categories.length - 2}
                                           </Badge>
-                                        );
-                                      })}
-                                      {userProfile.assigned_categories.length > 2 && (
-                                        <Badge size="sm" variant="flat" color="default">
-                                          +{userProfile.assigned_categories.length - 2}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <span className="text-sm text-gray-400">Žádné</span>
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  <span className="text-sm">
-                                    {new Date(userProfile.created_at).toLocaleDateString('cs-CZ')}
-                                  </span>
-                                </TableCell>
-                                <TableCell>
-                                  <Button
-                                    isIconOnly
-                                    size="sm"
-                                    variant="light"
-                                    color="danger"
-                                    onPress={() => handleDeleteRole(userProfile.id)}
-                                  >
-                                    <TrashIcon className="h-4 w-4" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <span className="text-sm text-gray-400">Žádné</span>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="text-sm">
+                                      {new Date(userProfile.created_at).toLocaleDateString('cs-CZ')}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      isIconOnly
+                                      size="sm"
+                                      variant="light"
+                                      color="danger"
+                                      onPress={() => handleDeleteRole(userProfile.id)}
+                                    >
+                                      <TrashIcon className="h-4 w-4" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
                             </TableBody>
                           </Table>
                         </div>
@@ -499,7 +483,7 @@ export default function UserFormModal({
                   Zrušit
                 </Button>
                 <Button color="primary" type="submit" isLoading={isSubmitting}>
-                  {selectedUser ? "Uložit změny" : "Vytvořit uživatele"}
+                  {selectedUser ? 'Uložit změny' : 'Vytvořit uživatele'}
                 </Button>
               </ModalFooter>
             </form>
@@ -521,13 +505,12 @@ export default function UserFormModal({
               <ModalBody>
                 <div className="space-y-4">
                   <p className="text-sm text-gray-700">
-                    Kategorie můžete vybrat později, ale pro správné fungování systému je doporučeno přiřadit alespoň jednu kategorii.
+                    Kategorie můžete vybrat později, ale pro správné fungování systému je doporučeno
+                    přiřadit alespoň jednu kategorii.
                   </p>
-                  
+
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      Dostupné kategorie:
-                    </label>
+                    <label className="text-sm font-medium text-gray-700">Dostupné kategorie:</label>
                     <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto border rounded-lg p-3">
                       {categories.map((category) => (
                         <label
@@ -541,7 +524,9 @@ export default function UserFormModal({
                               if (e.target.checked) {
                                 setSelectedCategories([...selectedCategories, category.id]);
                               } else {
-                                setSelectedCategories(selectedCategories.filter(id => id !== category.id));
+                                setSelectedCategories(
+                                  selectedCategories.filter((id) => id !== category.id)
+                                );
                               }
                             }}
                             className="rounded border-gray-300 text-primary focus:ring-primary"
@@ -565,8 +550,8 @@ export default function UserFormModal({
                 <Button color="default" variant="light" onPress={handleCategorySelectionCancel}>
                   Zrušit
                 </Button>
-                <Button 
-                  color="primary" 
+                <Button
+                  color="primary"
                   onPress={handleCategorySelectionConfirm}
                   isDisabled={selectedCategories.length === 0}
                 >
