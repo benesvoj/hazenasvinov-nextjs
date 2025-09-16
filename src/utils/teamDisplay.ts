@@ -213,6 +213,20 @@ export function transformMatchWithTeamNames(
     'Away team'
   );
 
+  // Calculate short names with proper suffix logic
+  const homeShortName = getTeamDisplayNameSafe(
+    homeTeamDetails?.club_category?.club?.short_name,
+    homeTeamDetails?.team_suffix || 'A',
+    homeTeamCount,
+    'Home team'
+  );
+  const awayShortName = getTeamDisplayNameSafe(
+    awayTeamDetails?.club_category?.club?.short_name,
+    awayTeamDetails?.team_suffix || 'A',
+    awayTeamCount,
+    'Away team'
+  );
+
   // Determine if teams are own club
   const homeIsOwnClub = useTeamMap
     ? homeTeamDetails?.club_category?.club?.is_own_club === true
@@ -228,14 +242,14 @@ export function transformMatchWithTeamNames(
       home_team: {
         id: match.home_team_id,
         name: homeTeamName,
-        short_name: homeTeamDetails?.club_category?.club?.short_name,
+        short_name: homeShortName,
         is_own_club: homeIsOwnClub,
         logo_url: homeTeamDetails?.club_category?.club?.logo_url,
       },
       away_team: {
         id: match.away_team_id,
         name: awayTeamName,
-        short_name: awayTeamDetails?.club_category?.club?.short_name,
+        short_name: awayShortName,
         is_own_club: awayIsOwnClub,
         logo_url: awayTeamDetails?.club_category?.club?.logo_url,
       },
@@ -250,14 +264,14 @@ export function transformMatchWithTeamNames(
       home_team: {
         id: match.home_team?.id,
         name: homeTeamName,
-        short_name: match.home_team?.club_category?.club?.short_name,
+        short_name: homeShortName,
         is_own_club: homeIsOwnClub,
         logo_url: match.home_team?.club_category?.club?.logo_url,
       },
       away_team: {
         id: match.away_team?.id,
         name: awayTeamName,
-        short_name: match.away_team?.club_category?.club?.short_name,
+        short_name: awayShortName,
         is_own_club: awayIsOwnClub,
         logo_url: match.away_team?.club_category?.club?.logo_url,
       },

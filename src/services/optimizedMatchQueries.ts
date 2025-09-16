@@ -459,6 +459,20 @@ export async function getOwnClubMatchesOptimized(
           'Away team'
         );
 
+        // Calculate short names with proper suffix logic
+        const homeShortName = getTeamDisplayNameSafe(
+          match.home_club_short_name,
+          match.home_team_suffix || 'A',
+          clubTeamCounts.get(homeClubId) || 1,
+          'Home team'
+        );
+        const awayShortName = getTeamDisplayNameSafe(
+          match.away_club_short_name,
+          match.away_team_suffix || 'A',
+          clubTeamCounts.get(awayClubId) || 1,
+          'Away team'
+        );
+
         return {
           ...match,
           // Category information
@@ -479,7 +493,7 @@ export async function getOwnClubMatchesOptimized(
           home_team: {
             id: match.home_team_id,
             name: homeTeamName,
-            short_name: match.home_club_short_name,
+            short_name: homeShortName,
             is_own_club: match.home_is_own_club,
             logo_url: match.home_club_logo_url,
           },
@@ -487,7 +501,7 @@ export async function getOwnClubMatchesOptimized(
           away_team: {
             id: match.away_team_id,
             name: awayTeamName,
-            short_name: match.away_club_short_name,
+            short_name: awayShortName,
             is_own_club: match.away_is_own_club,
             logo_url: match.away_club_logo_url,
           },

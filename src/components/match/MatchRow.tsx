@@ -69,11 +69,11 @@ const MatchRow: React.FC<MatchRowProps> = ({
                   </div>
                 )}
                 <span className={'font-medium text-sm lg:text-sm text-gray-900 dark:text-white'}>
-                  {/* Mobile: Short name, Desktop: Full name */}
+                  {/* Mobile: Short name with suffix, Desktop: Full name */}
                   <span className="lg:hidden">
-                    {match.home_team?.short_name || match.home_team?.name || 'Neznámý tým'}
+                    {match.home_team?.short_name || match.home_team?.name}
                   </span>
-                  <span className="hidden lg:inline">{match.home_team?.name || 'Neznámý tým'}</span>
+                  <span className="hidden lg:inline">{match.home_team?.name}</span>
                 </span>
               </div>
 
@@ -82,11 +82,11 @@ const MatchRow: React.FC<MatchRowProps> = ({
               {/* Away Team */}
               <div className="flex items-center gap-2">
                 <span className={'font-medium text-sm lg:text-sm text-gray-900 dark:text-white'}>
-                  {/* Mobile: Short name, Desktop: Full name */}
+                  {/* Mobile: Short name with suffix, Desktop: Full name */}
                   <span className="lg:hidden">
-                    {match.away_team?.short_name || match.away_team?.name || 'Neznámý tým'}
+                    {match.away_team?.short_name || match.away_team?.name}
                   </span>
-                  <span className="hidden lg:inline">{match.away_team?.name || 'Neznámý tým'}</span>
+                  <span className="hidden lg:inline">{match.away_team?.name}</span>
                 </span>
                 {/* Logo - Hidden on mobile */}
                 {(match.away_team_logo || match.away_team?.logo_url) && (
