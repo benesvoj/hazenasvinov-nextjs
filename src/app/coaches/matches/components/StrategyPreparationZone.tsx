@@ -5,6 +5,7 @@ import {Card, CardHeader, CardBody, Button} from '@heroui/react';
 import {Tabs, Tab} from '@heroui/tabs';
 import {ClipboardDocumentListIcon, XMarkIcon} from '@heroicons/react/24/outline';
 import {useMatchesWithTeams} from '@/hooks/queries/useMatchQueries';
+import {useHeadToHeadMatches} from '@/hooks/useHeadToHeadMatches';
 import CompactVideoList from './CompactVideoList';
 import MatchRow from '@/components/match/MatchRow';
 import OpponentMatchStatistics from './OpponentMatchStatistics';
@@ -64,6 +65,71 @@ export default function StrategyPreparationZone({
       .slice(0, 10); // Limit to 10 most recent
   }, [allMatchesData, opponentTeam?.id]);
 
+  // Determine which team is from our club
+  const ownClubTeamId = useMemo(() => {
+    if (!selectedMatch || !opponentTeam?.id) {
+      console.log('Debug - Missing selectedMatch or opponentTeam:', {
+        selectedMatch: !!selectedMatch,
+        opponentTeam: !!opponentTeam?.id,
+      });
+      return undefined;
+    }
+
+    console.log('Debug - Determining ownClubTeamId:', {
+      home_team_id: selectedMatch.home_team_id,
+      away_team_id: selectedMatch.away_team_id,
+      opponentTeamId: opponentTeam.id,
+    });
+
+    // Since we know the opponent team ID, the other team must be from our club
+    if (selectedMatch.home_team_id === opponentTeam.id) {
+      console.log('Debug - Away team is from our club');
+      return selectedMatch.away_team_id;
+    } else if (selectedMatch.away_team_id === opponentTeam.id) {
+      console.log('Debug - Home team is from our club');
+      return selectedMatch.home_team_id;
+    }
+
+    console.log('Debug - No team matches opponent team ID');
+    return undefined;
+  }, [selectedMatch, opponentTeam?.id]);
+
+  // Use the dedicated hook for head-to-head matches (searches across all seasons)
+  console.log('Debug - Calling useHeadToHeadMatches with:', {
+    categoryId: selectedMatch?.category_id,
+    opponentTeamId: opponentTeam?.id,
+    ownClubTeamId: ownClubTeamId,
+    limit: 5,
+  });
+
+  const {
+    data: headToHeadMatches = [],
+    isLoading: headToHeadLoading,
+    error: headToHeadError,
+  } = useHeadToHeadMatches({
+    categoryId: selectedMatch?.category_id,
+    opponentTeamId: opponentTeam?.id,
+    ownClubTeamId: ownClubTeamId,
+    limit: 5,
+  });
+
+  // Get our club team IDs for statistics calculation
+  const ourClubTeamIds = useMemo(() => {
+    if (!headToHeadMatches.length) return [];
+
+    // Extract unique team IDs that belong to our club from the matches
+    const teamIds = new Set<string>();
+    headToHeadMatches.forEach((match: any) => {
+      if (match.home_team?.club_category?.club?.is_own_club) {
+        teamIds.add(match.home_team_id);
+      }
+      if (match.away_team?.club_category?.club?.is_own_club) {
+        teamIds.add(match.away_team_id);
+      }
+    });
+    return Array.from(teamIds);
+  }, [headToHeadMatches]);
+
   // Get opponent club ID for video filtering
   // Relationship: opponentTeam.club_category_id → club_categories.club_id
   const [opponentClubId, setOpponentClubId] = useState<string | null>(null);
@@ -78,7 +144,6 @@ export default function StrategyPreparationZone({
         opponentTeam.club_category_id === 'undefined' ||
         opponentTeam.club_category_id === 'null'
       ) {
-        console.log('No valid club_category_id found:', opponentTeam?.club_category_id);
         setOpponentClubId(null);
         return;
       }
@@ -86,8 +151,6 @@ export default function StrategyPreparationZone({
       try {
         setClubIdLoading(true);
         const supabase = createClient();
-
-        console.log('Fetching club ID for club_category_id:', opponentTeam.club_category_id);
 
         const {data: clubCategory, error} = await supabase
           .from('club_categories')
@@ -99,7 +162,6 @@ export default function StrategyPreparationZone({
           console.error('Error fetching club ID:', error);
           setOpponentClubId(null);
         } else {
-          console.log('Successfully fetched club ID:', clubCategory?.club_id);
           setOpponentClubId(clubCategory?.club_id || null);
         }
       } catch (error) {
@@ -128,7 +190,6 @@ export default function StrategyPreparationZone({
 
       // Validate filters before querying
       if (filters.club_id && (filters.club_id === 'undefined' || filters.club_id === 'null')) {
-        console.log('Invalid club_id, skipping video fetch:', filters.club_id);
         setOpponentVideos([]);
         return;
       }
@@ -137,12 +198,9 @@ export default function StrategyPreparationZone({
         filters.category_id &&
         (filters.category_id === 'undefined' || filters.category_id === 'null')
       ) {
-        console.log('Invalid category_id, skipping video fetch:', filters.category_id);
         setOpponentVideos([]);
         return;
       }
-
-      console.log('Fetching videos with filters:', filters);
 
       // Build query based on available filters
       let query = supabase
@@ -204,7 +262,6 @@ export default function StrategyPreparationZone({
         throw error;
       }
 
-      console.log('Successfully fetched videos:', videos?.length || 0);
       setOpponentVideos(videos || []);
     } catch (error) {
       console.error('Error fetching opponent videos:', error);
@@ -274,13 +331,6 @@ export default function StrategyPreparationZone({
       );
     });
 
-    console.log('Filtering videos by team name:', {
-      teamName,
-      totalVideos: processedVideos.length,
-      filteredVideos: filtered.length,
-      videos: processedVideos.map((v) => ({title: v.title, club: v.clubs?.name})),
-    });
-
     return filtered;
   }, [processedVideos, opponentTeam?.name, opponentClubId]);
 
@@ -289,18 +339,8 @@ export default function StrategyPreparationZone({
     if (selectedMatch?.category_id && selectedMatch?.id && !clubIdLoading) {
       const fetchKey = `${opponentClubId || 'no-club'}-${selectedMatch.category_id}`;
 
-      console.log('Fetching videos for:', {
-        opponentClubId,
-        categoryId: selectedMatch.category_id,
-        matchId: selectedMatch.id,
-        opponentTeam: opponentTeam?.name,
-        hasClubId: !!opponentClubId,
-        fetchKey,
-      });
-
       if (opponentClubId) {
         // Fetch videos by club_id and category_id (opponent videos)
-        console.log('Fetching opponent videos by club_id and category_id');
         fetchOpponentVideos({
           club_id: opponentClubId,
           category_id: selectedMatch.category_id,
@@ -308,9 +348,6 @@ export default function StrategyPreparationZone({
         });
       } else {
         // Fallback: fetch all videos for the category and filter by team name
-        console.log(
-          'No club ID found, fetching all videos for category and filtering by team name'
-        );
         fetchOpponentVideos({
           category_id: selectedMatch.category_id,
           is_active: true,
@@ -373,6 +410,7 @@ export default function StrategyPreparationZone({
           selectedKey={activeTab}
           onSelectionChange={(key) => setActiveTab(key as string)}
           className="px-2 sm:px-4 mt-4"
+          variant="solid"
         >
           <Tab key="strategy" title="Strategie">
             <div className="space-y-3 py-4 mx-1 sm:mx-2">
@@ -443,7 +481,7 @@ export default function StrategyPreparationZone({
               />
             </div>
           </Tab>
-          <Tab key="previousMatches" title="Předchozí zápasy">
+          <Tab key="previousMatches" title="Předchozí zápasy soupeře">
             <div className="py-4">
               {previousMatchesError && (
                 <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700 mb-4">
@@ -481,6 +519,112 @@ export default function StrategyPreparationZone({
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <p className="text-sm">
                     Žádné předchozí zápasy týmu {opponentTeam?.name || 'soupeře'} nejsou k dispozici
+                  </p>
+                </div>
+              )}
+            </div>
+          </Tab>
+          <Tab key="headToHead" title="Vzájemné zápasy">
+            <div className="py-4">
+              {headToHeadError && (
+                <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700 mb-4">
+                  <p className="text-xs sm:text-sm text-red-700 dark:text-red-300">
+                    Chyba při načítání vzájemných zápasů:{' '}
+                    {headToHeadError.message || 'Neznámá chyba'}
+                  </p>
+                </div>
+              )}
+
+              {headToHeadLoading ? (
+                <div className="flex justify-center py-8">
+                  <LoadingSpinner />
+                </div>
+              ) : headToHeadMatches.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="text-center mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      Vzájemné zápasy s {opponentTeam?.name || 'soupeřem'}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Posledních {headToHeadMatches.length} zápasů mezi našimi týmy
+                    </p>
+                  </div>
+
+                  {/* Head-to-head statistics */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {
+                          headToHeadMatches.filter((match: any) => {
+                            const homeIsOwnClub = ourClubTeamIds.includes(match.home_team_id);
+                            const awayIsOwnClub = ourClubTeamIds.includes(match.away_team_id);
+                            const homeScore = match.home_score || 0;
+                            const awayScore = match.away_score || 0;
+
+                            if (homeIsOwnClub && !awayIsOwnClub) {
+                              return homeScore > awayScore;
+                            } else if (!homeIsOwnClub && awayIsOwnClub) {
+                              return awayScore > homeScore;
+                            }
+                            return false;
+                          }).length
+                        }
+                      </div>
+                      <div className="text-sm font-medium text-green-700 dark:text-green-300">
+                        Naše výhry
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+                        {
+                          headToHeadMatches.filter((match: any) => {
+                            const homeScore = match.home_score || 0;
+                            const awayScore = match.away_score || 0;
+                            return homeScore === awayScore;
+                          }).length
+                        }
+                      </div>
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Remízy
+                      </div>
+                    </div>
+
+                    <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                        {
+                          headToHeadMatches.filter((match: any) => {
+                            const homeIsOwnClub = ourClubTeamIds.includes(match.home_team_id);
+                            const awayIsOwnClub = ourClubTeamIds.includes(match.away_team_id);
+                            const homeScore = match.home_score || 0;
+                            const awayScore = match.away_score || 0;
+
+                            if (homeIsOwnClub && !awayIsOwnClub) {
+                              return homeScore < awayScore;
+                            } else if (!homeIsOwnClub && awayIsOwnClub) {
+                              return awayScore < homeScore;
+                            }
+                            return false;
+                          }).length
+                        }
+                      </div>
+                      <div className="text-sm font-medium text-red-700 dark:text-red-300">
+                        Naše prohry
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Match list */}
+                  <div className="space-y-2">
+                    {headToHeadMatches.map((match: any) => {
+                      return <MatchRow key={match.id} match={match} redirectionLinks={false} />;
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p className="text-sm">
+                    Žádné vzájemné zápasy s {opponentTeam?.name || 'soupeřem'} nejsou k dispozici
                   </p>
                 </div>
               )}

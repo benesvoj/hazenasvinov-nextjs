@@ -29,7 +29,7 @@ const MatchRow: React.FC<MatchRowProps> = ({
   return (
     <div className="border rounded-lg p-3 lg:p-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
       <Link href={redirectionLinks ? `/matches/${match.id}` : '#'} className="block">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-2">
           {/* Date and Time - Left Side */}
           <div
             className={`flex flex-col items-start ${

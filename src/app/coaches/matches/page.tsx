@@ -53,24 +53,6 @@ export default function CoachesMatchesPage() {
     activeSeason?.id || undefined
   );
 
-  // Debug: Log all matches to see their status
-  useEffect(() => {
-    if (allMatches.length > 0) {
-      console.log(
-        'All matches:',
-        allMatches.map((m) => ({
-          id: m.id,
-          status: m.status,
-          date: m.date,
-          home_score: m.home_score,
-          away_score: m.away_score,
-          home_team: m.home_team?.name,
-          away_team: m.away_team?.name,
-        }))
-      );
-    }
-  }, [allMatches]);
-
   // Fetch data on mount
   useEffect(() => {
     fetchActiveSeason();
@@ -97,11 +79,6 @@ export default function CoachesMatchesPage() {
     const upcoming = allMatches.filter(
       (match) => match.status === 'upcoming' && new Date(match.date) >= now
     );
-
-    console.log(
-      'Upcoming matches:',
-      upcoming.map((m) => ({id: m.id, status: m.status, date: m.date}))
-    );
     return upcoming;
   }, [allMatches]);
 
@@ -110,17 +87,6 @@ export default function CoachesMatchesPage() {
     const recent = allMatches
       .filter((match) => match.status === 'completed' && new Date(match.date) <= now)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    console.log(
-      'Recent results:',
-      recent.map((m) => ({
-        id: m.id,
-        status: m.status,
-        date: m.date,
-        home_score: m.home_score,
-        away_score: m.away_score,
-      }))
-    );
     return recent;
   }, [allMatches]);
 
@@ -132,7 +98,6 @@ export default function CoachesMatchesPage() {
 
   const handleMatchSelect = (match: Match) => {
     setSelectedMatch(match);
-    console.log('Selected match:', match);
   };
 
   const handleCloseStrategy = () => {
@@ -151,7 +116,6 @@ export default function CoachesMatchesPage() {
 
   const handleResultSaved = () => {
     // Refresh matches data
-    console.log('Refreshing matches data after result saved');
     refetchMatches();
   };
 
