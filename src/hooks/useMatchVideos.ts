@@ -86,10 +86,9 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
           updated_at,
           created_by,
           updated_by,
-          categories!inner(
+          categories(
             id,
-            name,
-            code
+            name
           )
         `
         )

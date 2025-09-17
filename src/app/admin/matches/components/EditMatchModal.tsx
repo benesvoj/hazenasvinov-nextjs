@@ -4,7 +4,7 @@ import React, {useState, useEffect} from 'react';
 import {Input, NumberInput, Select, SelectItem, Button} from '@heroui/react';
 import {MagnifyingGlassIcon} from '@heroicons/react/24/outline';
 import {Match, Nullish, Video, EditMatchFormData} from '@/types';
-import {UnifiedModal, Heading} from '@/components';
+import {UnifiedModal, Heading, showToast} from '@/components';
 import {translations} from '@/lib/translations';
 import {matchStatuses} from '@/constants';
 import {useTeamClub, useMatchVideos} from '@/hooks';
@@ -70,10 +70,39 @@ export default function EditMatchModal({
   } = useMatchVideos(matchId);
 
   // Handle video selection
-  const handleVideoSelect = (videos: Video[]) => {
-    // For now, we'll handle this by adding/removing videos individually
-    // This could be optimized to batch operations
-    console.log('Selected videos:', videos);
+  const handleVideoSelect = async (videos: Video[]) => {
+    if (!matchId) return;
+
+    try {
+      // Get current video IDs
+      const currentVideoIds = matchVideos.map((v) => v.id);
+      const newVideoIds = videos.map((v) => v.id);
+
+      // Find videos to add
+      const videosToAdd = videos.filter((video) => !currentVideoIds.includes(video.id));
+
+      // Find videos to remove
+      const videosToRemove = matchVideos.filter((video) => !newVideoIds.includes(video.id));
+
+      // Add new videos
+      for (const video of videosToAdd) {
+        await addVideo(video.id);
+      }
+
+      // Remove videos
+      for (const video of videosToRemove) {
+        await removeVideo(video.id);
+      }
+
+      // Show success toast
+      const totalChanges = videosToAdd.length + videosToRemove.length;
+      if (totalChanges > 0) {
+        showToast.success(`Videa byla úspěšně aktualizována (${totalChanges} změn)`);
+      }
+    } catch (error) {
+      console.error('Error updating videos:', error);
+      showToast.danger('Chyba při aktualizaci videí');
+    }
   };
 
   const handleInputChange = (
@@ -302,7 +331,6 @@ export default function EditMatchModal({
                                 {video.title}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {video.category?.name} •{' '}
                                 {video.recording_date
                                   ? new Date(video.recording_date).toLocaleDateString('cs-CZ')
                                   : 'Neznámé datum'}

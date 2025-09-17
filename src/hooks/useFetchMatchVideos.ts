@@ -39,7 +39,7 @@ export function useFetchMatchVideos(matchId: string | null): UseFetchMatchVideos
           .select(
             `
             *,
-            category:categories(id, name, code),
+            category:categories(id, name),
             clubs:clubs(id, name, short_name),
             seasons:seasons(id, name, start_date, end_date)
           `

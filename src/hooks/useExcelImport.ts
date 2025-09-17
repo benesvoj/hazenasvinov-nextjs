@@ -47,7 +47,7 @@ export const useExcelImport = () => {
       };
 
       // Get categories and teams for mapping
-      const {data: categories} = await supabase.from('categories').select('id, name, code');
+      const {data: categories} = await supabase.from('categories').select('id, name');
 
       const {data: teams} = await supabase.from('teams').select('id, name, short_name');
 

@@ -24,6 +24,7 @@ import {
 import {Video} from '@/types';
 import {useVideos} from '@/hooks';
 import {formatDateString} from '@/helpers';
+import {MinusIcon, PlusIcon} from '@heroicons/react/24/outline';
 
 interface VideoSelectionModalProps {
   isOpen: boolean;
@@ -45,6 +46,7 @@ export default function VideoSelectionModal({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('active');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedVideos, setSelectedVideos] = useState<Video[]>([]);
 
   const statusFilterOptions = [
     {key: 'active', label: 'Aktivní'},
@@ -68,6 +70,17 @@ export default function VideoSelectionModal({
   // Use ref to store fetchVideos to avoid dependency issues
   const fetchVideosRef = useRef(fetchVideos);
   fetchVideosRef.current = fetchVideos;
+
+  // Initialize selected videos when modal opens
+  useEffect(() => {
+    if (isOpen && selectedVideoIds.length > 0) {
+      // Find videos that match the selected IDs from the current videos list
+      const matchingVideos = videos.filter((video) => selectedVideoIds.includes(video.id));
+      setSelectedVideos(matchingVideos);
+    } else if (isOpen) {
+      setSelectedVideos([]);
+    }
+  }, [isOpen, selectedVideoIds, videos]);
 
   // Fetch videos when modal opens or filters change
   useEffect(() => {
@@ -139,20 +152,19 @@ export default function VideoSelectionModal({
   }
 
   const handleToggleVideo = (video: Video) => {
-    const isSelected = selectedVideoIds.includes(video.id);
-    let newSelectedIds: string[];
+    const isSelected = selectedVideos.some((v) => v.id === video.id);
+    let newSelectedVideos: Video[];
 
     if (isSelected) {
       // Remove video from selection
-      newSelectedIds = selectedVideoIds.filter((id) => id !== video.id);
+      newSelectedVideos = selectedVideos.filter((v) => v.id !== video.id);
     } else {
       // Add video to selection
-      newSelectedIds = [...selectedVideoIds, video.id];
+      newSelectedVideos = [...selectedVideos, video];
     }
 
-    // Get the actual video objects for the selected IDs
-    const selectedVideos = videos.filter((v) => newSelectedIds.includes(v.id));
-    onSelect(selectedVideos);
+    setSelectedVideos(newSelectedVideos);
+    onSelect(newSelectedVideos);
   };
 
   return (
@@ -161,7 +173,7 @@ export default function VideoSelectionModal({
         <ModalHeader>
           <div className="flex items-center justify-between w-full">
             <h2 className="text-xl font-semibold">
-              Vyberte videa ({selectedVideoIds.length} vybráno)
+              Vyberte videa ({selectedVideos.length} vybráno)
             </h2>
           </div>
         </ModalHeader>
@@ -228,9 +240,7 @@ export default function VideoSelectionModal({
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          <div className="font-medium max-w-xs truncate">
-                            {video.title}, {video.seasons?.name}
-                          </div>
+                          <div className="font-medium max-w-xs truncate">{video.title}</div>
                           {video.description && (
                             <div className="text-sm text-gray-500 max-w-xs truncate">
                               {video.description}
@@ -244,15 +254,28 @@ export default function VideoSelectionModal({
                       <TableCell>
                         <Button
                           aria-label={
-                            selectedVideoIds.includes(video.id) ? 'Odznačit video' : 'Vybrat video'
+                            selectedVideos.some((v) => v.id === video.id)
+                              ? 'Odznačit video'
+                              : 'Vybrat video'
                           }
                           size="sm"
-                          color="primary"
-                          variant={selectedVideoIds.includes(video.id) ? 'solid' : 'bordered'}
+                          color={
+                            selectedVideos.some((v) => v.id === video.id) ? 'success' : 'primary'
+                          }
+                          variant={
+                            selectedVideos.some((v) => v.id === video.id) ? 'solid' : 'bordered'
+                          }
                           onPress={() => handleToggleVideo(video)}
-                        >
-                          {selectedVideoIds.includes(video.id) ? 'Odznačit' : 'Vybrat'}
-                        </Button>
+                          isIconOnly
+                          radius="full"
+                          startContent={
+                            selectedVideos.some((v) => v.id === video.id) ? (
+                              <MinusIcon className="w-4 h-4" />
+                            ) : (
+                              <PlusIcon className="w-4 h-4" />
+                            )
+                          }
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -286,7 +309,7 @@ export default function VideoSelectionModal({
 
         <ModalFooter className="flex items-center justify-between">
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            {selectedVideoIds.length} videí vybráno
+            {selectedVideos.length} videí vybráno
           </div>
           <div className="flex gap-2">
             <Button variant="light" onPress={onClose}>

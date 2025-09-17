@@ -303,7 +303,41 @@ export default function StrategyPreparationZone({
           `
           *,
           categories(id, name),
-          clubs(id, name, short_name)
+          clubs(id, name, short_name),
+          match_videos(
+            match_id,
+            match:matches(
+              id,
+              home_team_id,
+              away_team_id,
+              home_score,
+              away_score,
+              home_score_halftime,
+              away_score_halftime,
+              status,
+              date,
+              home_team:club_category_teams!matches_home_team_id_fkey(
+                id,
+                team_suffix,
+                club_category:club_categories(
+                  club:clubs(
+                    name,
+                    short_name
+                  )
+                )
+              ),
+              away_team:club_category_teams!matches_away_team_id_fkey(
+                id,
+                team_suffix,
+                club_category:club_categories(
+                  club:clubs(
+                    name,
+                    short_name
+                  )
+                )
+              )
+            )
+          )
         `
         )
         .eq('is_active', true);
@@ -333,16 +367,56 @@ export default function StrategyPreparationZone({
     }
   }, []);
 
+  // Process videos to include match information
+  const processedVideos = useMemo(() => {
+    return opponentVideos.map((video) => {
+      // Extract match information from match_videos relationship
+      const matchVideo = video.match_videos?.[0];
+      const match = matchVideo?.match;
+
+      return {
+        ...video,
+        match: match
+          ? {
+              id: match.id,
+              home_team: {
+                id: match.home_team.id,
+                name: match.home_team.club_category?.club?.name || 'Unknown Team',
+                short_name:
+                  match.home_team.team_suffix ||
+                  match.home_team.club_category?.club?.short_name ||
+                  'Unknown',
+              },
+              away_team: {
+                id: match.away_team.id,
+                name: match.away_team.club_category?.club?.name || 'Unknown Team',
+                short_name:
+                  match.away_team.team_suffix ||
+                  match.away_team.club_category?.club?.short_name ||
+                  'Unknown',
+              },
+              home_score: match.home_score,
+              away_score: match.away_score,
+              home_score_halftime: match.home_score_halftime,
+              away_score_halftime: match.away_score_halftime,
+              status: match.status,
+              date: match.date,
+            }
+          : undefined,
+      };
+    });
+  }, [opponentVideos]);
+
   // Filter videos by opponent team name if no club ID is available
   const filteredOpponentVideos = useMemo(() => {
     if (!opponentTeam?.name || opponentClubId) {
       // If we have club ID, use all videos (already filtered by club_id)
-      return opponentVideos;
+      return processedVideos;
     }
 
     // Filter by team name in video title or description
     const teamName = opponentTeam.name.toLowerCase();
-    const filtered = opponentVideos.filter((video) => {
+    const filtered = processedVideos.filter((video) => {
       const title = video.title?.toLowerCase() || '';
       const description = video.description?.toLowerCase() || '';
       const clubName = video.clubs?.name?.toLowerCase() || '';
@@ -354,13 +428,13 @@ export default function StrategyPreparationZone({
 
     console.log('Filtering videos by team name:', {
       teamName,
-      totalVideos: opponentVideos.length,
+      totalVideos: processedVideos.length,
       filteredVideos: filtered.length,
-      videos: opponentVideos.map((v) => ({title: v.title, club: v.clubs?.name})),
+      videos: processedVideos.map((v) => ({title: v.title, club: v.clubs?.name})),
     });
 
     return filtered;
-  }, [opponentVideos, opponentTeam?.name, opponentClubId]);
+  }, [processedVideos, opponentTeam?.name, opponentClubId]);
 
   // Fetch videos when match is selected and club ID is available
   useEffect(() => {
