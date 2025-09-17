@@ -11,6 +11,7 @@ import {
   ModalFooter,
 } from '@heroui/react';
 import {translations} from '@/lib/translations';
+import {AddMatchFormData} from '@/types';
 
 interface FilteredTeam {
   id: string;
@@ -23,18 +24,8 @@ interface AddMatchModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddMatch: () => void;
-  formData: {
-    date: string;
-    time: string;
-    home_team_id: string;
-    away_team_id: string;
-    venue?: string;
-    category_id: string;
-    season_id: string;
-    matchweek?: string;
-    match_number?: string;
-  };
-  setFormData: (data: any) => void;
+  formData: AddMatchFormData;
+  setFormData: (data: AddMatchFormData) => void;
   filteredTeams: FilteredTeam[];
   selectedCategory: string;
   selectedSeason: string;
@@ -153,10 +144,10 @@ export default function AddMatchModal({
                 <Select
                   label="Kolo"
                   placeholder="Vyberte kolo"
-                  selectedKeys={formData.matchweek ? [formData.matchweek] : []}
+                  selectedKeys={formData.matchweek ? [formData.matchweek.toString()] : []}
                   onSelectionChange={(keys) => {
                     const selectedMatchweek = Array.from(keys)[0] as string;
-                    setFormData({...formData, matchweek: selectedMatchweek || ''});
+                    setFormData({...formData, matchweek: Number(selectedMatchweek) || 0});
                   }}
                   className="w-full"
                 >
@@ -168,8 +159,13 @@ export default function AddMatchModal({
               <Input
                 label="Číslo zápasu"
                 placeholder="např. 1, 2, Finále, Semifinále"
-                value={formData.match_number}
-                onChange={(e) => setFormData({...formData, match_number: e.target.value})}
+                value={formData.match_number?.toString() || ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    match_number: e.target.value ? Number(e.target.value) : undefined,
+                  })
+                }
               />
             </div>
           </ModalBody>

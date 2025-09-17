@@ -25,3 +25,5 @@ export * from './member';
 export * from './memberFunction';
 
 export * from './releaseNote';
+
+export * from './matchForms';

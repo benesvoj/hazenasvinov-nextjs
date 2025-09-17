@@ -39,7 +39,7 @@ import {
   ButtonWithTooltip,
 } from '@/components';
 import {getCategoryInfo} from '@/helpers/getCategoryInfo';
-import {Match} from '@/types';
+import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
 import {
   useSeasons,
   useFilteredTeams,
@@ -157,7 +157,7 @@ export default function MatchesAdminPage() {
     return expandedMatchweeks.has(key);
   };
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AddMatchFormData>({
     date: '',
     time: '',
     home_team_id: '',
@@ -165,8 +165,9 @@ export default function MatchesAdminPage() {
     venue: '',
     category_id: '',
     season_id: '',
-    matchweek: '',
-    match_number: '',
+    matchweek: undefined,
+    match_number: undefined,
+    video_id: '',
   });
 
   const [resultData, setResultData] = useState({
@@ -176,7 +177,7 @@ export default function MatchesAdminPage() {
     away_score_halftime: 0,
   });
 
-  const [editData, setEditData] = useState({
+  const [editData, setEditData] = useState<EditMatchFormData>({
     date: '',
     time: '',
     home_team_id: '',
@@ -190,6 +191,7 @@ export default function MatchesAdminPage() {
     matchweek: '',
     match_number: '',
     category_id: '',
+    video_id: '',
   });
 
   const [bulkUpdateData, setBulkUpdateData] = useState({
@@ -413,16 +415,16 @@ export default function MatchesAdminPage() {
         status: matchStatusesKeys[0],
       };
 
-      // Handle matchweek - allow setting to null if empty, or parse the value
-      if (formData.matchweek === '') {
+      // Handle matchweek - allow setting to null if empty, or use the value
+      if (formData.matchweek === undefined || formData.matchweek === 0) {
         insertData.matchweek = null;
-      } else if (formData.matchweek) {
-        insertData.matchweek = parseInt(formData.matchweek);
+      } else {
+        insertData.matchweek = formData.matchweek;
       }
 
       // Handle match_number - only add if provided
-      if (formData.match_number && formData.match_number.trim()) {
-        insertData.match_number = formData.match_number.trim();
+      if (formData.match_number && formData.match_number > 0) {
+        insertData.match_number = formData.match_number.toString();
       }
 
       const {error} = await supabase.from('matches').insert(insertData);
@@ -441,8 +443,9 @@ export default function MatchesAdminPage() {
         venue: '',
         category_id: '',
         season_id: '',
-        matchweek: '',
-        match_number: '',
+        matchweek: undefined,
+        match_number: undefined,
+        video_id: '',
       });
       // Matches are automatically refreshed by useFetchMatches hook
       setError('');
@@ -598,6 +601,7 @@ export default function MatchesAdminPage() {
       matchweek: match.matchweek ? match.matchweek.toString() : '',
       match_number: match.match_number ? match.match_number.toString() : '',
       category_id: match.category_id,
+      video_id: match.video_id ?? '',
     });
 
     // Ensure filteredTeams is loaded for this category
@@ -722,6 +726,7 @@ export default function MatchesAdminPage() {
         matchweek: '',
         match_number: '',
         category_id: '',
+        video_id: '',
       });
       setSelectedMatch(null);
       // Refresh matches to show updated data

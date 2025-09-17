@@ -1,11 +1,14 @@
 'use client';
 
-import React from 'react';
-import {Input, NumberInput, Select, SelectItem} from '@heroui/react';
-import {Match, Nullish, MatchStatus} from '@/types';
+import React, {useState, useEffect} from 'react';
+import {Input, NumberInput, Select, SelectItem, Button} from '@heroui/react';
+import {MagnifyingGlassIcon} from '@heroicons/react/24/outline';
+import {Match, Nullish, Video, EditMatchFormData} from '@/types';
 import {UnifiedModal, Heading} from '@/components';
 import {translations} from '@/lib/translations';
 import {matchStatuses} from '@/constants';
+import VideoSelectionModal from './VideoSelectionModal';
+
 interface FilteredTeam {
   id: string;
   name: string;
@@ -17,22 +20,8 @@ interface EditMatchModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedMatch: Match | null;
-  editData: {
-    date: string;
-    time: string;
-    home_team_id: string;
-    away_team_id: string;
-    venue: string;
-    home_score: number;
-    away_score: number;
-    home_score_halftime: number;
-    away_score_halftime: number;
-    status: MatchStatus;
-    matchweek: string;
-    match_number: string;
-    category_id: string;
-  };
-  onEditDataChange: (data: any) => void;
+  editData: EditMatchFormData;
+  onEditDataChange: (data: EditMatchFormData) => void;
   onUpdateMatch: () => void;
   teams: FilteredTeam[];
   getMatchweekOptions: (categoryId?: string) => Array<{value: string; label: string}>;
@@ -51,6 +40,37 @@ export default function EditMatchModal({
   isSeasonClosed,
 }: EditMatchModalProps) {
   const t = translations.matches;
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  // Handle video selection
+  const handleVideoSelect = (video: Video | null) => {
+    setSelectedVideo(video);
+    onEditDataChange({
+      ...editData,
+      video_id: video?.id || '',
+    });
+  };
+
+  // Load selected video when editData.video_id changes
+  useEffect(() => {
+    if (editData.video_id) {
+      // In a real implementation, you would fetch the video data here
+      // For now, we'll just set a placeholder
+      setSelectedVideo({
+        id: editData.video_id,
+        title: 'Loading...',
+        youtube_url: '',
+        youtube_id: '',
+        category_id: '',
+        is_active: true,
+        created_at: '',
+        updated_at: '',
+      } as Video);
+    } else {
+      setSelectedVideo(null);
+    }
+  }, [editData.video_id]);
 
   const handleInputChange = (
     field: string,
@@ -246,10 +266,71 @@ export default function EditMatchModal({
                   )}
                 </div>
               </div>
+
+              {/* Video Selection Section */}
+              <div className="col-span-1 lg:col-span-2">
+                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">
+                  Související video
+                </h4>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Video (volitelné)
+                  </label>
+                  {selectedVideo ? (
+                    <div className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            {selectedVideo.title}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {selectedVideo.category?.name} •{' '}
+                            {selectedVideo.recording_date
+                              ? new Date(selectedVideo.recording_date).toLocaleDateString('cs-CZ')
+                              : 'Neznámé datum'}
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="light"
+                          color="danger"
+                          onPress={() => handleVideoSelect(null)}
+                          isDisabled={isSeasonClosed}
+                        >
+                          Odstranit
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="bordered"
+                      startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
+                      onPress={() => setIsVideoModalOpen(true)}
+                      className="w-full justify-start"
+                      isDisabled={isSeasonClosed}
+                    >
+                      Vybrat video
+                    </Button>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Vyberte video pro propojení se zápasem
+                  </p>
+                </div>
+              </div>
             </>
           )}
         </>
       </UnifiedModal>
+
+      {/* Video Selection Modal */}
+      <VideoSelectionModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        onSelect={handleVideoSelect}
+        selectedVideoId={selectedVideo?.id}
+        categoryId={editData.category_id}
+        opponentTeamId={editData.away_team_id}
+      />
     </>
   );
 }

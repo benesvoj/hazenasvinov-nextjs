@@ -36,3 +36,5 @@ export * from './useDebounce';
 export * from './useOptimizedMatches';
 export * from './useCategoryLineups';
 export * from './useVideos';
+export * from './useFetchMatchVideos';
+export * from './useFetchVideoMatch';
