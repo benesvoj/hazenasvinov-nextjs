@@ -14,7 +14,6 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Chip,
   Input,
   Select,
   SelectItem,
@@ -29,19 +28,19 @@ import {formatDateString} from '@/helpers';
 interface VideoSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (video: Video | null) => void;
-  selectedVideoId?: string;
+  onSelect: (videos: Video[]) => void;
+  selectedVideoIds?: string[];
   categoryId?: string;
-  opponentTeamId?: string; // For filtering videos by opponent club
+  opponentClubId?: string; // For filtering videos by opponent club
 }
 
 export default function VideoSelectionModal({
   isOpen,
   onClose,
   onSelect,
-  selectedVideoId,
+  selectedVideoIds = [],
   categoryId,
-  opponentTeamId,
+  opponentClubId,
 }: VideoSelectionModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('active');
@@ -52,6 +51,7 @@ export default function VideoSelectionModal({
     {key: 'inactive', label: 'Neaktivní'},
     {key: 'all', label: 'Všechny'},
   ];
+  console.log('opponentClubId', opponentClubId);
 
   // Fetch videos with filters and pagination
   const {
@@ -77,7 +77,7 @@ export default function VideoSelectionModal({
         fetchVideosRef.current(
           {
             category_id: categoryId,
-            club_id: opponentTeamId, // Filter by opponent club
+            club_id: opponentClubId, // Filter by opponent club
             is_active: statusFilter === 'all' ? undefined : statusFilter === 'active',
             search: searchTerm || undefined,
           },
@@ -87,7 +87,7 @@ export default function VideoSelectionModal({
 
       return () => clearTimeout(timeoutId);
     }
-  }, [isOpen, categoryId, statusFilter, searchTerm, currentPage, opponentTeamId]);
+  }, [isOpen, categoryId, statusFilter, searchTerm, currentPage, opponentClubId]);
 
   // Filter videos based on search and status
   const filteredVideos = useMemo(() => {
@@ -138,22 +138,21 @@ export default function VideoSelectionModal({
     );
   }
 
-  const handleSelect = (video: Video) => {
-    onSelect(video);
-    onClose();
-  };
+  const handleToggleVideo = (video: Video) => {
+    const isSelected = selectedVideoIds.includes(video.id);
+    let newSelectedIds: string[];
 
-  const handleClear = () => {
-    onSelect(null);
-    onClose();
-  };
+    if (isSelected) {
+      // Remove video from selection
+      newSelectedIds = selectedVideoIds.filter((id) => id !== video.id);
+    } else {
+      // Add video to selection
+      newSelectedIds = [...selectedVideoIds, video.id];
+    }
 
-  const getStatusColor = (isActive: boolean) => {
-    return isActive ? 'success' : 'default';
-  };
-
-  const getStatusLabel = (isActive: boolean) => {
-    return isActive ? 'Aktivní' : 'Neaktivní';
+    // Get the actual video objects for the selected IDs
+    const selectedVideos = videos.filter((v) => newSelectedIds.includes(v.id));
+    onSelect(selectedVideos);
   };
 
   return (
@@ -161,7 +160,9 @@ export default function VideoSelectionModal({
       <ModalContent>
         <ModalHeader>
           <div className="flex items-center justify-between w-full">
-            <h2 className="text-xl font-semibold">Vyberte video</h2>
+            <h2 className="text-xl font-semibold">
+              Vyberte videa ({selectedVideoIds.length} vybráno)
+            </h2>
           </div>
         </ModalHeader>
 
@@ -204,9 +205,7 @@ export default function VideoSelectionModal({
               <TableHeader>
                 <TableColumn>Náhled</TableColumn>
                 <TableColumn>Název</TableColumn>
-                <TableColumn>Kategorie</TableColumn>
-                <TableColumn>Datum nahrání</TableColumn>
-                <TableColumn>Stav</TableColumn>
+                <TableColumn>Odehráno</TableColumn>
                 <TableColumn>Akce</TableColumn>
               </TableHeader>
               <TableBody>
@@ -229,7 +228,9 @@ export default function VideoSelectionModal({
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          <div className="font-medium max-w-xs truncate">{video.title}</div>
+                          <div className="font-medium max-w-xs truncate">
+                            {video.title}, {video.seasons?.name}
+                          </div>
                           {video.description && (
                             <div className="text-sm text-gray-500 max-w-xs truncate">
                               {video.description}
@@ -238,29 +239,19 @@ export default function VideoSelectionModal({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Chip size="sm" variant="flat">
-                          {video.category?.name || 'Neznámá kategorie'}
-                        </Chip>
-                      </TableCell>
-                      <TableCell>
                         {video.recording_date ? formatDateString(video.recording_date) : '-'}
-                      </TableCell>
-                      <TableCell>
-                        <Chip size="sm" color={getStatusColor(video.is_active)} variant="flat">
-                          {getStatusLabel(video.is_active)}
-                        </Chip>
                       </TableCell>
                       <TableCell>
                         <Button
                           aria-label={
-                            selectedVideoId === video.id ? 'Vybrané video' : 'Vybrat video'
+                            selectedVideoIds.includes(video.id) ? 'Odznačit video' : 'Vybrat video'
                           }
                           size="sm"
                           color="primary"
-                          variant={selectedVideoId === video.id ? 'solid' : 'bordered'}
-                          onPress={() => handleSelect(video)}
+                          variant={selectedVideoIds.includes(video.id) ? 'solid' : 'bordered'}
+                          onPress={() => handleToggleVideo(video)}
                         >
-                          {selectedVideoId === video.id ? 'Vybrané' : 'Vybrat'}
+                          {selectedVideoIds.includes(video.id) ? 'Odznačit' : 'Vybrat'}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -268,7 +259,6 @@ export default function VideoSelectionModal({
               </TableBody>
             </Table>
           )}
-
           {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="flex flex-col items-center gap-4 mt-6">
@@ -294,10 +284,18 @@ export default function VideoSelectionModal({
           )}
         </ModalBody>
 
-        <ModalFooter>
-          <Button color="primary" variant="flat" onPress={onClose}>
-            Zavřít
-          </Button>
+        <ModalFooter className="flex items-center justify-between">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {selectedVideoIds.length} videí vybráno
+          </div>
+          <div className="flex gap-2">
+            <Button variant="light" onPress={onClose}>
+              Zavřít
+            </Button>
+            <Button color="primary" onPress={onClose}>
+              Potvrdit výběr
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

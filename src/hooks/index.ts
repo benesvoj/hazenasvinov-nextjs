@@ -38,3 +38,5 @@ export * from './useCategoryLineups';
 export * from './useVideos';
 export * from './useFetchMatchVideos';
 export * from './useFetchVideoMatch';
+export * from './useTeamClub';
+export * from './useMatchVideos';

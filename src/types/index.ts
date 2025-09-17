@@ -27,3 +27,4 @@ export * from './memberFunction';
 export * from './releaseNote';
 
 export * from './matchForms';
+export * from './matchVideo';

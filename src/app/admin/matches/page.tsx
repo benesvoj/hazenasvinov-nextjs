@@ -167,7 +167,7 @@ export default function MatchesAdminPage() {
     season_id: '',
     matchweek: undefined,
     match_number: undefined,
-    video_id: '',
+    video_ids: [],
   });
 
   const [resultData, setResultData] = useState({
@@ -191,7 +191,7 @@ export default function MatchesAdminPage() {
     matchweek: '',
     match_number: '',
     category_id: '',
-    video_id: '',
+    video_ids: [],
   });
 
   const [bulkUpdateData, setBulkUpdateData] = useState({
@@ -445,7 +445,7 @@ export default function MatchesAdminPage() {
         season_id: '',
         matchweek: undefined,
         match_number: undefined,
-        video_id: '',
+        video_ids: [],
       });
       // Matches are automatically refreshed by useFetchMatches hook
       setError('');
@@ -601,7 +601,6 @@ export default function MatchesAdminPage() {
       matchweek: match.matchweek ? match.matchweek.toString() : '',
       match_number: match.match_number ? match.match_number.toString() : '',
       category_id: match.category_id,
-      video_id: match.video_id ?? '',
     });
 
     // Ensure filteredTeams is loaded for this category
@@ -726,7 +725,7 @@ export default function MatchesAdminPage() {
         matchweek: '',
         match_number: '',
         category_id: '',
-        video_id: '',
+        video_ids: [],
       });
       setSelectedMatch(null);
       // Refresh matches to show updated data

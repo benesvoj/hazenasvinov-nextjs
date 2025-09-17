@@ -10,7 +10,7 @@ export interface AddMatchFormData {
   season_id: string;
   matchweek?: number;
   match_number?: number;
-  video_id?: string;
+  video_ids?: string[];
 }
 
 export interface EditMatchFormData {
@@ -27,5 +27,5 @@ export interface EditMatchFormData {
   matchweek: string;
   match_number: string;
   category_id: string;
-  video_id?: string;
+  video_ids?: string[];
 }

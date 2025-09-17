@@ -7,6 +7,7 @@ import {Match, Nullish, Video, EditMatchFormData} from '@/types';
 import {UnifiedModal, Heading} from '@/components';
 import {translations} from '@/lib/translations';
 import {matchStatuses} from '@/constants';
+import {useTeamClub, useMatchVideos} from '@/hooks';
 import VideoSelectionModal from './VideoSelectionModal';
 
 interface FilteredTeam {
@@ -40,37 +41,40 @@ export default function EditMatchModal({
   isSeasonClosed,
 }: EditMatchModalProps) {
   const t = translations.matches;
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
-  // Handle video selection
-  const handleVideoSelect = (video: Video | null) => {
-    setSelectedVideo(video);
-    onEditDataChange({
-      ...editData,
-      video_id: video?.id || '',
-    });
-  };
+  // Get club info for both teams
+  const {clubId: homeTeamClubId, isOwnClub: isHomeTeamOwnClub} = useTeamClub(editData.home_team_id);
+  const {clubId: awayTeamClubId, isOwnClub: isAwayTeamOwnClub} = useTeamClub(editData.away_team_id);
 
-  // Load selected video when editData.video_id changes
-  useEffect(() => {
-    if (editData.video_id) {
-      // In a real implementation, you would fetch the video data here
-      // For now, we'll just set a placeholder
-      setSelectedVideo({
-        id: editData.video_id,
-        title: 'Loading...',
-        youtube_url: '',
-        youtube_id: '',
-        category_id: '',
-        is_active: true,
-        created_at: '',
-        updated_at: '',
-      } as Video);
-    } else {
-      setSelectedVideo(null);
-    }
-  }, [editData.video_id]);
+  // Determine opponent club ID - whichever team is not our own club
+  const opponentClubId = isHomeTeamOwnClub ? awayTeamClubId : homeTeamClubId;
+
+  // Get match videos using the new hook (only when modal is open and we have a selected match)
+  const matchId = isOpen && selectedMatch?.id ? selectedMatch.id : null;
+  console.log(
+    'EditMatchModal - isOpen:',
+    isOpen,
+    'selectedMatch?.id:',
+    selectedMatch?.id,
+    'matchId:',
+    matchId
+  );
+
+  const {
+    videos: matchVideos = [],
+    loading: videosLoading,
+    addVideo,
+    removeVideo,
+    error: videosError,
+  } = useMatchVideos(matchId);
+
+  // Handle video selection
+  const handleVideoSelect = (videos: Video[]) => {
+    // For now, we'll handle this by adding/removing videos individually
+    // This could be optimized to batch operations
+    console.log('Selected videos:', videos);
+  };
 
   const handleInputChange = (
     field: string,
@@ -270,50 +274,66 @@ export default function EditMatchModal({
               {/* Video Selection Section */}
               <div className="col-span-1 lg:col-span-2">
                 <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">
-                  Související video
+                  Související videa
                 </h4>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Video (volitelné)
+                    Videa (volitelné)
                   </label>
-                  {selectedVideo ? (
-                    <div className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {selectedVideo.title}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {selectedVideo.category?.name} •{' '}
-                            {selectedVideo.recording_date
-                              ? new Date(selectedVideo.recording_date).toLocaleDateString('cs-CZ')
-                              : 'Neznámé datum'}
+
+                  {/* Display error if videos can't be loaded */}
+                  {videosError && (
+                    <div className="p-3 border border-red-300 dark:border-red-600 rounded-lg bg-red-50 dark:bg-red-900/20 mb-4">
+                      <div className="text-sm text-red-600 dark:text-red-400">{videosError}</div>
+                    </div>
+                  )}
+
+                  {/* Display selected videos */}
+                  {matchVideos.length > 0 ? (
+                    <div className="space-y-2 mb-4">
+                      {matchVideos.map((video) => (
+                        <div
+                          key={video.id}
+                          className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">
+                                {video.title}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {video.category?.name} •{' '}
+                                {video.recording_date
+                                  ? new Date(video.recording_date).toLocaleDateString('cs-CZ')
+                                  : 'Neznámé datum'}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="light"
+                              color="danger"
+                              onPress={() => removeVideo(video.id)}
+                              isDisabled={isSeasonClosed}
+                            >
+                              Odstranit
+                            </Button>
                           </div>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="light"
-                          color="danger"
-                          onPress={() => handleVideoSelect(null)}
-                          isDisabled={isSeasonClosed}
-                        >
-                          Odstranit
-                        </Button>
-                      </div>
+                      ))}
                     </div>
-                  ) : (
-                    <Button
-                      variant="bordered"
-                      startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-                      onPress={() => setIsVideoModalOpen(true)}
-                      className="w-full justify-start"
-                      isDisabled={isSeasonClosed}
-                    >
-                      Vybrat video
-                    </Button>
-                  )}
+                  ) : null}
+
+                  <Button
+                    variant="bordered"
+                    startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
+                    onPress={() => setIsVideoModalOpen(true)}
+                    className="w-full justify-start"
+                    isDisabled={isSeasonClosed || !!videosError}
+                  >
+                    {matchVideos.length > 0 ? 'Přidat další video' : 'Vybrat videa'}
+                  </Button>
                   <p className="text-xs text-gray-500 mt-1">
-                    Vyberte video pro propojení se zápasem
+                    Vyberte videa pro propojení se zápasem
                   </p>
                 </div>
               </div>
@@ -327,9 +347,9 @@ export default function EditMatchModal({
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
         onSelect={handleVideoSelect}
-        selectedVideoId={selectedVideo?.id}
+        selectedVideoIds={matchVideos.map((v) => v.id)}
         categoryId={editData.category_id}
-        opponentTeamId={editData.away_team_id}
+        opponentClubId={opponentClubId || undefined}
       />
     </>
   );

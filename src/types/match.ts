@@ -30,8 +30,8 @@ export interface Match {
   season: Season;
   /** Optional reference to related blog post */
   post_id?: string;
-  /** Optional reference to related video */
-  video_id?: string | Nullish;
+  /** Array of related video IDs */
+  video_ids?: string[];
   /** Additional properties for transformed data */
   home_team_is_own_club?: boolean;
   away_team_is_own_club?: boolean;
