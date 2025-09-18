@@ -44,13 +44,14 @@ import {
   useSeasons,
   useFilteredTeams,
   useStandings,
-  useFetchMatches,
   useCategories,
   useFetchMembers,
   useTeams,
   useExcelImport,
   useTeamDisplayLogic,
 } from '@/hooks';
+import {useMatchesSeasonal} from '@/hooks/queries/useMatchQueries';
+import {useQueryClient} from '@tanstack/react-query';
 import {AdminContainer} from '../components/AdminContainer';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
 import {matchStatuses, matchStatusesKeys} from '@/constants';
@@ -215,19 +216,25 @@ export default function MatchesAdminPage() {
   } = useSeasons();
 
   const [selectedSeason, setSelectedSeason] = useState<string>('');
+  const queryClient = useQueryClient();
 
   // Use the matches hook - pass category code instead of ID, and show ALL matches (admin mode)
   const selectedCategoryId = categories.find((cat) => cat.id === selectedCategory)?.id || '';
   const {
-    matches: seasonalMatches,
-    loading: matchesLoading,
+    data: seasonalMatchesData,
+    isLoading: matchesLoading,
     error: matchesError,
-    refreshMatches,
-  } = useFetchMatches(
-    selectedCategoryId,
-    selectedSeason, // Pass the selected season ID
-    {ownClubOnly: false} // Show all matches, not just own club
-  );
+  } = useMatchesSeasonal({
+    categoryId: selectedCategoryId,
+    seasonId: selectedSeason,
+    ownClubOnly: false,
+    includeTeamDetails: true,
+    includeCategory: true,
+    includeSeason: true,
+  });
+
+  // Extract matches from the data structure
+  const seasonalMatches = seasonalMatchesData || {autumn: [], spring: []};
 
   // Create a flat array of all matches for components that expect Match[]
   const matches = selectedCategoryId
@@ -434,6 +441,14 @@ export default function MatchesAdminPage() {
       // Refresh materialized view to ensure it has the latest data
       await refreshMaterializedViewWithCallback('admin match insert');
 
+      // Invalidate React Query cache to refresh matches list
+      await queryClient.invalidateQueries({
+        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['matches'],
+      });
+
       onAddMatchClose();
       setFormData({
         date: '',
@@ -447,7 +462,6 @@ export default function MatchesAdminPage() {
         match_number: undefined,
         video_ids: [],
       });
-      // Matches are automatically refreshed by useFetchMatches hook
       setError('');
     } catch (error) {
       setError('Chyba při přidávání zápasu');
@@ -514,8 +528,15 @@ export default function MatchesAdminPage() {
       onAddResultClose();
       setResultData({home_score: 0, away_score: 0, home_score_halftime: 0, away_score_halftime: 0});
       setSelectedMatch(null);
-      // Refresh matches to show updated data
-      refreshMatches();
+
+      // Invalidate React Query cache to refresh matches list
+      await queryClient.invalidateQueries({
+        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['matches'],
+      });
+
       setError('');
     } catch (error) {
       setError('Chyba při aktualizaci výsledku');
@@ -545,8 +566,14 @@ export default function MatchesAdminPage() {
       // Refresh materialized view to ensure it has the latest data
       await refreshMaterializedViewWithCallback('admin match delete');
 
-      // Refresh matches to show updated data
-      refreshMatches();
+      // Invalidate React Query cache to refresh matches list
+      await queryClient.invalidateQueries({
+        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['matches'],
+      });
+
       setError('');
       handleDeleteConfirmClose();
     } catch (error) {
@@ -567,7 +594,14 @@ export default function MatchesAdminPage() {
 
       if (error) throw error;
 
-      // Matches are automatically refreshed by useFetchMatches hook
+      // Invalidate React Query cache to refresh matches list
+      await queryClient.invalidateQueries({
+        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['matches'],
+      });
+
       setError('');
       onDeleteAllConfirmClose();
       setSelectedCategory('');
@@ -714,8 +748,15 @@ export default function MatchesAdminPage() {
         video_ids: [],
       });
       setSelectedMatch(null);
-      // Refresh matches to show updated data
-      refreshMatches();
+
+      // Invalidate React Query cache to refresh matches list
+      await queryClient.invalidateQueries({
+        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['matches'],
+      });
+
       setError('');
     } catch (error) {
       if (error && typeof error === 'object' && 'message' in error) {
@@ -791,10 +832,17 @@ export default function MatchesAdminPage() {
       // Refresh materialized view to ensure it has the latest data
       await refreshMaterializedViewWithCallback('admin bulk update');
 
+      // Invalidate React Query cache to refresh matches list
+      await queryClient.invalidateQueries({
+        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['matches'],
+      });
+
       setError('');
       onBulkUpdateClose();
       setBulkUpdateData({categoryId: '', matchweek: '', action: 'set'});
-      // Matches are automatically refreshed by useFetchMatches hook
     } catch (error) {
       console.error('Full error details:', error);
       if (error && typeof error === 'object' && 'message' in error) {
@@ -831,8 +879,15 @@ export default function MatchesAdminPage() {
         const result = await importMatches(matches, selectedSeason);
 
         if (result.success > 0) {
+          // Invalidate React Query cache to refresh matches list
+          await queryClient.invalidateQueries({
+            queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
+          });
+          await queryClient.invalidateQueries({
+            queryKey: ['matches'],
+          });
+
           // Refresh data
-          // Matches are automatically refreshed by useFetchMatches hook
           await fetchStandings(selectedCategory, selectedSeason);
           setError('');
 
@@ -855,7 +910,14 @@ export default function MatchesAdminPage() {
         setError(`Import selhal: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
       }
     },
-    [selectedSeason, importMatches, fetchStandings, selectedCategory]
+    [
+      selectedSeason,
+      importMatches,
+      fetchStandings,
+      selectedCategory,
+      queryClient,
+      selectedCategoryId,
+    ]
   );
 
   return (
