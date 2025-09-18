@@ -52,14 +52,6 @@ export default function EditMatchModal({
 
   // Get match videos using the new hook (only when modal is open and we have a selected match)
   const matchId = isOpen && selectedMatch?.id ? selectedMatch.id : null;
-  console.log(
-    'EditMatchModal - isOpen:',
-    isOpen,
-    'selectedMatch?.id:',
-    selectedMatch?.id,
-    'matchId:',
-    matchId
-  );
 
   const {
     videos: matchVideos = [],
@@ -204,7 +196,7 @@ export default function EditMatchModal({
                   <Input
                     label="Číslo zápasu"
                     placeholder="např. 1, 2, Finále, Semifinále"
-                    value={editData.match_number}
+                    value={editData.match_number.toString()}
                     onChange={(value) => handleInputChange('match_number', value)}
                     isDisabled={isSeasonClosed}
                   />

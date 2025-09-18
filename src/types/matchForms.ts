@@ -8,7 +8,7 @@ export interface AddMatchFormData {
   venue?: string;
   category_id: string;
   season_id: string;
-  matchweek?: number;
+  matchweek?: string;
   match_number?: number;
   video_ids?: string[];
 }
@@ -25,7 +25,7 @@ export interface EditMatchFormData {
   away_score_halftime: number;
   status: MatchStatus;
   matchweek: string;
-  match_number: string;
+  match_number: number;
   category_id: string;
   video_ids?: string[];
 }

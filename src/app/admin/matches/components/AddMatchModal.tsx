@@ -147,7 +147,7 @@ export default function AddMatchModal({
                   selectedKeys={formData.matchweek ? [formData.matchweek.toString()] : []}
                   onSelectionChange={(keys) => {
                     const selectedMatchweek = Array.from(keys)[0] as string;
-                    setFormData({...formData, matchweek: Number(selectedMatchweek) || 0});
+                    setFormData({...formData, matchweek: selectedMatchweek || '0'});
                   }}
                   className="w-full"
                 >

@@ -53,7 +53,6 @@ export default function VideoSelectionModal({
     {key: 'inactive', label: 'Neaktivní'},
     {key: 'all', label: 'Všechny'},
   ];
-  console.log('opponentClubId', opponentClubId);
 
   // Fetch videos with filters and pagination
   const {

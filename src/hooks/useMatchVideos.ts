@@ -47,9 +47,6 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
         return;
       }
 
-      // Fetch videos related to this match through the junction table
-      console.log('Fetching videos for match ID:', id);
-
       // First get the video IDs from match_videos
       const {data: matchVideoIds, error: matchVideoIdsError} = await supabase
         .from('match_videos')
@@ -62,7 +59,6 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
       }
 
       if (!matchVideoIds || matchVideoIds.length === 0) {
-        console.log('No videos found for match');
         setVideos([]);
         return;
       }
@@ -95,8 +91,6 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
         .in('id', videoIds)
         .eq('is_active', true)
         .order('created_at', {ascending: false});
-
-      console.log('Videos query result:', {videosData, videosError});
 
       if (videosError) {
         console.error('Error fetching videos:', videosError);
