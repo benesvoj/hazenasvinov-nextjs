@@ -1,18 +1,14 @@
 'use client';
 
 import React, {useState, useEffect, useMemo, useCallback} from 'react';
-import {Card, CardHeader, CardBody, Button} from '@heroui/react';
-import {Tabs, Tab} from '@heroui/tabs';
+import {Card, CardHeader, CardBody, Button, Tabs, Tab} from '@heroui/react';
 import {ClipboardDocumentListIcon, XMarkIcon} from '@heroicons/react/24/outline';
 import {useMatchesWithTeams} from '@/hooks/queries/useMatchQueries';
 import {useHeadToHeadMatches} from '@/hooks/useHeadToHeadMatches';
-import CompactVideoList from './CompactVideoList';
-import MatchRow from '@/components/match/MatchRow';
-import OpponentMatchStatistics from './OpponentMatchStatistics';
-import HeadToHeadStatistics from './HeadToHeadStatistics';
 import {createClient} from '@/utils/supabase/client';
-import {LoadingSpinner} from '@/components';
 import {Match, Nullish} from '@/types';
+import {TabWithHeadToHead, TabWithStrategy, TabWithVideos, TabWithPreviousMatches} from './';
+
 interface StrategyPreparationZoneProps {
   selectedMatch: Match | Nullish;
   onClose: () => void;
@@ -393,168 +389,33 @@ export default function StrategyPreparationZone({
           variant="solid"
         >
           <Tab key="strategy" title="Strategie">
-            <div className="space-y-3 py-4 mx-1 sm:mx-2">
-              <Card>
-                <CardHeader className="pb-2">
-                  <h5 className="font-medium text-sm sm:text-base">Taktické poznámky</h5>
-                </CardHeader>
-                <CardBody className="pt-0">
-                  <textarea
-                    className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md resize-none"
-                    rows={3}
-                    placeholder="Zadejte taktické poznámky pro tento zápas..."
-                  />
-                </CardBody>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <h5 className="font-medium text-sm sm:text-base">Sestava</h5>
-                </CardHeader>
-                <CardBody className="pt-0">
-                  <textarea
-                    className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md resize-none"
-                    rows={3}
-                    placeholder="Plánovaná sestava..."
-                  />
-                </CardBody>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <h5 className="font-medium text-sm sm:text-base">Příprava hráčů</h5>
-                </CardHeader>
-                <CardBody className="pt-0">
-                  <textarea
-                    className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md resize-none"
-                    rows={3}
-                    placeholder="Speciální příprava pro jednotlivé hráče..."
-                  />
-                </CardBody>
-              </Card>
-
-              <div className="flex flex-col sm:flex-row gap-2 pt-4">
-                <Button color="primary" size="sm" className="w-full sm:w-auto">
-                  Uložit poznámky
-                </Button>
-                <Button variant="light" size="sm" className="w-full sm:w-auto">
-                  Exportovat
-                </Button>
-              </div>
-            </div>
+            <TabWithStrategy />
           </Tab>
 
           <Tab key="videos" title="Videa soupeře">
-            <div className="py-4">
-              {videosError && (
-                <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700 mb-4">
-                  <p className="text-xs sm:text-sm text-red-700 dark:text-red-300">
-                    Chyba při načítání videí: {videosError}
-                  </p>
-                </div>
-              )}
-              <CompactVideoList
-                videos={filteredOpponentVideos}
-                loading={videosLoading}
-                title={`Videa týmu ${opponentTeam?.name || 'soupeře'}`}
-                emptyMessage={`Žádná videa týmu ${opponentTeam?.name || 'soupeře'} nejsou k dispozici`}
-              />
-            </div>
+            <TabWithVideos
+              videosError={videosError}
+              videosLoading={videosLoading}
+              filteredOpponentVideos={filteredOpponentVideos}
+              opponentTeam={opponentTeam}
+            />
           </Tab>
           <Tab key="previousMatches" title="Předchozí zápasy soupeře">
-            <div className="py-4">
-              {previousMatchesError && (
-                <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700 mb-4">
-                  <p className="text-xs sm:text-sm text-red-700 dark:text-red-300">
-                    Chyba při načítání předchozích zápasů:{' '}
-                    {previousMatchesError.message || 'Neznámá chyba'}
-                  </p>
-                </div>
-              )}
-
-              {previousMatchesLoading ? (
-                <div className="flex justify-center py-8">
-                  <LoadingSpinner />
-                </div>
-              ) : previousMatches.length > 0 ? (
-                <div className="space-y-6">
-                  {/* Statistics */}
-                  <OpponentMatchStatistics
-                    matches={previousMatches}
-                    opponentTeamName={opponentTeam?.name || 'Soupeř'}
-                  />
-
-                  {/* Match List */}
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      Posledních {previousMatches.length} zápasů týmu{' '}
-                      {opponentTeam?.name || 'soupeře'}:
-                    </p>
-                    {previousMatches.map((match: any) => (
-                      <MatchRow key={match.id} match={match} redirectionLinks={false} />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <p className="text-sm">
-                    Žádné předchozí zápasy týmu {opponentTeam?.name || 'soupeře'} nejsou k dispozici
-                  </p>
-                </div>
-              )}
-            </div>
+            <TabWithPreviousMatches
+              previousMatchesError={previousMatchesError?.message || null}
+              previousMatchesLoading={previousMatchesLoading}
+              previousMatches={previousMatches}
+              opponentTeam={opponentTeam}
+            />
           </Tab>
           <Tab key="headToHead" title="Vzájemné zápasy">
-            <div className="py-4">
-              {headToHeadError && (
-                <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700 mb-4">
-                  <p className="text-xs sm:text-sm text-red-700 dark:text-red-300">
-                    Chyba při načítání vzájemných zápasů:{' '}
-                    {headToHeadError.message || 'Neznámá chyba'}
-                  </p>
-                </div>
-              )}
-
-              {headToHeadLoading ? (
-                <div className="flex justify-center py-8">
-                  <LoadingSpinner />
-                </div>
-              ) : headToHeadMatches.length > 0 ? (
-                <div className="space-y-6">
-                  <div className="text-center mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Vzájemné zápasy s {opponentTeam?.name || 'soupeřem'}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Posledních {headToHeadMatches.length} zápasů mezi našimi týmy
-                    </p>
-                  </div>
-
-                  {/* Head-to-head statistics */}
-                  <HeadToHeadStatistics
-                    matches={headToHeadMatches}
-                    ourClubTeamIds={ourClubTeamIds}
-                    opponentTeamName={opponentTeam?.name || 'Soupeř'}
-                  />
-
-                  {/* Match list */}
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      Detailní přehled vzájemných zápasů:
-                    </p>
-                    {headToHeadMatches.map((match: any) => {
-                      return <MatchRow key={match.id} match={match} redirectionLinks={false} />;
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <p className="text-sm">
-                    Žádné vzájemné zápasy s {opponentTeam?.name || 'soupeřem'} nejsou k dispozici
-                  </p>
-                </div>
-              )}
-            </div>
+            <TabWithHeadToHead
+              headToHeadError={headToHeadError?.message || null}
+              headToHeadLoading={headToHeadLoading}
+              headToHeadMatches={headToHeadMatches}
+              opponentTeam={opponentTeam}
+              ourClubTeamIds={ourClubTeamIds}
+            />
           </Tab>
         </Tabs>
       </CardBody>
