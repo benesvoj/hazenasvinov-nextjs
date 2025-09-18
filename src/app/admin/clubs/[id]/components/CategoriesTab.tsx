@@ -1,11 +1,11 @@
 'use client';
 
-import React from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { TrashIcon, TrophyIcon } from "@heroicons/react/24/outline";
-import { PlusCircleIcon } from "@heroicons/react/16/solid";
-import { translations } from "@/lib/translations";
+import React from 'react';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Button} from '@heroui/button';
+import {TrashIcon, TrophyIcon} from '@heroicons/react/24/outline';
+import {PlusCircleIcon} from '@heroicons/react/16/solid';
+import {translations} from '@/lib/translations';
 
 interface CategoriesTabProps {
   clubCategories: any[];
@@ -15,22 +15,21 @@ interface CategoriesTabProps {
   onDeleteClubCategory: (clubCategoryId: string) => void;
 }
 
-export default function CategoriesTab({ 
-  clubCategories, 
-  categories, 
-  onAssignCategory, 
-  onGenerateTeams, 
-  onDeleteClubCategory 
+export default function CategoriesTab({
+  clubCategories,
+  categories,
+  onAssignCategory,
+  onGenerateTeams,
+  onDeleteClubCategory,
 }: CategoriesTabProps) {
   return (
     <Card className="mt-4">
       <CardHeader className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
         <h3 className="text-lg font-semibold">Přiřazené kategorie</h3>
-        <Button 
-          color="primary" 
+        <Button
+          color="primary"
           onPress={onAssignCategory}
           size="sm"
-          isDisabled={categories.filter(cat => !clubCategories.some(cc => cc.category_id === cat.id)).length === 0}
           startContent={<PlusCircleIcon className="w-4 h-4" />}
         >
           {translations.button.assign}

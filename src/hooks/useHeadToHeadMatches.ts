@@ -32,15 +32,9 @@ export function useHeadToHeadMatches({
     queryKey,
     queryFn: async () => {
       if (!categoryId || !opponentTeamId || !ownClubTeamId) {
-        console.log('Debug - Missing required parameters:', {
-          categoryId,
-          opponentTeamId,
-          ownClubTeamId,
-        });
         return [];
       }
 
-      console.log('Debug - Query parameters:', {categoryId, opponentTeamId, ownClubTeamId});
       const supabase = createClient();
 
       // Step 1: Get the opponent's club ID from the opponent team ID
@@ -59,7 +53,6 @@ export function useHeadToHeadMatches({
         .single();
 
       if (opponentTeamError || !opponentTeamData) {
-        console.log('Debug - Failed to find opponent team data:', opponentTeamError);
         throw new Error('Failed to find opponent team data');
       }
 
@@ -84,7 +77,6 @@ export function useHeadToHeadMatches({
         .single();
 
       if (ownTeamError || !ownTeamData) {
-        console.log('Debug - Failed to find own team data:', ownTeamError);
         throw new Error('Failed to find own team data');
       }
 
@@ -93,15 +85,13 @@ export function useHeadToHeadMatches({
         throw new Error('Failed to find own club ID');
       }
 
-      console.log('Debug - Club IDs:', {ownClubId, opponentClubId});
-
       // Step 3: Find all teams from our club in this category (across all seasons)
       const {data: ownClubTeams, error: ownClubTeamsError} = await supabase
         .from('club_category_teams')
         .select(
           `
           id,
-          club_category:club_categories(
+          club_category:club_categories!inner(
             club_id,
             club:clubs(id, name, short_name, is_own_club)
           )
@@ -111,17 +101,15 @@ export function useHeadToHeadMatches({
         .eq('club_category.category_id', categoryId);
 
       if (ownClubTeamsError) {
-        console.log('Debug - Failed to find own club teams:', ownClubTeamsError);
         throw ownClubTeamsError;
       }
-
       // Step 4: Find all teams from opponent club in this category (across all seasons)
       const {data: opponentClubTeams, error: opponentClubTeamsError} = await supabase
         .from('club_category_teams')
         .select(
           `
           id,
-          club_category:club_categories(
+          club_category:club_categories!inner(
             club_id,
             club:clubs(id, name, short_name, is_own_club)
           )
@@ -131,28 +119,20 @@ export function useHeadToHeadMatches({
         .eq('club_category.category_id', categoryId);
 
       if (opponentClubTeamsError) {
-        console.log('Debug - Failed to find opponent club teams:', opponentClubTeamsError);
         throw opponentClubTeamsError;
       }
-
       if (
         !ownClubTeams ||
         !opponentClubTeams ||
         ownClubTeams.length === 0 ||
         opponentClubTeams.length === 0
       ) {
-        console.log('Debug - No teams found for clubs:', {
-          ownClubTeams: ownClubTeams?.length,
-          opponentClubTeams: opponentClubTeams?.length,
-        });
         return [];
       }
 
       // Step 5: Get all team IDs for both clubs
       const ownClubTeamIds = ownClubTeams.map((team: any) => team.id);
       const opponentClubTeamIds = opponentClubTeams.map((team: any) => team.id);
-
-      console.log('Debug - Team IDs:', {ownClubTeamIds, opponentClubTeamIds});
 
       // Step 6: Find all matches between our teams and opponent teams
       const {data: allMatches, error: matchesError} = await supabase
@@ -214,47 +194,14 @@ export function useHeadToHeadMatches({
         )
         .order('date', {ascending: false});
 
-      console.log(
-        'Debug - Query executed with filter:',
-        `and(home_team_id.in.(${ownClubTeamIds.join(',')}),away_team_id.in.(${opponentClubTeamIds.join(',')})),and(home_team_id.in.(${opponentClubTeamIds.join(',')}),away_team_id.in.(${ownClubTeamIds.join(',')}))`
-      );
-
       if (matchesError) {
-        console.log('Debug - Query error:', matchesError);
         throw matchesError;
       }
 
       if (!allMatches) {
         return [];
       }
-
-      console.log('Debug - Found head-to-head matches:', allMatches.length);
-      console.log(
-        'Debug - Matches:',
-        allMatches.map((m: any) => ({
-          id: m.id,
-          date: m.date,
-          homeTeam: m.home_team?.club_category?.club?.name,
-          awayTeam: m.away_team?.club_category?.club?.name,
-          homeTeamId: m.home_team_id,
-          awayTeamId: m.away_team_id,
-        }))
-      );
-
       const headToHeadMatches = allMatches;
-
-      console.log('Debug - Head-to-head matches count:', headToHeadMatches.length);
-      console.log(
-        'Debug - Head-to-head matches details:',
-        headToHeadMatches.map((m: any) => ({
-          id: m.id,
-          date: m.date,
-          homeTeam: m.home_team?.club_category?.club?.name,
-          awayTeam: m.away_team?.club_category?.club?.name,
-          homeTeamId: m.home_team_id,
-          awayTeamId: m.away_team_id,
-        }))
-      );
 
       // Step 7: Add proper team names for display
       const matchesWithTeamNames = headToHeadMatches.map((match: any) => {
@@ -290,17 +237,7 @@ export function useHeadToHeadMatches({
 
       // Limit results and return
       const finalResult = matchesWithTeamNames.slice(0, limit);
-      console.log(
-        'Debug - Final result:',
-        finalResult.map((m: any) => ({
-          id: m.id,
-          date: m.date,
-          homeTeam: m.home_team?.name,
-          awayTeam: m.away_team?.name,
-          homeTeamId: m.home_team_id,
-          awayTeamId: m.away_team_id,
-        }))
-      );
+
       return finalResult;
     },
     enabled: !!(categoryId && opponentTeamId),

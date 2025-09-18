@@ -9,6 +9,7 @@ import {useHeadToHeadMatches} from '@/hooks/useHeadToHeadMatches';
 import CompactVideoList from './CompactVideoList';
 import MatchRow from '@/components/match/MatchRow';
 import OpponentMatchStatistics from './OpponentMatchStatistics';
+import HeadToHeadStatistics from './HeadToHeadStatistics';
 import {createClient} from '@/utils/supabase/client';
 import {LoadingSpinner} from '@/components';
 import {Match, Nullish} from '@/types';
@@ -68,39 +69,18 @@ export default function StrategyPreparationZone({
   // Determine which team is from our club
   const ownClubTeamId = useMemo(() => {
     if (!selectedMatch || !opponentTeam?.id) {
-      console.log('Debug - Missing selectedMatch or opponentTeam:', {
-        selectedMatch: !!selectedMatch,
-        opponentTeam: !!opponentTeam?.id,
-      });
       return undefined;
     }
 
-    console.log('Debug - Determining ownClubTeamId:', {
-      home_team_id: selectedMatch.home_team_id,
-      away_team_id: selectedMatch.away_team_id,
-      opponentTeamId: opponentTeam.id,
-    });
-
     // Since we know the opponent team ID, the other team must be from our club
     if (selectedMatch.home_team_id === opponentTeam.id) {
-      console.log('Debug - Away team is from our club');
       return selectedMatch.away_team_id;
     } else if (selectedMatch.away_team_id === opponentTeam.id) {
-      console.log('Debug - Home team is from our club');
       return selectedMatch.home_team_id;
     }
 
-    console.log('Debug - No team matches opponent team ID');
     return undefined;
   }, [selectedMatch, opponentTeam?.id]);
-
-  // Use the dedicated hook for head-to-head matches (searches across all seasons)
-  console.log('Debug - Calling useHeadToHeadMatches with:', {
-    categoryId: selectedMatch?.category_id,
-    opponentTeamId: opponentTeam?.id,
-    ownClubTeamId: ownClubTeamId,
-    limit: 5,
-  });
 
   const {
     data: headToHeadMatches = [],
@@ -540,7 +520,7 @@ export default function StrategyPreparationZone({
                   <LoadingSpinner />
                 </div>
               ) : headToHeadMatches.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="text-center mb-6">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                       Vzájemné zápasy s {opponentTeam?.name || 'soupeřem'}
@@ -551,71 +531,17 @@ export default function StrategyPreparationZone({
                   </div>
 
                   {/* Head-to-head statistics */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {
-                          headToHeadMatches.filter((match: any) => {
-                            const homeIsOwnClub = ourClubTeamIds.includes(match.home_team_id);
-                            const awayIsOwnClub = ourClubTeamIds.includes(match.away_team_id);
-                            const homeScore = match.home_score || 0;
-                            const awayScore = match.away_score || 0;
-
-                            if (homeIsOwnClub && !awayIsOwnClub) {
-                              return homeScore > awayScore;
-                            } else if (!homeIsOwnClub && awayIsOwnClub) {
-                              return awayScore > homeScore;
-                            }
-                            return false;
-                          }).length
-                        }
-                      </div>
-                      <div className="text-sm font-medium text-green-700 dark:text-green-300">
-                        Naše výhry
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                        {
-                          headToHeadMatches.filter((match: any) => {
-                            const homeScore = match.home_score || 0;
-                            const awayScore = match.away_score || 0;
-                            return homeScore === awayScore;
-                          }).length
-                        }
-                      </div>
-                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Remízy
-                      </div>
-                    </div>
-
-                    <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                        {
-                          headToHeadMatches.filter((match: any) => {
-                            const homeIsOwnClub = ourClubTeamIds.includes(match.home_team_id);
-                            const awayIsOwnClub = ourClubTeamIds.includes(match.away_team_id);
-                            const homeScore = match.home_score || 0;
-                            const awayScore = match.away_score || 0;
-
-                            if (homeIsOwnClub && !awayIsOwnClub) {
-                              return homeScore < awayScore;
-                            } else if (!homeIsOwnClub && awayIsOwnClub) {
-                              return awayScore < homeScore;
-                            }
-                            return false;
-                          }).length
-                        }
-                      </div>
-                      <div className="text-sm font-medium text-red-700 dark:text-red-300">
-                        Naše prohry
-                      </div>
-                    </div>
-                  </div>
+                  <HeadToHeadStatistics
+                    matches={headToHeadMatches}
+                    ourClubTeamIds={ourClubTeamIds}
+                    opponentTeamName={opponentTeam?.name || 'Soupeř'}
+                  />
 
                   {/* Match list */}
                   <div className="space-y-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      Detailní přehled vzájemných zápasů:
+                    </p>
                     {headToHeadMatches.map((match: any) => {
                       return <MatchRow key={match.id} match={match} redirectionLinks={false} />;
                     })}

@@ -62,6 +62,7 @@ const MatchRow: React.FC<MatchRowProps> = ({
                       width={32}
                       height={32}
                       className="w-8 h-8 object-contain rounded-full"
+                      style={{width: 'auto', height: 'auto'}}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
@@ -97,6 +98,7 @@ const MatchRow: React.FC<MatchRowProps> = ({
                       width={32}
                       height={32}
                       className="w-8 h-8 object-contain rounded-full"
+                      style={{width: 'auto', height: 'auto'}}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
