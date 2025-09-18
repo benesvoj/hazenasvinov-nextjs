@@ -19,12 +19,12 @@ function CoachesLayoutContent({children}: {children: React.ReactNode}) {
       <CoachesSidebar />
       <div
         className={`flex-1 transition-all duration-300 ease-in-out w-full ${
-          isCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+          isCollapsed ? 'lg:ml-16' : 'lg:ml-56'
         }`}
       >
         <CoachesTopBar />
-        <main className="pt-16 p-3 sm:p-4">
-          <div className="max-w-7xl mx-auto">{children}</div>
+        <main className="pt-16 p-2 sm:p-3">
+          <div className="w-full">{children}</div>
         </main>
       </div>
     </div>

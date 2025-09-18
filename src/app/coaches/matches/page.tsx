@@ -134,9 +134,9 @@ export default function CoachesMatchesPage() {
   return (
     <PageContainer isUnderConstruction>
       <div className="space-y-6">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
           {/* Left column - Matches and Standings */}
-          <div className="xl:col-span-1 space-y-6 order-2 xl:order-1">
+          <div className="xl:col-span-2 order-2 xl:order-1">
             <Tabs>
               <Tab key="upcoming" title="Upcoming">
                 <UpcomingMatchesCard
@@ -162,7 +162,7 @@ export default function CoachesMatchesPage() {
           </div>
 
           {/* Right column - Strategy Zone (only for upcoming matches) */}
-          <div className="xl:col-span-2 order-1 xl:order-2">
+          <div className="xl:col-span-3 order-1 xl:order-2">
             {selectedMatch && selectedMatch.status === 'upcoming' ? (
               <StrategyPreparationZone
                 selectedMatch={selectedMatch}

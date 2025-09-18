@@ -221,11 +221,11 @@ export const UnifiedTopBar = ({
   const getHeaderClasses = () => {
     if (variant === 'admin') {
       return `fixed top-0 right-0 bg-white h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300 ease-in-out ${
-        sidebarContext?.isMobile ? 'left-0' : sidebarContext?.isCollapsed ? 'left-16' : 'left-64'
+        sidebarContext?.isMobile ? 'left-0' : sidebarContext?.isCollapsed ? 'left-16' : 'left-56'
       }`;
     } else {
       return `fixed top-0 right-0 bg-white h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-30 transition-all duration-300 ease-in-out ${
-        sidebarContext?.isMobile ? 'left-0' : sidebarContext?.isCollapsed ? 'left-16' : 'left-64'
+        sidebarContext?.isMobile ? 'left-0' : sidebarContext?.isCollapsed ? 'left-16' : 'left-56'
       }`;
     }
   };
