@@ -3,8 +3,7 @@
 import React from 'react';
 import {Card, CardHeader, CardBody} from '@heroui/react';
 import {TrophyIcon} from '@heroicons/react/24/outline';
-import {MatchRow} from '@/components';
-import {LoadingSpinner} from '@/components';
+import {LoadingSpinner, Heading, MatchRow} from '@/components';
 
 interface RecentResultsCardProps {
   recentResults: any[];
@@ -23,7 +22,7 @@ export default function RecentResultsCard({
     <Card className="h-full">
       <CardHeader className="flex items-center gap-2">
         <TrophyIcon className="w-5 h-5 text-green-600" />
-        <h3 className="text-xl font-semibold">Poslední výsledky</h3>
+        <Heading size={3}>Poslední výsledky</Heading>
       </CardHeader>
       <CardBody className="p-0">
         {loading ? (
@@ -31,7 +30,7 @@ export default function RecentResultsCard({
             <LoadingSpinner />
           </div>
         ) : (
-          <div className="max-h-96 overflow-y-auto scrollbar-hide">
+          <div className="overflow-y-auto scrollbar-hide">
             <div className="space-y-0">
               {recentResults.map((match) => (
                 <div

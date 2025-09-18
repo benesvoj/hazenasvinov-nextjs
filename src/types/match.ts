@@ -24,12 +24,14 @@ export interface Match {
   away_score_halftime?: number | Nullish;
   coach_notes?: string | Nullish;
   match_photo_url?: string | Nullish;
-  matchweek?: number;
-  match_number?: number;
+  matchweek?: number | Nullish;
+  match_number?: number | Nullish;
   category: Category;
   season: Season;
   /** Optional reference to related blog post */
   post_id?: string;
+  /** Array of related video IDs */
+  video_ids?: string[];
   /** Additional properties for transformed data */
   home_team_is_own_club?: boolean;
   away_team_is_own_club?: boolean;

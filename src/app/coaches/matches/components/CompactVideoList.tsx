@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, {useState} from 'react';
 import {Card, CardHeader, CardBody, Button} from '@heroui/react';
-import {VideoCameraIcon, PlayIcon} from '@heroicons/react/24/outline';
+import {VideoCameraIcon, PlayIcon, LinkIcon, CheckIcon} from '@heroicons/react/24/outline';
 import {LoadingSpinner} from '@/components';
 import Image from 'next/image';
+import {formatDateString} from '@/helpers';
 
 interface Video {
   id: string;
@@ -19,6 +20,26 @@ interface Video {
     id: string;
     name: string;
     short_name: string;
+  };
+  // Match information when video is related to a match
+  match?: {
+    id: string;
+    home_team: {
+      id: string;
+      name: string;
+      short_name?: string;
+    };
+    away_team: {
+      id: string;
+      name: string;
+      short_name?: string;
+    };
+    home_score?: number;
+    away_score?: number;
+    home_score_halftime?: number;
+    away_score_halftime?: number;
+    status: 'upcoming' | 'completed';
+    date: string;
   };
 }
 
@@ -35,8 +56,24 @@ export default function CompactVideoList({
   title,
   emptyMessage = 'Žádná videa k dispozici',
 }: CompactVideoListProps) {
+  const [copiedVideoId, setCopiedVideoId] = useState<string | null>(null);
+
   const handleVideoClick = (video: Video) => {
     window.open(video.youtube_url, '_blank');
+  };
+
+  const handleCopyLink = async (video: Video) => {
+    try {
+      await navigator.clipboard.writeText(video.youtube_url);
+      setCopiedVideoId(video.id);
+
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setCopiedVideoId(null);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+    }
   };
 
   return (
@@ -51,7 +88,7 @@ export default function CompactVideoList({
             <LoadingSpinner />
           </div>
         ) : (
-          <div className="max-h-80 overflow-y-auto scrollbar-hide">
+          <div className="max-h-400 overflow-y-auto scrollbar-hide">
             <div className="space-y-2 p-1 sm:p-2">
               {videos.length === 0 ? (
                 <div className="text-center py-4 sm:py-6 text-gray-500">
@@ -91,32 +128,82 @@ export default function CompactVideoList({
                       <h4 className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
                         {video.title}
                       </h4>
+
+                      {/* Match information */}
+                      {video.match && (
+                        <div className="mt-1 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-700">
+                          <div className="text-xs font-medium text-blue-900 dark:text-blue-100 mb-1">
+                            {video.match.home_team.name} vs {video.match.away_team.name}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300">
+                            <span>{new Date(video.match.date).toLocaleDateString('cs-CZ')}</span>
+                            {video.match.status === 'completed' && (
+                              <>
+                                <span className="font-medium">
+                                  {video.match.home_score || 0} : {video.match.away_score || 0}
+                                </span>
+                                {(video.match.home_score_halftime !== undefined ||
+                                  video.match.away_score_halftime !== undefined) && (
+                                  <span className="text-gray-500">
+                                    ({video.match.home_score_halftime || 0} :{' '}
+                                    {video.match.away_score_halftime || 0})
+                                  </span>
+                                )}
+                              </>
+                            )}
+                            {video.match.status === 'upcoming' && (
+                              <span className="text-orange-600 dark:text-orange-400 font-medium">
+                                Nadcházející
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {video.description && (
                         <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1 hidden sm:block">
-                          {video.description}
+                          Poznámka: {video.description}
                         </p>
                       )}
                       <div className="flex items-center gap-1 sm:gap-2 mt-1">
                         {video.recording_date && (
                           <span className="text-xs text-gray-500">
-                            {new Date(video.recording_date).toLocaleDateString('cs-CZ')}
+                            Datum nahrání: {formatDateString(video.recording_date)}
                           </span>
-                        )}
-                        {video.duration && (
-                          <span className="text-xs text-gray-500">{video.duration}</span>
                         )}
                       </div>
                     </div>
 
-                    {/* Play button */}
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="light"
-                      className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10"
-                    >
-                      <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                    </Button>
+                    {/* Action buttons */}
+                    <div className="flex gap-1">
+                      {/* Copy link button */}
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        color={copiedVideoId === video.id ? 'success' : 'default'}
+                        className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+                        onPress={() => handleCopyLink(video)}
+                        title={copiedVideoId === video.id ? 'Link zkopírován!' : 'Zkopírovat odkaz'}
+                      >
+                        {copiedVideoId === video.id ? (
+                          <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                        ) : (
+                          <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                        )}
+                      </Button>
+
+                      {/* Play button */}
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+                        title="Přehrát video"
+                      >
+                        <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))
               )}

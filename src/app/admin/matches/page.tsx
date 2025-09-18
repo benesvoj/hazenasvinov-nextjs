@@ -39,7 +39,7 @@ import {
   ButtonWithTooltip,
 } from '@/components';
 import {getCategoryInfo} from '@/helpers/getCategoryInfo';
-import {Match} from '@/types';
+import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
 import {
   useSeasons,
   useFilteredTeams,
@@ -157,7 +157,7 @@ export default function MatchesAdminPage() {
     return expandedMatchweeks.has(key);
   };
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AddMatchFormData>({
     date: '',
     time: '',
     home_team_id: '',
@@ -165,8 +165,9 @@ export default function MatchesAdminPage() {
     venue: '',
     category_id: '',
     season_id: '',
-    matchweek: '',
-    match_number: '',
+    matchweek: undefined,
+    match_number: undefined,
+    video_ids: [],
   });
 
   const [resultData, setResultData] = useState({
@@ -176,7 +177,7 @@ export default function MatchesAdminPage() {
     away_score_halftime: 0,
   });
 
-  const [editData, setEditData] = useState({
+  const [editData, setEditData] = useState<EditMatchFormData>({
     date: '',
     time: '',
     home_team_id: '',
@@ -188,8 +189,9 @@ export default function MatchesAdminPage() {
     away_score_halftime: 0,
     status: 'completed' as 'upcoming' | 'completed',
     matchweek: '',
-    match_number: '',
+    match_number: 0,
     category_id: '',
+    video_ids: [],
   });
 
   const [bulkUpdateData, setBulkUpdateData] = useState({
@@ -413,16 +415,16 @@ export default function MatchesAdminPage() {
         status: matchStatusesKeys[0],
       };
 
-      // Handle matchweek - allow setting to null if empty, or parse the value
-      if (formData.matchweek === '') {
+      // Handle matchweek - allow setting to null if empty, or use the value
+      if (formData.matchweek === undefined || formData.matchweek === '0') {
         insertData.matchweek = null;
-      } else if (formData.matchweek) {
-        insertData.matchweek = parseInt(formData.matchweek);
+      } else {
+        insertData.matchweek = formData.matchweek;
       }
 
       // Handle match_number - only add if provided
-      if (formData.match_number && formData.match_number.trim()) {
-        insertData.match_number = formData.match_number.trim();
+      if (formData.match_number && formData.match_number > 0) {
+        insertData.match_number = formData.match_number;
       }
 
       const {error} = await supabase.from('matches').insert(insertData);
@@ -441,8 +443,9 @@ export default function MatchesAdminPage() {
         venue: '',
         category_id: '',
         season_id: '',
-        matchweek: '',
-        match_number: '',
+        matchweek: undefined,
+        match_number: undefined,
+        video_ids: [],
       });
       // Matches are automatically refreshed by useFetchMatches hook
       setError('');
@@ -491,25 +494,20 @@ export default function MatchesAdminPage() {
 
       // Automatically recalculate standings for this match's category and season
       try {
-        console.log('Recalculating standings after admin match result update...');
         const standingsResult = await autoRecalculateStandings(selectedMatch.id);
 
         if (standingsResult.success && standingsResult.recalculated) {
-          console.log('Standings recalculated successfully');
           // Refresh standings to show updated data
           if (selectedCategory && selectedSeason) {
             await fetchStandings(selectedCategory, selectedSeason);
           }
           showToast.success('Výsledek zápasu byl uložen a tabulka byla automaticky přepočítána!');
         } else if (standingsResult.success && !standingsResult.recalculated) {
-          console.log('Standings recalculation skipped (no standings exist or season closed)');
           showToast.success('Výsledek zápasu byl úspěšně uložen!');
         } else {
-          console.warn('Standings recalculation failed:', standingsResult.error);
           showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
         }
       } catch (standingsError) {
-        console.error('Error during standings recalculation:', standingsError);
         showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
       }
 
@@ -521,7 +519,6 @@ export default function MatchesAdminPage() {
       setError('');
     } catch (error) {
       setError('Chyba při aktualizaci výsledku');
-      console.error('Error updating result:', error);
     }
   };
 
@@ -554,7 +551,6 @@ export default function MatchesAdminPage() {
       handleDeleteConfirmClose();
     } catch (error) {
       setError('Chyba při mazání zápasu');
-      console.error('Error deleting match:', error);
     }
   };
 
@@ -577,7 +573,6 @@ export default function MatchesAdminPage() {
       setSelectedCategory('');
     } catch (error) {
       setError('Chyba při mazání všech zápasů');
-      console.error('Error deleting all matches:', error);
     }
   };
 
@@ -596,7 +591,7 @@ export default function MatchesAdminPage() {
       away_score_halftime: match.away_score_halftime ?? 0,
       status: match.status,
       matchweek: match.matchweek ? match.matchweek.toString() : '',
-      match_number: match.match_number ? match.match_number.toString() : '',
+      match_number: match.match_number ? match.match_number : 0,
       category_id: match.category_id,
     });
 
@@ -649,10 +644,10 @@ export default function MatchesAdminPage() {
       }
 
       // Handle match_number - only add if provided
-      if (editData.match_number && editData.match_number.trim()) {
-        updateData.match_number = editData.match_number.trim();
+      if (editData.match_number && editData.match_number) {
+        updateData.match_number = editData.match_number;
       } else {
-        updateData.match_number = null;
+        updateData.match_number = 0;
       }
 
       // Only update scores if they are provided
@@ -668,7 +663,6 @@ export default function MatchesAdminPage() {
       const {error} = await supabase.from('matches').update(updateData).eq('id', selectedMatch.id);
 
       if (error) {
-        console.error('Supabase error details:', error);
         throw error;
       }
 
@@ -684,25 +678,20 @@ export default function MatchesAdminPage() {
 
       if (scoresWereUpdated) {
         try {
-          console.log('Scores were updated, recalculating standings...');
           const standingsResult = await autoRecalculateStandings(selectedMatch.id);
 
           if (standingsResult.success && standingsResult.recalculated) {
-            console.log('Standings recalculated successfully');
             // Refresh standings to show updated data
             if (selectedCategory && selectedSeason) {
               await fetchStandings(selectedCategory, selectedSeason);
             }
             showToast.success('Zápas byl upraven a tabulka byla automaticky přepočítána!');
           } else if (standingsResult.success && !standingsResult.recalculated) {
-            console.log('Standings recalculation skipped (no standings exist or season closed)');
             showToast.success('Zápas byl úspěšně upraven!');
           } else {
-            console.warn('Standings recalculation failed:', standingsResult.error);
             showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
           }
         } catch (standingsError) {
-          console.error('Error during standings recalculation:', standingsError);
           showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
         }
       }
@@ -720,15 +709,15 @@ export default function MatchesAdminPage() {
         away_score_halftime: 0,
         status: 'completed',
         matchweek: '',
-        match_number: '',
+        match_number: 0,
         category_id: '',
+        video_ids: [],
       });
       setSelectedMatch(null);
       // Refresh matches to show updated data
       refreshMatches();
       setError('');
     } catch (error) {
-      console.error('Full error details:', error);
       if (error && typeof error === 'object' && 'message' in error) {
         setError(`Chyba při aktualizaci zápasu: ${error.message}`);
       } else {
@@ -796,7 +785,6 @@ export default function MatchesAdminPage() {
         );
 
       if (error) {
-        console.error('Supabase error details:', error);
         throw error;
       }
 

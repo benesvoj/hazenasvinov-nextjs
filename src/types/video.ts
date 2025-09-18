@@ -31,6 +31,8 @@ export interface Video {
   updated_at: string;
   created_by?: string;
   updated_by?: string;
+  /** Array of related match IDs */
+  match_ids?: string[];
 }
 
 export interface VideoFormData {

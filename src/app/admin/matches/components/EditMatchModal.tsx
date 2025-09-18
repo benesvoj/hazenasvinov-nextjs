@@ -1,11 +1,15 @@
 'use client';
 
-import React from 'react';
-import {Input, NumberInput, Select, SelectItem} from '@heroui/react';
-import {Match, Nullish, MatchStatus} from '@/types';
-import {UnifiedModal, Heading} from '@/components';
+import React, {useState, useEffect} from 'react';
+import {Input, NumberInput, Select, SelectItem, Button} from '@heroui/react';
+import {MagnifyingGlassIcon} from '@heroicons/react/24/outline';
+import {Match, Nullish, Video, EditMatchFormData} from '@/types';
+import {UnifiedModal, Heading, showToast} from '@/components';
 import {translations} from '@/lib/translations';
 import {matchStatuses} from '@/constants';
+import {useTeamClub, useMatchVideos} from '@/hooks';
+import VideoSelectionModal from './VideoSelectionModal';
+
 interface FilteredTeam {
   id: string;
   name: string;
@@ -17,22 +21,8 @@ interface EditMatchModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedMatch: Match | null;
-  editData: {
-    date: string;
-    time: string;
-    home_team_id: string;
-    away_team_id: string;
-    venue: string;
-    home_score: number;
-    away_score: number;
-    home_score_halftime: number;
-    away_score_halftime: number;
-    status: MatchStatus;
-    matchweek: string;
-    match_number: string;
-    category_id: string;
-  };
-  onEditDataChange: (data: any) => void;
+  editData: EditMatchFormData;
+  onEditDataChange: (data: EditMatchFormData) => void;
   onUpdateMatch: () => void;
   teams: FilteredTeam[];
   getMatchweekOptions: (categoryId?: string) => Array<{value: string; label: string}>;
@@ -51,6 +41,61 @@ export default function EditMatchModal({
   isSeasonClosed,
 }: EditMatchModalProps) {
   const t = translations.matches;
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  // Get club info for both teams
+  const {clubId: homeTeamClubId, isOwnClub: isHomeTeamOwnClub} = useTeamClub(editData.home_team_id);
+  const {clubId: awayTeamClubId, isOwnClub: isAwayTeamOwnClub} = useTeamClub(editData.away_team_id);
+
+  // Determine opponent club ID - whichever team is not our own club
+  const opponentClubId = isHomeTeamOwnClub ? awayTeamClubId : homeTeamClubId;
+
+  // Get match videos using the new hook (only when modal is open and we have a selected match)
+  const matchId = isOpen && selectedMatch?.id ? selectedMatch.id : null;
+
+  const {
+    videos: matchVideos = [],
+    loading: videosLoading,
+    addVideo,
+    removeVideo,
+    error: videosError,
+  } = useMatchVideos(matchId);
+
+  // Handle video selection
+  const handleVideoSelect = async (videos: Video[]) => {
+    if (!matchId) return;
+
+    try {
+      // Get current video IDs
+      const currentVideoIds = matchVideos.map((v) => v.id);
+      const newVideoIds = videos.map((v) => v.id);
+
+      // Find videos to add
+      const videosToAdd = videos.filter((video) => !currentVideoIds.includes(video.id));
+
+      // Find videos to remove
+      const videosToRemove = matchVideos.filter((video) => !newVideoIds.includes(video.id));
+
+      // Add new videos
+      for (const video of videosToAdd) {
+        await addVideo(video.id);
+      }
+
+      // Remove videos
+      for (const video of videosToRemove) {
+        await removeVideo(video.id);
+      }
+
+      // Show success toast
+      const totalChanges = videosToAdd.length + videosToRemove.length;
+      if (totalChanges > 0) {
+        showToast.success(`Videa byla úspěšně aktualizována (${totalChanges} změn)`);
+      }
+    } catch (error) {
+      console.error('Error updating videos:', error);
+      showToast.danger('Chyba při aktualizaci videí');
+    }
+  };
 
   const handleInputChange = (
     field: string,
@@ -151,7 +196,7 @@ export default function EditMatchModal({
                   <Input
                     label="Číslo zápasu"
                     placeholder="např. 1, 2, Finále, Semifinále"
-                    value={editData.match_number}
+                    value={editData.match_number.toString()}
                     onChange={(value) => handleInputChange('match_number', value)}
                     isDisabled={isSeasonClosed}
                   />
@@ -246,10 +291,86 @@ export default function EditMatchModal({
                   )}
                 </div>
               </div>
+
+              {/* Video Selection Section */}
+              <div className="col-span-1 lg:col-span-2">
+                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">
+                  Související videa
+                </h4>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Videa (volitelné)
+                  </label>
+
+                  {/* Display error if videos can't be loaded */}
+                  {videosError && (
+                    <div className="p-3 border border-red-300 dark:border-red-600 rounded-lg bg-red-50 dark:bg-red-900/20 mb-4">
+                      <div className="text-sm text-red-600 dark:text-red-400">{videosError}</div>
+                    </div>
+                  )}
+
+                  {/* Display selected videos */}
+                  {matchVideos.length > 0 ? (
+                    <div className="space-y-2 mb-4">
+                      {matchVideos.map((video) => (
+                        <div
+                          key={video.id}
+                          className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">
+                                {video.title}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {video.recording_date
+                                  ? new Date(video.recording_date).toLocaleDateString('cs-CZ')
+                                  : 'Neznámé datum'}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="light"
+                              color="danger"
+                              onPress={() => removeVideo(video.id)}
+                              isDisabled={isSeasonClosed}
+                            >
+                              Odstranit
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  <Button
+                    variant="bordered"
+                    startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
+                    onPress={() => setIsVideoModalOpen(true)}
+                    className="w-full justify-start"
+                    isDisabled={isSeasonClosed || !!videosError}
+                  >
+                    {matchVideos.length > 0 ? 'Přidat další video' : 'Vybrat videa'}
+                  </Button>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Vyberte videa pro propojení se zápasem
+                  </p>
+                </div>
+              </div>
             </>
           )}
         </>
       </UnifiedModal>
+
+      {/* Video Selection Modal */}
+      <VideoSelectionModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        onSelect={handleVideoSelect}
+        selectedVideoIds={matchVideos.map((v) => v.id)}
+        categoryId={editData.category_id}
+        opponentClubId={opponentClubId || undefined}
+      />
     </>
   );
 }
