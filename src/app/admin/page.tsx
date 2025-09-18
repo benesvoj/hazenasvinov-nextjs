@@ -2,51 +2,31 @@
 
 import {createClient} from '@/utils/supabase/client';
 import {redirect} from 'next/navigation';
-import {logout} from '@/utils/supabase/actions';
 import {useUser} from '@/contexts/UserContext';
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {Button} from '@heroui/button';
 import {
   CheckCircleIcon,
   ClockIcon,
   ExclamationTriangleIcon,
-  DocumentTextIcon,
-  PlusIcon,
-  TrashIcon,
-  PencilIcon,
-  ChatBubbleLeftRightIcon,
-  FlagIcon,
   FireIcon,
-  BoltIcon,
-  WrenchScrewdriverIcon,
-  BugAntIcon,
-  SparklesIcon,
-  Cog6ToothIcon,
-  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import {useState, useEffect} from 'react';
 import {
+  Button,
+  Card,
+  CardBody,
+  Input,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from '@heroui/modal';
-import {Input} from '@heroui/input';
-import {TodoItem, getPriorityLabel, getStatusLabel, getCategoryLabel} from '@/utils/todos';
+} from '@heroui/react';
 import {ReleaseNote, getReleaseNotes} from '@/utils/releaseNotes';
-import {Chip} from '@heroui/react';
-import {LoadingSpinner, showToast} from '@/components';
-
-interface Comment {
-  id: string;
-  content: string;
-  author: string;
-  user_email: string;
-  created_at: string;
-  type: 'general' | 'bug' | 'feature' | 'improvement';
-}
+import {showToast} from '@/components';
+import {ToDoList, CommentsZone} from './components';
+import {TodoItem} from '@/utils/todos';
+import {Comment} from '@/types';
 
 export default function AdminDashboard() {
   const {user, userProfile, loading, isAuthenticated, isAdmin} = useUser();
@@ -54,7 +34,7 @@ export default function AdminDashboard() {
   const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [todosLoading, setTodosLoading] = useState(true);
-
+  const [commentsLoading, setCommentsLoading] = useState(true);
   // Modal states
   const {isOpen: isAddTodoOpen, onOpen: onAddTodoOpen, onClose: onAddTodoClose} = useDisclosure();
   const {
@@ -152,10 +132,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
   const handleAddTodo = () => {
     setTodoFormData({
       title: '',
@@ -245,7 +221,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const updateTodoStatus = async (id: string, status: TodoItem['status']) => {
+  const updateTodoStatus = async (id: string, status: string) => {
     try {
       const supabase = createClient();
       const {error} = await supabase.from('todos').update({status}).eq('id', id);
@@ -254,79 +230,6 @@ export default function AdminDashboard() {
       loadTodos(); // Reload todos from database
     } catch (error) {
       showToast.danger(`Error updating todo:${error}`);
-    }
-  };
-
-  const getStatusIcon = (status: TodoItem['status']) => {
-    switch (status) {
-      case 'done':
-        return <CheckCircleIcon className="w-4 h-4" />;
-      case 'in-progress':
-        return <ClockIcon className="w-4 h-4" />;
-      case 'todo':
-        return <ExclamationTriangleIcon className="w-4 h-4" />;
-      default:
-        return <ExclamationTriangleIcon className="w-4 h-4" />;
-    }
-  };
-
-  const getPriorityIcon = (priority: TodoItem['priority']) => {
-    switch (priority) {
-      case 'urgent':
-        return <FireIcon className="w-4 h-4" />;
-      case 'high':
-        return <FlagIcon className="w-4 h-4" />;
-      case 'medium':
-        return <BoltIcon className="w-4 h-4" />;
-      case 'low':
-        return <ExclamationTriangleIcon className="w-4 h-4" />;
-      default:
-        return <BoltIcon className="w-4 h-4" />;
-    }
-  };
-
-  const getCategoryIcon = (category: TodoItem['category']) => {
-    switch (category) {
-      case 'feature':
-        return <SparklesIcon className="w-4 h-4" />;
-      case 'bug':
-        return <BugAntIcon className="w-4 h-4" />;
-      case 'improvement':
-        return <WrenchScrewdriverIcon className="w-4 h-4" />;
-      case 'technical':
-        return <Cog6ToothIcon className="w-4 h-4" />;
-      default:
-        return <WrenchScrewdriverIcon className="w-4 h-4" />;
-    }
-  };
-
-  const getCommentTypeIcon = (type: Comment['type']) => {
-    switch (type) {
-      case 'general':
-        return <InformationCircleIcon className="w-4 h-4" />;
-      case 'bug':
-        return <BugAntIcon className="w-4 h-4" />;
-      case 'feature':
-        return <SparklesIcon className="w-4 h-4" />;
-      case 'improvement':
-        return <WrenchScrewdriverIcon className="w-4 h-4" />;
-      default:
-        return <InformationCircleIcon className="w-4 h-4" />;
-    }
-  };
-
-  const getCommentTypeLabel = (type: Comment['type']) => {
-    switch (type) {
-      case 'general':
-        return 'General';
-      case 'bug':
-        return 'Bug Report';
-      case 'feature':
-        return 'Feature Request';
-      case 'improvement':
-        return 'Improvement';
-      default:
-        return 'General';
     }
   };
 
@@ -503,252 +406,24 @@ export default function AdminDashboard() {
       {/* Two Zones Layout - 50:50 Split */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Todo List Zone */}
-        <div>
-          <Card>
-            <CardHeader className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <ExclamationTriangleIcon className="w-5 h-5 text-blue-500" />
-                <h2 className="text-xl font-semibold">Todo List ({todos.length})</h2>
-              </div>
-              <Button
-                color="primary"
-                size="sm"
-                isIconOnly
-                aria-label="Add Todo"
-                startContent={<PlusIcon className="w-4 h-4" />}
-                onPress={handleAddTodo}
-              />
-            </CardHeader>
-            <CardBody>
-              {todosLoading ? (
-                <div className="text-center py-8">
-                  <LoadingSpinner />
-                </div>
-              ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto px-2">
-                  {todos
-                    .sort((a, b) => {
-                      // First sort by priority (urgent > high > medium > low)
-                      const priorityOrder = {urgent: 0, high: 1, medium: 2, low: 3};
-                      const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
-                      if (priorityDiff !== 0) return priorityDiff;
-
-                      // Then sort by due date (earliest first, null dates last)
-                      if (!a.due_date && !b.due_date) return 0;
-                      if (!a.due_date) return 1;
-                      if (!b.due_date) return -1;
-                      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-                    })
-                    .map((todo) => (
-                      <Card key={todo.id} className="hover:shadow-md transition-shadow">
-                        <CardBody>
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div
-                                  className="flex items-center gap-1"
-                                  title={`Priority: ${getPriorityLabel(todo.priority)}`}
-                                >
-                                  {getPriorityIcon(todo.priority)}
-                                  <span className="text-xs text-gray-500">
-                                    {getPriorityLabel(todo.priority)}
-                                  </span>
-                                </div>
-                                <div
-                                  className="flex items-center gap-1"
-                                  title={`Status: ${getStatusLabel(todo.status)}`}
-                                >
-                                  {getStatusIcon(todo.status)}
-                                  <span className="text-xs text-gray-500">
-                                    {getStatusLabel(todo.status)}
-                                  </span>
-                                </div>
-                                <div
-                                  className="flex items-center gap-1"
-                                  title={`Category: ${getCategoryLabel(todo.category)}`}
-                                >
-                                  {getCategoryIcon(todo.category)}
-                                  <span className="text-xs text-gray-500">
-                                    {getCategoryLabel(todo.category)}
-                                  </span>
-                                </div>
-                              </div>
-                              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                                {todo.title}
-                              </h3>
-                              {todo.description && (
-                                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                                  {todo.description}
-                                </p>
-                              )}
-                              <div className="grid gap-4 text-xs text-gray-500 mt-3 grid-cols-1 md:grid-cols-12">
-                                {todo.due_date && (
-                                  <div className="md:col-span-3 min-w-0">
-                                    <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                      Due Date
-                                    </div>
-                                    <div className="truncate">{todo.due_date}</div>
-                                  </div>
-                                )}
-                                <div
-                                  className={`min-w-0 ${todo.due_date ? 'md:col-span-6' : 'md:col-span-8'}`}
-                                >
-                                  <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Created by
-                                  </div>
-                                  <div className="truncate">{todo.user_email}</div>
-                                </div>
-                                <div
-                                  className={`min-w-0 ${todo.due_date ? 'md:col-span-3' : 'md:col-span-4'}`}
-                                >
-                                  <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Created
-                                  </div>
-                                  <div className="truncate">
-                                    {new Date(todo.created_at).toLocaleDateString('en-CA', {
-                                      year: 'numeric',
-                                      month: '2-digit',
-                                      day: '2-digit',
-                                    })}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="light"
-                                color="primary"
-                                isIconOnly
-                                onPress={() => handleEditTodo(todo)}
-                              >
-                                <PencilIcon className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="light"
-                                color="success"
-                                isIconOnly
-                                onPress={() => updateTodoStatus(todo.id, 'done')}
-                              >
-                                <CheckCircleIcon className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="light"
-                                color="danger"
-                                isIconOnly
-                                onPress={() => deleteTodo(todo.id)}
-                              >
-                                <TrashIcon className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </CardBody>
-                      </Card>
-                    ))}
-                  {todos.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
-                      No todos found. Create your first todo!
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardBody>
-          </Card>
-        </div>
+        <ToDoList
+          todos={todos}
+          todosLoading={todosLoading}
+          handleAddTodo={handleAddTodo}
+          updateTodoStatus={updateTodoStatus}
+          deleteTodo={deleteTodo}
+          handleEditTodo={handleEditTodo}
+        />
 
         {/* Comments Zone */}
-        <div>
-          <Card>
-            <CardHeader className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <ChatBubbleLeftRightIcon className="w-5 h-5 text-purple-500" />
-                <h2 className="text-xl font-semibold">Comments ({comments.length})</h2>
-              </div>
-              <Button
-                color="primary"
-                startContent={<PlusIcon className="w-4 h-4" />}
-                onPress={onAddCommentOpen}
-              >
-                Add Comment
-              </Button>
-            </CardHeader>
-            <CardBody>
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {comments.map((comment) => (
-                  <Card key={comment.id} className="hover:shadow-md transition-shadow">
-                    <CardBody>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div
-                              className="flex items-center gap-1"
-                              title={`Type: ${getCommentTypeLabel(comment.type)}`}
-                            >
-                              {getCommentTypeIcon(comment.type)}
-                              <span className="text-xs text-gray-500">
-                                {getCommentTypeLabel(comment.type)}
-                              </span>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            {comment.content}
-                          </p>
-                          <div className="grid gap-4 text-xs text-gray-500 mt-3 grid-cols-1 md:grid-cols-12">
-                            <div className="md:col-span-6 min-w-0">
-                              <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Created by
-                              </div>
-                              <div className="truncate">{comment.user_email}</div>
-                            </div>
-                            <div className="md:col-span-6 min-w-0">
-                              <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Created
-                              </div>
-                              <div className="truncate">
-                                {new Date(comment.created_at).toLocaleDateString('en-CA', {
-                                  year: 'numeric',
-                                  month: '2-digit',
-                                  day: '2-digit',
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="light"
-                            color="primary"
-                            isIconOnly
-                            onPress={() => handleEditComment(comment)}
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="light"
-                            color="danger"
-                            isIconOnly
-                            onPress={() => deleteComment(comment.id)}
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardBody>
-                  </Card>
-                ))}
-                {comments.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    No comments yet. Add your first comment!
-                  </div>
-                )}
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+        <CommentsZone
+          comments={comments}
+          commentsLoading={commentsLoading}
+          handleAddComment={addComment}
+          handleEditComment={handleEditComment}
+          deleteComment={deleteComment}
+          onAddCommentOpen={onAddCommentOpen}
+        />
       </div>
 
       {/* Modals */}
