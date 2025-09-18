@@ -14,6 +14,7 @@ import {
   RecentResultsCard,
   StandingsCard,
   StrategyPreparationZone,
+  RecentMatchDetails,
 } from './components';
 import CoachMatchResultFlow from './components/CoachMatchResultFlow';
 import {Tab, Tabs} from '@heroui/react';
@@ -24,6 +25,7 @@ export default function CoachesMatchesPage() {
   const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
   const [resultFlowMatch, setResultFlowMatch] = useState<any>(null);
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('upcoming');
 
   const {activeSeason, fetchActiveSeason} = useSeasons();
   const {categories, fetchCategories} = useCategories();
@@ -137,7 +139,13 @@ export default function CoachesMatchesPage() {
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
           {/* Left column - Matches and Standings */}
           <div className="xl:col-span-2 order-2 xl:order-1">
-            <Tabs>
+            <Tabs
+              selectedKey={activeTab}
+              onSelectionChange={(key) => {
+                setActiveTab(key as string);
+                setSelectedMatch(null); // Clear selected match when switching tabs
+              }}
+            >
               <Tab key="upcoming" title="Upcoming">
                 <UpcomingMatchesCard
                   upcomingMatches={upcomingMatches}
@@ -161,32 +169,57 @@ export default function CoachesMatchesPage() {
             </Tabs>
           </div>
 
-          {/* Right column - Strategy Zone (only for upcoming matches) */}
+          {/* Right column - Dynamic content based on active tab */}
           <div className="xl:col-span-3 order-1 xl:order-2">
-            {selectedMatch && selectedMatch.status === 'upcoming' ? (
-              <StrategyPreparationZone
-                selectedMatch={selectedMatch}
-                onClose={handleCloseStrategy}
-              />
-            ) : selectedMatch ? (
+            {activeTab === 'upcoming' ? (
+              // Strategy Zone for upcoming matches
+              selectedMatch && selectedMatch.status === 'upcoming' ? (
+                <StrategyPreparationZone
+                  selectedMatch={selectedMatch}
+                  onClose={handleCloseStrategy}
+                />
+              ) : selectedMatch ? (
+                <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-lg font-medium mb-2">Zápas již byl odehrán</p>
+                    <p className="text-sm">
+                      Strategie a příprava jsou dostupné pouze pro nadcházející zápasy.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-lg font-medium mb-2">Vyberte zápas</p>
+                    <p className="text-sm">
+                      Klikněte na zápas v seznamu vlevo pro zobrazení strategie a přípravy.
+                    </p>
+                  </div>
+                </div>
+              )
+            ) : activeTab === 'recent' ? (
+              // Match Details for recent matches
+              selectedMatch ? (
+                <RecentMatchDetails selectedMatch={selectedMatch} onClose={handleCloseStrategy} />
+              ) : (
+                <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-lg font-medium mb-2">Vyberte zápas</p>
+                    <p className="text-sm">
+                      Klikněte na zápas v seznamu vlevo pro zobrazení detailů a statistik.
+                    </p>
+                  </div>
+                </div>
+              )
+            ) : activeTab === 'standings' ? (
+              // Standings info
               <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="text-center text-gray-500 dark:text-gray-400">
-                  <p className="text-lg font-medium mb-2">Zápas již byl odehrán</p>
-                  <p className="text-sm">
-                    Strategie a příprava jsou dostupné pouze pro nadcházející zápasy.
-                  </p>
+                  <p className="text-lg font-medium mb-2">Tabulka</p>
+                  <p className="text-sm">Tabulka je zobrazena v levém sloupci.</p>
                 </div>
               </div>
-            ) : (
-              <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="text-center text-gray-500 dark:text-gray-400">
-                  <p className="text-lg font-medium mb-2">Vyberte zápas</p>
-                  <p className="text-sm">
-                    Klikněte na zápas v seznamu vlevo pro zobrazení strategie a přípravy.
-                  </p>
-                </div>
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
 
