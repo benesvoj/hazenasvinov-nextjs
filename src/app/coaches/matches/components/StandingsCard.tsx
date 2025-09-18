@@ -52,6 +52,8 @@ export default function StandingsCard({standings, loading}: StandingsCardProps) 
                             src={standing.club.logo_url}
                             alt={standing.club.name}
                             className="w-6 h-6 rounded-full object-cover"
+                            width={24}
+                            height={24}
                           />
                         )}
                         <span>{standing.team_name || standing.club?.name || 'Neznámý tým'}</span>

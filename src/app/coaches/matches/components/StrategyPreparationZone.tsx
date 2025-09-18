@@ -11,9 +11,9 @@ import MatchRow from '@/components/match/MatchRow';
 import OpponentMatchStatistics from './OpponentMatchStatistics';
 import {createClient} from '@/utils/supabase/client';
 import {LoadingSpinner} from '@/components';
-import {Match} from '@/types';
+import {Match, Nullish} from '@/types';
 interface StrategyPreparationZoneProps {
-  selectedMatch: Match;
+  selectedMatch: Match | Nullish;
   onClose: () => void;
 }
 
