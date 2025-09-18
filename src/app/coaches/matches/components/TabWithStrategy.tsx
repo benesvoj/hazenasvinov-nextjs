@@ -1,8 +1,12 @@
-import {Card, CardBody, CardHeader, Button} from '@heroui/react';
+import {Card, CardBody, CardHeader, Button, Alert} from '@heroui/react';
 
 export default function TabWithStrategy() {
   return (
-    <div className="space-y-3 py-4 mx-1 sm:mx-2">
+    <div className="space-y-3 p-4 mx-1 sm:mx-2">
+      <Alert
+        title="Tato sekce je v testovacím provozu. Některé funkce mohou být nedostupné nebo nefunkční."
+        color="warning"
+      />
       <Card>
         <CardHeader className="pb-2">
           <h5 className="font-medium text-sm sm:text-base">Taktické poznámky</h5>

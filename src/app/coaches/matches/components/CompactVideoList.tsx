@@ -88,7 +88,7 @@ export default function CompactVideoList({
             <LoadingSpinner />
           </div>
         ) : (
-          <div className="max-h-80 overflow-y-auto scrollbar-hide">
+          <div className="max-h-400 overflow-y-auto scrollbar-hide">
             <div className="space-y-2 p-1 sm:p-2">
               {videos.length === 0 ? (
                 <div className="text-center py-4 sm:py-6 text-gray-500">
