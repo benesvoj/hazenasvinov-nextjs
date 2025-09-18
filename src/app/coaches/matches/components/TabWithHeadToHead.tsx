@@ -56,7 +56,9 @@ export default function TabWithHeadToHead({
               Detailní přehled vzájemných zápasů:
             </p>
             {headToHeadMatches.map((match: any) => {
-              return <MatchRow key={match.id} match={match} redirectionLinks={false} />;
+              return (
+                <MatchRow key={match.id} match={match} redirectionLinks={false} showSeason={true} />
+              );
             })}
           </div>
         </div>
