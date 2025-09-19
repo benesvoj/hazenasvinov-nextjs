@@ -19,6 +19,7 @@ import {
 } from './components';
 import CoachMatchResultFlow from './components/CoachMatchResultFlow';
 import {Tab, Tabs} from '@heroui/react';
+import {ChartBarIcon} from '@heroicons/react/24/outline';
 import {Match} from '@/types';
 import {translations} from '@/lib/translations';
 
@@ -140,102 +141,105 @@ export default function CoachesMatchesPage() {
   return (
     <PageContainer isUnderConstruction>
       <div className="space-y-6">
-        {activeTab === 'statistics' ? (
-          // Full-width layout for statistics
-          <MatchStatisticsZone categoryId={selectedCategoryData.id} seasonId={activeSeason.id} />
-        ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-            {/* Left column - Matches and Standings */}
-            <div className="xl:col-span-2 order-2 xl:order-1">
-              <Tabs
-                selectedKey={activeTab}
-                onSelectionChange={(key) => {
-                  setActiveTab(key as string);
-                  setSelectedMatch(null); // Clear selected match when switching tabs
-                }}
-              >
-                <Tab key="upcoming" title={t.upcoming}>
-                  <UpcomingMatchesCard
-                    upcomingMatches={upcomingMatches}
-                    loading={loading}
-                    onMatchSelect={handleMatchSelect}
-                    selectedMatchId={selectedMatch?.id}
-                    onStartResultFlow={handleStartResultFlow}
-                  />
-                </Tab>
-                <Tab key="recent" title={t.recent}>
-                  <RecentResultsCard
-                    recentResults={recentResults}
-                    loading={loading}
-                    onMatchSelect={handleMatchSelect}
-                    selectedMatchId={selectedMatch?.id}
-                  />
-                </Tab>
-                <Tab key="standings" title={t.standings}>
-                  <StandingsCard standings={categoryStandings} loading={standingsLoading} />
-                </Tab>
-                <Tab key="statistics" title={t.statistics}>
-                  <div className="text-center py-8 text-gray-500">
-                    <p>Přejděte na záložku Statistiky pro zobrazení</p>
-                  </div>
-                </Tab>
-              </Tabs>
-            </div>
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+          {/* Left column - Matches and Standings */}
+          <div className="xl:col-span-2 order-2 xl:order-1">
+            <Tabs
+              selectedKey={activeTab}
+              onSelectionChange={(key) => {
+                setActiveTab(key as string);
+                setSelectedMatch(null); // Clear selected match when switching tabs
+              }}
+            >
+              <Tab key="upcoming" title={t.upcoming}>
+                <UpcomingMatchesCard
+                  upcomingMatches={upcomingMatches}
+                  loading={loading}
+                  onMatchSelect={handleMatchSelect}
+                  selectedMatchId={selectedMatch?.id}
+                  onStartResultFlow={handleStartResultFlow}
+                />
+              </Tab>
+              <Tab key="recent" title={t.recent}>
+                <RecentResultsCard
+                  recentResults={recentResults}
+                  loading={loading}
+                  onMatchSelect={handleMatchSelect}
+                  selectedMatchId={selectedMatch?.id}
+                />
+              </Tab>
+              <Tab key="standings" title={t.standings}>
+                <StandingsCard standings={categoryStandings} loading={standingsLoading} />
+              </Tab>
+              <Tab key="statistics" title={t.statistics}>
+                <div className="text-center py-8 text-gray-500">
+                  <ChartBarIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-lg font-medium mb-2">Statistiky zápasů</p>
+                  <p className="text-sm">Statistiky jsou zobrazeny v pravém sloupci</p>
+                </div>
+              </Tab>
+            </Tabs>
+          </div>
 
-            {/* Right column - Dynamic content based on active tab */}
-            <div className="xl:col-span-3 order-1 xl:order-2">
-              {activeTab === 'upcoming' ? (
-                // Strategy Zone for upcoming matches
-                selectedMatch && selectedMatch.status === 'upcoming' ? (
-                  <StrategyPreparationZone
-                    selectedMatch={selectedMatch}
-                    onClose={handleCloseStrategy}
-                  />
-                ) : selectedMatch ? (
-                  <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-center text-gray-500 dark:text-gray-400">
-                      <p className="text-lg font-medium mb-2">Zápas již byl odehrán</p>
-                      <p className="text-sm">
-                        Strategie a příprava jsou dostupné pouze pro nadcházející zápasy.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-center text-gray-500 dark:text-gray-400">
-                      <p className="text-lg font-medium mb-2">Vyberte zápas</p>
-                      <p className="text-sm">
-                        Klikněte na zápas v seznamu vlevo pro zobrazení strategie a přípravy.
-                      </p>
-                    </div>
-                  </div>
-                )
-              ) : activeTab === 'recent' ? (
-                // Match Details for recent matches
-                selectedMatch ? (
-                  <RecentMatchDetails selectedMatch={selectedMatch} onClose={handleCloseStrategy} />
-                ) : (
-                  <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-center text-gray-500 dark:text-gray-400">
-                      <p className="text-lg font-medium mb-2">Vyberte zápas</p>
-                      <p className="text-sm">
-                        Klikněte na zápas v seznamu vlevo pro zobrazení detailů a statistik.
-                      </p>
-                    </div>
-                  </div>
-                )
-              ) : activeTab === 'standings' ? (
-                // Standings info
+          {/* Right column - Dynamic content based on active tab */}
+          <div className="xl:col-span-3 order-1 xl:order-2">
+            {activeTab === 'upcoming' ? (
+              // Strategy Zone for upcoming matches
+              selectedMatch && selectedMatch.status === 'upcoming' ? (
+                <StrategyPreparationZone
+                  selectedMatch={selectedMatch}
+                  onClose={handleCloseStrategy}
+                />
+              ) : selectedMatch ? (
                 <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="text-center text-gray-500 dark:text-gray-400">
-                    <p className="text-lg font-medium mb-2">Tabulka</p>
-                    <p className="text-sm">Tabulka je zobrazena v levém sloupci.</p>
+                    <p className="text-lg font-medium mb-2">Zápas již byl odehrán</p>
+                    <p className="text-sm">
+                      Strategie a příprava jsou dostupné pouze pro nadcházející zápasy.
+                    </p>
                   </div>
                 </div>
-              ) : null}
-            </div>
+              ) : (
+                <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-lg font-medium mb-2">Vyberte zápas</p>
+                    <p className="text-sm">
+                      Klikněte na zápas v seznamu vlevo pro zobrazení strategie a přípravy.
+                    </p>
+                  </div>
+                </div>
+              )
+            ) : activeTab === 'recent' ? (
+              // Match Details for recent matches
+              selectedMatch ? (
+                <RecentMatchDetails selectedMatch={selectedMatch} onClose={handleCloseStrategy} />
+              ) : (
+                <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-lg font-medium mb-2">Vyberte zápas</p>
+                    <p className="text-sm">
+                      Klikněte na zápas v seznamu vlevo pro zobrazení detailů a statistik.
+                    </p>
+                  </div>
+                </div>
+              )
+            ) : activeTab === 'standings' ? (
+              // Standings info
+              <div className="h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="text-center text-gray-500 dark:text-gray-400">
+                  <p className="text-lg font-medium mb-2">Tabulka</p>
+                  <p className="text-sm">Tabulka je zobrazena v levém sloupci.</p>
+                </div>
+              </div>
+            ) : activeTab === 'statistics' ? (
+              // Statistics Zone
+              <MatchStatisticsZone
+                categoryId={selectedCategoryData.id}
+                seasonId={activeSeason.id}
+              />
+            ) : null}
           </div>
-        )}
+        </div>
 
         {/* Match Result Flow Modal */}
         <CoachMatchResultFlow
