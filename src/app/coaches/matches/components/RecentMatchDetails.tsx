@@ -1,7 +1,19 @@
 'use client';
 
 import React, {useState, useRef, useEffect} from 'react';
-import {Card, CardHeader, CardBody, Button, Textarea, Input} from '@heroui/react';
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Button,
+  Textarea,
+  TableColumn,
+  TableHeader,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+} from '@heroui/react';
 import {
   ClipboardDocumentListIcon,
   XMarkIcon,
@@ -30,6 +42,7 @@ import {
   useDeleteMatchMetadata,
   useSetPrimaryMatchMetadata,
 } from '@/hooks/useMatchMetadata';
+import {ArrowDownTrayIcon} from '@heroicons/react/16/solid';
 
 interface RecentMatchDetailsProps {
   selectedMatch: Match;
@@ -67,16 +80,16 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
   // Debug: Log photos data
   useEffect(() => {
     if (photos.length > 0) {
-      console.log(
-        'Photos loaded:',
-        photos.map((photo) => ({
+      console.log('Photos loaded:', photos.length, 'photos');
+      photos.forEach((photo, index) => {
+        console.log(`Photo ${index + 1}:`, {
           id: photo.id,
           file_url: photo.file_url,
           file_name: photo.file_name,
-          metadata: photo.metadata,
           is_primary: photo.is_primary,
-        }))
-      );
+          metadata: photo.metadata,
+        });
+      });
     }
   }, [photos]);
 
@@ -90,7 +103,7 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
 
     // Check if we have a temporary preview in metadata first
     if (metadata?.temp_preview) {
-      console.log('Using temp_preview:', metadata.temp_preview);
+      console.log('Using temp_preview:', metadata.temp_preview.substring(0, 50) + '...');
       return metadata.temp_preview;
     }
 
@@ -106,10 +119,17 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
       return placeholderDataUrl;
     }
 
+    // Check for blob URLs and reject them
+    if (fileUrl.startsWith('blob:')) {
+      console.log('❌ Blob URL detected, using placeholder. URL:', fileUrl);
+      console.log('💡 This photo was uploaded before the fix. Please delete and re-upload.');
+      return placeholderDataUrl;
+    }
+
     // For Supabase storage URLs, they should start with the storage URL
     // For now, let's be more permissive and allow any URL that looks valid
     if (fileUrl.startsWith('http') || fileUrl.startsWith('data:')) {
-      console.log('Valid URL detected:', fileUrl);
+      console.log('Valid URL detected:', fileUrl.substring(0, 50) + '...');
       return fileUrl;
     }
 
@@ -191,22 +211,26 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
     try {
       setIsUploadingPhoto(true);
 
-      // Create preview
+      // Create preview and data URL
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotoPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      const dataUrlPromise = new Promise<string>((resolve) => {
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setPhotoPreview(result);
+          resolve(result);
+        };
+        reader.readAsDataURL(file);
+      });
 
-      // TODO: Upload to Supabase storage
-      // For now, create a data URL for immediate preview
-      const dataUrl = URL.createObjectURL(file);
+      const dataUrl = await dataUrlPromise;
+      console.log('Data URL created:', dataUrl.substring(0, 50) + '...');
 
       // Simulate upload delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // For now, use data URL as file_url for immediate display
       // In production, this should be replaced with actual Supabase storage URL
+      console.log('Uploading photo with data URL...');
       await addMetadata.mutateAsync({
         match_id: selectedMatch.id,
         metadata_type: 'photo',
@@ -222,6 +246,7 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
           temp_preview: dataUrl, // Store preview locally only
         },
       });
+      console.log('Photo uploaded successfully');
 
       // Photo metadata added successfully
     } catch (error) {
@@ -317,31 +342,22 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
               <div className="space-y-3">
                 {/* Photos Table */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Náhled
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Název souboru
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Velikost
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Typ
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Akce
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <Table className="w-full" aria-label="Photos table">
+                    <TableHeader>
+                      <TableColumn>Náhled</TableColumn>
+                      <TableColumn>Název souboru</TableColumn>
+                      <TableColumn>Velikost</TableColumn>
+                      <TableColumn>Typ</TableColumn>
+                      <TableColumn>Akce</TableColumn>
+                    </TableHeader>
+                    <TableBody>
                       {photos.map((photo) => (
-                        <tr key={photo.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                          <td className="px-4 py-3">
-                            <div className="w-16 h-12 bg-gray-100 dark:bg-gray-600 rounded overflow-hidden">
+                        <TableRow
+                          key={photo.id}
+                          className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          <TableCell>
+                            <div className="w-16 h-12 bg-gray-100 dark:bg-gray-600 rounded overflow-hidden relative">
                               <Image
                                 src={getSafeImageUrl(photo.file_url, photo.metadata)}
                                 alt={photo.file_name || 'Fotografie'}
@@ -349,101 +365,95 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
                                 height={48}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  console.log('Table image failed to load, using placeholder');
                                   e.currentTarget.src = '/placeholder-image.jpg';
                                 }}
                               />
+                              {photo.file_url?.startsWith('blob:') && (
+                                <div className="absolute inset-0 bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                                  <div className="text-center">
+                                    <div className="text-red-600 dark:text-red-400 text-xs">⚠️</div>
+                                    <div className="text-red-600 dark:text-red-400 text-xs">
+                                      Invalid
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                          </td>
-                          <td className="px-4 py-3">
+                          </TableCell>
+                          <TableCell>
                             <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                               {photo.file_name || 'Bez názvu'}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">
                               {new Date(photo.created_at).toLocaleDateString('cs-CZ')}
                             </div>
-                          </td>
-                          <td className="px-4 py-3">
+                            {photo.file_url?.startsWith('blob:') && (
+                              <div className="text-xs text-red-600 dark:text-red-400 mt-1">
+                                ⚠️ Invalid URL - Please re-upload
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
                             <div className="text-sm text-gray-900 dark:text-gray-100">
                               {photo.file_size
                                 ? `${Math.round(photo.file_size / 1024)} KB`
                                 : 'Neznámá'}
                             </div>
-                          </td>
-                          <td className="px-4 py-3">
+                          </TableCell>
+                          <TableCell>
                             <div className="text-sm text-gray-900 dark:text-gray-100">
                               {photo.mime_type || 'Neznámý'}
                             </div>
-                          </td>
-                          <td className="p-2">
-                            <div className="flex">
-                              <Button
-                                size="sm"
-                                variant="light"
-                                color="primary"
-                                onPress={() => {
-                                  // Open photo in full view
-                                  const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
-                                  window.open(imageUrl, '_blank');
-                                }}
-                                title="Otevřít v novém okně"
-                                className="text-xs"
-                              >
-                                <PhotoIcon className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="light"
-                                color="primary"
-                                onPress={() => {
-                                  // Download photo
-                                  const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
-                                  const link = document.createElement('a');
-                                  link.href = imageUrl;
-                                  link.download = photo.file_name || 'photo.jpg';
-                                  document.body.appendChild(link);
-                                  link.click();
-                                  document.body.removeChild(link);
-                                }}
-                                title="Stáhnout"
-                                className="text-xs"
-                              >
-                                <DocumentIcon className="w-4 h-4" />
-                              </Button>
-                              {!photo.is_primary && (
-                                <Button
-                                  size="sm"
-                                  variant="light"
-                                  color="primary"
-                                  onPress={() =>
-                                    setPrimaryMetadata.mutate({
-                                      id: photo.id,
-                                      matchId: selectedMatch.id,
-                                      type: 'photo',
-                                    })
-                                  }
-                                  title="Nastavit jako hlavní"
-                                  className="text-xs"
-                                >
-                                  <Cog6ToothIcon className="w-4 h-4" />
-                                </Button>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="light"
-                                color="danger"
-                                onPress={() => deleteMetadata.mutate(photo.id)}
-                                title="Smazat"
-                                className="text-xs"
-                              >
-                                <TrashIcon className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
+                          </TableCell>
+                          <TableCell className="relative flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="light"
+                              color="primary"
+                              onPress={() => {
+                                // Open photo in full view
+                                const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
+                                window.open(imageUrl, '_blank');
+                              }}
+                              title="Otevřít v novém okně"
+                              className="text-xs"
+                            >
+                              <PhotoIcon className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="light"
+                              color="primary"
+                              onPress={() => {
+                                // Download photo
+                                const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
+                                const link = document.createElement('a');
+                                link.href = imageUrl;
+                                link.download = photo.file_name || 'photo.jpg';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }}
+                              title="Stáhnout"
+                              className="text-xs"
+                            >
+                              <ArrowDownTrayIcon className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="light"
+                              color="danger"
+                              onPress={() => deleteMetadata.mutate(photo.id)}
+                              title="Smazat"
+                              className="text-xs"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             ) : (
