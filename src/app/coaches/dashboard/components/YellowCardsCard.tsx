@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import {Card, CardBody, CardHeader, Chip, Avatar} from '@heroui/react';
+import {Card, CardBody, CardHeader} from '@heroui/react';
 import {ExclamationTriangleIcon} from '@heroicons/react/24/outline';
 import {usePlayerStats} from '@/hooks/usePlayerStats';
 import {LoadingSpinner} from '@/components';
@@ -88,15 +88,12 @@ export default function YellowCardsCard() {
                   {index + 1}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Avatar size="sm" name={`${player.name} ${player.surname}`} className="text-xs" />
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {player.name} {player.surname}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      #{player.jersey_number || player.registration_number}
-                      {player.position && ` • ${player.position}`}
-                    </div>
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    {player.name} {player.surname}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    #{player.jersey_number || player.registration_number}
+                    {player.position && ` • ${player.position}`}
                   </div>
                 </div>
               </div>

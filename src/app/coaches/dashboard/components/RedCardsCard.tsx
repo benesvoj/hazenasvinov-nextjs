@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import {Card, CardBody, CardHeader, Chip, Avatar} from '@heroui/react';
+import {Card, CardBody, CardHeader} from '@heroui/react';
 import {XCircleIcon} from '@heroicons/react/24/outline';
 import {usePlayerStats} from '@/hooks/usePlayerStats';
 import {LoadingSpinner} from '@/components';
@@ -88,7 +88,6 @@ export default function RedCardsCard() {
                   {index + 1}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Avatar size="sm" name={`${player.name} ${player.surname}`} className="text-xs" />
                   <div>
                     <div className="font-medium text-gray-900 dark:text-white">
                       {player.name} {player.surname}
