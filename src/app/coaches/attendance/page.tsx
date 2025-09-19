@@ -4,13 +4,7 @@ import React, {useState, useEffect, useMemo} from 'react';
 import {useAttendance, useCategoryLineups} from '@/hooks';
 import {useUser} from '@/contexts/UserContext';
 import {useAppData} from '@/contexts/AppDataContext';
-import {
-  ClipboardDocumentListIcon,
-  PlusIcon,
-  CalendarIcon,
-  PencilIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import {PlusIcon, CalendarIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 import {
   Button,
   Card,
@@ -25,14 +19,11 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Tabs,
-  Tab,
-  Spinner,
 } from '@heroui/react';
 import {TrainingSessionFormData} from '@/types';
 import {formatDateString, formatTime} from '@/helpers';
 import {TrainingSessionModal, TrainingSessionGenerator} from './components';
-import {DeleteConfirmationModal, PageContainer} from '@/components';
+import {DeleteConfirmationModal, LoadingSpinner, PageContainer} from '@/components';
 
 export default function CoachesAttendancePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -412,7 +403,7 @@ export default function CoachesAttendancePage() {
     return (
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
-          <Spinner size="lg" />
+          <LoadingSpinner />
         </div>
       </div>
     );
@@ -524,6 +515,11 @@ export default function CoachesAttendancePage() {
                           {session.location && (
                             <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
                               {session.location}
+                            </div>
+                          )}
+                          {session.description && (
+                            <div className="flex items-start gap-1 text-xs text-gray-500 mt-1">
+                              <span className="font-semibold">Popis:</span> {session.description}
                             </div>
                           )}
                         </div>
