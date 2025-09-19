@@ -2,6 +2,7 @@ import {useState, useEffect, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
 import {
   TrainingSession,
+  TrainingSessionStatus,
   MemberAttendance,
   AttendanceRecord,
   RawAttendanceRecord,
@@ -284,6 +285,12 @@ export function useAttendance() {
       try {
         setError(null);
 
+        // Check if session can be deleted (not done or cancelled)
+        const session = trainingSessions.find((s) => s.id === id);
+        if (session && (session.status === 'done' || session.status === 'cancelled')) {
+          throw new Error('Nelze smazat trénink se stavem "Proveden" nebo "Zrušen"');
+        }
+
         const {error} = await supabase.from('training_sessions').delete().eq('id', id);
 
         if (error) throw error;
@@ -296,7 +303,70 @@ export function useAttendance() {
         throw err;
       }
     },
-    [supabase]
+    [supabase, trainingSessions]
+  );
+
+  // Update training session status
+  const updateTrainingSessionStatus = useCallback(
+    async (sessionId: string, status: TrainingSessionStatus, statusReason?: string) => {
+      try {
+        setError(null);
+
+        const updateData: any = {
+          status,
+          updated_at: new Date().toISOString(),
+        };
+
+        if (status === 'cancelled' && statusReason) {
+          updateData.status_reason = statusReason;
+        }
+
+        const {data, error} = await supabase
+          .from('training_sessions')
+          .update(updateData)
+          .eq('id', sessionId)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Update local state
+        setTrainingSessions((prev) =>
+          prev.map((session) =>
+            session.id === sessionId ? {...session, status, status_reason: statusReason} : session
+          )
+        );
+
+        // If cancelled, set all attendance records to absent
+        if (status === 'cancelled') {
+          const {error: attendanceError} = await supabase
+            .from('member_attendance')
+            .update({
+              attendance_status: 'absent',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('training_session_id', sessionId);
+
+          if (attendanceError) {
+            console.error('Error updating attendance records:', attendanceError);
+            // Don't throw error here, status update was successful
+          } else {
+            // Refresh attendance records if this session is currently selected
+            const currentSession = trainingSessions.find((s) => s.id === sessionId);
+            if (currentSession) {
+              await fetchAttendanceRecords(sessionId);
+            }
+          }
+        }
+
+        return data;
+      } catch (err) {
+        console.error('Error updating training session status:', err);
+        setError(err instanceof Error ? err.message : 'Failed to update training session status');
+        throw err;
+      }
+    },
+    [supabase, trainingSessions, fetchAttendanceRecords]
   );
 
   // Create attendance records for all lineup members
@@ -574,6 +644,7 @@ export function useAttendance() {
     createTrainingSession,
     updateTrainingSession,
     deleteTrainingSession,
+    updateTrainingSessionStatus,
     recordAttendance,
     updateAttendance,
     deleteAttendance,
