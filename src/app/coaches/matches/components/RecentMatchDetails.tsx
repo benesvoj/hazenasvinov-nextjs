@@ -71,15 +71,17 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
 
   // Helper function to get safe image URL
   const getSafeImageUrl = (fileUrl: string | undefined | null, metadata?: any): string => {
+    // 1x1 transparent PNG data URL
+    const placeholderDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2ZkAAAAASUVORK5CYII=';
     if (!fileUrl) {
       // Check if we have a temporary preview in metadata
       if (metadata?.temp_preview) {
         return metadata.temp_preview;
       }
-      return '/placeholder-image.jpg';
+      return placeholderDataUrl;
     }
-    if (fileUrl.includes('example.com')) return '/placeholder-image.jpg';
-    if (!fileUrl.startsWith('http')) return '/placeholder-image.jpg';
+    if (fileUrl.includes('example.com')) return placeholderDataUrl;
+    if (!fileUrl.startsWith('http')) return placeholderDataUrl;
     return fileUrl;
   };
 
