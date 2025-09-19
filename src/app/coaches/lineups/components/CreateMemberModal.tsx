@@ -1,11 +1,13 @@
 'use client';
 
 import React, {useState} from 'react';
-import {Input, Select, SelectItem, Card, CardBody, Button} from '@heroui/react';
+import {Input, Select, SelectItem, Card, CardBody, Button, Textarea} from '@heroui/react';
 import {UserPlusIcon} from '@heroicons/react/24/outline';
 import {createClient} from '@/utils/supabase/client';
 import {useFetchMembers} from '@/hooks/useFetchMembers';
+import {useMemberMetadata} from '@/hooks/useMemberMetadata';
 import {UnifiedModal} from '@/components';
+import {MemberFormData} from '@/types/memberMetadata';
 
 interface CreateMemberModalProps {
   isOpen: boolean;
@@ -13,15 +15,6 @@ interface CreateMemberModalProps {
   onMemberCreated: (memberId: string) => void;
   selectedCategoryId: string;
   selectedCategoryName: string;
-}
-
-interface MemberFormData {
-  name: string;
-  surname: string;
-  registration_number: string;
-  date_of_birth: string;
-  sex: 'male' | 'female';
-  functions: string;
 }
 
 export default function CreateMemberModal({
@@ -32,16 +25,40 @@ export default function CreateMemberModal({
   selectedCategoryName,
 }: CreateMemberModalProps) {
   const [formData, setFormData] = useState<MemberFormData>({
+    // Basic Information
     name: '',
     surname: '',
     registration_number: '',
     date_of_birth: '',
     sex: 'male',
     functions: 'player',
+
+    // Contact Information
+    phone: '',
+    email: '',
+    address: '',
+
+    // Parent/Guardian Information
+    parent_name: '',
+    parent_phone: '',
+    parent_email: '',
+
+    // Medical Information
+    medical_notes: '',
+    allergies: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+
+    // Additional Information
+    notes: '',
+    preferred_position: '',
+    jersey_size: '',
+    shoe_size: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const {fetchMembers} = useFetchMembers();
+  const {createMemberMetadata} = useMemberMetadata();
 
   const handleInputChange = (field: keyof MemberFormData, value: string) => {
     setFormData((prev) => ({...prev, [field]: value}));
@@ -87,6 +104,24 @@ export default function CreateMemberModal({
 
       if (error) throw error;
 
+      // Create member metadata
+      await createMemberMetadata(data.id, {
+        phone: formData.phone || undefined,
+        email: formData.email || undefined,
+        address: formData.address || undefined,
+        parent_name: formData.parent_name || undefined,
+        parent_phone: formData.parent_phone || undefined,
+        parent_email: formData.parent_email || undefined,
+        medical_notes: formData.medical_notes || undefined,
+        allergies: formData.allergies || undefined,
+        emergency_contact_name: formData.emergency_contact_name || undefined,
+        emergency_contact_phone: formData.emergency_contact_phone || undefined,
+        notes: formData.notes || undefined,
+        preferred_position: formData.preferred_position || undefined,
+        jersey_size: formData.jersey_size || undefined,
+        shoe_size: formData.shoe_size || undefined,
+      });
+
       // Refresh members list
       await fetchMembers();
 
@@ -95,12 +130,35 @@ export default function CreateMemberModal({
 
       // Reset form and close modal
       setFormData({
+        // Basic Information
         name: '',
         surname: '',
         registration_number: '',
         date_of_birth: '',
         sex: 'male',
-        functions: '',
+        functions: 'player',
+
+        // Contact Information
+        phone: '',
+        email: '',
+        address: '',
+
+        // Parent/Guardian Information
+        parent_name: '',
+        parent_phone: '',
+        parent_email: '',
+
+        // Medical Information
+        medical_notes: '',
+        allergies: '',
+        emergency_contact_name: '',
+        emergency_contact_phone: '',
+
+        // Additional Information
+        notes: '',
+        preferred_position: '',
+        jersey_size: '',
+        shoe_size: '',
       });
       onClose();
     } catch (err) {
@@ -114,12 +172,35 @@ export default function CreateMemberModal({
   const handleClose = () => {
     setError(null);
     setFormData({
+      // Basic Information
       name: '',
       surname: '',
       registration_number: '',
       date_of_birth: '',
       sex: 'male',
       functions: 'player',
+
+      // Contact Information
+      phone: '',
+      email: '',
+      address: '',
+
+      // Parent/Guardian Information
+      parent_name: '',
+      parent_phone: '',
+      parent_email: '',
+
+      // Medical Information
+      medical_notes: '',
+      allergies: '',
+      emergency_contact_name: '',
+      emergency_contact_phone: '',
+
+      // Additional Information
+      notes: '',
+      preferred_position: '',
+      jersey_size: '',
+      shoe_size: '',
     });
     onClose();
   };
@@ -189,6 +270,136 @@ export default function CreateMemberModal({
                 <SelectItem key="male">Muž</SelectItem>
                 <SelectItem key="female">Žena</SelectItem>
               </Select>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Contact Information */}
+        <Card>
+          <CardBody className="p-4">
+            <h4 className="font-semibold mb-3 text-green-700">Kontaktní informace</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Telefon"
+                value={formData.phone}
+                onValueChange={(value) => handleInputChange('phone', value)}
+                placeholder="+420 xxx xxx xxx"
+              />
+              <Input
+                label="Email"
+                type="email"
+                value={formData.email}
+                onValueChange={(value) => handleInputChange('email', value)}
+                placeholder="email@example.com"
+              />
+              <Input
+                label="Adresa"
+                value={formData.address}
+                onValueChange={(value) => handleInputChange('address', value)}
+                placeholder="Ulice, město, PSČ"
+                className="md:col-span-2"
+              />
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Parent/Guardian Information */}
+        <Card>
+          <CardBody className="p-4">
+            <h4 className="font-semibold mb-3 text-purple-700">Informace o zákonném zástupci</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Jméno zákonného zástupce"
+                value={formData.parent_name}
+                onValueChange={(value) => handleInputChange('parent_name', value)}
+                placeholder="Jméno a příjmení"
+              />
+              <Input
+                label="Telefon zákonného zástupce"
+                value={formData.parent_phone}
+                onValueChange={(value) => handleInputChange('parent_phone', value)}
+                placeholder="+420 xxx xxx xxx"
+              />
+              <Input
+                label="Email zákonného zástupce"
+                type="email"
+                value={formData.parent_email}
+                onValueChange={(value) => handleInputChange('parent_email', value)}
+                placeholder="email@example.com"
+                className="md:col-span-2"
+              />
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Medical Information */}
+        <Card>
+          <CardBody className="p-4">
+            <h4 className="font-semibold mb-3 text-red-700">Zdravotní informace</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Textarea
+                label="Zdravotní poznámky"
+                value={formData.medical_notes}
+                onValueChange={(value) => handleInputChange('medical_notes', value)}
+                placeholder="Zdravotní omezení, chronické nemoci, atd."
+                minRows={2}
+                className="md:col-span-2"
+              />
+              <Textarea
+                label="Alergie"
+                value={formData.allergies}
+                onValueChange={(value) => handleInputChange('allergies', value)}
+                placeholder="Seznam alergií a jejich závažnost"
+                minRows={2}
+                className="md:col-span-2"
+              />
+              <Input
+                label="Název kontaktní osoby pro případ nouze"
+                value={formData.emergency_contact_name}
+                onValueChange={(value) => handleInputChange('emergency_contact_name', value)}
+                placeholder="Jméno a příjmení"
+              />
+              <Input
+                label="Telefon kontaktní osoby pro případ nouze"
+                value={formData.emergency_contact_phone}
+                onValueChange={(value) => handleInputChange('emergency_contact_phone', value)}
+                placeholder="+420 xxx xxx xxx"
+              />
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Additional Information */}
+        <Card>
+          <CardBody className="p-4">
+            <h4 className="font-semibold mb-3 text-orange-700">Dodatečné informace</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Preferovaná pozice"
+                value={formData.preferred_position}
+                onValueChange={(value) => handleInputChange('preferred_position', value)}
+                placeholder="např. Brankář, Obránce, Záložník, Útočník"
+              />
+              <Input
+                label="Velikost dresu"
+                value={formData.jersey_size}
+                onValueChange={(value) => handleInputChange('jersey_size', value)}
+                placeholder="např. S, M, L, XL"
+              />
+              <Input
+                label="Velikost bot"
+                value={formData.shoe_size}
+                onValueChange={(value) => handleInputChange('shoe_size', value)}
+                placeholder="např. 40, 41, 42"
+              />
+              <Textarea
+                label="Poznámky"
+                value={formData.notes}
+                onValueChange={(value) => handleInputChange('notes', value)}
+                placeholder="Další poznámky o členovi"
+                minRows={2}
+                className="md:col-span-2"
+              />
             </div>
           </CardBody>
         </Card>
