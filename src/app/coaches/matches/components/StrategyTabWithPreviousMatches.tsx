@@ -9,7 +9,7 @@ interface TabWithPreviousMatchesProps {
   previousMatches: Match[];
   opponentTeam: Team | Nullish;
 }
-export default function TabWithPreviousMatches({
+export default function StrategyTabWithPreviousMatches({
   previousMatchesError,
   previousMatchesLoading,
   previousMatches,

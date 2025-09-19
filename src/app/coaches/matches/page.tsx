@@ -19,6 +19,7 @@ import {
 import CoachMatchResultFlow from './components/CoachMatchResultFlow';
 import {Tab, Tabs} from '@heroui/react';
 import {Match} from '@/types';
+import {translations} from '@/lib/translations';
 
 export default function CoachesMatchesPage() {
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
@@ -30,6 +31,8 @@ export default function CoachesMatchesPage() {
   const {activeSeason, fetchActiveSeason} = useSeasons();
   const {categories, fetchCategories} = useCategories();
   const {standings, loading: standingsLoading, fetchStandings} = useStandings();
+
+  const t = translations.coaches.matches.tabs;
 
   // Try to get user roles, but handle case where UserProvider is not available
   let getCurrentUserCategories: (() => Promise<string[]>) | null = null;
@@ -146,7 +149,7 @@ export default function CoachesMatchesPage() {
                 setSelectedMatch(null); // Clear selected match when switching tabs
               }}
             >
-              <Tab key="upcoming" title="Upcoming">
+              <Tab key="upcoming" title={t.upcoming}>
                 <UpcomingMatchesCard
                   upcomingMatches={upcomingMatches}
                   loading={loading}
@@ -155,7 +158,7 @@ export default function CoachesMatchesPage() {
                   onStartResultFlow={handleStartResultFlow}
                 />
               </Tab>
-              <Tab key="recent" title="Recent">
+              <Tab key="recent" title={t.recent}>
                 <RecentResultsCard
                   recentResults={recentResults}
                   loading={loading}
@@ -163,8 +166,11 @@ export default function CoachesMatchesPage() {
                   selectedMatchId={selectedMatch?.id}
                 />
               </Tab>
-              <Tab key="standings" title="Standings">
+              <Tab key="standings" title={t.standings}>
                 <StandingsCard standings={categoryStandings} loading={standingsLoading} />
+              </Tab>
+              <Tab key="statistics" title={t.statistics}>
+                Tady budou statistiky
               </Tab>
             </Tabs>
           </div>
