@@ -71,10 +71,6 @@ const getAdminRouteIcon = (route: string) => {
       return <TagIcon className="w-5 h-5" />;
     case privateRoutes.seasons:
       return <CalendarIcon className="w-5 h-5" />;
-    case privateRoutes.teams:
-      return <UserGroupIcon className="w-5 h-5" />;
-    case privateRoutes.teamCategories:
-      return <BuildingOfficeIcon className="w-5 h-5" />;
     case privateRoutes.matches:
       return <TrophyIcon className="w-5 h-5" />;
     case privateRoutes.members:

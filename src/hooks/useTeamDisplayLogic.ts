@@ -1,65 +1,107 @@
-import {useState, useCallback, useRef} from 'react';
-import {createClient} from '@/utils/supabase/client';
+import {useMemo} from 'react';
 
-export function useTeamDisplayLogic(categoryId: string | null) {
-  const [teamCounts, setTeamCounts] = useState<Map<string, number>>(new Map());
-  const [loading, setLoading] = useState(false);
-  const lastCategoryId = useRef<string | null>(null);
+interface Team {
+  id: string;
+  name: string;
+  short_name?: string;
+  club_name: string;
+  club_short_name?: string;
+  team_suffix: string;
+  category_id?: string;
+  season_id?: string;
+}
 
-  // Fetch team counts for a category
-  const fetchTeamCounts = useCallback(async () => {
-    if (!categoryId || categoryId === lastCategoryId.current) return;
+interface TeamDisplayOptions {
+  showClubName?: boolean;
+  showSuffix?: boolean;
+  preferShortName?: boolean;
+  maxLength?: number;
+}
 
-    lastCategoryId.current = categoryId;
-    setLoading(true);
-    try {
-      const supabase = createClient();
-      const {data, error} = await supabase
-        .from('club_categories')
-        .select(
-          `
-          club_id,
-          club_category_teams(id)
-        `
-        )
-        .eq('category_id', categoryId)
-        .eq('is_active', true);
+export function useTeamDisplayLogic(selectedCategory?: string) {
+  // This parameter is for legacy compatibility but not used in the new implementation
+  const getTeamDisplayName = (team: Team, options: TeamDisplayOptions = {}): string => {
+    const {showClubName = true, showSuffix = true, preferShortName = false, maxLength} = options;
 
-      if (error) throw error;
+    let displayName = '';
 
-      const counts = new Map<string, number>();
-      data?.forEach((cc: any) => {
-        counts.set(cc.club_id, cc.club_category_teams?.length || 0);
-      });
-
-      setTeamCounts(counts);
-    } catch (error) {
-      console.error('Error fetching team counts:', error);
-    } finally {
-      setLoading(false);
+    if (showClubName) {
+      const clubName =
+        preferShortName && team.club_short_name ? team.club_short_name : team.club_name;
+      displayName = clubName;
     }
-  }, [categoryId]);
 
-  // Generate display name with smart suffix logic
-  const getDisplayName = useCallback(
-    (team: any) => {
-      if (!team?.club_category?.club) return 'Neznámý tým';
+    if (showSuffix && team.team_suffix) {
+      displayName += ` ${team.team_suffix}`;
+    }
 
-      const clubName = team.club_category.club.name;
-      const teamSuffix = team.team_suffix || 'A';
-      const clubId = team.club_category.club.id;
-      const teamCount = teamCounts.get(clubId) || 0;
+    if (maxLength && displayName.length > maxLength) {
+      displayName = displayName.substring(0, maxLength - 3) + '...';
+    }
 
-      // Only show suffix if club has multiple teams in this category
-      return teamCount > 1 ? `${clubName} ${teamSuffix}` : clubName;
-    },
-    [teamCounts]
-  );
+    return displayName || team.name;
+  };
+
+  const getTeamShortName = (team: Team): string => {
+    if (team.short_name) return team.short_name;
+
+    const clubName = team.club_short_name || team.club_name;
+    return team.team_suffix ? `${clubName} ${team.team_suffix}` : clubName;
+  };
+
+  const getTeamFullName = (team: Team): string => {
+    return team.team_suffix ? `${team.club_name} ${team.team_suffix}` : team.club_name;
+  };
+
+  const sortTeamsByClub = (teams: Team[]): Team[] => {
+    return [...teams].sort((a, b) => {
+      // Sort by club name first
+      const clubComparison = a.club_name.localeCompare(b.club_name);
+      if (clubComparison !== 0) return clubComparison;
+
+      // Then by team suffix
+      return a.team_suffix.localeCompare(b.team_suffix);
+    });
+  };
+
+  const groupTeamsByClub = (teams: Team[]): Record<string, Team[]> => {
+    return teams.reduce(
+      (groups, team) => {
+        const clubName = team.club_name;
+        if (!groups[clubName]) {
+          groups[clubName] = [];
+        }
+        groups[clubName].push(team);
+        return groups;
+      },
+      {} as Record<string, Team[]>
+    );
+  };
+
+  const getPrimaryTeam = (teams: Team[]): Team | null => {
+    return teams[0] || null;
+  };
+
+  const getTeamsByCategory = (teams: Team[], categoryId: string): Team[] => {
+    return teams.filter((team) => team.category_id === categoryId);
+  };
+
+  const getTeamsBySeason = (teams: Team[], seasonId: string): Team[] => {
+    return teams.filter((team) => team.season_id === seasonId);
+  };
 
   return {
-    teamCounts,
-    loading,
-    fetchTeamCounts,
-    getDisplayName,
+    getTeamDisplayName,
+    getTeamShortName,
+    getTeamFullName,
+    sortTeamsByClub,
+    groupTeamsByClub,
+    getPrimaryTeam,
+    getTeamsByCategory,
+    getTeamsBySeason,
+    // Legacy compatibility
+    teamCounts: [],
+    loading: false,
+    fetchTeamCounts: () => Promise.resolve(),
   };
 }

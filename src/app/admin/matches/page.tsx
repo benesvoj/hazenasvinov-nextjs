@@ -248,7 +248,7 @@ export default function MatchesAdminPage() {
     error: teamsError,
     fetchFilteredTeams,
     clearTeams,
-  } = useFilteredTeams();
+  } = useFilteredTeams(selectedCategory, selectedSeason);
 
   // Use the standings hook
   const {
@@ -275,14 +275,8 @@ export default function MatchesAdminPage() {
     }
   }, [sortedSeasons, selectedSeason, activeSeason]);
 
-  // Update filtered teams when category or season changes
-  useEffect(() => {
-    if (selectedCategory && selectedSeason) {
-      fetchFilteredTeams(selectedCategory, selectedSeason);
-    } else {
-      clearTeams();
-    }
-  }, [selectedCategory, selectedSeason, fetchFilteredTeams, clearTeams]);
+  // Teams are now automatically fetched when selectedCategory or selectedSeason changes
+  // No need for manual useEffect since useFilteredTeams handles this internally
 
   // Initial data fetch
   useEffect(() => {
