@@ -236,7 +236,7 @@ export default function AdminDashboard() {
       setSelectedTodo(null);
       loadTodos();
     } catch (error) {
-      showToast.danger('Chyba při aktualizaci úkolu');
+      console.error('Error updating todo:', error);
     }
   };
 
@@ -248,13 +248,12 @@ export default function AdminDashboard() {
       if (error) throw error;
       loadTodos(); // Reload todos from database
     } catch (error) {
-      showToast.danger(`Error deleting todo:${error}`);
+      console.error('Error deleting todo:', error);
     }
   };
 
   const updateTodoStatus = async (id: string, status: string) => {
     try {
-      console.log('Updating todo status:', {id, status});
       const supabase = createClient();
 
       const {error} = await supabase.from('todos').update({status}).eq('id', id);
@@ -264,7 +263,6 @@ export default function AdminDashboard() {
         throw error;
       }
 
-      console.log('Todo status updated successfully');
       showToast.success(`Todo marked as ${status}!`);
 
       // Force reload todos with a small delay to ensure database consistency
@@ -273,7 +271,6 @@ export default function AdminDashboard() {
       }, 100);
     } catch (error) {
       console.error('Error updating todo:', error);
-      showToast.danger(`Error updating todo: ${error}`);
     }
   };
 
@@ -298,7 +295,7 @@ export default function AdminDashboard() {
       setCommentFormData({content: '', type: 'general'});
       loadComments();
     } catch (error) {
-      showToast.danger(`Error adding comment:${error}`);
+      console.error('Error adding comment:', error);
     }
   };
 
@@ -330,7 +327,7 @@ export default function AdminDashboard() {
       setSelectedComment(null);
       loadComments();
     } catch (error) {
-      showToast.danger(`Error updating comment:${error}`);
+      console.error('Error updating comment:', error);
     }
   };
 
@@ -342,7 +339,7 @@ export default function AdminDashboard() {
       if (error) throw error;
       loadComments();
     } catch (error) {
-      showToast.danger(`Error deleting comment:${error}`);
+      console.error('Error deleting comment:', error);
     }
   };
 
@@ -357,12 +354,12 @@ export default function AdminDashboard() {
         .limit(1);
 
       if (tableError) {
-        showToast.danger(`Comments table error:${tableError}`);
+        console.error('Comments table error:', tableError);
         if (
           tableError.message &&
           tableError.message.includes('relation "comments" does not exist')
         ) {
-          showToast.danger('Comments table does not exist. Run: npm run setup:missing-tables');
+          console.error('Comments table does not exist. Run: npm run setup:missing-tables');
           setComments([]);
           return;
         }
@@ -377,7 +374,7 @@ export default function AdminDashboard() {
       if (error) throw error;
       setComments(data || []);
     } catch (error: any) {
-      showToast.danger(`Error loading comments:${error}`);
+      console.error('Error loading comments:', error);
       setComments([]);
     }
   };

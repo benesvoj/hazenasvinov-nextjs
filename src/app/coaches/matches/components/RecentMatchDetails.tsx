@@ -77,69 +77,43 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
     error: documentsError,
   } = useMatchMetadata(selectedMatch.id, 'document');
 
-  // Debug: Log photos data
-  useEffect(() => {
-    if (photos.length > 0) {
-      console.log('Photos loaded:', photos.length, 'photos');
-      photos.forEach((photo, index) => {
-        console.log(`Photo ${index + 1}:`, {
-          id: photo.id,
-          file_url: photo.file_url,
-          file_name: photo.file_name,
-          is_primary: photo.is_primary,
-          metadata: photo.metadata,
-        });
-      });
-    }
-  }, [photos]);
-
   // Helper function to get safe image URL
   const getSafeImageUrl = (fileUrl: string | undefined | null, metadata?: any): string => {
     // 1x1 transparent PNG data URL
     const placeholderDataUrl =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2ZkAAAAASUVORK5CYII=';
 
-    console.log('getSafeImageUrl called with:', {fileUrl, metadata});
-
     // Check if we have a temporary preview in metadata first
     if (metadata?.temp_preview) {
-      console.log('Using temp_preview:', metadata.temp_preview.substring(0, 50) + '...');
       return metadata.temp_preview;
     }
 
     // If no file URL, return placeholder
     if (!fileUrl) {
-      console.log('No file URL, using placeholder');
       return placeholderDataUrl;
     }
 
     // Skip example.com URLs
     if (fileUrl.includes('example.com')) {
-      console.log('Example.com URL detected, using placeholder');
       return placeholderDataUrl;
     }
 
     // Check for blob URLs and reject them
     if (fileUrl.startsWith('blob:')) {
-      console.log('❌ Blob URL detected, using placeholder. URL:', fileUrl);
-      console.log('💡 This photo was uploaded before the fix. Please delete and re-upload.');
       return placeholderDataUrl;
     }
 
     // For Supabase storage URLs, they should start with the storage URL
     // For now, let's be more permissive and allow any URL that looks valid
     if (fileUrl.startsWith('http') || fileUrl.startsWith('data:')) {
-      console.log('Valid URL detected:', fileUrl.substring(0, 50) + '...');
       return fileUrl;
     }
 
     // If it's a relative path, try to construct the full URL
     if (fileUrl.startsWith('/') || fileUrl.startsWith('./')) {
-      console.log('Relative path detected:', fileUrl);
       return fileUrl;
     }
 
-    console.log('URL not recognized, using placeholder. URL was:', fileUrl);
     return placeholderDataUrl;
   };
 
@@ -223,14 +197,12 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
       });
 
       const dataUrl = await dataUrlPromise;
-      console.log('Data URL created:', dataUrl.substring(0, 50) + '...');
 
       // Simulate upload delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // For now, use data URL as file_url for immediate display
       // In production, this should be replaced with actual Supabase storage URL
-      console.log('Uploading photo with data URL...');
       await addMetadata.mutateAsync({
         match_id: selectedMatch.id,
         metadata_type: 'photo',
@@ -246,11 +218,9 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
           temp_preview: dataUrl, // Store preview locally only
         },
       });
-      console.log('Photo uploaded successfully');
 
       // Photo metadata added successfully
     } catch (error) {
-      console.error('Error uploading photo:', error);
       showToast.danger('Chyba při nahrávání fotografie');
     } finally {
       setIsUploadingPhoto(false);
@@ -266,7 +236,6 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
           fileInputRef.current.value = '';
         }
       } catch (error) {
-        console.error('Error removing photo:', error);
         showToast.danger('Chyba při odstraňování fotografie');
       }
     } else {

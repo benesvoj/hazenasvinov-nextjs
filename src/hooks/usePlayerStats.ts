@@ -44,9 +44,7 @@ export function usePlayerStats(): UsePlayerStatsResult {
 
         // Get user's assigned categories
         const assignedCategoryIds = await getCurrentUserCategories();
-        console.log('User assigned categories:', assignedCategoryIds);
         if (assignedCategoryIds.length === 0) {
-          console.log('No assigned categories found for user');
           setPlayerStats([]);
           return;
         }
@@ -80,18 +78,14 @@ export function usePlayerStats(): UsePlayerStatsResult {
           .in('lineup.match.category_id', assignedCategoryIds);
 
         if (lineupPlayersError) {
-          console.warn('Error fetching lineup players:', lineupPlayersError);
           setPlayerStats([]);
           return;
         }
 
         if (!lineupPlayers || lineupPlayers.length === 0) {
-          console.log('No lineup players found for completed matches');
           setPlayerStats([]);
           return;
         }
-
-        console.log('Found lineup players:', lineupPlayers.length);
 
         // Process each player's statistics
         lineupPlayers.forEach((player: any) => {
@@ -156,7 +150,6 @@ export function usePlayerStats(): UsePlayerStatsResult {
             stats.matches_played > 0 ? stats.goals / stats.matches_played : 0,
         }));
 
-        console.log('Processed player stats:', statsArray.length, 'players');
         setPlayerStats(statsArray);
       } catch (err) {
         console.error('Error fetching player statistics:', err);

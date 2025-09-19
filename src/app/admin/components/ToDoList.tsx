@@ -283,7 +283,7 @@ export default function ToDoList({
                                 const nextStatus = getNextStatus(todo.status);
                                 if (nextStatus) {
                                   showToast.success(
-                                    `Moving todo ${todo.id} from ${todo.status} to ${nextStatus}`
+                                    `Todo moved from ${getStatusLabel(todo.status)} to ${getStatusLabel(nextStatus)}`
                                   );
                                   updateTodoStatus(todo.id, nextStatus);
                                 }

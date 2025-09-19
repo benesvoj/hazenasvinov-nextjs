@@ -100,7 +100,7 @@ export default function AttendanceStatistics({
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <LoadingSpinner size="lg" label="Načítání statistik..." />
+        <LoadingSpinner label="Načítání statistik..." />
       </div>
     );
   }
