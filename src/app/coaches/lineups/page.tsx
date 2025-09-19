@@ -261,22 +261,24 @@ export default function CoachesLineupsPage() {
   return (
     <PageContainer>
       {/* Category Tabs */}
-      <Card className="mb-6">
-        <CardBody>
-          <div className="overflow-x-auto">
-            <Tabs
-              selectedKey={selectedCategory}
-              onSelectionChange={(key) => setSelectedCategory(key as string)}
-              className="w-full min-w-max"
-            >
-              {userCategories.map((categoryId) => {
-                const category = categories.find((c) => c.id === categoryId);
-                return <Tab key={categoryId} title={category?.name || categoryId} />;
-              })}
-            </Tabs>
-          </div>
-        </CardBody>
-      </Card>
+      {userCategories.length > 1 && (
+        <Card className="mb-6">
+          <CardBody>
+            <div className="overflow-x-auto">
+              <Tabs
+                selectedKey={selectedCategory}
+                onSelectionChange={(key) => setSelectedCategory(key as string)}
+                className="w-full min-w-max"
+              >
+                {userCategories.map((categoryId) => {
+                  const category = categories.find((c) => c.id === categoryId);
+                  return <Tab key={categoryId} title={category?.name || categoryId} />;
+                })}
+              </Tabs>
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
