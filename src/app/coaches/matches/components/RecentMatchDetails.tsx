@@ -11,6 +11,8 @@ import {
   PlusIcon,
   UserGroupIcon,
   DocumentIcon,
+  TrashIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import {
   Match,
@@ -65,7 +67,16 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
   // Debug: Log photos data
   useEffect(() => {
     if (photos.length > 0) {
-      // Photos loaded successfully
+      console.log(
+        'Photos loaded:',
+        photos.map((photo) => ({
+          id: photo.id,
+          file_url: photo.file_url,
+          file_name: photo.file_name,
+          metadata: photo.metadata,
+          is_primary: photo.is_primary,
+        }))
+      );
     }
   }, [photos]);
 
@@ -74,16 +85,42 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
     // 1x1 transparent PNG data URL
     const placeholderDataUrl =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2ZkAAAAASUVORK5CYII=';
+
+    console.log('getSafeImageUrl called with:', {fileUrl, metadata});
+
+    // Check if we have a temporary preview in metadata first
+    if (metadata?.temp_preview) {
+      console.log('Using temp_preview:', metadata.temp_preview);
+      return metadata.temp_preview;
+    }
+
+    // If no file URL, return placeholder
     if (!fileUrl) {
-      // Check if we have a temporary preview in metadata
-      if (metadata?.temp_preview) {
-        return metadata.temp_preview;
-      }
+      console.log('No file URL, using placeholder');
       return placeholderDataUrl;
     }
-    if (fileUrl.includes('example.com')) return placeholderDataUrl;
-    if (!fileUrl.startsWith('http')) return placeholderDataUrl;
-    return fileUrl;
+
+    // Skip example.com URLs
+    if (fileUrl.includes('example.com')) {
+      console.log('Example.com URL detected, using placeholder');
+      return placeholderDataUrl;
+    }
+
+    // For Supabase storage URLs, they should start with the storage URL
+    // For now, let's be more permissive and allow any URL that looks valid
+    if (fileUrl.startsWith('http') || fileUrl.startsWith('data:')) {
+      console.log('Valid URL detected:', fileUrl);
+      return fileUrl;
+    }
+
+    // If it's a relative path, try to construct the full URL
+    if (fileUrl.startsWith('/') || fileUrl.startsWith('./')) {
+      console.log('Relative path detected:', fileUrl);
+      return fileUrl;
+    }
+
+    console.log('URL not recognized, using placeholder. URL was:', fileUrl);
+    return placeholderDataUrl;
   };
 
   // Get primary items
@@ -162,14 +199,18 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
       reader.readAsDataURL(file);
 
       // TODO: Upload to Supabase storage
+      // For now, create a data URL for immediate preview
+      const dataUrl = URL.createObjectURL(file);
 
       // Simulate upload delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // For now, just add metadata without file_url (will be uploaded later)
+      // For now, use data URL as file_url for immediate display
+      // In production, this should be replaced with actual Supabase storage URL
       await addMetadata.mutateAsync({
         match_id: selectedMatch.id,
         metadata_type: 'photo',
-        file_url: undefined, // Will be set after actual upload
+        file_url: dataUrl, // Use data URL for now
         file_name: file.name,
         file_size: file.size,
         mime_type: file.type,
@@ -178,7 +219,7 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
           width: 0, // TODO: Get actual dimensions
           height: 0,
           taken_at: new Date().toISOString(),
-          temp_preview: URL.createObjectURL(file), // Store preview locally only
+          temp_preview: dataUrl, // Store preview locally only
         },
       });
 
@@ -274,85 +315,136 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
               </div>
             ) : photos.length > 0 ? (
               <div className="space-y-3">
-                {/* Primary Photo Display */}
-                {primaryPhoto && (
-                  <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
-                    <Image
-                      src={getSafeImageUrl(primaryPhoto.file_url, primaryPhoto.metadata)}
-                      alt={primaryPhoto.file_name || 'Fotografie zápisu utkání'}
-                      fill
-                      className="object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder-image.jpg';
-                      }}
-                    />
-                    <div className="absolute top-2 right-2">
-                      <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                        Hlavní
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Photo Gallery */}
-                {photos.length > 1 && (
-                  <div className="grid grid-cols-3 gap-2">
-                    {photos
-                      .filter((photo) => !photo.is_primary)
-                      .slice(0, 6)
-                      .map((photo) => (
-                        <div
-                          key={photo.id}
-                          className="relative aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden group"
-                        >
-                          <Image
-                            src={getSafeImageUrl(photo.file_url, photo.metadata)}
-                            alt={photo.file_name || 'Fotografie'}
-                            fill
-                            className="object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = '/placeholder-image.jpg';
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+                {/* Photos Table */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Náhled
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Název souboru
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Velikost
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Typ
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          Akce
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {photos.map((photo) => (
+                        <tr key={photo.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <td className="px-4 py-3">
+                            <div className="w-16 h-12 bg-gray-100 dark:bg-gray-600 rounded overflow-hidden">
+                              <Image
+                                src={getSafeImageUrl(photo.file_url, photo.metadata)}
+                                alt={photo.file_name || 'Fotografie'}
+                                width={64}
+                                height={48}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  console.log('Table image failed to load, using placeholder');
+                                  e.currentTarget.src = '/placeholder-image.jpg';
+                                }}
+                              />
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              {photo.file_name || 'Bez názvu'}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(photo.created_at).toLocaleDateString('cs-CZ')}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm text-gray-900 dark:text-gray-100">
+                              {photo.file_size
+                                ? `${Math.round(photo.file_size / 1024)} KB`
+                                : 'Neznámá'}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm text-gray-900 dark:text-gray-100">
+                              {photo.mime_type || 'Neznámý'}
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            <div className="flex">
                               <Button
                                 size="sm"
                                 variant="light"
                                 color="primary"
-                                onPress={() =>
-                                  setPrimaryMetadata.mutate({
-                                    id: photo.id,
-                                    matchId: selectedMatch.id,
-                                    type: 'photo',
-                                  })
-                                }
+                                onPress={() => {
+                                  // Open photo in full view
+                                  const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
+                                  window.open(imageUrl, '_blank');
+                                }}
+                                title="Otevřít v novém okně"
                                 className="text-xs"
                               >
-                                Hlavní
+                                <PhotoIcon className="w-4 h-4" />
                               </Button>
+                              <Button
+                                size="sm"
+                                variant="light"
+                                color="primary"
+                                onPress={() => {
+                                  // Download photo
+                                  const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
+                                  const link = document.createElement('a');
+                                  link.href = imageUrl;
+                                  link.download = photo.file_name || 'photo.jpg';
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                }}
+                                title="Stáhnout"
+                                className="text-xs"
+                              >
+                                <DocumentIcon className="w-4 h-4" />
+                              </Button>
+                              {!photo.is_primary && (
+                                <Button
+                                  size="sm"
+                                  variant="light"
+                                  color="primary"
+                                  onPress={() =>
+                                    setPrimaryMetadata.mutate({
+                                      id: photo.id,
+                                      matchId: selectedMatch.id,
+                                      type: 'photo',
+                                    })
+                                  }
+                                  title="Nastavit jako hlavní"
+                                  className="text-xs"
+                                >
+                                  <Cog6ToothIcon className="w-4 h-4" />
+                                </Button>
+                              )}
                               <Button
                                 size="sm"
                                 variant="light"
                                 color="danger"
                                 onPress={() => deleteMetadata.mutate(photo.id)}
+                                title="Smazat"
                                 className="text-xs"
                               >
-                                Smazat
+                                <TrashIcon className="w-4 h-4" />
                               </Button>
                             </div>
-                          </div>
-                        </div>
+                          </td>
+                        </tr>
                       ))}
-                    {photos.length > 7 && (
-                      <div className="aspect-square bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          +{photos.length - 7}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ) : (
               <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
