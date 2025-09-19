@@ -16,6 +16,7 @@ interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> 
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  subtitle?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
@@ -32,6 +33,7 @@ export default function UnifiedModal({
   isOpen,
   onClose,
   title,
+  subtitle,
   children,
   footer,
   size = '2xl',
@@ -61,9 +63,10 @@ export default function UnifiedModal({
       {...props}
     >
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
+        <ModalHeader className="flex flex-col gap-1 justify-between">
+          <div className="flex flex-col gap-2">
             <Heading size={hSize}>{title}</Heading>
+            {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
           </div>
           {actions && <div className="flex items-center justify-end">{actions}</div>}
         </ModalHeader>

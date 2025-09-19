@@ -4,13 +4,7 @@ import React, {useState, useEffect, useMemo} from 'react';
 import {useAttendance, useCategoryLineups} from '@/hooks';
 import {useUser} from '@/contexts/UserContext';
 import {useAppData} from '@/contexts/AppDataContext';
-import {
-  ClipboardDocumentListIcon,
-  PlusIcon,
-  CalendarIcon,
-  PencilIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import {PlusIcon, CalendarIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 import {
   Button,
   Card,
@@ -25,14 +19,15 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Tabs,
-  Tab,
-  Spinner,
 } from '@heroui/react';
-import {TrainingSessionFormData} from '@/types';
+import {TrainingSessionFormData, TrainingSessionStatus} from '@/types';
 import {formatDateString, formatTime} from '@/helpers';
 import {TrainingSessionModal, TrainingSessionGenerator} from './components';
-import {DeleteConfirmationModal, PageContainer} from '@/components';
+import {DeleteConfirmationModal, LoadingSpinner, PageContainer} from '@/components';
+import TrainingSessionStatusDialog from './components/TrainingSessionStatusDialog';
+import TrainingSessionStatusBadge from './components/TrainingSessionStatusBadge';
+import AttendanceStatistics from './components/AttendanceStatistics';
+import AttendanceChart from './components/AttendanceChart';
 
 export default function CoachesAttendancePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -43,6 +38,8 @@ export default function CoachesAttendancePage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [editingSession, setEditingSession] = useState<any>(null);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [sessionForStatusUpdate, setSessionForStatusUpdate] = useState<any>(null);
 
   const {
     trainingSessions,
@@ -56,8 +53,13 @@ export default function CoachesAttendancePage() {
     createTrainingSession,
     updateTrainingSession,
     deleteTrainingSession,
+    updateTrainingSessionStatus,
     recordAttendance,
     createAttendanceForLineupMembers,
+    getMemberAttendanceStats,
+    getTrainingSessionStats,
+    getAttendanceTrends,
+    getCoachAnalytics,
   } = useAttendance();
 
   const {
@@ -326,6 +328,24 @@ export default function CoachesAttendancePage() {
     }
   };
 
+  const handleStatusUpdate = async (status: TrainingSessionStatus, reason?: string) => {
+    if (!sessionForStatusUpdate) return;
+
+    try {
+      await updateTrainingSessionStatus(sessionForStatusUpdate.id, status, reason);
+      setSessionForStatusUpdate(null);
+      setIsStatusDialogOpen(false);
+    } catch (err) {
+      console.error('Error updating session status:', err);
+      alert(err instanceof Error ? err.message : 'Chyba při změně stavu tréninku');
+    }
+  };
+
+  const handleOpenStatusDialog = (session: any) => {
+    setSessionForStatusUpdate(session);
+    setIsStatusDialogOpen(true);
+  };
+
   const handleRecordAttendance = async (
     memberId: string,
     status: 'present' | 'absent' | 'late' | 'excused'
@@ -412,7 +432,7 @@ export default function CoachesAttendancePage() {
     return (
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
-          <Spinner size="lg" />
+          <LoadingSpinner />
         </div>
       </div>
     );
@@ -485,6 +505,22 @@ export default function CoachesAttendancePage() {
         </CardBody>
       </Card>
 
+      {/* Statistics Section */}
+      {selectedCategory && selectedSeason && (
+        <Card className="mb-6">
+          <CardHeader>
+            <h2 className="text-xl font-semibold">Statistiky a analýza</h2>
+          </CardHeader>
+          <CardBody>
+            <AttendanceStatistics
+              categoryId={selectedCategory}
+              seasonId={selectedSeason}
+              onLoadAnalytics={getCoachAnalytics}
+            />
+          </CardBody>
+        </Card>
+      )}
+
       {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Training Sessions */}
@@ -516,7 +552,13 @@ export default function CoachesAttendancePage() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <h4 className="font-medium text-sm">{session.title}</h4>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-sm">{session.title}</h4>
+                            <TrainingSessionStatusBadge
+                              status={session.status || 'planned'}
+                              size="sm"
+                            />
+                          </div>
                           <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                             <div>{formatDateString(session.session_date)}</div>
                             {session.session_time && <div>{formatTime(session.session_time)}</div>}
@@ -526,8 +568,28 @@ export default function CoachesAttendancePage() {
                               {session.location}
                             </div>
                           )}
+                          {session.description && (
+                            <div className="flex items-start gap-1 text-xs text-gray-500 mt-1">
+                              <span className="font-semibold">Popis:</span> {session.description}
+                            </div>
+                          )}
+                          {session.status === 'cancelled' && session.status_reason && (
+                            <div className="flex items-start gap-1 text-xs text-red-600 mt-1">
+                              <span className="font-semibold">Důvod zrušení:</span>{' '}
+                              {session.status_reason}
+                            </div>
+                          )}
                         </div>
                         <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="light"
+                            color="primary"
+                            onPress={() => handleOpenStatusDialog(session)}
+                            isIconOnly
+                            aria-label={`Změnit stav tréninku ${session.title}`}
+                            startContent={<CalendarIcon className="w-4 h-4" />}
+                          />
                           <Button
                             size="sm"
                             variant="light"
@@ -542,8 +604,9 @@ export default function CoachesAttendancePage() {
                             variant="light"
                             onPress={() => handleDeleteSession(session.id)}
                             isIconOnly
-                            aria-label={`Upravit trénink ${session.title}`}
+                            aria-label={`Smazat trénink ${session.title}`}
                             startContent={<TrashIcon className="w-4 h-4" />}
+                            isDisabled={session.status === 'done' || session.status === 'cancelled'}
                           />
                         </div>
                       </div>
@@ -702,6 +765,18 @@ export default function CoachesAttendancePage() {
         onConfirm={confirmDeleteSession}
         title="Smazat trénink"
         message="Opravdu chcete smazat tento trénink? Tato akce je nevratná a smaže také všechny záznamy o docházce."
+      />
+
+      {/* Training Session Status Dialog */}
+      <TrainingSessionStatusDialog
+        isOpen={isStatusDialogOpen}
+        onClose={() => {
+          setIsStatusDialogOpen(false);
+          setSessionForStatusUpdate(null);
+        }}
+        onConfirm={handleStatusUpdate}
+        currentStatus={sessionForStatusUpdate?.status || 'planned'}
+        sessionTitle={sessionForStatusUpdate?.title || ''}
       />
     </PageContainer>
   );

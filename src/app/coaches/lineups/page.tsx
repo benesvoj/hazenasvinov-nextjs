@@ -261,22 +261,24 @@ export default function CoachesLineupsPage() {
   return (
     <PageContainer>
       {/* Category Tabs */}
-      <Card className="mb-6">
-        <CardBody>
-          <div className="overflow-x-auto">
-            <Tabs
-              selectedKey={selectedCategory}
-              onSelectionChange={(key) => setSelectedCategory(key as string)}
-              className="w-full min-w-max"
-            >
-              {userCategories.map((categoryId) => {
-                const category = categories.find((c) => c.id === categoryId);
-                return <Tab key={categoryId} title={category?.name || categoryId} />;
-              })}
-            </Tabs>
-          </div>
-        </CardBody>
-      </Card>
+      {userCategories.length > 1 && (
+        <Card className="mb-6">
+          <CardBody>
+            <div className="overflow-x-auto">
+              <Tabs
+                selectedKey={selectedCategory}
+                onSelectionChange={(key) => setSelectedCategory(key as string)}
+                className="w-full min-w-max"
+              >
+                {userCategories.map((categoryId) => {
+                  const category = categories.find((c) => c.id === categoryId);
+                  return <Tab key={categoryId} title={category?.name || categoryId} />;
+                })}
+              </Tabs>
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -411,7 +413,7 @@ export default function CoachesLineupsPage() {
                           <TableCell>
                             <div>
                               <div className="font-medium text-sm sm:text-base">
-                                {member.member?.name} {member.member?.surname}
+                                {member.member?.surname} {member.member?.name}
                               </div>
                               <div className="text-xs sm:text-sm text-gray-500">
                                 {member.member?.registration_number}
@@ -437,11 +439,6 @@ export default function CoachesLineupsPage() {
                                 {member.is_captain && (
                                   <Chip size="sm" color="warning" className="text-xs">
                                     K
-                                  </Chip>
-                                )}
-                                {member.is_vice_captain && (
-                                  <Chip size="sm" color="secondary" className="text-xs">
-                                    Z
                                   </Chip>
                                 )}
                               </div>
@@ -551,7 +548,7 @@ export default function CoachesLineupsPage() {
         isOpen={isAddMemberModalOpen}
         onClose={() => setIsAddMemberModalOpen(false)}
         onAddMember={handleAddMember}
-        selectedCategory={selectedCategory}
+        selectedCategoryName={categories.find((c) => c.id === selectedCategory)?.name || ''}
         selectedCategoryId={categories.find((c) => c.id === selectedCategory)?.id || ''}
         existingMembers={existingMemberIds}
         existingJerseyNumbers={existingJerseyNumbers}

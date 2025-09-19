@@ -1,3 +1,5 @@
+export type TrainingSessionStatus = 'planned' | 'done' | 'cancelled';
+
 export interface TrainingSession {
   id: string;
   title: string;
@@ -8,6 +10,8 @@ export interface TrainingSession {
   season_id: string;
   location?: string;
   coach_id: string;
+  status: TrainingSessionStatus;
+  status_reason?: string;
   created_at: string;
   updated_at: string;
 }

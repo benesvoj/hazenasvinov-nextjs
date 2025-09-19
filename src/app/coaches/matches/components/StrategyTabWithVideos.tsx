@@ -7,7 +7,7 @@ interface TabWithVideosProps {
   filteredOpponentVideos: Video[];
   opponentTeam: Team | null;
 }
-export default function TabWithVideos({
+export default function StrategyTabWithVideos({
   videosError,
   videosLoading,
   filteredOpponentVideos,

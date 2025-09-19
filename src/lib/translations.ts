@@ -493,5 +493,13 @@ export const translations = {
       statistics: 'Statistiky a analýzy týmů',
       meetingMinutes: 'Zápisy z výborových schůzí',
     },
+    matches: {
+      tabs: {
+        upcoming: 'Nadcházející',
+        recent: 'Nedávno odehrané',
+        standings: 'Tabulky',
+        statistics: 'Statistiky',
+      },
+    },
   },
 } as const;

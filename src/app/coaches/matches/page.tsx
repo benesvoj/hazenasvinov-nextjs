@@ -15,10 +15,13 @@ import {
   StandingsCard,
   StrategyPreparationZone,
   RecentMatchDetails,
+  MatchStatisticsZone,
 } from './components';
 import CoachMatchResultFlow from './components/CoachMatchResultFlow';
 import {Tab, Tabs} from '@heroui/react';
+import {ChartBarIcon} from '@heroicons/react/24/outline';
 import {Match} from '@/types';
+import {translations} from '@/lib/translations';
 
 export default function CoachesMatchesPage() {
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
@@ -30,6 +33,8 @@ export default function CoachesMatchesPage() {
   const {activeSeason, fetchActiveSeason} = useSeasons();
   const {categories, fetchCategories} = useCategories();
   const {standings, loading: standingsLoading, fetchStandings} = useStandings();
+
+  const t = translations.coaches.matches.tabs;
 
   // Try to get user roles, but handle case where UserProvider is not available
   let getCurrentUserCategories: (() => Promise<string[]>) | null = null;
@@ -146,7 +151,7 @@ export default function CoachesMatchesPage() {
                 setSelectedMatch(null); // Clear selected match when switching tabs
               }}
             >
-              <Tab key="upcoming" title="Upcoming">
+              <Tab key="upcoming" title={t.upcoming}>
                 <UpcomingMatchesCard
                   upcomingMatches={upcomingMatches}
                   loading={loading}
@@ -155,7 +160,7 @@ export default function CoachesMatchesPage() {
                   onStartResultFlow={handleStartResultFlow}
                 />
               </Tab>
-              <Tab key="recent" title="Recent">
+              <Tab key="recent" title={t.recent}>
                 <RecentResultsCard
                   recentResults={recentResults}
                   loading={loading}
@@ -163,8 +168,15 @@ export default function CoachesMatchesPage() {
                   selectedMatchId={selectedMatch?.id}
                 />
               </Tab>
-              <Tab key="standings" title="Standings">
+              <Tab key="standings" title={t.standings}>
                 <StandingsCard standings={categoryStandings} loading={standingsLoading} />
+              </Tab>
+              <Tab key="statistics" title={t.statistics}>
+                <div className="text-center py-8 text-gray-500">
+                  <ChartBarIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-lg font-medium mb-2">Statistiky zápasů</p>
+                  <p className="text-sm">Statistiky jsou zobrazeny v pravém sloupci</p>
+                </div>
               </Tab>
             </Tabs>
           </div>
@@ -219,6 +231,12 @@ export default function CoachesMatchesPage() {
                   <p className="text-sm">Tabulka je zobrazena v levém sloupci.</p>
                 </div>
               </div>
+            ) : activeTab === 'statistics' ? (
+              // Statistics Zone
+              <MatchStatisticsZone
+                categoryId={selectedCategoryData.id}
+                seasonId={activeSeason.id}
+              />
             ) : null}
           </div>
         </div>

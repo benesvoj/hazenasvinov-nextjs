@@ -11,7 +11,7 @@ interface TabWithHeadToHeadProps {
   ourClubTeamIds: string[];
 }
 
-export default function TabWithHeadToHead({
+export default function StrategyTabWithHeadToHead({
   headToHeadError,
   headToHeadLoading,
   headToHeadMatches,
