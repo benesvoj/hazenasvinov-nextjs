@@ -163,7 +163,6 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
       // TODO: Upload to Supabase storage
 
       // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // For now, just add metadata without file_url (will be uploaded later)
       await addMetadata.mutateAsync({
