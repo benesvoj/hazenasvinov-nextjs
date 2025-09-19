@@ -26,6 +26,8 @@ import {TrainingSessionModal, TrainingSessionGenerator} from './components';
 import {DeleteConfirmationModal, LoadingSpinner, PageContainer} from '@/components';
 import TrainingSessionStatusDialog from './components/TrainingSessionStatusDialog';
 import TrainingSessionStatusBadge from './components/TrainingSessionStatusBadge';
+import AttendanceStatistics from './components/AttendanceStatistics';
+import AttendanceChart from './components/AttendanceChart';
 
 export default function CoachesAttendancePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -54,6 +56,10 @@ export default function CoachesAttendancePage() {
     updateTrainingSessionStatus,
     recordAttendance,
     createAttendanceForLineupMembers,
+    getMemberAttendanceStats,
+    getTrainingSessionStats,
+    getAttendanceTrends,
+    getCoachAnalytics,
   } = useAttendance();
 
   const {
@@ -498,6 +504,22 @@ export default function CoachesAttendancePage() {
           </div>
         </CardBody>
       </Card>
+
+      {/* Statistics Section */}
+      {selectedCategory && selectedSeason && (
+        <Card className="mb-6">
+          <CardHeader>
+            <h2 className="text-xl font-semibold">Statistiky a analýza</h2>
+          </CardHeader>
+          <CardBody>
+            <AttendanceStatistics
+              categoryId={selectedCategory}
+              seasonId={selectedSeason}
+              onLoadAnalytics={getCoachAnalytics}
+            />
+          </CardBody>
+        </Card>
+      )}
 
       {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

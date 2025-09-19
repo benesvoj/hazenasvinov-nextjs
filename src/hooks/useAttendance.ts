@@ -11,6 +11,15 @@ import {
   AttendanceFilters,
   AttendanceStats,
 } from '@/types/attendance';
+import {
+  MemberAttendanceStats,
+  TrainingSessionStats,
+  AttendanceTrendData,
+  MonthlyStats,
+  CategoryStats,
+  CoachAnalytics,
+  AttendanceFilter,
+} from '@/types/statistics';
 import {useUser} from '@/contexts/UserContext';
 import showToast, {ToastOptions} from '@/components/Toast';
 
@@ -631,6 +640,327 @@ export function useAttendance() {
     [fetchAttendanceSummary]
   );
 
+  // Get detailed member attendance statistics
+  const getMemberAttendanceStats = useCallback(
+    async (categoryId: string, seasonId: string): Promise<MemberAttendanceStats[]> => {
+      try {
+        const {data: members, error: membersError} = await supabase
+          .from('members')
+          .select('id, name, surname')
+          .eq('category_id', categoryId);
+
+        if (membersError) throw membersError;
+
+        const {data: sessions, error: sessionsError} = await supabase
+          .from('training_sessions')
+          .select('id, session_date, status')
+          .eq('category_id', categoryId)
+          .eq('season_id', seasonId)
+          .eq('status', 'done')
+          .order('session_date', {ascending: true});
+
+        if (sessionsError) throw sessionsError;
+
+        const memberStats: MemberAttendanceStats[] = [];
+
+        for (const member of members || []) {
+          const {data: attendance, error: attendanceError} = await supabase
+            .from('member_attendance')
+            .select('attendance_status, recorded_at')
+            .eq('member_id', member.id)
+            .in('training_session_id', sessions?.map((s: any) => s.id) || []);
+
+          if (attendanceError) continue;
+
+          const presentCount =
+            attendance?.filter((a: any) => a.attendance_status === 'present').length || 0;
+          const absentCount =
+            attendance?.filter((a: any) => a.attendance_status === 'absent').length || 0;
+          const lateCount =
+            attendance?.filter((a: any) => a.attendance_status === 'late').length || 0;
+          const excusedCount =
+            attendance?.filter((a: any) => a.attendance_status === 'excused').length || 0;
+          const totalSessions = sessions?.length || 0;
+          const attendancePercentage =
+            totalSessions > 0 ? Math.round((presentCount / totalSessions) * 100) : 0;
+
+          // Calculate trends (last 5 sessions vs previous 5)
+          const sortedAttendance =
+            attendance?.sort(
+              (a: any, b: any) =>
+                new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime()
+            ) || [];
+
+          const recentSessions = sortedAttendance.slice(-5);
+          const previousSessions = sortedAttendance.slice(-10, -5);
+
+          const recentPresent = recentSessions.filter(
+            (a: any) => a.attendance_status === 'present'
+          ).length;
+          const previousPresent = previousSessions.filter(
+            (a: any) => a.attendance_status === 'present'
+          ).length;
+
+          let trend: 'improving' | 'declining' | 'stable' = 'stable';
+          if (recentSessions.length >= 3 && previousSessions.length >= 3) {
+            const recentRate = recentPresent / recentSessions.length;
+            const previousRate = previousPresent / previousSessions.length;
+            if (recentRate > previousRate + 0.1) trend = 'improving';
+            else if (recentRate < previousRate - 0.1) trend = 'declining';
+          }
+
+          // Calculate consecutive absences/present
+          let consecutiveAbsences = 0;
+          let consecutivePresent = 0;
+          let currentStreak = 0;
+          let currentStatus = '';
+
+          for (let i = sortedAttendance.length - 1; i >= 0; i--) {
+            const status = sortedAttendance[i].attendance_status;
+            if (i === sortedAttendance.length - 1 || status === currentStatus) {
+              currentStreak++;
+              currentStatus = status;
+            } else {
+              break;
+            }
+          }
+
+          if (currentStatus === 'absent') consecutiveAbsences = currentStreak;
+          else if (currentStatus === 'present') consecutivePresent = currentStreak;
+
+          const lastAttendance = sortedAttendance[sortedAttendance.length - 1];
+
+          memberStats.push({
+            member_id: member.id,
+            member_name: member.name,
+            member_surname: member.surname,
+            total_sessions: totalSessions,
+            present_count: presentCount,
+            absent_count: absentCount,
+            late_count: lateCount,
+            excused_count: excusedCount,
+            attendance_percentage: attendancePercentage,
+            recent_trend: trend,
+            last_attendance_date: lastAttendance?.recorded_at,
+            consecutive_absences: consecutiveAbsences,
+            consecutive_present: consecutivePresent,
+          });
+        }
+
+        return memberStats.sort((a, b) => b.attendance_percentage - a.attendance_percentage);
+      } catch (err) {
+        console.error('Error getting member attendance stats:', err);
+        throw err;
+      }
+    },
+    [supabase]
+  );
+
+  // Get training session statistics
+  const getTrainingSessionStats = useCallback(
+    async (categoryId: string, seasonId: string): Promise<TrainingSessionStats> => {
+      try {
+        const {data: sessions, error: sessionsError} = await supabase
+          .from('training_sessions')
+          .select('id, status')
+          .eq('category_id', categoryId)
+          .eq('season_id', seasonId);
+
+        if (sessionsError) throw sessionsError;
+
+        const totalSessions = sessions?.length || 0;
+        const plannedSessions = sessions?.filter((s: any) => s.status === 'planned').length || 0;
+        const completedSessions = sessions?.filter((s: any) => s.status === 'done').length || 0;
+        const cancelledSessions =
+          sessions?.filter((s: any) => s.status === 'cancelled').length || 0;
+
+        const completionRate =
+          totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
+        const cancellationRate =
+          totalSessions > 0 ? Math.round((cancelledSessions / totalSessions) * 100) : 0;
+
+        // Get attendance records for completed sessions
+        const {data: attendance, error: attendanceError} = await supabase
+          .from('member_attendance')
+          .select('attendance_status')
+          .in(
+            'training_session_id',
+            sessions?.filter((s: any) => s.status === 'done').map((s: any) => s.id) || []
+          );
+
+        if (attendanceError) throw attendanceError;
+
+        const totalAttendanceRecords = attendance?.length || 0;
+        const presentRecords =
+          attendance?.filter((a: any) => a.attendance_status === 'present').length || 0;
+        const averageAttendancePercentage =
+          totalAttendanceRecords > 0
+            ? Math.round((presentRecords / totalAttendanceRecords) * 100)
+            : 0;
+
+        return {
+          total_sessions: totalSessions,
+          planned_sessions: plannedSessions,
+          completed_sessions: completedSessions,
+          cancelled_sessions: cancelledSessions,
+          completion_rate: completionRate,
+          cancellation_rate: cancellationRate,
+          average_attendance_percentage: averageAttendancePercentage,
+          total_attendance_records: totalAttendanceRecords,
+        };
+      } catch (err) {
+        console.error('Error getting training session stats:', err);
+        throw err;
+      }
+    },
+    [supabase]
+  );
+
+  // Get attendance trends over time
+  const getAttendanceTrends = useCallback(
+    async (
+      categoryId: string,
+      seasonId: string,
+      days: number = 30
+    ): Promise<AttendanceTrendData[]> => {
+      try {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+
+        const {data: sessions, error: sessionsError} = await supabase
+          .from('training_sessions')
+          .select('id, session_date')
+          .eq('category_id', categoryId)
+          .eq('season_id', seasonId)
+          .eq('status', 'done')
+          .gte('session_date', startDate.toISOString().split('T')[0])
+          .lte('session_date', endDate.toISOString().split('T')[0])
+          .order('session_date', {ascending: true});
+
+        if (sessionsError) throw sessionsError;
+
+        const {data: members, error: membersError} = await supabase
+          .from('members')
+          .select('id')
+          .eq('category_id', categoryId);
+
+        if (membersError) throw membersError;
+
+        const totalMembers = members?.length || 0;
+        const trends: AttendanceTrendData[] = [];
+
+        for (const session of sessions || []) {
+          const {data: attendance, error: attendanceError} = await supabase
+            .from('member_attendance')
+            .select('attendance_status')
+            .eq('training_session_id', session.id);
+
+          if (attendanceError) continue;
+
+          const present =
+            attendance?.filter((a: any) => a.attendance_status === 'present').length || 0;
+          const absent =
+            attendance?.filter((a: any) => a.attendance_status === 'absent').length || 0;
+          const late = attendance?.filter((a: any) => a.attendance_status === 'late').length || 0;
+          const excused =
+            attendance?.filter((a: any) => a.attendance_status === 'excused').length || 0;
+          const attendancePercentage =
+            totalMembers > 0 ? Math.round((present / totalMembers) * 100) : 0;
+
+          trends.push({
+            date: session.session_date,
+            present,
+            absent,
+            late,
+            excused,
+            total_members: totalMembers,
+            attendance_percentage: attendancePercentage,
+          });
+        }
+
+        return trends;
+      } catch (err) {
+        console.error('Error getting attendance trends:', err);
+        throw err;
+      }
+    },
+    [supabase]
+  );
+
+  // Get comprehensive coach analytics
+  const getCoachAnalytics = useCallback(
+    async (categoryId: string, seasonId: string): Promise<CoachAnalytics> => {
+      try {
+        const [overallStats, memberPerformance, attendanceTrends] = await Promise.all([
+          getTrainingSessionStats(categoryId, seasonId),
+          getMemberAttendanceStats(categoryId, seasonId),
+          getAttendanceTrends(categoryId, seasonId, 30),
+        ]);
+
+        // Generate insights
+        const insights: string[] = [];
+        const recommendations: string[] = [];
+
+        // Attendance insights
+        if (overallStats.average_attendance_percentage < 70) {
+          insights.push('Nízká celková docházka - méně než 70%');
+          recommendations.push('Zvažte změnu času tréninků nebo komunikaci s rodiči');
+        }
+
+        if (overallStats.cancellation_rate > 20) {
+          insights.push('Vysoká míra zrušení tréninků - více než 20%');
+          recommendations.push('Analyzujte důvody zrušení a zvažte alternativní termíny');
+        }
+
+        // Member performance insights
+        const lowPerformers = memberPerformance.filter((m) => m.attendance_percentage < 60);
+        if (lowPerformers.length > 0) {
+          insights.push(`${lowPerformers.length} členů má docházku pod 60%`);
+          recommendations.push('Kontaktujte rodiče členů s nízkou docházkou');
+        }
+
+        const highPerformers = memberPerformance.filter((m) => m.attendance_percentage > 90);
+        if (highPerformers.length > 0) {
+          insights.push(`${highPerformers.length} členů má docházku nad 90%`);
+          recommendations.push('Oceňte členy s vynikající docházkou');
+        }
+
+        // Trend insights
+        if (attendanceTrends.length >= 2) {
+          const recentTrend = attendanceTrends.slice(-3);
+          const olderTrend = attendanceTrends.slice(-6, -3);
+
+          const recentAvg =
+            recentTrend.reduce((sum, t) => sum + t.attendance_percentage, 0) / recentTrend.length;
+          const olderAvg =
+            olderTrend.reduce((sum, t) => sum + t.attendance_percentage, 0) / olderTrend.length;
+
+          if (recentAvg > olderAvg + 10) {
+            insights.push('Docházka se v poslední době zlepšuje');
+          } else if (recentAvg < olderAvg - 10) {
+            insights.push('Docházka se v poslední době zhoršuje');
+            recommendations.push('Identifikujte příčiny poklesu docházky');
+          }
+        }
+
+        return {
+          overall_stats: overallStats,
+          member_performance: memberPerformance,
+          attendance_trends: attendanceTrends,
+          monthly_breakdown: [], // TODO: Implement monthly breakdown
+          category_analysis: [], // TODO: Implement category analysis
+          insights,
+          recommendations,
+        };
+      } catch (err) {
+        console.error('Error getting coach analytics:', err);
+        throw err;
+      }
+    },
+    [getTrainingSessionStats, getMemberAttendanceStats, getAttendanceTrends]
+  );
+
   return {
     attendanceRecords,
     trainingSessions,
@@ -649,6 +979,10 @@ export function useAttendance() {
     updateAttendance,
     deleteAttendance,
     getAttendanceStats,
+    getMemberAttendanceStats,
+    getTrainingSessionStats,
+    getAttendanceTrends,
+    getCoachAnalytics,
     createAttendanceForLineupMembers,
   };
 }
