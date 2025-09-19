@@ -11,3 +11,4 @@ export {default as OpponentMatchStatistics} from './OpponentMatchStatistics';
 export {default as HeadToHeadStatistics} from './HeadToHeadStatistics';
 export {default as TabWithHeadToHead} from './StrategyTabWithHeadToHead';
 export {default as TabWithPreviousMatches} from './StrategyTabWithPreviousMatches';
+export {default as MatchStatisticsZone} from './MatchStatisticsZone';
