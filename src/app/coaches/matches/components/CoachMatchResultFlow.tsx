@@ -33,6 +33,7 @@ import {showToast} from '@/components/Toast';
 import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
 import {useQueryClient} from '@tanstack/react-query';
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
+import {useAddMatchMetadata} from '@/hooks/useMatchMetadata';
 
 interface CoachMatchResultFlowProps {
   isOpen: boolean;
@@ -69,6 +70,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
   });
   const modalBodyRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const addMetadata = useAddMatchMetadata();
 
   const t = translations.match;
   const totalSteps = 3;
@@ -220,15 +222,9 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         away_score: formData.awayScore,
         home_score_halftime: formData.homeScoreHalftime,
         away_score_halftime: formData.awayScoreHalftime,
-        coach_notes: formData.coachNotes,
         status: 'completed',
         updated_at: new Date().toISOString(),
       };
-
-      // Add photo URL if uploaded
-      if (photoUrl) {
-        updateData.match_photo_url = photoUrl;
-      }
 
       console.log('Updating match with data:', updateData);
       console.log('Match ID:', match.id);
@@ -239,7 +235,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         away_score: match.away_score,
         home_score_halftime: match.home_score_halftime,
         away_score_halftime: match.away_score_halftime,
-        coach_notes: match.coach_notes,
       });
 
       const {error: updateError} = await supabase
@@ -254,6 +249,35 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
 
       console.log('Match updated successfully');
       console.log('Updated match data:', updateData);
+
+      // Add metadata (photo and notes) using the new system
+      if (photoUrl) {
+        await addMetadata.mutateAsync({
+          match_id: match.id,
+          metadata_type: 'photo',
+          file_url: photoUrl,
+          file_name: formData.matchPhoto?.name || 'match_photo.jpg',
+          file_size: formData.matchPhoto?.size || 0,
+          mime_type: formData.matchPhoto?.type || 'image/jpeg',
+          is_primary: true,
+          metadata: {
+            taken_at: new Date().toISOString(),
+          },
+        });
+      }
+
+      if (formData.coachNotes.trim()) {
+        await addMetadata.mutateAsync({
+          match_id: match.id,
+          metadata_type: 'note',
+          content: formData.coachNotes,
+          is_primary: true,
+          metadata: {
+            note_type: 'post_match',
+            is_public: false,
+          },
+        });
+      }
 
       // Automatically recalculate standings for this match's category and season
       try {

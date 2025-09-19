@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, {useState} from 'react';
 import {
   Modal,
   ModalContent,
@@ -12,11 +12,12 @@ import {
   SelectItem,
   SelectedItems,
   Chip,
-} from "@heroui/react";
-import { AcademicCapIcon } from "@heroicons/react/24/outline";
-import { useAdminCategorySimulation } from "@/contexts/AdminCategorySimulationContext";
-import LoadingSpinner from "./LoadingSpinner";
-import { Category } from "@/types";
+} from '@heroui/react';
+import {AcademicCapIcon} from '@heroicons/react/24/outline';
+import {useAdminCategorySimulation} from '@/contexts/AdminCategorySimulationContext';
+import LoadingSpinner from './LoadingSpinner';
+import {Category} from '@/types';
+import {createClient} from '@/utils/supabase/client';
 interface CoachPortalCategoryDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -37,31 +38,110 @@ export function CoachPortalCategoryDialog({
     loading,
   } = useAdminCategorySimulation();
 
-  const [tempSelectedCategories, setTempSelectedCategories] = useState<
-    string[]
-  >([]);
+  const [tempSelectedCategories, setTempSelectedCategories] = useState<string[]>([]);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   // Initialize temp selection when dialog opens
   React.useEffect(() => {
     if (isOpen) {
       setTempSelectedCategories([...selectedCategories]);
+      setProfileError(null);
     }
   }, [isOpen, selectedCategories]);
 
-  const handleConfirm = () => {
-    // Update the actual selection
-    selectedCategories.forEach((catId) => {
-      if (!tempSelectedCategories.includes(catId)) {
-        deselectCategory(catId);
-      }
-    });
-    tempSelectedCategories.forEach((catId) => {
-      if (!selectedCategories.includes(catId)) {
-        selectCategory(catId);
-      }
-    });
+  // Function to ensure user has a profile and admin role
+  const ensureUserProfile = async () => {
+    const supabase = createClient();
 
-    onConfirm();
+    try {
+      // Get current user
+      const {
+        data: {user},
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Check if profile exists using user_id field
+      const {data: profile, error: profileError} = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      // Create profile if it doesn't exist
+      if (profileError && profileError.code === 'PGRST116') {
+        const {error: insertError} = await supabase.from('profiles').insert({
+          user_id: user.id,
+          email: user.email || '',
+          display_name: user.user_metadata?.full_name || user.email || 'Admin User',
+          role: 'admin',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+        if (insertError) {
+          throw new Error(`Failed to create profile: ${insertError.message}`);
+        }
+      }
+
+      // Check if admin role exists in user_roles
+      const {data: userRole, error: roleError} = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .single();
+
+      // Create admin role if it doesn't exist
+      if (roleError && roleError.code === 'PGRST116') {
+        const {error: insertRoleError} = await supabase.from('user_roles').insert({
+          user_id: user.id,
+          role: 'admin',
+          created_at: new Date().toISOString(),
+        });
+
+        if (insertRoleError) {
+          throw new Error(`Failed to create admin role: ${insertRoleError.message}`);
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error ensuring user profile:', error);
+      throw error;
+    }
+  };
+
+  const handleConfirm = async () => {
+    setIsCreatingProfile(true);
+    setProfileError(null);
+
+    try {
+      // Ensure user has profile and admin role
+      await ensureUserProfile();
+
+      // Update the actual selection
+      selectedCategories.forEach((catId) => {
+        if (!tempSelectedCategories.includes(catId)) {
+          deselectCategory(catId);
+        }
+      });
+      tempSelectedCategories.forEach((catId) => {
+        if (!selectedCategories.includes(catId)) {
+          selectCategory(catId);
+        }
+      });
+
+      onConfirm();
+    } catch (error) {
+      console.error('Error setting up user profile:', error);
+      setProfileError(error instanceof Error ? error.message : 'Failed to set up user profile');
+    } finally {
+      setIsCreatingProfile(false);
+    }
   };
 
   const handleClearAll = () => {
@@ -101,13 +181,30 @@ export function CoachPortalCategoryDialog({
             <span>Test Coach Portal</span>
           </div>
           <p className="text-sm text-gray-600 font-normal">
-            Select categories to simulate coach access. You&apos;ll see filtered
-            content in the coach portal.
+            Select categories to simulate coach access. You&apos;ll see filtered content in the
+            coach portal.
           </p>
         </ModalHeader>
 
         <ModalBody>
           <div className="space-y-4">
+            {/* Profile setup status */}
+            {isCreatingProfile && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <LoadingSpinner />
+                <span className="text-sm text-blue-600 dark:text-blue-400">
+                  Setting up your profile for coach portal access...
+                </span>
+              </div>
+            )}
+
+            {/* Profile error */}
+            {profileError && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">Error: {profileError}</p>
+              </div>
+            )}
+
             {/* Action buttons */}
             <div className="flex items-center justify-between">
               <div className="flex space-x-2">
@@ -116,6 +213,7 @@ export function CoachPortalCategoryDialog({
                   variant="bordered"
                   onPress={handleSelectAll}
                   className="text-xs"
+                  isDisabled={isCreatingProfile}
                 >
                   Select All
                 </Button>
@@ -125,13 +223,13 @@ export function CoachPortalCategoryDialog({
                   color="danger"
                   onPress={handleClearAll}
                   className="text-xs"
+                  isDisabled={isCreatingProfile}
                 >
                   Clear All
                 </Button>
               </div>
               <div className="text-sm text-gray-600">
-                {tempSelectedCategories.length} of {availableCategories.length}{" "}
-                selected
+                {tempSelectedCategories.length} of {availableCategories.length} selected
               </div>
             </div>
 
@@ -171,8 +269,7 @@ export function CoachPortalCategoryDialog({
                   <li>Select the categories you want to test</li>
                   <li>Click &quot;Switch to Coach Portal&quot; to proceed</li>
                   <li>
-                    You&apos;ll see filtered content as if you were a coach with
-                    those categories
+                    You&apos;ll see filtered content as if you were a coach with those categories
                   </li>
                 </ol>
               </div>
@@ -181,16 +278,19 @@ export function CoachPortalCategoryDialog({
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="light" onPress={onClose}>
+          <Button variant="light" onPress={onClose} isDisabled={isCreatingProfile}>
             Cancel
           </Button>
           <Button
             color="primary"
             onPress={handleConfirm}
-            startContent={<AcademicCapIcon className="h-4 w-4" />}
-            isDisabled={tempSelectedCategories.length === 0}
+            startContent={
+              isCreatingProfile ? <LoadingSpinner /> : <AcademicCapIcon className="h-4 w-4" />
+            }
+            isLoading={isCreatingProfile}
+            isDisabled={tempSelectedCategories.length === 0 || isCreatingProfile}
           >
-            Switch to Coach Portal
+            {isCreatingProfile ? 'Setting up profile...' : 'Switch to Coach Portal'}
           </Button>
         </ModalFooter>
       </ModalContent>

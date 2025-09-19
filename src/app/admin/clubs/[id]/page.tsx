@@ -20,6 +20,7 @@ import {Category, Season, Club, Team} from '@/types';
 import {useParams} from 'next/navigation';
 import Link from 'next/link';
 import {AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation} from './components';
+import LogoUpload from '@/components/LogoUpload';
 
 export default function ClubDetailPage() {
   const params = useParams();
@@ -516,11 +517,11 @@ export default function ClubDetailPage() {
                 value={editForm.founded_year}
                 onChange={(e) => setEditForm({...editForm, founded_year: e.target.value})}
               />
-              <Input
-                label="URL loga"
-                placeholder="https://example.com/logo.png"
+              <LogoUpload
                 value={editForm.logo_url}
-                onChange={(e) => setEditForm({...editForm, logo_url: e.target.value})}
+                onChange={(logoUrl) => setEditForm({...editForm, logo_url: logoUrl})}
+                label="Logo klubu"
+                description="Nahrajte logo klubu (max 5MB, JPG/PNG)"
               />
             </div>
           </ModalBody>
