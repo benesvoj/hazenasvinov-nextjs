@@ -7,6 +7,7 @@ import {
   BugAntIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
+import {PlusCircleIcon} from '@heroicons/react/16/solid';
 import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 import {Comment} from '@/types';
 
@@ -66,15 +67,15 @@ export default function CommentsZone({
             <h2 className="text-xl font-semibold">Comments ({comments.length})</h2>
           </div>
           <Button
+            size="sm"
             color="primary"
-            startContent={<PlusIcon className="w-4 h-4" />}
+            startContent={<PlusCircleIcon className="w-4 h-4" />}
             onPress={onAddCommentOpen}
-          >
-            Add Comment
-          </Button>
+            isIconOnly
+          />
         </CardHeader>
         <CardBody>
-          <div className="space-y-4 max-h-96 overflow-y-auto">
+          <div className="space-y-4 max-h-96 overflow-y-auto p-2">
             {comments.map((comment) => (
               <Card key={comment.id} className="hover:shadow-md transition-shadow">
                 <CardBody>

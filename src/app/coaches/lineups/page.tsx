@@ -413,7 +413,7 @@ export default function CoachesLineupsPage() {
                           <TableCell>
                             <div>
                               <div className="font-medium text-sm sm:text-base">
-                                {member.member?.name} {member.member?.surname}
+                                {member.member?.surname} {member.member?.name}
                               </div>
                               <div className="text-xs sm:text-sm text-gray-500">
                                 {member.member?.registration_number}
@@ -439,11 +439,6 @@ export default function CoachesLineupsPage() {
                                 {member.is_captain && (
                                   <Chip size="sm" color="warning" className="text-xs">
                                     K
-                                  </Chip>
-                                )}
-                                {member.is_vice_captain && (
-                                  <Chip size="sm" color="secondary" className="text-xs">
-                                    Z
                                   </Chip>
                                 )}
                               </div>

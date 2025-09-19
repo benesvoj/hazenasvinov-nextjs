@@ -35,6 +35,37 @@ export default function AdminDashboard() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [todosLoading, setTodosLoading] = useState(true);
   const [commentsLoading, setCommentsLoading] = useState(true);
+  const [todoFilter, setTodoFilter] = useState<
+    'all' | 'todo' | 'in-progress' | 'done' | 'high-priority'
+  >('todo');
+
+  // Filter todos based on current filter
+  const filteredTodos = todos.filter((todo) => {
+    switch (todoFilter) {
+      case 'todo':
+        return todo.status === 'todo';
+      case 'in-progress':
+        return todo.status === 'in-progress';
+      case 'done':
+        return todo.status === 'done';
+      case 'high-priority':
+        return (todo.priority === 'high' || todo.priority === 'urgent') && todo.status !== 'done';
+      default:
+        return true;
+    }
+  });
+
+  // Calculate statistics
+  const todoStats = {
+    total: todos.length,
+    todo: todos.filter((t) => t.status === 'todo').length,
+    inProgress: todos.filter((t) => t.status === 'in-progress').length,
+    done: todos.filter((t) => t.status === 'done').length,
+    highPriority: todos.filter(
+      (t) => (t.priority === 'high' || t.priority === 'urgent') && t.status !== 'done'
+    ).length,
+  };
+
   // Modal states
   const {isOpen: isAddTodoOpen, onOpen: onAddTodoOpen, onClose: onAddTodoClose} = useDisclosure();
   const {
@@ -223,13 +254,26 @@ export default function AdminDashboard() {
 
   const updateTodoStatus = async (id: string, status: string) => {
     try {
+      console.log('Updating todo status:', {id, status});
       const supabase = createClient();
+
       const {error} = await supabase.from('todos').update({status}).eq('id', id);
 
-      if (error) throw error;
-      loadTodos(); // Reload todos from database
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Todo status updated successfully');
+      showToast.success(`Todo marked as ${status}!`);
+
+      // Force reload todos with a small delay to ensure database consistency
+      setTimeout(() => {
+        loadTodos();
+      }, 100);
     } catch (error) {
-      showToast.danger(`Error updating todo:${error}`);
+      console.error('Error updating todo:', error);
+      showToast.danger(`Error updating todo: ${error}`);
     }
   };
 
@@ -357,47 +401,59 @@ export default function AdminDashboard() {
     <div className="p-6 space-y-6">
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardBody className="text-center">
+        <Card
+          className={`cursor-pointer transition-all hover:shadow-lg ${todoFilter === 'todo' ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
+        >
+          <CardBody
+            className="text-center"
+            onClick={() => setTodoFilter(todoFilter === 'todo' ? 'all' : 'todo')}
+          >
             <div className="flex items-center justify-center gap-2 mb-2">
               <ExclamationTriangleIcon className="w-6 h-6 text-blue-600" />
             </div>
-            <div className="text-2xl font-bold text-blue-600">
-              {todos.filter((t) => t.status === 'todo').length}
-            </div>
+            <div className="text-2xl font-bold text-blue-600">{todoStats.todo}</div>
             <div className="text-sm text-gray-600">To Do</div>
           </CardBody>
         </Card>
-        <Card>
-          <CardBody className="text-center">
+        <Card
+          className={`cursor-pointer transition-all hover:shadow-lg ${todoFilter === 'in-progress' ? 'ring-2 ring-orange-500 bg-orange-50' : ''}`}
+        >
+          <CardBody
+            className="text-center"
+            onClick={() => setTodoFilter(todoFilter === 'in-progress' ? 'all' : 'in-progress')}
+          >
             <div className="flex items-center justify-center gap-2 mb-2">
               <ClockIcon className="w-6 h-6 text-orange-600" />
             </div>
-            <div className="text-2xl font-bold text-orange-600">
-              {todos.filter((t) => t.status === 'in-progress').length}
-            </div>
+            <div className="text-2xl font-bold text-orange-600">{todoStats.inProgress}</div>
             <div className="text-sm text-gray-600">In Progress</div>
           </CardBody>
         </Card>
-        <Card>
-          <CardBody className="text-center">
+        <Card
+          className={`cursor-pointer transition-all hover:shadow-lg ${todoFilter === 'done' ? 'ring-2 ring-green-500 bg-green-50' : ''}`}
+        >
+          <CardBody
+            className="text-center"
+            onClick={() => setTodoFilter(todoFilter === 'done' ? 'all' : 'done')}
+          >
             <div className="flex items-center justify-center gap-2 mb-2">
               <CheckCircleIcon className="w-6 h-6 text-green-600" />
             </div>
-            <div className="text-2xl font-bold text-green-600">
-              {todos.filter((t) => t.status === 'done').length}
-            </div>
+            <div className="text-2xl font-bold text-green-600">{todoStats.done}</div>
             <div className="text-sm text-gray-600">Completed</div>
           </CardBody>
         </Card>
-        <Card>
-          <CardBody className="text-center">
+        <Card
+          className={`cursor-pointer transition-all hover:shadow-lg ${todoFilter === 'high-priority' ? 'ring-2 ring-red-500 bg-red-50' : ''}`}
+        >
+          <CardBody
+            className="text-center"
+            onClick={() => setTodoFilter(todoFilter === 'high-priority' ? 'all' : 'high-priority')}
+          >
             <div className="flex items-center justify-center gap-2 mb-2">
               <FireIcon className="w-6 h-6 text-red-600" />
             </div>
-            <div className="text-2xl font-bold text-red-600">
-              {todos.filter((t) => t.priority === 'urgent').length}
-            </div>
+            <div className="text-2xl font-bold text-red-600">{todoStats.highPriority}</div>
             <div className="text-sm text-gray-600">High Priority</div>
           </CardBody>
         </Card>
@@ -407,12 +463,13 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Todo List Zone */}
         <ToDoList
-          todos={todos}
+          todos={filteredTodos}
           todosLoading={todosLoading}
           handleAddTodo={handleAddTodo}
           updateTodoStatus={updateTodoStatus}
           deleteTodo={deleteTodo}
           handleEditTodo={handleEditTodo}
+          currentFilter={todoFilter}
         />
 
         {/* Comments Zone */}
