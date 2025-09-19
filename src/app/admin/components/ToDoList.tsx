@@ -98,7 +98,7 @@ export default function ToDoList({
               <LoadingSpinner />
             </div>
           ) : (
-            <div className="space-y-4 max-h-250 overflow-y-auto p-2">
+            <div className="space-y-4 max-h-64 overflow-y-auto p-2">
               {todos
                 .sort((a, b) => {
                   // First sort by priority (urgent > high > medium > low)
