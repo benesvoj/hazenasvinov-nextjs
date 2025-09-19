@@ -32,8 +32,8 @@ interface AddMemberModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddMember: (memberData: AddMemberToLineupData) => Promise<void>;
-  selectedCategory: string; // Category ID
-  selectedCategoryId: string; // Category code (e.g., "U15", "U17")
+  selectedCategoryName: string; // Category Name
+  selectedCategoryId: string; // Category Id
   existingMembers: string[]; // Array of member IDs already in the lineup
   existingJerseyNumbers: number[]; // Array of jersey numbers already used
 }
@@ -43,7 +43,7 @@ export default function AddMemberModal({
   onClose,
 
   onAddMember,
-  selectedCategory,
+  selectedCategoryName,
   selectedCategoryId,
   existingMembers,
   existingJerseyNumbers,
@@ -384,7 +384,7 @@ export default function AddMemberModal({
         onClose={() => setIsCreateMemberModalOpen(false)}
         onMemberCreated={handleMemberCreated}
         selectedCategoryId={selectedCategoryId}
-        selectedCategoryName={selectedCategory}
+        selectedCategoryName={selectedCategoryName}
       />
     </>
   );

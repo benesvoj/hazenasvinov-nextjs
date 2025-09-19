@@ -551,7 +551,7 @@ export default function CoachesLineupsPage() {
         isOpen={isAddMemberModalOpen}
         onClose={() => setIsAddMemberModalOpen(false)}
         onAddMember={handleAddMember}
-        selectedCategory={selectedCategory}
+        selectedCategoryName={categories.find((c) => c.id === selectedCategory)?.name || ''}
         selectedCategoryId={categories.find((c) => c.id === selectedCategory)?.id || ''}
         existingMembers={existingMemberIds}
         existingJerseyNumbers={existingJerseyNumbers}
