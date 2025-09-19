@@ -6,7 +6,7 @@ import {useUser} from '@/contexts/UserContext';
 import {UserIcon, VideoCameraIcon, AcademicCapIcon} from '@heroicons/react/24/outline';
 import {Button, Card, CardBody, CardHeader} from '@heroui/react';
 import MatchSchedule from '@/components/match/MatchSchedule';
-import {BirthdayCard} from './components';
+import {BirthdayCard, TopScorersCard, YellowCardsCard, RedCardsCard} from './components';
 import {PageContainer, LoadingSpinner} from '@/components';
 import CoachMatchResultFlow from '../matches/components/CoachMatchResultFlow';
 
@@ -66,52 +66,11 @@ export default function CoachesDashboard() {
           <BirthdayCard />
         </div>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer hidden sm:block">
-          <CardBody className="text-center p-4 sm:p-6">
-            <AcademicCapIcon className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 mx-auto mb-3 sm:mb-4" />
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Zápasy</h3>
-            <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">
-              Sledujte a spravujte zápasy
-            </p>
-            <Button color="primary" variant="bordered" size="sm" className="w-full sm:w-auto">
-              Zobrazit zápasy
-            </Button>
-          </CardBody>
-        </Card>
+        <TopScorersCard />
 
-        <Link href="/coaches/videos" className="block">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer hidden sm:block">
-            <CardBody className="text-center p-4 sm:p-6">
-              <VideoCameraIcon className="w-10 h-10 sm:w-12 sm:h-12 text-purple-600 mx-auto mb-3 sm:mb-4" />
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Videa</h3>
-              <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">
-                Spravujte videa pro své kategorie
-              </p>
-              <Button
-                color="primary"
-                variant="bordered"
-                size="sm"
-                as="span"
-                className="w-full sm:w-auto"
-              >
-                Zobrazit videa
-              </Button>
-            </CardBody>
-          </Card>
-        </Link>
+        <YellowCardsCard />
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer hidden sm:block">
-          <CardBody className="text-center p-4 sm:p-6">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <span className="text-xl sm:text-2xl">📊</span>
-            </div>
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Statistiky</h3>
-            <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">Analýza výkonnosti týmů</p>
-            <Button color="primary" variant="bordered" size="sm" className="w-full sm:w-auto">
-              Zobrazit statistiky
-            </Button>
-          </CardBody>
-        </Card>
+        <RedCardsCard />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2">
