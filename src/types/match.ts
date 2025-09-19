@@ -22,8 +22,6 @@ export interface Match {
   away_score?: number | Nullish;
   home_score_halftime?: number | Nullish;
   away_score_halftime?: number | Nullish;
-  coach_notes?: string | Nullish;
-  match_photo_url?: string | Nullish;
   matchweek?: number | Nullish;
   match_number?: number | Nullish;
   category: Category;

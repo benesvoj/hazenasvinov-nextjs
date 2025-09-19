@@ -71,10 +71,6 @@ const getAdminRouteIcon = (route: string) => {
       return <TagIcon className="w-5 h-5" />;
     case privateRoutes.seasons:
       return <CalendarIcon className="w-5 h-5" />;
-    case privateRoutes.teams:
-      return <UserGroupIcon className="w-5 h-5" />;
-    case privateRoutes.teamCategories:
-      return <BuildingOfficeIcon className="w-5 h-5" />;
     case privateRoutes.matches:
       return <TrophyIcon className="w-5 h-5" />;
     case privateRoutes.members:
@@ -191,7 +187,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
     if (variant === 'admin') {
       return {
         container: `fixed left-0 top-0 h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white transition-all duration-300 ease-in-out z-50 shadow-xl flex flex-col ${
-          isCollapsed ? 'w-16' : 'w-64'
+          isCollapsed ? 'w-16' : 'w-56'
         }`,
         mobileContainer: `fixed left-0 top-0 h-full w-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white z-50 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col -translate-x-full`,
         header:
@@ -212,7 +208,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
     } else {
       return {
         container: `fixed top-0 left-0 z-50 h-screen bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
-          isCollapsed ? 'w-16' : 'w-64'
+          isCollapsed ? 'w-16' : 'w-56'
         }`,
         mobileContainer: `fixed top-0 left-0 z-50 h-full w-full bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ease-in-out flex flex-col -translate-x-full`,
         header:

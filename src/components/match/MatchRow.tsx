@@ -1,11 +1,11 @@
 import React from 'react';
 import Link from '@/components/Link';
-import {MapPinIcon, TrophyIcon} from '@heroicons/react/24/outline';
+import {TrophyIcon} from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import {formatDateToDayAndMonth, formatDateToWeekday, formatTime} from '@/helpers';
 import {Match} from '@/types';
 import {MatchScore} from '@/components';
-import {Button} from '@heroui/react';
+import {Button, Divider} from '@heroui/react';
 
 interface MatchRowProps {
   match: Match;
@@ -13,6 +13,7 @@ interface MatchRowProps {
   redirectionLinks: boolean;
   onStartResultFlow?: (match: Match) => void;
   showResultButton?: boolean;
+  showSeason?: boolean;
 }
 
 const MatchRow: React.FC<MatchRowProps> = ({
@@ -21,6 +22,7 @@ const MatchRow: React.FC<MatchRowProps> = ({
   redirectionLinks = true,
   onStartResultFlow,
   showResultButton = false,
+  showSeason = false,
 }) => {
   const handleResultButtonClick = () => {
     onStartResultFlow?.(match);
@@ -109,23 +111,27 @@ const MatchRow: React.FC<MatchRowProps> = ({
             </div>
 
             {/* Venue and League Info */}
-            <div className="text-center">
-              <div className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-1">
-                {/* Mobile: Shorter text, Desktop: Full text */}
-                <span className="lg:hidden flex flex-col items-start">
-                  <div>{match.category?.name}</div>
-                  <div>{match.venue}</div>
-                </span>
-                <span className="hidden lg:inline">
-                  {`${match.category?.name} - ${match.category?.description}`}
-                  {match.venue && (
-                    <>
-                      {' '}
-                      <MapPinIcon className="w-3 h-3 inline ml-2" /> {match.venue}
-                    </>
-                  )}
-                </span>
+            <div className="flex h-5 items-center space-x-4 text-xs text-gray-600 dark:text-gray-400">
+              {/* Mobile: Shorter text, Desktop: Full text */}
+              <div className="lg:hidden flex flex-col items-start">
+                <div>{match.category?.name}</div>
+                <div>{match.venue}</div>
               </div>
+              <div className="hidden lg:inline">
+                {`${match.category?.name} - ${match.category?.description}`}
+              </div>
+              {match.venue && (
+                <>
+                  <Divider orientation="vertical" />
+                  <div>{match.venue}</div>
+                </>
+              )}
+              {showSeason && (
+                <>
+                  <Divider orientation="vertical" />
+                  <div>Ročník: {match.season?.name}</div>
+                </>
+              )}
             </div>
           </div>
 

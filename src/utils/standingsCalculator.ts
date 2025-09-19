@@ -78,17 +78,6 @@ export async function calculateStandings(
               club_id: cc.club_id,
             })) || []
         );
-      } else {
-        // Fallback to old system
-        const fallbackResult = await supabase
-          .from('team_categories')
-          .select('team_id')
-          .eq('category_id', categoryId)
-          .eq('season_id', seasonId)
-          .eq('is_active', true);
-
-        if (fallbackResult.error) throw fallbackResult.error;
-        teamCategories = fallbackResult.data;
       }
     } catch (error) {
       teamsError = error;

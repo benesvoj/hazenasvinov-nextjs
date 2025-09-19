@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   Input,
   Button,
@@ -14,23 +14,24 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/react";
+} from '@heroui/react';
 import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
   EyeIcon,
   BuildingOfficeIcon,
-} from "@heroicons/react/24/outline";
-import { createClient } from "@/utils/supabase/client";
-import { Club } from "@/types";
-import Link from "next/link";
+} from '@heroicons/react/24/outline';
+import {createClient} from '@/utils/supabase/client';
+import {Club} from '@/types';
+import Link from 'next/link';
+import LogoUpload from '@/components/LogoUpload';
 
 export default function ClubsAdminPage() {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Memoize filtered clubs to prevent unnecessary re-renders
   const filteredClubs = React.useMemo(() => {
@@ -38,69 +39,52 @@ export default function ClubsAdminPage() {
     return clubs.filter(
       (club) =>
         club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (club.short_name &&
-          club.short_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (club.city &&
-          club.city.toLowerCase().includes(searchTerm.toLowerCase()))
+        (club.short_name && club.short_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (club.city && club.city.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [clubs, searchTerm]);
 
   // Memoize search handler to prevent unnecessary re-renders
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(e.target.value);
-    },
-    []
-  );
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
 
   // Modal states
-  const {
-    isOpen: isCreateOpen,
-    onOpen: onCreateOpen,
-    onClose: onCreateClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditOpen,
-    onOpen: onEditOpen,
-    onClose: onEditClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteOpen,
-    onOpen: onDeleteOpen,
-    onClose: onDeleteClose,
-  } = useDisclosure();
+  const {isOpen: isCreateOpen, onOpen: onCreateOpen, onClose: onCreateClose} = useDisclosure();
+  const {isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose} = useDisclosure();
+  const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
 
   // Form states
   const [createForm, setCreateForm] = useState({
-    name: "",
-    short_name: "",
-    city: "",
-    founded_year: "",
-    logo_url: "",
-    venue: "",
-    web: "",
-    email: "",
-    phone: "",
-    address: "",
-    description: "",
-    contact_person: "",
+    name: '',
+    short_name: '',
+    city: '',
+    founded_year: '',
+    logo_url: '',
+    venue: '',
+    web: '',
+    email: '',
+    phone: '',
+    address: '',
+    description: '',
+    contact_person: '',
     is_own_club: false,
   });
 
   const [editForm, setEditForm] = useState({
-    id: "",
-    name: "",
-    short_name: "",
-    city: "",
-    founded_year: "",
-    logo_url: "",
-    venue: "",
-    web: "",
-    email: "",
-    phone: "",
-    address: "",
-    description: "",
-    contact_person: "",
+    id: '',
+    name: '',
+    short_name: '',
+    city: '',
+    founded_year: '',
+    logo_url: '',
+    venue: '',
+    web: '',
+    email: '',
+    phone: '',
+    address: '',
+    description: '',
+    contact_person: '',
     is_own_club: false,
   });
 
@@ -112,16 +96,13 @@ export default function ClubsAdminPage() {
   const fetchClubs = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("clubs")
-        .select("*")
-        .order("name");
+      const {data, error} = await supabase.from('clubs').select('*').order('name');
 
       if (error) throw error;
       setClubs(data || []);
     } catch (error) {
-      setError("Chyba při načítání klubů");
-      console.error("Error fetching clubs:", error);
+      setError('Chyba při načítání klubů');
+      console.error('Error fetching clubs:', error);
     } finally {
       setLoading(false);
     }
@@ -131,17 +112,15 @@ export default function ClubsAdminPage() {
   const handleCreateClub = async () => {
     try {
       if (!createForm.name.trim()) {
-        setError("Název klubu je povinný");
+        setError('Název klubu je povinný');
         return;
       }
 
-      const { error } = await supabase.from("clubs").insert({
+      const {error} = await supabase.from('clubs').insert({
         name: createForm.name.trim(),
         short_name: createForm.short_name.trim() || null,
         city: createForm.city.trim() || null,
-        founded_year: createForm.founded_year
-          ? parseInt(createForm.founded_year)
-          : null,
+        founded_year: createForm.founded_year ? parseInt(createForm.founded_year) : null,
         logo_url: createForm.logo_url.trim() || null,
         venue: createForm.venue.trim() || null,
         web: createForm.web.trim() || null,
@@ -157,25 +136,25 @@ export default function ClubsAdminPage() {
 
       onCreateClose();
       setCreateForm({
-        name: "",
-        short_name: "",
-        city: "",
-        founded_year: "",
-        logo_url: "",
-        venue: "",
-        web: "",
-        email: "",
-        phone: "",
-        address: "",
-        description: "",
-        contact_person: "",
+        name: '',
+        short_name: '',
+        city: '',
+        founded_year: '',
+        logo_url: '',
+        venue: '',
+        web: '',
+        email: '',
+        phone: '',
+        address: '',
+        description: '',
+        contact_person: '',
         is_own_club: false,
       });
       fetchClubs();
-      setError("");
+      setError('');
     } catch (error) {
-      setError("Chyba při vytváření klubu");
-      console.error("Error creating club:", error);
+      setError('Chyba při vytváření klubu');
+      console.error('Error creating club:', error);
     }
   };
 
@@ -183,20 +162,18 @@ export default function ClubsAdminPage() {
   const handleUpdateClub = async () => {
     try {
       if (!editForm.name.trim()) {
-        setError("Název klubu je povinný");
+        setError('Název klubu je povinný');
         return;
       }
 
-      const { error } = await supabase
-        .from("clubs")
+      const {error} = await supabase
+        .from('clubs')
         .update({
           name: editForm.name.trim(),
           short_name: editForm.short_name.trim() || null,
           city: editForm.city.trim() || null,
-          founded_year: editForm.founded_year
-            ? parseInt(editForm.founded_year)
-            : null,
-          logo_url: editForm.logo_url.trim() || null,
+          founded_year: editForm.founded_year ? parseInt(editForm.founded_year) : null,
+          logo_url: editForm.logo_url && editForm.logo_url.trim() ? editForm.logo_url.trim() : null,
           venue: editForm.venue.trim() || null,
           web: editForm.web.trim() || null,
           email: editForm.email.trim() || null,
@@ -206,32 +183,37 @@ export default function ClubsAdminPage() {
           contact_person: editForm.contact_person.trim() || null,
           is_own_club: editForm.is_own_club,
         })
-        .eq("id", editForm.id);
+        .eq('id', editForm.id);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
+      // Refresh the clubs list first
+      await fetchClubs();
+
+      // Then close the modal and reset form
       onEditClose();
       setEditForm({
-        id: "",
-        name: "",
-        short_name: "",
-        city: "",
-        founded_year: "",
-        logo_url: "",
-        venue: "",
-        web: "",
-        email: "",
-        phone: "",
-        address: "",
-        description: "",
-        contact_person: "",
+        id: '',
+        name: '',
+        short_name: '',
+        city: '',
+        founded_year: '',
+        logo_url: '',
+        venue: '',
+        web: '',
+        email: '',
+        phone: '',
+        address: '',
+        description: '',
+        contact_person: '',
         is_own_club: false,
       });
-      fetchClubs();
-      setError("");
+      setError('');
     } catch (error) {
-      setError("Chyba při aktualizaci klubu");
-      console.error("Error updating club:", error);
+      setError('Chyba při aktualizaci klubu');
+      console.error('Error updating club:', error);
     }
   };
 
@@ -240,20 +222,17 @@ export default function ClubsAdminPage() {
     if (!clubToDelete) return;
 
     try {
-      const { error } = await supabase
-        .from("clubs")
-        .delete()
-        .eq("id", clubToDelete.id);
+      const {error} = await supabase.from('clubs').delete().eq('id', clubToDelete.id);
 
       if (error) throw error;
 
       onDeleteClose();
       setClubToDelete(null);
       fetchClubs();
-      setError("");
+      setError('');
     } catch (error) {
-      setError("Chyba při mazání klubu");
-      console.error("Error deleting club:", error);
+      setError('Chyba při mazání klubu');
+      console.error('Error deleting club:', error);
     }
   };
 
@@ -262,17 +241,17 @@ export default function ClubsAdminPage() {
     setEditForm({
       id: club.id,
       name: club.name,
-      short_name: club.short_name || "",
-      city: club.city || "",
-      founded_year: club.founded_year?.toString() || "",
-      logo_url: club.logo_url || "",
-      venue: club.venue || "",
-      web: club.web || "",
-      email: club.email || "",
-      phone: club.phone || "",
-      address: club.address || "",
-      description: club.description || "",
-      contact_person: club.contact_person || "",
+      short_name: club.short_name || '',
+      city: club.city || '',
+      founded_year: club.founded_year?.toString() || '',
+      logo_url: club.logo_url || '',
+      venue: club.venue || '',
+      web: club.web || '',
+      email: club.email || '',
+      phone: club.phone || '',
+      address: club.address || '',
+      description: club.description || '',
+      contact_person: club.contact_person || '',
       is_own_club: club.is_own_club || false,
     });
     onEditOpen();
@@ -292,7 +271,7 @@ export default function ClubsAdminPage() {
       try {
         await fetchClubs();
       } catch (error) {
-        console.error("Error loading clubs:", error);
+        console.error('Error loading clubs:', error);
       }
     };
 
@@ -358,9 +337,7 @@ export default function ClubsAdminPage() {
                       )}
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-800">
-                            {club.name}
-                          </h3>
+                          <h3 className="text-lg font-semibold text-gray-800">{club.name}</h3>
                           {club.is_own_club && (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               Domácí klub
@@ -372,9 +349,7 @@ export default function ClubsAdminPage() {
                             <p>Krátký název: {club.short_name}</p>
                           )}
                           {club.city && <p>Město: {club.city}</p>}
-                          {club.founded_year && (
-                            <p>Založen: {club.founded_year}</p>
-                          )}
+                          {club.founded_year && <p>Založen: {club.founded_year}</p>}
                           {club.venue && <p>Hřiště: {club.venue}</p>}
                           {club.web && <p>Web: {club.web}</p>}
                           {club.email && <p>Email: {club.email}</p>}
@@ -428,12 +403,12 @@ export default function ClubsAdminPage() {
                 <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                   <BuildingOfficeIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-700 mb-2">
-                    {searchTerm ? "Žádné kluby nenalezeny" : "Žádné kluby"}
+                    {searchTerm ? 'Žádné kluby nenalezeny' : 'Žádné kluby'}
                   </h3>
                   <p className="text-gray-500">
                     {searchTerm
-                      ? "Zkuste změnit vyhledávací termín"
-                      : "Začněte přidáním prvního klubu"}
+                      ? 'Zkuste změnit vyhledávací termín'
+                      : 'Začněte přidáním prvního klubu'}
                   </p>
                 </div>
               )}
@@ -452,91 +427,69 @@ export default function ClubsAdminPage() {
                 label="Název klubu *"
                 placeholder="např. Hazena Švínov"
                 value={createForm.name}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, name: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
               />
               <Input
                 label="Krátký název"
                 placeholder="např. Švínov"
                 value={createForm.short_name}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, short_name: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, short_name: e.target.value})}
               />
               <Input
                 label="Město"
                 placeholder="např. Švínov"
                 value={createForm.city}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, city: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, city: e.target.value})}
               />
               <Input
                 label="Rok založení"
                 type="number"
                 placeholder="např. 1920"
                 value={createForm.founded_year}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, founded_year: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, founded_year: e.target.value})}
               />
-              <Input
-                label="URL loga"
-                placeholder="https://example.com/logo.png"
+              <LogoUpload
                 value={createForm.logo_url}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, logo_url: e.target.value })
-                }
+                onChange={(logoUrl) => setCreateForm({...createForm, logo_url: logoUrl})}
+                label="Logo klubu"
+                description="Nahrajte logo klubu (max 5MB, JPG/PNG)"
               />
               <Input
                 label="Hřiště/venue"
                 placeholder="např. Sportovní hala Švínov"
                 value={createForm.venue}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, venue: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, venue: e.target.value})}
               />
               <Input
                 label="Webové stránky"
                 placeholder="https://example.com"
                 value={createForm.web}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, web: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, web: e.target.value})}
               />
               <Input
                 label="Email"
                 type="email"
                 placeholder="info@example.com"
                 value={createForm.email}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, email: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, email: e.target.value})}
               />
               <Input
                 label="Telefon"
                 placeholder="+420 123 456 789"
                 value={createForm.phone}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, phone: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, phone: e.target.value})}
               />
               <Input
                 label="Adresa"
                 placeholder="ulice, město, PSČ"
                 value={createForm.address}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, address: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, address: e.target.value})}
               />
               <Input
                 label="Popis"
                 placeholder="Krátký popis klubu..."
                 value={createForm.description}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, description: e.target.value })
-                }
+                onChange={(e) => setCreateForm({...createForm, description: e.target.value})}
               />
               <Input
                 label="Kontaktní osoba"
@@ -562,12 +515,8 @@ export default function ClubsAdminPage() {
                   }
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <label
-                  htmlFor="create-is-own-club"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Tento klub je náš domácí klub (pro filtrování zápasů a
-                  tabulek)
+                <label htmlFor="create-is-own-club" className="text-sm font-medium text-gray-700">
+                  Tento klub je náš domácí klub (pro filtrování zápasů a tabulek)
                 </label>
               </div>
             </div>
@@ -593,116 +542,88 @@ export default function ClubsAdminPage() {
                 label="Název klubu *"
                 placeholder="např. Hazena Švínov"
                 value={editForm.name}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, name: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
               />
               <Input
                 label="Krátký název"
                 placeholder="např. Švínov"
                 value={editForm.short_name}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, short_name: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, short_name: e.target.value})}
               />
               <Input
                 label="Město"
                 placeholder="např. Švínov"
                 value={editForm.city}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, city: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, city: e.target.value})}
               />
               <Input
                 label="Rok založení"
                 type="number"
                 placeholder="např. 1920"
                 value={editForm.founded_year}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, founded_year: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, founded_year: e.target.value})}
               />
-              <Input
-                label="URL loga"
-                placeholder="https://example.com/logo.png"
+              <LogoUpload
                 value={editForm.logo_url}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, logo_url: e.target.value })
-                }
+                onChange={(logoUrl) => {
+                  setEditForm({...editForm, logo_url: logoUrl});
+                }}
+                label="Logo klubu"
+                description="Nahrajte logo klubu (max 5MB, JPG/PNG)"
               />
               <Input
                 label="Hřiště/venue"
                 placeholder="např. Sportovní hala Švínov"
                 value={editForm.venue}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, venue: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, venue: e.target.value})}
               />
               <Input
                 label="Webové stránky"
                 placeholder="https://example.com"
                 value={editForm.web}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, web: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, web: e.target.value})}
               />
               <Input
                 label="Email"
                 type="email"
                 placeholder="info@example.com"
                 value={editForm.email}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, email: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, email: e.target.value})}
               />
               <Input
                 label="Telefon"
                 placeholder="+420 123 456 789"
                 value={editForm.phone}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, phone: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
               />
               <Input
                 label="Adresa"
                 placeholder="ulice, město, PSČ"
                 value={editForm.address}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, address: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, address: e.target.value})}
               />
               <Input
                 label="Popis"
                 placeholder="Krátký popis klubu..."
                 value={editForm.description}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, description: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, description: e.target.value})}
               />
               <Input
                 label="Kontaktní osoba"
                 placeholder="Jméno a příjmení"
                 value={editForm.contact_person}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, contact_person: e.target.value })
-                }
+                onChange={(e) => setEditForm({...editForm, contact_person: e.target.value})}
               />
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="edit-is-own-club"
                   checked={editForm.is_own_club}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, is_own_club: e.target.checked })
-                  }
+                  onChange={(e) => setEditForm({...editForm, is_own_club: e.target.checked})}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <label
-                  htmlFor="edit-is-own-club"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Tento klub je náš domácí klub (pro filtrování zápasů a
-                  tabulek)
+                <label htmlFor="edit-is-own-club" className="text-sm font-medium text-gray-700">
+                  Tento klub je náš domácí klub (pro filtrování zápasů a tabulek)
                 </label>
               </div>
             </div>
