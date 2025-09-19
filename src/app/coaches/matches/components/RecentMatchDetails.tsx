@@ -72,7 +72,8 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
   // Helper function to get safe image URL
   const getSafeImageUrl = (fileUrl: string | undefined | null, metadata?: any): string => {
     // 1x1 transparent PNG data URL
-    const placeholderDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2ZkAAAAASUVORK5CYII=';
+    const placeholderDataUrl =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2ZkAAAAASUVORK5CYII=';
     if (!fileUrl) {
       // Check if we have a temporary preview in metadata
       if (metadata?.temp_preview) {
@@ -229,7 +230,7 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
               <div className="flex items-center gap-2">
                 <PhotoIcon className="w-5 h-5 text-blue-600" />
                 <h4 className="font-semibold text-base">
-                  Fotografie zápisu utkání
+                  Zápis utkání
                   {photos.length > 0 && (
                     <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
                       ({photos.length})
