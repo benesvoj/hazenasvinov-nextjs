@@ -119,8 +119,8 @@ export function useUpcomingBirthdays(
   }, [limit, filterByAssignedCategories, assignedCategoryIds, categoryId]);
 
   useEffect(() => {
-    // Only fetch if we're not filtering by categories or if we have assigned categories
-    if (!filterByAssignedCategories || assignedCategoryIds.length > 0) {
+    // Only fetch if we're not filtering by categories, or if we have assigned categories, or if categoryId is set
+    if (!filterByAssignedCategories || assignedCategoryIds.length > 0 || categoryId) {
       fetchUpcomingBirthdays();
     }
   }, [fetchUpcomingBirthdays, filterByAssignedCategories, assignedCategoryIds, categoryId]);
