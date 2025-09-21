@@ -6,8 +6,12 @@ import {XCircleIcon} from '@heroicons/react/24/outline';
 import {usePlayerStats} from '@/hooks/usePlayerStats';
 import {LoadingSpinner} from '@/components';
 
-export default function RedCardsCard() {
-  const {redCardPlayers, loading, error} = usePlayerStats();
+interface RedCardsCardProps {
+  categoryId?: string;
+}
+
+export default function RedCardsCard({categoryId}: RedCardsCardProps) {
+  const {redCardPlayers, loading, error} = usePlayerStats(categoryId);
 
   if (loading) {
     return (

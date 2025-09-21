@@ -1,10 +1,11 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import Link from 'next/link';
 import {useUser} from '@/contexts/UserContext';
+import {useCategories, useUserRoles} from '@/hooks';
 import {UserIcon, VideoCameraIcon, AcademicCapIcon} from '@heroicons/react/24/outline';
-import {Button, Card, CardBody, CardHeader} from '@heroui/react';
+import {Button, Card, CardBody, CardHeader, Tab, Tabs} from '@heroui/react';
 import MatchSchedule from '@/components/match/MatchSchedule';
 import {BirthdayCard, TopScorersCard, YellowCardsCard, RedCardsCard} from './components';
 import {PageContainer, LoadingSpinner} from '@/components';
@@ -14,6 +15,35 @@ export default function CoachesDashboard() {
   const {user, userProfile, loading, error} = useUser();
   const [resultFlowMatch, setResultFlowMatch] = useState<any>(null);
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
+
+  const {categories, fetchCategories} = useCategories();
+  const {getCurrentUserCategories} = useUserRoles();
+
+  // Filter categories based on assigned categories
+  const availableCategories = useMemo(() => {
+    return categories.filter((cat) => assignedCategoryIds.includes(cat.id));
+  }, [categories, assignedCategoryIds]);
+
+  // Auto-select first category if none selected and only one available
+  useEffect(() => {
+    if (availableCategories.length > 0 && !selectedCategory) {
+      setSelectedCategory(availableCategories[0].id);
+    }
+  }, [availableCategories, selectedCategory]);
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  // Fetch assigned categories if available
+  useEffect(() => {
+    if (getCurrentUserCategories) {
+      getCurrentUserCategories().then(setAssignedCategoryIds);
+    }
+  }, [getCurrentUserCategories]);
 
   // Authentication is handled by ProtectedCoachRoute
 
@@ -59,18 +89,35 @@ export default function CoachesDashboard() {
 
   return (
     <PageContainer>
+      {/* Category Selection */}
+      {availableCategories.length > 1 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
+          <div className="overflow-x-auto">
+            <Tabs
+              selectedKey={selectedCategory}
+              onSelectionChange={(key) => setSelectedCategory(key as string)}
+              className="w-full min-w-max"
+            >
+              {availableCategories.map((category) => (
+                <Tab key={category.id} title={category.name} />
+              ))}
+            </Tabs>
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-6">
         {/* Birthday Card */}
-        <div className=" hidden sm:block m:col-span-2 xl:col-span-1">
-          <BirthdayCard />
+        <div className=" hidden sm:block md:col-span-2 xl:col-span-1">
+          <BirthdayCard categoryId={selectedCategory} />
         </div>
 
-        <TopScorersCard />
+        <TopScorersCard categoryId={selectedCategory} />
 
-        <YellowCardsCard />
+        <YellowCardsCard categoryId={selectedCategory} />
 
-        <RedCardsCard />
+        <RedCardsCard categoryId={selectedCategory} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -80,6 +127,7 @@ export default function CoachesDashboard() {
             redirectionLinks={false}
             onStartResultFlow={handleStartResultFlow}
             showResultButton={true}
+            selectedCategoryId={selectedCategory}
           />
         </div>
       </div>

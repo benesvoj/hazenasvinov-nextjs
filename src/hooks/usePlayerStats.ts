@@ -28,7 +28,7 @@ export interface UsePlayerStatsResult {
   error: string | null;
 }
 
-export function usePlayerStats(): UsePlayerStatsResult {
+export function usePlayerStats(categoryId?: string): UsePlayerStatsResult {
   const [playerStats, setPlayerStats] = useState<PlayerStats[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +48,9 @@ export function usePlayerStats(): UsePlayerStatsResult {
           setPlayerStats([]);
           return;
         }
+
+        // If categoryId is provided, filter by that category, otherwise use all assigned categories
+        const categoryIdsToUse = categoryId ? [categoryId] : assignedCategoryIds;
 
         const supabase = createClient();
         const playerStatsMap = new Map<string, PlayerStats>();
@@ -75,7 +78,7 @@ export function usePlayerStats(): UsePlayerStatsResult {
           `
           )
           .eq('lineup.match.status', 'completed')
-          .in('lineup.match.category_id', assignedCategoryIds);
+          .in('lineup.match.category_id', categoryIdsToUse);
 
         if (lineupPlayersError) {
           setPlayerStats([]);
@@ -161,7 +164,7 @@ export function usePlayerStats(): UsePlayerStatsResult {
     };
 
     fetchPlayerStats();
-  }, [user?.id, getCurrentUserCategories]);
+  }, [user?.id, getCurrentUserCategories, categoryId]);
 
   // Memoize the sorted results
   const topScorers = useMemo(() => {

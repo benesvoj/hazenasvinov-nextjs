@@ -6,8 +6,12 @@ import {GiftIcon, CalendarIcon} from '@heroicons/react/24/outline';
 import {useUpcomingBirthdays} from '@/hooks/useUpcomingBirthdays';
 import {formatDateString} from '@/helpers';
 
-export default function BirthdayCard() {
-  const {birthdays, loading, error} = useUpcomingBirthdays(3, true);
+interface BirthdayCardProps {
+  categoryId?: string;
+}
+
+export default function BirthdayCard({categoryId}: BirthdayCardProps) {
+  const {birthdays, loading, error} = useUpcomingBirthdays(3, true, categoryId);
 
   const getDaysUntilText = (days: number) => {
     if (days === 0) return 'Dnes!';

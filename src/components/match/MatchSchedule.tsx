@@ -21,6 +21,7 @@ interface MatchScheduleProps {
   description?: string;
   showOnlyAssignedCategories?: boolean; // New prop to control category filtering
   redirectionLinks?: boolean;
+  selectedCategoryId?: string; // External category selection
   onStartResultFlow?: (match: any) => void;
   showResultButton?: boolean;
 }
@@ -30,6 +31,7 @@ export default function MatchSchedule({
   description,
   showOnlyAssignedCategories = false,
   redirectionLinks = true,
+  selectedCategoryId,
   onStartResultFlow,
   showResultButton = false,
 }: MatchScheduleProps) {
@@ -101,15 +103,18 @@ export default function MatchSchedule({
     }
   }, [showOnlyAssignedCategories, getCurrentUserCategories, categories]);
 
-  // Update selected category when available categories change
+  // Update selected category when available categories change or external category is provided
   useEffect(() => {
-    if (availableCategories.length > 0) {
+    if (selectedCategoryId) {
+      // Use external category selection
+      setSelectedCategory(selectedCategoryId);
+    } else if (availableCategories.length > 0) {
       // If no category is selected or current selected category is not available, select the first available one
       if (!selectedCategory || !availableCategories.some((cat) => cat.id === selectedCategory)) {
         setSelectedCategory(availableCategories[0].id);
       }
     }
-  }, [availableCategories, selectedCategory]);
+  }, [availableCategories, selectedCategory, selectedCategoryId]);
 
   // Fetch standings when category or active season changes
   useEffect(() => {
@@ -210,8 +215,8 @@ export default function MatchSchedule({
           )}
         </div>
 
-        {/* Category Tabs */}
-        {availableCategories.length > 0 ? (
+        {/* Category Tabs - only show if no external category is provided */}
+        {!selectedCategoryId && availableCategories.length > 0 ? (
           <Tabs
             selectedKey={selectedCategory}
             onSelectionChange={(key) => setSelectedCategory(key as string)}
@@ -223,18 +228,18 @@ export default function MatchSchedule({
               <Tab key={category.id} title={category.name} />
             ))}
           </Tabs>
-        ) : showOnlyAssignedCategories ? (
+        ) : !selectedCategoryId && showOnlyAssignedCategories ? (
           <div className="text-center py-8 mb-8">
             <p className="text-gray-600 mb-2">Nemáte přiřazené žádné kategorie</p>
             <p className="text-sm text-gray-500">
               Pro testování trenérského portálu použijte simulaci kategorií v administraci
             </p>
           </div>
-        ) : (
+        ) : !selectedCategoryId ? (
           <div className="text-center py-8 mb-8">
             <p className="text-gray-600">Žádné kategorie nejsou k dispozici</p>
           </div>
-        )}
+        ) : null}
 
         {/* Content */}
         {availableCategories.length > 0 && (

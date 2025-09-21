@@ -26,6 +26,7 @@ import {translations} from '@/lib/translations';
 export default function CoachesMatchesPage() {
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [resultFlowMatch, setResultFlowMatch] = useState<any>(null);
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('upcoming');
@@ -47,7 +48,15 @@ export default function CoachesMatchesPage() {
 
   // Filter categories based on assigned categories
   const availableCategories = categories.filter((cat) => assignedCategoryIds.includes(cat.id));
-  const selectedCategoryData = availableCategories[0]; // Use first available category
+
+  // Auto-select first category if none selected and only one available
+  useEffect(() => {
+    if (availableCategories.length > 0 && !selectedCategory) {
+      setSelectedCategory(availableCategories[0].id);
+    }
+  }, [availableCategories, selectedCategory]);
+
+  const selectedCategoryData = availableCategories.find((cat) => cat.id === selectedCategory);
 
   // Get matches for the selected category
   const {
@@ -141,6 +150,25 @@ export default function CoachesMatchesPage() {
   return (
     <PageContainer isUnderConstruction>
       <div className="space-y-6">
+        {/* Category Selection */}
+        {availableCategories.length > 1 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div className="overflow-x-auto">
+              <Tabs
+                selectedKey={selectedCategory}
+                onSelectionChange={(key) => {
+                  setSelectedCategory(key as string);
+                  setSelectedMatch(null); // Clear selected match when switching categories
+                }}
+                className="w-full min-w-max"
+              >
+                {availableCategories.map((category) => (
+                  <Tab key={category.id} title={category.name} />
+                ))}
+              </Tabs>
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
           {/* Left column - Matches and Standings */}
           <div className="xl:col-span-2 order-2 xl:order-1">
