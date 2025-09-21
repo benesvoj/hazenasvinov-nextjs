@@ -6,8 +6,12 @@ import {TrophyIcon, FireIcon} from '@heroicons/react/24/outline';
 import {usePlayerStats} from '@/hooks/usePlayerStats';
 import {LoadingSpinner} from '@/components';
 
-export default function TopScorersCard() {
-  const {topScorers, loading, error} = usePlayerStats();
+interface TopScorersCardProps {
+  categoryId?: string;
+}
+
+export default function TopScorersCard({categoryId}: TopScorersCardProps) {
+  const {topScorers, loading, error} = usePlayerStats(categoryId);
 
   if (loading) {
     return (

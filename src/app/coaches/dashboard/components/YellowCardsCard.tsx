@@ -6,8 +6,12 @@ import {ExclamationTriangleIcon} from '@heroicons/react/24/outline';
 import {usePlayerStats} from '@/hooks/usePlayerStats';
 import {LoadingSpinner} from '@/components';
 
-export default function YellowCardsCard() {
-  const {yellowCardPlayers, loading, error} = usePlayerStats();
+interface YellowCardsCardProps {
+  categoryId?: string;
+}
+
+export default function YellowCardsCard({categoryId}: YellowCardsCardProps) {
+  const {yellowCardPlayers, loading, error} = usePlayerStats(categoryId);
 
   if (loading) {
     return (
