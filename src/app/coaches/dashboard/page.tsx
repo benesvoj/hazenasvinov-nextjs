@@ -109,7 +109,7 @@ export default function CoachesDashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-6">
         {/* Birthday Card */}
-        <div className=" hidden sm:block m:col-span-2 xl:col-span-1">
+        <div className=" hidden sm:block md:col-span-2 xl:col-span-1">
           <BirthdayCard categoryId={selectedCategory} />
         </div>
 
