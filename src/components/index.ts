@@ -88,3 +88,7 @@ export {default as MatchScore} from './match/MatchScore';
 export {MatchResultInput} from './match/MatchResultInput';
 export {default as UnifiedModal} from './UnifiedModal';
 export {default as PageContainer} from './PageContainer';
+
+export {default as PlayerLoanModal} from './loaning/PlayerLoanModal';
+export {default as LoaningManagement} from './loaning/LoaningManagement';
+export {default as UnifiedPlayerManager} from './players/UnifiedPlayerManager';

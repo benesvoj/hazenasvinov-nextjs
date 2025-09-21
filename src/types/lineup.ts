@@ -1,4 +1,4 @@
-import { Member } from './member';
+import {Member} from './member';
 
 export interface Lineup {
   id: string;
@@ -23,11 +23,13 @@ export interface LineupPlayer {
   id?: string;
   lineup_id?: string;
   member_id?: string;
+  // Legacy external player fields (deprecated - use unified player system)
   external_name?: string;
   external_surname?: string;
   external_registration_number?: string;
   display_name?: string;
   is_external?: boolean;
+  // Unified player system fields
   position: string;
   role?: string;
   is_captain?: boolean;
@@ -37,6 +39,16 @@ export interface LineupPlayer {
   red_cards_5min?: number;
   red_cards_10min?: number;
   red_cards_personal?: number;
+  // Enhanced player information
+  player?: {
+    id: string;
+    name: string;
+    surname: string;
+    registration_number: string;
+    is_external: boolean;
+    current_club_name?: string;
+    position?: string;
+  };
 }
 
 export interface LineupCoach {
