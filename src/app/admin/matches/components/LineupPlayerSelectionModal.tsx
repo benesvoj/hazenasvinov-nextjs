@@ -13,6 +13,7 @@ interface LineupPlayerSelectionModalProps {
   categoryId?: string;
   editingPlayerIndex?: number | null;
   currentPlayer?: LineupPlayerFormData | null;
+  teamName?: string;
 }
 
 export default function LineupPlayerSelectionModal({
@@ -23,20 +24,21 @@ export default function LineupPlayerSelectionModal({
   categoryId,
   editingPlayerIndex,
   currentPlayer,
+  teamName,
 }: LineupPlayerSelectionModalProps) {
   const handlePlayerSelected = (player: PlayerSearchResult) => {
     const lineupPlayer: LineupPlayerFormData = {
       is_external: !isOwnClub,
-      position: 'field_player',
-      role: 'player',
+      position: player.position || 'field_player',
+      role: player.is_captain ? 'captain' : 'player',
       ...(isOwnClub
         ? {
             member_id: player.id,
             jersey_number: player.jersey_number,
           }
         : {
-            external_name: player.display_name.split(' ')[0] || '',
-            external_surname: player.display_name.split(' ').slice(1).join(' ') || '',
+            external_name: player.name || '',
+            external_surname: player.surname || '',
             external_registration_number: player.registration_number || '',
             jersey_number: player.jersey_number,
           }),
@@ -68,6 +70,7 @@ export default function LineupPlayerSelectionModal({
         showExternalPlayers={!isOwnClub}
         onPlayerSelected={handlePlayerSelected}
         categoryId={categoryId}
+        teamName={teamName}
       />
     </UnifiedModal>
   );

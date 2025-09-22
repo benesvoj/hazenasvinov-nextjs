@@ -34,6 +34,7 @@ export interface PlayerSearchResult {
   position?: string;
   jersey_number?: number;
   display_name: string;
+  is_captain?: boolean;
 }
 
 export interface PlayerWithLoans extends UnifiedPlayer {

@@ -955,6 +955,7 @@ export default function LineupManager({
         currentPlayer={
           editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null
         }
+        teamName={currentTeamName}
       />
 
       {/* Player Edit Modal */}

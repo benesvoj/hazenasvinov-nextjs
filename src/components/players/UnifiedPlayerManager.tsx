@@ -6,13 +6,16 @@ import {PlayerSearchFilters, PlayerSearchResult} from '@/types/unifiedPlayer';
 import {PlayerLoanModal} from '@/components';
 import {Input} from '@heroui/input';
 import {Select, SelectItem, Button} from '@heroui/react';
-import {ArrowPathIcon, CheckIcon} from '@heroicons/react/24/outline';
+import {ArrowPathIcon, CheckIcon, PlusIcon} from '@heroicons/react/24/outline';
+import CreateMemberModal from '@/app/admin/matches/components/CreateMemberModal';
+import CreateExternalPlayerModal from '@/app/admin/matches/components/CreateExternalPlayerModal';
 
 interface UnifiedPlayerManagerProps {
   clubId?: string;
   showExternalPlayers?: boolean;
   onPlayerSelected?: (player: PlayerSearchResult) => void;
   categoryId?: string;
+  teamName?: string;
 }
 
 export default function UnifiedPlayerManager({
@@ -20,6 +23,7 @@ export default function UnifiedPlayerManager({
   showExternalPlayers = true,
   onPlayerSelected,
   categoryId,
+  teamName,
 }: UnifiedPlayerManagerProps) {
   const {searchPlayers, getPlayersByClub, loading, error} = useUnifiedPlayers();
 
@@ -31,6 +35,8 @@ export default function UnifiedPlayerManager({
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [showLoanModal, setShowLoanModal] = useState(false);
+  const [showCreateMemberModal, setShowCreateMemberModal] = useState(false);
+  const [showCreateExternalPlayerModal, setShowCreateExternalPlayerModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerSearchResult | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -104,6 +110,44 @@ export default function UnifiedPlayerManager({
       onPlayerSelected?.(player);
     } else if (action === 'loan') {
       setShowLoanModal(true);
+    }
+  };
+
+  const handleMemberCreated = (member: {
+    id: string;
+    name: string;
+    surname: string;
+    registration_number: string;
+  }) => {
+    // Create a PlayerSearchResult from the new member
+    const newPlayer: PlayerSearchResult = {
+      id: member.id,
+      name: member.name,
+      surname: member.surname,
+      registration_number: member.registration_number,
+      position: undefined,
+      jersey_number: undefined,
+      is_external: false,
+      current_club_name: 'TJ Sokol Svinov',
+      display_name: `${member.surname} ${member.name} (${member.registration_number})`,
+    };
+
+    // Add the new player to the list
+    setPlayers((prev) => [newPlayer, ...prev]);
+
+    // Select the new player
+    if (onPlayerSelected) {
+      onPlayerSelected(newPlayer);
+    }
+  };
+
+  const handleExternalPlayerCreated = (player: PlayerSearchResult) => {
+    // Add the new external player to the list
+    setPlayers((prev) => [player, ...prev]);
+
+    // Select the new player
+    if (onPlayerSelected) {
+      onPlayerSelected(player);
     }
   };
 
@@ -189,6 +233,29 @@ export default function UnifiedPlayerManager({
         </Select>
       </div>
 
+      {/* Create Player Button - Different for internal vs external */}
+      <div className="flex justify-end">
+        {!showExternalPlayers ? (
+          <Button
+            color="primary"
+            variant="bordered"
+            startContent={<PlusIcon className="w-4 h-4" />}
+            onPress={() => setShowCreateMemberModal(true)}
+          >
+            Vytvořit nového člena
+          </Button>
+        ) : (
+          <Button
+            color="primary"
+            variant="bordered"
+            startContent={<PlusIcon className="w-4 h-4" />}
+            onPress={() => setShowCreateExternalPlayerModal(true)}
+          >
+            Vytvořit externího hráče
+          </Button>
+        )}
+      </div>
+
       {/* Players List */}
       <div className="space-y-2">
         {players.length === 0 ? (
@@ -247,6 +314,22 @@ export default function UnifiedPlayerManager({
           setShowLoanModal(false);
           setSelectedPlayer(null);
         }}
+      />
+
+      {/* Create Member Modal */}
+      <CreateMemberModal
+        isOpen={showCreateMemberModal}
+        onClose={() => setShowCreateMemberModal(false)}
+        onMemberCreated={handleMemberCreated}
+        categoryId={categoryId}
+      />
+
+      {/* Create External Player Modal */}
+      <CreateExternalPlayerModal
+        isOpen={showCreateExternalPlayerModal}
+        onClose={() => setShowCreateExternalPlayerModal(false)}
+        onPlayerCreated={handleExternalPlayerCreated}
+        teamName={teamName}
       />
     </div>
   );
