@@ -1,10 +1,13 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {usePathname} from 'next/navigation';
+import {usePathname, useRouter} from 'next/navigation';
 import {createPortal} from 'react-dom';
 import {useAuth} from '@/hooks/useAuthNew';
 import {usePortalAccess} from '@/hooks/usePortalAccess';
+
+// Constants
+const LOGOUT_OVERLAY_Z_INDEX = 9999;
 import {
   UserIcon,
   ArrowRightEndOnRectangleIcon,
@@ -59,6 +62,7 @@ export const UnifiedTopBar = ({
   userProfile,
 }: UnifiedTopBarProps) => {
   const pathname = usePathname();
+  const router = useRouter();
   const {user, signOut} = useAuth();
   const {hasCoachAccess, hasBothAccess, hasAdminAccess, loading} = usePortalAccess();
 
@@ -131,8 +135,8 @@ export const UnifiedTopBar = ({
       // Step 4: Complete and redirect
       setLogoutProgress(100);
       setTimeout(() => {
-        window.location.href = '/login';
-      }, 3000); // Increased from 1000ms to 3000ms for better visibility
+        router.push('/login');
+      }, 3000);
     } catch (error) {
       console.error('Logout error:', error);
       showToast.danger('Chyba při odhlašování. Zkuste to znovu.');
@@ -489,7 +493,7 @@ export const UnifiedTopBar = ({
         createPortal(
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-            style={{zIndex: 999999}}
+            style={{zIndex: LOGOUT_OVERLAY_Z_INDEX}}
           >
             <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 shadow-xl">
               <div className="text-center">

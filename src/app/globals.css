@@ -266,8 +266,3 @@ html {
 .animate-scroll:hover > * {
   animation-play-state: paused;
 }
-
-/* Logout overlay - ensure it appears above everything */
-.logout-overlay {
-  z-index: 99999 !important;
-}
