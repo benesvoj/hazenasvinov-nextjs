@@ -527,7 +527,24 @@ export const useLineupData = () => {
                 const {error: playerError} = await supabase.from('lineup_players').insert([player]);
 
                 if (playerError) {
-                  console.warn(`Could not insert player ${player.member_id}:`, playerError.message);
+                  // Check if it's a database validation error
+                  if (playerError.code === 'P0001' && playerError.message?.includes('goalkeeper')) {
+                    console.warn(
+                      `Database validation: ${playerError.message} - skipping player ${player.member_id}`
+                    );
+                  } else if (
+                    playerError.code === '22P02' &&
+                    playerError.message?.includes('uuid')
+                  ) {
+                    console.warn(
+                      `Invalid UUID error: ${playerError.message} - skipping player ${player.member_id}`
+                    );
+                  } else {
+                    console.warn(
+                      `Could not insert player ${player.member_id}:`,
+                      playerError.message
+                    );
+                  }
                   // Continue with next player instead of failing completely
                 } else {
                   insertedCount++;
