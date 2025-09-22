@@ -31,3 +31,5 @@ export * from './matchVideo';
 
 export * from './comment';
 export * from './matchMetadata';
+
+export * from './memberClubRelationship';

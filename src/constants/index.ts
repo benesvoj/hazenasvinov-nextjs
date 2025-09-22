@@ -8,3 +8,6 @@ export * from './gender';
 export * from './posts';
 export * from './months';
 export * from './match';
+
+export * from './relationshipType';
+export * from './relationshipStatus';
