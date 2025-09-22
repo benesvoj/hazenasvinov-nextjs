@@ -199,7 +199,7 @@ export const useLineupData = () => {
           // Internal player
           return {
             ...player,
-            display_name: `${player.member.name} ${player.member.surname} (${player.member.registration_number})`,
+            display_name: `${player.member.surname} ${player.member.name}`,
             is_external: false,
           };
         }
@@ -207,6 +207,7 @@ export const useLineupData = () => {
       });
 
       // Fetch coaches
+      console.log('Fetching coaches for lineup_id:', lineupData.id);
       const {data: coachesData, error: coachesError} = await supabase
         .from('lineup_coaches')
         .select(
@@ -217,6 +218,8 @@ export const useLineupData = () => {
         )
         .eq('lineup_id', lineupData.id);
 
+      console.log('Coaches query result:', {coachesData, coachesError});
+
       if (coachesError) {
         console.warn('Error fetching lineup coaches, table might not exist yet:', coachesError);
         // Return empty data instead of throwing error
@@ -226,9 +229,15 @@ export const useLineupData = () => {
         };
       }
 
+      // Process coaches data to match LineupCoachFormData format
+      const processedCoaches = (coachesData || []).map((coach: any) => ({
+        member_id: coach.member_id,
+        role: coach.role,
+      }));
+
       return {
         players: processedPlayers || [],
-        coaches: coachesData || [],
+        coaches: processedCoaches || [],
       };
     } catch (error: any) {
       const errorMessage = error?.message || 'Chyba při načítání sestavy';
@@ -299,6 +308,7 @@ export const useLineupData = () => {
       });
 
       // Fetch coaches
+      console.log('Fetching coaches for lineup_id (by ID):', lineupId);
       const {data: coachesData, error: coachesError} = await supabase
         .from('lineup_coaches')
         .select(
@@ -309,6 +319,8 @@ export const useLineupData = () => {
         )
         .eq('lineup_id', lineupId);
 
+      console.log('Coaches query result (by ID):', {coachesData, coachesError});
+
       if (coachesError) {
         console.warn('Error fetching lineup coaches, table might not exist yet:', coachesError);
         // Return empty data instead of throwing error
@@ -318,9 +330,15 @@ export const useLineupData = () => {
         };
       }
 
+      // Process coaches data to match LineupCoachFormData format
+      const processedCoaches = (coachesData || []).map((coach: any) => ({
+        member_id: coach.member_id,
+        role: coach.role,
+      }));
+
       return {
         players: processedPlayers || [],
-        coaches: coachesData || [],
+        coaches: processedCoaches || [],
       };
     } catch (error: any) {
       const errorMessage = error?.message || 'Chyba při načítání sestavy';
@@ -537,6 +555,9 @@ export const useLineupData = () => {
             member_id: coach.member_id,
             role: coach.role,
           }));
+
+        console.log('Coaches to insert:', coachesToInsert);
+        console.log('Form data coaches:', formData.coaches);
 
         if (coachesToInsert.length > 0) {
           console.log('Inserting all coaches at once:', coachesToInsert);

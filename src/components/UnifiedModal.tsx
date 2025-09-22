@@ -27,6 +27,7 @@ interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> 
   isFooterWithActions?: boolean;
   onPress?: () => void;
   isDisabled?: boolean;
+  isLoading?: boolean;
 }
 
 export default function UnifiedModal({
@@ -43,6 +44,7 @@ export default function UnifiedModal({
   isFooterWithActions = false,
   onPress,
   isDisabled,
+  isLoading,
   ...props
 }: UnifiedModalProps) {
   const t = translations.button;
@@ -78,7 +80,13 @@ export default function UnifiedModal({
             <Button color="danger" variant="flat" onPress={onClose} aria-label={t.cancel}>
               {t.cancel}
             </Button>
-            <Button color="primary" onPress={onPress} isDisabled={isDisabled} aria-label={t.save}>
+            <Button
+              color="primary"
+              onPress={onPress}
+              isDisabled={isDisabled}
+              aria-label={t.save}
+              isLoading={isLoading}
+            >
               {t.save}
             </Button>
           </ModalFooter>

@@ -49,13 +49,11 @@ export default function MatchInfoCard({match}: MatchInfoCardProps) {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-gray-500" />
-            <div className="font-semibold text-sm sm:text-base">
-              {formatDateWithWeekday(match.date)}
-            </div>
+            <div className="text-sm sm:text-base">{formatDateWithWeekday(match.date)}</div>
           </div>
           <div className="flex items-center gap-2">
             <ClockIcon className="w-5 h-5 text-gray-500" />
-            <div className="font-semibold text-sm sm:text-base">{formatTime(match.time)}</div>
+            <div className="text-sm sm:text-base">{formatTime(match.time)}</div>
           </div>
         </div>
         <div className="flex items-center justify-center nowrap gap-2 text-sm text-gray-600 dark:text-gray-400">

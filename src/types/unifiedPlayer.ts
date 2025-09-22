@@ -21,6 +21,7 @@ export interface PlayerSearchFilters {
   position?: string;
   is_active?: boolean;
   has_active_loan?: boolean;
+  category_id?: string;
 }
 
 export interface PlayerSearchResult {

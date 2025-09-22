@@ -1,43 +1,42 @@
-import { Category } from "./category";
+import {Category} from './category';
 
 type CategoryProps = {
-	id: string;
-	name: string;
-	description?: string;
-	created_at?: string;
-	updated_at?: string;
-	route?: string;
-}
+  id: string;
+  name: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  route?: string;
+};
 
 type SeasonProps = {
-	id: string;
-	name: string;
-	valid_from: string;
-	valid_to: string;
-	created_at: string;
-	updated_at: string;
-}
+  id: string;
+  name: string;
+  valid_from: string;
+  valid_to: string;
+  created_at: string;
+  updated_at: string;
+};
 
 type SupabaseUser = {
-	id: string;
-	email: string;
-	updated_at: string;
-	created_at: string;
-	user_metadata?: {
-		full_name?: string;
-		phone?: string;
-		bio?: string;
-		position?: string;
-		is_blocked?: boolean;
-	};
-	email_confirmed_at?: string;
-}
-
+  id: string;
+  email: string;
+  updated_at: string;
+  created_at: string;
+  user_metadata?: {
+    full_name?: string;
+    phone?: string;
+    bio?: string;
+    position?: string;
+    is_blocked?: boolean;
+  };
+  email_confirmed_at?: string;
+};
 
 type ColumnType = {
-	key: string;
-	label: React.ReactNode;
-	// Add other properties if they exist
+  key: string;
+  label: React.ReactNode;
+  // Add other properties if they exist
 };
 
 export interface ClubConfig {
@@ -78,8 +77,7 @@ export interface PageVisibility {
   updated_at: string;
 }
 
-
-export type { CategoryProps, SeasonProps, SupabaseUser, ColumnType }
+export type {CategoryProps, SeasonProps, SupabaseUser, ColumnType};
 
 // Lineup Management Types
 export interface Lineup {
@@ -122,7 +120,7 @@ export interface LineupCoach {
   created_at: string;
   updated_at: string;
   // Extended fields for display
-  member?: import("@/types/member").Member;
+  member?: import('@/types/member').Member;
   member_name?: string;
   member_surname?: string;
 }
@@ -163,7 +161,7 @@ export interface LineupPlayerFormData {
 
 export interface LineupCoachFormData {
   member_id: string;
-  role: 'head_coach' | 'assistant_coach' | 'goalkeeper_coach';
+  role: 'head_coach' | 'assistant_coach' | 'goalkeeper_coach' | 'team_manager';
 }
 
 export interface LineupValidation {
@@ -173,25 +171,25 @@ export interface LineupValidation {
 }
 
 export interface MemberFunction {
-	id: string; // Can be either UUID or simple text ID like 'func_player'
-	name: string;
-	display_name: string;
-	description?: string;
-	is_active: boolean;
-	sort_order: number;
-	created_at: string;
-	updated_at: string;
+  id: string; // Can be either UUID or simple text ID like 'func_player'
+  name: string;
+  display_name: string;
+  description?: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface MembersListTabProps {
-  members: import("@/types/member").Member[];
+  members: import('@/types/member').Member[];
   categoriesData: Category[] | null;
   functionOptions: Record<string, string>;
   sexOptions: Record<string, string>;
 }
 
 export interface MembersStatisticTabProps {
-  members: import("@/types/member").Member[];  
+  members: import('@/types/member').Member[];
   categoriesData: Category[] | null;
   functionOptions: Record<string, string>;
 }

@@ -1,20 +1,25 @@
 'use client';
 
-import {useState, useEffect, useCallback} from 'react';
+import {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 import {useUnifiedPlayers} from '@/hooks/useUnifiedPlayers';
 import {PlayerSearchFilters, PlayerSearchResult} from '@/types/unifiedPlayer';
 import {PlayerLoanModal} from '@/components';
+import {Input} from '@heroui/input';
+import {Select, SelectItem, Button} from '@heroui/react';
+import {ArrowPathIcon, CheckIcon} from '@heroicons/react/24/outline';
 
 interface UnifiedPlayerManagerProps {
   clubId?: string;
   showExternalPlayers?: boolean;
   onPlayerSelected?: (player: PlayerSearchResult) => void;
+  categoryId?: string;
 }
 
 export default function UnifiedPlayerManager({
   clubId,
   showExternalPlayers = true,
   onPlayerSelected,
+  categoryId,
 }: UnifiedPlayerManagerProps) {
   const {searchPlayers, getPlayersByClub, loading, error} = useUnifiedPlayers();
 
@@ -22,35 +27,71 @@ export default function UnifiedPlayerManager({
   const [filters, setFilters] = useState<PlayerSearchFilters>({
     club_id: clubId,
     is_external: showExternalPlayers ? undefined : false,
+    category_id: categoryId,
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [showLoanModal, setShowLoanModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerSearchResult | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadPlayers = useCallback(async () => {
     const searchFilters = {
       ...filters,
       search_term: searchTerm,
       club_id: clubId || filters.club_id,
+      category_id: categoryId || filters.category_id,
     };
 
     const data = await searchPlayers(searchFilters);
     setPlayers(data);
-  }, [filters, searchTerm, clubId, searchPlayers]);
+  }, [filters, searchTerm, clubId, categoryId, searchPlayers]);
 
+  // Separate function for search that doesn't depend on loadPlayers
+  const performSearch = useCallback(
+    async (term: string) => {
+      const searchFilters = {
+        club_id: clubId,
+        is_external: showExternalPlayers ? undefined : false,
+        category_id: categoryId,
+        search_term: term,
+      };
+
+      const data = await searchPlayers(searchFilters);
+      setPlayers(data);
+    },
+    [clubId, showExternalPlayers, categoryId, searchPlayers]
+  );
+
+  // Load initial players
   useEffect(() => {
-    loadPlayers();
-  }, [loadPlayers]);
+    performSearch('');
+  }, [performSearch]);
 
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-    // Debounce search
-    const timeoutId = setTimeout(() => {
-      loadPlayers();
-    }, 300);
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
-    return () => clearTimeout(timeoutId);
-  };
+  const handleSearch = useCallback(
+    (term: string) => {
+      setSearchTerm(term);
+
+      // Clear existing timeout
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
+      // Set new timeout for debounced search
+      searchTimeoutRef.current = setTimeout(() => {
+        performSearch(term);
+      }, 300);
+    },
+    [performSearch]
+  );
 
   const handleFilterChange = (newFilters: Partial<PlayerSearchFilters>) => {
     setFilters((prev) => ({...prev, ...newFilters}));
@@ -122,70 +163,30 @@ export default function UnifiedPlayerManager({
   return (
     <div className="space-y-4">
       {/* Search and Filters */}
-      <div className="rounded bg-white p-4 shadow-sm">
-        <div className="space-y-4">
-          {/* Search */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Hledat hráče</label>
-            <input
-              type="text"
-              placeholder="Jméno, příjmení nebo registrační číslo..."
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-
-          {/* Filters */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Typ hráče</label>
-              <select
-                value={filters.is_external === undefined ? '' : filters.is_external.toString()}
-                onChange={(e) =>
-                  handleFilterChange({
-                    is_external: e.target.value === '' ? undefined : e.target.value === 'true',
-                  })
-                }
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm"
-              >
-                <option value="">Všichni</option>
-                <option value="false">Interní</option>
-                <option value="true">Externí</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Pozice</label>
-              <select
-                value={filters.position || ''}
-                onChange={(e) => handleFilterChange({position: e.target.value || undefined})}
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm"
-              >
-                <option value="">Všechny</option>
-                <option value="goalkeeper">Brankář</option>
-                <option value="field_player">Hráč v poli</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Status</label>
-              <select
-                value={filters.is_active === undefined ? '' : filters.is_active.toString()}
-                onChange={(e) =>
-                  handleFilterChange({
-                    is_active: e.target.value === '' ? undefined : e.target.value === 'true',
-                  })
-                }
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm"
-              >
-                <option value="">Všichni</option>
-                <option value="true">Aktivní</option>
-                <option value="false">Neaktivní</option>
-              </select>
-            </div>
-          </div>
-        </div>
+      <div className="flex gap-4">
+        <Input
+          key="search-input"
+          label="Hledat hráče"
+          type="search"
+          placeholder="Jméno, příjmení nebo registrační číslo..."
+          value={searchTerm}
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+        <Select
+          label="Typ hráče"
+          value={filters.is_external === undefined ? '' : filters.is_external.toString()}
+          selectedKeys={filters.is_external === undefined ? [] : [filters.is_external.toString()]}
+          onSelectionChange={(keys) => {
+            const selectedKey = Array.from(keys)[0] as string;
+            handleFilterChange({
+              is_external: selectedKey === '' ? undefined : selectedKey === 'true',
+            });
+          }}
+        >
+          <SelectItem key="all">Všichni</SelectItem>
+          <SelectItem key="false">Interní</SelectItem>
+          <SelectItem key="true">Externí</SelectItem>
+        </Select>
       </div>
 
       {/* Players List */}
@@ -216,18 +217,20 @@ export default function UnifiedPlayerManager({
                 </div>
 
                 <div className="flex space-x-2">
-                  <button
-                    onClick={() => handlePlayerAction(player, 'select')}
-                    className="rounded bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
-                  >
-                    Vybrat
-                  </button>
-                  <button
-                    onClick={() => handlePlayerAction(player, 'loan')}
-                    className="rounded bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700 hover:bg-orange-200"
-                  >
-                    Půjčit
-                  </button>
+                  <Button
+                    size="sm"
+                    onPress={() => handlePlayerAction(player, 'select')}
+                    isIconOnly
+                    startContent={<CheckIcon className="w-4 h-4" />}
+                    aria-label="Vybrat hráče"
+                  />
+                  <Button
+                    onPress={() => handlePlayerAction(player, 'loan')}
+                    isIconOnly
+                    size="sm"
+                    startContent={<ArrowPathIcon className="w-4 h-4" />}
+                    aria-label="Půjčit hráče"
+                  />
                 </div>
               </div>
             </div>

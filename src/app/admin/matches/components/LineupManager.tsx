@@ -1,38 +1,54 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
 import {
   Button,
   Input,
-  Card, CardBody, CardHeader,
+  Card,
+  CardBody,
+  CardHeader,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
   useDisclosure,
-  Select, SelectItem, Alert
-} from "@heroui/react";
+  Select,
+  SelectItem,
+  Alert,
+  Table,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHeader,
+  Tabs,
+  Tab,
+  ButtonGroup,
+} from '@heroui/react';
 import {
   UserGroupIcon,
   PlusIcon,
   TrashIcon,
   PencilIcon,
   UserIcon,
-} from "@heroicons/react/24/outline";
-import { useLineupData, classifyLineupError, LineupErrorType } from "@/hooks/useLineupData";
+} from '@heroicons/react/24/outline';
+import {useLineupData, classifyLineupError, LineupErrorType} from '@/hooks/useLineupData';
 import {
   LineupFormData,
   LineupPlayerFormData,
   LineupCoachFormData,
   Member,
   ExternalPlayer,
-} from "@/types";
-import { createClient } from "@/utils/supabase/client";
-import { DeleteConfirmationModal, showToast } from "@/components";
-import LineupManagerPlayerCard from "./LineupManagerPlayerCard";
-import { generateLineupId } from "@/utils/uuid";
-import { Heading } from "@/components";
+} from '@/types';
+import {createClient} from '@/utils/supabase/client';
+import {DeleteConfirmationModal, showToast, LoadingSpinner} from '@/components';
+import LineupPlayerSelectionModal from './LineupPlayerSelectionModal';
+import LineupPlayerEditModal from './LineupPlayerEditModal';
+import LineupCoachSelectionModal from './LineupCoachSelectionModal';
+import LineupCoachEditModal from './LineupCoachEditModal';
+import {generateLineupId} from '@/utils/uuid';
+import {Heading} from '@/components';
 
 interface LineupManagerProps {
   matchId: string;
@@ -62,9 +78,7 @@ export default function LineupManager({
     }
 
     // Try filtering by category_id first (new approach)
-    let filtered = members.filter(
-      (member) => member.category_id === categoryId
-    );
+    let filtered = members.filter((member) => member.category_id === categoryId);
 
     // If no members found with category_id, fallback to legacy category code filtering
     if (filtered.length === 0 && categoryId) {
@@ -79,7 +93,7 @@ export default function LineupManager({
     return filtered;
   }, [members, categoryId]);
 
-  const [selectedTeam, setSelectedTeam] = useState<"home" | "away">("home");
+  const [selectedTeam, setSelectedTeam] = useState<'home' | 'away'>('home');
   const [homeFormData, setHomeFormData] = useState<LineupFormData>({
     match_id: matchId,
     team_id: homeTeamId,
@@ -106,7 +120,7 @@ export default function LineupManager({
     // 4. Based on team name: return selectedTeam === 'home' ? homeTeamName.includes('Your Club') : awayTeamName.includes('Your Club');
 
     // FIXED: Home team is your club (internal players), Away team is other club (external players)
-    return selectedTeam === "home";
+    return selectedTeam === 'home';
 
     // Alternative configurations (uncomment one):
     // return selectedTeam === 'away'; // Away team is your club
@@ -114,7 +128,7 @@ export default function LineupManager({
   }, [selectedTeam]);
 
   // Debug: Log the own club determination
-  console.log("Own club determination:", {
+  console.log('Own club determination:', {
     selectedTeam,
     isOwnClub,
     homeTeamName,
@@ -125,13 +139,13 @@ export default function LineupManager({
 
   // Get the current form data based on selected team
   const currentFormData = useMemo(() => {
-    return selectedTeam === "home" ? homeFormData : awayFormData;
+    return selectedTeam === 'home' ? homeFormData : awayFormData;
   }, [selectedTeam, homeFormData, awayFormData]);
 
   // Get the setter function for current form data
   const setCurrentFormData = useCallback(
     (updater: (prev: LineupFormData) => LineupFormData) => {
-      if (selectedTeam === "home") {
+      if (selectedTeam === 'home') {
         setHomeFormData(updater);
       } else {
         setAwayFormData(updater);
@@ -141,10 +155,17 @@ export default function LineupManager({
   );
   const [homeLineupSummary, setHomeLineupSummary] = useState<any | null>(null);
   const [awayLineupSummary, setAwayLineupSummary] = useState<any | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<ExternalPlayer[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [editingPlayerIndex, setEditingPlayerIndex] = useState<number | null>(null);
+  const [deletingPlayerIndex, setDeletingPlayerIndex] = useState<number | null>(null);
+  const [isPlayerEditModalOpen, setIsPlayerEditModalOpen] = useState(false);
+  const [isCoachSelectionModalOpen, setIsCoachSelectionModalOpen] = useState(false);
+  const [isCoachEditModalOpen, setIsCoachEditModalOpen] = useState(false);
+  const [editingCoachIndex, setEditingCoachIndex] = useState<number | null>(null);
+  const [deletingCoachIndex, setDeletingCoachIndex] = useState<number | null>(null);
 
   const supabase = createClient();
 
@@ -152,6 +173,12 @@ export default function LineupManager({
     isOpen: isEditModalOpen,
     onOpen: onEditModalOpen,
     onClose: onEditModalClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isPlayerSelectionModalOpen,
+    onOpen: onPlayerSelectionModalOpen,
+    onClose: onPlayerSelectionModalClose,
   } = useDisclosure();
 
   const handleEditModalOpen = () => {
@@ -166,6 +193,12 @@ export default function LineupManager({
   } = useDisclosure();
 
   const {
+    isOpen: isDeletePlayerModalOpen,
+    onOpen: onDeletePlayerModalOpen,
+    onClose: onDeletePlayerModalClose,
+  } = useDisclosure();
+
+  const {
     fetchLineup,
     saveLineup,
     deleteLineup,
@@ -175,8 +208,8 @@ export default function LineupManager({
     error,
   } = useLineupData();
 
-  const currentTeamId = selectedTeam === "home" ? homeTeamId : awayTeamId;
-  const currentTeamName = selectedTeam === "home" ? homeTeamName : awayTeamName;
+  const currentTeamId = selectedTeam === 'home' ? homeTeamId : awayTeamId;
+  const currentTeamName = selectedTeam === 'home' ? homeTeamName : awayTeamName;
 
   // Load lineup data when team changes
   const handleLoadLineup = useCallback(
@@ -199,7 +232,7 @@ export default function LineupManager({
           setAwayFormData(updatedFormData);
         }
       } catch (error) {
-        console.error("Error loading lineup:", error);
+        console.error('Error loading lineup:', error);
         // Set empty form data if no lineup exists
         const emptyFormData = {
           match_id: matchId,
@@ -228,7 +261,7 @@ export default function LineupManager({
       setHomeLineupSummary(homeSummary);
       setAwayLineupSummary(awaySummary);
     } catch (error) {
-      console.error("Error loading lineup summaries:", error);
+      console.error('Error loading lineup summaries:', error);
     }
   }, [matchId, homeTeamId, awayTeamId, getLineupSummary]);
 
@@ -238,7 +271,7 @@ export default function LineupManager({
 
     const loadData = async () => {
       if (isMounted) {
-        await handleLoadLineup(selectedTeam === "home");
+        await handleLoadLineup(selectedTeam === 'home');
       }
     };
 
@@ -298,9 +331,7 @@ export default function LineupManager({
       if (!player) return;
 
       // Search for existing player with this registration number
-      const existingPlayer = searchResults.find(
-        (p) => p.registration_number === value
-      );
+      const existingPlayer = searchResults.find((p) => p.registration_number === value);
 
       if (existingPlayer) {
         // Auto-fill the player data
@@ -312,7 +343,7 @@ export default function LineupManager({
           external_registration_number: existingPlayer.registration_number,
           display_name: `${existingPlayer.name} ${existingPlayer.surname} (${existingPlayer.registration_number})`,
         };
-        setCurrentFormData((prev) => ({ ...prev, players: updatedPlayers }));
+        setCurrentFormData((prev) => ({...prev, players: updatedPlayers}));
       } else {
         // Just update the registration number
         const updatedPlayers = [...currentFormData.players];
@@ -320,7 +351,7 @@ export default function LineupManager({
           ...player,
           external_registration_number: value,
         };
-        setCurrentFormData((prev) => ({ ...prev, players: updatedPlayers }));
+        setCurrentFormData((prev) => ({...prev, players: updatedPlayers}));
       }
     },
     [currentFormData, searchResults, setCurrentFormData]
@@ -330,30 +361,32 @@ export default function LineupManager({
     try {
       const currentTeamId = isHome ? homeTeamId : awayTeamId;
 
+      // Get current form data for debugging
+      const formDataToSave = isHome ? homeFormData : awayFormData;
+      console.log('Saving lineup with form data:', formDataToSave);
+      console.log('Coaches in form data:', formDataToSave.coaches);
+
       // First, check if lineup already exists and get its ID
-      const { data: existingLineup, error: fetchError } = await supabase
-        .from("lineups")
-        .select("id")
-        .eq("match_id", matchId)
-        .eq("team_id", currentTeamId)
+      const {data: existingLineup, error: fetchError} = await supabase
+        .from('lineups')
+        .select('id')
+        .eq('match_id', matchId)
+        .eq('team_id', currentTeamId)
         .maybeSingle();
 
       if (fetchError) {
-        throw new Error(
-          `Chyba při hledání sestavy: ${fetchError.message || "Neznámá chyba"}`
-        );
+        throw new Error(`Chyba při hledání sestavy: ${fetchError.message || 'Neznámá chyba'}`);
       }
 
       // Use existing ID or create a new deterministic UUID
-      const lineupId =
-        existingLineup?.id || generateLineupId(matchId, currentTeamId, isHome);
+      const lineupId = existingLineup?.id || generateLineupId(matchId, currentTeamId, isHome);
 
       // Debug: Verify the match exists in database
-      console.log("Match ID being used:", matchId);
-      console.log("Team IDs being used:", { homeTeamId, awayTeamId });
+      console.log('Match ID being used:', matchId);
+      console.log('Team IDs being used:', {homeTeamId, awayTeamId});
 
       await saveLineup(lineupId, {
-        ...currentFormData,
+        ...formDataToSave,
         match_id: matchId,
         team_id: currentTeamId,
         is_home_team: isHome,
@@ -363,15 +396,15 @@ export default function LineupManager({
       await loadLineupSummaries();
 
       // Show success message
-      showToast.success("Sestava byla úspěšně uložena!");
-      
+      showToast.success('Sestava byla úspěšně uložena!');
+
       // Close the dialog only on successful save
       if (onClose) {
         onClose();
       }
     } catch (error: any) {
-      console.error("Error saving lineup:", error);
-      
+      console.error('Error saving lineup:', error);
+
       // Use robust error classification
       const classifiedError = classifyLineupError(error);
 
@@ -401,46 +434,42 @@ export default function LineupManager({
       }
 
       // Handle unknown errors
-      showToast.danger(
-        `❌ Neznámá chyba:\n\n${classifiedError.message}\n\nKontaktujte podporu.`
-      );
+      showToast.danger(`❌ Neznámá chyba:\n\n${classifiedError.message}\n\nKontaktujte podporu.`);
     }
   };
 
   const handleDeleteLineup = async () => {
     try {
-      const currentTeamId = selectedTeam === "home" ? homeTeamId : awayTeamId;
+      const currentTeamId = selectedTeam === 'home' ? homeTeamId : awayTeamId;
 
       // First, find the actual lineup ID from the database
-      console.log("Looking for lineup with:", { matchId, currentTeamId });
+      console.log('Looking for lineup with:', {matchId, currentTeamId});
 
-      const { data: lineupData, error: fetchError } = await supabase
-        .from("lineups")
-        .select("id")
-        .eq("match_id", matchId)
-        .eq("team_id", currentTeamId)
+      const {data: lineupData, error: fetchError} = await supabase
+        .from('lineups')
+        .select('id')
+        .eq('match_id', matchId)
+        .eq('team_id', currentTeamId)
         .maybeSingle();
 
-      console.log("Lineup query result:", { lineupData, fetchError });
+      console.log('Lineup query result:', {lineupData, fetchError});
 
       if (fetchError) {
-        throw new Error(
-          `Chyba při hledání sestavy: ${fetchError.message || "Neznámá chyba"}`
-        );
+        throw new Error(`Chyba při hledání sestavy: ${fetchError.message || 'Neznámá chyba'}`);
       }
 
       if (!lineupData) {
         // If no lineup exists, just reset the form data and show success message
-        console.log("No lineup found, resetting form data");
+        console.log('No lineup found, resetting form data');
         const emptyFormData = {
           match_id: matchId,
           team_id: currentTeamId,
-          is_home_team: selectedTeam === "home",
+          is_home_team: selectedTeam === 'home',
           players: [],
           coaches: [],
         };
 
-        if (selectedTeam === "home") {
+        if (selectedTeam === 'home') {
           setHomeFormData(emptyFormData);
         } else {
           setAwayFormData(emptyFormData);
@@ -448,7 +477,7 @@ export default function LineupManager({
 
         await loadLineupSummaries();
         onDeleteModalClose();
-        alert("Sestava byla vymazána (neexistovala v databázi)");
+        alert('Sestava byla vymazána (neexistovala v databázi)');
         return;
       }
 
@@ -458,12 +487,12 @@ export default function LineupManager({
       const emptyFormData = {
         match_id: matchId,
         team_id: currentTeamId,
-        is_home_team: selectedTeam === "home",
+        is_home_team: selectedTeam === 'home',
         players: [],
         coaches: [],
       };
 
-      if (selectedTeam === "home") {
+      if (selectedTeam === 'home') {
         setHomeFormData(emptyFormData);
       } else {
         setAwayFormData(emptyFormData);
@@ -472,9 +501,8 @@ export default function LineupManager({
       await loadLineupSummaries();
       onDeleteModalClose();
     } catch (error: any) {
-      console.error("Error deleting lineup:", error);
-      const errorMessage =
-        error?.message || error?.details || error?.hint || "Neznámá chyba";
+      console.error('Error deleting lineup:', error);
+      const errorMessage = error?.message || error?.details || error?.hint || 'Neznámá chyba';
       alert(`Chyba při mazání sestavy: ${errorMessage}`);
     }
   };
@@ -484,17 +512,72 @@ export default function LineupManager({
     if (validationError) {
       setValidationError(null);
     }
-    
-    const newPlayer: LineupPlayerFormData = {
-      is_external: !isOwnClub, // External if not own club, internal if own club
-      position: "field_player",
-      role: "player",
-    };
 
-    setCurrentFormData((prev) => ({
-      ...prev,
-      players: [...prev.players, newPlayer],
-    }));
+    onPlayerSelectionModalOpen();
+  };
+
+  const handlePlayerSelected = (player: LineupPlayerFormData) => {
+    if (editingPlayerIndex !== null) {
+      // Editing existing player
+      setCurrentFormData((prev) => ({
+        ...prev,
+        players: prev.players.map((p, i) => (i === editingPlayerIndex ? player : p)),
+      }));
+      setEditingPlayerIndex(null);
+    } else {
+      // Adding new player
+      setCurrentFormData((prev) => ({
+        ...prev,
+        players: [...prev.players, player],
+      }));
+    }
+  };
+
+  const handleEditPlayer = (index: number) => {
+    setEditingPlayerIndex(index);
+    setIsPlayerEditModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setEditingPlayerIndex(null);
+    onPlayerSelectionModalClose();
+  };
+
+  const handlePlayerEditSave = (updatedPlayer: LineupPlayerFormData) => {
+    if (editingPlayerIndex !== null) {
+      setCurrentFormData((prev) => ({
+        ...prev,
+        players: prev.players.map((p, i) => (i === editingPlayerIndex ? updatedPlayer : p)),
+      }));
+      setEditingPlayerIndex(null);
+    }
+  };
+
+  const handlePlayerEditClose = () => {
+    setIsPlayerEditModalOpen(false);
+    setEditingPlayerIndex(null);
+  };
+
+  const handleDeletePlayer = (index: number) => {
+    setDeletingPlayerIndex(index);
+    onDeletePlayerModalOpen();
+  };
+
+  const confirmDeletePlayer = () => {
+    if (deletingPlayerIndex !== null) {
+      // Clear validation error when user removes players
+      if (validationError) {
+        setValidationError(null);
+      }
+
+      setCurrentFormData((prev) => ({
+        ...prev,
+        players: prev.players.filter((_, i) => i !== deletingPlayerIndex),
+      }));
+
+      setDeletingPlayerIndex(null);
+      onDeletePlayerModalClose();
+    }
   };
 
   const removePlayer = (index: number) => {
@@ -502,75 +585,104 @@ export default function LineupManager({
     if (validationError) {
       setValidationError(null);
     }
-    
+
     setCurrentFormData((prev) => ({
       ...prev,
       players: prev.players.filter((_, i) => i !== index),
     }));
   };
 
-  const updatePlayer = (
-    index: number,
-    field: keyof LineupPlayerFormData,
-    value: any
-  ) => {
+  const updatePlayer = (index: number, field: keyof LineupPlayerFormData, value: any) => {
     // Clear validation error when user makes changes
     if (validationError) {
       setValidationError(null);
     }
-    
+
     setCurrentFormData((prev) => ({
       ...prev,
       players: prev.players.map((player, i) =>
-        i === index ? { ...player, [field]: value } : player
+        i === index ? {...player, [field]: value} : player
       ),
     }));
   };
 
-  const addCoach = () => {
-    setCurrentFormData((prev) => ({
-      ...prev,
-      coaches: [
-        ...prev.coaches,
-        {
-          member_id: "",
-          role: "assistant_coach",
-        },
-      ],
-    }));
+  const handleAddCoach = () => {
+    setIsCoachSelectionModalOpen(true);
   };
 
-  const removeCoach = (index: number) => {
+  const handleCoachSelected = (coach: {member_id: string; role: string}) => {
+    const coachData: LineupCoachFormData = {
+      member_id: coach.member_id,
+      role: coach.role as 'head_coach' | 'assistant_coach' | 'goalkeeper_coach' | 'team_manager',
+    };
+
+    if (editingCoachIndex !== null) {
+      // Editing existing coach
+      setCurrentFormData((prev) => ({
+        ...prev,
+        coaches: prev.coaches.map((c, i) => (i === editingCoachIndex ? coachData : c)),
+      }));
+      setEditingCoachIndex(null);
+    } else {
+      // Adding new coach
+      setCurrentFormData((prev) => {
+        const newFormData = {
+          ...prev,
+          coaches: [...prev.coaches, coachData],
+        };
+        console.log('Added coach to form data:', coachData);
+        console.log('Updated coaches array:', newFormData.coaches);
+        return newFormData;
+      });
+    }
+  };
+
+  const handleEditCoach = (index: number) => {
+    setEditingCoachIndex(index);
+    setIsCoachEditModalOpen(true);
+  };
+
+  const handleCoachEditSave = (updatedCoach: LineupCoachFormData) => {
+    if (editingCoachIndex !== null) {
+      setCurrentFormData((prev) => ({
+        ...prev,
+        coaches: prev.coaches.map((c, i) => (i === editingCoachIndex ? updatedCoach : c)),
+      }));
+      setEditingCoachIndex(null);
+    }
+  };
+
+  const handleCoachEditClose = () => {
+    setIsCoachEditModalOpen(false);
+    setEditingCoachIndex(null);
+  };
+
+  const handleCoachSelectionClose = () => {
+    setIsCoachSelectionModalOpen(false);
+    setEditingCoachIndex(null);
+  };
+
+  const handleDeleteCoach = (index: number) => {
     setCurrentFormData((prev) => ({
       ...prev,
       coaches: prev.coaches.filter((_, i) => i !== index),
     }));
   };
 
-  const updateCoach = (
-    index: number,
-    field: keyof LineupCoachFormData,
-    value: any
-  ) => {
+  const handleUpdateCoach = (index: number, field: keyof LineupCoachFormData, value: any) => {
     setCurrentFormData((prev) => ({
       ...prev,
-      coaches: prev.coaches.map((coach, i) =>
-        i === index ? { ...coach, [field]: value } : coach
-      ),
+      coaches: prev.coaches.map((coach, i) => (i === index ? {...coach, [field]: value} : coach)),
     }));
   };
 
   const getMemberName = (memberId: string) => {
     const member = filteredMembers.find((m) => m.id === memberId);
-    return member ? `${member.name} ${member.surname}` : "Neznámý člen";
+    return member ? `${member.surname} ${member.name}` : 'Neznámý člen';
   };
 
-  const getAvailableMembers = (type: "player" | "coach") => {
-    if (type === "player") {
-      return filteredMembers.filter((m) => m.functions?.includes("player"));
-    } else {
-      return filteredMembers.filter((m) => m.functions?.includes("coach"));
-    }
+  const getAvailableCoaches = () => {
+    return filteredMembers.filter((m) => m.functions?.includes('coach'));
   };
 
   const getLineupSummaryDisplay = (summary: any | null, teamName: string) => {
@@ -602,16 +714,16 @@ export default function LineupManager({
         <CardBody>
           <div className="flex gap-4">
             <Button
-              variant={selectedTeam === "home" ? "solid" : "bordered"}
-              color={selectedTeam === "home" ? "primary" : "default"}
-              onPress={() => setSelectedTeam("home")}
+              variant={selectedTeam === 'home' ? 'solid' : 'bordered'}
+              color={selectedTeam === 'home' ? 'primary' : 'default'}
+              onPress={() => setSelectedTeam('home')}
             >
               {homeTeamName} (Domácí)
             </Button>
             <Button
-              variant={selectedTeam === "away" ? "solid" : "bordered"}
-              color={selectedTeam === "away" ? "primary" : "default"}
-              onPress={() => setSelectedTeam("away")}
+              variant={selectedTeam === 'away' ? 'solid' : 'bordered'}
+              color={selectedTeam === 'away' ? 'primary' : 'default'}
+              onPress={() => setSelectedTeam('away')}
             >
               {awayTeamName} (Hosté)
             </Button>
@@ -622,21 +734,17 @@ export default function LineupManager({
       {/* Lineup Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
-            <CardHeader>
-              <Heading size={4}>Domácí tým</Heading>
-            </CardHeader>
-          <CardBody>
-            {getLineupSummaryDisplay(homeLineupSummary, homeTeamName)}
-          </CardBody>
+          <CardHeader>
+            <Heading size={4}>Domácí tým</Heading>
+          </CardHeader>
+          <CardBody>{getLineupSummaryDisplay(homeLineupSummary, homeTeamName)}</CardBody>
         </Card>
 
         <Card>
           <CardHeader>
             <Heading size={4}>Hostující tým</Heading>
           </CardHeader>
-          <CardBody>
-            {getLineupSummaryDisplay(awayLineupSummary, awayTeamName)}
-          </CardBody>
+          <CardBody>{getLineupSummaryDisplay(awayLineupSummary, awayTeamName)}</CardBody>
         </Card>
       </div>
 
@@ -645,20 +753,10 @@ export default function LineupManager({
         <CardHeader className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <UserGroupIcon className="w-5 h-5 text-blue-500" />
-            <Heading size={3}>
-              Sestava: {currentTeamName}
-            </Heading>
+            <Heading size={3}>Sestava: {currentTeamName}</Heading>
           </div>
           <div className="flex gap-2">
-            <Button
-              color="primary"
-              startContent={<PencilIcon className="w-4 h-4" />}
-              onPress={handleEditModalOpen}
-            >
-              Upravit sestavu
-            </Button>
-            {(currentFormData.players.length > 0 ||
-              currentFormData.coaches.length > 0) && (
+            {(currentFormData.players.length > 0 || currentFormData.coaches.length > 0) && (
               <Button
                 color="danger"
                 variant="bordered"
@@ -671,344 +769,229 @@ export default function LineupManager({
           </div>
         </CardHeader>
         <CardBody>
-          {currentFormData.players.length === 0 &&
-          currentFormData.coaches.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <LoadingSpinner label="Načítání sestavy..." />
+            </div>
+          ) : currentFormData.players.length === 0 && currentFormData.coaches.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              Žádná sestava nebyla vytvořena
+              <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 mb-4">Žádná sestava nebyla vytvořena</p>
+              <Button
+                color="primary"
+                startContent={<PlusIcon className="w-4 h-4" />}
+                onPress={addPlayer}
+              >
+                Přidat prvního hráče
+              </Button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* Players Section */}
-              {currentFormData.players.length > 0 && (
-                <div>
-                  <Heading size={4}>
-                    <UserIcon className="w-4 h-4" />
-                    Hráči ({currentFormData.players.length})
-                  </Heading>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {currentFormData.players.map((player, index) => (
-                      <div
-                        key={index}
-                        className="p-3 border rounded-lg bg-gray-50"
+            <div className="space-y-2">
+              {/* Players Table */}
+              <Tabs>
+                <Tab key="players" title={`Hráči (${currentFormData.players.length})`}>
+                  <div>
+                    <div className="flex justify-end items-center mb-4">
+                      <Button
+                        color="primary"
+                        startContent={<PlusIcon className="w-4 h-4" />}
+                        onPress={addPlayer}
                       >
-                        <div className="text-sm text-gray-600">
-                          {player.member_id
-                            ? getMemberName(player.member_id)
-                            : `${player.external_name} ${player.external_surname}`}
-                        </div>
-                        <div className="flex items-center justify-between gap-2">
-                        <div className="text-xs text-gray-500">
-                          {player.position === "goalkeeper"
-                            ? "Brankář"
-                            : "Hráč v poli"}
-                        </div>
-                        {player.is_captain && (
-                          <div className="text-xs text-gray-500">
-                            Kapitán
-                          </div>
-                        )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                        Přidat hráče
+                      </Button>
+                    </div>
+                    <Table aria-label="Players table">
+                      <TableHeader>
+                        <TableColumn>HRÁČ</TableColumn>
+                        <TableColumn>POZICE</TableColumn>
+                        <TableColumn>DRES</TableColumn>
+                        <TableColumn>GÓLY</TableColumn>
+                        <TableColumn>ŽK</TableColumn>
+                        <TableColumn>ČK5</TableColumn>
+                        <TableColumn>ČK10</TableColumn>
+                        <TableColumn>ČKOT</TableColumn>
+                        <TableColumn>FUNKCE</TableColumn>
+                        <TableColumn>AKCE</TableColumn>
+                      </TableHeader>
+                      <TableBody emptyContent={'Žádní hráči k zobrazení.'}>
+                        {currentFormData.players
+                          .sort((a, b) => {
+                            // Goalkeepers first
+                            if (a.position === 'goalkeeper' && b.position !== 'goalkeeper')
+                              return -1;
+                            if (a.position !== 'goalkeeper' && b.position === 'goalkeeper')
+                              return 1;
 
-              {/* Coaches Section */}
-              {currentFormData.coaches.length > 0 && (
-                <div>
-                  <h4 className="text-md font-medium mb-3 flex items-center gap-2">
-                    <UserIcon className="w-4 h-4" />
-                    Trenéři ({currentFormData.coaches.length})
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {currentFormData.coaches.map((coach, index) => (
-                      <div
-                        key={index}
-                        className="p-3 border rounded-lg bg-blue-50"
-                      >
-                        <div className="text-sm font-medium">
-                          {getMemberName(coach.member_id)}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {coach.role === "head_coach"
-                            ? "Hlavní trenér"
-                            : coach.role === "assistant_coach"
-                            ? "Asistent"
-                            : coach.role === "goalkeeper_coach"
-                            ? "Trenér brankářů"
-                            : coach.role}
-                        </div>
-                      </div>
-                    ))}
+                            // Then sort by surname
+                            const aName = a.member_id
+                              ? getMemberName(a.member_id)
+                              : `${a.external_surname || ''} ${a.external_name || ''}`;
+                            const bName = b.member_id
+                              ? getMemberName(b.member_id)
+                              : `${b.external_surname || ''} ${b.external_name || ''}`;
+                            return aName.localeCompare(bName);
+                          })
+                          .map((player, index) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                {player.member_id
+                                  ? getMemberName(player.member_id)
+                                  : `${player.external_surname || ''} ${player.external_name || ''}`}
+                              </TableCell>
+                              <TableCell>
+                                {player.position === 'goalkeeper' ? 'Brankář' : 'Hráč v poli'}
+                              </TableCell>
+                              <TableCell>{player.jersey_number || '-'}</TableCell>
+                              <TableCell>{player.goals || '-'}</TableCell>
+                              <TableCell>{player.yellow_cards || '-'}</TableCell>
+                              <TableCell>{player.red_cards_5min || '-'}</TableCell>
+                              <TableCell>{player.red_cards_10min || '-'}</TableCell>
+                              <TableCell>{player.red_cards_personal || '-'}</TableCell>
+                              <TableCell>
+                                {player.role === 'captain' ? 'Kapitán' : 'Hráč'}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    color="primary"
+                                    variant="light"
+                                    onPress={() => handleEditPlayer(index)}
+                                    isIconOnly
+                                    aria-label="Upravit hráče"
+                                    startContent={<PencilIcon className="w-4 h-4" />}
+                                  />
+                                  <Button
+                                    size="sm"
+                                    color="danger"
+                                    variant="light"
+                                    onPress={() => handleDeletePlayer(index)}
+                                    isIconOnly
+                                    aria-label="Odebrat hráče"
+                                    startContent={<TrashIcon className="w-4 h-4" />}
+                                  />
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
                   </div>
-                </div>
-              )}
+                </Tab>
+                <Tab key="coaches" title={`Trenéři (${currentFormData.coaches.length})`}>
+                  <div>
+                    <div className="flex justify-end items-center mb-4">
+                      <Button
+                        color="primary"
+                        startContent={<PlusIcon className="w-4 h-4" />}
+                        onPress={handleAddCoach}
+                      >
+                        Přidat trenéra
+                      </Button>
+                    </div>
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableColumn>TRENÉR</TableColumn>
+                      <TableColumn>FUNKCE</TableColumn>
+                      <TableColumn>AKCE</TableColumn>
+                    </TableHeader>
+                    <TableBody emptyContent={'Žádní trenéři k zobrazení.'}>
+                      {currentFormData.coaches.map((coach, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{getMemberName(coach.member_id)}</TableCell>
+                          <TableCell>
+                            {coach.role === 'head_coach'
+                              ? 'Hlavní trenér'
+                              : coach.role === 'assistant_coach'
+                                ? 'Asistent trenéra'
+                                : coach.role === 'goalkeeper_coach'
+                                  ? 'Trenér brankářů'
+                                  : coach.role === 'team_manager'
+                                    ? 'Vedoucí týmu'
+                                    : coach.role}
+                          </TableCell>
+                          <TableCell>
+                            <ButtonGroup>
+                              <Button
+                                size="sm"
+                                color="primary"
+                                variant="light"
+                                onPress={() => handleEditCoach(index)}
+                                isIconOnly
+                                aria-label="Upravit trenéra"
+                                startContent={<PencilIcon className="w-4 h-4" />}
+                              />
+                              <Button
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => handleDeleteCoach(index)}
+                                isIconOnly
+                                aria-label="Odebrat trenéra"
+                                startContent={<TrashIcon className="w-4 h-4" />}
+                              />
+                            </ButtonGroup>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Tab>
+              </Tabs>
             </div>
           )}
         </CardBody>
       </Card>
 
-      {/* Lineup Edit Modal */}
-      <Modal
-        isOpen={isEditModalOpen}
-        onClose={onEditModalClose}
-        size="5xl"
-        scrollBehavior="inside"
-      >
-        <ModalContent>
-          <ModalHeader className="flex justify-between items-center gap-1">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-xl font-bold">
-                Upravit sestavu: {currentTeamName}
-              </h2>
-              <p className="text-sm text-gray-600">
-                {isOwnClub
-                  ? "Vlastní klub - výběr z členů"
-                  : "Hostující klub - externí hráči"}
-              </p>
-            </div>
-            <div>
-              <Button
-                color="primary"
-                startContent={<PlusIcon className="w-4 h-4" />}
-                onPress={addPlayer}
-                className="shrink-0"
-              >
-                Přidat hráče
-              </Button>
-            </div>
-          </ModalHeader>
-          <ModalBody className="max-h-[80vh] overflow-y-auto">
-            <div className="space-y-8">
-              {/* Players Section */}
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      Hráči
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      {currentFormData.players.length} hráčů • Minimálně 6 hráčů
-                      v poli
-                    </p>
-                  </div>
-                </div>
+      {/* Player Selection Modal */}
+      <LineupPlayerSelectionModal
+        isOpen={isPlayerSelectionModalOpen}
+        onClose={handleModalClose}
+        onPlayerSelected={handlePlayerSelected}
+        isOwnClub={isOwnClub}
+        categoryId={categoryId}
+        editingPlayerIndex={editingPlayerIndex}
+        currentPlayer={
+          editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null
+        }
+      />
 
-                {/* Players Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {currentFormData.players.map((player, index) => (
-                    <LineupManagerPlayerCard
-                      key={index}
-                      index={index}
-                      player={player}
-                      isOwnClub={isOwnClub}
-                      filteredMembers={filteredMembers}
-                      updatePlayer={updatePlayer}
-                      removePlayer={removePlayer}
-                    />
-                  ))}
-                </div>
+      {/* Player Edit Modal */}
+      <LineupPlayerEditModal
+        isOpen={isPlayerEditModalOpen}
+        onClose={handlePlayerEditClose}
+        onSave={handlePlayerEditSave}
+        player={editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null}
+        playerIndex={editingPlayerIndex || 0}
+        isOwnClub={isOwnClub}
+      />
 
-                {/* Add Player Button (if no players) */}
-                {currentFormData.players.length === 0 && (
-                  <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                    <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">
-                      Žádní hráči nejsou přidáni
-                    </p>
-                    <Button
-                      color="primary"
-                      startContent={<PlusIcon className="w-4 h-4" />}
-                      onPress={addPlayer}
-                    >
-                      Přidat prvního hráče
-                    </Button>
-                  </div>
-                )}
-              </div>
+      {/* Coach Selection Modal */}
+      <LineupCoachSelectionModal
+        isOpen={isCoachSelectionModalOpen}
+        onClose={handleCoachSelectionClose}
+        onCoachSelected={handleCoachSelected}
+        coaches={getAvailableCoaches()}
+        editingCoachIndex={editingCoachIndex}
+        currentCoach={
+          editingCoachIndex !== null ? currentFormData.coaches[editingCoachIndex] : null
+        }
+      />
 
-              {/* Coaches Section */}
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      Trenéři
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      {currentFormData.coaches.length} trenérů • Maximálně 3
-                      trenéři
-                    </p>
-                  </div>
-                  <Button
-                    color="primary"
-                    variant="bordered"
-                    startContent={<PlusIcon className="w-4 h-4" />}
-                    onPress={addCoach}
-                    className="shrink-0"
-                    isDisabled={currentFormData.coaches.length >= 3}
-                  >
-                    Přidat trenéra
-                  </Button>
-                </div>
-
-                {/* Coaches Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {currentFormData.coaches.map((coach, index) => (
-                    <Card
-                      key={index}
-                      className="border border-blue-200 bg-blue-50"
-                    >
-                      <CardBody className="p-4">
-                        <div className="space-y-4">
-                          {/* Coach Header */}
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-blue-700">
-                                  {index + 1}
-                                </span>
-                              </div>
-                              <span className="text-sm font-medium text-blue-700">
-                                Trenér {index + 1}
-                              </span>
-                            </div>
-                            <Button
-                              size="sm"
-                              color="danger"
-                              variant="light"
-                              isIconOnly
-                              onPress={() => removeCoach(index)}
-                              className="min-w-8 w-8 h-8"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </Button>
-                          </div>
-
-                          {/* Coach Form */}
-                          <div className="grid grid-cols-1 gap-3">
-                            <Select
-                              label="Trenér"
-                              selectedKeys={
-                                coach.member_id ? [coach.member_id] : []
-                              }
-                              onSelectionChange={(keys: any) =>
-                                updateCoach(
-                                  index,
-                                  "member_id",
-                                  Array.from(keys)[0]
-                                )
-                              }
-                              isRequired
-                              classNames={{
-                                trigger: "min-h-12",
-                              }}
-                            >
-                              {getAvailableMembers("coach").map((member) => (
-                                <SelectItem
-                                  key={member.id}
-                                  textValue={`${member.name} ${member.surname} (${member.registration_number})`}
-                                >
-                                  {member.name} {member.surname} (
-                                  {member.registration_number})
-                                </SelectItem>
-                              ))}
-                            </Select>
-
-                            <Select
-                              label="Role"
-                              selectedKeys={coach.role ? [coach.role] : []}
-                              onSelectionChange={(keys: any) =>
-                                updateCoach(index, "role", Array.from(keys)[0])
-                              }
-                              isRequired
-                            >
-                              <SelectItem
-                                key="head_coach"
-                                textValue="Hlavní trenér"
-                              >
-                                Hlavní trenér
-                              </SelectItem>
-                              <SelectItem
-                                key="assistant_coach"
-                                textValue="Asistent"
-                              >
-                                Asistent
-                              </SelectItem>
-                              <SelectItem
-                                key="goalkeeper_coach"
-                                textValue="Trenér brankářů"
-                              >
-                                Trenér brankářů
-                              </SelectItem>
-                            </Select>
-                          </div>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Add Coach Button (if no coaches) */}
-                {currentFormData.coaches.length === 0 && (
-                  <div className="text-center py-6 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
-                    <UserIcon className="w-10 h-10 text-blue-400 mx-auto mb-3" />
-                    <p className="text-blue-600 mb-3">
-                      Žádní trenéři nejsou přidáni
-                    </p>
-                    <Button
-                      color="primary"
-                      variant="bordered"
-                      startContent={<PlusIcon className="w-4 h-4" />}
-                      onPress={addCoach}
-                    >
-                      Přidat prvního trenéra
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {/* Validation Summary */}
-              {error && (
-                <div className="p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg">
-                  <div className="font-medium">Chyba:</div>
-                  <div className="text-sm">{error}</div>
-                </div>
-              )}
-
-              {/* Validation Error Display */}
-              {validationError && (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg">
-                  <Alert
-                    color="warning"
-                    title="Pravidla sestavy"
-                    description={validationError}
-                  />
-                </div>
-              )}
-            </div>
-          </ModalBody>
-          <ModalFooter className="flex items-end gap-2">
-            <Button
-              color="danger"
-              variant="bordered"
-              onPress={onEditModalClose}
-            >
-              Zrušit
-            </Button>
-            <div className="flex gap-2">
-              <Button
-                color="primary"
-                onPress={() => handleSaveLineup(selectedTeam === "home")}
-                isLoading={loading}
-                className="min-w-32"
-              >
-                Uložit sestavu
-              </Button>
-            </div>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      {/* Coach Edit Modal */}
+      <LineupCoachEditModal
+        isOpen={isCoachEditModalOpen}
+        onClose={handleCoachEditClose}
+        onSave={handleCoachEditSave}
+        coach={editingCoachIndex !== null ? currentFormData.coaches[editingCoachIndex] : null}
+        coachIndex={editingCoachIndex || 0}
+        coachName={
+          editingCoachIndex !== null
+            ? getMemberName(currentFormData.coaches[editingCoachIndex].member_id)
+            : ''
+        }
+      />
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
@@ -1017,6 +1000,15 @@ export default function LineupManager({
         onConfirm={handleDeleteLineup}
         title="Smazat sestavu"
         message={`Opravdu chcete smazat sestavu pro tým ${currentTeamName}? Tato akce je nevratná.`}
+      />
+
+      {/* Delete Player Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={isDeletePlayerModalOpen}
+        onClose={onDeletePlayerModalClose}
+        onConfirm={confirmDeletePlayer}
+        title="Odebrat hráče"
+        message="Opravdu chcete odebrat tohoto hráče ze sestavy? Tato akce je nevratná."
       />
     </div>
   );
