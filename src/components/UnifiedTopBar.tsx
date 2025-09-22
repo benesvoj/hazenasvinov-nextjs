@@ -8,6 +8,14 @@ import {usePortalAccess} from '@/hooks/usePortalAccess';
 
 // Constants
 const LOGOUT_OVERLAY_Z_INDEX = 9999;
+
+// Logout timing constants
+const LOGOUT_DELAYS = {
+  STEP_DELAY: 300, // Delay between logout steps
+  SUCCESS_DELAY: 500, // Delay after success message
+  FINAL_DELAY: 3000, // Final delay before redirect
+  RETRY_MESSAGE_DELAY: 2000, // Delay before showing retry message
+} as const;
 import {
   UserIcon,
   ArrowRightEndOnRectangleIcon,
@@ -75,6 +83,7 @@ export const UnifiedTopBar = ({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutProgress, setLogoutProgress] = useState(0);
   const [isClient, setIsClient] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   // Set client-side flag
   useEffect(() => {
@@ -102,6 +111,7 @@ export const UnifiedTopBar = ({
 
     setIsLoggingOut(true);
     setLogoutProgress(0);
+    setLogoutError(null); // Clear any previous errors
 
     try {
       // Step 1: Logging logout
@@ -116,32 +126,53 @@ export const UnifiedTopBar = ({
       }
 
       // Small delay for better UX
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, LOGOUT_DELAYS.STEP_DELAY));
 
       // Step 2: Sign out
       setLogoutProgress(50);
       await signOut();
 
       // Small delay for better UX
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, LOGOUT_DELAYS.STEP_DELAY));
 
       // Step 3: Show success message
       setLogoutProgress(75);
       showToast.success('Úspěšně odhlášen. Přesměrovávám...');
 
       // Small delay for better UX
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, LOGOUT_DELAYS.SUCCESS_DELAY));
 
       // Step 4: Complete and redirect
       setLogoutProgress(100);
       setTimeout(() => {
         router.push('/login');
-      }, 3000);
+      }, LOGOUT_DELAYS.FINAL_DELAY);
     } catch (error) {
       console.error('Logout error:', error);
-      showToast.danger('Chyba při odhlašování. Zkuste to znovu.');
-      setIsLoggingOut(false); // Reset state on error
+
+      // Determine error type and message
+      const errorMessage = error instanceof Error ? error.message : 'Neznámá chyba';
+      const isNetworkError = errorMessage.includes('network') || errorMessage.includes('fetch');
+      const isAuthError = errorMessage.includes('auth') || errorMessage.includes('unauthorized');
+
+      let userMessage = 'Chyba při odhlašování.';
+      if (isNetworkError) {
+        userMessage = 'Problém s připojením. Zkuste to znovu.';
+      } else if (isAuthError) {
+        userMessage = 'Problém s autentizací. Zkuste obnovit stránku.';
+      }
+
+      setLogoutError(errorMessage);
+      showToast.danger(userMessage);
+
+      // Reset UI state but keep user logged in for retry
+      setIsLoggingOut(false);
       setLogoutProgress(0);
+
+      // Show retry option after a short delay
+      setTimeout(() => {
+        showToast.warning('Klikněte na "Odhlásit" pro opakování pokusu.');
+      }, LOGOUT_DELAYS.RETRY_MESSAGE_DELAY);
     }
   };
 
@@ -510,36 +541,62 @@ export const UnifiedTopBar = ({
 
                 {/* Progress Text */}
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Odhlašování...
+                  {logoutError ? 'Chyba při odhlašování' : 'Odhlašování...'}
                 </h3>
 
-                {/* Progress Steps */}
-                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  {logoutProgress >= 25 && (
+                {/* Progress Steps or Error Message */}
+                {logoutError ? (
+                  <div className="text-sm text-red-600 dark:text-red-400 space-y-3">
                     <div className="flex items-center justify-center">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      Zaznamenávání odhlášení...
+                      <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                      {logoutError}
                     </div>
-                  )}
-                  {logoutProgress >= 50 && (
-                    <div className="flex items-center justify-center">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      Ukončování relace...
+                    <div className="flex gap-2 justify-center">
+                      <Button size="sm" color="primary" onPress={handleLogout} className="text-xs">
+                        Zkusit znovu
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        onPress={() => {
+                          setIsLoggingOut(false);
+                          setLogoutError(null);
+                          setLogoutProgress(0);
+                        }}
+                        className="text-xs"
+                      >
+                        Zrušit
+                      </Button>
                     </div>
-                  )}
-                  {logoutProgress >= 75 && (
-                    <div className="flex items-center justify-center">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      Připravování přesměrování...
-                    </div>
-                  )}
-                  {logoutProgress >= 100 && (
-                    <div className="flex items-center justify-center">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      Dokončování...
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    {logoutProgress >= 25 && (
+                      <div className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        Zaznamenávání odhlášení...
+                      </div>
+                    )}
+                    {logoutProgress >= 50 && (
+                      <div className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        Ukončování relace...
+                      </div>
+                    )}
+                    {logoutProgress >= 75 && (
+                      <div className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        Připravování přesměrování...
+                      </div>
+                    )}
+                    {logoutProgress >= 100 && (
+                      <div className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        Dokončování...
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>,
