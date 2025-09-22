@@ -15,14 +15,21 @@ export function useUnifiedPlayers() {
         setLoading(true);
         setError(null);
 
-        // Build query based on filters
+        // Build query with member_club_relationships join to determine internal vs external
         let query = supabase.from('members').select(`
             id,
             name,
             surname,
             registration_number,
             category_id,
-            functions
+            functions,
+            member_club_relationships!inner(
+              club_id,
+              clubs!inner(
+                id,
+                name
+              )
+            )
           `);
 
         // Apply search term filter
@@ -33,10 +40,9 @@ export function useUnifiedPlayers() {
           );
         }
 
-        // Apply club filter (if club_id is provided, show only internal players)
+        // Apply club filter
         if (filters.club_id) {
-          // For internal players, we don't need additional filtering by club_id
-          // as members table already contains our club's players
+          query = query.eq('member_club_relationships.club_id', filters.club_id);
         }
 
         // Apply category filter
@@ -47,19 +53,17 @@ export function useUnifiedPlayers() {
         // Filter to show only players (members with 'player' function)
         query = query.contains('functions', ['player']);
 
-        // Apply external filter
+        // Apply external filter based on club relationship
         if (filters.is_external !== undefined) {
-          // For now, we'll treat all members as internal players
-          // External players would need a different approach
           if (filters.is_external) {
-            // Return empty array for external players for now
-            return [];
+            // For external players, exclude our club (assuming club_id filter is our club)
+            // This would need to be implemented based on your club ID
+            // For now, we'll show all players and filter in the transformation
+          } else {
+            // For internal players, only show our club members
+            // This would need to be implemented based on your club ID
           }
         }
-
-        // Note: Position filter is not applicable here as position is a lineup attribute, not a member attribute
-
-        // Note: is_active filter is not applicable as this column doesn't exist in members table
 
         const {data, error: searchError} = await query.order('surname');
 
@@ -68,19 +72,25 @@ export function useUnifiedPlayers() {
           throw searchError;
         }
 
-        // Transform results to include display_name and other required fields
-        const results: PlayerSearchResult[] = (data || []).map((player: any) => ({
-          id: player.id,
-          name: player.name,
-          surname: player.surname,
-          registration_number: player.registration_number,
-          position: undefined, // Position is set when adding to lineup, not a member attribute
-          jersey_number: undefined, // Jersey number is set when adding to lineup, not a member attribute
-          is_external: false, // All members are internal
-          is_active: true, // Assume all members are active since is_active column doesn't exist
-          current_club_name: 'TJ Sokol Svinov', // Default club name
-          display_name: `${player.surname} ${player.name} (${player.registration_number})`,
-        }));
+        // Transform results to include display_name and determine internal vs external
+        const results: PlayerSearchResult[] = (data || []).map((player: any) => {
+          const clubRelationship = player.member_club_relationships?.[0];
+          const isExternal = !clubRelationship || clubRelationship.club_id !== filters.club_id;
+          const isActive = clubRelationship?.status === 'active';
+
+          return {
+            id: player.id,
+            name: player.name,
+            surname: player.surname,
+            registration_number: player.registration_number,
+            position: undefined, // Position is set when adding to lineup, not a member attribute
+            jersey_number: undefined, // Jersey number is set when adding to lineup, not a member attribute
+            is_external: isExternal,
+            is_active: isActive, // Use status from member_club_relationships
+            current_club_name: clubRelationship?.clubs?.name || 'Neznámý klub',
+            display_name: `${player.surname} ${player.name} (${player.registration_number})`,
+          };
+        });
 
         // Sort results by surname (position sorting will be handled in the lineup display)
         results.sort((a, b) => a.surname.localeCompare(b.surname));
@@ -139,8 +149,8 @@ export function useUnifiedPlayers() {
         functions: data.functions,
         date_of_birth: data.date_of_birth,
         sex: data.sex,
-        is_external: false,
-        is_active: true,
+        is_external: false, // This will be determined by club relationship
+        is_active: true, // This will be determined by club relationship status
         created_at: data.created_at || new Date().toISOString(),
         updated_at: data.updated_at || new Date().toISOString(),
         current_club_name: 'TJ Sokol Svinov', // Default club name
@@ -204,8 +214,8 @@ export function useUnifiedPlayers() {
           functions: member.functions,
           date_of_birth: member.date_of_birth,
           sex: member.sex,
-          is_external: false,
-          is_active: true,
+          is_external: false, // This will be determined by club relationship
+          is_active: true, // This will be determined by club relationship status
           created_at: member.created_at,
           updated_at: member.updated_at,
           current_club_name: 'TJ Sokol Svinov', // This should be fetched from clubs table
@@ -312,8 +322,8 @@ export function useUnifiedPlayers() {
         functions: member.functions,
         date_of_birth: member.date_of_birth,
         sex: member.sex,
-        is_external: false,
-        is_active: true,
+        is_external: false, // This will be determined by club relationship
+        is_active: true, // This will be determined by club relationship status
         created_at: member.created_at,
         updated_at: member.updated_at,
         current_club_name: 'TJ Sokol Svinov', // Default club name

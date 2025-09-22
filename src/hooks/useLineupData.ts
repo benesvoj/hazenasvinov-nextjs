@@ -207,7 +207,6 @@ export const useLineupData = () => {
       });
 
       // Fetch coaches
-      console.log('Fetching coaches for lineup_id:', lineupData.id);
       const {data: coachesData, error: coachesError} = await supabase
         .from('lineup_coaches')
         .select(
@@ -217,8 +216,6 @@ export const useLineupData = () => {
         `
         )
         .eq('lineup_id', lineupData.id);
-
-      console.log('Coaches query result:', {coachesData, coachesError});
 
       if (coachesError) {
         console.warn('Error fetching lineup coaches, table might not exist yet:', coachesError);
@@ -265,7 +262,6 @@ export const useLineupData = () => {
       if (lineupError) {
         if (lineupError.code === 'PGRST116') {
           // No lineup found
-          console.log('No lineup found with ID, returning empty data');
           return {
             players: [],
             coaches: [],
@@ -308,7 +304,6 @@ export const useLineupData = () => {
       });
 
       // Fetch coaches
-      console.log('Fetching coaches for lineup_id (by ID):', lineupId);
       const {data: coachesData, error: coachesError} = await supabase
         .from('lineup_coaches')
         .select(
@@ -318,8 +313,6 @@ export const useLineupData = () => {
         `
         )
         .eq('lineup_id', lineupId);
-
-      console.log('Coaches query result (by ID):', {coachesData, coachesError});
 
       if (coachesError) {
         console.warn('Error fetching lineup coaches, table might not exist yet:', coachesError);
@@ -393,15 +386,21 @@ export const useLineupData = () => {
 
   // Save lineup
   const saveLineup = useCallback(
-    async (lineupId: string, formData: LineupFormData): Promise<void> => {
+    async (
+      lineupId: string,
+      formData: LineupFormData,
+      skipValidation: boolean = false
+    ): Promise<void> => {
       try {
-        // Client-side validation before saving
-        const validation = validateLineupData(formData);
-        if (!validation.isValid) {
-          const validationError = new Error(validation.errors.join(', '));
-          (validationError as any).type = 'validation';
-          (validationError as any).code = 'VALIDATION_ERROR';
-          throw validationError;
+        // Client-side validation before saving (skip for automatic lineup creation)
+        if (!skipValidation) {
+          const validation = validateLineupData(formData);
+          if (!validation.isValid) {
+            const validationError = new Error(validation.errors.join(', '));
+            (validationError as any).type = 'validation';
+            (validationError as any).code = 'VALIDATION_ERROR';
+            throw validationError;
+          }
         }
 
         // First verify that the match exists
@@ -421,7 +420,6 @@ export const useLineupData = () => {
         }
 
         // Verify that the club_category_team exists - formData.team_id is actually a club_category_teams.id
-        console.log('Looking for club_category_team with ID:', formData.team_id);
 
         const {data: clubCategoryTeamData, error: clubCategoryTeamError} = await supabase
           .from('club_category_teams')
@@ -429,20 +427,12 @@ export const useLineupData = () => {
           .eq('id', formData.team_id)
           .maybeSingle();
 
-        console.log('Club category team lookup result:', {
-          clubCategoryTeamData,
-          clubCategoryTeamError,
-        });
-
         if (clubCategoryTeamError) {
           console.error('Club category team not found:', clubCategoryTeamError);
           throw new Error(`Tým s ID ${formData.team_id} nebyl nalezen v databázi.`);
         }
 
         if (!clubCategoryTeamData) {
-          console.log(
-            'Club category team not found, this should not happen if team IDs are correct'
-          );
           throw new Error(
             `Tým s ID ${formData.team_id} nebyl nalezen v databázi. Zkontrolujte, zda jsou správně předány ID týmů.`
           );
@@ -455,50 +445,68 @@ export const useLineupData = () => {
           name: `Tým ${clubCategoryTeamData.team_suffix}`,
         };
 
-        console.log('Match and team verified, proceeding with lineup save:', {
-          match: matchData,
-          team: teamData,
-        });
+        // Check if lineup already exists for this match/team combination
+        let finalLineupId = lineupId;
+        let isNewLineup = false;
 
-        // Delete existing lineup data
-        await deleteLineup(lineupId);
+        if (!finalLineupId) {
+          // Look for existing lineup
+          const {data: existingLineup, error: lookupError} = await supabase
+            .from('lineups')
+            .select('id')
+            .eq('match_id', formData.match_id)
+            .eq('team_id', clubCategoryTeamData.id)
+            .eq('is_home_team', formData.is_home_team)
+            .maybeSingle();
 
-        // Insert new lineup using the club_category_teams.id directly
-        const {error: lineupError} = await supabase.from('lineups').insert({
-          id: lineupId,
-          match_id: formData.match_id,
-          team_id: clubCategoryTeamData.id, // Use the club_category_teams.id directly
-          is_home_team: formData.is_home_team,
-        });
+          if (lookupError) {
+            console.error('Error looking up existing lineup:', lookupError);
+            throw new Error(`Chyba při hledání existující sestavy: ${lookupError.message}`);
+          }
 
-        if (lineupError) {
-          console.error('Error inserting lineup:', lineupError);
-          throw new Error(
-            `Chyba při ukládání sestavy: ${lineupError.message || lineupError.details || lineupError.hint || 'Neznámá chyba'}`
-          );
+          if (existingLineup) {
+            // Use existing lineup ID
+            finalLineupId = existingLineup.id;
+            isNewLineup = false;
+            console.log('Using existing lineup ID:', finalLineupId);
+          } else {
+            // Generate new UUID for new lineups
+            finalLineupId = crypto.randomUUID();
+            isNewLineup = true;
+            console.log('Creating new lineup with ID:', finalLineupId);
+          }
         }
 
-        // Debug: Log the players being inserted
-        console.log(
-          'Players to be inserted:',
-          formData.players.map((p) => ({
-            member_id: p.member_id,
-            position: p.position,
-            role: p.role,
-            is_goalkeeper: p.position === 'goalkeeper',
-          }))
-        );
+        // Delete existing lineup data only if we have a lineupId (existing lineup)
+        if (lineupId) {
+          await deleteLineup(lineupId);
+        }
+
+        // Insert new lineup only if it's a new lineup
+        if (isNewLineup) {
+          const {error: lineupError} = await supabase.from('lineups').insert({
+            id: finalLineupId,
+            match_id: formData.match_id,
+            team_id: clubCategoryTeamData.id, // Use the club_category_teams.id directly
+            is_home_team: formData.is_home_team,
+          });
+
+          if (lineupError) {
+            console.error('Error inserting lineup:', lineupError);
+            throw new Error(
+              `Chyba při ukládání sestavy: ${lineupError.message || lineupError.details || lineupError.hint || 'Neznámá chyba'}`
+            );
+          }
+        }
 
         const goalkeepers = formData.players.filter((p) => p.position === 'goalkeeper');
         const fieldPlayers = formData.players.filter((p) => p.position === 'field_player');
-        console.log('Goalkeepers count:', goalkeepers.length);
-        console.log('Field players count:', fieldPlayers.length);
 
-        // Insert all players at once to avoid validation trigger issues
+        // Insert players - use different strategies based on skipValidation
         const playersToInsert = formData.players
-          .filter((player) => player.member_id)
+          .filter((player) => player.member_id) // All players should have member_id now
           .map((player) => ({
-            lineup_id: lineupId,
+            lineup_id: finalLineupId,
             member_id: player.member_id,
             position: player.position || 'field_player',
             is_captain: player.role === 'captain',
@@ -511,57 +519,63 @@ export const useLineupData = () => {
           }));
 
         if (playersToInsert.length > 0) {
-          console.log('Inserting all players at once:', playersToInsert);
+          if (skipValidation) {
+            // For automatic lineup creation, try to insert players one by one to avoid constraint issues
+            let insertedCount = 0;
+            for (const player of playersToInsert) {
+              try {
+                const {error: playerError} = await supabase.from('lineup_players').insert([player]);
 
-          const {error: playersError} = await supabase
-            .from('lineup_players')
-            .insert(playersToInsert);
-
-          if (playersError) {
-            console.error('Error inserting players:', playersError);
-
-            // Check if it's a validation error (lineup rules)
-            if (playersError.message && playersError.message.includes('Lineup must have')) {
-              throw new Error(`VALIDATION_WARNING: ${playersError.message}`);
+                if (playerError) {
+                  console.warn(`Could not insert player ${player.member_id}:`, playerError.message);
+                  // Continue with next player instead of failing completely
+                } else {
+                  insertedCount++;
+                }
+              } catch (error) {
+                console.warn(`Error inserting player ${player.member_id}:`, error);
+                // Continue with next player
+              }
             }
 
-            throw new Error(
-              `Chyba při ukládání hráčů: ${playersError.message || playersError.details || playersError.hint || 'Neznámá chyba'}`
-            );
+            if (insertedCount === 0) {
+              console.warn('No players could be inserted due to validation constraints');
+            } else {
+              console.log(
+                `Successfully inserted ${insertedCount} out of ${playersToInsert.length} players`
+              );
+            }
+          } else {
+            // For manual saves, use the original validation logic
+            const {error: playersError} = await supabase
+              .from('lineup_players')
+              .insert(playersToInsert);
+
+            if (playersError) {
+              console.error('Error inserting players:', playersError);
+
+              // Check if it's a validation error (lineup rules)
+              if (playersError.message && playersError.message.includes('Lineup must have')) {
+                throw new Error(`VALIDATION_WARNING: ${playersError.message}`);
+              } else {
+                throw new Error(
+                  `Chyba při ukládání hráčů: ${playersError.message || playersError.details || playersError.hint || 'Neznámá chyba'}`
+                );
+              }
+            }
           }
-        }
-
-        // Handle external players (not supported in current schema)
-        const externalPlayers = formData.players.filter(
-          (player) =>
-            !player.member_id &&
-            player.external_name &&
-            player.external_surname &&
-            player.external_registration_number
-        );
-
-        if (externalPlayers.length > 0) {
-          console.warn(
-            'External players not supported in current schema, skipping:',
-            externalPlayers
-          );
         }
 
         // Insert all coaches at once
         const coachesToInsert = formData.coaches
           .filter((coach) => coach.member_id && coach.role)
           .map((coach) => ({
-            lineup_id: lineupId,
+            lineup_id: finalLineupId,
             member_id: coach.member_id,
             role: coach.role,
           }));
 
-        console.log('Coaches to insert:', coachesToInsert);
-        console.log('Form data coaches:', formData.coaches);
-
         if (coachesToInsert.length > 0) {
-          console.log('Inserting all coaches at once:', coachesToInsert);
-
           const {error: coachesError} = await supabase
             .from('lineup_coaches')
             .insert(coachesToInsert);
@@ -695,16 +709,6 @@ export const useLineupData = () => {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // Debug: Log all players and their positions
-    console.log('🔍 Validating lineup data:', {
-      totalPlayers: formData.players.length,
-      players: formData.players.map((p) => ({
-        name: p.display_name || `${p.external_name} ${p.external_surname}`,
-        position: p.position,
-        isExternal: p.is_external,
-      })),
-    });
-
     // Partition players into valid and invalid positions in a single pass
     const {validPlayers, invalidPlayers} = formData.players.reduce(
       (acc, p) => {
@@ -728,14 +732,6 @@ export const useLineupData = () => {
     const goalkeepers = validPlayers.filter((p) => p.position === 'goalkeeper');
     const fieldPlayers = validPlayers.filter((p) => p.position === 'field_player');
     const coaches = formData.coaches;
-
-    console.log('🔍 Position filtering results:', {
-      goalkeepers: goalkeepers.length,
-      fieldPlayers: fieldPlayers.length,
-      validPlayers: validPlayers.length,
-      totalPlayers: formData.players.length,
-      invalidPlayers: invalidPlayers.length,
-    });
 
     // Minimum requirements
     if (goalkeepers.length < 1) {

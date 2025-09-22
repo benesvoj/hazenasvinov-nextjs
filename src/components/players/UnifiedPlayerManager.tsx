@@ -16,6 +16,7 @@ interface UnifiedPlayerManagerProps {
   onPlayerSelected?: (player: PlayerSearchResult) => void;
   categoryId?: string;
   teamName?: string;
+  excludePlayerIds?: string[]; // IDs of players already in the lineup
 }
 
 export default function UnifiedPlayerManager({
@@ -24,6 +25,7 @@ export default function UnifiedPlayerManager({
   onPlayerSelected,
   categoryId,
   teamName,
+  excludePlayerIds = [],
 }: UnifiedPlayerManagerProps) {
   const {searchPlayers, getPlayersByClub, loading, error} = useUnifiedPlayers();
 
@@ -33,6 +35,11 @@ export default function UnifiedPlayerManager({
     is_external: showExternalPlayers ? undefined : false,
     category_id: categoryId,
   });
+
+  // Filter out players that are already in the lineup
+  const filteredPlayers = useMemo(() => {
+    return players.filter((player) => !excludePlayerIds.includes(player.id));
+  }, [players, excludePlayerIds]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showLoanModal, setShowLoanModal] = useState(false);
   const [showCreateMemberModal, setShowCreateMemberModal] = useState(false);
@@ -55,9 +62,20 @@ export default function UnifiedPlayerManager({
   // Separate function for search that doesn't depend on loadPlayers
   const performSearch = useCallback(
     async (term: string) => {
+      // Determine the is_external filter based on context and user selection
+      let isExternalFilter: boolean | undefined;
+
+      if (showExternalPlayers) {
+        // When showing external players, use the filter selection
+        isExternalFilter = filters.is_external;
+      } else {
+        // When showing internal players, always filter for internal only
+        isExternalFilter = false;
+      }
+
       const searchFilters = {
         club_id: clubId,
-        is_external: showExternalPlayers ? undefined : false,
+        is_external: isExternalFilter,
         category_id: categoryId,
         search_term: term,
       };
@@ -65,13 +83,18 @@ export default function UnifiedPlayerManager({
       const data = await searchPlayers(searchFilters);
       setPlayers(data);
     },
-    [clubId, showExternalPlayers, categoryId, searchPlayers]
+    [clubId, filters.is_external, categoryId, searchPlayers, showExternalPlayers]
   );
 
   // Load initial players
   useEffect(() => {
     performSearch('');
   }, [performSearch]);
+
+  // Trigger search when filters change
+  useEffect(() => {
+    performSearch(searchTerm);
+  }, [filters.is_external, performSearch, searchTerm]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -216,21 +239,23 @@ export default function UnifiedPlayerManager({
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
         />
-        <Select
-          label="Typ hráče"
-          value={filters.is_external === undefined ? '' : filters.is_external.toString()}
-          selectedKeys={filters.is_external === undefined ? [] : [filters.is_external.toString()]}
-          onSelectionChange={(keys) => {
-            const selectedKey = Array.from(keys)[0] as string;
-            handleFilterChange({
-              is_external: selectedKey === '' ? undefined : selectedKey === 'true',
-            });
-          }}
-        >
-          <SelectItem key="all">Všichni</SelectItem>
-          <SelectItem key="false">Interní</SelectItem>
-          <SelectItem key="true">Externí</SelectItem>
-        </Select>
+        {showExternalPlayers && (
+          <Select
+            label="Typ hráče"
+            value={filters.is_external === undefined ? '' : filters.is_external.toString()}
+            selectedKeys={filters.is_external === undefined ? [] : [filters.is_external.toString()]}
+            onSelectionChange={(keys) => {
+              const selectedKey = Array.from(keys)[0] as string;
+              handleFilterChange({
+                is_external: selectedKey === '' ? undefined : selectedKey === 'true',
+              });
+            }}
+          >
+            <SelectItem key="all">Všichni</SelectItem>
+            <SelectItem key="false">Interní</SelectItem>
+            <SelectItem key="true">Externí</SelectItem>
+          </Select>
+        )}
       </div>
 
       {/* Create Player Button - Different for internal vs external */}
@@ -258,12 +283,14 @@ export default function UnifiedPlayerManager({
 
       {/* Players List */}
       <div className="space-y-2">
-        {players.length === 0 ? (
+        {filteredPlayers.length === 0 ? (
           <div className="rounded bg-gray-50 p-8 text-center">
-            <div className="text-sm text-gray-500">Žádní hráči nenalezeni</div>
+            <div className="text-sm text-gray-500">
+              {players.length === 0 ? 'Žádní hráči nenalezeni' : 'Všichni hráči jsou již v sestavě'}
+            </div>
           </div>
         ) : (
-          players.map((player) => (
+          filteredPlayers.map((player) => (
             <div key={player.id} className="rounded border border-gray-200 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
@@ -330,6 +357,7 @@ export default function UnifiedPlayerManager({
         onClose={() => setShowCreateExternalPlayerModal(false)}
         onPlayerCreated={handleExternalPlayerCreated}
         teamName={teamName}
+        categoryId={categoryId} // Passed categoryId to determine gender
       />
     </div>
   );

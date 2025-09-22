@@ -1,7 +1,7 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {UnifiedModal} from '@/components';
+import {UnifiedModal, showToast} from '@/components';
 import {Input, Select, SelectItem, Button, Checkbox} from '@heroui/react';
 import {PlayerSearchResult} from '@/types/unifiedPlayer';
 
@@ -10,6 +10,7 @@ interface CreateExternalPlayerModalProps {
   onClose: () => void;
   onPlayerCreated: (player: PlayerSearchResult) => void;
   teamName?: string;
+  categoryId?: string; // Add categoryId to determine gender
 }
 
 export default function CreateExternalPlayerModal({
@@ -17,6 +18,7 @@ export default function CreateExternalPlayerModal({
   onClose,
   onPlayerCreated,
   teamName,
+  categoryId,
 }: CreateExternalPlayerModalProps) {
   const [formData, setFormData] = useState({
     name: '',
@@ -29,6 +31,7 @@ export default function CreateExternalPlayerModal({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [categoryGender, setCategoryGender] = useState<'male' | 'female' | null>(null);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -50,30 +53,107 @@ export default function CreateExternalPlayerModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
 
-    // Create a PlayerSearchResult for external player
-    const externalPlayer: PlayerSearchResult = {
-      id: `external_${Date.now()}`, // Generate temporary ID
-      name: formData.name.trim(),
-      surname: formData.surname.trim(),
-      registration_number: formData.registration_number.trim(),
-      position: formData.position,
-      jersey_number: formData.jersey_number ? parseInt(formData.jersey_number) : undefined,
-      is_external: true,
-      current_club_name: formData.club_name.trim(),
-      display_name: `${formData.surname.trim()} ${formData.name.trim()} (${formData.registration_number.trim()})`,
-      is_captain: formData.is_captain,
-    };
+    try {
+      // Import Supabase client
+      const {createClient} = await import('@/utils/supabase/client');
+      const supabase = createClient();
 
-    onPlayerCreated(externalPlayer);
-    onClose();
-    setIsLoading(false);
+      // First, find or create the club
+      let clubId: string;
+      const {data: existingClub, error: clubSearchError} = await supabase
+        .from('clubs')
+        .select('id')
+        .eq('name', formData.club_name.trim())
+        .single();
+
+      if (clubSearchError && clubSearchError.code !== 'PGRST116') {
+        throw new Error(`Chyba při hledání klubu: ${clubSearchError.message}`);
+      }
+
+      if (existingClub) {
+        clubId = existingClub.id;
+      } else {
+        // Create new club if it doesn't exist
+        const {data: newClub, error: clubCreateError} = await supabase
+          .from('clubs')
+          .insert({
+            name: formData.club_name.trim(),
+            is_active: true,
+          })
+          .select()
+          .single();
+
+        if (clubCreateError) {
+          throw new Error(`Chyba při vytváření klubu: ${clubCreateError.message}`);
+        }
+        clubId = newClub.id;
+      }
+
+      // Create member record in database (no position field needed - it's in lineup_players)
+      const {data: memberData, error: memberError} = await supabase
+        .from('members')
+        .insert({
+          name: formData.name.trim(),
+          surname: formData.surname.trim(),
+          registration_number: formData.registration_number.trim(),
+          functions: ['player'], // External players are players
+          sex: categoryGender || 'male', // Use category gender, fallback to male
+          category_id: categoryId, // Set category_id from the match category
+        })
+        .select()
+        .single();
+
+      if (memberError) {
+        console.error('Error creating external player:', memberError);
+        throw new Error(`Chyba při vytváření externího hráče: ${memberError.message}`);
+      }
+
+      // Create member-club relationship
+      const {error: relationshipError} = await supabase.from('member_club_relationships').insert({
+        member_id: memberData.id,
+        club_id: clubId,
+        relationship_type: 'permanent', // External players are permanent members of their club
+        status: 'active',
+        valid_from: new Date().toISOString().split('T')[0],
+      });
+
+      if (relationshipError) {
+        console.error('Error creating member-club relationship:', relationshipError);
+        throw new Error(`Chyba při vytváření vztahu hráč-klub: ${relationshipError.message}`);
+      }
+
+      // Create a PlayerSearchResult for the created member
+      const externalPlayer: PlayerSearchResult = {
+        id: memberData.id,
+        name: memberData.name,
+        surname: memberData.surname,
+        registration_number: memberData.registration_number,
+        position: formData.position, // Use position from form data, not from member data
+        jersey_number: formData.jersey_number ? parseInt(formData.jersey_number) : undefined,
+        is_external: true,
+        current_club_name: formData.club_name.trim(),
+        display_name: `${memberData.surname} ${memberData.name} (${memberData.registration_number})`,
+        is_captain: formData.is_captain,
+      };
+
+      showToast.success('Externí hráč byl úspěšně vytvořen');
+      onPlayerCreated(externalPlayer);
+      onClose();
+    } catch (error) {
+      console.error('Error creating external player:', error);
+      showToast.danger(
+        `Chyba při vytváření externího hráče: ${error instanceof Error ? error.message : 'Neznámá chyba'}`
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const updateField = (field: string, value: any) => {
@@ -83,6 +163,36 @@ export default function CreateExternalPlayerModal({
       setErrors((prev) => ({...prev, [field]: ''}));
     }
   };
+
+  // Fetch category gender when modal opens
+  useEffect(() => {
+    const fetchCategoryGender = async () => {
+      if (isOpen && categoryId) {
+        try {
+          const {createClient} = await import('@/utils/supabase/client');
+          const supabase = createClient();
+
+          const {data: category, error} = await supabase
+            .from('categories')
+            .select('gender')
+            .eq('id', categoryId)
+            .single();
+
+          if (error) {
+            console.error('Error fetching category gender:', error);
+            setCategoryGender('male'); // Default fallback
+          } else {
+            setCategoryGender(category.gender);
+          }
+        } catch (error) {
+          console.error('Error fetching category gender:', error);
+          setCategoryGender('male'); // Default fallback
+        }
+      }
+    };
+
+    fetchCategoryGender();
+  }, [isOpen, categoryId]);
 
   // Reset form when modal opens
   useEffect(() => {
@@ -163,11 +273,12 @@ export default function CreateExternalPlayerModal({
           isRequired
           isInvalid={!!errors.club_name}
           errorMessage={errors.club_name}
+          aria-label="Club name"
         />
 
         <Select
           label="Pozice"
-          value={formData.position}
+          selectedKeys={formData.position ? [formData.position] : ['field_player']}
           onSelectionChange={(keys) => {
             const selectedKey = Array.from(keys)[0] as string;
             updateField('position', selectedKey);
