@@ -22,7 +22,10 @@ interface AttendanceModalProps {
   membersLoading: boolean;
   filteredMembers: any[];
   attendanceRecords: any[];
-  onRecordAttendance: (memberId: string, status: 'present' | 'absent' | 'late' | 'excused') => void;
+  onRecordAttendance: (
+    memberId: string,
+    status: 'present' | 'absent' | 'late' | 'excused'
+  ) => Promise<void>;
   getStatusColor: (status: string) => 'success' | 'danger' | 'warning' | 'default';
   getStatusText: (status: string) => string;
 }
