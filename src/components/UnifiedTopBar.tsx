@@ -1,9 +1,21 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {usePathname} from 'next/navigation';
+import {usePathname, useRouter} from 'next/navigation';
+import {createPortal} from 'react-dom';
 import {useAuth} from '@/hooks/useAuthNew';
 import {usePortalAccess} from '@/hooks/usePortalAccess';
+
+// Constants
+const LOGOUT_OVERLAY_Z_INDEX = 9999;
+
+// Logout timing constants
+const LOGOUT_DELAYS = {
+  STEP_DELAY: 300, // Delay between logout steps
+  SUCCESS_DELAY: 500, // Delay after success message
+  FINAL_DELAY: 3000, // Final delay before redirect
+  RETRY_MESSAGE_DELAY: 2000, // Delay before showing retry message
+} as const;
 import {
   UserIcon,
   ArrowRightEndOnRectangleIcon,
@@ -29,6 +41,7 @@ import {
   UserProfileModal,
   ThemeSwitch,
   CoachPortalCategoryDialog,
+  showToast,
 } from '@/components';
 import {logLogout} from '@/utils/loginLogger';
 
@@ -57,6 +70,7 @@ export const UnifiedTopBar = ({
   userProfile,
 }: UnifiedTopBarProps) => {
   const pathname = usePathname();
+  const router = useRouter();
   const {user, signOut} = useAuth();
   const {hasCoachAccess, hasBothAccess, hasAdminAccess, loading} = usePortalAccess();
 
@@ -66,6 +80,15 @@ export const UnifiedTopBar = ({
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showCoachPortalDialog, setShowCoachPortalDialog] = useState(false);
   const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutProgress, setLogoutProgress] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Load release notes
   useEffect(() => {
@@ -84,17 +107,72 @@ export const UnifiedTopBar = ({
 
   // Handlers
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+
+    setIsLoggingOut(true);
+    setLogoutProgress(0);
+    setLogoutError(null); // Clear any previous errors
+
     try {
+      // Step 1: Logging logout
+      setLogoutProgress(25);
       if (user?.email) {
         try {
           await logLogout(user.email);
         } catch (logError) {
           console.error('Failed to log logout:', logError);
+          // Don't show error toast for logging failure, just continue with logout
         }
       }
+
+      // Small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, LOGOUT_DELAYS.STEP_DELAY));
+
+      // Step 2: Sign out
+      setLogoutProgress(50);
       await signOut();
+
+      // Small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, LOGOUT_DELAYS.STEP_DELAY));
+
+      // Step 3: Show success message
+      setLogoutProgress(75);
+      showToast.success('Úspěšně odhlášen. Přesměrovávám...');
+
+      // Small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, LOGOUT_DELAYS.SUCCESS_DELAY));
+
+      // Step 4: Complete and redirect
+      setLogoutProgress(100);
+      setTimeout(() => {
+        router.push('/login');
+      }, LOGOUT_DELAYS.FINAL_DELAY);
     } catch (error) {
       console.error('Logout error:', error);
+
+      // Determine error type and message
+      const errorMessage = error instanceof Error ? error.message : 'Neznámá chyba';
+      const isNetworkError = errorMessage.includes('network') || errorMessage.includes('fetch');
+      const isAuthError = errorMessage.includes('auth') || errorMessage.includes('unauthorized');
+
+      let userMessage = 'Chyba při odhlašování.';
+      if (isNetworkError) {
+        userMessage = 'Problém s připojením. Zkuste to znovu.';
+      } else if (isAuthError) {
+        userMessage = 'Problém s autentizací. Zkuste obnovit stránku.';
+      }
+
+      setLogoutError(errorMessage);
+      showToast.danger(userMessage);
+
+      // Reset UI state but keep user logged in for retry
+      setIsLoggingOut(false);
+      setLogoutProgress(0);
+
+      // Show retry option after a short delay
+      setTimeout(() => {
+        showToast.warning('Klikněte na "Odhlásit" pro opakování pokusu.');
+      }, LOGOUT_DELAYS.RETRY_MESSAGE_DELAY);
     }
   };
 
@@ -309,7 +387,8 @@ export const UnifiedTopBar = ({
                 variant="light"
                 className={`flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
                   variant === 'coach' ? 'p-2' : ''
-                }`}
+                } ${isLoggingOut ? 'opacity-70' : ''}`}
+                isDisabled={isLoggingOut}
               >
                 <Avatar
                   name={getUserInitials()}
@@ -412,6 +491,7 @@ export const UnifiedTopBar = ({
                 onPress={handleLogout}
                 aria-label="Odhlásit se"
                 className={variant === 'coach' ? 'text-danger' : ''}
+                isDisabled={isLoggingOut}
               >
                 <span>{variant === 'admin' ? 'Odhlásit' : 'Odhlásit se'}</span>
               </DropdownItem>
@@ -437,6 +517,91 @@ export const UnifiedTopBar = ({
           onConfirm={handleConfirmCoachPortalSwitch}
         />
       )}
+
+      {/* Logout Progress Overlay - Rendered via Portal */}
+      {isLoggingOut &&
+        isClient &&
+        createPortal(
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            style={{zIndex: LOGOUT_OVERLAY_Z_INDEX}}
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 shadow-xl">
+              <div className="text-center">
+                {/* Spinner */}
+                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                    style={{width: `${logoutProgress}%`}}
+                  ></div>
+                </div>
+
+                {/* Progress Text */}
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  {logoutError ? 'Chyba při odhlašování' : 'Odhlašování...'}
+                </h3>
+
+                {/* Progress Steps or Error Message */}
+                {logoutError ? (
+                  <div className="text-sm text-red-600 dark:text-red-400 space-y-3">
+                    <div className="flex items-center justify-center">
+                      <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                      {logoutError}
+                    </div>
+                    <div className="flex gap-2 justify-center">
+                      <Button size="sm" color="primary" onPress={handleLogout} className="text-xs">
+                        Zkusit znovu
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        onPress={() => {
+                          setIsLoggingOut(false);
+                          setLogoutError(null);
+                          setLogoutProgress(0);
+                        }}
+                        className="text-xs"
+                      >
+                        Zrušit
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    {logoutProgress >= 25 && (
+                      <div className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        Zaznamenávání odhlášení...
+                      </div>
+                    )}
+                    {logoutProgress >= 50 && (
+                      <div className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        Ukončování relace...
+                      </div>
+                    )}
+                    {logoutProgress >= 75 && (
+                      <div className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        Připravování přesměrování...
+                      </div>
+                    )}
+                    {logoutProgress >= 100 && (
+                      <div className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        Dokončování...
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
