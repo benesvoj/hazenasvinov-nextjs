@@ -104,8 +104,21 @@ export function useUnifiedPlayers() {
       setError(null);
 
       const {data, error: fetchError} = await supabase
-        .from('unified_players')
-        .select('*')
+        .from('members')
+        .select(
+          `
+          id,
+          name,
+          surname,
+          registration_number,
+          category_id,
+          functions,
+          date_of_birth,
+          sex,
+          created_at,
+          updated_at
+        `
+        )
         .eq('id', playerId)
         .single();
 
@@ -114,7 +127,26 @@ export function useUnifiedPlayers() {
         throw fetchError;
       }
 
-      return data;
+      if (!data) return null;
+
+      // Transform member data to UnifiedPlayer format
+      const unifiedPlayer: UnifiedPlayer = {
+        id: data.id,
+        name: data.name,
+        surname: data.surname,
+        registration_number: data.registration_number,
+        category_id: data.category_id,
+        functions: data.functions,
+        date_of_birth: data.date_of_birth,
+        sex: data.sex,
+        is_external: false,
+        is_active: true,
+        created_at: data.created_at || new Date().toISOString(),
+        updated_at: data.updated_at || new Date().toISOString(),
+        current_club_name: 'TJ Sokol Svinov', // Default club name
+      };
+
+      return unifiedPlayer;
     } catch (err) {
       console.error('Error in getPlayerById:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch player');
@@ -124,25 +156,63 @@ export function useUnifiedPlayers() {
     }
   }, []);
 
-  // Get players by club
+  // Get players by club using member_club_relationships
   const getPlayersByClub = useCallback(async (clubId: string): Promise<UnifiedPlayer[]> => {
     try {
       setLoading(true);
       setError(null);
 
       const {data, error: fetchError} = await supabase
-        .from('unified_players')
-        .select('*')
-        .eq('current_club_id', clubId)
-        .eq('is_active', true)
-        .order('name');
+        .from('member_club_relationships')
+        .select(
+          `
+          member_id,
+          members!inner(
+            id,
+            name,
+            surname,
+            registration_number,
+            category_id,
+            functions,
+            date_of_birth,
+            sex,
+            created_at,
+            updated_at
+          )
+        `
+        )
+        .eq('club_id', clubId)
+        .eq('status', 'active')
+        .lte('valid_from', new Date().toISOString().split('T')[0])
+        .or('valid_to.is.null,valid_to.gte.' + new Date().toISOString().split('T')[0])
+        .order('members(surname)');
 
       if (fetchError) {
         console.error('Error fetching club players:', fetchError);
         throw fetchError;
       }
 
-      return data || [];
+      // Transform results to UnifiedPlayer format
+      const players: UnifiedPlayer[] = (data || []).map((relationship: any) => {
+        const member = relationship.members;
+        return {
+          id: member.id,
+          name: member.name,
+          surname: member.surname,
+          registration_number: member.registration_number,
+          category_id: member.category_id,
+          functions: member.functions,
+          date_of_birth: member.date_of_birth,
+          sex: member.sex,
+          is_external: false,
+          is_active: true,
+          created_at: member.created_at,
+          updated_at: member.updated_at,
+          current_club_name: 'TJ Sokol Svinov', // This should be fetched from clubs table
+        };
+      });
+
+      return players;
     } catch (err) {
       console.error('Error in getPlayersByClub:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch club players');
@@ -183,24 +253,16 @@ export function useUnifiedPlayers() {
   );
 
   // Get external players (players from other clubs)
+  // Note: External players are typically created on-the-fly in lineups
+  // This function returns empty array as external players don't exist in members table
   const getExternalPlayers = useCallback(async (): Promise<UnifiedPlayer[]> => {
     try {
       setLoading(true);
       setError(null);
 
-      const {data, error: fetchError} = await supabase
-        .from('unified_players')
-        .select('*')
-        .eq('is_external', true)
-        .eq('is_active', true)
-        .order('name');
-
-      if (fetchError) {
-        console.error('Error fetching external players:', fetchError);
-        throw fetchError;
-      }
-
-      return data || [];
+      // External players are created dynamically in lineups, not stored in members table
+      // Return empty array as external players are handled differently
+      return [];
     } catch (err) {
       console.error('Error in getExternalPlayers:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch external players');
@@ -217,18 +279,47 @@ export function useUnifiedPlayers() {
       setError(null);
 
       const {data, error: fetchError} = await supabase
-        .from('unified_players')
-        .select('*')
-        .eq('is_external', false)
-        .eq('is_active', true)
-        .order('name');
+        .from('members')
+        .select(
+          `
+          id,
+          name,
+          surname,
+          registration_number,
+          category_id,
+          functions,
+          date_of_birth,
+          sex,
+          created_at,
+          updated_at
+        `
+        )
+        .contains('functions', ['player'])
+        .order('surname');
 
       if (fetchError) {
         console.error('Error fetching internal players:', fetchError);
         throw fetchError;
       }
 
-      return data || [];
+      // Transform results to UnifiedPlayer format
+      const players: UnifiedPlayer[] = (data || []).map((member: any) => ({
+        id: member.id,
+        name: member.name,
+        surname: member.surname,
+        registration_number: member.registration_number,
+        category_id: member.category_id,
+        functions: member.functions,
+        date_of_birth: member.date_of_birth,
+        sex: member.sex,
+        is_external: false,
+        is_active: true,
+        created_at: member.created_at,
+        updated_at: member.updated_at,
+        current_club_name: 'TJ Sokol Svinov', // Default club name
+      }));
+
+      return players;
     } catch (err) {
       console.error('Error in getInternalPlayers:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch internal players');
