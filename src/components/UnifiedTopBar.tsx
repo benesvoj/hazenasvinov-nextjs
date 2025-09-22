@@ -2,6 +2,7 @@
 
 import React, {useState, useEffect} from 'react';
 import {usePathname} from 'next/navigation';
+import {createPortal} from 'react-dom';
 import {useAuth} from '@/hooks/useAuthNew';
 import {usePortalAccess} from '@/hooks/usePortalAccess';
 import {
@@ -29,6 +30,7 @@ import {
   UserProfileModal,
   ThemeSwitch,
   CoachPortalCategoryDialog,
+  showToast,
 } from '@/components';
 import {logLogout} from '@/utils/loginLogger';
 
@@ -66,6 +68,14 @@ export const UnifiedTopBar = ({
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showCoachPortalDialog, setShowCoachPortalDialog] = useState(false);
   const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutProgress, setLogoutProgress] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Load release notes
   useEffect(() => {
@@ -84,17 +94,50 @@ export const UnifiedTopBar = ({
 
   // Handlers
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+
+    setIsLoggingOut(true);
+    setLogoutProgress(0);
+
     try {
+      // Step 1: Logging logout
+      setLogoutProgress(25);
       if (user?.email) {
         try {
           await logLogout(user.email);
         } catch (logError) {
           console.error('Failed to log logout:', logError);
+          // Don't show error toast for logging failure, just continue with logout
         }
       }
+
+      // Small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Step 2: Sign out
+      setLogoutProgress(50);
       await signOut();
+
+      // Small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Step 3: Show success message
+      setLogoutProgress(75);
+      showToast.success('Úspěšně odhlášen. Přesměrovávám...');
+
+      // Small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Step 4: Complete and redirect
+      setLogoutProgress(100);
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 3000); // Increased from 1000ms to 3000ms for better visibility
     } catch (error) {
       console.error('Logout error:', error);
+      showToast.danger('Chyba při odhlašování. Zkuste to znovu.');
+      setIsLoggingOut(false); // Reset state on error
+      setLogoutProgress(0);
     }
   };
 
@@ -309,7 +352,8 @@ export const UnifiedTopBar = ({
                 variant="light"
                 className={`flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
                   variant === 'coach' ? 'p-2' : ''
-                }`}
+                } ${isLoggingOut ? 'opacity-70' : ''}`}
+                isDisabled={isLoggingOut}
               >
                 <Avatar
                   name={getUserInitials()}
@@ -412,6 +456,7 @@ export const UnifiedTopBar = ({
                 onPress={handleLogout}
                 aria-label="Odhlásit se"
                 className={variant === 'coach' ? 'text-danger' : ''}
+                isDisabled={isLoggingOut}
               >
                 <span>{variant === 'admin' ? 'Odhlásit' : 'Odhlásit se'}</span>
               </DropdownItem>
@@ -437,6 +482,65 @@ export const UnifiedTopBar = ({
           onConfirm={handleConfirmCoachPortalSwitch}
         />
       )}
+
+      {/* Logout Progress Overlay - Rendered via Portal */}
+      {isLoggingOut &&
+        isClient &&
+        createPortal(
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            style={{zIndex: 999999}}
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 shadow-xl">
+              <div className="text-center">
+                {/* Spinner */}
+                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                    style={{width: `${logoutProgress}%`}}
+                  ></div>
+                </div>
+
+                {/* Progress Text */}
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Odhlašování...
+                </h3>
+
+                {/* Progress Steps */}
+                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  {logoutProgress >= 25 && (
+                    <div className="flex items-center justify-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                      Zaznamenávání odhlášení...
+                    </div>
+                  )}
+                  {logoutProgress >= 50 && (
+                    <div className="flex items-center justify-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                      Ukončování relace...
+                    </div>
+                  )}
+                  {logoutProgress >= 75 && (
+                    <div className="flex items-center justify-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                      Připravování přesměrování...
+                    </div>
+                  )}
+                  {logoutProgress >= 100 && (
+                    <div className="flex items-center justify-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                      Dokončování...
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
