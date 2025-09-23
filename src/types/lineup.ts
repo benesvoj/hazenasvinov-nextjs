@@ -1,6 +1,6 @@
 import {Member} from './member';
 import {LineupCoachRoles} from '@/constants';
-
+import {LineupErrorType} from '@/enums';
 export interface Lineup {
   id: string;
   match_id: string;
@@ -108,4 +108,10 @@ export interface LineupValidation {
   isValid: boolean;
   errors: string[];
   warnings: string[];
+}
+
+export interface LineupError {
+  type: LineupErrorType;
+  message: string;
+  code?: string;
 }

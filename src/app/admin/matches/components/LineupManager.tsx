@@ -25,7 +25,7 @@ import {
   ButtonGroup,
 } from '@heroui/react';
 import {UserGroupIcon, PlusIcon, TrashIcon, PencilIcon} from '@heroicons/react/24/outline';
-import {useLineupData, classifyLineupError, LineupErrorType} from '@/hooks/useLineupData';
+import {useLineupData} from '@/hooks';
 import {useLineupManager} from '@/hooks/useLineupManager';
 import {
   LineupFormData,
@@ -43,6 +43,8 @@ import LineupCoachSelectionModal from './LineupCoachSelectionModal';
 import LineupCoachEditModal from './LineupCoachEditModal';
 import {Heading} from '@/components';
 import {LineupCoachRoles, LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
+import {classifyLineupError} from '@/helpers';
+import {LineupErrorType} from '@/enums';
 
 const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
   (

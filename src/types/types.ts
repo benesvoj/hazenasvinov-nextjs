@@ -100,19 +100,6 @@ export interface ExternalPlayer {
   updated_at: string;
 }
 
-export interface LineupPlayer {
-  id?: string;
-  lineup_id?: string;
-  member_id?: string;
-  external_name?: string;
-  external_surname?: string;
-  external_registration_number?: string;
-  display_name?: string;
-  is_external?: boolean;
-  position: string;
-  role?: string;
-}
-
 export interface LineupCoach {
   id: string;
   lineup_id: string;
