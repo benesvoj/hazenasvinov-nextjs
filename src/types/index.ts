@@ -6,6 +6,8 @@ export * from './standing';
 export * from './clubs';
 
 export * from './lineup';
+export * from './lineupManager';
+
 export * from './video';
 export * from './userRoles';
 export * from './meetingMinutes';

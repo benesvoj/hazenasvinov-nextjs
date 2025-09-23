@@ -24,45 +24,25 @@ import {
   Tab,
   ButtonGroup,
 } from '@heroui/react';
-import {
-  UserGroupIcon,
-  PlusIcon,
-  TrashIcon,
-  PencilIcon,
-  UserIcon,
-} from '@heroicons/react/24/outline';
+import {UserGroupIcon, PlusIcon, TrashIcon, PencilIcon} from '@heroicons/react/24/outline';
 import {useLineupData, classifyLineupError, LineupErrorType} from '@/hooks/useLineupData';
+import {useLineupManager} from '@/hooks/useLineupManager';
 import {
   LineupFormData,
   LineupPlayerFormData,
   LineupCoachFormData,
-  Member,
+  LineupSummary,
   ExternalPlayer,
+  LineupManagerProps,
+  LineupManagerRef,
 } from '@/types';
-import {createClient} from '@/utils/supabase/client';
 import {DeleteConfirmationModal, showToast, LoadingSpinner} from '@/components';
 import LineupPlayerSelectionModal from './LineupPlayerSelectionModal';
 import LineupPlayerEditModal from './LineupPlayerEditModal';
 import LineupCoachSelectionModal from './LineupCoachSelectionModal';
 import LineupCoachEditModal from './LineupCoachEditModal';
-import {generateLineupId} from '@/utils/uuid';
 import {Heading} from '@/components';
 import {LineupCoachRoles, LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
-
-interface LineupManagerProps {
-  matchId: string;
-  homeTeamId: string;
-  awayTeamId: string;
-  homeTeamName: string;
-  awayTeamName: string;
-  members: Member[];
-  categoryId: string;
-  onClose?: () => void;
-}
-
-export interface LineupManagerRef {
-  saveLineup: () => Promise<void>;
-}
 
 const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
   (
@@ -143,8 +123,8 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       },
       [selectedTeam]
     );
-    const [homeLineupSummary, setHomeLineupSummary] = useState<any | null>(null);
-    const [awayLineupSummary, setAwayLineupSummary] = useState<any | null>(null);
+    const [homeLineupSummary, setHomeLineupSummary] = useState<LineupSummary | null>(null);
+    const [awayLineupSummary, setAwayLineupSummary] = useState<LineupSummary | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<ExternalPlayer[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -155,26 +135,15 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     const [isCoachSelectionModalOpen, setIsCoachSelectionModalOpen] = useState(false);
     const [isCoachEditModalOpen, setIsCoachEditModalOpen] = useState(false);
     const [editingCoachIndex, setEditingCoachIndex] = useState<number | null>(null);
-    const [deletingCoachIndex, setDeletingCoachIndex] = useState<number | null>(null);
 
-    const supabase = createClient();
-
-    const {
-      isOpen: isEditModalOpen,
-      onOpen: onEditModalOpen,
-      onClose: onEditModalClose,
-    } = useDisclosure();
+    // Use the lineup manager hook for Supabase operations
+    const {getOrCreateLineupId, findLineupId} = useLineupManager();
 
     const {
       isOpen: isPlayerSelectionModalOpen,
       onOpen: onPlayerSelectionModalOpen,
       onClose: onPlayerSelectionModalClose,
     } = useDisclosure();
-
-    const handleEditModalOpen = () => {
-      setValidationError(null); // Clear any previous validation errors
-      onEditModalOpen();
-    };
 
     const {
       isOpen: isDeleteModalOpen,
@@ -199,7 +168,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       error,
     } = useLineupData();
 
-    const currentTeamId = selectedTeam === 'home' ? homeTeamId : awayTeamId;
     const currentTeamName = selectedTeam === 'home' ? homeTeamName : awayTeamName;
 
     // Load lineup data when team changes
@@ -315,39 +283,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       return () => clearTimeout(timeoutId);
     }, [searchTerm, handleSearchExternalPlayers]);
 
-    // Auto-fill external player data when registration number is entered
-    const handleExternalRegistrationNumberChange = useCallback(
-      (index: number, value: string) => {
-        const player = currentFormData.players[index];
-        if (!player) return;
-
-        // Search for existing player with this registration number
-        const existingPlayer = searchResults.find((p) => p.registration_number === value);
-
-        if (existingPlayer) {
-          // Auto-fill the player data
-          const updatedPlayers = [...currentFormData.players];
-          updatedPlayers[index] = {
-            ...player,
-            external_name: existingPlayer.name,
-            external_surname: existingPlayer.surname,
-            external_registration_number: existingPlayer.registration_number,
-            display_name: `${existingPlayer.name} ${existingPlayer.surname} (${existingPlayer.registration_number})`,
-          };
-          setCurrentFormData((prev) => ({...prev, players: updatedPlayers}));
-        } else {
-          // Just update the registration number
-          const updatedPlayers = [...currentFormData.players];
-          updatedPlayers[index] = {
-            ...player,
-            external_registration_number: value,
-          };
-          setCurrentFormData((prev) => ({...prev, players: updatedPlayers}));
-        }
-      },
-      [currentFormData, searchResults, setCurrentFormData]
-    );
-
     const handleSaveLineup = async (isHome: boolean) => {
       try {
         const currentTeamId = isHome ? homeTeamId : awayTeamId;
@@ -355,20 +290,8 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
         // Get current form data for debugging
         const formDataToSave = isHome ? homeFormData : awayFormData;
 
-        // First, check if lineup already exists and get its ID
-        const {data: existingLineup, error: fetchError} = await supabase
-          .from('lineups')
-          .select('id')
-          .eq('match_id', matchId)
-          .eq('team_id', currentTeamId)
-          .maybeSingle();
-
-        if (fetchError) {
-          throw new Error(`Chyba při hledání sestavy: ${fetchError.message || 'Neznámá chyba'}`);
-        }
-
-        // Use existing ID or create a new deterministic UUID
-        const lineupId = existingLineup?.id || generateLineupId(matchId, currentTeamId, isHome);
+        // Get or create lineup ID using the hook
+        const lineupId = await getOrCreateLineupId(matchId, currentTeamId, isHome);
 
         // Debug: Verify the match exists in database
 
@@ -389,7 +312,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
         if (onClose) {
           onClose();
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error saving lineup:', error);
 
         // Use robust error classification
@@ -436,20 +359,10 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       try {
         const currentTeamId = selectedTeam === 'home' ? homeTeamId : awayTeamId;
 
-        // First, find the actual lineup ID from the database
+        // Find the lineup ID using the hook
+        const lineupId = await findLineupId(matchId, currentTeamId);
 
-        const {data: lineupData, error: fetchError} = await supabase
-          .from('lineups')
-          .select('id')
-          .eq('match_id', matchId)
-          .eq('team_id', currentTeamId)
-          .maybeSingle();
-
-        if (fetchError) {
-          throw new Error(`Chyba při hledání sestavy: ${fetchError.message || 'Neznámá chyba'}`);
-        }
-
-        if (!lineupData) {
+        if (!lineupId) {
           // If no lineup exists, just reset the form data and show success message
           const emptyFormData = {
             match_id: matchId,
@@ -471,7 +384,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           return;
         }
 
-        await deleteLineup(lineupData.id);
+        await deleteLineup(lineupId);
 
         // Reset form data
         const emptyFormData = {
@@ -490,9 +403,9 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
 
         await loadLineupSummaries();
         onDeleteModalClose();
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error deleting lineup:', error);
-        const errorMessage = error?.message || error?.details || error?.hint || 'Neznámá chyba';
+        const errorMessage = error instanceof Error ? error.message : 'Neznámá chyba';
         alert(`Chyba při mazání sestavy: ${errorMessage}`);
       }
     };
@@ -627,32 +540,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       }
     };
 
-    const removePlayer = (index: number) => {
-      // Clear validation error when user removes players
-      if (validationError) {
-        setValidationError(null);
-      }
-
-      setCurrentFormData((prev) => ({
-        ...prev,
-        players: prev.players.filter((_, i) => i !== index),
-      }));
-    };
-
-    const updatePlayer = (index: number, field: keyof LineupPlayerFormData, value: any) => {
-      // Clear validation error when user makes changes
-      if (validationError) {
-        setValidationError(null);
-      }
-
-      setCurrentFormData((prev) => ({
-        ...prev,
-        players: prev.players.map((player, i) =>
-          i === index ? {...player, [field]: value} : player
-        ),
-      }));
-    };
-
     const handleAddCoach = () => {
       setIsCoachSelectionModalOpen(true);
     };
@@ -714,13 +601,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       }));
     };
 
-    const handleUpdateCoach = (index: number, field: keyof LineupCoachFormData, value: any) => {
-      setCurrentFormData((prev) => ({
-        ...prev,
-        coaches: prev.coaches.map((coach, i) => (i === index ? {...coach, [field]: value} : coach)),
-      }));
-    };
-
     const getMemberName = (memberId: string) => {
       const member = filteredMembers.find((m) => m.id === memberId);
       return member ? `${member.surname} ${member.name}` : 'Neznámý člen';
@@ -730,7 +610,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       return filteredMembers.filter((m) => m.functions?.includes('coach'));
     };
 
-    const getLineupSummaryDisplay = (summary: any | null, teamName: string) => {
+    const getLineupSummaryDisplay = (summary: LineupSummary | null, teamName: string) => {
       if (!summary) {
         return <div className="text-gray-500 text-sm">Žádná sestava</div>;
       }

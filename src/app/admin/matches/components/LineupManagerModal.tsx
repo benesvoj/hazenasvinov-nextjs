@@ -1,8 +1,8 @@
 'use client';
 
 import {useRef} from 'react';
-import LineupManager, {LineupManagerRef} from './LineupManager';
-import {Match, Member} from '@/types';
+import LineupManager from './LineupManager';
+import {Match, Member, LineupManagerRef} from '@/types';
 import {UnifiedModal} from '@/components';
 
 interface LineupManagerModalProps {
