@@ -1,7 +1,6 @@
 import {useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
 import {generateLineupId} from '@/utils/uuid';
-import {LineupFormData} from '@/types';
 
 /**
  * Hook for managing lineup-related Supabase operations

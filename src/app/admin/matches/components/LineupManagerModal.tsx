@@ -4,7 +4,7 @@ import {useRef} from 'react';
 import LineupManager from './LineupManager';
 import {Match, Member, LineupManagerRef} from '@/types';
 import {UnifiedModal} from '@/components';
-
+import {translations} from '@/lib/translations';
 interface LineupManagerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -19,6 +19,7 @@ export default function LineupManagerModal({
   members,
 }: LineupManagerModalProps) {
   const lineupManagerRef = useRef<LineupManagerRef>(null);
+  const t = translations.lineupManager;
 
   if (!selectedMatch) return null;
 
@@ -48,7 +49,7 @@ export default function LineupManagerModal({
       className="max-h-[90vh] overflow-y-auto"
       isFooterWithActions
       onPress={handleSave}
-      title={`Správa sestav - ${selectedMatch.home_team?.name} vs ${selectedMatch.away_team?.name}`}
+      title={t.title}
     >
       <LineupManager key={selectedMatch.id} {...lineupManagerProps} />
     </UnifiedModal>

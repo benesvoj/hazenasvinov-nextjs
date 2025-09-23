@@ -1,7 +1,6 @@
 'use client';
 
 import {useMemo} from 'react';
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button} from '@heroui/react';
 import {UnifiedModal, UnifiedPlayerManager} from '@/components';
 import {PlayerSearchResult} from '@/types/unifiedPlayer';
 import {LineupPlayerFormData} from '@/types';
@@ -31,9 +30,8 @@ export default function LineupPlayerSelectionModal({
 }: LineupPlayerSelectionModalProps) {
   const handlePlayerSelected = async (player: PlayerSearchResult) => {
     const lineupPlayer: LineupPlayerFormData = {
-      is_external: !isOwnClub,
       position: player.position || 'field_player',
-      role: player.is_captain ? 'captain' : 'player',
+      is_captain: player.is_captain,
       member_id: player.id, // Most players have member_id (created in members table), but legacy external players may not during migration
       jersey_number: player.jersey_number,
     };

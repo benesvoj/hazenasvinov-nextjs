@@ -5,11 +5,6 @@ export * from './standing';
 
 export * from './clubs';
 
-export * from './lineup';
-export * from './lineupManager';
-export * from './externalPlayer';
-export * from './unifiedPlayer';
-
 export * from './video';
 export * from './userRoles';
 export * from './meetingMinutes';
@@ -39,3 +34,14 @@ export * from './matchMetadata';
 export * from './memberClubRelationship';
 
 export * from './categoryGender';
+
+export * from './lineup';
+export * from './lineupManager';
+export * from './lineupCoach';
+export * from './lineupPlayer';
+export * from './externalPlayer';
+export * from './unifiedPlayer';
+
+export * from './clubMemberRelationship';
+
+export * from './pageVisibility';

@@ -7,3 +7,5 @@ export * from './relationshipStatus';
 export * from './relationshipType';
 
 export * from './teamTypes';
+
+export * from './lineupRole';

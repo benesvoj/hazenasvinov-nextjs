@@ -4,17 +4,21 @@ import {UserIcon, UserGroupIcon} from '@heroicons/react/24/outline';
 import {Chip, Badge, Avatar, Card, CardBody, CardHeader} from '@heroui/react';
 import {BallIcon, YellowCardIcon, RedCardIcon} from '@/lib/icons';
 import {LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
+import {translations} from '@/lib/translations';
+import {PlayerPosition, TeamTypes} from '@/enums';
 
 export default function LineupCard({match, lineup, lineupLoading, teamType}: LineupCardProps) {
+  const t = translations.components.matches.lineupCard;
+  console.log(lineup);
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
           <UserGroupIcon
-            className={`w-5 h-5 ${teamType === 'home' ? 'text-blue-500' : 'text-green-500'}`}
+            className={`w-5 h-5 ${teamType === TeamTypes.HOME ? 'text-blue-500' : 'text-green-500'}`}
           />
           <Heading size={3}>
-            Sestava - {teamType === 'home' ? match.home_team.name : match.away_team.name}
+            {t.title} - {teamType === TeamTypes.HOME ? match.home_team.name : match.away_team.name}
           </Heading>
         </div>
       </CardHeader>
@@ -28,10 +32,10 @@ export default function LineupCard({match, lineup, lineupLoading, teamType}: Lin
             {/* Players */}
             {lineup.players.length > 0 && (
               <div>
-                <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Heading size={4}>
                   <UserIcon className="w-4 h-4" />
-                  Hráči ({lineup.players.length})
-                </h4>
+                  {t.players} ({lineup.players.length})
+                </Heading>
                 <div className="space-y-2">
                   {lineup.players.map((player: LineupPlayer, index: number) => (
                     <div
@@ -40,10 +44,9 @@ export default function LineupCard({match, lineup, lineupLoading, teamType}: Lin
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">
-                          {player.display_name ||
-                            `${player.external_surname || ''} ${player.external_name || 'Neznámý'} `}
+                          {`${player.member?.surname} ${player.member?.name}` || t.unknownPlayer}
                         </span>
-                        {player.position === 'goalkeeper' && (
+                        {player.position === PlayerPosition.GOALKEEPER && (
                           <Avatar
                             className="w-4 h-4 text-tiny text-white"
                             color="success"
@@ -78,10 +81,10 @@ export default function LineupCard({match, lineup, lineupLoading, teamType}: Lin
             {/* Coaches */}
             {lineup.coaches.length > 0 && (
               <div>
-                <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Heading size={4}>
                   <UserIcon className="w-4 h-4" />
-                  Trenéři ({lineup.coaches.length})
-                </h4>
+                  {t.coaches} ({lineup.coaches.length})
+                </Heading>
                 <div className="space-y-2">
                   {lineup.coaches.map((coach: any, index: number) => (
                     <div
@@ -91,7 +94,7 @@ export default function LineupCard({match, lineup, lineupLoading, teamType}: Lin
                       <span className="text-sm font-medium">
                         {coach.member
                           ? `${coach.member.surname} ${coach.member.name}`
-                          : 'Neznámý trenér'}
+                          : t.unknownCoach}
                       </span>
                       <Chip color="secondary" variant="flat" size="sm">
                         {
@@ -106,11 +109,11 @@ export default function LineupCard({match, lineup, lineupLoading, teamType}: Lin
             )}
 
             {lineup.players.length === 0 && lineup.coaches.length === 0 && (
-              <div className="text-center py-4 text-gray-500">Sestava zatím nebyla vytvořena</div>
+              <div className="text-center py-4 text-gray-500">{t.noLineup}</div>
             )}
           </div>
         ) : (
-          <div className="text-center py-4 text-gray-500">Sestava zatím nebyla vytvořena</div>
+          <div className="text-center py-4 text-gray-500">{t.noLineup}</div>
         )}
       </CardBody>
     </Card>

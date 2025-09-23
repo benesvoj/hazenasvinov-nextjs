@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { PageVisibility } from '@/types/types';
+import {useState, useEffect} from 'react';
+import {PageVisibility} from '@/types';
 
 export const usePageVisibility = () => {
   const [pages, setPages] = useState<PageVisibility[]>([]);
@@ -30,7 +30,7 @@ export const usePageVisibility = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ id, is_visible, sort_order }),
+        body: JSON.stringify({id, is_visible, sort_order}),
       });
 
       if (!response.ok) {
@@ -38,11 +38,7 @@ export const usePageVisibility = () => {
       }
 
       const updatedPage = await response.json();
-      setPages(prevPages => 
-        prevPages.map(page => 
-          page.id === id ? updatedPage : page
-        )
-      );
+      setPages((prevPages) => prevPages.map((page) => (page.id === id ? updatedPage : page)));
 
       return updatedPage;
     } catch (err) {
@@ -52,7 +48,7 @@ export const usePageVisibility = () => {
   };
 
   const togglePageVisibility = async (id: string) => {
-    const page = pages.find(p => p.id === id);
+    const page = pages.find((p) => p.id === id);
     if (!page) return;
 
     const newVisibility = !page.is_visible;
@@ -60,7 +56,7 @@ export const usePageVisibility = () => {
   };
 
   const updatePageOrder = async (id: string, newSortOrder: number) => {
-    const page = pages.find(p => p.id === id);
+    const page = pages.find((p) => p.id === id);
     if (!page) return;
 
     await updatePageVisibility(id, page.is_visible, newSortOrder);
@@ -73,7 +69,7 @@ export const usePageVisibility = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ id, page_route: newRoute }),
+        body: JSON.stringify({id, page_route: newRoute}),
       });
 
       if (!response.ok) {
@@ -81,11 +77,7 @@ export const usePageVisibility = () => {
       }
 
       const updatedPage = await response.json();
-      setPages(prevPages => 
-        prevPages.map(page => 
-          page.id === id ? updatedPage : page
-        )
-      );
+      setPages((prevPages) => prevPages.map((page) => (page.id === id ? updatedPage : page)));
 
       return updatedPage;
     } catch (err) {
@@ -101,7 +93,7 @@ export const usePageVisibility = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ id, page_title: newTitle }),
+        body: JSON.stringify({id, page_title: newTitle}),
       });
 
       if (!response.ok) {
@@ -109,11 +101,7 @@ export const usePageVisibility = () => {
       }
 
       const updatedPage = await response.json();
-      setPages(prevPages => 
-        prevPages.map(page => 
-          page.id === id ? updatedPage : page
-        )
-      );
+      setPages((prevPages) => prevPages.map((page) => (page.id === id ? updatedPage : page)));
 
       return updatedPage;
     } catch (err) {

@@ -42,3 +42,4 @@ export * from './useTeams';
 export * from './useTeamClub';
 export * from './useUnifiedPlayers';
 export * from './useExternalPlayerCreation';
+export * from './useLineupManager';

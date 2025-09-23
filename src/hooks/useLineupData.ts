@@ -1,37 +1,15 @@
 import {useState, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
-import {LineupFormData, LineupSummary, LineupValidation, ExternalPlayer} from '@/types/types';
+import {LineupFormData, LineupSummary, LineupValidation} from '@/types';
 import {generateUUID} from '@/utils/uuid';
-import {LineupPlayer} from '@/types';
+import {LineupCoach, LineupPlayer} from '@/types';
+import {LineupRole, PlayerPosition} from '@/enums';
 
 const supabase = createClient();
 
 export const useLineupData = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // External players functionality removed - only internal players (members) are supported
-  const searchExternalPlayers = useCallback(
-    async (searchTerm: string): Promise<ExternalPlayer[]> => {
-      console.warn('External players functionality is not available');
-      return [];
-    },
-    []
-  );
-
-  // External players functionality removed - only internal players (members) are supported
-  const getOrCreateExternalPlayer = useCallback(
-    async (
-      registrationNumber: string,
-      name: string,
-      surname: string,
-      position: string
-    ): Promise<string> => {
-      console.warn('External players functionality is not available');
-      throw new Error('External players are not supported');
-    },
-    []
-  );
 
   // Fetch lineup data
   const fetchLineup = useCallback(async (matchId: string, teamId: string) => {
@@ -80,14 +58,12 @@ export const useLineupData = () => {
         };
       }
 
-      // Process players data to include display names
       const processedPlayers = (playersData || []).map((lineupPlayer: LineupPlayer) => {
         if (lineupPlayer) {
-          // Internal player
           return {
             ...lineupPlayer,
-            display_name: `${lineupPlayer.player?.surname} ${lineupPlayer.player?.name}`,
-            is_external: false,
+            member_name: lineupPlayer.member?.name,
+            member_surname: lineupPlayer.member?.surname,
           };
         }
         return lineupPlayer;
@@ -114,7 +90,10 @@ export const useLineupData = () => {
       }
 
       // Process coaches data to match LineupCoachFormData format
-      const processedCoaches = (coachesData || []).map((coach: any) => ({
+      const processedCoaches = (coachesData || []).map((coach: LineupCoach) => ({
+        ...coach,
+        member_name: coach.member?.name,
+        member_surname: coach.member?.surname,
         member_id: coach.member_id,
         role: coach.role,
       }));
@@ -369,8 +348,21 @@ export const useLineupData = () => {
           await deleteLineup(lineupId);
         }
 
-        // Insert new lineup only if it's a new lineup
-        if (isNewLineup) {
+        // Always ensure the lineup record exists before inserting players
+        // Check if lineup exists, if not create it
+        const {data: lineupExists, error: checkError} = await supabase
+          .from('lineups')
+          .select('id')
+          .eq('id', finalLineupId)
+          .maybeSingle();
+
+        if (checkError) {
+          console.error('Error checking lineup existence:', checkError);
+          throw new Error(`Chyba při kontrole sestavy: ${checkError.message}`);
+        }
+
+        if (!lineupExists) {
+          // Create the lineup record
           const {error: lineupError} = await supabase.from('lineups').insert({
             id: finalLineupId,
             match_id: formData.match_id,
@@ -386,17 +378,14 @@ export const useLineupData = () => {
           }
         }
 
-        const goalkeepers = formData.players.filter((p) => p.position === 'goalkeeper');
-        const fieldPlayers = formData.players.filter((p) => p.position === 'field_player');
-
         // Insert players - use different strategies based on skipValidation
         const playersToInsert = formData.players
           .filter((player) => player.member_id) // All players should have member_id now
           .map((player) => ({
             lineup_id: finalLineupId,
             member_id: player.member_id,
-            position: player.position || 'field_player',
-            is_captain: player.role === 'captain',
+            position: player.position || PlayerPosition.FIELD_PLAYER,
+            is_captain: player.is_captain,
             jersey_number: player.jersey_number || null,
             goals: player.goals || 0,
             yellow_cards: player.yellow_cards || 0,
@@ -414,24 +403,8 @@ export const useLineupData = () => {
                 const {error: playerError} = await supabase.from('lineup_players').insert([player]);
 
                 if (playerError) {
-                  // Check if it's a database validation error
-                  if (playerError.code === 'P0001' && playerError.message?.includes('goalkeeper')) {
-                    console.warn(
-                      `Database validation: ${playerError.message} - skipping player ${player.member_id}`
-                    );
-                  } else if (
-                    playerError.code === '22P02' &&
-                    playerError.message?.includes('uuid')
-                  ) {
-                    console.warn(
-                      `Invalid UUID error: ${playerError.message} - skipping player ${player.member_id}`
-                    );
-                  } else {
-                    console.warn(
-                      `Could not insert player ${player.member_id}:`,
-                      playerError.message
-                    );
-                  }
+                  // Log the error but continue with next player
+                  console.warn(`Could not insert player ${player.member_id}:`, playerError.message);
                   // Continue with next player instead of failing completely
                 } else {
                   insertedCount++;
@@ -510,31 +483,11 @@ export const useLineupData = () => {
   const getLineupSummary = useCallback(
     async (matchId: string, teamId: string): Promise<LineupSummary | null> => {
       try {
-        // First try to get the summary from the database function
-        const {data, error} = await supabase.rpc('get_lineup_summary', {
-          match_uuid: matchId,
-          team_uuid: teamId,
-        });
-
-        if (error) {
-          // If the database function doesn't exist or has type issues, calculate summary from local data
-          console.warn(
-            'Database function get_lineup_summary not available, using fallback:',
-            error
-          );
-          return calculateLineupSummaryFromData(matchId, teamId);
-        }
-
-        // Handle the case where data might be an array or single object
-        if (Array.isArray(data)) {
-          return data[0] || null;
-        }
-
-        return data || null;
+        // Since we removed all database functions, use local calculation directly
+        return calculateLineupSummaryFromData(matchId, teamId);
       } catch (error: any) {
         console.error('Error getting lineup summary:', error);
-        // Fallback to local calculation
-        return calculateLineupSummaryFromData(matchId, teamId);
+        return null;
       }
     },
     []
@@ -694,7 +647,5 @@ export const useLineupData = () => {
     deleteLineup,
     getLineupSummary,
     validateLineupData,
-    searchExternalPlayers,
-    getOrCreateExternalPlayer,
   };
 };

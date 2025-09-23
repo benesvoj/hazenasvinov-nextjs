@@ -368,6 +368,16 @@ export const translations = {
     callToAction: 'Chcete se připojit k našemu týmu?',
   },
   components: {
+    matches: {
+      lineupCard: {
+        title: 'Sestava',
+        players: 'Hráči',
+        coaches: 'Trenéři',
+        noLineup: 'Sestava zatím nebyla vytvořena',
+        unknownCoach: 'Neznámý trenér',
+        unknownPlayer: 'Neznámý hráč',
+      },
+    },
     themeSwitch: {
       label: 'Téma',
       light: 'Světlé',
@@ -501,5 +511,31 @@ export const translations = {
         statistics: 'Statistiky',
       },
     },
+  },
+  lineupManager: {
+    title: 'Správa sestav',
+    noLineup: 'Žádná sestava nebyla vytvořena',
+    homeTeam: 'Domácí tým',
+    awayTeam: 'Hostující tým',
+    loading: 'Načítání sestavy...',
+    listOfPlayers: 'Seznam hráčů',
+    listOfCoaches: 'Seznam trenérů',
+    players: 'Hráči',
+    coaches: 'Trenéři',
+    lineup: 'Sestava',
+    addPlayer: 'Přidat hráče',
+    addCoach: 'Přidat trenéra',
+    addPlayerDescription: 'Přidat hráče do sestavy',
+    addCoachDescription: 'Přidat trenéra do sestavy',
+    deleteLineup: 'Smazat sestavu',
+    deleteLineupDescription: 'Smazat sestavu z vybraného týmu',
+    deletePlayer: 'Odebrat hráče',
+    editCoach: 'Upravit trenéra',
+    deleteCoach: 'Odebrat trenéra',
+    goalkeepers: 'Brankáři',
+    unknownPlayer: 'Neznámý hráč',
+  },
+  unifiedTable: {
+    emptyMessage: 'Žádné záznamy k zobrazení.',
   },
 } as const;

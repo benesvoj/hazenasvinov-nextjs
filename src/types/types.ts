@@ -1,5 +1,4 @@
 import {Category} from './category';
-import {LineupCoachRoles} from '@/constants';
 
 type CategoryProps = {
   id: string;
@@ -64,99 +63,7 @@ export interface ClubConfig {
   updated_at: string;
 }
 
-export interface PageVisibility {
-  id: string;
-  page_key: string;
-  page_title: string;
-  page_route: string;
-  page_description?: string;
-  is_visible: boolean;
-  sort_order: number;
-  category?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
 export type {CategoryProps, SeasonProps, SupabaseUser, ColumnType};
-
-// Lineup Management Types
-export interface Lineup {
-  id: string;
-  match_id: string;
-  team_id: string;
-  is_home_team: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ExternalPlayer {
-  id: string;
-  registration_number: string;
-  name: string;
-  surname: string;
-  position: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface LineupCoach {
-  id: string;
-  lineup_id: string;
-  member_id: string;
-  role: LineupCoachRoles;
-  created_at: string;
-  updated_at: string;
-  // Extended fields for display
-  member?: import('@/types/member').Member;
-  member_name?: string;
-  member_surname?: string;
-}
-
-export interface LineupSummary {
-  total_players: number;
-  goalkeepers: number;
-  field_players: number;
-  coaches: number;
-  is_valid: boolean;
-}
-
-export interface LineupFormData {
-  match_id: string;
-  team_id: string;
-  is_home_team: boolean;
-  players: LineupPlayerFormData[];
-  coaches: LineupCoachFormData[];
-}
-
-export interface LineupPlayerFormData {
-  member_id?: string;
-  external_name?: string;
-  external_surname?: string;
-  external_registration_number?: string;
-  display_name?: string;
-  is_external?: boolean;
-  position: string;
-  role?: string;
-  is_captain?: boolean;
-  jersey_number?: number;
-  goals?: number;
-  yellow_cards?: number;
-  red_cards_5min?: number;
-  red_cards_10min?: number;
-  red_cards_personal?: number;
-}
-
-export interface LineupCoachFormData {
-  member_id: string;
-  role: LineupCoachRoles;
-}
-
-export interface LineupValidation {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-}
 
 export interface MemberFunction {
   id: string; // Can be either UUID or simple text ID like 'func_player'

@@ -92,3 +92,5 @@ export {default as PageContainer} from './PageContainer';
 export {default as PlayerLoanModal} from './loaning/PlayerLoanModal';
 export {default as LoaningManagement} from './loaning/LoaningManagement';
 export {default as UnifiedPlayerManager} from './players/UnifiedPlayerManager';
+export {default as UnifiedCard} from './UnifiedCard';
+export {default as UnifiedTable} from './UnifiedTable';

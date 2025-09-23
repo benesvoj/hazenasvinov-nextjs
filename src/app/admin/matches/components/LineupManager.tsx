@@ -25,32 +25,59 @@ import {
   ButtonGroup,
 } from '@heroui/react';
 import {UserGroupIcon, PlusIcon, TrashIcon, PencilIcon} from '@heroicons/react/24/outline';
-import {useLineupData} from '@/hooks';
-import {useLineupManager} from '@/hooks/useLineupManager';
+import {PlusCircleIcon} from '@heroicons/react/24/solid';
+import {useLineupData, useLineupManager} from '@/hooks';
 import {
   LineupFormData,
   LineupPlayerFormData,
   LineupCoachFormData,
   LineupSummary,
-  ExternalPlayer,
   LineupManagerProps,
   LineupManagerRef,
 } from '@/types';
-import {DeleteConfirmationModal, showToast, LoadingSpinner} from '@/components';
-import LineupPlayerSelectionModal from './LineupPlayerSelectionModal';
-import LineupPlayerEditModal from './LineupPlayerEditModal';
-import LineupCoachSelectionModal from './LineupCoachSelectionModal';
-import LineupCoachEditModal from './LineupCoachEditModal';
-import {Heading} from '@/components';
+import {
+  Heading,
+  DeleteConfirmationModal,
+  showToast,
+  LoadingSpinner,
+  UnifiedCard,
+  ButtonWithTooltip,
+  UnifiedTable,
+} from '@/components';
+import {
+  LineupPlayerSelectionModal,
+  LineupPlayerEditModal,
+  LineupCoachSelectionModal,
+  LineupCoachEditModal,
+} from './';
 import {LineupCoachRoles, LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
 import {classifyLineupError} from '@/helpers';
-import {LineupErrorType} from '@/enums';
+import {LineupErrorType, PlayerPosition, TeamTypes} from '@/enums';
+import {translations} from '@/lib/translations';
+
+const playersColumns = [
+  {key: 'name', label: 'Hráč', allowsSorting: true},
+  {key: 'position', label: 'Pozice', allowsSorting: true},
+  {key: 'jersey_number', label: 'Dres', allowsSorting: true, align: 'center' as const},
+  {key: 'goals', label: 'Góly', allowsSorting: true, align: 'center' as const},
+  {key: 'yellow_cards', label: 'ŽK', allowsSorting: true, align: 'center' as const},
+  {key: 'red_cards_5min', label: 'ČK5', allowsSorting: true, align: 'center' as const},
+  {key: 'red_cards_10min', label: 'ČK10', allowsSorting: true, align: 'center' as const},
+  {key: 'red_cards_personal', label: 'ČKOT', allowsSorting: true, align: 'center' as const},
+  {key: 'actions', label: 'Akce', align: 'center' as const},
+];
+const coachesColumns = [
+  {key: 'name', label: 'Trenér'},
+  {key: 'role', label: 'Funkce'},
+  {key: 'actions', label: 'Akce', align: 'center' as const},
+];
 
 const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
   (
     {matchId, homeTeamId, awayTeamId, homeTeamName, awayTeamName, members, categoryId, onClose},
     ref
   ) => {
+    const t = translations.lineupManager;
     // Filter members by category
     const filteredMembers = useMemo(() => {
       if (!categoryId) {
@@ -100,7 +127,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       // 4. Based on team name: return selectedTeam === 'home' ? homeTeamName.includes('Your Club') : awayTeamName.includes('Your Club');
 
       // FIXED: Home team is your club (internal players), Away team is other club (external players)
-      return selectedTeam === 'home';
+      return selectedTeam === TeamTypes.HOME;
 
       // Alternative configurations (uncomment one):
       // return selectedTeam === 'away'; // Away team is your club
@@ -111,13 +138,13 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
 
     // Get the current form data based on selected team
     const currentFormData = useMemo(() => {
-      return selectedTeam === 'home' ? homeFormData : awayFormData;
+      return selectedTeam === TeamTypes.HOME ? homeFormData : awayFormData;
     }, [selectedTeam, homeFormData, awayFormData]);
 
     // Get the setter function for current form data
     const setCurrentFormData = useCallback(
       (updater: (prev: LineupFormData) => LineupFormData) => {
-        if (selectedTeam === 'home') {
+        if (selectedTeam === TeamTypes.HOME) {
           setHomeFormData(updater);
         } else {
           setAwayFormData(updater);
@@ -128,7 +155,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     const [homeLineupSummary, setHomeLineupSummary] = useState<LineupSummary | null>(null);
     const [awayLineupSummary, setAwayLineupSummary] = useState<LineupSummary | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [searchResults, setSearchResults] = useState<ExternalPlayer[]>([]);
+    const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [editingPlayerIndex, setEditingPlayerIndex] = useState<number | null>(null);
@@ -164,13 +191,12 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       saveLineup,
       deleteLineup,
       getLineupSummary,
-      searchExternalPlayers,
       validateLineupData,
       loading,
       error,
     } = useLineupData();
 
-    const currentTeamName = selectedTeam === 'home' ? homeTeamName : awayTeamName;
+    const currentTeamName = selectedTeam === TeamTypes.HOME ? homeTeamName : awayTeamName;
 
     // Load lineup data when team changes
     const handleLoadLineup = useCallback(
@@ -232,7 +258,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
 
       const loadData = async () => {
         if (isMounted) {
-          await handleLoadLineup(selectedTeam === 'home');
+          await handleLoadLineup(selectedTeam === TeamTypes.HOME);
         }
       };
 
@@ -259,31 +285,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
         isMounted = false;
       };
     }, [loadLineupSummaries]);
-
-    // Search external players
-    const handleSearchExternalPlayers = useCallback(
-      async (term: string) => {
-        if (term.length < 2) {
-          setSearchResults([]);
-          return;
-        }
-
-        setIsSearching(true);
-        const results = await searchExternalPlayers(term);
-        setSearchResults(results);
-        setIsSearching(false);
-      },
-      [searchExternalPlayers]
-    );
-
-    // Debounced search
-    useEffect(() => {
-      const timeoutId = setTimeout(() => {
-        handleSearchExternalPlayers(searchTerm);
-      }, 300);
-
-      return () => clearTimeout(timeoutId);
-    }, [searchTerm, handleSearchExternalPlayers]);
 
     const handleSaveLineup = async (isHome: boolean) => {
       try {
@@ -353,13 +354,13 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     // Expose saveLineup function to parent component
     useImperativeHandle(ref, () => ({
       saveLineup: async () => {
-        await handleSaveLineup(selectedTeam === 'home');
+        await handleSaveLineup(selectedTeam === TeamTypes.HOME);
       },
     }));
 
     const handleDeleteLineup = async () => {
       try {
-        const currentTeamId = selectedTeam === 'home' ? homeTeamId : awayTeamId;
+        const currentTeamId = selectedTeam === TeamTypes.HOME ? homeTeamId : awayTeamId;
 
         // Find the lineup ID using the hook
         const lineupId = await findLineupId(matchId, currentTeamId);
@@ -369,12 +370,12 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           const emptyFormData = {
             match_id: matchId,
             team_id: currentTeamId,
-            is_home_team: selectedTeam === 'home',
+            is_home_team: selectedTeam === TeamTypes.HOME,
             players: [],
             coaches: [],
           };
 
-          if (selectedTeam === 'home') {
+          if (selectedTeam === TeamTypes.HOME) {
             setHomeFormData(emptyFormData);
           } else {
             setAwayFormData(emptyFormData);
@@ -392,12 +393,12 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
         const emptyFormData = {
           match_id: matchId,
           team_id: currentTeamId,
-          is_home_team: selectedTeam === 'home',
+          is_home_team: selectedTeam === TeamTypes.HOME,
           players: [],
           coaches: [],
         };
 
-        if (selectedTeam === 'home') {
+        if (selectedTeam === TeamTypes.HOME) {
           setHomeFormData(emptyFormData);
         } else {
           setAwayFormData(emptyFormData);
@@ -412,7 +413,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       }
     };
 
-    const addPlayer = () => {
+    const handleAddPlayer = () => {
       // Clear validation error when user adds players
       if (validationError) {
         setValidationError(null);
@@ -441,11 +442,12 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
         // If this is the first player, create lineup automatically
         if (currentFormData.players.length === 0) {
           try {
-            const isHome = selectedTeam === 'home';
+            const isHome = selectedTeam === TeamTypes.HOME;
             const currentTeamId = isHome ? homeTeamId : awayTeamId;
 
+            const lineupId = await getOrCreateLineupId(matchId, currentTeamId, isHome);
             await saveLineup(
-              '',
+              lineupId,
               {
                 ...updatedFormData,
                 match_id: matchId,
@@ -495,10 +497,10 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       }
     };
 
-    const handleEditPlayer = (index: number) => {
+    const handleEditPlayer = useCallback((index: number) => {
       setEditingPlayerIndex(index);
       setIsPlayerEditModalOpen(true);
-    };
+    }, []);
 
     const handleModalClose = () => {
       setEditingPlayerIndex(null);
@@ -520,10 +522,13 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       setEditingPlayerIndex(null);
     };
 
-    const handleDeletePlayer = (index: number) => {
-      setDeletingPlayerIndex(index);
-      onDeletePlayerModalOpen();
-    };
+    const handleDeletePlayer = useCallback(
+      (index: number) => {
+        setDeletingPlayerIndex(index);
+        onDeletePlayerModalOpen();
+      },
+      [onDeletePlayerModalOpen]
+    );
 
     const confirmDeletePlayer = () => {
       if (deletingPlayerIndex !== null) {
@@ -571,10 +576,10 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       }
     };
 
-    const handleEditCoach = (index: number) => {
+    const handleEditCoach = useCallback((index: number) => {
       setEditingCoachIndex(index);
       setIsCoachEditModalOpen(true);
-    };
+    }, []);
 
     const handleCoachEditSave = (updatedCoach: LineupCoachFormData) => {
       if (editingCoachIndex !== null) {
@@ -596,17 +601,23 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       setEditingCoachIndex(null);
     };
 
-    const handleDeleteCoach = (index: number) => {
-      setCurrentFormData((prev) => ({
-        ...prev,
-        coaches: prev.coaches.filter((_, i) => i !== index),
-      }));
-    };
+    const handleDeleteCoach = useCallback(
+      (index: number) => {
+        setCurrentFormData((prev) => ({
+          ...prev,
+          coaches: prev.coaches.filter((_, i) => i !== index),
+        }));
+      },
+      [setCurrentFormData]
+    );
 
-    const getMemberName = (memberId: string) => {
-      const member = filteredMembers.find((m) => m.id === memberId);
-      return member ? `${member.surname} ${member.name}` : 'Neznámý člen';
-    };
+    const getMemberName = useCallback(
+      (memberId: string) => {
+        const member = filteredMembers.find((m) => m.id === memberId);
+        return member ? `${member.surname} ${member.name}` : 'Neznámý člen';
+      },
+      [filteredMembers]
+    );
 
     const getAvailableCoaches = () => {
       return filteredMembers.filter((m) => m.functions?.includes('coach'));
@@ -623,56 +634,138 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
             <span className="text-sm font-medium">{teamName}</span>
           </div>
           <div className="text-xs text-gray-600 space-x-2">
-            <span>Brankáři: {summary.goalkeepers}/2</span>
-            <span>Hráči: {summary.field_players}/13</span>
-            <span>Trenéři: {summary.coaches}/3</span>
+            <span>
+              {t.goalkeepers}: {summary.goalkeepers}/2
+            </span>
+            <span>
+              {t.players}: {summary.field_players}/13
+            </span>
+            <span>
+              {t.coaches}: {summary.coaches}/3
+            </span>
           </div>
         </div>
       );
     };
 
+    const renderPlayerCell = React.useCallback(
+      (player: LineupPlayerFormData, columnKey: React.Key) => {
+        const cellValue = player[columnKey as keyof LineupPlayerFormData];
+
+        switch (columnKey) {
+          case 'name':
+            return getMemberName(player?.member_id || `${t.unknownPlayer}`);
+          case 'position':
+            return player.position === PlayerPosition.GOALKEEPER ? t.goalkeepers : t.players;
+          case 'jersey_number':
+            return player.jersey_number || '-';
+          case 'goals':
+            return player.goals || 0;
+          case 'yellow_cards':
+            return player.yellow_cards || 0;
+          case 'red_cards_5min':
+            return player.red_cards_5min || 0;
+          case 'red_cards_10min':
+            return player.red_cards_10min || 0;
+          case 'red_cards_personal':
+            return player.red_cards_personal || 0;
+          case 'actions':
+            const playerIndex = currentFormData.players.findIndex(
+              (p) => p.member_id === player.member_id
+            );
+            return (
+              <ButtonGroup>
+                <Button
+                  size="sm"
+                  color="primary"
+                  variant="light"
+                  onPress={() => handleEditPlayer(playerIndex)}
+                  isIconOnly
+                  aria-label="Upravit hráče"
+                  startContent={<PencilIcon className="w-4 h-4" />}
+                />
+                <Button
+                  size="sm"
+                  color="danger"
+                  variant="light"
+                  onPress={() => handleDeletePlayer(playerIndex)}
+                  isIconOnly
+                  aria-label="Odebrat hráče"
+                  startContent={<TrashIcon className="w-4 h-4" />}
+                />
+              </ButtonGroup>
+            );
+          default:
+            return cellValue;
+        }
+      },
+      [currentFormData.players, getMemberName, handleEditPlayer, handleDeletePlayer]
+    );
+
+    const renderCoachCell = React.useCallback(
+      (coach: LineupCoachFormData, columnKey: React.Key) => {
+        const cellValue = coach[columnKey as keyof LineupCoachFormData];
+
+        switch (columnKey) {
+          case 'name':
+            return getMemberName(coach.member_id);
+          case 'role':
+            return (
+              LINEUP_COACH_ROLES_OPTIONS.find((role) => role.value === coach.role)?.label ||
+              coach.role
+            );
+          case 'actions':
+            const coachIndex = currentFormData.coaches.findIndex(
+              (item) => item.member_id === coach.member_id
+            );
+            return (
+              <ButtonGroup>
+                <Button
+                  size="sm"
+                  color="primary"
+                  variant="light"
+                  onPress={() => handleEditCoach(coachIndex)}
+                  isIconOnly
+                  aria-label={t.editCoach}
+                  startContent={<PencilIcon className="w-4 h-4" />}
+                />
+                <Button
+                  size="sm"
+                  color="danger"
+                  variant="light"
+                  onPress={() => handleDeleteCoach(coachIndex)}
+                  isIconOnly
+                  aria-label={t.deleteCoach}
+                  startContent={<TrashIcon className="w-4 h-4" />}
+                />
+              </ButtonGroup>
+            );
+          default:
+            return cellValue;
+        }
+      },
+      [currentFormData.coaches, getMemberName, handleEditCoach, handleDeleteCoach, t]
+    );
+
     return (
       <div className="space-y-6">
-        {/* Team Selection */}
-        <Card>
-          <CardHeader>
-            <Heading size={3}>Výběr týmu</Heading>
-          </CardHeader>
-          <CardBody>
-            <div className="flex gap-4">
-              <Button
-                variant={selectedTeam === 'home' ? 'solid' : 'bordered'}
-                color={selectedTeam === 'home' ? 'primary' : 'default'}
-                onPress={() => setSelectedTeam('home')}
-              >
-                {homeTeamName} (Domácí)
-              </Button>
-              <Button
-                variant={selectedTeam === 'away' ? 'solid' : 'bordered'}
-                color={selectedTeam === 'away' ? 'primary' : 'default'}
-                onPress={() => setSelectedTeam('away')}
-              >
-                {awayTeamName} (Hosté)
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Lineup Summary */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <Heading size={4}>Domácí tým</Heading>
-            </CardHeader>
-            <CardBody>{getLineupSummaryDisplay(homeLineupSummary, homeTeamName)}</CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <Heading size={4}>Hostující tým</Heading>
-            </CardHeader>
-            <CardBody>{getLineupSummaryDisplay(awayLineupSummary, awayTeamName)}</CardBody>
-          </Card>
+          <UnifiedCard
+            onPress={() => setSelectedTeam(TeamTypes.HOME)}
+            title={t.homeTeam}
+            titleSize={4}
+            isSelected={selectedTeam === TeamTypes.HOME}
+          >
+            {getLineupSummaryDisplay(homeLineupSummary, homeTeamName)}
+          </UnifiedCard>
+          <UnifiedCard
+            onPress={() => setSelectedTeam(TeamTypes.AWAY)}
+            title={t.awayTeam}
+            titleSize={4}
+            isSelected={selectedTeam === TeamTypes.AWAY}
+          >
+            {getLineupSummaryDisplay(awayLineupSummary, awayTeamName)}
+          </UnifiedCard>
         </div>
 
         {/* Lineup Management */}
@@ -680,181 +773,80 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           <CardHeader className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <UserGroupIcon className="w-5 h-5 text-blue-500" />
-              <Heading size={3}>Sestava: {currentTeamName}</Heading>
+              <Heading size={3}>
+                {t.lineup}: {currentTeamName}
+              </Heading>
             </div>
             <div className="flex gap-2">
               {(currentFormData.players.length > 0 || currentFormData.coaches.length > 0) && (
-                <Button
-                  color="danger"
-                  variant="bordered"
-                  startContent={<TrashIcon className="w-4 h-4" />}
-                  onPress={onDeleteModalOpen}
-                >
-                  Smazat sestavu
-                </Button>
+                <>
+                  <Button
+                    size="sm"
+                    color="primary"
+                    startContent={<PlusCircleIcon className="w-4 h-4" />}
+                    onPress={handleAddPlayer}
+                  >
+                    {t.addPlayer}
+                  </Button>
+                  <Button
+                    size="sm"
+                    color="primary"
+                    startContent={<PlusCircleIcon className="w-4 h-4" />}
+                    onPress={handleAddCoach}
+                  >
+                    {t.addCoach}
+                  </Button>
+                  <ButtonWithTooltip
+                    tooltip={t.deleteLineup}
+                    onPress={onDeleteModalOpen}
+                    isIconOnly
+                    isDanger
+                    ariaLabel="Remove lineup"
+                    startContent={<TrashIcon className="w-4 h-4" />}
+                  />
+                </>
               )}
             </div>
           </CardHeader>
           <CardBody>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <LoadingSpinner label="Načítání sestavy..." />
+                <LoadingSpinner label={t.loading} />
               </div>
             ) : currentFormData.players.length === 0 && currentFormData.coaches.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-4">Žádná sestava nebyla vytvořena</p>
+                <p className="text-gray-600 mb-4">{t.noLineup}</p>
                 <Button
                   color="primary"
                   startContent={<PlusIcon className="w-4 h-4" />}
-                  onPress={addPlayer}
+                  onPress={handleAddPlayer}
                 >
-                  Přidat prvního hráče
+                  {t.addPlayer}
                 </Button>
               </div>
             ) : (
               <div className="space-y-2">
-                {/* Players Table */}
                 <Tabs>
-                  <Tab key="players" title={`Hráči (${currentFormData.players.length})`}>
-                    <div>
-                      <div className="flex justify-end items-center mb-4">
-                        <Button
-                          color="primary"
-                          startContent={<PlusIcon className="w-4 h-4" />}
-                          onPress={addPlayer}
-                        >
-                          Přidat hráče
-                        </Button>
-                      </div>
-                      <Table aria-label="Players table">
-                        <TableHeader>
-                          <TableColumn>HRÁČ</TableColumn>
-                          <TableColumn>POZICE</TableColumn>
-                          <TableColumn>DRES</TableColumn>
-                          <TableColumn>GÓLY</TableColumn>
-                          <TableColumn>ŽK</TableColumn>
-                          <TableColumn>ČK5</TableColumn>
-                          <TableColumn>ČK10</TableColumn>
-                          <TableColumn>ČKOT</TableColumn>
-                          <TableColumn>FUNKCE</TableColumn>
-                          <TableColumn>AKCE</TableColumn>
-                        </TableHeader>
-                        <TableBody emptyContent={'Žádní hráči k zobrazení.'}>
-                          {currentFormData.players
-                            .sort((a, b) => {
-                              // Goalkeepers first
-                              if (a.position === 'goalkeeper' && b.position !== 'goalkeeper')
-                                return -1;
-                              if (a.position !== 'goalkeeper' && b.position === 'goalkeeper')
-                                return 1;
-
-                              // Then sort by surname
-                              const aName = a.member_id
-                                ? getMemberName(a.member_id)
-                                : `${a.external_surname || ''} ${a.external_name || ''}`;
-                              const bName = b.member_id
-                                ? getMemberName(b.member_id)
-                                : `${b.external_surname || ''} ${b.external_name || ''}`;
-                              return aName.localeCompare(bName);
-                            })
-                            .map((player, index) => (
-                              <TableRow key={player.member_id}>
-                                <TableCell>{getMemberName(player.member_id || '')}</TableCell>
-                                <TableCell>
-                                  {player.position === 'goalkeeper' ? 'Brankář' : 'Hráč v poli'}
-                                </TableCell>
-                                <TableCell>{player.jersey_number || '-'}</TableCell>
-                                <TableCell>{player.goals || '-'}</TableCell>
-                                <TableCell>{player.yellow_cards || '-'}</TableCell>
-                                <TableCell>{player.red_cards_5min || '-'}</TableCell>
-                                <TableCell>{player.red_cards_10min || '-'}</TableCell>
-                                <TableCell>{player.red_cards_personal || '-'}</TableCell>
-                                <TableCell>
-                                  {player.role === 'captain' ? 'Kapitán' : 'Hráč'}
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex gap-2">
-                                    <Button
-                                      size="sm"
-                                      color="primary"
-                                      variant="light"
-                                      onPress={() => handleEditPlayer(index)}
-                                      isIconOnly
-                                      aria-label="Upravit hráče"
-                                      startContent={<PencilIcon className="w-4 h-4" />}
-                                    />
-                                    <Button
-                                      size="sm"
-                                      color="danger"
-                                      variant="light"
-                                      onPress={() => handleDeletePlayer(index)}
-                                      isIconOnly
-                                      aria-label="Odebrat hráče"
-                                      startContent={<TrashIcon className="w-4 h-4" />}
-                                    />
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                  <Tab key="players" title={`${t.players} (${currentFormData.players.length})`}>
+                    <UnifiedTable
+                      columns={playersColumns}
+                      data={currentFormData.players}
+                      ariaLabel={t.listOfPlayers}
+                      renderCell={renderPlayerCell}
+                      getKey={(player) => player.member_id || ''}
+                      isStriped
+                    />
                   </Tab>
-                  <Tab key="coaches" title={`Trenéři (${currentFormData.coaches.length})`}>
-                    <div>
-                      <div className="flex justify-end items-center mb-4">
-                        <Button
-                          color="primary"
-                          startContent={<PlusIcon className="w-4 h-4" />}
-                          onPress={handleAddCoach}
-                        >
-                          Přidat trenéra
-                        </Button>
-                      </div>
-                    </div>
-                    <Table>
-                      <TableHeader>
-                        <TableColumn>TRENÉR</TableColumn>
-                        <TableColumn>FUNKCE</TableColumn>
-                        <TableColumn>AKCE</TableColumn>
-                      </TableHeader>
-                      <TableBody emptyContent={'Žádní trenéři k zobrazení.'}>
-                        {currentFormData.coaches.map((coach, index) => (
-                          <TableRow key={coach.member_id}>
-                            <TableCell>{getMemberName(coach.member_id)}</TableCell>
-                            <TableCell>
-                              {
-                                LINEUP_COACH_ROLES_OPTIONS.find((role) => role.value === coach.role)
-                                  ?.label
-                              }
-                            </TableCell>
-                            <TableCell>
-                              <ButtonGroup>
-                                <Button
-                                  size="sm"
-                                  color="primary"
-                                  variant="light"
-                                  onPress={() => handleEditCoach(index)}
-                                  isIconOnly
-                                  aria-label="Upravit trenéra"
-                                  startContent={<PencilIcon className="w-4 h-4" />}
-                                />
-                                <Button
-                                  size="sm"
-                                  color="danger"
-                                  variant="light"
-                                  onPress={() => handleDeleteCoach(index)}
-                                  isIconOnly
-                                  aria-label="Odebrat trenéra"
-                                  startContent={<TrashIcon className="w-4 h-4" />}
-                                />
-                              </ButtonGroup>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                  <Tab key="coaches" title={`${t.coaches} (${currentFormData.coaches.length})`}>
+                    <UnifiedTable
+                      columns={coachesColumns}
+                      data={currentFormData.coaches}
+                      ariaLabel={t.listOfCoaches}
+                      renderCell={renderCoachCell}
+                      getKey={(coach) => coach.member_id}
+                      isStriped
+                    />
                   </Tab>
                 </Tabs>
               </div>
@@ -883,8 +875,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           onClose={handlePlayerEditClose}
           onSave={handlePlayerEditSave}
           player={editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null}
-          playerIndex={editingPlayerIndex || 0}
-          isOwnClub={isOwnClub}
         />
 
         {/* Coach Selection Modal */}

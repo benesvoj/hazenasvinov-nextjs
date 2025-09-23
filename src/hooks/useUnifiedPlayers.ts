@@ -73,10 +73,12 @@ export function useUnifiedPlayers() {
           throw searchError;
         }
 
+        // TODO: remove any type
         // Transform results to include display_name and determine internal vs external
         const results: PlayerSearchResult[] = (data || []).map((player: any) => {
           const clubRelationship = player.member_club_relationships?.[0];
-          const isExternal = !clubRelationship || clubRelationship.club_id !== filters.club_id;
+          // Player is external if they don't have a relationship with the filtered club
+          const isExternal = clubRelationship?.club_id !== filters.club_id;
           const isActive = clubRelationship?.status === 'active';
 
           return {

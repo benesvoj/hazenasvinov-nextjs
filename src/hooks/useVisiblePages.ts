@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { PageVisibility } from '@/types/types';
+import {useState, useEffect} from 'react';
+import {PageVisibility} from '@/types';
 
 export const useVisiblePages = () => {
   const [visiblePages, setVisiblePages] = useState<PageVisibility[]>([]);
@@ -14,12 +14,12 @@ export const useVisiblePages = () => {
         throw new Error('Failed to fetch pages');
       }
       const allPages: PageVisibility[] = await response.json();
-      
+
       // Filter only visible pages and sort by order
       const visible = allPages
-        .filter(page => page.is_visible && page.is_active)
+        .filter((page) => page.is_visible && page.is_active)
         .sort((a, b) => a.sort_order - b.sort_order);
-      
+
       setVisiblePages(visible);
       setError(null);
     } catch (err) {

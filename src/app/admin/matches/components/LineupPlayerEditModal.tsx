@@ -10,8 +10,6 @@ interface LineupPlayerEditModalProps {
   onClose: () => void;
   onSave: (player: LineupPlayerFormData) => void;
   player: LineupPlayerFormData | null;
-  playerIndex: number;
-  isOwnClub: boolean;
 }
 
 export default function LineupPlayerEditModal({
@@ -19,13 +17,10 @@ export default function LineupPlayerEditModal({
   onClose,
   onSave,
   player,
-  playerIndex,
-  isOwnClub,
 }: LineupPlayerEditModalProps) {
   const [formData, setFormData] = useState<LineupPlayerFormData>({
-    is_external: false,
     position: 'field_player',
-    role: 'player',
+    is_captain: false,
     jersey_number: undefined,
     goals: 0,
     yellow_cards: 0,
@@ -59,23 +54,11 @@ export default function LineupPlayerEditModal({
     setFormData((prev) => ({...prev, [field]: value}));
   };
 
-  const getPlayerName = () => {
-    if (isOwnClub && player?.member_id) {
-      // For internal players, we'd need to get the member name from props or context
-      return `Hráč ${playerIndex + 1}`;
-    } else {
-      return (
-        `${player?.external_surname || ''} ${player?.external_name || ''}`.trim() ||
-        `Externí hráč ${playerIndex + 1}`
-      );
-    }
-  };
-
   return (
     <UnifiedModal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Upravit hráče: ${getPlayerName()}`}
+      title={`Upravit hráče: ${player?.display_name}`}
       size="lg"
       isFooterWithActions
       isLoading={isLoading}
@@ -115,8 +98,8 @@ export default function LineupPlayerEditModal({
           <label className="block text-sm font-medium text-gray-700">Funkce</label>
           <div className="flex items-center space-x-4">
             <Checkbox
-              isSelected={formData.role === 'captain'}
-              onValueChange={(isSelected) => updateField('role', isSelected ? 'captain' : 'player')}
+              isSelected={formData.is_captain}
+              onValueChange={(isSelected) => updateField('is_captain', isSelected)}
             >
               Kapitán
             </Checkbox>
