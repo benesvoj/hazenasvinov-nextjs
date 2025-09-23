@@ -10,19 +10,10 @@ import React, {
 } from 'react';
 import {
   Button,
-  Input,
   Card,
   CardBody,
   CardHeader,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   useDisclosure,
-  Select,
-  SelectItem,
-  Alert,
   Table,
   TableColumn,
   TableBody,
@@ -56,6 +47,7 @@ import LineupCoachSelectionModal from './LineupCoachSelectionModal';
 import LineupCoachEditModal from './LineupCoachEditModal';
 import {generateLineupId} from '@/utils/uuid';
 import {Heading} from '@/components';
+import {LineupCoachRoles, LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
 
 interface LineupManagerProps {
   matchId: string;
@@ -668,7 +660,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     const handleCoachSelected = (coach: {member_id: string; role: string}) => {
       const coachData: LineupCoachFormData = {
         member_id: coach.member_id,
-        role: coach.role as 'head_coach' | 'assistant_coach' | 'goalkeeper_coach' | 'team_manager',
+        role: coach.role as LineupCoachRoles,
       };
 
       if (editingCoachIndex !== null) {
@@ -950,15 +942,10 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                           <TableRow key={index}>
                             <TableCell>{getMemberName(coach.member_id)}</TableCell>
                             <TableCell>
-                              {coach.role === 'head_coach'
-                                ? 'Hlavní trenér'
-                                : coach.role === 'assistant_coach'
-                                  ? 'Asistent trenéra'
-                                  : coach.role === 'goalkeeper_coach'
-                                    ? 'Trenér brankářů'
-                                    : coach.role === 'team_manager'
-                                      ? 'Vedoucí týmu'
-                                      : coach.role}
+                              {
+                                LINEUP_COACH_ROLES_OPTIONS.find((role) => role.value === coach.role)
+                                  ?.label
+                              }
                             </TableCell>
                             <TableCell>
                               <ButtonGroup>

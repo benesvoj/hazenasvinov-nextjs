@@ -4,6 +4,7 @@ import {LineupPlayer, LineupCoach, Match} from '@/types';
 import {UserIcon} from '@heroicons/react/24/outline';
 import {Chip, Badge, Avatar, Card, CardBody, CardHeader} from '@heroui/react';
 import {BallIcon, YellowCardIcon, RedCardIcon} from '@/lib/icons';
+import {LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
 interface LineupCardProps {
   match: Match;
   lineup: {
@@ -99,17 +100,15 @@ export default function LineupCard({match, lineup, lineupLoading, teamType}: Lin
                     >
                       <span className="text-sm font-medium">
                         {coach.member
-                          ? `${coach.member.name} ${coach.member.surname}`
+                          ? `${coach.member.surname} ${coach.member.name}`
                           : 'Neznámý trenér'}
                       </span>
+                      {/* TODO: use constant instead of hardcoded strings */}
                       <Chip color="secondary" variant="flat" size="sm">
-                        {coach.role === 'head_coach'
-                          ? 'Hlavní trenér'
-                          : coach.role === 'assistant_coach'
-                            ? 'Asistent'
-                            : coach.role === 'goalkeeper_coach'
-                              ? 'Trenér brankářů'
-                              : coach.role}
+                        {
+                          LINEUP_COACH_ROLES_OPTIONS.find((role) => role.value === coach.role)
+                            ?.label
+                        }
                       </Chip>
                     </div>
                   ))}

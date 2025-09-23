@@ -1,6 +1,7 @@
 import {useState, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
 import {LineupFormData, LineupSummary, LineupValidation, ExternalPlayer} from '@/types/types';
+import {generateUUID} from '@/utils/uuid';
 
 // Error types for robust error handling
 export enum LineupErrorType {
@@ -194,6 +195,7 @@ export const useLineupData = () => {
       }
 
       // Process players data to include display names
+      // TODO: replace any to proper type
       const processedPlayers = (playersData || []).map((player: any) => {
         if (player.member) {
           // Internal player
@@ -296,7 +298,7 @@ export const useLineupData = () => {
           // Internal player
           return {
             ...player,
-            display_name: `${player.member.name} ${player.member.surname} (${player.member.registration_number})`,
+            display_name: `${player.member.surname} ${player.member.name} (${player.member.registration_number})`,
             is_external: false,
           };
         }
@@ -471,7 +473,7 @@ export const useLineupData = () => {
             console.log('Using existing lineup ID:', finalLineupId);
           } else {
             // Generate new UUID for new lineups
-            finalLineupId = crypto.randomUUID();
+            finalLineupId = generateUUID();
             isNewLineup = true;
             console.log('Creating new lineup with ID:', finalLineupId);
           }

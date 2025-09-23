@@ -11,3 +11,6 @@ export * from './match';
 
 export * from './relationshipType';
 export * from './relationshipStatus';
+
+export * from './lineupCoachRoles';
+export * from './club';

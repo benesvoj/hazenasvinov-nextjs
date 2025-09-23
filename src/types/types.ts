@@ -1,4 +1,5 @@
 import {Category} from './category';
+import {LineupCoachRoles} from '@/constants';
 
 type CategoryProps = {
   id: string;
@@ -116,7 +117,7 @@ export interface LineupCoach {
   id: string;
   lineup_id: string;
   member_id: string;
-  role: 'head_coach' | 'assistant_coach' | 'goalkeeper_coach';
+  role: LineupCoachRoles;
   created_at: string;
   updated_at: string;
   // Extended fields for display
@@ -161,7 +162,7 @@ export interface LineupPlayerFormData {
 
 export interface LineupCoachFormData {
   member_id: string;
-  role: 'head_coach' | 'assistant_coach' | 'goalkeeper_coach' | 'team_manager';
+  role: LineupCoachRoles;
 }
 
 export interface LineupValidation {

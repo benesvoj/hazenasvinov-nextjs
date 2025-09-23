@@ -34,7 +34,7 @@ export default function LineupPlayerSelectionModal({
       is_external: !isOwnClub,
       position: player.position || 'field_player',
       role: player.is_captain ? 'captain' : 'player',
-      member_id: player.id, // All players now have member_id (created in members table)
+      member_id: player.id, // Most players have member_id (created in members table), but legacy external players may not during migration
       jersey_number: player.jersey_number,
     };
 

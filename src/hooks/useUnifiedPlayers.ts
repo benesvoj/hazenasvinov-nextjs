@@ -1,6 +1,7 @@
 import {useState, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
 import {UnifiedPlayer, PlayerSearchFilters, PlayerSearchResult} from '@/types/unifiedPlayer';
+import {getClubName} from '@/constants';
 
 const supabase = createClient();
 
@@ -153,7 +154,7 @@ export function useUnifiedPlayers() {
         is_active: true, // This will be determined by club relationship status
         created_at: data.created_at || new Date().toISOString(),
         updated_at: data.updated_at || new Date().toISOString(),
-        current_club_name: 'TJ Sokol Svinov', // Default club name
+        current_club_name: getClubName(), // Get club name from configuration
       };
 
       return unifiedPlayer;
@@ -218,7 +219,7 @@ export function useUnifiedPlayers() {
           is_active: true, // This will be determined by club relationship status
           created_at: member.created_at,
           updated_at: member.updated_at,
-          current_club_name: 'TJ Sokol Svinov', // This should be fetched from clubs table
+          current_club_name: getClubName(), // Get club name from configuration
         };
       });
 
@@ -326,7 +327,7 @@ export function useUnifiedPlayers() {
         is_active: true, // This will be determined by club relationship status
         created_at: member.created_at,
         updated_at: member.updated_at,
-        current_club_name: 'TJ Sokol Svinov', // Default club name
+        current_club_name: getClubName(), // Get club name from configuration
       }));
 
       return players;

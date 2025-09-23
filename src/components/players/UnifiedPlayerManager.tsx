@@ -9,6 +9,7 @@ import {Select, SelectItem, Button} from '@heroui/react';
 import {ArrowPathIcon, CheckIcon, PlusIcon} from '@heroicons/react/24/outline';
 import CreateMemberModal from '@/app/admin/matches/components/CreateMemberModal';
 import CreateExternalPlayerModal from '@/app/admin/matches/components/CreateExternalPlayerModal';
+import {getClubName} from '@/constants';
 
 interface UnifiedPlayerManagerProps {
   clubId?: string;
@@ -151,7 +152,7 @@ export default function UnifiedPlayerManager({
       position: undefined,
       jersey_number: undefined,
       is_external: false,
-      current_club_name: 'TJ Sokol Svinov',
+      current_club_name: getClubName(),
       display_name: `${member.surname} ${member.name} (${member.registration_number})`,
     };
 

@@ -48,6 +48,7 @@ import {
   showToast,
 } from '@/components';
 import {logLogout} from '@/utils/loginLogger';
+import {getClubName} from '@/constants';
 
 interface UnifiedTopBarProps {
   variant: 'admin' | 'coach';
@@ -245,6 +246,12 @@ export const UnifiedTopBar = ({
     return 'Administrátor';
   };
 
+  const getClubDisplay = () => {
+    if (variant === 'coach') {
+      return userProfile?.clubs?.name || getClubName();
+    }
+    return getClubName();
+  };
   // Determine if we should show portal switch
   const shouldShowPortalSwitch = () => {
     if (variant === 'admin') {

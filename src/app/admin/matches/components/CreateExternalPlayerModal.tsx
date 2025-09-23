@@ -2,7 +2,7 @@
 
 import {useState, useEffect} from 'react';
 import {UnifiedModal, showToast} from '@/components';
-import {Input, Select, SelectItem, Button, Checkbox} from '@heroui/react';
+import {Input, Select, SelectItem, Checkbox} from '@heroui/react';
 import {PlayerSearchResult} from '@/types/unifiedPlayer';
 
 interface CreateExternalPlayerModalProps {
@@ -28,6 +28,7 @@ export default function CreateExternalPlayerModal({
     jersey_number: '',
     club_name: '',
     is_captain: false,
+    sex: 'male' as 'male' | 'female', // Explicit gender selection
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -47,6 +48,9 @@ export default function CreateExternalPlayerModal({
     }
     if (!formData.club_name.trim()) {
       newErrors.club_name = 'Název klubu je povinný';
+    }
+    if (!formData.sex) {
+      newErrors.sex = 'Pohlaví je povinné';
     }
 
     setErrors(newErrors);
@@ -104,7 +108,7 @@ export default function CreateExternalPlayerModal({
           surname: formData.surname.trim(),
           registration_number: formData.registration_number.trim(),
           functions: ['player'], // External players are players
-          sex: categoryGender || 'male', // Use category gender, fallback to male
+          sex: formData.sex, // Use explicit gender selection from form
           category_id: categoryId, // Set category_id from the match category
         })
         .select()
@@ -180,13 +184,18 @@ export default function CreateExternalPlayerModal({
 
           if (error) {
             console.error('Error fetching category gender:', error);
-            setCategoryGender('male'); // Default fallback
+            setCategoryGender(null);
           } else {
             setCategoryGender(category.gender);
+            // Set form gender to match category gender as default
+            setFormData((prev) => ({
+              ...prev,
+              sex: category.gender,
+            }));
           }
         } catch (error) {
           console.error('Error fetching category gender:', error);
-          setCategoryGender('male'); // Default fallback
+          setCategoryGender(null);
         }
       }
     };
@@ -205,6 +214,7 @@ export default function CreateExternalPlayerModal({
         jersey_number: '',
         club_name: teamName || '',
         is_captain: false,
+        sex: 'male', // Default gender
       });
       setErrors({});
     }
@@ -276,21 +286,47 @@ export default function CreateExternalPlayerModal({
           aria-label="Club name"
         />
 
-        <Select
-          label="Pozice"
-          selectedKeys={formData.position ? [formData.position] : ['field_player']}
-          onSelectionChange={(keys) => {
-            const selectedKey = Array.from(keys)[0] as string;
-            updateField('position', selectedKey);
-          }}
-        >
-          <SelectItem key="field_player" textValue="Hráč v poli">
-            Hráč v poli
-          </SelectItem>
-          <SelectItem key="goalkeeper" textValue="Brankář">
-            Brankář
-          </SelectItem>
-        </Select>
+        <div className="grid grid-cols-2 gap-4">
+          <Select
+            label="Pozice"
+            selectedKeys={formData.position ? [formData.position] : ['field_player']}
+            onSelectionChange={(keys) => {
+              const selectedKey = Array.from(keys)[0] as string;
+              updateField('position', selectedKey);
+            }}
+          >
+            <SelectItem key="field_player" textValue="Hráč v poli">
+              Hráč v poli
+            </SelectItem>
+            <SelectItem key="goalkeeper" textValue="Brankář">
+              Brankář
+            </SelectItem>
+          </Select>
+
+          <Select
+            label="Pohlaví"
+            selectedKeys={formData.sex ? [formData.sex] : []}
+            onSelectionChange={(keys) => {
+              const selectedKey = Array.from(keys)[0] as string;
+              updateField('sex', selectedKey as 'male' | 'female');
+            }}
+            isRequired
+            isInvalid={!!errors.sex}
+            errorMessage={errors.sex}
+            description={
+              categoryGender
+                ? `Doporučeno podle kategorie: ${categoryGender === 'male' ? 'Muž' : 'Žena'}`
+                : undefined
+            }
+          >
+            <SelectItem key="male" textValue="Muž">
+              Muž
+            </SelectItem>
+            <SelectItem key="female" textValue="Žena">
+              Žena
+            </SelectItem>
+          </Select>
+        </div>
 
         <div className="flex items-center space-x-4">
           <Checkbox
