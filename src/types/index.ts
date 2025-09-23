@@ -7,6 +7,8 @@ export * from './clubs';
 
 export * from './lineup';
 export * from './lineupManager';
+export * from './externalPlayer';
+export * from './unifiedPlayer';
 
 export * from './video';
 export * from './userRoles';
@@ -35,3 +37,5 @@ export * from './comment';
 export * from './matchMetadata';
 
 export * from './memberClubRelationship';
+
+export * from './categoryGender';

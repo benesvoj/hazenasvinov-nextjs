@@ -759,7 +759,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                               return aName.localeCompare(bName);
                             })
                             .map((player, index) => (
-                              <TableRow key={index}>
+                              <TableRow key={player.member_id}>
                                 <TableCell>{getMemberName(player.member_id || '')}</TableCell>
                                 <TableCell>
                                   {player.position === 'goalkeeper' ? 'Brankář' : 'Hráč v poli'}
@@ -821,7 +821,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                       </TableHeader>
                       <TableBody emptyContent={'Žádní trenéři k zobrazení.'}>
                         {currentFormData.coaches.map((coach, index) => (
-                          <TableRow key={index}>
+                          <TableRow key={coach.member_id}>
                             <TableCell>{getMemberName(coach.member_id)}</TableCell>
                             <TableCell>
                               {

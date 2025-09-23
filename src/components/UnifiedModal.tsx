@@ -8,7 +8,6 @@ import {
   useDisclosure,
   ModalProps,
   Button,
-  ButtonGroup,
 } from '@heroui/react';
 import {Heading, HeadingLevel} from './Headings';
 import {translations} from '@/lib/translations';

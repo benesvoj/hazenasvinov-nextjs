@@ -1,19 +1,9 @@
-import {UserGroupIcon} from '@heroicons/react/24/outline';
 import {LoadingSpinner, Heading} from '@/components';
-import {LineupPlayer, LineupCoach, Match} from '@/types';
-import {UserIcon} from '@heroicons/react/24/outline';
+import {LineupPlayer, LineupCardProps} from '@/types';
+import {UserIcon, UserGroupIcon} from '@heroicons/react/24/outline';
 import {Chip, Badge, Avatar, Card, CardBody, CardHeader} from '@heroui/react';
 import {BallIcon, YellowCardIcon, RedCardIcon} from '@/lib/icons';
 import {LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
-interface LineupCardProps {
-  match: Match;
-  lineup: {
-    players: LineupPlayer[];
-    coaches: LineupCoach[];
-  } | null;
-  lineupLoading: boolean;
-  teamType: 'home' | 'away';
-}
 
 export default function LineupCard({match, lineup, lineupLoading, teamType}: LineupCardProps) {
   return (
@@ -103,7 +93,6 @@ export default function LineupCard({match, lineup, lineupLoading, teamType}: Lin
                           ? `${coach.member.surname} ${coach.member.name}`
                           : 'Neznámý trenér'}
                       </span>
-                      {/* TODO: use constant instead of hardcoded strings */}
                       <Chip color="secondary" variant="flat" size="sm">
                         {
                           LINEUP_COACH_ROLES_OPTIONS.find((role) => role.value === coach.role)

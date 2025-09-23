@@ -1,35 +1,29 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Button } from "@heroui/button";
-import {
-  ArrowLeftIcon,
-  TrophyIcon,
-  ArrowTopRightOnSquareIcon,
-} from "@heroicons/react/24/outline";
-import Link from "@/components/Link";
-import { useParams } from "next/navigation";
-import { translations } from "@/lib/translations";
-import { useLineupData, useFetchMatch } from "@/hooks";
-import { LoadingSpinner } from "@/components";
-import { LineupCard, MatchInfoCard } from "./components";
-
+import React, {useState, useEffect} from 'react';
+import {Button} from '@heroui/react';
+import {ArrowLeftIcon, TrophyIcon, ArrowTopRightOnSquareIcon} from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import {useParams} from 'next/navigation';
+import {translations} from '@/lib/translations';
+import {useLineupData, useFetchMatch} from '@/hooks';
+import {LoadingSpinner} from '@/components';
+import {LineupCard, MatchInfoCard} from './components';
+import {TeamTypes} from '@/enums';
 export default function MatchDetailPage() {
-
   // TODO: Change to Lineup type
   const [homeLineup, setHomeLineup] = useState<any>(null);
   const [awayLineup, setAwayLineup] = useState<any>(null);
   const [lineupLoading, setLineupLoading] = useState(false);
 
-
   const params = useParams();
   const matchId = params.id as string;
 
   // Use the new hook for fetching match data
-  const { match, loading, error } = useFetchMatch(matchId);
-  const { fetchLineup, getLineupSummary } = useLineupData();
+  const {match, loading, error} = useFetchMatch(matchId);
+  const {fetchLineup, getLineupSummary} = useLineupData();
 
-    // Match data is now fetched automatically by useFetchMatch hook
+  // Match data is now fetched automatically by useFetchMatch hook
 
   // Fetch lineup data when match is loaded
   useEffect(() => {
@@ -47,7 +41,7 @@ export default function MatchDetailPage() {
         const awayLineupData = await fetchLineup(match.id, match.away_team_id);
         setAwayLineup(awayLineupData);
       } catch (error: any) {
-        console.error("Error fetching lineup data:", error);
+        console.error('Error fetching lineup data:', error);
         // Don't set error state for lineup - it's optional data
       } finally {
         setLineupLoading(false);
@@ -62,7 +56,7 @@ export default function MatchDetailPage() {
       <div className="max-w-4xl mx-auto p-6">
         <div className="text-center py-12">
           <LoadingSpinner />
-          </div>
+        </div>
       </div>
     );
   }
@@ -82,9 +76,7 @@ export default function MatchDetailPage() {
           </p>
           <Button
             as={Link}
-            href={`/matches${
-              match?.category?.id ? `?category=${match.category.id}` : ""
-            }`}
+            href={`/matches${match?.category?.id ? `?category=${match.category.id}` : ''}`}
             color="primary"
             startContent={<ArrowLeftIcon className="w-4 h-4" />}
           >
@@ -101,9 +93,7 @@ export default function MatchDetailPage() {
       <div className="flex items-start">
         <Button
           as={Link}
-          href={`/matches${
-            match?.category?.id ? `?category=${match.category.id}` : ""
-          }`}
+          href={`/matches${match?.category?.id ? `?category=${match.category.id}` : ''}`}
           variant="light"
           color="primary"
           startContent={<ArrowLeftIcon className="w-4 h-4" />}
@@ -118,10 +108,20 @@ export default function MatchDetailPage() {
       {/* Lineup Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Home Team Lineup */}
-        <LineupCard match={match} lineup={homeLineup} lineupLoading={lineupLoading} teamType="home" />
+        <LineupCard
+          match={match}
+          lineup={homeLineup}
+          lineupLoading={lineupLoading}
+          teamType={TeamTypes.HOME}
+        />
 
         {/* Away Team Lineup */}
-        <LineupCard match={match} lineup={awayLineup} lineupLoading={lineupLoading} teamType="away" />
+        <LineupCard
+          match={match}
+          lineup={awayLineup}
+          lineupLoading={lineupLoading}
+          teamType={TeamTypes.AWAY}
+        />
       </div>
 
       {/* Actions */}
@@ -135,11 +135,8 @@ export default function MatchDetailPage() {
         >
           Zpět na zápasy
         </Button>
-        {match.status === "upcoming" && (
-          <Button
-            color="primary"
-            endContent={<ArrowTopRightOnSquareIcon className="w-4 h-4" />}
-          >
+        {match.status === 'upcoming' && (
+          <Button color="primary" endContent={<ArrowTopRightOnSquareIcon className="w-4 h-4" />}>
             Přidat do kalendáře
           </Button>
         )}

@@ -85,9 +85,7 @@ export default function PlayerLoanModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     if (!validateForm()) {
       return;
     }
@@ -126,7 +124,7 @@ export default function PlayerLoanModal({
       size="md"
       isFooterWithActions
       isLoading={loanLoading}
-      onPress={() => handleSubmit(new Event('submit') as any)}
+      onPress={handleSubmit}
       isDisabled={
         !formData.player_id ||
         !formData.to_club_id ||

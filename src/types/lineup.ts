@@ -1,6 +1,7 @@
 import {Member} from './member';
 import {LineupCoachRoles} from '@/constants';
-import {LineupErrorType} from '@/enums';
+import {LineupErrorType, TeamTypes} from '@/enums';
+import {Match} from './match';
 export interface Lineup {
   id: string;
   match_id: string;
@@ -114,4 +115,14 @@ export interface LineupError {
   type: LineupErrorType;
   message: string;
   code?: string;
+}
+
+export interface LineupCardProps {
+  match: Match;
+  lineup: {
+    players: LineupPlayer[];
+    coaches: LineupCoach[];
+  } | null;
+  lineupLoading: boolean;
+  teamType: TeamTypes;
 }
