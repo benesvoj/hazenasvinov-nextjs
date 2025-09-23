@@ -10,6 +10,7 @@ import {useLineupData, useFetchMatch} from '@/hooks';
 import {LoadingSpinner} from '@/components';
 import {LineupCard, MatchInfoCard} from './components';
 import {TeamTypes} from '@/enums';
+
 export default function MatchDetailPage() {
   // TODO: Change to Lineup type
   const [homeLineup, setHomeLineup] = useState<any>(null);
