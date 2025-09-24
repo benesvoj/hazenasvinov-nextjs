@@ -1,7 +1,7 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {usePathname, useRouter} from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import {createPortal} from 'react-dom';
 import {useAuth} from '@/hooks/useAuthNew';
 import {usePortalAccess} from '@/hooks/usePortalAccess';
@@ -69,7 +69,6 @@ export const UnifiedTopBar = ({
   pageDescription,
   userProfile,
 }: UnifiedTopBarProps) => {
-  const pathname = usePathname();
   const router = useRouter();
   const {user, signOut} = useAuth();
   const {hasCoachAccess, hasBothAccess, hasAdminAccess, loading} = usePortalAccess();
@@ -242,13 +241,6 @@ export const UnifiedTopBar = ({
     return 'Administrátor';
   };
 
-  const getClubDisplay = () => {
-    if (variant === 'coach') {
-      return userProfile?.clubs?.name || 'TJ Sokol Svinov';
-    }
-    return 'TJ Sokol Svinov';
-  };
-
   // Determine if we should show portal switch
   const shouldShowPortalSwitch = () => {
     if (variant === 'admin') {
@@ -390,10 +382,10 @@ export const UnifiedTopBar = ({
                 />
                 {/* User info - visible from sm breakpoint, merged small/medium behavior */}
                 <div className="hidden sm:block text-left min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[120px] xl:max-w-none">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-32 xl:max-w-none">
                     {variant === 'coach' ? user?.email : getDisplayName()}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px] xl:max-w-none">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-32 xl:max-w-none">
                     {variant === 'coach' ? getRoleDisplay() : user?.email || 'Načítání...'}
                   </p>
                 </div>
