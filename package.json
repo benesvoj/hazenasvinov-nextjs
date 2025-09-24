@@ -26,6 +26,7 @@
     "setup:user-profiles": "node scripts/setup-user-profiles.js",
     "setup:meeting-minutes": "node scripts/building-app/setup-meeting-minutes-table.js",
     "fix:meeting-attendees-fk": "node scripts/building-app/fix-meeting-attendees-fk.js",
+    "fix:jakub-coach-access": "node scripts/fix-jakub-coach-access.js",
     "prepare": "husky"
   },
   "dependencies": {

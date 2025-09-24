@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {createContext, useContext, useState, useEffect} from 'react';
 
 interface UnifiedSidebarContextType {
   isCollapsed: boolean;
@@ -26,7 +26,10 @@ interface UnifiedSidebarProviderProps {
   variant: 'admin' | 'coach';
 }
 
-export const UnifiedSidebarProvider: React.FC<UnifiedSidebarProviderProps> = ({ children, variant }) => {
+export const UnifiedSidebarProvider: React.FC<UnifiedSidebarProviderProps> = ({
+  children,
+  variant,
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -51,15 +54,15 @@ export const UnifiedSidebarProvider: React.FC<UnifiedSidebarProviderProps> = ({ 
   // Handle responsive behavior
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth >= 768) {
+      setIsMobile(window.innerWidth < 1024);
+      if (window.innerWidth >= 1024) {
         setIsMobileOpen(false);
       }
     };
 
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -72,14 +75,16 @@ export const UnifiedSidebarProvider: React.FC<UnifiedSidebarProviderProps> = ({ 
   };
 
   return (
-    <UnifiedSidebarContext.Provider value={{ 
-      isCollapsed, 
-      setIsCollapsed, 
-      isMobileOpen, 
-      setIsMobileOpen,
-      isMobile,
-      toggleSidebar
-    }}>
+    <UnifiedSidebarContext.Provider
+      value={{
+        isCollapsed,
+        setIsCollapsed,
+        isMobileOpen,
+        setIsMobileOpen,
+        isMobile,
+        toggleSidebar,
+      }}
+    >
       {children}
     </UnifiedSidebarContext.Provider>
   );

@@ -21,7 +21,7 @@ export function CoachesSidebarProvider({children}: {children: React.ReactNode}) 
   // Mobile detection
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 1024);
     };
 
     checkMobile();
