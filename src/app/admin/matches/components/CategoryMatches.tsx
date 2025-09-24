@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {ChevronDownIcon, ChevronUpIcon} from '@heroicons/react/24/outline';
 import {Match, Category} from '@/types';
 import {CategoryMatchRow} from './CategoryMatchRow';
@@ -30,25 +30,43 @@ export default function CategoryMatches({
   onMatchActionsOpen,
   isSeasonClosed,
 }: CategoryMatchesProps) {
-  // Group matches by matchweek
-  const matchesForCategory = matches.filter((match) => match.category_id === category.id);
-  const groupedMatches = new Map<number, Match[]>();
+  // Memoize the grouped matches calculation to avoid unnecessary re-computations
+  const {groupedMatches, sortedMatchweeks} = useMemo(() => {
+    const matchesForCategory = matches.filter((match) => match.category_id === category.id);
+    const grouped = new Map<number, Match[]>();
 
-  // Group by matchweek, put matches without matchweek at the end
-  matchesForCategory.forEach((match) => {
-    const matchweek = match.matchweek || 0;
-    if (!groupedMatches.has(matchweek)) {
-      groupedMatches.set(matchweek, []);
-    }
-    groupedMatches.get(matchweek)!.push(match);
-  });
+    // Group by matchweek, put matches without matchweek at the end
+    matchesForCategory.forEach((match) => {
+      const matchweek = match.matchweek || 0;
+      if (!grouped.has(matchweek)) {
+        grouped.set(matchweek, []);
+      }
+      grouped.get(matchweek)!.push(match);
+    });
 
-  // Sort matchweeks and convert to array
-  const sortedMatchweeks = Array.from(groupedMatches.keys()).sort((a, b) => {
-    if (a === 0) return 1; // No matchweek goes last
-    if (b === 0) return -1;
-    return a - b;
-  });
+    // Sort matchweeks and convert to array
+    const sorted = Array.from(grouped.keys()).sort((a, b) => {
+      if (a === 0) return 1; // No matchweek goes last
+      if (b === 0) return -1;
+      return a - b;
+    });
+
+    return {groupedMatches: grouped, sortedMatchweeks: sorted};
+  }, [matches, category.id]);
+
+  // Memoize match statistics for each week to avoid recalculating on every render
+  const matchWeekStats = useMemo(() => {
+    const stats = new Map<number, {total: number; completed: number}>();
+
+    sortedMatchweeks.forEach((matchweek) => {
+      const weekMatches = groupedMatches.get(matchweek)!;
+      const total = weekMatches.length;
+      const completed = weekMatches.filter((match) => match.status === 'completed').length;
+      stats.set(matchweek, {total, completed});
+    });
+
+    return stats;
+  }, [sortedMatchweeks, groupedMatches]);
 
   // Sort matches within each matchweek by match_number
   sortedMatchweeks.forEach((matchweek) => {
@@ -73,8 +91,7 @@ export default function CategoryMatches({
       {sortedMatchweeks.map((matchweek) => {
         const weekMatches = groupedMatches.get(matchweek)!;
         const weekTitle = matchweek === 0 ? 'Bez kola' : `${matchweek}. kolo`;
-        const totalMatches = weekMatches.length;
-        const completedMatches = weekMatches.filter((match) => match.status === 'completed').length;
+        const {total: totalMatches, completed: completedMatches} = matchWeekStats.get(matchweek)!;
 
         return (
           <div key={matchweek} className="border rounded-lg p-4 bg-gray-50">
