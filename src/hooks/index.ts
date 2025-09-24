@@ -40,6 +40,7 @@ export * from './useTeamDisplayLogic';
 export * from './useFilteredTeams';
 export * from './useTeams';
 export * from './useTeamClub';
+export * from './useTeamClubId';
 export * from './useUnifiedPlayers';
 export * from './useExternalPlayerCreation';
 export * from './useLineupManager';

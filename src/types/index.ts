@@ -47,3 +47,5 @@ export * from './clubMemberRelationship';
 export * from './pageVisibility';
 
 export * from './playerLoan';
+
+export * from './teamClub';

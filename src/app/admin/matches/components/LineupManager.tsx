@@ -20,7 +20,7 @@ import {
 } from '@heroui/react';
 import {UserGroupIcon, PlusIcon, TrashIcon, PencilIcon} from '@heroicons/react/24/outline';
 import {PlusCircleIcon} from '@heroicons/react/24/solid';
-import {useLineupData, useLineupManager} from '@/hooks';
+import {useLineupData, useLineupManager, useTeamClubId} from '@/hooks';
 import {
   LineupFormData,
   LineupPlayerFormData,
@@ -111,24 +111,23 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       coaches: [],
     });
 
-    // Determine if the selected team is the user's own club
-    const isOwnClub = useMemo(() => {
-      // CONFIGURATION: Change this to determine which team is your own club
-      // Options:
-      // 1. Home team is always your club: return selectedTeam === 'home';
-      // 2. Away team is always your club: return selectedTeam === 'away';
-      // 3. Specific team ID: return selectedTeam === 'home' ? homeTeamId === 'YOUR_CLUB_ID' : awayTeamId === 'YOUR_CLUB_ID';
-      // 4. Based on team name: return selectedTeam === 'home' ? homeTeamName.includes('Your Club') : awayTeamName.includes('Your Club');
+    // Get the current team ID based on selected team
+    const currentTeamId = useMemo(() => {
+      return selectedTeam === TeamTypes.HOME ? homeTeamId : awayTeamId;
+    }, [selectedTeam, homeTeamId, awayTeamId]);
 
-      // FIXED: Home team is your club (internal players), Away team is other club (external players)
-      return selectedTeam === TeamTypes.HOME;
+    // Get club ID for the current team
+    const {
+      clubId: currentTeamClubId,
+      loading: clubIdLoading,
+      error: clubIdError,
+    } = useTeamClubId(currentTeamId);
 
-      // Alternative configurations (uncomment one):
-      // return selectedTeam === 'away'; // Away team is your club
-      // return homeTeamName.includes('Baník Most') || awayTeamName.includes('Baník Most'); // Based on team name
-    }, [selectedTeam]);
-
-    // Debug: Log the own club determination
+    // Debug logs
+    console.log('currentTeamId', currentTeamId);
+    console.log('currentTeamClubId', currentTeamClubId);
+    console.log('clubIdLoading', clubIdLoading);
+    console.log('clubIdError', clubIdError);
 
     // Get the current form data based on selected team
     const currentFormData = useMemo(() => {
@@ -148,10 +147,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     );
     const [homeLineupSummary, setHomeLineupSummary] = useState<LineupSummary | null>(null);
     const [awayLineupSummary, setAwayLineupSummary] = useState<LineupSummary | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    // TODO: Replace any with the correct type
-    const [searchResults, setSearchResults] = useState<any[]>([]);
-    const [isSearching, setIsSearching] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [editingPlayerIndex, setEditingPlayerIndex] = useState<number | null>(null);
     const [deletingPlayerIndex, setDeletingPlayerIndex] = useState<number | null>(null);
@@ -615,7 +610,16 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     );
 
     const getAvailableCoaches = () => {
-      return filteredMembers.filter((m) => m.functions?.includes(MemberFunction.COACH));
+      let coaches = filteredMembers.filter((m) => m.functions?.includes(MemberFunction.COACH));
+
+      // If we have club information, filter by the current team's club
+      if (currentTeamClubId) {
+        coaches = coaches.filter(
+          (m) => m.core_club_id === currentTeamClubId || m.current_club_id === currentTeamClubId
+        );
+      }
+
+      return coaches;
     };
 
     const getLineupSummaryDisplay = (summary: LineupSummary | null, teamName: string) => {
@@ -862,13 +866,13 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           isOpen={isPlayerSelectionModalOpen}
           onClose={handleModalClose}
           onPlayerSelected={handlePlayerSelected}
-          isOwnClub={isOwnClub}
           categoryId={categoryId}
           editingPlayerIndex={editingPlayerIndex}
           currentPlayer={
             editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null
           }
           teamName={currentTeamName}
+          clubId={currentTeamClubId || undefined}
           currentLineupPlayers={currentFormData.players}
         />
 

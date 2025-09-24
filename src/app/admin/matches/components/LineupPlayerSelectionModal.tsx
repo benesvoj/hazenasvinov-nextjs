@@ -2,30 +2,17 @@
 
 import {useMemo} from 'react';
 import {UnifiedModal, UnifiedPlayerManager} from '@/components';
-import {PlayerSearchResult} from '@/types/unifiedPlayer';
-import {LineupPlayerFormData} from '@/types';
-
-interface LineupPlayerSelectionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onPlayerSelected: (player: LineupPlayerFormData) => Promise<void>;
-  isOwnClub: boolean;
-  categoryId?: string;
-  editingPlayerIndex?: number | null;
-  currentPlayer?: LineupPlayerFormData | null;
-  teamName?: string;
-  currentLineupPlayers?: LineupPlayerFormData[]; // Current players in the lineup
-}
+import {PlayerSearchResult, LineupPlayerFormData, LineupPlayerSelectionModalProps} from '@/types';
 
 export default function LineupPlayerSelectionModal({
   isOpen,
   onClose,
   onPlayerSelected,
-  isOwnClub,
   categoryId,
   editingPlayerIndex,
   currentPlayer,
   teamName,
+  clubId,
   currentLineupPlayers = [],
 }: LineupPlayerSelectionModalProps) {
   const handlePlayerSelected = async (player: PlayerSearchResult) => {
@@ -41,13 +28,7 @@ export default function LineupPlayerSelectionModal({
   };
 
   const isEditing = editingPlayerIndex !== null && editingPlayerIndex !== undefined;
-  const modalTitle = isEditing
-    ? isOwnClub
-      ? 'Upravit hráče z klubu'
-      : 'Upravit externího hráče'
-    : isOwnClub
-      ? 'Vybrat hráče z klubu'
-      : 'Vybrat externího hráče';
+  const modalTitle = isEditing ? 'Upravit hráče' : 'Vybrat hráče';
 
   // Get player IDs to exclude (current lineup players, excluding the one being edited)
   const excludePlayerIds = useMemo(() => {
@@ -64,6 +45,8 @@ export default function LineupPlayerSelectionModal({
       });
   }, [currentLineupPlayers, isEditing, currentPlayer?.member_id]);
 
+  console.log('clubId', clubId);
+
   return (
     <UnifiedModal
       isOpen={isOpen}
@@ -75,7 +58,8 @@ export default function LineupPlayerSelectionModal({
       isOnlyCloseButton
     >
       <UnifiedPlayerManager
-        showExternalPlayers={!isOwnClub}
+        clubId={clubId}
+        showExternalPlayers={false}
         onPlayerSelected={handlePlayerSelected}
         categoryId={categoryId}
         teamName={teamName}

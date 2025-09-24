@@ -1,21 +1,6 @@
 import {useState, useEffect, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
-
-interface TeamClub {
-  team_id: string;
-  club_id: string;
-  club_name: string;
-  club_short_name?: string;
-  team_suffix: string;
-  is_primary?: boolean;
-}
-
-interface UseTeamClubOptions {
-  teamId?: string;
-  clubId?: string;
-  categoryId?: string;
-  seasonId?: string;
-}
+import {TeamClub, UseTeamClubOptions} from '@/types';
 
 export function useTeamClub(teamIdOrOptions?: string | UseTeamClubOptions) {
   // Handle both string teamId and options object
@@ -37,6 +22,7 @@ export function useTeamClub(teamIdOrOptions?: string | UseTeamClubOptions) {
           id,
           team_suffix,
           is_primary,
+          is_active,
           club_category:club_categories!inner(
             club_id,
             club:clubs!inner(
@@ -50,6 +36,9 @@ export function useTeamClub(teamIdOrOptions?: string | UseTeamClubOptions) {
       if (options.teamId) {
         query = query.eq('id', options.teamId);
       }
+
+      // Add is_active filter to match other queries
+      query = query.eq('is_active', true);
       if (options.clubId) {
         query = query.eq('club_category.club_id', options.clubId);
       }

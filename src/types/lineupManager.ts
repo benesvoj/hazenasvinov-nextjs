@@ -1,3 +1,4 @@
+import {LineupPlayerFormData} from './lineup';
 import {Member} from './member';
 
 export interface LineupManagerProps {
@@ -13,4 +14,16 @@ export interface LineupManagerProps {
 
 export interface LineupManagerRef {
   saveLineup: () => Promise<void>;
+}
+
+export interface LineupPlayerSelectionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onPlayerSelected: (player: LineupPlayerFormData) => Promise<void>;
+  categoryId?: string;
+  editingPlayerIndex?: number | null;
+  currentPlayer?: LineupPlayerFormData | null;
+  teamName?: string;
+  clubId?: string;
+  currentLineupPlayers?: LineupPlayerFormData[];
 }
