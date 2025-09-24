@@ -45,8 +45,6 @@ export default function LineupPlayerSelectionModal({
       });
   }, [currentLineupPlayers, isEditing, currentPlayer?.member_id]);
 
-  console.log('clubId', clubId);
-
   return (
     <UnifiedModal
       isOpen={isOpen}

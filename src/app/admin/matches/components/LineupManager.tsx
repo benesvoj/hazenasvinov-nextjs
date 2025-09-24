@@ -123,12 +123,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       error: clubIdError,
     } = useTeamClubId(currentTeamId);
 
-    // Debug logs
-    console.log('currentTeamId', currentTeamId);
-    console.log('currentTeamClubId', currentTeamClubId);
-    console.log('clubIdLoading', clubIdLoading);
-    console.log('clubIdError', clubIdError);
-
     // Get the current form data based on selected team
     const currentFormData = useMemo(() => {
       return selectedTeam === TeamTypes.HOME ? homeFormData : awayFormData;
