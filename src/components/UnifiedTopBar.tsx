@@ -1,13 +1,17 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {usePathname, useRouter} from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import {createPortal} from 'react-dom';
 import {useAuth} from '@/hooks/useAuthNew';
 import {usePortalAccess} from '@/hooks/usePortalAccess';
 
 // Constants
 const LOGOUT_OVERLAY_Z_INDEX = 9999;
+
+// UI layout constants
+const USER_INFO_MAX_WIDTH = 'max-w-32'; // 128px - max width for user info text on smaller screens
+const USER_INFO_MAX_WIDTH_XL = 'xl:max-w-none'; // No max width on extra large screens
 
 // Logout timing constants
 const LOGOUT_DELAYS = {
@@ -69,7 +73,6 @@ export const UnifiedTopBar = ({
   pageDescription,
   userProfile,
 }: UnifiedTopBarProps) => {
-  const pathname = usePathname();
   const router = useRouter();
   const {user, signOut} = useAuth();
   const {hasCoachAccess, hasBothAccess, hasAdminAccess, loading} = usePortalAccess();
@@ -242,13 +245,6 @@ export const UnifiedTopBar = ({
     return 'Administrátor';
   };
 
-  const getClubDisplay = () => {
-    if (variant === 'coach') {
-      return userProfile?.clubs?.name || 'TJ Sokol Svinov';
-    }
-    return 'TJ Sokol Svinov';
-  };
-
   // Determine if we should show portal switch
   const shouldShowPortalSwitch = () => {
     if (variant === 'admin') {
@@ -264,7 +260,9 @@ export const UnifiedTopBar = ({
   const getSidebarButton = () => {
     if (!sidebarContext) return null;
 
-    if (variant === 'admin' && sidebarContext.isMobile) {
+    // Show sidebar button only when sidebar is hidden (mobile screens)
+    // Both admin and coach sidebars are visible on lg+ (1024px+)
+    if (sidebarContext.isMobile) {
       return (
         <Button
           isIconOnly
@@ -273,19 +271,6 @@ export const UnifiedTopBar = ({
           className="lg:hidden"
           onPress={() => sidebarContext.setIsMobileOpen?.(true)}
           title="Otevřít menu"
-        >
-          <Bars3Icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-        </Button>
-      );
-    }
-
-    if (variant === 'coach') {
-      return (
-        <Button
-          isIconOnly
-          variant="light"
-          className="lg:hidden"
-          onPress={() => sidebarContext.setIsMobileOpen?.(true)}
         >
           <Bars3Icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </Button>
@@ -311,9 +296,9 @@ export const UnifiedTopBar = ({
   // Get the appropriate content classes
   const getContentClasses = () => {
     if (variant === 'admin') {
-      return 'flex items-center justify-between h-full px-4 sm:px-6';
+      return 'flex items-center justify-between h-full px-3 sm:px-4 xl:px-6 min-w-0';
     } else {
-      return 'flex items-center justify-between px-4 py-3';
+      return 'flex items-center justify-between px-3 sm:px-4 py-3 min-w-0';
     }
   };
 
@@ -321,11 +306,11 @@ export const UnifiedTopBar = ({
     <div className={getHeaderClasses()}>
       <div className={getContentClasses()}>
         {/* Left side - Mobile menu button and Section info */}
-        <div className="flex items-center space-x-3 sm:space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
           {getSidebarButton()}
 
           <div className="min-w-0 flex-1">
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">
+            <h1 className="text-base sm:text-lg xl:text-xl font-semibold text-gray-900 dark:text-white truncate">
               {pageTitle || (variant === 'admin' ? 'Dashboard' : 'Trenérský Portal')}
             </h1>
             {pageDescription && (
@@ -337,11 +322,11 @@ export const UnifiedTopBar = ({
         </div>
 
         {/* Right side - User actions */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
+        <div className="flex items-center space-x-1 sm:space-x-2 xl:space-x-4 flex-shrink-0">
           {/* Theme Switch */}
           <ThemeSwitch />
 
-          {/* Release Notes Button */}
+          {/* Release Notes Button - Hidden on mobile, visible from sm up */}
           <Button
             isIconOnly
             variant="light"
@@ -362,7 +347,7 @@ export const UnifiedTopBar = ({
             )}
           </Button>
 
-          {/* Notifications - Admin only */}
+          {/* Notifications - Admin only, hidden on mobile, visible from sm up */}
           {variant === 'admin' && (
             <Button
               isIconOnly
@@ -385,8 +370,8 @@ export const UnifiedTopBar = ({
             <DropdownTrigger>
               <Button
                 variant="light"
-                className={`flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
-                  variant === 'coach' ? 'p-2' : ''
+                className={`flex items-center space-x-1 sm:space-x-2 md:space-x-3 px-1 sm:px-2 md:px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
+                  variant === 'coach' ? 'p-1 sm:p-2' : ''
                 } ${isLoggingOut ? 'opacity-70' : ''}`}
                 isDisabled={isLoggingOut}
               >
@@ -399,11 +384,16 @@ export const UnifiedTopBar = ({
                   }`}
                   size={variant === 'coach' ? 'sm' : undefined}
                 />
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {/* User info - visible from sm breakpoint, merged small/medium behavior */}
+                <div className="hidden sm:block text-left min-w-0">
+                  <p
+                    className={`text-sm font-medium text-gray-900 dark:text-white truncate ${USER_INFO_MAX_WIDTH} ${USER_INFO_MAX_WIDTH_XL}`}
+                  >
                     {variant === 'coach' ? user?.email : getDisplayName()}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p
+                    className={`text-xs text-gray-500 dark:text-gray-400 truncate ${USER_INFO_MAX_WIDTH} ${USER_INFO_MAX_WIDTH_XL}`}
+                  >
                     {variant === 'coach' ? getRoleDisplay() : user?.email || 'Načítání...'}
                   </p>
                 </div>
