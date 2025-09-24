@@ -9,6 +9,10 @@ import {usePortalAccess} from '@/hooks/usePortalAccess';
 // Constants
 const LOGOUT_OVERLAY_Z_INDEX = 9999;
 
+// UI layout constants
+const USER_INFO_MAX_WIDTH = 'max-w-32'; // 128px - max width for user info text on smaller screens
+const USER_INFO_MAX_WIDTH_XL = 'xl:max-w-none'; // No max width on extra large screens
+
 // Logout timing constants
 const LOGOUT_DELAYS = {
   STEP_DELAY: 300, // Delay between logout steps
@@ -382,10 +386,14 @@ export const UnifiedTopBar = ({
                 />
                 {/* User info - visible from sm breakpoint, merged small/medium behavior */}
                 <div className="hidden sm:block text-left min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-32 xl:max-w-none">
+                  <p
+                    className={`text-sm font-medium text-gray-900 dark:text-white truncate ${USER_INFO_MAX_WIDTH} ${USER_INFO_MAX_WIDTH_XL}`}
+                  >
                     {variant === 'coach' ? user?.email : getDisplayName()}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-32 xl:max-w-none">
+                  <p
+                    className={`text-xs text-gray-500 dark:text-gray-400 truncate ${USER_INFO_MAX_WIDTH} ${USER_INFO_MAX_WIDTH_XL}`}
+                  >
                     {variant === 'coach' ? getRoleDisplay() : user?.email || 'Načítání...'}
                   </p>
                 </div>
