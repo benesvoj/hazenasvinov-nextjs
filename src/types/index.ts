@@ -45,3 +45,5 @@ export * from './unifiedPlayer';
 export * from './clubMemberRelationship';
 
 export * from './pageVisibility';
+
+export * from './playerLoan';

@@ -61,3 +61,12 @@ export interface ClubPlayerSummary {
   loaned_in_players: number;
   loaned_out_players: number;
 }
+
+export interface UnifiedPlayerManagerProps {
+  clubId?: string;
+  showExternalPlayers?: boolean;
+  onPlayerSelected?: (player: PlayerSearchResult) => void;
+  categoryId?: string;
+  teamName?: string;
+  excludePlayerIds?: string[]; // IDs of players already in the lineup
+}

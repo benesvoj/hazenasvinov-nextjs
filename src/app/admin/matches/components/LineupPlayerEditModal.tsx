@@ -1,15 +1,18 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {UnifiedModal} from '@/components';
+import {UnifiedModal, Heading} from '@/components';
 import {Input, Checkbox} from '@heroui/react';
 import {LineupPlayerFormData} from '@/types';
+import {PlayerPosition} from '@/enums';
+import {translations} from '@/lib/translations';
 
 interface LineupPlayerEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (player: LineupPlayerFormData) => void;
   player: LineupPlayerFormData | null;
+  playerName?: string; // Add player name as a prop
 }
 
 export default function LineupPlayerEditModal({
@@ -17,6 +20,7 @@ export default function LineupPlayerEditModal({
   onClose,
   onSave,
   player,
+  playerName,
 }: LineupPlayerEditModalProps) {
   const [formData, setFormData] = useState<LineupPlayerFormData>({
     position: 'field_player',
@@ -29,6 +33,8 @@ export default function LineupPlayerEditModal({
     red_cards_personal: 0,
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  const t = translations;
 
   useEffect(() => {
     if (player) {
@@ -54,11 +60,19 @@ export default function LineupPlayerEditModal({
     setFormData((prev) => ({...prev, [field]: value}));
   };
 
+  // Get display name from props or construct from player data
+  const getDisplayName = () => {
+    if (playerName) return playerName;
+    if (player?.display_name) return player.display_name;
+    if (player?.name && player?.surname) return `${player.surname} ${player.name}`;
+    return 'Neznámý hráč';
+  };
+
   return (
     <UnifiedModal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Upravit hráče: ${player?.display_name}`}
+      title={`${t.lineupManager.playerModal.titleEdit}: ${getDisplayName()}`}
       size="lg"
       isFooterWithActions
       isLoading={isLoading}
@@ -66,81 +80,78 @@ export default function LineupPlayerEditModal({
     >
       <div className="space-y-6">
         {/* Jersey Number */}
-        <Input
-          label="Číslo dresu"
-          type="number"
-          value={formData.jersey_number?.toString() || ''}
-          onChange={(e) =>
-            updateField('jersey_number', e.target.value ? parseInt(e.target.value) : undefined)
-          }
-          min="1"
-          max="99"
-          placeholder="1-99"
-        />
-
-        {/* Position */}
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">Pozice</label>
-          <div className="flex items-center space-x-4">
-            <Checkbox
-              isSelected={formData.position === 'goalkeeper'}
-              onValueChange={(isSelected) =>
-                updateField('position', isSelected ? 'goalkeeper' : 'field_player')
-              }
-            >
-              Brankář
-            </Checkbox>
-          </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label={t.lineupManager.playerModal.jerseyNumber}
+            type="number"
+            value={formData.jersey_number?.toString() || ''}
+            onChange={(e) =>
+              updateField('jersey_number', e.target.value ? parseInt(e.target.value) : undefined)
+            }
+            min="1"
+            max="99"
+            placeholder="1-99"
+          />
         </div>
 
-        {/* Role */}
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">Funkce</label>
-          <div className="flex items-center space-x-4">
-            <Checkbox
-              isSelected={formData.is_captain}
-              onValueChange={(isSelected) => updateField('is_captain', isSelected)}
-            >
-              Kapitán
-            </Checkbox>
-          </div>
+        {/* Position */}
+        <div className="flex items-center gap-4">
+          <Checkbox
+            aria-label={t.playerPosition.goalkeeper}
+            isSelected={formData.position === PlayerPosition.GOALKEEPER}
+            onValueChange={(isSelected) =>
+              updateField(
+                'position',
+                isSelected ? PlayerPosition.GOALKEEPER : PlayerPosition.FIELD_PLAYER
+              )
+            }
+          >
+            {t.playerPosition.goalkeeper}
+          </Checkbox>
+          <Checkbox
+            aria-label={t.playerRoles.captain}
+            isSelected={formData.is_captain}
+            onValueChange={(isSelected) => updateField('is_captain', isSelected)}
+          >
+            {t.playerRoles.captain}
+          </Checkbox>
         </div>
 
         {/* Statistics */}
         <div className="space-y-4">
-          <h4 className="text-lg font-medium text-gray-900">Statistiky</h4>
+          <Heading size={4}>{t.lineupManager.playerModal.statistics}</Heading>
 
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Góly"
+              label={t.lineupManager.playerModal.goals}
               type="number"
               value={formData.goals?.toString() || '0'}
               onChange={(e) => updateField('goals', parseInt(e.target.value) || 0)}
               min="0"
             />
             <Input
-              label="Žluté karty"
+              label={t.lineupManager.playerModal.yellowCards}
               type="number"
               value={formData.yellow_cards?.toString() || '0'}
               onChange={(e) => updateField('yellow_cards', parseInt(e.target.value) || 0)}
               min="0"
             />
             <Input
-              label="Červené karty (5 min)"
+              label={t.lineupManager.playerModal.redCards5min}
               type="number"
               value={formData.red_cards_5min?.toString() || '0'}
               onChange={(e) => updateField('red_cards_5min', parseInt(e.target.value) || 0)}
               min="0"
             />
             <Input
-              label="Červené karty (10 min)"
+              label={t.lineupManager.playerModal.redCards10min}
               type="number"
               value={formData.red_cards_10min?.toString() || '0'}
               onChange={(e) => updateField('red_cards_10min', parseInt(e.target.value) || 0)}
               min="0"
             />
             <Input
-              label="Červené karty (OT)"
+              label={t.lineupManager.playerModal.redCardsPersonal}
               type="number"
               value={formData.red_cards_personal?.toString() || '0'}
               onChange={(e) => updateField('red_cards_personal', parseInt(e.target.value) || 0)}

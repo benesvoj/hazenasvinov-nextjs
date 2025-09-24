@@ -1,24 +1,18 @@
 'use client';
 
 import {useState, useEffect, useCallback, useRef, useMemo} from 'react';
-import {useUnifiedPlayers} from '@/hooks/useUnifiedPlayers';
-import {PlayerSearchFilters, PlayerSearchResult} from '@/types/unifiedPlayer';
-import {PlayerLoanModal} from '@/components';
-import {Input} from '@heroui/input';
-import {Select, SelectItem, Button} from '@heroui/react';
+import {Select, SelectItem, Button, Input} from '@heroui/react';
 import {ArrowPathIcon, CheckIcon, PlusIcon} from '@heroicons/react/24/outline';
+
 import CreateMemberModal from '@/app/admin/matches/components/CreateMemberModal';
 import CreateExternalPlayerModal from '@/app/admin/matches/components/CreateExternalPlayerModal';
-import {getClubName} from '@/constants';
 
-interface UnifiedPlayerManagerProps {
-  clubId?: string;
-  showExternalPlayers?: boolean;
-  onPlayerSelected?: (player: PlayerSearchResult) => void;
-  categoryId?: string;
-  teamName?: string;
-  excludePlayerIds?: string[]; // IDs of players already in the lineup
-}
+import {useUnifiedPlayers} from '@/hooks';
+import {PlayerLoanModal} from '@/components';
+import {getClubName} from '@/constants';
+import {PlayerPosition} from '@/enums';
+import {PlayerSearchFilters, PlayerSearchResult, UnifiedPlayerManagerProps} from '@/types';
+import {translations} from '@/lib/translations';
 
 export default function UnifiedPlayerManager({
   clubId,
@@ -194,13 +188,13 @@ export default function UnifiedPlayerManager({
     if (!position) return null;
 
     const positionColors = {
-      goalkeeper: 'bg-blue-100 text-blue-800',
-      field_player: 'bg-purple-100 text-purple-800',
+      [PlayerPosition.GOALKEEPER]: 'bg-blue-100 text-blue-800',
+      [PlayerPosition.FIELD_PLAYER]: 'bg-purple-100 text-purple-800',
     };
 
     const positionLabels = {
-      goalkeeper: 'Brankář',
-      field_player: 'Hráč v poli',
+      [PlayerPosition.GOALKEEPER]: translations.playerPosition.goalkeeper,
+      [PlayerPosition.FIELD_PLAYER]: translations.playerPosition.fieldPlayer,
     };
 
     return (
@@ -215,7 +209,7 @@ export default function UnifiedPlayerManager({
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-sm text-gray-500">Načítání hráčů...</div>
+        <div className="text-sm text-gray-500">{translations.unifiedPlayerManager.loading}</div>
       </div>
     );
   }
@@ -223,7 +217,9 @@ export default function UnifiedPlayerManager({
   if (error) {
     return (
       <div className="rounded bg-red-50 p-4">
-        <div className="text-sm text-red-800">Chyba při načítání hráčů: {error}</div>
+        <div className="text-sm text-red-800">
+          {translations.unifiedPlayerManager.error}: {error}
+        </div>
       </div>
     );
   }

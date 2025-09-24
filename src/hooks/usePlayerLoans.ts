@@ -6,7 +6,7 @@ import {
   CreatePlayerLoanData,
   UpdatePlayerLoanData,
   PlayerLoanFilters,
-} from '@/types/playerLoan';
+} from '@/types';
 
 const supabase = createClient();
 

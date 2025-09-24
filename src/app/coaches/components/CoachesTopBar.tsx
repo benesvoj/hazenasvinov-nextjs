@@ -7,6 +7,7 @@ import {useUser} from '@/contexts/UserContext';
 import {UnifiedTopBar} from '@/components';
 import {coachesRoutes} from '../routes/routes';
 import {translations} from '@/lib/translations';
+import {UserRoles} from '@/enums';
 
 const getPageInfo = (pathname: string) => {
   // Find the route that matches the current pathname
@@ -42,7 +43,7 @@ export const CoachesTopBar = () => {
 
   return (
     <UnifiedTopBar
-      variant="coach"
+      variant={UserRoles.COACH}
       sidebarContext={{
         isCollapsed,
         isMobileOpen,

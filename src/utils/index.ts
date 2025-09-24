@@ -6,3 +6,5 @@ export * from './standingsCalculator';
 export * from './standingsGenerator';
 export * from './supabase/client';
 export * from './matchQueryBuilder';
+export * from './loginLogger';
+export * from './releaseNotes';

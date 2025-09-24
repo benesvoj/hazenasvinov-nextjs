@@ -3,8 +3,7 @@
 import React, {useState, useEffect} from 'react';
 import {useRouter} from 'next/navigation';
 import {createPortal} from 'react-dom';
-import {useAuth} from '@/hooks/useAuthNew';
-import {usePortalAccess} from '@/hooks/usePortalAccess';
+import {useAuth, usePortalAccess} from '@/hooks';
 
 // Constants
 const LOGOUT_OVERLAY_Z_INDEX = 9999;
@@ -39,7 +38,7 @@ import {
   Badge,
   Avatar,
 } from '@heroui/react';
-import {ReleaseNote, getReleaseNotes} from '@/utils/releaseNotes';
+import {ReleaseNote, getReleaseNotes, logLogout} from '@/utils';
 import {
   ReleaseNotesModal,
   UserProfileModal,
@@ -47,11 +46,10 @@ import {
   CoachPortalCategoryDialog,
   showToast,
 } from '@/components';
-import {logLogout} from '@/utils/loginLogger';
-import {getClubName} from '@/constants';
+import {UserRoles} from '@/enums';
 
 interface UnifiedTopBarProps {
-  variant: 'admin' | 'coach';
+  variant: UserRoles.ADMIN | UserRoles.COACH;
   sidebarContext?: {
     isCollapsed?: boolean;
     isMobileOpen?: boolean;
@@ -240,21 +238,15 @@ export const UnifiedTopBar = ({
   };
 
   const getRoleDisplay = () => {
-    if (variant === 'coach') {
-      return userProfile?.role === 'head_coach' ? 'Hlavní trenér' : 'Trenér';
+    if (variant === UserRoles.COACH) {
+      return userProfile?.role === UserRoles.HEAD_COACH ? 'Hlavní trenér' : 'Trenér';
     }
     return 'Administrátor';
   };
 
-  const getClubDisplay = () => {
-    if (variant === 'coach') {
-      return userProfile?.clubs?.name || getClubName();
-    }
-    return getClubName();
-  };
   // Determine if we should show portal switch
   const shouldShowPortalSwitch = () => {
-    if (variant === 'admin') {
+    if (variant === UserRoles.ADMIN) {
       // Admin users can switch to coach portal if they have coach access OR if they're admin (admin can access coach portal)
       return hasCoachAccess || hasAdminAccess;
     } else {
@@ -289,7 +281,7 @@ export const UnifiedTopBar = ({
 
   // Get the appropriate header classes
   const getHeaderClasses = () => {
-    if (variant === 'admin') {
+    if (variant === UserRoles.ADMIN) {
       return `fixed top-0 right-0 bg-white h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300 ease-in-out ${
         sidebarContext?.isMobile ? 'left-0' : sidebarContext?.isCollapsed ? 'left-16' : 'left-56'
       }`;
@@ -302,7 +294,7 @@ export const UnifiedTopBar = ({
 
   // Get the appropriate content classes
   const getContentClasses = () => {
-    if (variant === 'admin') {
+    if (variant === UserRoles.ADMIN) {
       return 'flex items-center justify-between h-full px-3 sm:px-4 xl:px-6 min-w-0';
     } else {
       return 'flex items-center justify-between px-3 sm:px-4 py-3 min-w-0';
@@ -318,7 +310,7 @@ export const UnifiedTopBar = ({
 
           <div className="min-w-0 flex-1">
             <h1 className="text-base sm:text-lg xl:text-xl font-semibold text-gray-900 dark:text-white truncate">
-              {pageTitle || (variant === 'admin' ? 'Dashboard' : 'Trenérský Portal')}
+              {pageTitle || (variant === UserRoles.ADMIN ? 'Dashboard' : 'Trenérský Portal')}
             </h1>
             {pageDescription && (
               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 hidden sm:block">
@@ -347,7 +339,7 @@ export const UnifiedTopBar = ({
               <Badge
                 color="primary"
                 size="sm"
-                className={variant === 'admin' ? '' : 'absolute -top-1 -right-1'}
+                className={variant === UserRoles.ADMIN ? '' : 'absolute -top-1 -right-1'}
               >
                 {releaseNotes.length}
               </Badge>
@@ -355,7 +347,7 @@ export const UnifiedTopBar = ({
           </Button>
 
           {/* Notifications - Admin only, hidden on mobile, visible from sm up */}
-          {variant === 'admin' && (
+          {variant === UserRoles.ADMIN && (
             <Button
               isIconOnly
               variant="light"
@@ -378,18 +370,18 @@ export const UnifiedTopBar = ({
               <Button
                 variant="light"
                 className={`flex items-center space-x-1 sm:space-x-2 md:space-x-3 px-1 sm:px-2 md:px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
-                  variant === 'coach' ? 'p-1 sm:p-2' : ''
+                  variant === UserRoles.COACH ? 'p-1 sm:p-2' : ''
                 } ${isLoggingOut ? 'opacity-70' : ''}`}
                 isDisabled={isLoggingOut}
               >
                 <Avatar
                   name={getUserInitials()}
                   className={`${
-                    variant === 'coach'
+                    variant === UserRoles.COACH
                       ? 'bg-green-100 text-green-700'
                       : 'w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-medium'
                   }`}
-                  size={variant === 'coach' ? 'sm' : undefined}
+                  size={variant === UserRoles.COACH ? 'sm' : undefined}
                 />
                 {/* User info - visible from sm breakpoint, merged small/medium behavior */}
                 <div className="hidden sm:block text-left min-w-0">
@@ -407,7 +399,7 @@ export const UnifiedTopBar = ({
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="User actions">
-              {variant === 'admin' ? (
+              {variant === UserRoles.ADMIN ? (
                 <>
                   <DropdownItem
                     key="profile-header"
@@ -450,29 +442,31 @@ export const UnifiedTopBar = ({
                 <DropdownItem
                   key="switch-portal"
                   startContent={
-                    variant === 'admin' ? (
+                    variant === UserRoles.ADMIN ? (
                       <AcademicCapIcon className="w-4 h-4" />
                     ) : (
                       <ShieldCheckIcon className="w-4 h-4" />
                     )
                   }
                   onPress={
-                    variant === 'admin' ? handleSwitchToCoachPortal : handleSwitchToAdminPortal
+                    variant === UserRoles.ADMIN
+                      ? handleSwitchToCoachPortal
+                      : handleSwitchToAdminPortal
                   }
                   aria-label={
-                    variant === 'admin'
+                    variant === UserRoles.ADMIN
                       ? 'Přepnout na trenérský portál'
                       : 'Přepnout na admin portál'
                   }
                 >
                   <span>
-                    {variant === 'admin'
+                    {variant === UserRoles.ADMIN
                       ? 'Přepnout na trenérský portál'
                       : 'Přepnout na admin portál'}
                   </span>
                 </DropdownItem>
               ) : null}
-              {variant === 'admin' ? (
+              {variant === UserRoles.ADMIN ? (
                 <DropdownItem
                   key="settings"
                   startContent={<Cog6ToothIcon className="w-4 h-4" />}
@@ -487,10 +481,10 @@ export const UnifiedTopBar = ({
                 startContent={<ArrowRightEndOnRectangleIcon className="w-4 h-4" />}
                 onPress={handleLogout}
                 aria-label="Odhlásit se"
-                className={variant === 'coach' ? 'text-danger' : ''}
+                className={variant === UserRoles.COACH ? 'text-danger' : ''}
                 isDisabled={isLoggingOut}
               >
-                <span>{variant === 'admin' ? 'Odhlásit' : 'Odhlásit se'}</span>
+                <span>{variant === UserRoles.ADMIN ? 'Odhlásit' : 'Odhlásit se'}</span>
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
@@ -507,7 +501,7 @@ export const UnifiedTopBar = ({
         showReleaseNotes={showReleaseNotes}
         setShowReleaseNotes={setShowReleaseNotes}
       />
-      {variant === 'admin' && (
+      {variant === UserRoles.ADMIN && (
         <CoachPortalCategoryDialog
           isOpen={showCoachPortalDialog}
           onClose={() => setShowCoachPortalDialog(false)}

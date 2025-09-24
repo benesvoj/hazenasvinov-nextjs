@@ -14,12 +14,6 @@ import {
   CardBody,
   CardHeader,
   useDisclosure,
-  Table,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHeader,
   Tabs,
   Tab,
   ButtonGroup,
@@ -52,7 +46,7 @@ import {
 } from './';
 import {LineupCoachRoles, LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
 import {classifyLineupError} from '@/helpers';
-import {LineupErrorType, PlayerPosition, TeamTypes} from '@/enums';
+import {LineupErrorType, MemberFunction, PlayerPosition, TeamTypes} from '@/enums';
 import {translations} from '@/lib/translations';
 
 const playersColumns = [
@@ -100,7 +94,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       return filtered;
     }, [members, categoryId]);
 
-    const [selectedTeam, setSelectedTeam] = useState<'home' | 'away'>('home');
+    const [selectedTeam, setSelectedTeam] = useState<TeamTypes>(TeamTypes.HOME);
     const [homeFormData, setHomeFormData] = useState<LineupFormData>({
       match_id: matchId,
       team_id: homeTeamId,
@@ -155,6 +149,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     const [homeLineupSummary, setHomeLineupSummary] = useState<LineupSummary | null>(null);
     const [awayLineupSummary, setAwayLineupSummary] = useState<LineupSummary | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    // TODO: Replace any with the correct type
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
@@ -620,7 +615,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     );
 
     const getAvailableCoaches = () => {
-      return filteredMembers.filter((m) => m.functions?.includes('coach'));
+      return filteredMembers.filter((m) => m.functions?.includes(MemberFunction.COACH));
     };
 
     const getLineupSummaryDisplay = (summary: LineupSummary | null, teamName: string) => {
@@ -699,7 +694,15 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
             return cellValue;
         }
       },
-      [currentFormData.players, getMemberName, handleEditPlayer, handleDeletePlayer]
+      [
+        currentFormData.players,
+        getMemberName,
+        handleEditPlayer,
+        handleDeletePlayer,
+        t.goalkeepers,
+        t.players,
+        t.unknownPlayer,
+      ]
     );
 
     const renderCoachCell = React.useCallback(
@@ -875,6 +878,11 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           onClose={handlePlayerEditClose}
           onSave={handlePlayerEditSave}
           player={editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null}
+          playerName={
+            editingPlayerIndex !== null
+              ? getMemberName(currentFormData.players[editingPlayerIndex].member_id || '')
+              : undefined
+          }
         />
 
         {/* Coach Selection Modal */}

@@ -534,8 +534,31 @@ export const translations = {
     deleteCoach: 'Odebrat trenéra',
     goalkeepers: 'Brankáři',
     unknownPlayer: 'Neznámý hráč',
+    playerModal: {
+      titleEdit: 'Upravit hráče',
+      jerseyNumber: 'Číslo dresu',
+      position: 'Pozice',
+      goals: 'Góly',
+      yellowCards: 'Žluté karty',
+      redCards: 'Červené karty',
+      redCards5min: 'Červené karty (5 min)',
+      redCards10min: 'Červené karty (10 min)',
+      redCardsPersonal: 'Červené karty (OT)',
+      statistics: 'Statistiky',
+    },
   },
   unifiedTable: {
     emptyMessage: 'Žádné záznamy k zobrazení.',
+  },
+  unifiedPlayerManager: {
+    loading: 'Načítání hráčů...',
+    error: 'Chyba při načítání hráčů',
+  },
+  playerPosition: {
+    goalkeeper: 'Brankář',
+    fieldPlayer: 'Hráč v poli',
+  },
+  playerRoles: {
+    captain: 'Kapitán',
   },
 } as const;
