@@ -1,17 +1,6 @@
 import React from 'react';
-import {Button} from '@heroui/button';
-import {
-  MapPinIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  EyeIcon,
-  PencilIcon,
-  UserGroupIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import {ChevronDownIcon, ChevronUpIcon} from '@heroicons/react/24/outline';
 import {Match, Category} from '@/types';
-import {formatTime, formatDateString} from '@/helpers';
-import {translations} from '@/lib/translations';
 import {CategoryMatchRow} from './CategoryMatchRow';
 
 interface CategoryMatchesProps {
@@ -84,6 +73,8 @@ export default function CategoryMatches({
       {sortedMatchweeks.map((matchweek) => {
         const weekMatches = groupedMatches.get(matchweek)!;
         const weekTitle = matchweek === 0 ? 'Bez kola' : `${matchweek}. kolo`;
+        const totalMatches = weekMatches.length;
+        const completedMatches = weekMatches.filter((match) => match.status === 'completed').length;
 
         return (
           <div key={matchweek} className="border rounded-lg p-4 bg-gray-50">
@@ -92,8 +83,8 @@ export default function CategoryMatches({
               onClick={() => toggleMatchweek(category.id, matchweek)}
             >
               <h4 className="text-lg font-semibold text-gray-800">
-                {weekTitle} ({weekMatches.length} zápas
-                {weekMatches.length !== 1 ? 'ů' : ''})
+                {weekTitle} ({completedMatches} / {totalMatches} zápas
+                {totalMatches !== 1 ? 'ů' : ''})
               </h4>
               <div className="text-gray-600">
                 {isMatchweekExpanded(category.id, matchweek) ? (
