@@ -69,4 +69,5 @@ export interface UnifiedPlayerManagerProps {
   categoryId?: string;
   teamName?: string;
   excludePlayerIds?: string[]; // IDs of players already in the lineup
+  onMemberCreated?: () => void; // Callback when a new member is created
 }

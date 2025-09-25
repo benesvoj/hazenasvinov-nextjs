@@ -3,6 +3,7 @@
 import {useMemo} from 'react';
 import {UnifiedModal, UnifiedPlayerManager} from '@/components';
 import {PlayerSearchResult, LineupPlayerFormData, LineupPlayerSelectionModalProps} from '@/types';
+import {PlayerPosition} from '@/enums';
 
 export default function LineupPlayerSelectionModal({
   isOpen,
@@ -14,17 +15,17 @@ export default function LineupPlayerSelectionModal({
   teamName,
   clubId,
   currentLineupPlayers = [],
+  onMemberCreated,
 }: LineupPlayerSelectionModalProps) {
   const handlePlayerSelected = async (player: PlayerSearchResult) => {
     const lineupPlayer: LineupPlayerFormData = {
-      position: player.position || 'field_player',
+      position: player.position || PlayerPosition.FIELD_PLAYER,
       is_captain: player.is_captain,
       member_id: player.id, // Most players have member_id (created in members table), but legacy external players may not during migration
       jersey_number: player.jersey_number,
     };
 
     await onPlayerSelected(lineupPlayer);
-    onClose();
   };
 
   const isEditing = editingPlayerIndex !== null && editingPlayerIndex !== undefined;
@@ -62,6 +63,7 @@ export default function LineupPlayerSelectionModal({
         categoryId={categoryId}
         teamName={teamName}
         excludePlayerIds={excludePlayerIds}
+        onMemberCreated={onMemberCreated}
       />
     </UnifiedModal>
   );

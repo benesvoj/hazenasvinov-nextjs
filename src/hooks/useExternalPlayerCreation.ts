@@ -2,7 +2,8 @@ import {useState, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
 import {showToast} from '@/components';
 import {ExternalPlayerFormData, PlayerSearchResult} from '@/types';
-import {Genders, MemberFunction, RelationshipStatus, RelationshipType} from '@/enums';
+import {Genders, MemberFunction} from '@/enums';
+import {useMemberClubRelationships} from './useMemberClubRelationships';
 
 /**
  * Hook for managing external player creation business logic
@@ -13,6 +14,7 @@ export function useExternalPlayerCreation() {
   const [categoryGender, setCategoryGender] = useState<Genders | null>(null);
 
   const supabase = createClient();
+  const {createRelationship} = useMemberClubRelationships();
 
   /**
    * Fetch category gender information
@@ -111,27 +113,6 @@ export function useExternalPlayerCreation() {
   );
 
   /**
-   * Create member-club relationship
-   */
-  const createMemberClubRelationship = useCallback(
-    async (memberId: string, clubId: string): Promise<void> => {
-      const {error: relationshipError} = await supabase.from('member_club_relationships').insert({
-        member_id: memberId,
-        club_id: clubId,
-        relationship_type: RelationshipType.PERMANENT, // External players are permanent members of their club
-        status: RelationshipStatus.ACTIVE,
-        valid_from: new Date().toISOString().split('T')[0],
-      });
-
-      if (relationshipError) {
-        console.error('Error creating member-club relationship:', relationshipError);
-        throw new Error(`Chyba při vytváření vztahu hráč-klub: ${relationshipError.message}`);
-      }
-    },
-    [supabase]
-  );
-
-  /**
    * Create external player (main business logic)
    */
   const createExternalPlayer = useCallback(
@@ -146,7 +127,10 @@ export function useExternalPlayerCreation() {
         const memberData = await createMember(formData, categoryId);
 
         // Step 3: Create member-club relationship
-        await createMemberClubRelationship(memberData.id, clubId);
+        await createRelationship({
+          memberId: memberData.id,
+          clubId: clubId,
+        });
 
         // Step 4: Create PlayerSearchResult for the created member
         const externalPlayer: PlayerSearchResult = {
@@ -173,7 +157,7 @@ export function useExternalPlayerCreation() {
         setIsLoading(false);
       }
     },
-    [findOrCreateClub, createMember, createMemberClubRelationship]
+    [findOrCreateClub, createMember, createRelationship]
   );
 
   /**

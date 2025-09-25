@@ -1232,6 +1232,7 @@ export default function MatchesAdminPage() {
         onClose={onLineupModalClose}
         selectedMatch={selectedMatch}
         members={members}
+        onMemberCreated={fetchMembers}
       />
 
       {/* Excel Import Modal */}

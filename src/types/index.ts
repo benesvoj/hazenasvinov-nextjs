@@ -21,7 +21,6 @@ export * from './Nullish';
 export * from './ValueByDevice';
 
 export * from './member';
-export * from './memberFunction';
 
 export * from './releaseNote';
 

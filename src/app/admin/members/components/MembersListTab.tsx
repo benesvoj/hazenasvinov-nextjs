@@ -28,18 +28,14 @@ import MemberFormModal from './MemberFormModal';
 import MembersCsvImport from './MembersCsvImport';
 import BulkEditModal from './BulkEditModal';
 import {GenderType} from '@/constants';
+import {getMemberFunctionOptions, Genders, MemberFunction} from '@/enums';
 
 interface MembersListTabProps {
   categoriesData: Category[] | null;
-  functionOptions: Record<string, string>;
   sexOptions: Record<string, string>;
 }
 
-export default function MembersListTab({
-  categoriesData,
-  functionOptions,
-  sexOptions,
-}: MembersListTabProps) {
+export default function MembersListTab({categoriesData, sexOptions}: MembersListTabProps) {
   // Use AppDataContext for members data
   const {members, membersLoading, membersError, refreshMembers} = useAppData();
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
@@ -88,7 +84,7 @@ export default function MembersListTab({
     surname: '',
     date_of_birth: undefined,
     category_id: '',
-    sex: 'male',
+    sex: Genders.MALE,
     functions: [],
     id: '',
     created_at: '',
@@ -144,7 +140,8 @@ export default function MembersListTab({
     // Filter by function
     if (filters.function) {
       filtered = filtered.filter(
-        (member) => member.functions && member.functions.includes(filters.function)
+        (member) =>
+          member.functions && member.functions.includes(filters.function as MemberFunction)
       );
     }
 
@@ -293,7 +290,7 @@ export default function MembersListTab({
       surname: '',
       date_of_birth: undefined, // Changed to undefined for optional field
       category_id: '',
-      sex: 'male',
+      sex: Genders.MALE,
       functions: [],
       id: '',
       created_at: '',
@@ -455,7 +452,7 @@ export default function MembersListTab({
           <div className="flex flex-wrap gap-1">
             {member.functions.map((func) => (
               <Chip key={func} color="primary" variant="solid" size="sm">
-                {functionOptions[func] || func}
+                {getMemberFunctionOptions().find((option) => option.value === func)?.label || func}
               </Chip>
             ))}
           </div>
@@ -552,15 +549,12 @@ export default function MembersListTab({
             onImportComplete={refreshMembers}
             categories={categories}
             sexOptions={sexOptions}
-            functionOptions={functionOptions}
           />
           <Button
             color="primary"
             startContent={<PlusIcon className="w-4 h-4" />}
             onPress={openAddModal}
-            isDisabled={
-              Object.keys(categories).length === 0 || Object.keys(functionOptions).length === 0
-            }
+            isDisabled={Object.keys(categories).length === 0}
           >
             Přidat člena
           </Button>
@@ -649,9 +643,9 @@ export default function MembersListTab({
                     className="w-full"
                     size="sm"
                   >
-                    {Object.entries(functionOptions).map(([key, value]) => (
-                      <SelectItem key={key} aria-label={`Select function ${value}`}>
-                        {value}
+                    {getMemberFunctionOptions().map(({value, label}) => (
+                      <SelectItem key={value} aria-label={`Select function ${label}`}>
+                        {label}
                       </SelectItem>
                     ))}
                   </Select>
@@ -728,7 +722,7 @@ export default function MembersListTab({
           emptyContent={
             searchTerm
               ? 'Žádní členové nebyli nalezeni pro zadaný vyhledávací termín.'
-              : Object.keys(functionOptions).length === 0
+              : false
                 ? "Žádní členové nebyli nalezeni. Pro přidání členů je potřeba nejprve nastavit funkce v sekci 'Funkce členů'."
                 : 'Žádní členové nebyli nalezeni.'
           }
@@ -751,7 +745,6 @@ export default function MembersListTab({
         setFormData={setFormData}
         categories={categoriesData || []}
         sexOptions={sexOptions}
-        functionOptions={functionOptions}
         submitButtonText="Přidat člena"
         isEditMode={false}
       />
@@ -765,7 +758,6 @@ export default function MembersListTab({
         setFormData={setFormData}
         categories={categoriesData || []}
         sexOptions={sexOptions}
-        functionOptions={functionOptions}
         submitButtonText="Uložit změny"
         isEditMode={true}
       />
@@ -786,7 +778,6 @@ export default function MembersListTab({
         formData={bulkEditFormData}
         setFormData={setBulkEditFormData}
         categories={categoriesData || []}
-        functionOptions={functionOptions}
         isLoading={membersLoading}
       />
     </div>

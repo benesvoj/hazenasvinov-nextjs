@@ -1,3 +1,6 @@
+import {Genders, MemberFunction as MemberFunctionEnum} from '@/enums';
+import {Category} from './category';
+
 export interface Member {
   id: string;
   registration_number: string;
@@ -5,8 +8,8 @@ export interface Member {
   surname: string;
   date_of_birth?: string;
   category_id?: string;
-  sex: 'male' | 'female';
-  functions: string[];
+  sex: Genders;
+  functions: MemberFunctionEnum[];
   // New unified player system fields
   is_external: boolean;
   core_club_id?: string;
@@ -20,13 +23,64 @@ export interface Member {
 }
 export interface MembersListTabProps {
   members: Member[];
-  categoriesData: any[] | null;
+  categoriesData: Category[] | null;
   functionOptions: Record<string, string>;
   sexOptions: Record<string, string>;
 }
 
 export interface MembersStatisticTabProps {
   members: Member[];
-  categoriesData: any[] | null;
-  functionOptions: Record<string, string>;
+  categoriesData: Category[] | null;
+}
+
+export interface CreateMemberModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onMemberCreated: (member: {
+    id: string;
+    name: string;
+    surname: string;
+    registration_number: string;
+  }) => void;
+  categoryId?: string;
+  clubId?: string;
+}
+
+export interface MemberFormData {
+  name: string;
+  surname: string;
+  registration_number: string;
+  date_of_birth?: string;
+  sex: Genders;
+  functions: MemberFunctionEnum[];
+}
+
+export interface CreateMemberResult {
+  id: string;
+  name: string;
+  surname: string;
+  registration_number: string;
+}
+
+export interface UpdateMemberData {
+  id: string;
+  name?: string;
+  surname?: string;
+  registration_number?: string;
+  date_of_birth?: string | null;
+  sex?: Genders;
+  functions?: MemberFunctionEnum[];
+  category_id?: string;
+  is_active?: boolean;
+}
+
+export interface MemberFunction {
+  id: string; // Can be either UUID or simple text ID like 'func_player'
+  name: string;
+  display_name: string;
+  description?: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }

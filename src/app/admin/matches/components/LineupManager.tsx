@@ -68,7 +68,17 @@ const coachesColumns = [
 
 const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
   (
-    {matchId, homeTeamId, awayTeamId, homeTeamName, awayTeamName, members, categoryId, onClose},
+    {
+      matchId,
+      homeTeamId,
+      awayTeamId,
+      homeTeamName,
+      awayTeamName,
+      members,
+      categoryId,
+      onClose,
+      onMemberCreated,
+    },
     ref
   ) => {
     const t = translations.lineupManager;
@@ -139,8 +149,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       },
       [selectedTeam]
     );
-    const [homeLineupSummary, setHomeLineupSummary] = useState<LineupSummary | null>(null);
-    const [awayLineupSummary, setAwayLineupSummary] = useState<LineupSummary | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [editingPlayerIndex, setEditingPlayerIndex] = useState<number | null>(null);
     const [deletingPlayerIndex, setDeletingPlayerIndex] = useState<number | null>(null);
@@ -223,19 +231,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       [matchId, homeTeamId, awayTeamId, fetchLineup]
     );
 
-    // Load lineup summaries
-    const loadLineupSummaries = useCallback(async () => {
-      try {
-        const homeSummary = await getLineupSummary(matchId, homeTeamId);
-        const awaySummary = await getLineupSummary(matchId, awayTeamId);
-
-        setHomeLineupSummary(homeSummary);
-        setAwayLineupSummary(awaySummary);
-      } catch (error) {
-        console.error('Error loading lineup summaries:', error);
-      }
-    }, [matchId, homeTeamId, awayTeamId, getLineupSummary]);
-
     // Load lineup data when component mounts or team changes
     useEffect(() => {
       let isMounted = true;
@@ -252,23 +247,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
         isMounted = false;
       };
     }, [selectedTeam, handleLoadLineup]);
-
-    // Load lineup summaries when component mounts
-    useEffect(() => {
-      let isMounted = true;
-
-      const loadSummaries = async () => {
-        if (isMounted) {
-          await loadLineupSummaries();
-        }
-      };
-
-      loadSummaries();
-
-      return () => {
-        isMounted = false;
-      };
-    }, [loadLineupSummaries]);
 
     const handleSaveLineup = async (isHome: boolean) => {
       try {
@@ -288,9 +266,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           team_id: currentTeamId,
           is_home_team: isHome,
         });
-
-        // Refresh summaries
-        await loadLineupSummaries();
 
         // Show success message
         showToast.success('Sestava byla úspěšně uložena!');
@@ -365,7 +340,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
             setAwayFormData(emptyFormData);
           }
 
-          await loadLineupSummaries();
           onDeleteModalClose();
           alert('Sestava byla vymazána (neexistovala v databázi)');
           return;
@@ -388,7 +362,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           setAwayFormData(emptyFormData);
         }
 
-        await loadLineupSummaries();
         onDeleteModalClose();
       } catch (error: unknown) {
         console.error('Error deleting lineup:', error);
@@ -440,6 +413,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
               },
               true
             ); // Skip validation for automatic lineup creation
+
             showToast.success('Sestava byla automaticky vytvořena');
 
             // Show validation warnings for incomplete lineup
@@ -616,6 +590,27 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       return coaches;
     };
 
+    // Calculate summary from local form data
+    const calculateLocalSummary = useCallback((formData: LineupFormData): LineupSummary => {
+      const goalkeepers = formData.players.filter((p) => p.position === 'goalkeeper').length;
+      const fieldPlayers = formData.players.filter((p) => p.position === 'field_player').length;
+      const coaches = formData.coaches.length;
+      const totalPlayers = goalkeepers + fieldPlayers;
+
+      return {
+        total_players: totalPlayers,
+        goalkeepers,
+        field_players: fieldPlayers,
+        coaches,
+        is_valid:
+          goalkeepers >= 1 &&
+          goalkeepers <= 2 &&
+          fieldPlayers >= 6 &&
+          fieldPlayers <= 13 &&
+          coaches <= 3,
+      };
+    }, []);
+
     const getLineupSummaryDisplay = (summary: LineupSummary | null, teamName: string) => {
       if (!summary) {
         return <div className="text-gray-500 text-sm">Žádná sestava</div>;
@@ -649,7 +644,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           case 'name':
             return getMemberName(player?.member_id || `${t.unknownPlayer}`);
           case 'position':
-            return player.position === PlayerPosition.GOALKEEPER ? t.goalkeepers : t.players;
+            return player.position === PlayerPosition.GOALKEEPER ? t.goalkeeper : t.player;
           case 'jersey_number':
             return player.jersey_number || '-';
           case 'goals':
@@ -692,15 +687,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
             return cellValue;
         }
       },
-      [
-        currentFormData.players,
-        getMemberName,
-        handleEditPlayer,
-        handleDeletePlayer,
-        t.goalkeepers,
-        t.players,
-        t.unknownPlayer,
-      ]
+      [currentFormData.players, getMemberName, handleEditPlayer, handleDeletePlayer, t]
     );
 
     const renderCoachCell = React.useCallback(
@@ -757,7 +744,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
             titleSize={4}
             isSelected={selectedTeam === TeamTypes.HOME}
           >
-            {getLineupSummaryDisplay(homeLineupSummary, homeTeamName)}
+            {getLineupSummaryDisplay(calculateLocalSummary(homeFormData), homeTeamName)}
           </UnifiedCard>
           <UnifiedCard
             onPress={() => setSelectedTeam(TeamTypes.AWAY)}
@@ -765,7 +752,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
             titleSize={4}
             isSelected={selectedTeam === TeamTypes.AWAY}
           >
-            {getLineupSummaryDisplay(awayLineupSummary, awayTeamName)}
+            {getLineupSummaryDisplay(calculateLocalSummary(awayFormData), awayTeamName)}
           </UnifiedCard>
         </div>
 
@@ -868,6 +855,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           teamName={currentTeamName}
           clubId={currentTeamClubId || undefined}
           currentLineupPlayers={currentFormData.players}
+          onMemberCreated={onMemberCreated}
         />
 
         {/* Player Edit Modal */}

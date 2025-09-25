@@ -10,6 +10,7 @@ export interface LineupManagerProps {
   members: Member[];
   categoryId: string;
   onClose?: () => void;
+  onMemberCreated?: () => void; // Callback when a new member is created
 }
 
 export interface LineupManagerRef {
@@ -26,4 +27,5 @@ export interface LineupPlayerSelectionModalProps {
   teamName?: string;
   clubId?: string;
   currentLineupPlayers?: LineupPlayerFormData[];
+  onMemberCreated?: () => void; // Callback when a new member is created
 }

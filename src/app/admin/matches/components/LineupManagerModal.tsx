@@ -10,6 +10,7 @@ interface LineupManagerModalProps {
   onClose: () => void;
   selectedMatch: Match | null;
   members: Member[];
+  onMemberCreated?: () => void; // Callback when a new member is created
 }
 
 export default function LineupManagerModal({
@@ -17,6 +18,7 @@ export default function LineupManagerModal({
   onClose,
   selectedMatch,
   members,
+  onMemberCreated,
 }: LineupManagerModalProps) {
   const lineupManagerRef = useRef<LineupManagerRef>(null);
   const t = translations.lineupManager;
@@ -32,6 +34,7 @@ export default function LineupManagerModal({
     members: members,
     categoryId: selectedMatch.category_id,
     onClose: onClose,
+    onMemberCreated: onMemberCreated,
     ref: lineupManagerRef,
   };
 

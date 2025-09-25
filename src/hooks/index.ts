@@ -43,4 +43,6 @@ export * from './useTeamClub';
 export * from './useTeamClubId';
 export * from './useUnifiedPlayers';
 export * from './useExternalPlayerCreation';
+export * from './useMembers';
+export * from './useMemberClubRelationships';
 export * from './useLineupManager';

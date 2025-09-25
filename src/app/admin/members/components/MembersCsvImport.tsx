@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, {useState, useCallback} from 'react';
 import {
   Modal,
   ModalContent,
@@ -6,20 +6,21 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Checkbox } from "@heroui/checkbox";
-import { Badge } from "@heroui/badge";
-import { 
-  DocumentArrowUpIcon, 
+} from '@heroui/modal';
+import {Button} from '@heroui/button';
+import {Input} from '@heroui/input';
+import {Select, SelectItem} from '@heroui/select';
+import {Checkbox} from '@heroui/checkbox';
+import {Badge} from '@heroui/badge';
+import {
+  DocumentArrowUpIcon,
   XMarkIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon
-} from "@heroicons/react/24/outline";
-import { createClient } from "@/utils/supabase/client";
-import { translations } from "@/lib/translations";
+  CheckCircleIcon,
+} from '@heroicons/react/24/outline';
+import {createClient} from '@/utils/supabase/client';
+import {translations} from '@/lib/translations';
+import {getMemberFunctionOptions} from '@/enums';
 
 interface CsvMember {
   regNumber: string;
@@ -38,16 +39,14 @@ interface MembersCsvImportProps {
   onImportComplete: () => void;
   categories: Record<string, string>;
   sexOptions: Record<string, string>;
-  functionOptions: Record<string, string>;
 }
 
-export default function MembersCsvImport({ 
-  onImportComplete, 
-  categories, 
-  sexOptions, 
-  functionOptions 
+export default function MembersCsvImport({
+  onImportComplete,
+  categories,
+  sexOptions,
 }: MembersCsvImportProps) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {isOpen, onOpen, onClose} = useDisclosure();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<CsvMember[]>([]);
   const [importing, setImporting] = useState(false);
@@ -63,7 +62,7 @@ export default function MembersCsvImport({
     reader.onload = (e) => {
       const text = e.target?.result as string;
       const lines = text.split('\n');
-      
+
       if (lines.length < 2) {
         alert('CSV soubor je prázdný nebo neobsahuje data');
         return;
@@ -72,22 +71,22 @@ export default function MembersCsvImport({
       // Detect separator (comma or semicolon)
       const firstLine = lines[0];
       const separator = firstLine.includes(';') ? ';' : ',';
-      
+
       console.log('🔍 Detected CSV separator:', separator);
 
       // Parse header and data
-      const header = firstLine.split(separator).map(h => h.trim().toLowerCase());
+      const header = firstLine.split(separator).map((h) => h.trim().toLowerCase());
       const data: CsvMember[] = [];
 
       for (let i = 1; i < lines.length; i++) {
         if (lines[i].trim()) {
-          const values = lines[i].split(separator).map(v => v.trim());
+          const values = lines[i].split(separator).map((v) => v.trim());
           if (values.length >= 4) {
             data.push({
               regNumber: values[0] || '',
               surname: values[1] || '',
               firstName: values[2] || '',
-              dateOfBirth: values[3] || ''
+              dateOfBirth: values[3] || '',
             });
           }
         }
@@ -99,18 +98,21 @@ export default function MembersCsvImport({
     reader.readAsText(csvFile);
   }, []);
 
-  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (!selectedFile) return;
+  const handleFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFile = event.target.files?.[0];
+      if (!selectedFile) return;
 
-    if (!selectedFile.name.endsWith('.csv')) {
-      alert('Prosím vyberte CSV soubor');
-      return;
-    }
+      if (!selectedFile.name.endsWith('.csv')) {
+        alert('Prosím vyberte CSV soubor');
+        return;
+      }
 
-    setFile(selectedFile);
-    parseCsvFile(selectedFile);
-  }, [parseCsvFile]);
+      setFile(selectedFile);
+      parseCsvFile(selectedFile);
+    },
+    [parseCsvFile]
+  );
 
   const handleImport = useCallback(async () => {
     if (!preview.length) return;
@@ -121,7 +123,7 @@ export default function MembersCsvImport({
     const result: ImportResult = {
       success: 0,
       failed: 0,
-      errors: []
+      errors: [],
     };
 
     for (const member of preview) {
@@ -147,27 +149,29 @@ export default function MembersCsvImport({
         }
 
         // Insert member
-        const { error } = await supabase
-          .from('members')
-          .insert({
-            registration_number: member.regNumber || undefined,
-            name: member.firstName,
-            surname: member.surname,
-            date_of_birth: parsedDate, // Can be null if not provided
-            category: defaultCategory,
-            sex: defaultSex,
-            functions: defaultFunctions
-          });
+        const {error} = await supabase.from('members').insert({
+          registration_number: member.regNumber || undefined,
+          name: member.firstName,
+          surname: member.surname,
+          date_of_birth: parsedDate, // Can be null if not provided
+          category: defaultCategory,
+          sex: defaultSex,
+          functions: defaultFunctions,
+        });
 
         if (error) {
           result.failed++;
-          result.errors.push(`Chyba při importu ${member.surname} ${member.firstName}: ${error.message}`);
+          result.errors.push(
+            `Chyba při importu ${member.surname} ${member.firstName}: ${error.message}`
+          );
         } else {
           result.success++;
         }
       } catch (error: any) {
         result.failed++;
-        result.errors.push(`Chyba při importu ${member.surname} ${member.firstName}: ${error.message}`);
+        result.errors.push(
+          `Chyba při importu ${member.surname} ${member.firstName}: ${error.message}`
+        );
       }
     }
 
@@ -215,7 +219,8 @@ export default function MembersCsvImport({
                   placeholder="Vyberte CSV soubor"
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  CSV musí obsahovat sloupce: regNumber, surname, firstName, dateOfBirth<br/>
+                  CSV musí obsahovat sloupce: regNumber, surname, firstName, dateOfBirth
+                  <br />
                   Podporované oddělovače: čárka (,) nebo středník (;)
                 </p>
               </div>
@@ -236,7 +241,9 @@ export default function MembersCsvImport({
                   <Select
                     label="Výchozí pohlaví"
                     selectedKeys={[defaultSex]}
-                    onSelectionChange={(keys) => setDefaultSex(Array.from(keys)[0] as 'male' | 'female')}
+                    onSelectionChange={(keys) =>
+                      setDefaultSex(Array.from(keys)[0] as 'male' | 'female')
+                    }
                   >
                     {Object.entries(sexOptions).map(([key, value]) => (
                       <SelectItem key={key}>{value}</SelectItem>
@@ -248,19 +255,19 @@ export default function MembersCsvImport({
                       Výchozí funkce
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {Object.entries(functionOptions).map(([key, value]) => (
+                      {getMemberFunctionOptions().map(({value, label}) => (
                         <Checkbox
-                          key={key}
-                          isSelected={defaultFunctions.includes(key)}
+                          key={value}
+                          isSelected={defaultFunctions.includes(value)}
                           onValueChange={(checked) => {
                             if (checked) {
-                              setDefaultFunctions([...defaultFunctions, key]);
+                              setDefaultFunctions([...defaultFunctions, value]);
                             } else {
-                              setDefaultFunctions(defaultFunctions.filter(f => f !== key));
+                              setDefaultFunctions(defaultFunctions.filter((f) => f !== value));
                             }
                           }}
                         >
-                          {value}
+                          {label}
                         </Checkbox>
                       ))}
                     </div>
@@ -271,9 +278,7 @@ export default function MembersCsvImport({
               {/* Preview */}
               {preview.length > 0 && (
                 <div>
-                  <h4 className="text-lg font-medium mb-3">
-                    Náhled dat ({preview.length} členů)
-                  </h4>
+                  <h4 className="text-lg font-medium mb-3">Náhled dat ({preview.length} členů)</h4>
                   <div className="max-h-60 overflow-y-auto border rounded-lg">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
@@ -301,11 +306,13 @@ export default function MembersCsvImport({
 
               {/* Import Result */}
               {importResult && (
-                <div className={`p-4 rounded-lg ${
-                  importResult.failed === 0 
-                    ? 'bg-green-50 border border-green-200' 
-                    : 'bg-yellow-50 border border-yellow-200'
-                }`}>
+                <div
+                  className={`p-4 rounded-lg ${
+                    importResult.failed === 0
+                      ? 'bg-green-50 border border-green-200'
+                      : 'bg-yellow-50 border border-yellow-200'
+                  }`}
+                >
                   <div className="flex items-center gap-2 mb-2">
                     {importResult.failed === 0 ? (
                       <CheckCircleIcon className="w-5 h-5 text-green-600" />
@@ -316,7 +323,7 @@ export default function MembersCsvImport({
                       Import dokončen: {importResult.success} úspěšných, {importResult.failed} chyb
                     </span>
                   </div>
-                  
+
                   {importResult.errors.length > 0 && (
                     <div className="mt-3">
                       <h5 className="font-medium text-sm mb-2">Chyby:</h5>
@@ -338,8 +345,8 @@ export default function MembersCsvImport({
               Zavřít
             </Button>
             {preview.length > 0 && !importResult && (
-              <Button 
-                color="primary" 
+              <Button
+                color="primary"
                 onPress={handleImport}
                 isLoading={importing}
                 startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
@@ -348,8 +355,8 @@ export default function MembersCsvImport({
               </Button>
             )}
             {importResult && importResult.success > 0 && (
-              <Button 
-                color="success" 
+              <Button
+                color="success"
                 onPress={handleImportComplete}
                 startContent={<CheckCircleIcon className="w-4 h-4" />}
               >

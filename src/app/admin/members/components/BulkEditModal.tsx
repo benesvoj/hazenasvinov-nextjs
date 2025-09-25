@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Modal,
   ModalContent,
@@ -9,9 +9,10 @@ import {
   Select,
   SelectItem,
   Checkbox,
-} from "@heroui/react";
-import { Category } from "@/types";
-import { GenderType } from "@/constants";
+} from '@heroui/react';
+import {Category} from '@/types';
+import {getMemberFunctionOptions} from '@/enums';
+import {GenderType} from '@/constants';
 interface BulkEditFormData {
   sex: GenderType;
   category: string;
@@ -26,7 +27,6 @@ interface BulkEditModalProps {
   formData: BulkEditFormData;
   setFormData: React.Dispatch<React.SetStateAction<BulkEditFormData>>;
   categories: Category[];
-  functionOptions: Record<string, string>;
   isLoading: boolean;
 }
 
@@ -38,20 +38,16 @@ export default function BulkEditModal({
   formData,
   setFormData,
   categories,
-  functionOptions,
   isLoading,
 }: BulkEditModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
       <ModalContent>
-        <ModalHeader>
-          Hromadná úprava členů ({selectedCount} vybráno)
-        </ModalHeader>
+        <ModalHeader>Hromadná úprava členů ({selectedCount} vybráno)</ModalHeader>
         <ModalBody>
           <div className="space-y-6">
             <div className="text-sm text-gray-600">
-              Vyberte pole, která chcete upravit. Prázdná pole zůstanou beze
-              změny.
+              Vyberte pole, která chcete upravit. Prázdná pole zůstanou beze změny.
             </div>
 
             {/* Row 1: Sex and Category */}
@@ -64,13 +60,12 @@ export default function BulkEditModal({
                 <Select
                   selectedKeys={formData.sex ? [formData.sex] : []}
                   onSelectionChange={(keys) => {
-                    const newSex = Array.from(keys)[0] as
-                      GenderType;
+                    const newSex = Array.from(keys)[0] as GenderType;
                     setFormData((prev) => ({
                       ...prev,
                       sex: newSex,
                       // Clear category when sex changes to ensure proper filtering
-                      category: newSex !== prev.sex ? "" : prev.category,
+                      category: newSex !== prev.sex ? '' : prev.category,
                     }));
                   }}
                   placeholder="Ponechat beze změny"
@@ -99,18 +94,12 @@ export default function BulkEditModal({
                   {categories
                     .filter((category) => {
                       // Filter categories based on sex using the gender field from database
-                      if (formData.sex === "male") {
+                      if (formData.sex === 'male') {
                         // For male sex, show male and mixed categories
-                        return (
-                          category.gender === "male" ||
-                          category.gender === "mixed"
-                        );
-                      } else if (formData.sex === "female") {
+                        return category.gender === 'male' || category.gender === 'mixed';
+                      } else if (formData.sex === 'female') {
                         // For female sex, show female and mixed categories
-                        return (
-                          category.gender === "female" ||
-                          category.gender === "mixed"
-                        );
+                        return category.gender === 'female' || category.gender === 'mixed';
                       }
                       return false;
                     })
@@ -131,35 +120,29 @@ export default function BulkEditModal({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Funkce
               </label>
-              {Object.keys(functionOptions).length === 0 ? (
-                <div className="text-sm text-gray-500 p-3 bg-gray-50 rounded-lg border">
-                  Žádné funkce nejsou momentálně dostupné.
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(functionOptions).map(([key, value]) => (
-                    <Checkbox
-                      key={key}
-                      isSelected={formData.functions.includes(key)}
-                      onValueChange={(checked) => {
-                        if (checked) {
-                          setFormData((prev) => ({
-                            ...prev,
-                            functions: [...prev.functions, key],
-                          }));
-                        } else {
-                          setFormData((prev) => ({
-                            ...prev,
-                            functions: prev.functions.filter((f) => f !== key),
-                          }));
-                        }
-                      }}
-                    >
-                      {value}
-                    </Checkbox>
-                  ))}
-                </div>
-              )}
+              <div className="flex flex-wrap gap-2">
+                {getMemberFunctionOptions().map(({value, label}) => (
+                  <Checkbox
+                    key={value}
+                    isSelected={formData.functions.includes(value)}
+                    onValueChange={(checked) => {
+                      if (checked) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          functions: [...prev.functions, value],
+                        }));
+                      } else {
+                        setFormData((prev) => ({
+                          ...prev,
+                          functions: prev.functions.filter((f) => f !== value),
+                        }));
+                      }
+                    }}
+                  >
+                    {label}
+                  </Checkbox>
+                ))}
+              </div>
               <p className="text-sm text-gray-500 mt-2">
                 Prázdný výběr ponechá současné funkce beze změny.
               </p>
@@ -174,11 +157,7 @@ export default function BulkEditModal({
             color="primary"
             onPress={onSubmit}
             isLoading={isLoading}
-            isDisabled={
-              !formData.sex &&
-              !formData.category &&
-              formData.functions.length === 0
-            }
+            isDisabled={!formData.sex && !formData.category && formData.functions.length === 0}
           >
             Uložit změny
           </Button>

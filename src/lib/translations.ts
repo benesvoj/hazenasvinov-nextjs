@@ -521,6 +521,7 @@ export const translations = {
     listOfPlayers: 'Seznam hráčů',
     listOfCoaches: 'Seznam trenérů',
     players: 'Hráči',
+    player: 'Hráč',
     coaches: 'Trenéři',
     lineup: 'Sestava',
     addPlayer: 'Přidat hráče',
@@ -533,6 +534,7 @@ export const translations = {
     editCoach: 'Upravit trenéra',
     deleteCoach: 'Odebrat trenéra',
     goalkeepers: 'Brankáři',
+    goalkeeper: 'Brankář',
     unknownPlayer: 'Neznámý hráč',
     playerModal: {
       titleEdit: 'Upravit hráče',

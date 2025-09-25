@@ -21,6 +21,7 @@ export default function UnifiedPlayerManager({
   categoryId,
   teamName,
   excludePlayerIds = [],
+  onMemberCreated,
 }: UnifiedPlayerManagerProps) {
   const {searchPlayers, getPlayersByClub, loading, error} = useUnifiedPlayers();
 
@@ -156,6 +157,11 @@ export default function UnifiedPlayerManager({
     // Select the new player
     if (onPlayerSelected) {
       onPlayerSelected(newPlayer);
+    }
+
+    // Notify parent component to refresh member list
+    if (onMemberCreated) {
+      onMemberCreated();
     }
   };
 
@@ -335,6 +341,7 @@ export default function UnifiedPlayerManager({
         onClose={() => setShowCreateMemberModal(false)}
         onMemberCreated={handleMemberCreated}
         categoryId={categoryId}
+        clubId={clubId}
       />
 
       {/* Create External Player Modal */}

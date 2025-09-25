@@ -1,6 +1,4 @@
-import {Category} from './category';
-
-type CategoryProps = {
+export type CategoryProps = {
   id: string;
   name: string;
   description?: string;
@@ -9,7 +7,7 @@ type CategoryProps = {
   route?: string;
 };
 
-type SeasonProps = {
+export type SeasonProps = {
   id: string;
   name: string;
   valid_from: string;
@@ -18,7 +16,7 @@ type SeasonProps = {
   updated_at: string;
 };
 
-type SupabaseUser = {
+export type SupabaseUser = {
   id: string;
   email: string;
   updated_at: string;
@@ -33,7 +31,7 @@ type SupabaseUser = {
   email_confirmed_at?: string;
 };
 
-type ColumnType = {
+export type ColumnType = {
   key: string;
   label: React.ReactNode;
   // Add other properties if they exist
@@ -61,30 +59,4 @@ export interface ClubConfig {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-}
-
-export type {CategoryProps, SeasonProps, SupabaseUser, ColumnType};
-
-export interface MemberFunction {
-  id: string; // Can be either UUID or simple text ID like 'func_player'
-  name: string;
-  display_name: string;
-  description?: string;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface MembersListTabProps {
-  members: import('@/types/member').Member[];
-  categoriesData: Category[] | null;
-  functionOptions: Record<string, string>;
-  sexOptions: Record<string, string>;
-}
-
-export interface MembersStatisticTabProps {
-  members: import('@/types/member').Member[];
-  categoriesData: Category[] | null;
-  functionOptions: Record<string, string>;
 }

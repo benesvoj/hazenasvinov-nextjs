@@ -3,112 +3,45 @@
 import {useState, useEffect} from 'react';
 import {UnifiedModal} from '@/components';
 import {Input, Select, SelectItem} from '@heroui/react';
-import {createClient} from '@/utils/supabase/client';
-import {showToast} from '@/components';
+import {useMembers} from '@/hooks';
 import {translations} from '@/lib/translations';
-
-interface CreateMemberModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onMemberCreated: (member: {
-    id: string;
-    name: string;
-    surname: string;
-    registration_number: string;
-  }) => void;
-  categoryId?: string;
-}
+import {CreateMemberModalProps, MemberFormData} from '@/types';
+import {Genders, MemberFunction} from '@/enums';
 
 export default function CreateMemberModal({
   isOpen,
   onClose,
   onMemberCreated,
   categoryId,
+  clubId,
 }: CreateMemberModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<MemberFormData>({
     name: '',
     surname: '',
     registration_number: '',
     date_of_birth: '',
-    sex: 'male' as 'male' | 'female',
-    functions: ['player'] as string[],
+    sex: Genders.MALE,
+    functions: [MemberFunction.PLAYER],
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const t = translations.createMemberModal;
-
-  const supabase = createClient();
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Jméno je povinné';
-    }
-    if (!formData.surname.trim()) {
-      newErrors.surname = 'Příjmení je povinné';
-    }
-    if (!formData.registration_number.trim()) {
-      newErrors.registration_number = 'Registrační číslo je povinné';
-    }
-    if (!formData.date_of_birth) {
-      newErrors.date_of_birth = 'Datum narození je povinné';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const {isLoading, errors, createMember, clearFieldError, reset} = useMembers();
 
   const handleSave = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
     try {
-      const {data, error} = await supabase
-        .from('members')
-        .insert({
-          name: formData.name.trim(),
-          surname: formData.surname.trim(),
-          registration_number: formData.registration_number.trim(),
-          date_of_birth: formData.date_of_birth,
-          sex: formData.sex,
-          functions: formData.functions,
-          category_id: categoryId,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating member:', error);
-        showToast.danger(`Chyba při vytváření člena: ${error.message}`);
-        return;
-      }
-
-      showToast.success('Člen byl úspěšně vytvořen');
-      onMemberCreated({
-        id: data.id,
-        name: data.name,
-        surname: data.surname,
-        registration_number: data.registration_number,
-      });
+      const result = await createMember(formData, categoryId, clubId);
+      onMemberCreated(result);
       onClose();
     } catch (error) {
+      // Error handling is done in the hook
       console.error('Error creating member:', error);
-      showToast.danger('Chyba při vytváření člena');
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const updateField = (field: string, value: any) => {
     setFormData((prev) => ({...prev, [field]: value}));
     // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({...prev, [field]: ''}));
-    }
+    clearFieldError(field);
   };
 
   // Reset form when modal opens
@@ -119,12 +52,12 @@ export default function CreateMemberModal({
         surname: '',
         registration_number: '',
         date_of_birth: '',
-        sex: 'male',
-        functions: ['player'],
+        sex: Genders.MALE,
+        functions: [MemberFunction.PLAYER],
       });
-      setErrors({});
+      reset();
     }
-  }, [isOpen]);
+  }, [isOpen, reset]);
 
   return (
     <UnifiedModal
@@ -142,13 +75,16 @@ export default function CreateMemberModal({
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label={t.name}
-            value={formData.name}
-            onChange={(e) => updateField('name', e.target.value)}
+            label={t.registrationNumber}
+            value={formData.registration_number}
+            onChange={(e) => updateField('registration_number', e.target.value)}
             isRequired
-            isInvalid={!!errors.name}
-            errorMessage={errors.name}
+            isInvalid={!!errors.registration_number}
+            errorMessage={errors.registration_number}
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <Input
             label={t.surname}
             value={formData.surname}
@@ -157,16 +93,16 @@ export default function CreateMemberModal({
             isInvalid={!!errors.surname}
             errorMessage={errors.surname}
           />
-        </div>
 
-        <Input
-          label={t.registrationNumber}
-          value={formData.registration_number}
-          onChange={(e) => updateField('registration_number', e.target.value)}
-          isRequired
-          isInvalid={!!errors.registration_number}
-          errorMessage={errors.registration_number}
-        />
+          <Input
+            label={t.name}
+            value={formData.name}
+            onChange={(e) => updateField('name', e.target.value)}
+            isRequired
+            isInvalid={!!errors.name}
+            errorMessage={errors.name}
+          />
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <Input
@@ -181,14 +117,14 @@ export default function CreateMemberModal({
             label={t.sex}
             value={formData.sex}
             onSelectionChange={(keys) => {
-              const selectedKey = Array.from(keys)[0] as string;
+              const selectedKey = Array.from(keys)[0] as Genders;
               updateField('sex', selectedKey);
             }}
           >
-            <SelectItem key="male" textValue="Muž">
+            <SelectItem key={Genders.MALE} textValue="Muž">
               Muž
             </SelectItem>
-            <SelectItem key="female" textValue="Žena">
+            <SelectItem key={Genders.FEMALE} textValue="Žena">
               Žena
             </SelectItem>
           </Select>
