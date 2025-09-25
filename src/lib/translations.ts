@@ -553,6 +553,16 @@ export const translations = {
   unifiedPlayerManager: {
     loading: 'Načítání hráčů...',
     error: 'Chyba při načítání hráčů',
+    createMember: 'Vytvořit nového člena',
+  },
+  createMemberModal: {
+    title: 'Vytvořit nového člena',
+    name: 'Jméno',
+    surname: 'Příjmení',
+    registrationNumber: 'Registrační číslo',
+    dateOfBirth: 'Datum narození',
+    sex: 'Pohlaví',
+    functions: 'Funkce',
   },
   playerPosition: {
     goalkeeper: 'Brankář',

@@ -257,25 +257,14 @@ export default function UnifiedPlayerManager({
 
       {/* Create Player Button - Different for internal vs external */}
       <div className="flex justify-end">
-        {!showExternalPlayers ? (
-          <Button
-            color="primary"
-            variant="bordered"
-            startContent={<PlusIcon className="w-4 h-4" />}
-            onPress={() => setShowCreateMemberModal(true)}
-          >
-            Vytvořit nového člena
-          </Button>
-        ) : (
-          <Button
-            color="primary"
-            variant="bordered"
-            startContent={<PlusIcon className="w-4 h-4" />}
-            onPress={() => setShowCreateExternalPlayerModal(true)}
-          >
-            Vytvořit externího hráče
-          </Button>
-        )}
+        <Button
+          color="primary"
+          variant="bordered"
+          startContent={<PlusIcon className="w-4 h-4" />}
+          onPress={() => setShowCreateMemberModal(true)}
+        >
+          {translations.unifiedPlayerManager.createMember}
+        </Button>
       </div>
 
       {/* Players List */}
