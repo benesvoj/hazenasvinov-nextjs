@@ -11,10 +11,9 @@ import {
   Checkbox,
 } from '@heroui/react';
 import {Category} from '@/types';
-import {getMemberFunctionOptions} from '@/enums';
-import {GenderType} from '@/constants';
+import {getMemberFunctionOptions, Genders} from '@/enums';
 interface BulkEditFormData {
-  sex: GenderType;
+  sex: Genders;
   category: string;
   functions: string[];
 }
@@ -60,7 +59,7 @@ export default function BulkEditModal({
                 <Select
                   selectedKeys={formData.sex ? [formData.sex] : []}
                   onSelectionChange={(keys) => {
-                    const newSex = Array.from(keys)[0] as GenderType;
+                    const newSex = Array.from(keys)[0] as Genders;
                     setFormData((prev) => ({
                       ...prev,
                       sex: newSex,

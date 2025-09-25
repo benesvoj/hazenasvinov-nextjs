@@ -573,4 +573,12 @@ export const translations = {
   playerRoles: {
     captain: 'Kapitán',
   },
+  common: {
+    gender: {
+      male: 'Muž',
+      female: 'Žena',
+      empty: 'Ostatní',
+      mixed: 'Smíšený',
+    },
+  },
 } as const;

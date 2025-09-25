@@ -1,4 +1,4 @@
-import {GenderType} from '@/constants';
+import {Genders} from '@/enums';
 /**
  * Enhanced Category interface for the new category system with URL-friendly routing.
  *
@@ -10,7 +10,7 @@ import {GenderType} from '@/constants';
  * @property name - Display name in Czech (e.g., 'Muži', 'Ženy')
  * @property description - Optional detailed description
  * @property age_group - Age classification ('adults', 'juniors', 'youth', 'kids')
- * @property gender - Gender classification ('male', 'female', 'mixed')
+ * @property gender - Gender classification (Genders enum)
  * @property is_active - Whether category is currently active
  * @property sort_order - Display order in UI
  * @property created_at - Creation timestamp
@@ -22,7 +22,7 @@ export interface Category {
   name: string;
   description?: string;
   age_group?: string;
-  gender?: GenderType;
+  gender?: Genders;
   is_active?: boolean;
   sort_order?: number;
   created_at?: string;

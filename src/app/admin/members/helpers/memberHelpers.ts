@@ -1,5 +1,5 @@
 import {Category} from '@/types';
-import {GenderType} from '@/constants';
+import {Genders} from '@/enums';
 
 /**
  * Get the display name for a category code
@@ -70,7 +70,7 @@ export const filterMembers = (
   members: any[],
   searchTerm: string,
   filters: {
-    sex: GenderType;
+    sex: Genders;
     category: string;
     function: string;
   }

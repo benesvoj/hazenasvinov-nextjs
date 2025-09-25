@@ -27,7 +27,6 @@ import {useDebounce} from '@/hooks/useDebounce';
 import MemberFormModal from './MemberFormModal';
 import MembersCsvImport from './MembersCsvImport';
 import BulkEditModal from './BulkEditModal';
-import {GenderType} from '@/constants';
 import {getMemberFunctionOptions, Genders, MemberFunction} from '@/enums';
 
 interface MembersListTabProps {
@@ -44,7 +43,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
   // Debounce search term to improve performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [filters, setFilters] = useState({
-    sex: 'empty' as GenderType,
+    sex: Genders.EMPTY,
     category_id: '',
     function: '',
   });
@@ -74,7 +73,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
   const [bulkEditFormData, setBulkEditFormData] = useState({
-    sex: '' as GenderType,
+    sex: Genders.EMPTY,
     category: '',
     functions: [] as string[],
   });
@@ -128,7 +127,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     }
 
     // Filter by sex
-    if (filters.sex && filters.sex !== 'empty') {
+    if (filters.sex && filters.sex !== Genders.EMPTY) {
       filtered = filtered.filter((member) => member.sex === filters.sex);
     }
 
@@ -251,7 +250,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       // Clear selection and form
       setSelectedMembers(new Set());
       setBulkEditFormData({
-        sex: 'empty',
+        sex: Genders.EMPTY,
         category: '',
         functions: [],
       });
@@ -275,7 +274,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
   const closeBulkEditModal = () => {
     setSelectedMembers(new Set());
     setBulkEditFormData({
-      sex: 'empty',
+      sex: Genders.EMPTY,
       category: '',
       functions: [],
     });
@@ -587,12 +586,12 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
                   <Select
                     aria-label="Filter by gender"
                     placeholder="Všechna pohlaví"
-                    selectedKeys={filters.sex && filters.sex !== 'empty' ? [filters.sex] : []}
+                    selectedKeys={filters.sex && filters.sex !== Genders.EMPTY ? [filters.sex] : []}
                     onSelectionChange={(keys) => {
-                      const selectedKey = Array.from(keys)[0] as GenderType;
+                      const selectedKey = Array.from(keys)[0] as Genders;
                       setFilters((prev) => ({
                         ...prev,
-                        sex: selectedKey || 'empty',
+                        sex: selectedKey || Genders.EMPTY,
                       }));
                     }}
                     className="w-full"
@@ -657,7 +656,9 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
                     <Button
                       variant="light"
                       size="sm"
-                      onPress={() => setFilters({sex: 'empty', category_id: '', function: ''})}
+                      onPress={() =>
+                        setFilters({sex: Genders.EMPTY, category_id: '', function: ''})
+                      }
                       className="w-full sm:w-auto"
                       aria-label="Clear all filters"
                     >

@@ -5,10 +5,16 @@ import {useAppData} from '@/contexts/AppDataContext';
 import {Tabs, Tab} from '@heroui/react';
 import MembersStatisticTab from './components/MembersStatisticTab';
 import MembersListTab from './components/MembersListTab';
-import {GENDER_OPTIONS} from '@/constants';
+import {getGenderOptions} from '@/enums';
 
 export default function MembersAdminPage() {
-  const genderOptions = GENDER_OPTIONS;
+  const genderOptions = getGenderOptions().reduce(
+    (acc, {value, label}) => {
+      acc[value] = label;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
 
   // State for tabs
   const [activeTab, setActiveTab] = useState('members');

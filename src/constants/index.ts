@@ -3,7 +3,6 @@
  */
 export * from './environment';
 export * from './roleOptions';
-export * from './gender';
 export * from './posts';
 export * from './months';
 export * from './match';
