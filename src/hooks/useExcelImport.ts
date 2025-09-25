@@ -1,5 +1,6 @@
 import {useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
+import {CompetitionTypes} from '@/enums';
 
 interface ExcelMatch {
   date: string;
@@ -235,7 +236,7 @@ export const useExcelImport = () => {
             home_team_id: homeTeam.id,
             away_team_id: awayTeam.id,
             venue: '', // Default empty venue
-            competition: 'league', // Default competition type
+            competition: CompetitionTypes.LEAGUE, // Default competition type
             is_home: false, // Default value
             status: 'upcoming', // Default status
             matchweek: matchweek, // Calculated from date
