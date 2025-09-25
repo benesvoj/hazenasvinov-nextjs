@@ -7,20 +7,14 @@ import {
   ModalFooter,
   useDisclosure,
 } from '@heroui/modal';
-import {Button} from '@heroui/button';
-import {Input} from '@heroui/input';
-import {Select, SelectItem} from '@heroui/select';
-import {Checkbox} from '@heroui/checkbox';
-import {Badge} from '@heroui/badge';
+import {Select, SelectItem, Button, Input, Checkbox} from '@heroui/react';
 import {
   DocumentArrowUpIcon,
-  XMarkIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import {createClient} from '@/utils/supabase/client';
-import {translations} from '@/lib/translations';
-import {getMemberFunctionOptions} from '@/enums';
+import {Genders, getMemberFunctionOptions, MemberFunction, getGenderOptions} from '@/enums';
 
 interface CsvMember {
   regNumber: string;
@@ -51,9 +45,9 @@ export default function MembersCsvImport({
   const [preview, setPreview] = useState<CsvMember[]>([]);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
-  const [defaultCategory, setDefaultCategory] = useState('men');
-  const [defaultSex, setDefaultSex] = useState<'male' | 'female'>('male');
-  const [defaultFunctions, setDefaultFunctions] = useState<string[]>(['player']);
+  const [defaultCategory, setDefaultCategory] = useState(Genders.MALE);
+  const [defaultSex, setDefaultSex] = useState<Genders>(Genders.MALE);
+  const [defaultFunctions, setDefaultFunctions] = useState<string[]>([MemberFunction.PLAYER]);
 
   const supabase = createClient();
 
@@ -231,7 +225,7 @@ export default function MembersCsvImport({
                   <Select
                     label="Výchozí kategorie"
                     selectedKeys={[defaultCategory]}
-                    onSelectionChange={(keys) => setDefaultCategory(Array.from(keys)[0] as string)}
+                    onSelectionChange={(keys) => setDefaultCategory(Array.from(keys)[0] as Genders)}
                   >
                     {Object.entries(categories).map(([key, value]) => (
                       <SelectItem key={key}>{value}</SelectItem>
@@ -241,12 +235,10 @@ export default function MembersCsvImport({
                   <Select
                     label="Výchozí pohlaví"
                     selectedKeys={[defaultSex]}
-                    onSelectionChange={(keys) =>
-                      setDefaultSex(Array.from(keys)[0] as 'male' | 'female')
-                    }
+                    onSelectionChange={(keys) => setDefaultSex(Array.from(keys)[0] as Genders)}
                   >
-                    {Object.entries(sexOptions).map(([key, value]) => (
-                      <SelectItem key={key}>{value}</SelectItem>
+                    {getGenderOptions().map(({value, label}) => (
+                      <SelectItem key={value}>{label}</SelectItem>
                     ))}
                   </Select>
 

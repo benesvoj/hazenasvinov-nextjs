@@ -1,19 +1,11 @@
-"use client";
+'use client';
 
-import React from "react";
-import { ProtectedRoute } from "@/components";
-import { AdminCategorySimulationProvider } from "@/contexts/AdminCategorySimulationContext";
-import {
-  AdminTopBar,
-  AdminSidebar,
-  AdminSidebarProvider,
-} from "@/app/admin/components";
+import React from 'react';
+import {ProtectedRoute} from '@/components';
+import {AdminCategorySimulationProvider} from '@/contexts/AdminCategorySimulationContext';
+import {AdminTopBar, AdminSidebar, AdminSidebarProvider} from '@/components/admin';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({children}: {children: React.ReactNode}) {
   return (
     <ProtectedRoute>
       <AdminCategorySimulationProvider>

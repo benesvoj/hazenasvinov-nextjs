@@ -1,8 +1,8 @@
 'use client';
 
-import React from "react";
-import { UnifiedSidebar } from "@/components";
-import { useAdminSidebar } from "./AdminSidebarContext";
+import React from 'react';
+import {UnifiedSidebar} from '@/components';
+import {useAdminSidebar} from './AdminSidebarContext';
 
 export const AdminSidebar = () => {
   const sidebarContext = useAdminSidebar();
@@ -15,7 +15,7 @@ export const AdminSidebar = () => {
         isMobileOpen: sidebarContext.isMobileOpen,
         setIsMobileOpen: sidebarContext.setIsMobileOpen,
         isMobile: sidebarContext.isMobile,
-        toggleSidebar: () => sidebarContext.setIsCollapsed(!sidebarContext.isCollapsed)
+        toggleSidebar: () => sidebarContext.setIsCollapsed(!sidebarContext.isCollapsed),
       }}
     />
   );

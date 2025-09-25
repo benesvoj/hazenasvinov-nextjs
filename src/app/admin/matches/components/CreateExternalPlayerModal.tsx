@@ -5,7 +5,7 @@ import {UnifiedModal} from '@/components';
 import {Input, Select, SelectItem, Checkbox} from '@heroui/react';
 import {CreateExternalPlayerModalProps, ExternalPlayerFormData} from '@/types';
 import {useExternalPlayerCreation} from '@/hooks';
-import {Genders, PlayerPosition} from '@/enums';
+import {Genders, getGenderOptions, PlayerPosition} from '@/enums';
 
 export default function CreateExternalPlayerModal({
   isOpen,
@@ -175,16 +175,16 @@ export default function CreateExternalPlayerModal({
         <div className="grid grid-cols-2 gap-4">
           <Select
             label="Pozice"
-            selectedKeys={formData.position ? [formData.position] : ['field_player']}
+            selectedKeys={formData.position ? [formData.position] : [PlayerPosition.FIELD_PLAYER]}
             onSelectionChange={(keys) => {
               const selectedKey = Array.from(keys)[0] as string;
               updateField('position', selectedKey);
             }}
           >
-            <SelectItem key="field_player" textValue="Hráč v poli">
+            <SelectItem key={PlayerPosition.FIELD_PLAYER} textValue="Hráč v poli">
               Hráč v poli
             </SelectItem>
-            <SelectItem key="goalkeeper" textValue="Brankář">
+            <SelectItem key={PlayerPosition.GOALKEEPER} textValue="Brankář">
               Brankář
             </SelectItem>
           </Select>
@@ -194,23 +194,20 @@ export default function CreateExternalPlayerModal({
             selectedKeys={formData.sex ? [formData.sex] : []}
             onSelectionChange={(keys) => {
               const selectedKey = Array.from(keys)[0] as string;
-              updateField('sex', selectedKey as 'male' | 'female');
+              updateField('sex', selectedKey as Genders);
             }}
             isRequired
             isInvalid={!!errors.sex}
             errorMessage={errors.sex}
             description={
               categoryGender
-                ? `Doporučeno podle kategorie: ${categoryGender === 'male' ? 'Muž' : 'Žena'}`
+                ? `Doporučeno podle kategorie: ${categoryGender === Genders.MALE ? 'Muž' : 'Žena'}`
                 : undefined
             }
           >
-            <SelectItem key="male" textValue="Muž">
-              Muž
-            </SelectItem>
-            <SelectItem key="female" textValue="Žena">
-              Žena
-            </SelectItem>
+            {getGenderOptions().map((option) => (
+              <SelectItem key={option.value}>{option.label}</SelectItem>
+            ))}
           </Select>
         </div>
 

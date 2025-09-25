@@ -5,18 +5,20 @@ import {Heading, HeadingLevel} from './Headings';
 
 export interface UnifiedCardProps {
   children: React.ReactNode;
-  onPress: () => void;
-  title: string;
-  titleSize: HeadingLevel;
+  onPress?: () => void;
+  title?: string;
+  titleSize?: HeadingLevel;
   isSelected?: boolean;
+  fullWidth?: boolean;
 }
 
 export default function UnifiedCard({
   children,
   onPress,
   title,
-  titleSize,
+  titleSize = 2,
   isSelected = false,
+  fullWidth = false,
 }: UnifiedCardProps) {
   const selectedClass = isSelected
     ? 'bg-primary-50 border-2 border-primary-500 shadow-md'
@@ -24,17 +26,23 @@ export default function UnifiedCard({
 
   return (
     <Card
-      isPressable
+      isPressable={!!onPress}
       onPress={onPress}
       className={`
-        transition-all duration-200 cursor-pointer
+        transition-all duration-200 ${onPress ? 'cursor-pointer' : ''}
         ${selectedClass}
+        ${fullWidth ? 'w-full' : ''}
       `}
     >
-      <CardHeader>
-        <Heading size={titleSize}>{title}</Heading>
-      </CardHeader>
-      <CardBody>{children}</CardBody>
+      {title && (
+        <CardHeader>
+          {' '}
+          <Heading size={titleSize}>{title}</Heading>
+        </CardHeader>
+      )}
+      <CardBody className={fullWidth ? 'w-full' : ''}>
+        <div className={fullWidth ? 'flex flex-col gap-2 justify-end' : ''}>{children}</div>
+      </CardBody>
     </Card>
   );
 }

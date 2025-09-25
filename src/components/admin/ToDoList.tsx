@@ -1,3 +1,5 @@
+'use client';
+
 import {Card, CardHeader, CardBody, Button, Pagination} from '@heroui/react';
 import {
   ClockIcon,

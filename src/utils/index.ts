@@ -8,3 +8,4 @@ export * from './supabase/client';
 export * from './matchQueryBuilder';
 export * from './loginLogger';
 export * from './releaseNotes';
+export * from './enumHelpers';

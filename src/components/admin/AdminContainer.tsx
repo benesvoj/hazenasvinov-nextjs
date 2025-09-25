@@ -1,7 +1,7 @@
-import { LoadingSpinner } from "@/components";
+import {LoadingSpinner, Heading, UnifiedCard} from '@/components';
 
 interface AdminContainerProps {
-  title: string;
+  title?: string;
   description?: string;
   icon?: React.ReactNode;
   children: React.ReactNode;
@@ -25,17 +25,15 @@ export function AdminContainer({
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-2">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                {icon && icon}
-                {title}
-              </h1>
-              {description && (
-                <p className="text-gray-600 dark:text-gray-400">
-                  {description}
-                </p>
+              {title && (
+                <Heading size={1}>
+                  {icon && icon}
+                  {title}
+                </Heading>
               )}
+              {description && <p className="text-gray-600 dark:text-gray-400">{description}</p>}
             </div>
-            {actions && actions}
+            {actions && <UnifiedCard fullWidth>{actions}</UnifiedCard>}
           </div>
           {children}
         </div>

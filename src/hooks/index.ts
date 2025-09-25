@@ -45,4 +45,5 @@ export * from './useUnifiedPlayers';
 export * from './useExternalPlayerCreation';
 export * from './useMembers';
 export * from './useMemberClubRelationships';
+export * from './useCategories';
 export * from './useLineupManager';

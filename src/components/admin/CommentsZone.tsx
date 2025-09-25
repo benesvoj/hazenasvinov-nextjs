@@ -1,8 +1,9 @@
+'use client';
+
 import {Card, CardHeader, CardBody, Button} from '@heroui/react';
 import {
   ChatBubbleLeftRightIcon,
   InformationCircleIcon,
-  PlusIcon,
   WrenchScrewdriverIcon,
   BugAntIcon,
   SparklesIcon,

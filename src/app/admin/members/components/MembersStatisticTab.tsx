@@ -3,7 +3,7 @@ import {Card, CardBody, CardHeader} from '@heroui/card';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@heroui/table';
 import {Badge} from '@heroui/badge';
 import {MembersStatisticTabProps} from '@/types';
-import {getMemberFunctionOptions} from '@/enums';
+import {Genders, getMemberFunctionOptions} from '@/enums';
 
 export default function MembersStatisticTab({members, categoriesData}: MembersStatisticTabProps) {
   // Statistics calculations
@@ -11,8 +11,8 @@ export default function MembersStatisticTab({members, categoriesData}: MembersSt
     if (!members.length) return null;
 
     const totalMembers = members.length;
-    const maleMembers = members.filter((m) => m.sex === 'male').length;
-    const femaleMembers = members.filter((m) => m.sex === 'female').length;
+    const maleMembers = members.filter((m) => m.sex === Genders.MALE).length;
+    const femaleMembers = members.filter((m) => m.sex === Genders.FEMALE).length;
 
     // Category statistics
     const categoryStats =

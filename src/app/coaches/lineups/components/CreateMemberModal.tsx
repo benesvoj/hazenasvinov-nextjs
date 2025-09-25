@@ -8,6 +8,7 @@ import {useFetchMembers} from '@/hooks/useFetchMembers';
 import {useMemberMetadata} from '@/hooks/useMemberMetadata';
 import {UnifiedModal} from '@/components';
 import {MemberFormData} from '@/types/memberMetadata';
+import {Genders, getGenderOptions, MemberFunction} from '@/enums';
 
 interface CreateMemberModalProps {
   isOpen: boolean;
@@ -30,8 +31,8 @@ export default function CreateMemberModal({
     surname: '',
     registration_number: '',
     date_of_birth: '',
-    sex: 'male',
-    functions: 'player',
+    sex: Genders.MALE,
+    functions: MemberFunction.PLAYER,
 
     // Contact Information
     phone: '',
@@ -135,8 +136,8 @@ export default function CreateMemberModal({
         surname: '',
         registration_number: '',
         date_of_birth: '',
-        sex: 'male',
-        functions: 'player',
+        sex: Genders.MALE,
+        functions: MemberFunction.PLAYER,
 
         // Contact Information
         phone: '',
@@ -177,8 +178,8 @@ export default function CreateMemberModal({
       surname: '',
       registration_number: '',
       date_of_birth: '',
-      sex: 'male',
-      functions: 'player',
+      sex: Genders.MALE,
+      functions: MemberFunction.PLAYER,
 
       // Contact Information
       phone: '',
@@ -263,12 +264,13 @@ export default function CreateMemberModal({
                 label="Pohlaví"
                 selectedKeys={[formData.sex]}
                 onSelectionChange={(keys) => {
-                  const sex = Array.from(keys)[0] as 'male' | 'female';
+                  const sex = Array.from(keys)[0] as Genders;
                   handleInputChange('sex', sex);
                 }}
               >
-                <SelectItem key="male">Muž</SelectItem>
-                <SelectItem key="female">Žena</SelectItem>
+                {getGenderOptions().map(({value, label}) => (
+                  <SelectItem key={value}>{label}</SelectItem>
+                ))}
               </Select>
             </div>
           </CardBody>

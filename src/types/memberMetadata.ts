@@ -1,3 +1,5 @@
+import {Genders} from '@/enums';
+
 export interface MemberMetadata {
   id: string;
   member_id: string;
@@ -36,7 +38,7 @@ export interface MemberWithMetadata {
   surname: string;
   registration_number: string;
   date_of_birth: string;
-  sex: 'male' | 'female';
+  sex: Genders;
   functions?: string;
   category_id: string;
   created_at: string;
@@ -69,7 +71,7 @@ export interface MemberFormData {
   surname: string;
   registration_number: string;
   date_of_birth: string;
-  sex: 'male' | 'female';
+  sex: Genders;
   functions: string;
 
   // Contact Information

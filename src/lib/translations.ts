@@ -580,5 +580,16 @@ export const translations = {
       empty: 'Ostatní',
       mixed: 'Smíšený',
     },
+    ageGroups: {
+      adults: 'Dospělí',
+      juniors: 'Junioři',
+      youth: 'Mládež',
+      kids: 'Děti',
+    },
+    competitionTypes: {
+      league: 'Liga',
+      league_playoff: 'Liga s playoff',
+      tournament: 'Turnaj',
+    },
   },
 } as const;

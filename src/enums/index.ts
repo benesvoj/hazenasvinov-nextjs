@@ -11,3 +11,7 @@ export * from './teamTypes';
 export * from './lineupRole';
 
 export * from './userRoles';
+
+export * from './ageGroups';
+
+export * from './competitionTypes';

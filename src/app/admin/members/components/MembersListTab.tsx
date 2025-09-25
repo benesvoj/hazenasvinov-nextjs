@@ -442,7 +442,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       case 'category':
         return getCategoryName(member.category_id);
       case 'sex':
-        return member.sex === 'male' ? 'Muž' : 'Žena';
+        return member.sex === Genders.MALE ? 'Muž' : 'Žena';
       case 'functions':
         if (!member.functions || member.functions.length === 0) {
           return <span className="text-gray-500">Žádné funkce</span>;

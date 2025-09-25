@@ -1,4 +1,5 @@
-import {Genders} from '@/enums';
+import {AgeGroups, CompetitionTypes, Genders} from '@/enums';
+import {CategorySeason} from './categorySeason';
 /**
  * Enhanced Category interface for the new category system with URL-friendly routing.
  *
@@ -21,7 +22,7 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
-  age_group?: string;
+  age_group?: AgeGroups;
   gender?: Genders;
   is_active?: boolean;
   sort_order?: number;
@@ -29,3 +30,38 @@ export interface Category {
   updated_at?: string;
   slug?: string;
 }
+
+export interface AddCategoryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAddCategory: () => void;
+  formData: Category;
+  setFormData: (data: Category) => void;
+}
+
+export interface EditCategoryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdateCategory: () => void;
+  onAddSeason: () => void;
+  onEditSeason: (categorySeason: CategorySeason) => void;
+  onRemoveSeason: (seasonId: string) => void;
+  formData: Category;
+  setFormData: (data: Category) => void;
+  categorySeasons: CategorySeason[];
+}
+
+// Old inteface from categories.tsx
+// interface Category {
+//   id: string;
+//   code: string;
+//   name: string;
+//   description?: string;
+//   age_group?: string;
+//   gender?: string;
+//   is_active: boolean;
+//   sort_order: number;
+//   created_at: string;
+//   updated_at: string;
+//   category_seasons?: CategorySeason[];
+// }

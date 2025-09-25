@@ -27,9 +27,3 @@ export const getGenderOptions = () =>
     value: value as Genders,
     label,
   }));
-
-/**
- * Legacy type for backward compatibility
- * @deprecated Use Genders enum instead
- */
-export type GenderType = keyof typeof GENDER_LABELS;

@@ -1,5 +1,8 @@
 export * from './match';
+
 export * from './category';
+export * from './categorySeason';
+
 export * from './season';
 export * from './standing';
 

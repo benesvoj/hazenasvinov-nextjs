@@ -37,6 +37,7 @@ import {
   MobileActionsMenu,
   showToast,
   ButtonWithTooltip,
+  AdminContainer,
 } from '@/components';
 import {getCategoryInfo} from '@/helpers/getCategoryInfo';
 import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
@@ -52,9 +53,8 @@ import {
 } from '@/hooks';
 import {useMatchesSeasonal} from '@/hooks/queries/useMatchQueries';
 import {useQueryClient} from '@tanstack/react-query';
-import {AdminContainer} from '../components/AdminContainer';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
-import {matchStatuses, matchStatusesKeys} from '@/constants';
+import {matchStatusesKeys} from '@/constants';
 import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
 import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
@@ -65,7 +65,7 @@ export default function MatchesAdminPage() {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
   // Use existing hooks instead of custom state and fetch functions
-  const {categories, loading: categoriesLoading, fetchCategoriesFull} = useCategories();
+  const {categories, loading: categoriesLoading, fetchCategories} = useCategories();
   const {members, loading: membersLoading, fetchMembers} = useFetchMembers();
   const {teams, loading: allTeamsLoading, fetchTeams} = useTeams();
 
@@ -280,11 +280,11 @@ export default function MatchesAdminPage() {
 
   // Initial data fetch
   useEffect(() => {
-    fetchCategoriesFull();
+    fetchCategories();
     fetchAllSeasons();
     fetchTeams();
     fetchMembers();
-  }, [fetchCategoriesFull, fetchAllSeasons, fetchTeams, fetchMembers]);
+  }, [fetchCategories, fetchAllSeasons, fetchTeams, fetchMembers]);
 
   // Set first category as default when categories are loaded
   useEffect(() => {
