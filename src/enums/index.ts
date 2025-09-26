@@ -1,17 +1,12 @@
-export * from './lineupErrorType';
+export * from './ageGroups';
+export * from './competitionTypes';
 export * from './genders';
-export * from './playerPosition';
+export * from './lineupCoachRole';
+export * from './lineupErrorType';
+export * from './lineupRole';
 export * from './memberFunction';
-
+export * from './playerPosition';
 export * from './relationshipStatus';
 export * from './relationshipType';
-
 export * from './teamTypes';
-
-export * from './lineupRole';
-
 export * from './userRoles';
-
-export * from './ageGroups';
-
-export * from './competitionTypes';

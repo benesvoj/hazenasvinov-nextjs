@@ -1,4 +1,4 @@
-import {RelationshipStatus, RelationshipType} from '@/constants';
+import {RelationshipStatus, RelationshipType} from '@/enums';
 
 export interface MemberClubRelationship {
   id: string;

@@ -21,7 +21,7 @@ import {AddCategoryModal, AddSeasonModal, EditCategoryModal, EditSeasonModal} fr
 import {DeleteConfirmationModal, AdminContainer} from '@/components';
 import {Category, CategorySeason} from '@/types';
 import {AgeGroups, Genders} from '@/enums';
-import {ageGroupOptions, genderOptions, competitionTypeOptions} from '@/utils';
+import {ageGroupsOptions, genderOptions, competitionTypeOptions} from '@/utils';
 import {getAgeGroupBadgeColor, getGenderBadgeColor} from './constants';
 import {useCategories} from '@/hooks';
 
@@ -191,7 +191,7 @@ export default function CategoriesAdminPage() {
                           variant="flat"
                           size="sm"
                         >
-                          {ageGroupOptions[category.age_group]}
+                          {ageGroupsOptions[category.age_group]}
                         </Badge>
                       ) : (
                         <span className="text-gray-400">-</span>

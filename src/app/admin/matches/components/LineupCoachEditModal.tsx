@@ -4,7 +4,7 @@ import {useState, useEffect} from 'react';
 import {UnifiedModal} from '@/components';
 import {Select, SelectItem} from '@heroui/react';
 import {LineupCoachFormData} from '@/types';
-
+import {getLineupCoachRoleOptions, LineupCoachRole} from '@/enums';
 interface LineupCoachEditModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,7 +24,7 @@ export default function LineupCoachEditModal({
 }: LineupCoachEditModalProps) {
   const [formData, setFormData] = useState<LineupCoachFormData>({
     member_id: '',
-    role: 'assistant_coach',
+    role: LineupCoachRole.ASSISTANT_COACH,
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,15 +69,11 @@ export default function LineupCoachEditModal({
           }}
           isRequired
         >
-          <SelectItem key="head_coach" textValue="Hlavní trenér">
-            Hlavní trenér
-          </SelectItem>
-          <SelectItem key="assistant_coach" textValue="Asistent trenéra">
-            Asistent trenéra
-          </SelectItem>
-          <SelectItem key="team_manager" textValue="Vedoucí týmu">
-            Vedoucí týmu
-          </SelectItem>
+          {getLineupCoachRoleOptions().map((role) => (
+            <SelectItem key={role.value} textValue={role.label}>
+              {role.label}
+            </SelectItem>
+          ))}
         </Select>
       </div>
     </UnifiedModal>

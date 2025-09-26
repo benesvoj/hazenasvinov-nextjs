@@ -1,8 +1,16 @@
 import {
-  getGenderOptions,
-  getMemberFunctionOptions,
   getAgeGroupsOptions,
   getCompetitionTypeOptions,
+  getGenderOptions,
+  getLineupCoachRoleOptions,
+  getLineupErrorTypeOptions,
+  getLineupRoleOptions,
+  getMemberFunctionOptions,
+  getPlayerPositionOptions,
+  getRelationshipStatusOptions,
+  getRelationshipTypeOptions,
+  getTeamTypesOptions,
+  getUserRolesOptions,
 } from '@/enums';
 
 /**
@@ -21,7 +29,15 @@ export const createOptionsRecord = <T extends string>(
 };
 
 // Pre-built option records for common use cases
-export const genderOptions = createOptionsRecord(getGenderOptions());
-export const memberFunctionOptions = createOptionsRecord(getMemberFunctionOptions());
-export const ageGroupOptions = createOptionsRecord(getAgeGroupsOptions());
+export const ageGroupsOptions = createOptionsRecord(getAgeGroupsOptions());
 export const competitionTypeOptions = createOptionsRecord(getCompetitionTypeOptions());
+export const genderOptions = createOptionsRecord(getGenderOptions());
+export const lineupCoachRoleOptions = createOptionsRecord(getLineupCoachRoleOptions());
+export const lineupErrorTypeOptions = createOptionsRecord(getLineupErrorTypeOptions());
+export const lineupRoleOptions = createOptionsRecord(getLineupRoleOptions());
+export const memberFunctionOptions = createOptionsRecord(getMemberFunctionOptions());
+export const playerPositionOptions = createOptionsRecord(getPlayerPositionOptions());
+export const relationshipStatusOptions = createOptionsRecord(getRelationshipStatusOptions());
+export const relationshipTypeOptions = createOptionsRecord(getRelationshipTypeOptions());
+export const teamTypesOptions = createOptionsRecord(getTeamTypesOptions());
+export const userRolesOptions = createOptionsRecord(getUserRolesOptions());

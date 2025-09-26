@@ -6,9 +6,4 @@ export * from './roleOptions';
 export * from './posts';
 export * from './months';
 export * from './match';
-
-export * from './relationshipType';
-export * from './relationshipStatus';
-
-export * from './lineupCoachRoles';
 export * from './club';

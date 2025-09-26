@@ -9,9 +9,6 @@ export enum Genders {
   MIXED = 'mixed',
 }
 
-/**
- * Gender display labels
- */
 export const GENDER_LABELS: Record<Genders, string> = {
   [Genders.MALE]: t.male,
   [Genders.FEMALE]: t.female,
@@ -19,9 +16,6 @@ export const GENDER_LABELS: Record<Genders, string> = {
   [Genders.MIXED]: t.mixed,
 };
 
-/**
- * Get all genders as options for UI
- */
 export const getGenderOptions = () =>
   Object.entries(GENDER_LABELS).map(([value, label]) => ({
     value: value as Genders,

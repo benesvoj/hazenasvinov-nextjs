@@ -3,13 +3,12 @@ import {LineupPlayer, LineupCardProps} from '@/types';
 import {UserIcon, UserGroupIcon} from '@heroicons/react/24/outline';
 import {Chip, Badge, Avatar, Card, CardBody, CardHeader} from '@heroui/react';
 import {BallIcon, YellowCardIcon, RedCardIcon} from '@/lib/icons';
-import {LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
-import {translations} from '@/lib/translations';
-import {PlayerPosition, TeamTypes} from '@/enums';
+import {translations} from '@/lib';
+import {getLineupCoachRoleOptions, PlayerPosition, TeamTypes} from '@/enums';
 
 export default function LineupCard({match, lineup, lineupLoading, teamType}: LineupCardProps) {
   const t = translations.components.matches.lineupCard;
-  console.log(lineup);
+
   return (
     <Card>
       <CardHeader>
@@ -98,7 +97,7 @@ export default function LineupCard({match, lineup, lineupLoading, teamType}: Lin
                       </span>
                       <Chip color="secondary" variant="flat" size="sm">
                         {
-                          LINEUP_COACH_ROLES_OPTIONS.find((role) => role.value === coach.role)
+                          getLineupCoachRoleOptions().find((role) => role.value === coach.role)
                             ?.label
                         }
                       </Chip>

@@ -1,11 +1,11 @@
-import {LineupCoachRoles} from '@/constants';
+import {LineupCoachRole} from '@/enums';
 import {Member} from './member';
 
 export interface LineupCoach {
   id: string;
   lineup_id: string;
   member_id: string;
-  role: LineupCoachRoles;
+  role: LineupCoachRole;
   created_at: string;
   updated_at: string;
   // Extended fields for display
@@ -16,5 +16,5 @@ export interface LineupCoach {
 
 export interface LineupCoachFormData {
   member_id: string;
-  role: LineupCoachRoles;
+  role: LineupCoachRole;
 }

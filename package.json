@@ -18,6 +18,7 @@
     "setup:user-roles": "node scripts/setup-user-roles.js",
     "setup:initial-admin": "node scripts/setup-initial-admin.js",
     "create:first-admin": "node scripts/create-first-admin.js",
+    "generate:enum-exports": "node scripts/generate-enum-exports.mjs",
     "fix:admin-user": "node scripts/fix-admin-user.js",
     "update:user-role-view": "node scripts/update-user-role-view.js",
     "setup:missing-tables": "node scripts/setup-missing-tables.js",

@@ -573,6 +573,38 @@ export const translations = {
   playerRoles: {
     captain: 'Kapitán',
   },
+  relationshipStatus: {
+    active: 'Aktivní',
+    inactive: 'Neaktivní',
+    expired: 'Vypršel',
+    terminated: 'Ukončen',
+  },
+  relationshipType: {
+    permanent: 'Permanentní',
+    loan: 'Půjčený',
+    temporary: 'Dočasný',
+    youthLoan: 'Mládežnická půjčená',
+  },
+  teamTypes: {
+    home: 'Domácí',
+    away: 'Hosté',
+  },
+  userRoles: {
+    admin: 'Admin',
+    coach: 'Trenér',
+    headCoach: 'Hlavní trenér',
+    member: 'Člen',
+  },
+  lineupRole: {
+    captain: 'Kapitán',
+    member: 'Člen',
+  },
+  lineupErrorType: {
+    validationError: 'Validace',
+    databaseError: 'Databáze',
+    networkError: 'Síť',
+    unknownError: 'Neznámá',
+  },
   common: {
     gender: {
       male: 'Muž',

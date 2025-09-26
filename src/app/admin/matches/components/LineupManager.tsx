@@ -1,13 +1,6 @@
 'use client';
 
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  forwardRef,
-  useImperativeHandle,
-} from 'react';
+import React, {useState, useEffect, forwardRef, useImperativeHandle} from 'react';
 import {
   Button,
   Card,
@@ -20,19 +13,16 @@ import {
 } from '@heroui/react';
 import {UserGroupIcon, PlusIcon, TrashIcon, PencilIcon} from '@heroicons/react/24/outline';
 import {PlusCircleIcon} from '@heroicons/react/24/solid';
-import {useLineupData, useLineupManager, useTeamClubId} from '@/hooks';
 import {
-  LineupFormData,
-  LineupPlayerFormData,
-  LineupCoachFormData,
-  LineupSummary,
   LineupManagerProps,
   LineupManagerRef,
+  LineupSummary,
+  LineupPlayerFormData,
+  LineupCoachFormData,
 } from '@/types';
 import {
   Heading,
   DeleteConfirmationModal,
-  showToast,
   LoadingSpinner,
   UnifiedCard,
   ButtonWithTooltip,
@@ -44,10 +34,9 @@ import {
   LineupCoachSelectionModal,
   LineupCoachEditModal,
 } from './';
-import {LineupCoachRoles, LINEUP_COACH_ROLES_OPTIONS} from '@/constants';
-import {classifyLineupError} from '@/helpers';
-import {LineupErrorType, MemberFunction, PlayerPosition, TeamTypes} from '@/enums';
+import {getLineupCoachRoleOptions, PlayerPosition, TeamTypes} from '@/enums';
 import {translations} from '@/lib/translations';
+import {useLineupDataManager} from './lineupManager/hooks/useLineupDataManager';
 
 const playersColumns = [
   {key: 'name', label: 'Hráč', allowsSorting: true},
@@ -82,83 +71,85 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     ref
   ) => {
     const t = translations.lineupManager;
-    // Filter members by category
-    const filteredMembers = useMemo(() => {
-      if (!categoryId) {
-        return members;
-      }
 
-      // Try filtering by category_id first (new approach)
-      let filtered = members.filter((member) => member.category_id === categoryId);
-
-      // If no members found with category_id, fallback to legacy category code filtering
-      if (filtered.length === 0 && categoryId) {
-        filtered = members.filter((member) => member.category_id === categoryId);
-      }
-
-      // If still no members found, show all members as fallback
-      if (filtered.length === 0) {
-        return members;
-      }
-
-      return filtered;
-    }, [members, categoryId]);
-
-    const [selectedTeam, setSelectedTeam] = useState<TeamTypes>(TeamTypes.HOME);
-    const [homeFormData, setHomeFormData] = useState<LineupFormData>({
-      match_id: matchId,
-      team_id: homeTeamId,
-      is_home_team: true,
-      players: [],
-      coaches: [],
-    });
-
-    const [awayFormData, setAwayFormData] = useState<LineupFormData>({
-      match_id: matchId,
-      team_id: awayTeamId,
-      is_home_team: false,
-      players: [],
-      coaches: [],
-    });
-
-    // Get the current team ID based on selected team
-    const currentTeamId = useMemo(() => {
-      return selectedTeam === TeamTypes.HOME ? homeTeamId : awayTeamId;
-    }, [selectedTeam, homeTeamId, awayTeamId]);
-
-    // Get club ID for the current team
+    // Use the data manager hook
     const {
-      clubId: currentTeamClubId,
-      loading: clubIdLoading,
-      error: clubIdError,
-    } = useTeamClubId(currentTeamId);
+      // Form data
+      homeFormData,
+      awayFormData,
+      selectedTeam,
+      setSelectedTeam,
 
-    // Get the current form data based on selected team
-    const currentFormData = useMemo(() => {
-      return selectedTeam === TeamTypes.HOME ? homeFormData : awayFormData;
-    }, [selectedTeam, homeFormData, awayFormData]);
+      // Current team data
+      currentTeamId,
+      currentTeamName,
+      currentFormData,
+      setCurrentFormData,
 
-    // Get the setter function for current form data
-    const setCurrentFormData = useCallback(
-      (updater: (prev: LineupFormData) => LineupFormData) => {
-        if (selectedTeam === TeamTypes.HOME) {
-          setHomeFormData(updater);
-        } else {
-          setAwayFormData(updater);
-        }
-      },
-      [selectedTeam]
-    );
-    const [validationError, setValidationError] = useState<string | null>(null);
-    const [editingPlayerIndex, setEditingPlayerIndex] = useState<number | null>(null);
-    const [deletingPlayerIndex, setDeletingPlayerIndex] = useState<number | null>(null);
+      // Club information
+      currentTeamClubId,
+      clubIdLoading,
+      clubIdError,
+
+      // Filtered members
+      filteredMembers,
+      availableCoaches,
+
+      // Validation
+      validationError,
+      setValidationError,
+
+      // CRUD operations
+      handleLoadLineup,
+      handleSaveLineup,
+      handleDeleteLineup,
+
+      // Player operations
+      handleAddPlayer,
+      handlePlayerSelected,
+      handleEditPlayer,
+      handlePlayerEditSave,
+      handleDeletePlayer,
+      confirmDeletePlayer,
+
+      // Coach operations
+      handleAddCoach,
+      handleCoachSelected,
+      handleEditCoach,
+      handleCoachEditSave,
+      handleDeleteCoach,
+
+      // Utility functions
+      getMemberName,
+      calculateLocalSummary,
+
+      // Modal states
+      editingPlayerIndex,
+      setEditingPlayerIndex,
+      deletingPlayerIndex,
+      setDeletingPlayerIndex,
+      editingCoachIndex,
+      setEditingCoachIndex,
+
+      // Loading and error states
+      loading,
+      error,
+    } = useLineupDataManager({
+      matchId,
+      homeTeamId,
+      awayTeamId,
+      homeTeamName,
+      awayTeamName,
+      members,
+      categoryId,
+      onClose,
+      onMemberCreated,
+    });
+
+    // Modal states
     const [isPlayerEditModalOpen, setIsPlayerEditModalOpen] = useState(false);
     const [isCoachSelectionModalOpen, setIsCoachSelectionModalOpen] = useState(false);
     const [isCoachEditModalOpen, setIsCoachEditModalOpen] = useState(false);
-    const [editingCoachIndex, setEditingCoachIndex] = useState<number | null>(null);
-
-    // Use the lineup manager hook for Supabase operations
-    const {getOrCreateLineupId, findLineupId} = useLineupManager();
 
     const {
       isOpen: isPlayerSelectionModalOpen,
@@ -178,59 +169,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       onClose: onDeletePlayerModalClose,
     } = useDisclosure();
 
-    const {
-      fetchLineup,
-      saveLineup,
-      deleteLineup,
-      getLineupSummary,
-      validateLineupData,
-      loading,
-      error,
-    } = useLineupData();
-
-    const currentTeamName = selectedTeam === TeamTypes.HOME ? homeTeamName : awayTeamName;
-
-    // Load lineup data when team changes
-    const handleLoadLineup = useCallback(
-      async (isHome: boolean) => {
-        try {
-          const currentTeamId = isHome ? homeTeamId : awayTeamId;
-          const lineupData = await fetchLineup(matchId, currentTeamId);
-
-          const updatedFormData = {
-            match_id: matchId,
-            team_id: currentTeamId,
-            is_home_team: isHome,
-            players: lineupData.players || [],
-            coaches: lineupData.coaches || [],
-          };
-
-          if (isHome) {
-            setHomeFormData(updatedFormData);
-          } else {
-            setAwayFormData(updatedFormData);
-          }
-        } catch (error) {
-          console.error('Error loading lineup:', error);
-          // Set empty form data if no lineup exists
-          const emptyFormData = {
-            match_id: matchId,
-            team_id: isHome ? homeTeamId : awayTeamId,
-            is_home_team: isHome,
-            players: [],
-            coaches: [],
-          };
-
-          if (isHome) {
-            setHomeFormData(emptyFormData);
-          } else {
-            setAwayFormData(emptyFormData);
-          }
-        }
-      },
-      [matchId, homeTeamId, awayTeamId, fetchLineup]
-    );
-
     // Load lineup data when component mounts or team changes
     useEffect(() => {
       let isMounted = true;
@@ -248,68 +186,6 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       };
     }, [selectedTeam, handleLoadLineup]);
 
-    const handleSaveLineup = async (isHome: boolean) => {
-      try {
-        const currentTeamId = isHome ? homeTeamId : awayTeamId;
-
-        // Get current form data for debugging
-        const formDataToSave = isHome ? homeFormData : awayFormData;
-
-        // Get or create lineup ID using the hook
-        const lineupId = await getOrCreateLineupId(matchId, currentTeamId, isHome);
-
-        // Debug: Verify the match exists in database
-
-        await saveLineup(lineupId, {
-          ...formDataToSave,
-          match_id: matchId,
-          team_id: currentTeamId,
-          is_home_team: isHome,
-        });
-
-        // Show success message
-        showToast.success('Sestava byla úspěšně uložena!');
-
-        // Close the dialog only on successful save
-        if (onClose) {
-          onClose();
-        }
-      } catch (error: unknown) {
-        console.error('Error saving lineup:', error);
-
-        // Use robust error classification
-        const classifiedError = classifyLineupError(error);
-
-        // Handle validation errors (keep modal open)
-        if (classifiedError.type === LineupErrorType.VALIDATION_ERROR) {
-          setValidationError(classifiedError.message);
-          showToast.warning(
-            `⚠️ Pravidla sestavy:\n\n${classifiedError.message}\n\nOpravte chyby a zkuste to znovu.`
-          );
-          return; // Don't close the modal
-        }
-
-        // Handle database errors
-        if (classifiedError.type === LineupErrorType.DATABASE_ERROR) {
-          showToast.danger(
-            `❌ Chyba databáze:\n\n${classifiedError.message}\n\nKontaktujte podporu.`
-          );
-          return;
-        }
-
-        // Handle network errors
-        if (classifiedError.type === LineupErrorType.NETWORK_ERROR) {
-          showToast.danger(
-            `❌ Problém se sítí:\n\n${classifiedError.message}\n\nZkontrolujte připojení a zkuste to znovu.`
-          );
-          return;
-        }
-
-        // Handle unknown errors
-        showToast.danger(`❌ Neznámá chyba:\n\n${classifiedError.message}\n\nKontaktujte podporu.`);
-      }
-    };
-
     // Expose saveLineup function to parent component
     useImperativeHandle(ref, () => ({
       saveLineup: async () => {
@@ -317,236 +193,49 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       },
     }));
 
-    const handleDeleteLineup = async () => {
-      try {
-        const currentTeamId = selectedTeam === TeamTypes.HOME ? homeTeamId : awayTeamId;
-
-        // Find the lineup ID using the hook
-        const lineupId = await findLineupId(matchId, currentTeamId);
-
-        if (!lineupId) {
-          // If no lineup exists, just reset the form data and show success message
-          const emptyFormData = {
-            match_id: matchId,
-            team_id: currentTeamId,
-            is_home_team: selectedTeam === TeamTypes.HOME,
-            players: [],
-            coaches: [],
-          };
-
-          if (selectedTeam === TeamTypes.HOME) {
-            setHomeFormData(emptyFormData);
-          } else {
-            setAwayFormData(emptyFormData);
-          }
-
-          onDeleteModalClose();
-          alert('Sestava byla vymazána (neexistovala v databázi)');
-          return;
-        }
-
-        await deleteLineup(lineupId);
-
-        // Reset form data
-        const emptyFormData = {
-          match_id: matchId,
-          team_id: currentTeamId,
-          is_home_team: selectedTeam === TeamTypes.HOME,
-          players: [],
-          coaches: [],
-        };
-
-        if (selectedTeam === TeamTypes.HOME) {
-          setHomeFormData(emptyFormData);
-        } else {
-          setAwayFormData(emptyFormData);
-        }
-
-        onDeleteModalClose();
-      } catch (error: unknown) {
-        console.error('Error deleting lineup:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Neznámá chyba';
-        alert(`Chyba při mazání sestavy: ${errorMessage}`);
-      }
-    };
-
-    const handleAddPlayer = () => {
-      // Clear validation error when user adds players
-      if (validationError) {
-        setValidationError(null);
-      }
-
+    // Enhanced handlers that include modal management
+    const handleAddPlayerWithModal = () => {
+      handleAddPlayer();
       onPlayerSelectionModalOpen();
     };
 
-    const handlePlayerSelected = async (player: LineupPlayerFormData) => {
-      if (editingPlayerIndex !== null) {
-        // Editing existing player
-        setCurrentFormData((prev) => ({
-          ...prev,
-          players: prev.players.map((p, i) => (i === editingPlayerIndex ? player : p)),
-        }));
-        setEditingPlayerIndex(null);
-      } else {
-        // Adding new player
-        const updatedFormData = {
-          ...currentFormData,
-          players: [...currentFormData.players, player],
-        };
+    const handleEditPlayerWithModal = React.useCallback(
+      (index: number) => {
+        handleEditPlayer(index);
+        setIsPlayerEditModalOpen(true);
+      },
+      [handleEditPlayer]
+    );
 
-        setCurrentFormData((prev) => updatedFormData);
+    const handleDeletePlayerWithModal = React.useCallback(
+      (index: number) => {
+        handleDeletePlayer(index);
+        onDeletePlayerModalOpen();
+      },
+      [handleDeletePlayer, onDeletePlayerModalOpen]
+    );
 
-        // If this is the first player, create lineup automatically
-        if (currentFormData.players.length === 0) {
-          try {
-            const isHome = selectedTeam === TeamTypes.HOME;
-            const currentTeamId = isHome ? homeTeamId : awayTeamId;
-
-            const lineupId = await getOrCreateLineupId(matchId, currentTeamId, isHome);
-            await saveLineup(
-              lineupId,
-              {
-                ...updatedFormData,
-                match_id: matchId,
-                team_id: currentTeamId,
-                is_home_team: isHome,
-              },
-              true
-            ); // Skip validation for automatic lineup creation
-
-            showToast.success('Sestava byla automaticky vytvořena');
-
-            // Show validation warnings for incomplete lineup
-            const validation = validateLineupData(updatedFormData);
-            if (validation.warnings.length > 0) {
-              showToast.warning(`Upozornění: ${validation.warnings.join(', ')}`);
-            }
-
-            // Show specific warning about goalkeeper requirement
-            const goalkeepers = updatedFormData.players.filter((p) => p.position === 'goalkeeper');
-            if (goalkeepers.length === 0) {
-              showToast.warning('Upozornění: Sestava musí mít alespoň 1 brankáře');
-            }
-          } catch (error) {
-            console.error('Error creating lineup automatically:', error);
-
-            // Check if it's a validation warning that we should show as a warning instead of error
-            if (error instanceof Error && error.message.includes('VALIDATION_WARNING')) {
-              const warningMessage = error.message.replace('VALIDATION_WARNING: ', '');
-              showToast.warning(`Upozornění: ${warningMessage}`);
-              // Still show success for lineup creation, just with warning
-              showToast.success('Sestava byla vytvořena s upozorněním');
-            } else {
-              showToast.danger(
-                `Chyba při vytváření sestavy: ${error instanceof Error ? error.message : 'Neznámá chyba'}`
-              );
-            }
-          }
-        } else {
-          // Player added to existing lineup
-          showToast.success('Hráč byl přidán do sestavy');
-
-          // Show validation warnings for incomplete lineup
-          const validation = validateLineupData(updatedFormData);
-          if (validation.warnings.length > 0) {
-            showToast.warning(`Upozornění: ${validation.warnings.join(', ')}`);
-          }
-        }
-      }
+    const handleAddCoachWithModal = () => {
+      handleAddCoach();
+      setIsCoachSelectionModalOpen(true);
     };
 
-    const handleEditPlayer = useCallback((index: number) => {
-      setEditingPlayerIndex(index);
-      setIsPlayerEditModalOpen(true);
-    }, []);
+    const handleEditCoachWithModal = React.useCallback(
+      (index: number) => {
+        handleEditCoach(index);
+        setIsCoachEditModalOpen(true);
+      },
+      [handleEditCoach]
+    );
 
     const handleModalClose = () => {
       setEditingPlayerIndex(null);
       onPlayerSelectionModalClose();
     };
 
-    const handlePlayerEditSave = (updatedPlayer: LineupPlayerFormData) => {
-      if (editingPlayerIndex !== null) {
-        setCurrentFormData((prev) => ({
-          ...prev,
-          players: prev.players.map((p, i) => (i === editingPlayerIndex ? updatedPlayer : p)),
-        }));
-        setEditingPlayerIndex(null);
-      }
-    };
-
     const handlePlayerEditClose = () => {
       setIsPlayerEditModalOpen(false);
       setEditingPlayerIndex(null);
-    };
-
-    const handleDeletePlayer = useCallback(
-      (index: number) => {
-        setDeletingPlayerIndex(index);
-        onDeletePlayerModalOpen();
-      },
-      [onDeletePlayerModalOpen]
-    );
-
-    const confirmDeletePlayer = () => {
-      if (deletingPlayerIndex !== null) {
-        // Clear validation error when user removes players
-        if (validationError) {
-          setValidationError(null);
-        }
-
-        setCurrentFormData((prev) => ({
-          ...prev,
-          players: prev.players.filter((_, i) => i !== deletingPlayerIndex),
-        }));
-
-        setDeletingPlayerIndex(null);
-        onDeletePlayerModalClose();
-      }
-    };
-
-    const handleAddCoach = () => {
-      setIsCoachSelectionModalOpen(true);
-    };
-
-    const handleCoachSelected = (coach: {member_id: string; role: string}) => {
-      const coachData: LineupCoachFormData = {
-        member_id: coach.member_id,
-        role: coach.role as LineupCoachRoles,
-      };
-
-      if (editingCoachIndex !== null) {
-        // Editing existing coach
-        setCurrentFormData((prev) => ({
-          ...prev,
-          coaches: prev.coaches.map((c, i) => (i === editingCoachIndex ? coachData : c)),
-        }));
-        setEditingCoachIndex(null);
-      } else {
-        // Adding new coach
-        setCurrentFormData((prev) => {
-          const newFormData = {
-            ...prev,
-            coaches: [...prev.coaches, coachData],
-          };
-          return newFormData;
-        });
-      }
-    };
-
-    const handleEditCoach = useCallback((index: number) => {
-      setEditingCoachIndex(index);
-      setIsCoachEditModalOpen(true);
-    }, []);
-
-    const handleCoachEditSave = (updatedCoach: LineupCoachFormData) => {
-      if (editingCoachIndex !== null) {
-        setCurrentFormData((prev) => ({
-          ...prev,
-          coaches: prev.coaches.map((c, i) => (i === editingCoachIndex ? updatedCoach : c)),
-        }));
-        setEditingCoachIndex(null);
-      }
     };
 
     const handleCoachEditClose = () => {
@@ -559,57 +248,10 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       setEditingCoachIndex(null);
     };
 
-    const handleDeleteCoach = useCallback(
-      (index: number) => {
-        setCurrentFormData((prev) => ({
-          ...prev,
-          coaches: prev.coaches.filter((_, i) => i !== index),
-        }));
-      },
-      [setCurrentFormData]
-    );
-
-    const getMemberName = useCallback(
-      (memberId: string) => {
-        const member = filteredMembers.find((m) => m.id === memberId);
-        return member ? `${member.surname} ${member.name}` : 'Neznámý člen';
-      },
-      [filteredMembers]
-    );
-
-    const getAvailableCoaches = () => {
-      let coaches = filteredMembers.filter((m) => m.functions?.includes(MemberFunction.COACH));
-
-      // If we have club information, filter by the current team's club
-      if (currentTeamClubId) {
-        coaches = coaches.filter(
-          (m) => m.core_club_id === currentTeamClubId || m.current_club_id === currentTeamClubId
-        );
-      }
-
-      return coaches;
+    const confirmDeletePlayerWithModal = () => {
+      confirmDeletePlayer();
+      onDeletePlayerModalClose();
     };
-
-    // Calculate summary from local form data
-    const calculateLocalSummary = useCallback((formData: LineupFormData): LineupSummary => {
-      const goalkeepers = formData.players.filter((p) => p.position === 'goalkeeper').length;
-      const fieldPlayers = formData.players.filter((p) => p.position === 'field_player').length;
-      const coaches = formData.coaches.length;
-      const totalPlayers = goalkeepers + fieldPlayers;
-
-      return {
-        total_players: totalPlayers,
-        goalkeepers,
-        field_players: fieldPlayers,
-        coaches,
-        is_valid:
-          goalkeepers >= 1 &&
-          goalkeepers <= 2 &&
-          fieldPlayers >= 6 &&
-          fieldPlayers <= 13 &&
-          coaches <= 3,
-      };
-    }, []);
 
     const getLineupSummaryDisplay = (summary: LineupSummary | null, teamName: string) => {
       if (!summary) {
@@ -667,7 +309,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                   size="sm"
                   color="primary"
                   variant="light"
-                  onPress={() => handleEditPlayer(playerIndex)}
+                  onPress={() => handleEditPlayerWithModal(playerIndex)}
                   isIconOnly
                   aria-label="Upravit hráče"
                   startContent={<PencilIcon className="w-4 h-4" />}
@@ -676,7 +318,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                   size="sm"
                   color="danger"
                   variant="light"
-                  onPress={() => handleDeletePlayer(playerIndex)}
+                  onPress={() => handleDeletePlayerWithModal(playerIndex)}
                   isIconOnly
                   aria-label="Odebrat hráče"
                   startContent={<TrashIcon className="w-4 h-4" />}
@@ -687,7 +329,13 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
             return cellValue;
         }
       },
-      [currentFormData.players, getMemberName, handleEditPlayer, handleDeletePlayer, t]
+      [
+        currentFormData.players,
+        getMemberName,
+        handleEditPlayerWithModal,
+        handleDeletePlayerWithModal,
+        t,
+      ]
     );
 
     const renderCoachCell = React.useCallback(
@@ -699,7 +347,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
             return getMemberName(coach.member_id);
           case 'role':
             return (
-              LINEUP_COACH_ROLES_OPTIONS.find((role) => role.value === coach.role)?.label ||
+              getLineupCoachRoleOptions().find((role) => role.value === coach.role)?.label ||
               coach.role
             );
           case 'actions':
@@ -712,7 +360,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                   size="sm"
                   color="primary"
                   variant="light"
-                  onPress={() => handleEditCoach(coachIndex)}
+                  onPress={() => handleEditCoachWithModal(coachIndex)}
                   isIconOnly
                   aria-label={t.editCoach}
                   startContent={<PencilIcon className="w-4 h-4" />}
@@ -732,7 +380,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
             return cellValue;
         }
       },
-      [currentFormData.coaches, getMemberName, handleEditCoach, handleDeleteCoach, t]
+      [currentFormData.coaches, getMemberName, handleEditCoachWithModal, handleDeleteCoach, t]
     );
 
     return (
@@ -772,7 +420,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                     size="sm"
                     color="primary"
                     startContent={<PlusCircleIcon className="w-4 h-4" />}
-                    onPress={handleAddPlayer}
+                    onPress={handleAddPlayerWithModal}
                   >
                     {t.addPlayer}
                   </Button>
@@ -780,7 +428,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                     size="sm"
                     color="primary"
                     startContent={<PlusCircleIcon className="w-4 h-4" />}
-                    onPress={handleAddCoach}
+                    onPress={handleAddCoachWithModal}
                   >
                     {t.addCoach}
                   </Button>
@@ -808,7 +456,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                 <Button
                   color="primary"
                   startContent={<PlusIcon className="w-4 h-4" />}
-                  onPress={handleAddPlayer}
+                  onPress={handleAddPlayerWithModal}
                 >
                   {t.addPlayer}
                 </Button>
@@ -876,7 +524,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
           isOpen={isCoachSelectionModalOpen}
           onClose={handleCoachSelectionClose}
           onCoachSelected={handleCoachSelected}
-          coaches={getAvailableCoaches()}
+          coaches={availableCoaches}
           editingCoachIndex={editingCoachIndex}
           currentCoach={
             editingCoachIndex !== null ? currentFormData.coaches[editingCoachIndex] : null
@@ -910,7 +558,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
         <DeleteConfirmationModal
           isOpen={isDeletePlayerModalOpen}
           onClose={onDeletePlayerModalClose}
-          onConfirm={confirmDeletePlayer}
+          onConfirm={confirmDeletePlayerWithModal}
           title="Odebrat hráče"
           message="Opravdu chcete odebrat tohoto hráče ze sestavy? Tato akce je nevratná."
         />
