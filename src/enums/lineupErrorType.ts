@@ -3,7 +3,7 @@ import {translations} from '@/lib/translations';
 const t = translations.lineupErrorType;
 /**
  * @file lineupErrorType.ts
- * @descriptionError types for robust error handling
+ * @description Error types for robust error handling
  */
 export enum LineupErrorType {
   VALIDATION_ERROR = 'VALIDATION_ERROR',

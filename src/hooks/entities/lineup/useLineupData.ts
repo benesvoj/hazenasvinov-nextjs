@@ -1,9 +1,8 @@
 import {useState, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
-import {LineupFormData, LineupSummary, LineupValidation} from '@/types';
+import {LineupFormData, LineupSummary, LineupValidation, LineupCoach, LineupPlayer} from '@/types';
 import {generateUUID} from '@/utils/uuid';
-import {LineupCoach, LineupPlayer} from '@/types';
-import {LineupRole, PlayerPosition} from '@/enums';
+import {PlayerPosition} from '@/enums';
 
 const supabase = createClient();
 
@@ -334,12 +333,10 @@ export const useLineupData = () => {
             // Use existing lineup ID
             finalLineupId = existingLineup.id;
             isNewLineup = false;
-            console.log('Using existing lineup ID:', finalLineupId);
           } else {
             // Generate new UUID for new lineups
             finalLineupId = generateUUID();
             isNewLineup = true;
-            console.log('Creating new lineup with ID:', finalLineupId);
           }
         }
 
@@ -417,10 +414,6 @@ export const useLineupData = () => {
 
             if (insertedCount === 0) {
               console.warn('No players could be inserted due to validation constraints');
-            } else {
-              console.log(
-                `Successfully inserted ${insertedCount} out of ${playersToInsert.length} players`
-              );
             }
           } else {
             // For manual saves, use the original validation logic
