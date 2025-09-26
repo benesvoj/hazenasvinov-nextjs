@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
-import {useFetchCategories} from '@/hooks/entities/category/useFetchCategories';
+import {useFetchCategories} from '@/hooks';
 import {Skeleton} from '@heroui/skeleton';
 import {EditIcon} from '@/lib/icons';
 import {

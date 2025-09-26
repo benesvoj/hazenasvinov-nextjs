@@ -1,9 +1,8 @@
 'use client';
 
-import {translations} from '@/lib/translations';
 import {MatchResultCard} from './';
 import {LoadingSpinner} from '@/components';
-import {useAllCategoriesOwnClubMatches} from '@/hooks/entities/match/useAllCategoriesOwnClubMatches';
+import {useAllCategoriesOwnClubMatches} from '@/hooks';
 
 export default function LatestResultsSection() {
   const {matches: latestMatches, loading, error} = useAllCategoriesOwnClubMatches();

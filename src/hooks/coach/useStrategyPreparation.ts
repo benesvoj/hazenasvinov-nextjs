@@ -1,6 +1,5 @@
 import {useState, useEffect, useMemo, useCallback} from 'react';
-import {useMatchesWithTeams} from '@/hooks/shared/queries/useMatchQueries';
-import {useHeadToHeadMatches} from '@/hooks/entities/match/useHeadToHeadMatches';
+import {useHeadToHeadMatches, useMatchesWithTeams} from '@/hooks';
 import {createClient} from '@/utils/supabase/client';
 import {Match, Nullish} from '@/types';
 

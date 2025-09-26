@@ -7,7 +7,7 @@ import {useDisclosure} from '@heroui/modal';
 import {Badge} from '@heroui/badge';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@heroui/table';
 import {PlusIcon, PencilIcon, TrashIcon, CogIcon} from '@heroicons/react/24/outline';
-import {useFetchMemberFunctions} from '@/hooks/entities/member/useFetchMemberFunctions';
+import {useFetchMemberFunctions} from '@/hooks';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import {MemberFunction} from '@/types';
 import FunctionFormModal from './components/FunctionFormModal';

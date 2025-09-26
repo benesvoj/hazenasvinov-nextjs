@@ -2,7 +2,7 @@
 
 import React, {useState, useEffect} from 'react';
 import {Video, VideoFormData, Category, Club} from '@/types';
-import {useCategories} from '@/hooks/entities/category/useCategories';
+import {useCategories} from '@/hooks';
 import {useSeasons} from '@/hooks/entities/season/useSeasons';
 import {
   Modal,

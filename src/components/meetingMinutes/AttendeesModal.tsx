@@ -1,7 +1,7 @@
 'use client';
 
 import React, {useState, useEffect, useMemo} from 'react';
-import {useFetchMembers} from '@/hooks/entities/member/useFetchMembers';
+import {useFetchMembers} from '@/hooks';
 import {MeetingAttendeeFormData} from '@/types';
 import {
   Modal,

@@ -23,7 +23,7 @@ import {Category, CategorySeason} from '@/types';
 import {AgeGroups, Genders} from '@/enums';
 import {ageGroupOptions, genderOptions, competitionTypeOptions} from '@/utils';
 import {getAgeGroupBadgeColor, getGenderBadgeColor} from './constants';
-import {useCategories} from '@/hooks/entities/category/useCategories';
+import {useCategories} from '@/hooks';
 
 export default function CategoriesAdminPage() {
   // Use the custom hook for all business logic

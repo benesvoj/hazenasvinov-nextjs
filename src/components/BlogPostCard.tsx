@@ -7,7 +7,7 @@ import Image from 'next/image';
 import {CalendarIcon} from '@heroicons/react/24/outline';
 import {BlogPostCard as BlogPostCardProps, Category} from '@/types';
 import {useAppData} from '@/contexts/AppDataContext';
-import {useCategories} from '@/hooks/entities/category/useCategories';
+import {useCategories} from '@/hooks';
 import {formatDateString} from '@/helpers';
 
 export default function BlogPostCard({

@@ -4,7 +4,7 @@ import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import {MeetingMinutes, MeetingMinutesFormData, MeetingAttendeeFormData} from '@/types';
 import {useSeasons} from '@/hooks/entities/season/useSeasons';
 import {useAuth} from '@/hooks/auth/useAuthNew';
-import {useFetchMembers} from '@/hooks/entities/member/useFetchMembers';
+import {useFetchMembers} from '@/hooks';
 import {
   Modal,
   ModalContent,
