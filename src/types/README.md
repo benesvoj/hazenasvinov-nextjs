@@ -220,6 +220,7 @@ The `index.ts` file is automatically generated using the `generate-type-exports.
 - **No manual maintenance** of the barrel file
 - **Automatic updates** when files are added/removed
 - **Conflict resolution** for duplicate type names
+- **Exclusion of declaration files** (`.d.ts`) to prevent TypeScript compilation issues
 
 ## 📋 **Naming Conventions**
 
