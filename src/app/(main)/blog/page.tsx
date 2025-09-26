@@ -5,7 +5,7 @@ import {Card, CardBody, Button, Input, Select, SelectItem} from '@heroui/react';
 import {BlogPostCard, BlogPostCardSkeleton} from '@/components';
 import {TagIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
 import {useFetchBlogPosts} from '@/hooks';
-import {useDebounce} from '@/hooks/useDebounce';
+import {useDebounce} from '@/hooks/shared/useDebounce';
 import {createSearchablePost, searchPosts} from '@/utils/contentSearch';
 
 export default function BlogPage() {

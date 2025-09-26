@@ -3,7 +3,7 @@
 import {texts} from '@/utils/texts';
 import ThemeSwitch from '@/components/ThemeSwitch';
 import Link from '@/components/Link';
-import {useVisiblePages} from '@/hooks/settings/useVisiblePages';
+import {useVisiblePages} from '@/hooks/entities/settings/useVisiblePages';
 import {buildMenuFromPages, fallbackRoutes} from '../routes/dynamicRoutes';
 import {MenuItem} from '../routes/dynamicRoutes';
 import DropdownMenu from '@/components/DropdownMenu';

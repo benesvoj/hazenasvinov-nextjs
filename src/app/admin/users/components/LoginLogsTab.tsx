@@ -13,7 +13,7 @@ import {
   useDisclosure,
 } from '@heroui/modal';
 import {Select, SelectItem} from '@heroui/select';
-import {LoginLog, PaginationInfo} from '@/hooks/user/useFetchUsers';
+import {LoginLog, PaginationInfo} from '@/hooks/entities/user/useFetchUsers';
 import {SupabaseUser} from '@/types/types';
 import {translations} from '@/lib/translations';
 import {

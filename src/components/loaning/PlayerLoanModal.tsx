@@ -1,8 +1,8 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {useClubs} from '@/hooks/club/useClubs';
-import {usePlayerLoans} from '@/hooks/player/usePlayerLoans';
+import {useClubs} from '@/hooks/entities/club/useClubs';
+import {usePlayerLoans} from '@/hooks/entities/player/usePlayerLoans';
 import {CreatePlayerLoanData} from '@/types/playerLoan';
 import {UnifiedModal} from '@/components';
 import {Input, Select, SelectItem, Button, Textarea} from '@heroui/react';

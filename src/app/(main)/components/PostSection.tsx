@@ -7,7 +7,7 @@ import {TagIcon} from '@heroicons/react/24/outline';
 import {BlogPostCardSkeleton} from '@/components/BlogPostCard';
 import BlogPostCard from '@/components/BlogPostCard';
 import {ArrowRightIcon} from '@heroicons/react/24/outline';
-import {useFetchBlogPosts} from '@/hooks/blog/useFetchBlogPosts';
+import {useFetchBlogPosts} from '@/hooks/entities/blog/useFetchBlogPosts';
 import {translations} from '@/lib/translations';
 
 export default function PostSection() {

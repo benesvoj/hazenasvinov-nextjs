@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import {useClubConfig} from '@/hooks/club/useClubConfig';
+import {useClubConfig} from '@/hooks/entities/club/useClubConfig';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';

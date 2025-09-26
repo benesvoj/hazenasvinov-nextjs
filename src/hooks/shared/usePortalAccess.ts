@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback} from 'react';
-import {useUserRoles} from './user/useUserRoles';
+import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
 
 export interface PortalAccess {
   hasAdminAccess: boolean;

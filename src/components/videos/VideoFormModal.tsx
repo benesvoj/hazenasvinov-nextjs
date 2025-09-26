@@ -2,8 +2,8 @@
 
 import React, {useState, useEffect} from 'react';
 import {Video, VideoFormData, Category, Club} from '@/types';
-import {useCategories} from '@/hooks/category/useCategories';
-import {useSeasons} from '@/hooks/season/useSeasons';
+import {useCategories} from '@/hooks/entities/category/useCategories';
+import {useSeasons} from '@/hooks/entities/season/useSeasons';
 import {
   Modal,
   ModalContent,

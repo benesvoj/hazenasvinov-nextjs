@@ -7,7 +7,7 @@ import {Card, CardBody, Button, Chip, Divider} from '@heroui/react';
 // TODO: Remove Link from here, use Heroui Link
 import Link from '@/components/Link';
 import {useCategories, useFetchBlogPost} from '@/hooks';
-import {useFetchPostMatch} from '@/hooks/blog/useFetchPostMatch';
+import {useFetchPostMatch} from '@/hooks/entities/blog/useFetchPostMatch';
 import {
   CalendarIcon,
   UserIcon,

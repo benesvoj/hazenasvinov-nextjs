@@ -51,7 +51,7 @@ import {
   useExcelImport,
   useTeamDisplayLogic,
 } from '@/hooks';
-import {useMatchesSeasonal} from '@/hooks/queries/useMatchQueries';
+import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
 import {useQueryClient} from '@tanstack/react-query';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
 import {matchStatusesKeys} from '@/constants';

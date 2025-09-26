@@ -1,7 +1,7 @@
 import {Card, CardHeader, CardBody} from '@heroui/react';
 import {TrophyIcon} from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import {EnhancedStanding} from '@/hooks/standings/useStandings';
+import {EnhancedStanding} from '@/hooks/entities/standings/useStandings';
 import {getTeamDisplayNameSafe, createClubTeamCountsMap} from '@/utils';
 import {LoadingSpinner} from '@/components';
 

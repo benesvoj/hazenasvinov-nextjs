@@ -23,7 +23,7 @@ import {translations} from '@/lib/translations';
 import {Member, Category} from '@/types';
 import {useAppData} from '@/contexts/AppDataContext';
 import {DeleteConfirmationModal, showToast} from '@/components';
-import {useDebounce} from '@/hooks/useDebounce';
+import {useDebounce} from '@/hooks/shared/useDebounce';
 import MemberFormModal from './MemberFormModal';
 import MembersCsvImport from './MembersCsvImport';
 import BulkEditModal from './BulkEditModal';

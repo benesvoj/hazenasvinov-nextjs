@@ -5,7 +5,7 @@ import {Card, CardBody, CardHeader} from '@heroui/card';
 import {Button} from '@heroui/button';
 import {Badge} from '@heroui/badge';
 import {translations} from '@/lib/translations';
-import {useSponsorshipData, MediaPartner} from '@/hooks/settings/useSponsorshipData';
+import {useSponsorshipData, MediaPartner} from '@/hooks/entities/settings/useSponsorshipData';
 import {
   PlusIcon,
   PencilIcon,

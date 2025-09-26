@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import {useMeetingMinutes} from '@/hooks/meetingMinute/useMeetingMinutes';
-import {useSeasons} from '@/hooks/season/useSeasons';
+import {useMeetingMinutes} from '@/hooks/entities/meetingMinute/useMeetingMinutes';
+import {useSeasons} from '@/hooks/entities/season/useSeasons';
 import {MeetingMinutes, MeetingMinutesFilters} from '@/types';
 import {
   DocumentTextIcon,

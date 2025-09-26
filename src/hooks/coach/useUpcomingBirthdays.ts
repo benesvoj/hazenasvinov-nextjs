@@ -1,7 +1,7 @@
 import {useState, useEffect, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
 import {Member} from '@/types/member';
-import {useUserRoles} from '../user/useUserRoles';
+import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
 
 interface BirthdayMember extends Member {
   daysUntilBirthday: number;

@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
-import {useSupabaseClient} from '../supabase/useSupabaseClient';
+import {useSupabaseClient} from '../../shared/useSupabaseClient';
 import {useUser} from '@/contexts/UserContext';
 import {UserRole, CoachCategory, UserRoleSummary, RoleAssignment} from '@/types';
 

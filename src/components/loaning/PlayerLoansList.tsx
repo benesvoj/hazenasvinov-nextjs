@@ -1,7 +1,7 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {usePlayerLoans} from '@/hooks/player/usePlayerLoans';
+import {usePlayerLoans} from '@/hooks/entities/player/usePlayerLoans';
 import {PlayerLoanWithDetails, PlayerLoanFilters} from '@/types/playerLoan';
 
 interface PlayerLoansListProps {

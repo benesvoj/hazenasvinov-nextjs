@@ -11,7 +11,7 @@ import {
   PhotoIcon,
 } from '@heroicons/react/24/outline';
 import {useState} from 'react';
-import {useClubConfig} from '@/hooks/club/useClubConfig';
+import {useClubConfig} from '@/hooks/entities/club/useClubConfig';
 import {useEffect} from 'react';
 import {uploadClubAsset, deleteClubAsset} from '@/utils/supabase/storage';
 import Image from 'next/image';

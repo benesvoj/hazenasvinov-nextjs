@@ -3,7 +3,7 @@
  * This replaces the original useFetchMatches with caching capabilities
  */
 
-import {useMatchesSeasonal} from '../queries/useMatchQueries';
+import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
 
 export interface UseCachedMatchesOptions {
   /**

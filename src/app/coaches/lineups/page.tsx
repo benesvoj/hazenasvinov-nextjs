@@ -1,10 +1,10 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {useCategoryLineups} from '@/hooks/category/useCategoryLineups';
-import {useSeasons} from '@/hooks/season/useSeasons';
-import {useCategories} from '@/hooks/category/useCategories';
-import {useUserRoles} from '@/hooks/user/useUserRoles';
+import {useCategoryLineups} from '@/hooks/entities/category/useCategoryLineups';
+import {useSeasons} from '@/hooks/entities/season/useSeasons';
+import {useCategories} from '@/hooks/entities/category/useCategories';
+import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
 import {
   UserGroupIcon,
   PlusIcon,

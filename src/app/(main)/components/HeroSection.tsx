@@ -1,6 +1,6 @@
 'use client';
 
-import {useClubConfig} from '@/hooks/club/useClubConfig';
+import {useClubConfig} from '@/hooks/entities/club/useClubConfig';
 import {Button} from '@heroui/button';
 import Link from '@/components/Link';
 import {Image} from '@heroui/image';

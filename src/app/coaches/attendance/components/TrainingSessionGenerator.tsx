@@ -17,7 +17,7 @@ import {
   TimeInput,
 } from '@heroui/react';
 import {CalendarIcon, ClockIcon, PlusIcon} from '@heroicons/react/24/outline';
-import {useAttendance} from '@/hooks/attendance/useAttendance';
+import {useAttendance} from '@/hooks/entities/attendance/useAttendance';
 import {formatDateString, formatTime} from '@/helpers';
 
 interface TrainingSessionGeneratorProps {

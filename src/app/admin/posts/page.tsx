@@ -27,7 +27,7 @@ import {
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import {BlogPost} from '@/types';
-import {useBlogPosts} from '@/hooks/blog/useBlogPosts';
+import {useBlogPosts} from '@/hooks/entities/blog/useBlogPosts';
 import {AddPostModal, EditPostModal, DeletePostModal} from './components';
 import {formatDateString} from '@/helpers';
 import {translations} from '@/lib/translations';

@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {usePageVisibility} from '../usePageVisibility';
+import {usePageVisibility} from '../../shared/usePageVisibility';
 
 export const useSectionVisibility = () => {
   const {pages, loading, error} = usePageVisibility();

@@ -2,7 +2,7 @@
 
 import {Tabs, Tab} from '@heroui/tabs';
 import {Card, CardBody, CardHeader} from '@heroui/card';
-import {useFetchUsers} from '@/hooks/user/useFetchUsers';
+import {useFetchUsers} from '@/hooks/entities/user/useFetchUsers';
 import {UsersTab} from './components/UsersTab';
 import {LoginLogsTab} from './components/LoginLogsTab';
 import {translations} from '@/lib/translations';

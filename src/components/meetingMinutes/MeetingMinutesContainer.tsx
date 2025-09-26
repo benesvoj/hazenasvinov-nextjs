@@ -11,8 +11,8 @@ import {
 import {MeetingMinutes, MeetingMinutesFilters} from '@/types';
 import {translations} from '@/lib/translations';
 import {MeetingMinutesCard} from './MeetingMinutesCard';
-import {useSeasons} from '@/hooks/season/useSeasons';
-import {useMeetingMinutes} from '@/hooks/meetingMinute/useMeetingMinutes';
+import {useSeasons} from '@/hooks/entities/season/useSeasons';
+import {useMeetingMinutes} from '@/hooks/entities/meetingMinute/useMeetingMinutes';
 import {showToast} from '../Toast';
 import {AttendeesModal} from './AttendeesModal';
 import {DeleteConfirmationModal, MeetingMinutesFormModal} from '..';
