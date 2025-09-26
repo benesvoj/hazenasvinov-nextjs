@@ -1,13 +1,13 @@
 import {LineupErrorType} from '@/enums';
-import {LineupError} from '@/types';
+import {LineupError, UnknownErrorShape} from '@/types';
 
-export const classifyLineupError = (error: any): LineupError => {
+export const classifyLineupError = (error: UnknownErrorShape): LineupError => {
   const message = error?.message || error?.details || error?.hint || 'Neznámá chyba';
 
   // Primary classification based on error structure and codes
-  if (error?.code === 'VALIDATION_ERROR' || error?.type === 'validation') {
+  if (error?.code === LineupErrorType.VALIDATION || error?.type === 'validation') {
     return {
-      type: LineupErrorType.VALIDATION_ERROR,
+      type: LineupErrorType.VALIDATION,
       message,
       code: error?.code,
     };
@@ -48,7 +48,7 @@ export const classifyLineupError = (error: any): LineupError => {
     message.includes('unique constraint')
   ) {
     return {
-      type: LineupErrorType.DATABASE_ERROR,
+      type: LineupErrorType.DATABASE,
       message,
       code: error?.code,
     };
@@ -71,7 +71,7 @@ export const classifyLineupError = (error: any): LineupError => {
     message.includes('ENOTFOUND')
   ) {
     return {
-      type: LineupErrorType.NETWORK_ERROR,
+      type: LineupErrorType.NETWORK,
       message,
       code: error?.code,
     };
@@ -87,7 +87,7 @@ export const classifyLineupError = (error: any): LineupError => {
     message.includes('trenér')
   ) {
     return {
-      type: LineupErrorType.VALIDATION_ERROR,
+      type: LineupErrorType.VALIDATION,
       message,
       code: error?.code,
     };
@@ -95,7 +95,7 @@ export const classifyLineupError = (error: any): LineupError => {
 
   // Default to unknown error
   return {
-    type: LineupErrorType.UNKNOWN_ERROR,
+    type: LineupErrorType.UNKNOWN,
     message,
     code: error?.code,
   };

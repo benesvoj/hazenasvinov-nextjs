@@ -39,17 +39,6 @@ export function useAuth() {
         } = await supabase.auth.getUser();
 
         if (error) {
-          // Check if it's a permission error and handle gracefully
-          if (
-            error.message.includes('permission denied') ||
-            error.message.includes('permission denied for table')
-          ) {
-            showToast.danger(
-              'Permission denied in useAuth - this is normal for unauthenticated users'
-            );
-            return;
-          }
-
           setAuthState((prev) => ({
             ...prev,
             loading: false,
@@ -72,7 +61,7 @@ export function useAuth() {
         hasProcessedInitialSession.current = true;
       } catch (error) {
         // Handle any unexpected errors
-        showToast.danger(`Unexpected error in useAuth:${error}`);
+        showToast.danger(`Unexpected error in useAuth: ${error}`);
         setAuthState((prev) => ({
           ...prev,
           loading: false,
@@ -155,7 +144,7 @@ export function useAuth() {
           isAuthenticated: !!user,
         });
       } catch (error) {
-        showToast.danger(`Error in auth state change:${error}`);
+        showToast.danger(`Error in auth state change: ${error}`);
         // Don't update state on error, keep current state
       }
     });
@@ -168,7 +157,7 @@ export function useAuth() {
       const supabase = createClient();
       await supabase.auth.signOut();
     } catch (error) {
-      showToast.danger(`Error signing out:${error}`);
+      showToast.danger(`Error signing out: ${error}`);
       // Even if signout fails, we should clear local state
       setAuthState({
         user: null,

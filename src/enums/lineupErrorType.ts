@@ -6,17 +6,17 @@ const t = translations.lineupErrorType;
  * @description Error types for robust error handling
  */
 export enum LineupErrorType {
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  DATABASE_ERROR = 'DATABASE_ERROR',
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  VALIDATION = 'VALIDATION',
+  DATABASE = 'DATABASE',
+  NETWORK = 'NETWORK',
+  UNKNOWN = 'UNKNOWN',
 }
 
 export const LINEUP_ERROR_TYPE_LABELS: Record<LineupErrorType, string> = {
-  [LineupErrorType.VALIDATION_ERROR]: t.validationError,
-  [LineupErrorType.DATABASE_ERROR]: t.databaseError,
-  [LineupErrorType.NETWORK_ERROR]: t.networkError,
-  [LineupErrorType.UNKNOWN_ERROR]: t.unknownError,
+  [LineupErrorType.VALIDATION]: t.validationError,
+  [LineupErrorType.DATABASE]: t.databaseError,
+  [LineupErrorType.NETWORK]: t.networkError,
+  [LineupErrorType.UNKNOWN]: t.unknownError,
 };
 
 export const getLineupErrorTypeOptions = () =>

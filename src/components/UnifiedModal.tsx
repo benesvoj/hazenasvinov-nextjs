@@ -10,7 +10,7 @@ import {
   Button,
 } from '@heroui/react';
 import {Heading, HeadingLevel} from './Headings';
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib';
 
 interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
   isOpen: boolean;
@@ -79,25 +79,19 @@ export default function UnifiedModal({
         {footer && <ModalFooter className="px-4 sm:px-6 py-4">{footer}</ModalFooter>}
         {isFooterWithActions && (
           <ModalFooter className="px-4 sm:px-6 py-4">
-            {isOnlyCloseButton ? (
-              <Button variant="flat" onPress={onClose} aria-label={t.cancel}>
-                {t.cancel}
+            <Button variant="flat" onPress={onClose} aria-label={t.cancel}>
+              {t.cancel}
+            </Button>
+            {isOnlyCloseButton && (
+              <Button
+                color="primary"
+                onPress={onPress}
+                isDisabled={isDisabled}
+                aria-label={t.save}
+                isLoading={isLoading}
+              >
+                {t.save}
               </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button variant="flat" onPress={onClose} aria-label={t.cancel}>
-                  {t.cancel}
-                </Button>
-                <Button
-                  color="primary"
-                  onPress={onPress}
-                  isDisabled={isDisabled}
-                  aria-label={t.save}
-                  isLoading={isLoading}
-                >
-                  {t.save}
-                </Button>
-              </div>
             )}
           </ModalFooter>
         )}

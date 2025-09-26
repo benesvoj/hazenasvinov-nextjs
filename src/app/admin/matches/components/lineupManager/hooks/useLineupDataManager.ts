@@ -1,6 +1,12 @@
 import {useState, useCallback, useMemo} from 'react';
 import {useLineupData, useLineupManager, useTeamClubId} from '@/hooks';
-import {LineupFormData, LineupPlayerFormData, LineupCoachFormData, LineupSummary} from '@/types';
+import {
+  LineupFormData,
+  LineupPlayerFormData,
+  LineupCoachFormData,
+  LineupSummary,
+  UnknownErrorShape,
+} from '@/types';
 import {TeamTypes, LineupCoachRole, MemberFunction, PlayerPosition} from '@/enums';
 import {showToast} from '@/components';
 import {LineupErrorType} from '@/enums';
@@ -255,10 +261,10 @@ export function useLineupDataManager({
         console.error('Error saving lineup:', error);
 
         // Use robust error classification
-        const classifiedError = classifyLineupError(error);
+        const classifiedError = classifyLineupError(error as UnknownErrorShape);
 
         // Handle validation errors (keep modal open)
-        if (classifiedError.type === LineupErrorType.VALIDATION_ERROR) {
+        if (classifiedError.type === LineupErrorType.VALIDATION) {
           setValidationError(classifiedError.message);
           showToast.warning(
             `⚠️ Pravidla sestavy:\n\n${classifiedError.message}\n\nOpravte chyby a zkuste to znovu.`
@@ -267,7 +273,7 @@ export function useLineupDataManager({
         }
 
         // Handle database errors
-        if (classifiedError.type === LineupErrorType.DATABASE_ERROR) {
+        if (classifiedError.type === LineupErrorType.DATABASE) {
           showToast.danger(
             `❌ Chyba databáze:\n\n${classifiedError.message}\n\nKontaktujte podporu.`
           );
@@ -275,7 +281,7 @@ export function useLineupDataManager({
         }
 
         // Handle network errors
-        if (classifiedError.type === LineupErrorType.NETWORK_ERROR) {
+        if (classifiedError.type === LineupErrorType.NETWORK) {
           showToast.danger(
             `❌ Problém se sítí:\n\n${classifiedError.message}\n\nZkontrolujte připojení a zkuste to znovu.`
           );
