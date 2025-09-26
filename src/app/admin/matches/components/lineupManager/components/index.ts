@@ -4,3 +4,5 @@ export {default as CoachesTable} from './CoachesTable';
 export {default as LineupActions} from './LineupActions';
 export {default as LineupEmptyState} from './LineupEmptyState';
 export {default as LineupTabs} from './LineupTabs';
+export {default as LineupErrorBoundary} from './LineupErrorBoundary';
+export {default as LineupSkeleton} from './LineupSkeleton';

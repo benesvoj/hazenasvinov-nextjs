@@ -1,27 +1,16 @@
 'use client';
 
-import React, {useState, useEffect, forwardRef, useImperativeHandle} from 'react';
-import {Card, CardBody, CardHeader, useDisclosure} from '@heroui/react';
-import {UserGroupIcon} from '@heroicons/react/24/outline';
+import React, {useEffect, forwardRef, useImperativeHandle} from 'react';
+import {Card} from '@heroui/react';
 import {LineupManagerProps, LineupManagerRef} from '@/types';
-import {Heading, DeleteConfirmationModal, LoadingSpinner} from '@/components';
-import {
-  LineupPlayerSelectionModal,
-  LineupPlayerEditModal,
-  LineupCoachSelectionModal,
-  LineupCoachEditModal,
-} from './';
 import {TeamTypes} from '@/enums';
 import {translations} from '@/lib/translations';
 import {useLineupDataManager} from './lineupManager/hooks/useLineupDataManager';
-import {
-  TeamSelector,
-  PlayersTable,
-  CoachesTable,
-  LineupActions,
-  LineupEmptyState,
-  LineupTabs,
-} from './lineupManager/components';
+import {useLineupModals} from './lineupManager/hooks/useLineupModals';
+import {useLineupPerformance} from './lineupManager/hooks/useLineupPerformance';
+import {useLineupErrorHandler} from './lineupManager/hooks/useLineupErrorHandler';
+import {TeamSelector, LineupErrorBoundary, LineupSkeleton} from './lineupManager/components';
+import {LineupHeader, LineupContent, LineupModals} from './lineupManager/components/utils';
 
 const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
   (
@@ -114,28 +103,38 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       onMemberCreated,
     });
 
-    // Modal states
-    const [isPlayerEditModalOpen, setIsPlayerEditModalOpen] = useState(false);
-    const [isCoachSelectionModalOpen, setIsCoachSelectionModalOpen] = useState(false);
-    const [isCoachEditModalOpen, setIsCoachEditModalOpen] = useState(false);
-
+    // Modal management
     const {
-      isOpen: isPlayerSelectionModalOpen,
-      onOpen: onPlayerSelectionModalOpen,
-      onClose: onPlayerSelectionModalClose,
-    } = useDisclosure();
+      isPlayerSelectionModalOpen,
+      onPlayerSelectionModalOpen,
+      onPlayerSelectionModalClose,
+      isPlayerEditModalOpen,
+      setIsPlayerEditModalOpen,
+      isCoachSelectionModalOpen,
+      setIsCoachSelectionModalOpen,
+      isCoachEditModalOpen,
+      setIsCoachEditModalOpen,
+      isDeleteModalOpen,
+      onDeleteModalOpen,
+      onDeleteModalClose,
+      isDeletePlayerModalOpen,
+      onDeletePlayerModalOpen,
+      onDeletePlayerModalClose,
+    } = useLineupModals();
 
-    const {
-      isOpen: isDeleteModalOpen,
-      onOpen: onDeleteModalOpen,
-      onClose: onDeleteModalClose,
-    } = useDisclosure();
+    // Performance monitoring
+    const {metrics: performanceMetrics} = useLineupPerformance({
+      componentName: 'LineupManager',
+      logPerformance: process.env.NODE_ENV === 'development',
+      threshold: 16,
+    });
 
-    const {
-      isOpen: isDeletePlayerModalOpen,
-      onOpen: onDeletePlayerModalOpen,
-      onClose: onDeletePlayerModalClose,
-    } = useDisclosure();
+    // Error handling
+    const {handleAsyncOperation, hasErrors} = useLineupErrorHandler({
+      maxErrors: 5,
+      autoRetry: true,
+      retryDelay: 1000,
+    });
 
     // Load lineup data when component mounts or team changes
     useEffect(() => {
@@ -172,7 +171,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
         handleEditPlayer(index);
         setIsPlayerEditModalOpen(true);
       },
-      [handleEditPlayer]
+      [handleEditPlayer, setIsPlayerEditModalOpen]
     );
 
     const handleDeletePlayerWithModal = React.useCallback(
@@ -193,7 +192,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
         handleEditCoach(index);
         setIsCoachEditModalOpen(true);
       },
-      [handleEditCoach]
+      [handleEditCoach, setIsCoachEditModalOpen]
     );
 
     const handleModalClose = () => {
@@ -222,48 +221,39 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     };
 
     return (
-      <div className="space-y-6">
-        <TeamSelector
-          selectedTeam={selectedTeam}
-          onTeamSelect={setSelectedTeam}
-          homeTeamName={homeTeamName}
-          awayTeamName={awayTeamName}
-          homeFormData={homeFormData}
-          awayFormData={awayFormData}
-          calculateLocalSummary={calculateLocalSummary}
-          t={t}
-        />
+      <LineupErrorBoundary>
+        <div className="space-y-6">
+          <TeamSelector
+            selectedTeam={selectedTeam}
+            onTeamSelect={setSelectedTeam}
+            homeTeamName={homeTeamName}
+            awayTeamName={awayTeamName}
+            homeFormData={homeFormData}
+            awayFormData={awayFormData}
+            calculateLocalSummary={calculateLocalSummary}
+            t={t}
+          />
 
-        {/* Lineup Management */}
-        <Card>
-          <CardHeader className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <UserGroupIcon className="w-5 h-5 text-blue-500" />
-              <Heading size={3}>
-                {t.lineup}: {currentTeamName}
-              </Heading>
-            </div>
-            <LineupActions
-              hasPlayersOrCoaches={
-                currentFormData.players.length > 0 || currentFormData.coaches.length > 0
-              }
-              onAddPlayer={handleAddPlayerWithModal}
-              onAddCoach={handleAddCoachWithModal}
-              onDeleteLineup={onDeleteModalOpen}
-              t={t}
-            />
-          </CardHeader>
-          <CardBody>
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <LoadingSpinner label={t.loading} />
-              </div>
-            ) : currentFormData.players.length === 0 && currentFormData.coaches.length === 0 ? (
-              <LineupEmptyState onAddPlayer={handleAddPlayerWithModal} t={t} />
-            ) : (
-              <LineupTabs
+          {/* Lineup Management */}
+          {loading ? (
+            <LineupSkeleton showHeader={true} showTabs={true} playerCount={5} coachCount={2} />
+          ) : (
+            <Card>
+              <LineupHeader
+                currentTeamName={currentTeamName}
+                hasPlayersOrCoaches={
+                  currentFormData.players.length > 0 || currentFormData.coaches.length > 0
+                }
+                onAddPlayer={handleAddPlayerWithModal}
+                onAddCoach={handleAddCoachWithModal}
+                onDeleteLineup={onDeleteModalOpen}
+                t={t}
+              />
+              <LineupContent
+                loading={loading}
                 players={currentFormData.players}
                 coaches={currentFormData.coaches}
+                onAddPlayer={handleAddPlayerWithModal}
                 onEditPlayer={handleEditPlayerWithModal}
                 onDeletePlayer={handleDeletePlayerWithModal}
                 onEditCoach={handleEditCoachWithModal}
@@ -271,83 +261,64 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
                 getMemberName={getMemberName}
                 t={t}
               />
-            )}
-          </CardBody>
-        </Card>
+            </Card>
+          )}
 
-        {/* Player Selection Modal */}
-        <LineupPlayerSelectionModal
-          isOpen={isPlayerSelectionModalOpen}
-          onClose={handleModalClose}
-          onPlayerSelected={handlePlayerSelected}
-          categoryId={categoryId}
-          editingPlayerIndex={editingPlayerIndex}
-          currentPlayer={
-            editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null
-          }
-          teamName={currentTeamName}
-          clubId={currentTeamClubId || undefined}
-          currentLineupPlayers={currentFormData.players}
-          onMemberCreated={onMemberCreated}
-        />
-
-        {/* Player Edit Modal */}
-        <LineupPlayerEditModal
-          isOpen={isPlayerEditModalOpen}
-          onClose={handlePlayerEditClose}
-          onSave={handlePlayerEditSave}
-          player={editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null}
-          playerName={
-            editingPlayerIndex !== null
-              ? getMemberName(currentFormData.players[editingPlayerIndex].member_id || '')
-              : undefined
-          }
-        />
-
-        {/* Coach Selection Modal */}
-        <LineupCoachSelectionModal
-          isOpen={isCoachSelectionModalOpen}
-          onClose={handleCoachSelectionClose}
-          onCoachSelected={handleCoachSelected}
-          coaches={availableCoaches}
-          editingCoachIndex={editingCoachIndex}
-          currentCoach={
-            editingCoachIndex !== null ? currentFormData.coaches[editingCoachIndex] : null
-          }
-        />
-
-        {/* Coach Edit Modal */}
-        <LineupCoachEditModal
-          isOpen={isCoachEditModalOpen}
-          onClose={handleCoachEditClose}
-          onSave={handleCoachEditSave}
-          coach={editingCoachIndex !== null ? currentFormData.coaches[editingCoachIndex] : null}
-          coachIndex={editingCoachIndex || 0}
-          coachName={
-            editingCoachIndex !== null
-              ? getMemberName(currentFormData.coaches[editingCoachIndex].member_id)
-              : ''
-          }
-        />
-
-        {/* Delete Confirmation Modal */}
-        <DeleteConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={onDeleteModalClose}
-          onConfirm={handleDeleteLineup}
-          title="Smazat sestavu"
-          message={`Opravdu chcete smazat sestavu pro tým ${currentTeamName}? Tato akce je nevratná.`}
-        />
-
-        {/* Delete Player Confirmation Modal */}
-        <DeleteConfirmationModal
-          isOpen={isDeletePlayerModalOpen}
-          onClose={onDeletePlayerModalClose}
-          onConfirm={confirmDeletePlayerWithModal}
-          title="Odebrat hráče"
-          message="Opravdu chcete odebrat tohoto hráče ze sestavy? Tato akce je nevratná."
-        />
-      </div>
+          {/* All Modals */}
+          <LineupModals
+            // Player modals
+            isPlayerSelectionModalOpen={isPlayerSelectionModalOpen}
+            onPlayerSelectionModalClose={handleModalClose}
+            onPlayerSelected={handlePlayerSelected}
+            categoryId={categoryId}
+            editingPlayerIndex={editingPlayerIndex}
+            currentPlayer={
+              editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null
+            }
+            teamName={currentTeamName}
+            clubId={currentTeamClubId || undefined}
+            currentLineupPlayers={currentFormData.players}
+            onMemberCreated={onMemberCreated}
+            // Player edit modal
+            isPlayerEditModalOpen={isPlayerEditModalOpen}
+            onPlayerEditClose={handlePlayerEditClose}
+            onPlayerEditSave={handlePlayerEditSave}
+            playerName={
+              editingPlayerIndex !== null
+                ? getMemberName(currentFormData.players[editingPlayerIndex].member_id || '')
+                : undefined
+            }
+            // Coach modals
+            isCoachSelectionModalOpen={isCoachSelectionModalOpen}
+            onCoachSelectionClose={handleCoachSelectionClose}
+            onCoachSelected={handleCoachSelected}
+            coaches={availableCoaches}
+            editingCoachIndex={editingCoachIndex}
+            currentCoach={
+              editingCoachIndex !== null ? currentFormData.coaches[editingCoachIndex] : null
+            }
+            // Coach edit modal
+            isCoachEditModalOpen={isCoachEditModalOpen}
+            onCoachEditClose={handleCoachEditClose}
+            onCoachEditSave={handleCoachEditSave}
+            coachIndex={editingCoachIndex}
+            coachName={
+              editingCoachIndex !== null
+                ? getMemberName(currentFormData.coaches[editingCoachIndex].member_id)
+                : ''
+            }
+            // Delete modals
+            isDeleteModalOpen={isDeleteModalOpen}
+            onDeleteModalClose={onDeleteModalClose}
+            onDeleteLineup={handleDeleteLineup}
+            isDeletePlayerModalOpen={isDeletePlayerModalOpen}
+            onDeletePlayerModalClose={onDeletePlayerModalClose}
+            onConfirmDeletePlayer={confirmDeletePlayerWithModal}
+            currentTeamName={currentTeamName}
+            t={t}
+          />
+        </div>
+      </LineupErrorBoundary>
     );
   }
 );
