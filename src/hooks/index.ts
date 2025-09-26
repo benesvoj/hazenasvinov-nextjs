@@ -76,4 +76,3 @@ export * from './shared/useDebounce';
 export * from './shared/usePageVisibility';
 export * from './shared/usePortalAccess';
 export * from './shared/useSupabaseClient';
-export * from './shared/useSupabaseServer';
