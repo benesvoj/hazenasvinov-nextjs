@@ -186,7 +186,7 @@ export const cacheKeys = {
     byClub: (clubId: string) => `teams:club:${clubId}`,
   },
   categories: {
-    all: 'categories:all',
+    all: 'category:all',
     byId: (id: string) => `category:${id}`,
     bySlug: (slug: string) => `category:slug:${slug}`,
   },

@@ -59,7 +59,7 @@ interface TrainingSession {
   description?: string;
   session_date: string;
   session_time?: string;
-  category_id: string;        // ✅ UUID reference to categories
+  category_id: string;        // ✅ UUID reference to category
   season_id: string;
   location?: string;
   coach_id: string;
@@ -100,7 +100,7 @@ interface Member {
   name: string;
   surname: string;
   date_of_birth?: string;
-  category_id?: string;       // ✅ UUID reference to categories
+  category_id?: string;       // ✅ UUID reference to category
   sex: 'male' | 'female';
   functions: string[];
   created_at: string;
@@ -112,7 +112,7 @@ interface Member {
 ```typescript
 interface Match {
   id: string;
-  category_id: string;        // ✅ UUID reference to categories
+  category_id: string;        // ✅ UUID reference to category
   season_id: string;
   date: string;
   time: string;
@@ -128,7 +128,7 @@ interface Standing {
   id?: string;
   team_id?: string;
   club_id?: string;
-  category_id: string;        // ✅ UUID reference to categories
+  category_id: string;        // ✅ UUID reference to category
   season_id: string;
   position: number;
   // ... other fields
@@ -144,7 +144,7 @@ interface BlogPost {
   content: string;
   author_id: string;
   status: 'draft' | 'published' | 'archived';
-  category_id?: string;       // ✅ UUID reference to categories
+  category_id?: string;       // ✅ UUID reference to category
   // ... other fields
 }
 ```

@@ -24,11 +24,9 @@ import {
   UserGroupIcon,
   DocumentIcon,
   TrashIcon,
-  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import {
   Match,
-  MatchMetadata,
   isPhotoMetadata,
   isNoteMetadata,
   isLineupMetadata,
@@ -41,7 +39,7 @@ import {
   useAddMatchMetadata,
   useDeleteMatchMetadata,
   useSetPrimaryMatchMetadata,
-} from '@/hooks/useMatchMetadata';
+} from '@/hooks';
 import {ArrowDownTrayIcon} from '@heroicons/react/16/solid';
 
 interface RecentMatchDetailsProps {

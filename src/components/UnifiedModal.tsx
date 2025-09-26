@@ -25,8 +25,10 @@ interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> 
   hSize?: HeadingLevel;
   actions?: React.ReactNode;
   isFooterWithActions?: boolean;
+  isOnlyCloseButton?: boolean;
   onPress?: () => void;
   isDisabled?: boolean;
+  isLoading?: boolean;
 }
 
 export default function UnifiedModal({
@@ -43,6 +45,8 @@ export default function UnifiedModal({
   isFooterWithActions = false,
   onPress,
   isDisabled,
+  isLoading,
+  isOnlyCloseButton = false,
   ...props
 }: UnifiedModalProps) {
   const t = translations.button;
@@ -75,12 +79,26 @@ export default function UnifiedModal({
         {footer && <ModalFooter className="px-4 sm:px-6 py-4">{footer}</ModalFooter>}
         {isFooterWithActions && (
           <ModalFooter className="px-4 sm:px-6 py-4">
-            <Button color="danger" variant="flat" onPress={onClose} aria-label={t.cancel}>
-              {t.cancel}
-            </Button>
-            <Button color="primary" onPress={onPress} isDisabled={isDisabled} aria-label={t.save}>
-              {t.save}
-            </Button>
+            {isOnlyCloseButton ? (
+              <Button variant="flat" onPress={onClose} aria-label={t.cancel}>
+                {t.cancel}
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button variant="flat" onPress={onClose} aria-label={t.cancel}>
+                  {t.cancel}
+                </Button>
+                <Button
+                  color="primary"
+                  onPress={onPress}
+                  isDisabled={isDisabled}
+                  aria-label={t.save}
+                  isLoading={isLoading}
+                >
+                  {t.save}
+                </Button>
+              </div>
+            )}
           </ModalFooter>
         )}
       </ModalContent>

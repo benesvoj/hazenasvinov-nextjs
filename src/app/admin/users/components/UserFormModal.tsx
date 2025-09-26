@@ -96,7 +96,7 @@ export default function UserFormModal({
     }
   };
 
-  // Load categories
+  // Load category
   const loadCategories = async () => {
     try {
       const supabase = createClient();
@@ -105,11 +105,11 @@ export default function UserFormModal({
       if (error) throw error;
       setCategories(data || []);
     } catch (error: any) {
-      console.error('Error loading categories:', error);
+      console.error('Error loading category:', error);
     }
   };
 
-  // Check if role requires categories
+  // Check if role requires category
   const roleRequiresCategories = (role: string) => {
     return role === 'coach' || role === 'head_coach';
   };
@@ -118,7 +118,7 @@ export default function UserFormModal({
   const handleAddRole = async () => {
     if (!newRole || !selectedUser) return;
 
-    // If role requires categories, show category selection modal
+    // If role requires category, show category selection modal
     if (roleRequiresCategories(newRole)) {
       setPendingRole(newRole);
       setSelectedCategories([]);
@@ -126,7 +126,7 @@ export default function UserFormModal({
       return;
     }
 
-    // For roles that don't require categories, add directly
+    // For roles that don't require category, add directly
     await addRoleToDatabase(newRole, null);
   };
 
@@ -243,7 +243,7 @@ export default function UserFormModal({
     }
   }, [selectedUser]);
 
-  // Load categories on component mount
+  // Load category on component mount
   useEffect(() => {
     loadCategories();
   }, []);

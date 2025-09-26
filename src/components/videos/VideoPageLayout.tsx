@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Video, VideoFilters as VideoFiltersType, Category, Club, Season } from "@/types";
-import { Card, CardBody } from "@heroui/react";
-import { VideoPageHeader } from "./VideoPageHeader";
-import { VideoFilters } from "./VideoFilters";
-import { VideoGrid } from "./VideoGrid";
-import { VideoFormModal } from "./VideoFormModal";
+import React from 'react';
+import {Video, VideoFilters as VideoFiltersType, Category, Club, Season} from '@/types';
+import {Card, CardBody} from '@heroui/react';
+import {VideoPageHeader} from './VideoPageHeader';
+import {VideoFilters} from './VideoFilters';
+import {VideoGrid} from './VideoGrid';
+import {VideoFormModal} from './VideoFormModal';
 
 interface VideoPageLayoutProps {
   // Header props
   title: string;
   description: string;
   iconColor?: string;
-  buttonColor?: "primary" | "success";
+  buttonColor?: 'primary' | 'success';
   buttonText: string;
   onAddVideo: () => void;
   isAddDisabled?: boolean;
@@ -27,7 +27,7 @@ interface VideoPageLayoutProps {
   categories: Category[];
   clubs: Club[];
   seasons: Season[];
-  availableCategories?: Category[]; // For coaches - only show assigned categories
+  availableCategories?: Category[]; // For coaches - only show assigned category
 
   // Event handlers
   onFiltersChange: (filters: VideoFiltersType) => void;
@@ -48,7 +48,7 @@ interface VideoPageLayoutProps {
   emptyStateTitle?: string;
   emptyStateDescription?: string;
   showAddButton?: boolean;
-  
+
   // Pagination props
   currentPage?: number;
   totalPages?: number;
@@ -62,8 +62,8 @@ export function VideoPageLayout({
   // Header props
   title,
   description,
-  iconColor = "text-blue-600",
-  buttonColor = "primary",
+  iconColor = 'text-blue-600',
+  buttonColor = 'primary',
   buttonText,
   onAddVideo,
   isAddDisabled = false,
@@ -98,7 +98,7 @@ export function VideoPageLayout({
   emptyStateTitle,
   emptyStateDescription,
   showAddButton = true,
-  
+
   // Pagination props
   currentPage = 1,
   totalPages = 1,
@@ -123,9 +123,7 @@ export function VideoPageLayout({
       {/* Access Control Message */}
       {showAccessControlMessage && accessControlMessage && (
         <Card className="border-yellow-200 bg-yellow-50">
-          <CardBody>
-            {accessControlMessage}
-          </CardBody>
+          <CardBody>{accessControlMessage}</CardBody>
         </Card>
       )}
 
@@ -145,16 +143,14 @@ export function VideoPageLayout({
           <CardBody>
             <div className="space-y-3">
               <p className="text-red-700 font-medium">{error}</p>
-              {error.includes("Tabulka videí neexistuje") && (
+              {error.includes('Tabulka videí neexistuje') && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">
-                    Jak vyřešit:
-                  </h4>
+                  <h4 className="font-medium text-blue-900 mb-2">Jak vyřešit:</h4>
                   <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
                     <li>Jděte do Supabase Dashboard</li>
                     <li>Otevřete SQL Editor</li>
                     <li>
-                      Zkopírujte obsah souboru{" "}
+                      Zkopírujte obsah souboru{' '}
                       <code className="bg-blue-100 px-1 rounded">
                         scripts/create_videos_table.sql
                       </code>
@@ -163,10 +159,8 @@ export function VideoPageLayout({
                     <li>Obnovte stránku</li>
                   </ol>
                   <p className="text-xs text-blue-600 mt-2">
-                    Podrobné instrukce najdete v{" "}
-                    <code className="bg-blue-100 px-1 rounded">
-                      docs/VIDEOS_MANUAL_SETUP.md
-                    </code>
+                    Podrobné instrukce najdete v{' '}
+                    <code className="bg-blue-100 px-1 rounded">docs/VIDEOS_MANUAL_SETUP.md</code>
                   </p>
                 </div>
               )}

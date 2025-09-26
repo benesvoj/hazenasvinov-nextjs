@@ -23,8 +23,8 @@ import {
   Card,
   CardBody,
 } from '@heroui/react';
-import {useFetchMembers} from '@/hooks/useFetchMembers';
-import {AddMemberToLineupData} from '@/types/categoryLineup';
+import {useFetchMembers} from '@/hooks';
+import {AddMemberToLineupData} from '@/types/entities/category/data/categoryLineup';
 import {MagnifyingGlassIcon as SearchIcon, UserPlusIcon} from '@heroicons/react/24/outline';
 import {CreateMemberModal} from './';
 

@@ -1,35 +1,43 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Switch } from "@heroui/switch";
-import { Badge } from "@heroui/badge";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Image } from "@heroui/react";
-import { 
+import React, {useState, useEffect, useCallback} from 'react';
+import {Card, CardBody} from '@heroui/card';
+import {Button} from '@heroui/button';
+import {Input} from '@heroui/input';
+import {Switch} from '@heroui/switch';
+import {Badge} from '@heroui/badge';
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Image,
+} from '@heroui/react';
+import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
   EyeIcon,
   EyeSlashIcon,
-  PhotoIcon
-} from "@heroicons/react/24/outline";
-import { PhotoAlbum, CreateAlbumData, UpdateAlbumData } from "@/types/photoGallery";
-import { 
-  getPhotoAlbums, 
-  createPhotoAlbum, 
-  updatePhotoAlbum, 
-  deletePhotoAlbum 
-} from "@/utils/supabase/photoGallery";
-import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
-import AlbumFormModal from "./AlbumFormModal";
+  PhotoIcon,
+} from '@heroicons/react/24/outline';
+import {PhotoAlbum, CreateAlbumData, UpdateAlbumData} from '@/types/features/gallery/photoGallery';
+import {
+  getPhotoAlbums,
+  createPhotoAlbum,
+  updatePhotoAlbum,
+  deletePhotoAlbum,
+} from '@/utils/supabase/photoGallery';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import AlbumFormModal from './AlbumFormModal';
 
 export default function AlbumsTab() {
   const [albums, setAlbums] = useState<PhotoAlbum[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  
+  const [error, setError] = useState('');
+
   // Modal states
   const [isAlbumFormOpen, setIsAlbumFormOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -43,7 +51,7 @@ export default function AlbumsTab() {
       const data = await getPhotoAlbums();
       setAlbums(data);
     } catch (err) {
-      setError("Chyba při načítání alb");
+      setError('Chyba při načítání alb');
       console.error(err);
     } finally {
       setLoading(false);
@@ -61,22 +69,22 @@ export default function AlbumsTab() {
         // Update existing album
         const updated = await updatePhotoAlbum(editingAlbum.id, albumData as UpdateAlbumData);
         if (updated) {
-          setAlbums(prev => prev.map(album => 
-            album.id === editingAlbum.id ? updated : album
-          ));
+          setAlbums((prev) =>
+            prev.map((album) => (album.id === editingAlbum.id ? updated : album))
+          );
         }
       } else {
         // Create new album
         const created = await createPhotoAlbum(albumData as CreateAlbumData);
         if (created) {
-          setAlbums(prev => [created, ...prev]);
+          setAlbums((prev) => [created, ...prev]);
         }
       }
-      
+
       setIsAlbumFormOpen(false);
       setEditingAlbum(null);
     } catch (err) {
-      setError("Chyba při ukládání alba");
+      setError('Chyba při ukládání alba');
       console.error(err);
     }
   };
@@ -84,16 +92,16 @@ export default function AlbumsTab() {
   // Handle album deletion
   const handleAlbumDelete = async () => {
     if (!deletingAlbum) return;
-    
+
     try {
       const success = await deletePhotoAlbum(deletingAlbum.id);
       if (success) {
-        setAlbums(prev => prev.filter(album => album.id !== deletingAlbum.id));
+        setAlbums((prev) => prev.filter((album) => album.id !== deletingAlbum.id));
       }
       setIsDeleteModalOpen(false);
       setDeletingAlbum(null);
     } catch (err) {
-      setError("Chyba při mazání alba");
+      setError('Chyba při mazání alba');
       console.error(err);
     }
   };
@@ -129,12 +137,8 @@ export default function AlbumsTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Fotoalba
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Správa fotoalb a jejich nastavení
-          </p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Fotoalba</h2>
+          <p className="text-gray-600 dark:text-gray-400">Správa fotoalb a jejich nastavení</p>
         </div>
         <Button
           color="primary"
@@ -185,7 +189,7 @@ export default function AlbumsTab() {
                   </TableCell>
                   <TableCell>
                     <div className="max-w-xs truncate text-gray-600 dark:text-gray-400">
-                      {album.description || "—"}
+                      {album.description || '—'}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -201,7 +205,7 @@ export default function AlbumsTab() {
                         <EyeSlashIcon className="w-4 h-4 text-gray-500" />
                       )}
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {album.is_public ? "Veřejné" : "Soukromé"}
+                        {album.is_public ? 'Veřejné' : 'Soukromé'}
                       </span>
                     </div>
                   </TableCell>

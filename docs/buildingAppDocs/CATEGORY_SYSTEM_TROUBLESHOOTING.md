@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS categories (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Insert some sample categories
+-- Insert some sample category
 INSERT INTO categories (code, name, description, age_group, gender, sort_order) VALUES
     ('men', 'Muži', '1.liga mužů, SM oblast', '18+', 'male', 1),
     ('women', 'Ženy', 'Oblastní liga žen, SM oblast', '18+', 'female', 2),
@@ -235,8 +235,8 @@ Try this simple test in your Supabase SQL Editor:
 ```sql
 -- Test if basic tables exist
 SELECT 
-    'categories' as table_name,
-    (SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'categories') as exists
+    'category' as table_name,
+    (SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'category') as exists
 UNION ALL
 SELECT 
     'seasons' as table_name,

@@ -4,10 +4,10 @@ import React, {useState} from 'react';
 import {Input, Select, SelectItem, Card, CardBody, Button, Textarea} from '@heroui/react';
 import {UserPlusIcon} from '@heroicons/react/24/outline';
 import {createClient} from '@/utils/supabase/client';
-import {useFetchMembers} from '@/hooks/useFetchMembers';
-import {useMemberMetadata} from '@/hooks/useMemberMetadata';
+import {useFetchMembers, useMemberMetadata} from '@/hooks';
 import {UnifiedModal} from '@/components';
-import {MemberFormData} from '@/types/memberMetadata';
+import {MemberMetadaFormData} from '@/types';
+import {Genders, getGenderOptions, MemberFunction} from '@/enums';
 
 interface CreateMemberModalProps {
   isOpen: boolean;
@@ -24,14 +24,14 @@ export default function CreateMemberModal({
   selectedCategoryId,
   selectedCategoryName,
 }: CreateMemberModalProps) {
-  const [formData, setFormData] = useState<MemberFormData>({
+  const [formData, setFormData] = useState<MemberMetadaFormData>({
     // Basic Information
     name: '',
     surname: '',
     registration_number: '',
     date_of_birth: '',
-    sex: 'male',
-    functions: 'player',
+    sex: Genders.MALE,
+    functions: MemberFunction.PLAYER,
 
     // Contact Information
     phone: '',
@@ -60,7 +60,7 @@ export default function CreateMemberModal({
   const {fetchMembers} = useFetchMembers();
   const {createMemberMetadata} = useMemberMetadata();
 
-  const handleInputChange = (field: keyof MemberFormData, value: string) => {
+  const handleInputChange = (field: keyof MemberMetadaFormData, value: string) => {
     setFormData((prev) => ({...prev, [field]: value}));
   };
 
@@ -135,8 +135,8 @@ export default function CreateMemberModal({
         surname: '',
         registration_number: '',
         date_of_birth: '',
-        sex: 'male',
-        functions: 'player',
+        sex: Genders.MALE,
+        functions: MemberFunction.PLAYER,
 
         // Contact Information
         phone: '',
@@ -177,8 +177,8 @@ export default function CreateMemberModal({
       surname: '',
       registration_number: '',
       date_of_birth: '',
-      sex: 'male',
-      functions: 'player',
+      sex: Genders.MALE,
+      functions: MemberFunction.PLAYER,
 
       // Contact Information
       phone: '',
@@ -263,12 +263,13 @@ export default function CreateMemberModal({
                 label="Pohlaví"
                 selectedKeys={[formData.sex]}
                 onSelectionChange={(keys) => {
-                  const sex = Array.from(keys)[0] as 'male' | 'female';
+                  const sex = Array.from(keys)[0] as Genders;
                   handleInputChange('sex', sex);
                 }}
               >
-                <SelectItem key="male">Muž</SelectItem>
-                <SelectItem key="female">Žena</SelectItem>
+                {getGenderOptions().map(({value, label}) => (
+                  <SelectItem key={value}>{label}</SelectItem>
+                ))}
               </Select>
             </div>
           </CardBody>

@@ -10,21 +10,9 @@ import {
   FireIcon,
 } from '@heroicons/react/24/outline';
 import {useState, useEffect} from 'react';
-import {
-  Button,
-  Card,
-  CardBody,
-  Input,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-} from '@heroui/react';
+import {Card, CardBody, Input, useDisclosure} from '@heroui/react';
 import {ReleaseNote, getReleaseNotes} from '@/utils/releaseNotes';
-import {showToast} from '@/components';
-import {ToDoList, CommentsZone} from './components';
+import {showToast, ToDoList, CommentsZone, AdminContainer, UnifiedModal} from '@/components';
 import {TodoItem} from '@/utils/todos';
 import {Comment} from '@/types';
 
@@ -395,7 +383,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <AdminContainer>
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card
@@ -482,268 +470,226 @@ export default function AdminDashboard() {
 
       {/* Modals */}
       {/* Add Todo Modal */}
-      <Modal isOpen={isAddTodoOpen} onClose={onAddTodoClose} size="2xl">
-        <ModalContent>
-          <ModalHeader>Add New Todo</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Title"
-                value={todoFormData.title}
-                onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
-                isRequired
-                placeholder="Enter todo title"
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Description
-                </label>
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
-                  value={todoFormData.description}
-                  onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
-                  placeholder="Enter description (optional)"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={todoFormData.priority}
-                  onChange={(e) =>
-                    setTodoFormData({
-                      ...todoFormData,
-                      priority: e.target.value as TodoItem['priority'],
-                    })
-                  }
-                >
-                  <option value="low">Low Priority</option>
-                  <option value="medium">Medium Priority</option>
-                  <option value="high">High Priority</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={todoFormData.category}
-                  onChange={(e) =>
-                    setTodoFormData({
-                      ...todoFormData,
-                      category: e.target.value as TodoItem['category'],
-                    })
-                  }
-                >
-                  <option value="feature">Feature</option>
-                  <option value="bug">Bug</option>
-                  <option value="improvement">Improvement</option>
-                  <option value="technical">Technical</option>
-                </select>
-              </div>
-              <Input
-                label="Due Date"
-                type="date"
-                value={todoFormData.due_date}
-                onChange={(e) => setTodoFormData({...todoFormData, due_date: e.target.value})}
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onAddTodoClose}>
-              Cancel
-            </Button>
-            <Button color="primary" onPress={addTodo}>
-              Add Todo
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <UnifiedModal title="Add New Todo" isOpen={isAddTodoOpen} onClose={onAddTodoClose} size="2xl">
+        <div className="space-y-4">
+          <Input
+            label="Title"
+            value={todoFormData.title}
+            onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
+            isRequired
+            placeholder="Enter todo title"
+          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Description
+            </label>
+            <textarea
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
+              value={todoFormData.description}
+              onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
+              placeholder="Enter description (optional)"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+              value={todoFormData.priority}
+              onChange={(e) =>
+                setTodoFormData({
+                  ...todoFormData,
+                  priority: e.target.value as TodoItem['priority'],
+                })
+              }
+            >
+              <option value="low">Low Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="high">High Priority</option>
+              <option value="urgent">Urgent</option>
+            </select>
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+              value={todoFormData.category}
+              onChange={(e) =>
+                setTodoFormData({
+                  ...todoFormData,
+                  category: e.target.value as TodoItem['category'],
+                })
+              }
+            >
+              <option value="feature">Feature</option>
+              <option value="bug">Bug</option>
+              <option value="improvement">Improvement</option>
+              <option value="technical">Technical</option>
+            </select>
+          </div>
+          <Input
+            label="Due Date"
+            type="date"
+            value={todoFormData.due_date}
+            onChange={(e) => setTodoFormData({...todoFormData, due_date: e.target.value})}
+          />
+        </div>
+      </UnifiedModal>
 
       {/* Edit Todo Modal */}
-      <Modal isOpen={isEditTodoOpen} onClose={onEditTodoClose} size="2xl">
-        <ModalContent>
-          <ModalHeader>Edit Todo</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Title"
-                value={todoFormData.title}
-                onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
-                isRequired
-                placeholder="Enter todo title"
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Description
-                </label>
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
-                  value={todoFormData.description}
-                  onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
-                  placeholder="Enter description (optional)"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={todoFormData.priority}
-                  onChange={(e) =>
-                    setTodoFormData({
-                      ...todoFormData,
-                      priority: e.target.value as TodoItem['priority'],
-                    })
-                  }
-                >
-                  <option value="low">Low Priority</option>
-                  <option value="medium">Medium Priority</option>
-                  <option value="high">High Priority</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={todoFormData.status}
-                  onChange={(e) =>
-                    setTodoFormData({...todoFormData, status: e.target.value as TodoItem['status']})
-                  }
-                >
-                  <option value="todo">To Do</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="done">Done</option>
-                </select>
-              </div>
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                value={todoFormData.category}
-                onChange={(e) =>
-                  setTodoFormData({
-                    ...todoFormData,
-                    category: e.target.value as TodoItem['category'],
-                  })
-                }
-              >
-                <option value="feature">Feature</option>
-                <option value="bug">Bug</option>
-                <option value="improvement">Improvement</option>
-                <option value="technical">Technical</option>
-              </select>
-              <Input
-                label="Due Date"
-                type="date"
-                value={todoFormData.due_date}
-                onChange={(e) => setTodoFormData({...todoFormData, due_date: e.target.value})}
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onEditTodoClose}>
-              Cancel
-            </Button>
-            <Button color="primary" onPress={updateTodo}>
-              Update Todo
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <UnifiedModal title="Edit Todo" isOpen={isEditTodoOpen} onClose={onEditTodoClose} size="2xl">
+        <div className="space-y-4">
+          <Input
+            label="Title"
+            value={todoFormData.title}
+            onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
+            isRequired
+            placeholder="Enter todo title"
+          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Description
+            </label>
+            <textarea
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
+              value={todoFormData.description}
+              onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
+              placeholder="Enter description (optional)"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+              value={todoFormData.priority}
+              onChange={(e) =>
+                setTodoFormData({
+                  ...todoFormData,
+                  priority: e.target.value as TodoItem['priority'],
+                })
+              }
+            >
+              <option value="low">Low Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="high">High Priority</option>
+              <option value="urgent">Urgent</option>
+            </select>
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+              value={todoFormData.status}
+              onChange={(e) =>
+                setTodoFormData({...todoFormData, status: e.target.value as TodoItem['status']})
+              }
+            >
+              <option value="todo">To Do</option>
+              <option value="in-progress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+          <select
+            className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+            value={todoFormData.category}
+            onChange={(e) =>
+              setTodoFormData({
+                ...todoFormData,
+                category: e.target.value as TodoItem['category'],
+              })
+            }
+          >
+            <option value="feature">Feature</option>
+            <option value="bug">Bug</option>
+            <option value="improvement">Improvement</option>
+            <option value="technical">Technical</option>
+          </select>
+          <Input
+            label="Due Date"
+            type="date"
+            value={todoFormData.due_date}
+            onChange={(e) => setTodoFormData({...todoFormData, due_date: e.target.value})}
+          />
+        </div>
+      </UnifiedModal>
 
       {/* Add Comment Modal */}
-      <Modal isOpen={isAddCommentOpen} onClose={onAddCommentClose} size="lg">
-        <ModalContent>
-          <ModalHeader>Add Comment</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Comment Type
-                </label>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={commentFormData.type}
-                  onChange={(e) =>
-                    setCommentFormData({
-                      ...commentFormData,
-                      type: e.target.value as Comment['type'],
-                    })
-                  }
-                >
-                  <option value="general">ℹ️ General</option>
-                  <option value="bug">🐛 Bug Report</option>
-                  <option value="feature">✨ Feature Request</option>
-                  <option value="improvement">🔧 Improvement</option>
-                </select>
-              </div>
-              <textarea
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
-                value={commentFormData.content}
-                onChange={(e) => setCommentFormData({...commentFormData, content: e.target.value})}
-                placeholder="Enter your comment..."
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onAddCommentClose}>
-              Cancel
-            </Button>
-            <Button color="primary" onPress={addComment}>
-              Add Comment
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <UnifiedModal
+        title="Add Comment"
+        isOpen={isAddCommentOpen}
+        onClose={onAddCommentClose}
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Comment Type
+            </label>
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+              value={commentFormData.type}
+              onChange={(e) =>
+                setCommentFormData({
+                  ...commentFormData,
+                  type: e.target.value as Comment['type'],
+                })
+              }
+            >
+              <option value="general">ℹ️ General</option>
+              <option value="bug">🐛 Bug Report</option>
+              <option value="feature">✨ Feature Request</option>
+              <option value="improvement">🔧 Improvement</option>
+            </select>
+          </div>
+          <textarea
+            className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
+            value={commentFormData.content}
+            onChange={(e) => setCommentFormData({...commentFormData, content: e.target.value})}
+            placeholder="Enter your comment..."
+          />
+        </div>
+      </UnifiedModal>
 
       {/* Edit Comment Modal */}
-      <Modal isOpen={isEditCommentOpen} onClose={onEditCommentClose} size="lg">
-        <ModalContent>
-          <ModalHeader>Edit Comment</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Author:</strong> {selectedComment?.user_email}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Created:</strong>{' '}
-                  {selectedComment?.created_at
-                    ? new Date(selectedComment.created_at).toLocaleDateString()
-                    : 'N/A'}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Comment Type
-                </label>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-                  value={editCommentFormData.type}
-                  onChange={(e) =>
-                    setEditCommentFormData({
-                      ...editCommentFormData,
-                      type: e.target.value as Comment['type'],
-                    })
-                  }
-                >
-                  <option value="general">ℹ️ General</option>
-                  <option value="bug">🐛 Bug Report</option>
-                  <option value="feature">✨ Feature Request</option>
-                  <option value="improvement">🔧 Improvement</option>
-                </select>
-              </div>
-              <textarea
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
-                value={editCommentFormData.content}
-                onChange={(e) =>
-                  setEditCommentFormData({...editCommentFormData, content: e.target.value})
-                }
-                placeholder="Enter your comment..."
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onEditCommentClose}>
-              Cancel
-            </Button>
-            <Button color="primary" onPress={updateComment}>
-              Update Comment
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </div>
+      <UnifiedModal
+        title="Edit Comment"
+        isOpen={isEditCommentOpen}
+        onClose={onEditCommentClose}
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              <strong>Author:</strong> {selectedComment?.user_email}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              <strong>Created:</strong>{' '}
+              {selectedComment?.created_at
+                ? new Date(selectedComment.created_at).toLocaleDateString()
+                : 'N/A'}
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Comment Type
+            </label>
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+              value={editCommentFormData.type}
+              onChange={(e) =>
+                setEditCommentFormData({
+                  ...editCommentFormData,
+                  type: e.target.value as Comment['type'],
+                })
+              }
+            >
+              <option value="general">ℹ️ General</option>
+              <option value="bug">🐛 Bug Report</option>
+              <option value="feature">✨ Feature Request</option>
+              <option value="improvement">🔧 Improvement</option>
+            </select>
+          </div>
+          <textarea
+            className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
+            value={editCommentFormData.content}
+            onChange={(e) =>
+              setEditCommentFormData({...editCommentFormData, content: e.target.value})
+            }
+            placeholder="Enter your comment..."
+          />
+        </div>
+      </UnifiedModal>
+    </AdminContainer>
   );
 }

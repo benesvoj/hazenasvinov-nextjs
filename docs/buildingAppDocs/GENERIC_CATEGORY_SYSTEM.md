@@ -42,7 +42,7 @@ The new system replaces the static category pages with a dynamic, database-drive
 - description (TEXT)
 - age_group (VARCHAR)
 - gender (VARCHAR)
-- route (VARCHAR) - e.g., '/categories/men'
+- route (VARCHAR) - e.g., '/category/men'
 - is_active (BOOLEAN)
 ```
 

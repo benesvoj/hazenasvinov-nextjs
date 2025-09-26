@@ -14,7 +14,7 @@ const EXCLUDED_PAGES = ['/reset-password', '/set-password', '/login', '/', '/err
 const NO_APP_DATA_PAGES = ['/reset-password', '/set-password', '/login', '/', '/error', '/blocked'];
 
 // Public pages that don't need user context
-const PUBLIC_PAGES = ['/categories', '/blog', '/matches', '/about', '/contact'];
+const PUBLIC_PAGES = ['/category', '/blog', '/matches', '/about', '/contact'];
 
 interface ConditionalProvidersProps {
   children: React.ReactNode;
@@ -26,7 +26,7 @@ export function ConditionalProviders({children}: ConditionalProvidersProps) {
   // Get the base path without query parameters
   const basePath = pathname.split('?')[0];
 
-  // Check if this is a public page (categories, blog, etc.)
+  // Check if this is a public page (category, blog, etc.)
   const isPublicPage = PUBLIC_PAGES.some((publicPath) => basePath.startsWith(publicPath));
 
   // Check if this is an admin page

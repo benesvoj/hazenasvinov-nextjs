@@ -255,7 +255,7 @@ export async function runPerformanceTestSuite(
 
   console.log('🚀 Starting performance test suite...');
 
-  // Run all test categories
+  // Run all test category
   const basicTests = await runBasicMatchTests(categoryId, seasonId);
   tests.push(...basicTests);
 

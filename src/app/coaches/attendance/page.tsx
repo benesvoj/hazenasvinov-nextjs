@@ -100,23 +100,23 @@ export default function CoachesAttendancePage() {
     }
   }, [isAdmin]);
 
-  // Get user's assigned categories from UserContext
+  // Get user's assigned category from UserContext
   // const [userCategories, setUserCategories] = useState<string[]>([]);
 
   // No need to fetch initial data - AppDataContext handles this
 
-  // Compute available categories for this user
+  // Compute available category for this user
   const availableCategories = useMemo(() => {
     if (adminSimulationCategories.length > 0) {
-      // Admin simulation mode - show only selected categories from localStorage
+      // Admin simulation mode - show only selected category from localStorage
       return adminSimulationCategories
         .map((categoryId: string) => categories.find((c) => c.id === categoryId))
         .filter(Boolean);
     } else if (isAdmin) {
-      // Admin users can access all categories
+      // Admin users can access all category
       return categories;
     } else {
-      // Regular coaches use their assigned categories
+      // Regular coaches use their assigned category
       return userCategories
         .map((categoryId: string) => categories.find((c) => c.id === categoryId))
         .filter(Boolean);

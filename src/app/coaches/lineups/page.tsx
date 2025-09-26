@@ -1,10 +1,9 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {useCategoryLineups} from '@/hooks/useCategoryLineups';
-import {useSeasons} from '@/hooks/useSeasons';
-import {useCategories} from '@/hooks/useCategories';
-import {useUserRoles} from '@/hooks/useUserRoles';
+import {useCategoryLineups, useCategories} from '@/hooks';
+import {useSeasons} from '@/hooks/entities/season/useSeasons';
+import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
 import {
   UserGroupIcon,
   PlusIcon,
@@ -36,7 +35,10 @@ import {
   TableRow,
   TableCell,
 } from '@heroui/react';
-import {CategoryLineupFormData, AddMemberToLineupData} from '@/types/categoryLineup';
+import {
+  CategoryLineupFormData,
+  AddMemberToLineupData,
+} from '@/types/entities/category/data/categoryLineup';
 import AddMemberModal from './components/AddMemberModal';
 import {PageContainer} from '@/components';
 
@@ -73,7 +75,7 @@ export default function CoachesLineupsPage() {
   const {categories, loading: categoriesLoading, fetchCategories} = useCategories();
   const {getCurrentUserCategories} = useUserRoles();
 
-  // Get user's assigned categories
+  // Get user's assigned category
   const [userCategories, setUserCategories] = useState<string[]>([]);
 
   // Fetch initial data
@@ -91,7 +93,7 @@ export default function CoachesLineupsPage() {
           setSelectedCategory(categories[0]);
         }
       } catch (err) {
-        console.error('Error fetching user categories:', err);
+        console.error('Error fetching user category:', err);
       }
     };
 

@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Textarea } from "@heroui/input";
-import { Switch } from "@heroui/switch";
-import { Photo, CreatePhotoData, UpdatePhotoData } from "@/types/photoGallery";
+import React, {useState, useEffect} from 'react';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+import {Button} from '@heroui/button';
+import {Input} from '@heroui/input';
+import {Textarea} from '@heroui/input';
+import {Switch} from '@heroui/switch';
+import {Photo, CreatePhotoData, UpdatePhotoData} from '@/types/features/gallery/photoGallery';
 
 interface PhotoFormModalProps {
   isOpen: boolean;
@@ -16,12 +16,12 @@ interface PhotoFormModalProps {
   albumId: string;
 }
 
-export default function PhotoFormModal({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
+export default function PhotoFormModal({
+  isOpen,
+  onClose,
+  onSubmit,
   photo,
-  albumId
+  albumId,
 }: PhotoFormModalProps) {
   const [formData, setFormData] = useState<CreatePhotoData>({
     album_id: albumId,
@@ -30,7 +30,7 @@ export default function PhotoFormModal({
     file_path: '',
     file_url: '',
     sort_order: 0,
-    is_featured: false
+    is_featured: false,
   });
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +44,7 @@ export default function PhotoFormModal({
         file_path: photo.file_path,
         file_url: photo.file_url,
         sort_order: photo.sort_order,
-        is_featured: photo.is_featured
+        is_featured: photo.is_featured,
       });
     } else {
       setFormData({
@@ -54,7 +54,7 @@ export default function PhotoFormModal({
         file_path: '',
         file_url: '',
         sort_order: 0,
-        is_featured: false
+        is_featured: false,
       });
     }
   }, [photo, albumId]);
@@ -62,7 +62,7 @@ export default function PhotoFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       await onSubmit(formData);
       onClose();
@@ -74,9 +74,9 @@ export default function PhotoFormModal({
   };
 
   const handleInputChange = (field: keyof CreatePhotoData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -103,9 +103,7 @@ export default function PhotoFormModal({
 
             {/* Description */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Popis
-              </label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Popis</label>
               <Textarea
                 placeholder="Zadejte popis fotografie (volitelné)"
                 value={formData.description}
@@ -117,9 +115,7 @@ export default function PhotoFormModal({
 
             {/* Sort Order */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Pořadí
-              </label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Pořadí</label>
               <Input
                 type="number"
                 placeholder="0"
@@ -127,9 +123,7 @@ export default function PhotoFormModal({
                 onChange={(e) => handleInputChange('sort_order', parseInt(e.target.value) || 0)}
                 min={0}
               />
-              <p className="text-xs text-gray-500">
-                Nižší číslo = vyšší priorita v albu
-              </p>
+              <p className="text-xs text-gray-500">Nižší číslo = vyšší priorita v albu</p>
             </div>
 
             {/* Featured Toggle */}
@@ -162,11 +156,11 @@ export default function PhotoFormModal({
                     {photo.file_size && (
                       <div>Velikost: {(photo.file_size / 1024 / 1024).toFixed(2)} MB</div>
                     )}
-                    {photo.mime_type && (
-                      <div>Typ: {photo.mime_type}</div>
-                    )}
+                    {photo.mime_type && <div>Typ: {photo.mime_type}</div>}
                     {photo.width && photo.height && (
-                      <div>Rozměry: {photo.width} × {photo.height} px</div>
+                      <div>
+                        Rozměry: {photo.width} × {photo.height} px
+                      </div>
                     )}
                   </div>
                 </div>
@@ -177,11 +171,7 @@ export default function PhotoFormModal({
             <Button variant="light" onPress={onClose}>
               Zrušit
             </Button>
-            <Button 
-              color="primary" 
-              type="submit"
-              isLoading={loading}
-            >
+            <Button color="primary" type="submit" isLoading={loading}>
               {photo ? 'Uložit změny' : 'Vytvořit fotografii'}
             </Button>
           </ModalFooter>

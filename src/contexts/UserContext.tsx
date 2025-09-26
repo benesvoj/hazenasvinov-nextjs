@@ -250,7 +250,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
         setUserProfile(profile);
         setUserRoles(roles);
 
-        // Extract categories from profile
+        // Extract category from profile
         if (profile) {
           setUserCategories(profile.assigned_categories || []);
         }
@@ -374,7 +374,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
     [userCategories]
   );
 
-  // Get current user's assigned categories (for coaches)
+  // Get current user's assigned category (for coaches)
   const getCurrentUserCategories = useCallback(async (): Promise<string[]> => {
     try {
       if (!user) return [];
@@ -394,10 +394,10 @@ export function UserProvider({children}: {children: React.ReactNode}) {
         }
       }
 
-      // Return categories from UserContext
+      // Return category from UserContext
       return userCategories;
     } catch (err) {
-      console.error('Error fetching current user categories:', err);
+      console.error('Error fetching current user category:', err);
       return [];
     }
   }, [user, userCategories]);

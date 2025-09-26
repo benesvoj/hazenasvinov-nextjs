@@ -1,4 +1,4 @@
-import {Match} from '@/types/match';
+import {Match} from '@/types/entities/match/data/match';
 import {matchStatusesKeys} from '@/constants/match';
 
 interface MatchScoreProps {
