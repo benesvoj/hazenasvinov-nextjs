@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, {useState} from 'react';
 import {
   Modal,
   ModalContent,
@@ -15,10 +15,10 @@ import {
   CardBody,
   Divider,
   TimeInput,
-} from "@heroui/react";
-import { CalendarIcon, ClockIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { useAttendance } from "@/hooks/useAttendance";
-import { formatDateString, formatTime } from "@/helpers";
+} from '@heroui/react';
+import {CalendarIcon, ClockIcon, PlusIcon} from '@heroicons/react/24/outline';
+import {useAttendance} from '@/hooks/attendance/useAttendance';
+import {formatDateString, formatTime} from '@/helpers';
 
 interface TrainingSessionGeneratorProps {
   isOpen: boolean;
@@ -42,31 +42,29 @@ export default function TrainingSessionGenerator({
   selectedCategory,
   selectedSeason,
 }: TrainingSessionGeneratorProps) {
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [trainingTime, setTrainingTime] = useState("");
-  const [titleTemplate, setTitleTemplate] = useState("Trénink");
+  const [trainingTime, setTrainingTime] = useState('');
+  const [titleTemplate, setTitleTemplate] = useState('Trénink');
   const [includeNumber, setIncludeNumber] = useState(false);
-  const [generatedSessions, setGeneratedSessions] = useState<
-    GeneratedSession[]
-  >([]);
+  const [generatedSessions, setGeneratedSessions] = useState<GeneratedSession[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createAttendanceRecords, setCreateAttendanceRecords] = useState(true);
 
-  const { createTrainingSession, createAttendanceForLineupMembers } = useAttendance();
+  const {createTrainingSession, createAttendanceForLineupMembers} = useAttendance();
 
   // Use userCategories from UserContext instead of local state
 
   // Function to fetch lineup members directly
   const fetchLineupMembersForCategory = async (categoryId: string, seasonId: string) => {
     try {
-      const { createClient } = await import('@/utils/supabase/client');
+      const {createClient} = await import('@/utils/supabase/client');
       const supabase = createClient();
-      
+
       // First get the lineup for this category and season
-      const { data: lineupData, error: lineupError } = await supabase
+      const {data: lineupData, error: lineupError} = await supabase
         .from('category_lineups')
         .select('id')
         .eq('category_id', categoryId)
@@ -79,9 +77,10 @@ export default function TrainingSessionGenerator({
       }
 
       // Then get the lineup members
-      const { data: membersData, error: membersError } = await supabase
+      const {data: membersData, error: membersError} = await supabase
         .from('category_lineup_members')
-        .select(`
+        .select(
+          `
           member_id,
           members!inner (
             id,
@@ -89,7 +88,8 @@ export default function TrainingSessionGenerator({
             surname,
             category_id
           )
-        `)
+        `
+        )
         .eq('lineup_id', lineupData.id)
         .eq('is_active', true);
 
@@ -106,17 +106,17 @@ export default function TrainingSessionGenerator({
 
   // Days of the week options
   const dayOptions = [
-    { value: "monday", label: "Pondělí" },
-    { value: "tuesday", label: "Úterý" },
-    { value: "wednesday", label: "Středa" },
-    { value: "thursday", label: "Čtvrtek" },
-    { value: "friday", label: "Pátek" },
-    { value: "saturday", label: "Sobota" },
-    { value: "sunday", label: "Neděle" },
+    {value: 'monday', label: 'Pondělí'},
+    {value: 'tuesday', label: 'Úterý'},
+    {value: 'wednesday', label: 'Středa'},
+    {value: 'thursday', label: 'Čtvrtek'},
+    {value: 'friday', label: 'Pátek'},
+    {value: 'saturday', label: 'Sobota'},
+    {value: 'sunday', label: 'Neděle'},
   ];
 
   // Day mapping for JavaScript Date.getDay() to our day values
-  const dayMap: { [key: string]: number } = {
+  const dayMap: {[key: string]: number} = {
     monday: 1,
     tuesday: 2,
     wednesday: 3,
@@ -131,7 +131,7 @@ export default function TrainingSessionGenerator({
   // Generate sessions based on criteria
   const generateSessions = () => {
     if (!dateFrom || !dateTo || selectedDays.length === 0 || !trainingTime) {
-      setError("Vyplňte všechna povinná pole");
+      setError('Vyplňte všechna povinná pole');
       return;
     }
 
@@ -141,7 +141,7 @@ export default function TrainingSessionGenerator({
 
     // Validate date range
     if (startDate >= endDate) {
-      setError("Datum do musí být později než datum od");
+      setError('Datum do musí být později než datum od');
       return;
     }
 
@@ -149,22 +149,18 @@ export default function TrainingSessionGenerator({
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const dayOfWeek = currentDate.getDay();
-      const dayName = Object.keys(dayMap).find(
-        (day) => dayMap[day] === dayOfWeek
-      );
+      const dayName = Object.keys(dayMap).find((day) => dayMap[day] === dayOfWeek);
 
       if (dayName && selectedDays.includes(dayName)) {
         const sessionNumber = sessions.length + 1;
-        const title = includeNumber
-          ? `${titleTemplate} ${sessionNumber}`
-          : titleTemplate;
+        const title = includeNumber ? `${titleTemplate} ${sessionNumber}` : titleTemplate;
 
         // Use category ID directly
         sessions.push({
-          date: currentDate.toISOString().split("T")[0],
+          date: currentDate.toISOString().split('T')[0],
           time: trainingTime,
           title,
-          category_id: selectedCategory || "",
+          category_id: selectedCategory || '',
         });
       }
 
@@ -192,18 +188,18 @@ export default function TrainingSessionGenerator({
       if (createAttendanceRecords && selectedCategory && selectedSeason) {
         try {
           memberIds = await fetchLineupMembersForCategory(selectedCategory, selectedSeason);
-          
+
           // If no lineup members found, try to get all members from the category
           if (memberIds.length === 0) {
-            const { createClient } = await import('@/utils/supabase/client');
+            const {createClient} = await import('@/utils/supabase/client');
             const supabase = createClient();
-            
+
             if (selectedCategory) {
-              const { data: membersData, error: membersError } = await supabase
+              const {data: membersData, error: membersError} = await supabase
                 .from('members')
                 .select('id')
                 .eq('category_id', selectedCategory);
-                
+
               if (!membersError && membersData) {
                 memberIds = membersData.map((m: any) => m.id);
               }
@@ -221,10 +217,10 @@ export default function TrainingSessionGenerator({
             session_date: session.date,
             session_time: session.time,
             category_id: session.category_id,
-            season_id: selectedSeason || "", // Use the selected season ID
+            season_id: selectedSeason || '', // Use the selected season ID
             description: `Automaticky vygenerovaný trénink - ${session.title}`,
           });
-          
+
           createdSessionIds.push(createdSession.id);
           successCount++;
 
@@ -252,13 +248,11 @@ export default function TrainingSessionGenerator({
       }
 
       if (errorCount > 0) {
-        setError(
-          `Vytvořeno ${successCount} tréninků, ${errorCount} se nepodařilo vytvořit`
-        );
+        setError(`Vytvořeno ${successCount} tréninků, ${errorCount} se nepodařilo vytvořit`);
       }
     } catch (err) {
-      setError("Chyba při vytváření tréninků");
-      console.error("Error creating sessions:", err);
+      setError('Chyba při vytváření tréninků');
+      console.error('Error creating sessions:', err);
     } finally {
       setIsGenerating(false);
     }
@@ -266,11 +260,11 @@ export default function TrainingSessionGenerator({
 
   // Reset form
   const resetForm = () => {
-    setDateFrom("");
-    setDateTo("");
+    setDateFrom('');
+    setDateTo('');
     setSelectedDays([]);
-    setTrainingTime("");
-    setTitleTemplate("Trénink");
+    setTrainingTime('');
+    setTitleTemplate('Trénink');
     setIncludeNumber(false);
     setGeneratedSessions([]);
     setError(null);
@@ -284,12 +278,7 @@ export default function TrainingSessionGenerator({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      size="2xl"
-      scrollBehavior="inside"
-    >
+    <Modal isOpen={isOpen} onClose={handleClose} size="2xl" scrollBehavior="inside">
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
@@ -312,9 +301,7 @@ export default function TrainingSessionGenerator({
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                startContent={
-                  <CalendarIcon className="w-4 h-4 text-gray-400" />
-                }
+                startContent={<CalendarIcon className="w-4 h-4 text-gray-400" />}
                 placeholder="Vyberte datum"
                 label="Datum od"
                 isRequired
@@ -326,9 +313,7 @@ export default function TrainingSessionGenerator({
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                startContent={
-                  <CalendarIcon className="w-4 h-4 text-gray-400" />
-                }
+                startContent={<CalendarIcon className="w-4 h-4 text-gray-400" />}
                 placeholder="Vyberte datum"
                 label="Datum do"
                 isRequired
@@ -356,7 +341,7 @@ export default function TrainingSessionGenerator({
           <div>
             <TimeInput
               // value={trainingTime}
-              onChange={(e) => setTrainingTime(e?.toString() || "")}
+              onChange={(e) => setTrainingTime(e?.toString() || '')}
               label="Čas tréninku"
               isRequired
               hourCycle={24}
@@ -396,7 +381,8 @@ export default function TrainingSessionGenerator({
               Automaticky vytvořit záznamy docházky pro členy sestavy (výchozí: přítomen)
             </Checkbox>
             <p className="text-sm text-gray-600 mt-1">
-              Pokud je zaškrtnuto, budou automaticky vytvořeny záznamy docházky pro všechny členy sestavy vybrané kategorie a sezóny.
+              Pokud je zaškrtnuto, budou automaticky vytvořeny záznamy docházky pro všechny členy
+              sestavy vybrané kategorie a sezóny.
             </p>
           </div>
 
@@ -405,12 +391,7 @@ export default function TrainingSessionGenerator({
             <Button
               color="primary"
               onPress={generateSessions}
-              isDisabled={
-                !dateFrom ||
-                !dateTo ||
-                selectedDays.length === 0 ||
-                !trainingTime
-              }
+              isDisabled={!dateFrom || !dateTo || selectedDays.length === 0 || !trainingTime}
             >
               Generovat náhled
             </Button>
@@ -441,9 +422,7 @@ export default function TrainingSessionGenerator({
                                 (d) =>
                                   d.value ===
                                   Object.keys(dayMap).find(
-                                    (day) =>
-                                      dayMap[day] ===
-                                      new Date(session.date).getDay()
+                                    (day) => dayMap[day] === new Date(session.date).getDay()
                                   )
                               )?.label
                             }
@@ -469,9 +448,7 @@ export default function TrainingSessionGenerator({
               isLoading={isGenerating}
               isDisabled={isGenerating}
             >
-              {isGenerating
-                ? "Vytváření..."
-                : `Vytvořit ${generatedSessions.length} tréninků`}
+              {isGenerating ? 'Vytváření...' : `Vytvořit ${generatedSessions.length} tréninků`}
             </Button>
           )}
         </ModalFooter>

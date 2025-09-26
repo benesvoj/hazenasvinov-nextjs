@@ -51,7 +51,7 @@ export interface EditCategoryModalProps {
   categorySeasons: CategorySeason[];
 }
 
-// Old inteface from categories.tsx
+// Old inteface from category.tsx
 // interface Category {
 //   id: string;
 //   code: string;

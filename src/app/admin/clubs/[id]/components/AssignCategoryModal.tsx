@@ -76,7 +76,7 @@ export default function AssignCategoryModal({
     }
   }, [activeSeason, formData.season_id]);
 
-  // Fetch assigned categories for the selected season
+  // Fetch assigned category for the selected season
   const fetchAssignedCategoriesForSeason = useCallback(
     async (seasonId: string) => {
       if (!seasonId || !clubId) return;
@@ -94,18 +94,18 @@ export default function AssignCategoryModal({
         const categoryIds = data?.map((item: any) => item.category_id) || [];
         setAssignedCategoriesForSeason(categoryIds);
       } catch (error) {
-        console.error('Error fetching assigned categories for season:', error);
+        console.error('Error fetching assigned category for season:', error);
         setAssignedCategoriesForSeason([]);
       }
     },
     [clubId, supabase]
   );
 
-  // Update assigned categories when season changes
+  // Update assigned category when season changes
   useEffect(() => {
     if (formData.season_id) {
       fetchAssignedCategoriesForSeason(formData.season_id);
-      // Clear selected category when season changes since available categories will change
+      // Clear selected category when season changes since available category will change
       setFormData((prev) => ({...prev, category_id: ''}));
     } else {
       setAssignedCategoriesForSeason([]);
@@ -176,10 +176,10 @@ export default function AssignCategoryModal({
                 isRequired
               >
                 {(() => {
-                  // Filter categories based on the selected season
-                  // Only show categories that are NOT already assigned to this club in the selected season
+                  // Filter category based on the selected season
+                  // Only show category that are NOT already assigned to this club in the selected season
                   const availableCategories = categories.filter((category) => {
-                    // If no season is selected yet, show all categories
+                    // If no season is selected yet, show all category
                     if (!formData.season_id) {
                       return true;
                     }

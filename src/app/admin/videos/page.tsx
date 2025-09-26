@@ -2,7 +2,7 @@
 
 import React, {useState, useEffect} from 'react';
 import {Video, VideoFormData, VideoFilters} from '@/types';
-import {useVideos} from '@/hooks/useVideos';
+import {useVideos} from '@/hooks/video/useVideos';
 import {useAppData} from '@/contexts/AppDataContext';
 import {VideoCameraIcon} from '@heroicons/react/24/outline';
 import {DeleteConfirmationModal, VideoPageLayout} from '@/components';

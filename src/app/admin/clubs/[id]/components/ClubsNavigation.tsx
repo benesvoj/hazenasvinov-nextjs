@@ -1,34 +1,26 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { Button } from '@heroui/button';
-import { Select, SelectItem } from '@heroui/select';
-import { 
-  ChevronLeftIcon, 
+import React, {useEffect} from 'react';
+import {Button} from '@heroui/button';
+import {Select, SelectItem} from '@heroui/select';
+import {
+  ChevronLeftIcon,
   ChevronRightIcon,
   BuildingOfficeIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useClubsNavigation } from '@/hooks/useClubsNavigation';
+import {useRouter} from 'next/navigation';
+import {useClubsNavigation} from '@/hooks/club/useClubsNavigation';
 
 interface ClubsNavigationProps {
   currentClubId: string;
 }
 
-export default function ClubsNavigation({ currentClubId }: ClubsNavigationProps) {
+export default function ClubsNavigation({currentClubId}: ClubsNavigationProps) {
   const router = useRouter();
-  const { 
-    hasPrevious, 
-    hasNext, 
-    previousClub, 
-    nextClub, 
-    loading, 
-    error,
-    currentIndex,
-    clubs 
-  } = useClubsNavigation(currentClubId);
+  const {hasPrevious, hasNext, previousClub, nextClub, loading, error, currentIndex, clubs} =
+    useClubsNavigation(currentClubId);
 
   // Keyboard navigation
   useEffect(() => {
@@ -83,14 +75,14 @@ export default function ClubsNavigation({ currentClubId }: ClubsNavigationProps)
       {/* Previous Club Button */}
       <div className="flex items-center gap-2">
         {hasPrevious && previousClub ? (
-          <Link 
+          <Link
             href={`/admin/clubs/${previousClub.id}`}
             prefetch={true}
             scroll={false}
             replace={false}
           >
-            <Button 
-              variant="flat" 
+            <Button
+              variant="flat"
               size="sm"
               startContent={<ChevronLeftIcon className="w-4 h-4" />}
               className="min-w-[120px] justify-start"
@@ -104,8 +96,8 @@ export default function ClubsNavigation({ currentClubId }: ClubsNavigationProps)
             </Button>
           </Link>
         ) : (
-          <Button 
-            variant="flat" 
+          <Button
+            variant="flat"
             size="sm"
             startContent={<ChevronLeftIcon className="w-4 h-4" />}
             isDisabled
@@ -126,11 +118,9 @@ export default function ClubsNavigation({ currentClubId }: ClubsNavigationProps)
           <span>
             {currentIndex + 1} z {clubs.length}
           </span>
-          <span className="text-xs text-gray-400 ml-2">
-            (← → pro navigaci)
-          </span>
+          <span className="text-xs text-gray-400 ml-2">(← → pro navigaci)</span>
         </div>
-        
+
         {/* Quick Jump Dropdown */}
         <div className="flex items-center gap-2">
           <MagnifyingGlassIcon className="w-4 h-4" />
@@ -147,9 +137,7 @@ export default function ClubsNavigation({ currentClubId }: ClubsNavigationProps)
             className="min-w-[180px] max-w-[250px]"
           >
             {clubs.map((club) => (
-              <SelectItem key={club.id}>
-                {club.short_name || club.name}
-              </SelectItem>
+              <SelectItem key={club.id}>{club.short_name || club.name}</SelectItem>
             ))}
           </Select>
         </div>
@@ -158,14 +146,9 @@ export default function ClubsNavigation({ currentClubId }: ClubsNavigationProps)
       {/* Next Club Button */}
       <div className="flex items-center gap-2">
         {hasNext && nextClub ? (
-          <Link 
-            href={`/admin/clubs/${nextClub.id}`}
-            prefetch={true}
-            scroll={false}
-            replace={false}
-          >
-            <Button 
-              variant="flat" 
+          <Link href={`/admin/clubs/${nextClub.id}`} prefetch={true} scroll={false} replace={false}>
+            <Button
+              variant="flat"
               size="sm"
               endContent={<ChevronRightIcon className="w-4 h-4" />}
               className="min-w-[120px] justify-end"
@@ -179,8 +162,8 @@ export default function ClubsNavigation({ currentClubId }: ClubsNavigationProps)
             </Button>
           </Link>
         ) : (
-          <Button 
-            variant="flat" 
+          <Button
+            variant="flat"
             size="sm"
             endContent={<ChevronRightIcon className="w-4 h-4" />}
             isDisabled

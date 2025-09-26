@@ -1,5 +1,5 @@
-import Image from "next/image";
-import { useClubConfig } from "@/hooks/useClubConfig";
+import Image from 'next/image';
+import {useClubConfig} from '@/hooks/club/useClubConfig';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -8,24 +8,24 @@ interface LogoProps {
   alt?: string;
 }
 
-export default function Logo({ 
-  size = 'md', 
-  className = '', 
-  fallbackSrc = "/logo.png",
-  alt = "Club Logo"
+export default function Logo({
+  size = 'md',
+  className = '',
+  fallbackSrc = '/logo.png',
+  alt = 'Club Logo',
 }: LogoProps) {
-  const { clubConfig } = useClubConfig();
-  
+  const {clubConfig} = useClubConfig();
+
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-12 h-12',
-    lg: 'w-16 h-16'
+    lg: 'w-16 h-16',
   };
 
   const sizePixels = {
     sm: 32,
     md: 48,
-    lg: 64
+    lg: 64,
   };
 
   const logoUrl = clubConfig?.club_logo_url || fallbackSrc;

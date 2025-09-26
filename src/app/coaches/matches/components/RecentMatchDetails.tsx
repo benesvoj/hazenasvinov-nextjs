@@ -41,7 +41,7 @@ import {
   useAddMatchMetadata,
   useDeleteMatchMetadata,
   useSetPrimaryMatchMetadata,
-} from '@/hooks/useMatchMetadata';
+} from '@/hooks/match/useMatchMetadata';
 import {ArrowDownTrayIcon} from '@heroicons/react/16/solid';
 
 interface RecentMatchDetailsProps {

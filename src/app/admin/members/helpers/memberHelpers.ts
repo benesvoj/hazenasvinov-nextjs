@@ -32,7 +32,7 @@ export const getCategoryBadgeColor = (categoryId: string, categoriesData: Catego
   if (categoryData.gender === Genders.FEMALE) return 'secondary';
   if (categoryData.gender === Genders.MIXED) return 'success';
 
-  // Fallback for categories without gender
+  // Fallback for category without gender
   if (
     categoryData.name.toLowerCase().includes('kids') ||
     categoryData.name.toLowerCase().includes('prep')
@@ -157,7 +157,7 @@ export const sortMembers = (
 };
 
 /**
- * Convert categories array to Record format for compatibility
+ * Convert category array to Record format for compatibility
  * Uses category code as key for backward compatibility with existing components
  *
  * @deprecated Use convertCategoriesToRecordBySlug instead

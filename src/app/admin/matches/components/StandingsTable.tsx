@@ -1,9 +1,9 @@
-import React from "react";
-import { Button } from "@heroui/button";
-import { TrophyIcon } from "@heroicons/react/24/outline";
-import Image from "next/image";
-import { EnhancedStanding } from "@/hooks/useStandings";
-import { getTeamDisplayNameSafe, createClubTeamCountsMap } from "@/utils";
+import React from 'react';
+import {Button} from '@heroui/button';
+import {TrophyIcon} from '@heroicons/react/24/outline';
+import Image from 'next/image';
+import {EnhancedStanding} from '@/hooks/standings/useStandings';
+import {getTeamDisplayNameSafe, createClubTeamCountsMap} from '@/utils';
 
 interface StandingsTableProps {
   standings: EnhancedStanding[];
@@ -22,9 +22,7 @@ export default function StandingsTable({
   onGenerateStandings,
   hasStandings,
 }: StandingsTableProps) {
-  const categoryStandings = standings.filter(
-    (standing) => standing.category_id === categoryId
-  );
+  const categoryStandings = standings.filter((standing) => standing.category_id === categoryId);
 
   // Debug: Check if standings have team data
   // const standingsWithTeams = categoryStandings.filter(
@@ -69,9 +67,7 @@ export default function StandingsTable({
           <div className="text-gray-500 mb-4">
             <TrophyIcon className="w-12 h-12 mx-auto text-gray-400" />
           </div>
-          <h5 className="text-lg font-medium text-gray-700 mb-2">
-            Žádná tabulka
-          </h5>
+          <h5 className="text-lg font-medium text-gray-700 mb-2">Žádná tabulka</h5>
           <p className="text-gray-500 mb-4">
             Pro tuto kategorii ještě nebyla vygenerována tabulka.
           </p>
@@ -88,8 +84,10 @@ export default function StandingsTable({
     );
   }
 
-  const tableHeaderClassLeft = 'px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-  const tableHeaderClassCenter = 'px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider'
+  const tableHeaderClassLeft =
+    'px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider';
+  const tableHeaderClassCenter =
+    'px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider';
   return (
     <div className="mt-8">
       <div className="flex items-center justify-between mb-4">
@@ -102,30 +100,14 @@ export default function StandingsTable({
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className={tableHeaderClassLeft}>
-                    Pozice
-                  </th>
-                  <th className={tableHeaderClassLeft}>
-                    Tým
-                  </th>
-                  <th className={tableHeaderClassLeft}>
-                    Z
-                  </th>
-                  <th className={tableHeaderClassLeft}>
-                    V
-                  </th>
-                  <th className={tableHeaderClassLeft}>
-                    R
-                  </th>
-                  <th className={tableHeaderClassCenter}>
-                    P
-                  </th>
-                  <th className={tableHeaderClassCenter}>
-                    Skóre
-                  </th>
-                  <th className={tableHeaderClassCenter}>
-                    Body
-                  </th>
+                  <th className={tableHeaderClassLeft}>Pozice</th>
+                  <th className={tableHeaderClassLeft}>Tým</th>
+                  <th className={tableHeaderClassLeft}>Z</th>
+                  <th className={tableHeaderClassLeft}>V</th>
+                  <th className={tableHeaderClassLeft}>R</th>
+                  <th className={tableHeaderClassCenter}>P</th>
+                  <th className={tableHeaderClassCenter}>Skóre</th>
+                  <th className={tableHeaderClassCenter}>Body</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -136,22 +118,15 @@ export default function StandingsTable({
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        {(standing.club?.logo_url ||
-                          standing.team?.logo_url) && (
+                        {(standing.club?.logo_url || standing.team?.logo_url) && (
                           <Image
-                            src={
-                              standing.club?.logo_url ||
-                              standing.team?.logo_url ||
-                              ""
-                            }
-                            alt={`${
-                              standing.club?.name || standing.team?.name
-                            } logo`}
+                            src={standing.club?.logo_url || standing.team?.logo_url || ''}
+                            alt={`${standing.club?.name || standing.team?.name} logo`}
                             width={24}
                             height={24}
                             className="w-6 h-6 object-contain"
                             onError={(e) => {
-                              e.currentTarget.style.display = "none";
+                              e.currentTarget.style.display = 'none';
                             }}
                           />
                         )}
@@ -162,15 +137,15 @@ export default function StandingsTable({
                               const teamCount = clubTeamCounts.get(standing.club.id) || 0;
                               return getTeamDisplayNameSafe(
                                 standing.club.name,
-                                standing.team?.team_suffix || "A",
+                                standing.team?.team_suffix || 'A',
                                 teamCount,
-                                "N/A"
+                                'N/A'
                               );
                             } else if (standing.team?.name) {
                               // Fallback to team name if club data is missing
                               return standing.team.name;
                             } else {
-                              return "N/A";
+                              return 'N/A';
                             }
                           })()}
                         </span>

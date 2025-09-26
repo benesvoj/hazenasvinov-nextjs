@@ -37,7 +37,7 @@ export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
     });
   }
 
-  // Build categories section if any category pages exist
+  // Build category section if any category pages exist
   if (groupedPages.categories && groupedPages.categories.length > 0) {
     const categoryChildren = groupedPages.categories.map((page) => ({
       title: page.page_title,
@@ -89,26 +89,26 @@ export const fallbackRoutes = {
   login: '/login',
   matches: '/matches',
   photoGallery: '/photo-gallery',
-  youngestKids: '/categories/youngest-kids',
-  prepKids: '/categories/prep-kids',
-  youngerBoys: '/categories/younger-boys',
-  youngerGirls: '/categories/younger-girls',
-  olderBoys: '/categories/older-boys',
-  olderGirls: '/categories/older-girls',
-  juniorBoys: '/categories/junior-boys',
-  juniorGirls: '/categories/junior-girls',
-  men: '/categories/men',
-  women: '/categories/women',
+  youngestKids: '/category/youngest-kids',
+  prepKids: '/category/prep-kids',
+  youngerBoys: '/category/younger-boys',
+  youngerGirls: '/category/younger-girls',
+  olderBoys: '/category/older-boys',
+  olderGirls: '/category/older-girls',
+  juniorBoys: '/category/junior-boys',
+  juniorGirls: '/category/junior-girls',
+  men: '/category/men',
+  women: '/category/women',
 } as const;
 
 export const privateRoutes = {
   admin: '/admin',
   users: '/admin/users',
   posts: '/admin/posts',
-  categories: '/admin/categories',
+  categories: '/admin/category',
   seasons: '/admin/seasons',
   teams: '/admin/teams',
-  teamCategories: '/admin/team-categories',
+  teamCategories: '/admin/team-category',
   matches: '/admin/matches',
   members: '/admin/members',
   memberFunctions: '/admin/member-functions',

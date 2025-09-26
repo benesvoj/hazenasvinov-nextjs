@@ -7,7 +7,7 @@ import Image from 'next/image';
 import {CalendarIcon} from '@heroicons/react/24/outline';
 import {BlogPostCard as BlogPostCardProps, Category} from '@/types';
 import {useAppData} from '@/contexts/AppDataContext';
-import {useCategories} from '@/hooks/useCategories';
+import {useCategories} from '@/hooks/category/useCategories';
 import {formatDateString} from '@/helpers';
 
 export default function BlogPostCard({
@@ -26,7 +26,7 @@ export default function BlogPostCard({
     const appData = useAppData();
     appDataCategories = appData.categories;
   } catch (error) {
-    // AppDataProvider not available, will use hook categories
+    // AppDataProvider not available, will use hook category
     appDataCategories = [];
   }
 
@@ -34,7 +34,7 @@ export default function BlogPostCard({
   const {categories: hookCategoriesData} = useCategories();
   hookCategories = hookCategoriesData;
 
-  // Use AppDataContext categories if available, otherwise fallback to hook categories
+  // Use AppDataContext category if available, otherwise fallback to hook category
   const categories = appDataCategories.length > 0 ? appDataCategories : hookCategories;
 
   // Memoized category lookup for performance

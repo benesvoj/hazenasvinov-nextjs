@@ -2,7 +2,7 @@
  * Season interface representing the database schema for seasons table.
  *
  * This interface defines the structure for seasons used throughout the application
- * for organizing categories, matches, and competitions.
+ * for organizing category, matches, and competitions.
  */
 export interface Season {
   /**

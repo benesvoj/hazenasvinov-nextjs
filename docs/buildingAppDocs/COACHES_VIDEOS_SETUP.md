@@ -43,7 +43,7 @@ ON user_profiles USING GIN (assigned_categories);
 Run the setup script to add the required database fields:
 
 ```bash
-npm run setup:coach-categories
+npm run setup:coach-category
 ```
 
 Or manually execute the SQL in Supabase Dashboard:
@@ -57,7 +57,7 @@ Or manually execute the SQL in Supabase Dashboard:
 After setup, assign categories to coaches:
 
 ```sql
--- Example: Assign categories to a coach
+-- Example: Assign category to a coach
 UPDATE user_profiles 
 SET assigned_categories = ARRAY[
   (SELECT id FROM categories WHERE code = 'men'),
@@ -132,7 +132,7 @@ docs/
 -- Get coach user ID
 SELECT id, user_id, role FROM user_profiles WHERE role = 'coach';
 
--- Assign categories
+-- Assign category
 UPDATE user_profiles 
 SET assigned_categories = ARRAY[
   (SELECT id FROM categories WHERE code = 'men'),
@@ -176,7 +176,7 @@ CREATE POLICY "Coaches can view assigned category videos" ON videos
         SELECT 1 FROM user_profiles 
         WHERE user_id = auth.uid() AND role = 'admin'
       ) OR
-      -- Coach can see assigned categories
+      -- Coach can see assigned category
       category_id = ANY(
         SELECT assigned_categories FROM user_profiles 
         WHERE user_id = auth.uid() AND role IN ('coach', 'head_coach')

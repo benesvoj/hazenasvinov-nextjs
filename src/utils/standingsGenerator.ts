@@ -111,7 +111,7 @@ export async function generateInitialStandings(
 
     if (teamsError) throw teamsError;
 
-    console.log('🔍 Team categories found:', {
+    console.log('🔍 Team category found:', {
       teamCategoriesCount: teamCategories?.length || 0,
       teamCategories: teamCategories,
     });

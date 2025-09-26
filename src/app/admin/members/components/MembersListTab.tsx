@@ -94,7 +94,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
   // Members are loaded by AppDataContext, no need for manual fetching
 
-  // Convert categories array to Record format for compatibility
+  // Convert category array to Record format for compatibility
   const categories = useMemo(() => {
     if (!categoriesData) return {};
     return categoriesData.reduce(

@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import {LoadingSpinner} from '@/components';
 import {useOptimizedOwnClubMatches} from '@/hooks';
-import {useMatchLineupStats, PlayerMatchStats} from '@/hooks/useMatchLineupStats';
+import {useMatchLineupStats, PlayerMatchStats} from '@/hooks/lineup/useMatchLineupStats';
 import {Match, LineupPlayer} from '@/types';
 
 interface MatchStatisticsZoneProps {

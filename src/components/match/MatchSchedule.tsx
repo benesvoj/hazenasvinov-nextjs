@@ -51,12 +51,12 @@ export default function MatchSchedule({
     // UserProvider not available (e.g., on public pages)
   }
 
-  // Filter categories based on the prop
+  // Filter category based on the prop
   const availableCategories = showOnlyAssignedCategories
     ? categories.filter((cat) => assignedCategoryIds.includes(cat.id))
     : categories;
 
-  // Get the selected category data from available categories
+  // Get the selected category data from available category
   const selectedCategoryData = availableCategories.find((cat) => cat.id === selectedCategory);
 
   // Only call the hook when we have valid data
@@ -78,13 +78,13 @@ export default function MatchSchedule({
   } = useStandings();
   const [fetchedCategoryId, setFetchedCategoryId] = useState<string | null>(null);
 
-  // Fetch active season and categories on mount
+  // Fetch active season and category on mount
   useEffect(() => {
     fetchActiveSeason();
     fetchCategories();
   }, [fetchActiveSeason, fetchCategories]);
 
-  // Fetch assigned categories if needed for coach portal
+  // Fetch assigned category if needed for coach portal
   useEffect(() => {
     if (showOnlyAssignedCategories && getCurrentUserCategories) {
       const fetchAssignedCategories = async () => {
@@ -92,18 +92,18 @@ export default function MatchSchedule({
           const categories = await getCurrentUserCategories();
           setAssignedCategoryIds(categories);
         } catch (error) {
-          console.error('Error fetching assigned categories:', error);
+          console.error('Error fetching assigned category:', error);
           setAssignedCategoryIds([]);
         }
       };
       fetchAssignedCategories();
     } else if (showOnlyAssignedCategories && !getCurrentUserCategories) {
-      // If UserProvider is not available, use all categories
+      // If UserProvider is not available, use all category
       setAssignedCategoryIds(categories.map((cat) => cat.id));
     }
   }, [showOnlyAssignedCategories, getCurrentUserCategories, categories]);
 
-  // Update selected category when available categories change or external category is provided
+  // Update selected category when available category change or external category is provided
   useEffect(() => {
     if (selectedCategoryId) {
       // Use external category selection

@@ -37,7 +37,7 @@ const getCurrentSection = (pathname: string) => {
   if (pathname.includes('/admin/seasons')) {
     return {title: 'Sezóny', description: 'Správa sezón pro organizaci soutěží a týmů.'};
   }
-  if (pathname.includes('/admin/categories')) {
+  if (pathname.includes('/admin/category')) {
     return {title: 'Kategorie', description: 'Správa kategorií pro týmové soutěže a členy klubu.'};
   }
   if (pathname.includes('/admin/users')) {

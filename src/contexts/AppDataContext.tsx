@@ -126,7 +126,7 @@ export function AppDataProvider({children}: {children: React.ReactNode}) {
     });
   }, [supabase]);
 
-  // Fetch categories
+  // Fetch category
   const fetchCategories = useCallback(async (): Promise<Category[]> => {
     return getCachedData('categories', async () => {
       const {data, error} = await supabase
@@ -188,7 +188,7 @@ export function AppDataProvider({children}: {children: React.ReactNode}) {
     }
   }, [fetchSeasons]);
 
-  // Refresh categories
+  // Refresh category
   const refreshCategories = useCallback(async () => {
     try {
       setCategoriesLoading(true);
@@ -201,8 +201,8 @@ export function AppDataProvider({children}: {children: React.ReactNode}) {
       const data = await fetchCategories();
       setCategories(data);
     } catch (err) {
-      console.error('Error refreshing categories:', err);
-      setCategoriesError(err instanceof Error ? err.message : 'Failed to refresh categories');
+      console.error('Error refreshing category:', err);
+      setCategoriesError(err instanceof Error ? err.message : 'Failed to refresh category');
     } finally {
       setCategoriesLoading(false);
     }

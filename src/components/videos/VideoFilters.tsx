@@ -1,20 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import { VideoFilters as VideoFiltersType, Category, Club, Season } from "@/types";
-import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
-} from "@heroicons/react/24/outline";
-import {
-  Card,
-  CardBody,
-  Input,
-  Select,
-  SelectItem,
-  Switch,
-  Button,
-} from "@heroui/react";
+import React from 'react';
+import {VideoFilters as VideoFiltersType, Category, Club, Season} from '@/types';
+import {MagnifyingGlassIcon, FunnelIcon} from '@heroicons/react/24/outline';
+import {Card, CardBody, Input, Select, SelectItem, Switch, Button} from '@heroui/react';
 
 interface VideoFiltersProps {
   filters: VideoFiltersType;
@@ -22,7 +11,7 @@ interface VideoFiltersProps {
   categories: Category[];
   clubs: Club[];
   seasons: Season[];
-  availableCategories?: Category[]; // For coaches - only show assigned categories
+  availableCategories?: Category[]; // For coaches - only show assigned category
 }
 
 export function VideoFilters({
@@ -33,7 +22,7 @@ export function VideoFilters({
   seasons,
   availableCategories,
 }: VideoFiltersProps) {
-  // Use availableCategories if provided (for coaches), otherwise use all categories
+  // Use availableCategories if provided (for coaches), otherwise use all category
   const displayCategories = availableCategories || categories;
 
   const handleSearchFilter = (search: string) => {
@@ -46,21 +35,21 @@ export function VideoFilters({
   const handleCategoryFilter = (categoryId: string) => {
     onFiltersChange({
       ...filters,
-      category_id: categoryId === "all" ? undefined : categoryId,
+      category_id: categoryId === 'all' ? undefined : categoryId,
     });
   };
 
   const handleClubFilter = (clubId: string) => {
     onFiltersChange({
       ...filters,
-      club_id: clubId === "all" ? undefined : clubId,
+      club_id: clubId === 'all' ? undefined : clubId,
     });
   };
 
   const handleSeasonFilter = (seasonId: string) => {
     onFiltersChange({
       ...filters,
-      season_id: seasonId === "all" ? undefined : seasonId,
+      season_id: seasonId === 'all' ? undefined : seasonId,
     });
   };
 
@@ -82,19 +71,15 @@ export function VideoFilters({
           {/* Search */}
           <Input
             placeholder="Hledat videa..."
-            startContent={
-              <MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />
-            }
-            value={filters.search || ""}
+            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
+            value={filters.search || ''}
             onValueChange={handleSearchFilter}
           />
 
           {/* Category Filter */}
           <Select
             placeholder="Všechny kategorie"
-            selectedKeys={
-              filters.category_id ? [filters.category_id] : ["all"]
-            }
+            selectedKeys={filters.category_id ? [filters.category_id] : ['all']}
             onSelectionChange={(keys) => {
               const selected = Array.from(keys)[0] as string;
               handleCategoryFilter(selected);
@@ -111,7 +96,7 @@ export function VideoFilters({
           {/* Club Filter */}
           <Select
             placeholder="Všechny kluby"
-            selectedKeys={filters.club_id ? [filters.club_id] : ["all"]}
+            selectedKeys={filters.club_id ? [filters.club_id] : ['all']}
             onSelectionChange={(keys) => {
               const selected = Array.from(keys)[0] as string;
               handleClubFilter(selected);
@@ -128,7 +113,7 @@ export function VideoFilters({
           {/* Season Filter */}
           <Select
             placeholder="Všechny sezóny"
-            selectedKeys={filters.season_id ? [filters.season_id] : ["all"]}
+            selectedKeys={filters.season_id ? [filters.season_id] : ['all']}
             onSelectionChange={(keys) => {
               const selected = Array.from(keys)[0] as string;
               handleSeasonFilter(selected);
@@ -144,10 +129,7 @@ export function VideoFilters({
 
           {/* Active Filter */}
           <div className="flex items-center gap-2">
-            <Switch
-              isSelected={filters.is_active === true}
-              onValueChange={handleActiveFilter}
-            />
+            <Switch isSelected={filters.is_active === true} onValueChange={handleActiveFilter} />
             <span className="text-sm text-gray-600">Pouze aktivní</span>
           </div>
 

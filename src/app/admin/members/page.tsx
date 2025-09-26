@@ -19,7 +19,7 @@ export default function MembersAdminPage() {
   // State for tabs
   const [activeTab, setActiveTab] = useState('members');
 
-  // Use AppDataContext for members and categories data
+  // Use AppDataContext for members and category data
   const {members, membersLoading, membersError, categories, categoriesLoading, categoriesError} =
     useAppData();
 

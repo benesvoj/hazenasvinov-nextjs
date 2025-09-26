@@ -1,32 +1,32 @@
-"use client";
+'use client';
 
-import { texts } from "@/utils/texts";
-import ThemeSwitch from "@/components/ThemeSwitch";
-import Link from "@/components/Link";
-import { useVisiblePages } from "@/hooks/useVisiblePages";
-import { buildMenuFromPages, fallbackRoutes } from "../routes/dynamicRoutes";
-import { MenuItem } from "../routes/dynamicRoutes";
-import DropdownMenu from "@/components/DropdownMenu";
-import Logo from "@/components/Logo";
-import { useState } from "react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Button } from "@heroui/react";
+import {texts} from '@/utils/texts';
+import ThemeSwitch from '@/components/ThemeSwitch';
+import Link from '@/components/Link';
+import {useVisiblePages} from '@/hooks/settings/useVisiblePages';
+import {buildMenuFromPages, fallbackRoutes} from '../routes/dynamicRoutes';
+import {MenuItem} from '../routes/dynamicRoutes';
+import DropdownMenu from '@/components/DropdownMenu';
+import Logo from '@/components/Logo';
+import {useState} from 'react';
+import {Bars3Icon, XMarkIcon} from '@heroicons/react/24/outline';
+import {Button} from '@heroui/react';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { visiblePages, loading, error } = useVisiblePages();
-  
+  const {visiblePages, loading, error} = useVisiblePages();
+
   // Build menu items from visible pages, with fallback to static routes
   const menuItems: MenuItem[] = loading ? [] : buildMenuFromPages(visiblePages);
-  
+
   // Fallback menu items if none are available
   const fallbackMenuItems: MenuItem[] = [
-    { title: "Domů", route: "/" },
-    { title: "O nás", route: "/about" },
-    { title: "Novinky", route: "/news" },
-    { title: "Kontakt", route: "/contact" }
+    {title: 'Domů', route: '/'},
+    {title: 'O nás', route: '/about'},
+    {title: 'Novinky', route: '/news'},
+    {title: 'Kontakt', route: '/contact'},
   ];
-  
+
   // Use dynamic menu items if available, otherwise fallback
   const displayMenuItems = menuItems.length > 0 ? menuItems : fallbackMenuItems;
 
@@ -37,11 +37,7 @@ const Header = () => {
           {/* Logo and Title */}
           <Link href={fallbackRoutes.home}>
             <div className="flex items-center space-x-3 lg:space-x-4">
-              <Logo 
-                size="md" 
-                className="lg:w-12 lg:h-12" 
-                alt={texts.club.title}
-              />
+              <Logo size="md" className="lg:w-12 lg:h-12" alt={texts.club.title} />
               <div className="hidden sm:block">
                 <h1 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-white">
                   {texts.club.title}
@@ -57,15 +53,15 @@ const Header = () => {
           <nav className="hidden lg:flex items-center space-x-6">
             {displayMenuItems.map((item: MenuItem) => {
               return item.children ? (
-                <DropdownMenu 
-                  key={item.title} 
-                  item={item} 
+                <DropdownMenu
+                  key={item.title}
+                  item={item}
                   className="text-sm text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
                 />
               ) : (
                 <Link
                   key={item.route}
-                  href={item.route || ""}
+                  href={item.route || ''}
                   className="text-sm font-semibold text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
                 >
                   {item.title}
@@ -104,10 +100,10 @@ const Header = () => {
 
         {/* Mobile Navigation - Simple Full Screen */}
         {isMobileMenuOpen && (
-          <div 
+          <div
             className="fixed inset-0 z-[9999] lg:hidden bg-white dark:bg-gray-900"
-            style={{ 
-              zIndex: 9999
+            style={{
+              zIndex: 9999,
             }}
           >
             {/* Header */}
@@ -124,12 +120,12 @@ const Header = () => {
                 <XMarkIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
               </Button>
             </div>
-            
+
             {/* Navigation Content - Scrollable */}
-            <div 
-              className="overflow-y-auto p-4 space-y-2 bg-white dark:bg-gray-900" 
-              style={{ 
-                height: 'calc(100vh - 64px)'
+            <div
+              className="overflow-y-auto p-4 space-y-2 bg-white dark:bg-gray-900"
+              style={{
+                height: 'calc(100vh - 64px)',
               }}
             >
               {/* Menu items */}
@@ -145,7 +141,7 @@ const Header = () => {
                         {item.children.map((child: MenuItem) => (
                           <Link
                             key={child.route || child.title}
-                            href={child.route || "#"}
+                            href={child.route || '#'}
                             className="block p-3 text-center text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
@@ -160,7 +156,7 @@ const Header = () => {
                   return (
                     <Link
                       key={item.route || item.title}
-                      href={item.route || "#"}
+                      href={item.route || '#'}
                       className="block w-full p-4 text-left text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -169,7 +165,7 @@ const Header = () => {
                   );
                 }
               })}
-              
+
               {/* Portal Link - Bottom */}
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                 <Link
@@ -182,7 +178,6 @@ const Header = () => {
                 </Link>
               </div>
             </div>
-            
           </div>
         )}
       </div>

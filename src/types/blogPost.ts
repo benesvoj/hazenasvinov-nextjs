@@ -23,7 +23,7 @@ export interface BlogPost {
   updated_at?: string;
   /** Image URL */
   image_url?: string;
-  /** Category ID, relation to categories table */
+  /** Category ID, relation to category table */
   category_id?: string;
   /** Optional reference to related match */
   match_id?: string;

@@ -33,7 +33,7 @@ import {showToast} from '@/components/Toast';
 import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
 import {useQueryClient} from '@tanstack/react-query';
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
-import {useAddMatchMetadata} from '@/hooks/useMatchMetadata';
+import {useAddMatchMetadata} from '@/hooks/match/useMatchMetadata';
 
 interface CoachMatchResultFlowProps {
   isOpen: boolean;

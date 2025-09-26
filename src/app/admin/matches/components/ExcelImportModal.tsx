@@ -84,7 +84,7 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
         categoriesCount: categories.length,
         teamsCount: teams.length,
         selectedSeason,
-        categories: categories.slice(0, 3), // First 3 categories
+        categories: categories.slice(0, 3), // First 3 category
         teams: teams.slice(0, 3), // First 3 teams
       });
 
@@ -267,7 +267,7 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           catNameLower.includes(searchTerm) ||
           searchTerm.includes(catNameLower);
 
-        // Debug: Log each category check (only for first few categories to avoid spam)
+        // Debug: Log each category check (only for first few category to avoid spam)
         if (categoriesData.indexOf(cat) < 3) {
           console.log(`🏷️ Checking category "${match.category}":`, {
             searchTerm,

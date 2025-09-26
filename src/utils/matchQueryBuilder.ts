@@ -447,7 +447,7 @@ export class MatchQueryBuilder {
                 this.options.seasonId
               );
             } else {
-              // All categories - get team counts for all categories that have matches
+              // All category - get team counts for all category that have matches
               const categoryIds = [
                 ...new Set(matches.map((match: any) => match.category_id)),
               ].filter((id): id is string => typeof id === 'string');
@@ -581,7 +581,7 @@ export class MatchQueryBuilder {
                 this.options.seasonId
               );
             } else {
-              // All categories - get team counts for the match's category
+              // All category - get team counts for the match's category
               clubTeamCounts = await getClubTeamCounts(data.category_id, this.options.seasonId);
             }
           } catch (error) {

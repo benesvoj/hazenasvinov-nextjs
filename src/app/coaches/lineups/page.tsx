@@ -1,10 +1,10 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {useCategoryLineups} from '@/hooks/useCategoryLineups';
-import {useSeasons} from '@/hooks/useSeasons';
-import {useCategories} from '@/hooks/useCategories';
-import {useUserRoles} from '@/hooks/useUserRoles';
+import {useCategoryLineups} from '@/hooks/category/useCategoryLineups';
+import {useSeasons} from '@/hooks/season/useSeasons';
+import {useCategories} from '@/hooks/category/useCategories';
+import {useUserRoles} from '@/hooks/user/useUserRoles';
 import {
   UserGroupIcon,
   PlusIcon,
@@ -73,7 +73,7 @@ export default function CoachesLineupsPage() {
   const {categories, loading: categoriesLoading, fetchCategories} = useCategories();
   const {getCurrentUserCategories} = useUserRoles();
 
-  // Get user's assigned categories
+  // Get user's assigned category
   const [userCategories, setUserCategories] = useState<string[]>([]);
 
   // Fetch initial data
@@ -91,7 +91,7 @@ export default function CoachesLineupsPage() {
           setSelectedCategory(categories[0]);
         }
       } catch (err) {
-        console.error('Error fetching user categories:', err);
+        console.error('Error fetching user category:', err);
       }
     };
 

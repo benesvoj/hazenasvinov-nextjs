@@ -8,7 +8,7 @@ import {
   PostSection,
   LatestResultsSection,
 } from './components';
-import {useSectionVisibility} from '@/hooks/useSectionVisibility';
+import {useSectionVisibility} from '@/hooks/settings/useSectionVisibility';
 import AuthHandler from './components/AuthHandler';
 import {translations} from '@/lib/translations';
 // import OptimizedMatchSchedule from "@/components/match/OptimizedMatchSchedule";

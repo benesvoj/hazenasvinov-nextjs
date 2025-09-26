@@ -3,9 +3,9 @@
  */
 
 import React, {memo, useMemo, useCallback} from 'react';
-import {useOptimizedOwnClubMatches} from '@/hooks/useOptimizedMatches';
-import {useCategories} from '@/hooks/useCategories';
-import {useSeasons} from '@/hooks/useSeasons';
+import {useOptimizedOwnClubMatches} from '@/hooks/match/useOptimizedMatches';
+import {useCategories} from '@/hooks/category/useCategories';
+import {useSeasons} from '@/hooks/season/useSeasons';
 import CategoryMatchesAndResults from '@/app/(main)/components/CategoryMatchesAndResults';
 import {PerformanceMonitorPanel} from '@/components/PerformanceMonitorPanel';
 

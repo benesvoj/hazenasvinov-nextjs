@@ -3,7 +3,7 @@
 import React from 'react';
 import {Card, CardBody, CardHeader} from '@heroui/react';
 import {ExclamationTriangleIcon} from '@heroicons/react/24/outline';
-import {usePlayerStats} from '@/hooks/usePlayerStats';
+import {usePlayerStats} from '@/hooks/player/usePlayerStats';
 import {LoadingSpinner} from '@/components';
 
 interface YellowCardsCardProps {

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useMemo } from "react";
-import { useFetchMembers } from "@/hooks/useFetchMembers";
-import { MeetingAttendeeFormData } from "@/types";
+import React, {useState, useEffect, useMemo} from 'react';
+import {useFetchMembers} from '@/hooks/member/useFetchMembers';
+import {MeetingAttendeeFormData} from '@/types';
 import {
   Modal,
   ModalContent,
@@ -18,16 +18,16 @@ import {
   Select,
   SelectItem,
   Divider,
-} from "@heroui/react";
-import { 
-  MagnifyingGlassIcon, 
-  UserPlusIcon, 
+} from '@heroui/react';
+import {
+  MagnifyingGlassIcon,
+  UserPlusIcon,
   CheckIcon,
   XMarkIcon,
   UserIcon,
   TrashIcon,
-} from "@heroicons/react/24/outline";
-import { translations } from "@/lib/translations";
+} from '@heroicons/react/24/outline';
+import {translations} from '@/lib/translations';
 
 interface AttendeesModalProps {
   isOpen: boolean;
@@ -42,24 +42,24 @@ export function AttendeesModal({
   attendees,
   onAttendeesChange,
 }: AttendeesModalProps) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  
-  const { members, loading: membersLoading } = useFetchMembers();
+
+  const {members, loading: membersLoading} = useFetchMembers();
   const t = translations.components.meetingMinutes;
 
   // Filter members based on search
   const filteredMembers = useMemo(() => {
     if (!searchTerm) return members;
-    
-    return members.filter(member => {
+
+    return members.filter((member) => {
       const fullName = `${member.name} ${member.surname}`.toLowerCase();
       const registrationNumber = member.registration_number.toLowerCase();
       const searchQuery = searchTerm.toLowerCase();
-      
+
       return fullName.includes(searchQuery) || registrationNumber.includes(searchQuery);
     });
   }, [members, searchTerm]);
@@ -77,14 +77,14 @@ export function AttendeesModal({
 
   // Filter attendees based on status
   const filteredAttendees = useMemo(() => {
-    if (statusFilter === "all") return attendees;
-    return attendees.filter(attendee => attendee.status === statusFilter);
+    if (statusFilter === 'all') return attendees;
+    return attendees.filter((attendee) => attendee.status === statusFilter);
   }, [attendees, statusFilter]);
 
   // Initialize selected members from existing attendees
   useEffect(() => {
     if (isOpen) {
-      const existingMemberIds = new Set(attendees.map(a => a.user_id).filter(Boolean));
+      const existingMemberIds = new Set(attendees.map((a) => a.user_id).filter(Boolean));
       setSelectedMembers(existingMemberIds);
     }
   }, [isOpen, attendees]);
@@ -101,19 +101,19 @@ export function AttendeesModal({
 
   const handleBulkAdd = () => {
     const newAttendees: MeetingAttendeeFormData[] = Array.from(selectedMembers)
-      .filter(memberId => !attendees.some(a => a.user_id === memberId))
-      .map(memberId => {
-        const member = members.find(m => m.id === memberId);
+      .filter((memberId) => !attendees.some((a) => a.user_id === memberId))
+      .map((memberId) => {
+        const member = members.find((m) => m.id === memberId);
         return {
           user_id: memberId,
-          status: "present" as const,
-          notes: "",
+          status: 'present' as const,
+          notes: '',
         };
       });
 
     onAttendeesChange([...attendees, ...newAttendees]);
     setSelectedMembers(new Set());
-    setSearchTerm("");
+    setSearchTerm('');
   };
 
   const handleRemoveAttendee = (index: number) => {
@@ -121,7 +121,7 @@ export function AttendeesModal({
     onAttendeesChange(newAttendees);
   };
 
-  const handleStatusChange = (index: number, status: "present" | "excused") => {
+  const handleStatusChange = (index: number, status: 'present' | 'excused') => {
     const newAttendees = [...attendees];
     newAttendees[index].status = status;
     onAttendeesChange(newAttendees);
@@ -134,8 +134,10 @@ export function AttendeesModal({
   };
 
   const getMemberDisplayName = (memberId: string) => {
-    const member = members.find(m => m.id === memberId);
-    return member ? `${member.name} ${member.surname} (${member.registration_number})` : "Neznámý člen";
+    const member = members.find((m) => m.id === memberId);
+    return member
+      ? `${member.name} ${member.surname} (${member.registration_number})`
+      : 'Neznámý člen';
   };
 
   return (
@@ -175,7 +177,9 @@ export function AttendeesModal({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm text-gray-600">
                     <span>
-                      {searchTerm ? `Nalezeno ${filteredMembers.length} členů` : `Celkem ${members.length} členů`}
+                      {searchTerm
+                        ? `Nalezeno ${filteredMembers.length} členů`
+                        : `Celkem ${members.length} členů`}
                     </span>
                     {totalPages > 1 && (
                       <span>
@@ -183,12 +187,12 @@ export function AttendeesModal({
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="max-h-80 overflow-y-auto space-y-2">
                     {paginatedMembers.map((member) => {
                       const isSelected = selectedMembers.has(member.id);
-                      const isAlreadyAdded = attendees.some(a => a.user_id === member.id);
-                      
+                      const isAlreadyAdded = attendees.some((a) => a.user_id === member.id);
+
                       return (
                         <div
                           key={member.id}
@@ -210,14 +214,20 @@ export function AttendeesModal({
                             </div>
                           </div>
                           {isAlreadyAdded && (
-                            <Chip size="sm" color="success" variant="flat" aria-label={t.added} startContent={<CheckIcon className="w-3 h-3" />}>
+                            <Chip
+                              size="sm"
+                              color="success"
+                              variant="flat"
+                              aria-label={t.added}
+                              startContent={<CheckIcon className="w-3 h-3" />}
+                            >
                               {t.added}
                             </Chip>
                           )}
                         </div>
                       );
                     })}
-                    
+
                     {paginatedMembers.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
                         <UserIcon className="w-12 h-12 mx-auto mb-2 text-gray-300" />
@@ -232,21 +242,21 @@ export function AttendeesModal({
                       <Button
                         size="sm"
                         variant="flat"
-                        onPress={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        onPress={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                         isDisabled={currentPage === 1}
                       >
                         {t.previous}
                       </Button>
-                      
+
                       <div className="flex gap-1">
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        {Array.from({length: Math.min(5, totalPages)}, (_, i) => {
                           const pageNum = i + 1;
                           return (
                             <Button
                               key={pageNum}
                               size="sm"
-                              variant={currentPage === pageNum ? "solid" : "flat"}
-                              color={currentPage === pageNum ? "primary" : "default"}
+                              variant={currentPage === pageNum ? 'solid' : 'flat'}
+                              color={currentPage === pageNum ? 'primary' : 'default'}
                               onPress={() => setCurrentPage(pageNum)}
                               className="w-8 h-8 min-w-8"
                             >
@@ -255,11 +265,11 @@ export function AttendeesModal({
                           );
                         })}
                       </div>
-                      
+
                       <Button
                         size="sm"
                         variant="flat"
-                        onPress={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        onPress={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                         isDisabled={currentPage === totalPages}
                       >
                         {t.next}
@@ -276,7 +286,9 @@ export function AttendeesModal({
           {/* Current Attendees */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{t.currentAttendees} ({attendees.length})</h3>
+              <h3 className="text-lg font-semibold">
+                {t.currentAttendees} ({attendees.length})
+              </h3>
               <Select
                 size="sm"
                 placeholder={t.filtersByStatus}
@@ -293,7 +305,10 @@ export function AttendeesModal({
             <div className="max-h-96 overflow-y-auto">
               <div className="space-y-2 h-[300px] overflow-y-auto py-2">
                 {filteredAttendees.map((attendee, index) => (
-                  <Card key={`${attendee.user_id}-${index}`} className="hover:shadow-md transition-shadow mx-2">
+                  <Card
+                    key={`${attendee.user_id}-${index}`}
+                    className="hover:shadow-md transition-shadow mx-2"
+                  >
                     <CardBody className="p-3">
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
                         <div className="md:col-span-1">
@@ -306,7 +321,7 @@ export function AttendeesModal({
                           size="sm"
                           selectedKeys={[attendee.status]}
                           onSelectionChange={(keys) => {
-                            const status = Array.from(keys)[0] as "present" | "excused";
+                            const status = Array.from(keys)[0] as 'present' | 'excused';
                             handleStatusChange(index, status);
                           }}
                           className="w-full"

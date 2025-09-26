@@ -233,7 +233,7 @@ export async function getMatchesWithTeamsOptimized(
           // Single category - get team counts for that category
           clubTeamCounts = await getClubTeamCounts(options.categoryId, options.seasonId);
         } else {
-          // All categories - get team counts for each category separately
+          // All category - get team counts for each category separately
           const categoryIds = [...new Set(matches.map((match: any) => match.category_id))].filter(
             (id): id is string => typeof id === 'string'
           );
@@ -253,7 +253,7 @@ export async function getMatchesWithTeamsOptimized(
 
       // Transform team names with proper team counting
       const transformedMatches = matches.map((match: any) => {
-        // For "all categories", use the team counts from the match's specific category
+        // For "all category", use the team counts from the match's specific category
         let matchClubTeamCounts = clubTeamCounts;
         if (!options.categoryId && options.seasonId) {
           matchClubTeamCounts = categoryTeamCounts.get(match.category_id) || new Map();

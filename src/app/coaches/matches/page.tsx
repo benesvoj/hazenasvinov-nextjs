@@ -46,7 +46,7 @@ export default function CoachesMatchesPage() {
     // UserProvider not available
   }
 
-  // Filter categories based on assigned categories
+  // Filter category based on assigned category
   const availableCategories = categories.filter((cat) => assignedCategoryIds.includes(cat.id));
 
   // Auto-select first category if none selected and only one available
@@ -75,7 +75,7 @@ export default function CoachesMatchesPage() {
     fetchCategories();
   }, [fetchActiveSeason, fetchCategories]);
 
-  // Fetch assigned categories if available
+  // Fetch assigned category if available
   useEffect(() => {
     if (getCurrentUserCategories) {
       getCurrentUserCategories().then(setAssignedCategoryIds);
@@ -158,7 +158,7 @@ export default function CoachesMatchesPage() {
                 selectedKey={selectedCategory}
                 onSelectionChange={(key) => {
                   setSelectedCategory(key as string);
-                  setSelectedMatch(null); // Clear selected match when switching categories
+                  setSelectedMatch(null); // Clear selected match when switching category
                 }}
                 className="w-full min-w-max"
               >

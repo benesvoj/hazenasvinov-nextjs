@@ -122,12 +122,12 @@ export default function MemberFormModal({
               >
                 {categories
                   .filter((category) => {
-                    // Filter categories based on sex using the gender field from database
+                    // Filter category based on sex using the gender field from database
                     if (formData.sex === Genders.MALE) {
-                      // For male sex, show male and mixed categories
+                      // For male sex, show male and mixed category
                       return category.gender === Genders.MALE || category.gender === Genders.MIXED;
                     } else if (formData.sex === Genders.FEMALE) {
-                      // For female sex, show female and mixed categories
+                      // For female sex, show female and mixed category
                       return (
                         category.gender === Genders.FEMALE || category.gender === Genders.MIXED
                       );

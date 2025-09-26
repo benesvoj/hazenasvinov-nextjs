@@ -2,9 +2,9 @@
 
 import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import {MeetingMinutes, MeetingMinutesFormData, MeetingAttendeeFormData} from '@/types';
-import {useSeasons} from '@/hooks/useSeasons';
-import {useAuth} from '@/hooks/useAuthNew';
-import {useFetchMembers} from '@/hooks/useFetchMembers';
+import {useSeasons} from '@/hooks/season/useSeasons';
+import {useAuth} from '@/hooks/auth/useAuthNew';
+import {useFetchMembers} from '@/hooks/member/useFetchMembers';
 import {
   Modal,
   ModalContent,
@@ -87,7 +87,7 @@ export function MeetingMinutesFormModal({
     }
   }, [isOpen, fetchAllSeasons]);
 
-  // Reset form when modal opens/closes or meetingMinutes changes
+  // Reset form when modal opens/closes or meetingMinute changes
   useEffect(() => {
     if (isOpen) {
       if (meetingMinutes) {

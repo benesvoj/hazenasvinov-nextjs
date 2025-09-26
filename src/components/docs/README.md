@@ -215,7 +215,7 @@ import {
 <Breadcrumb
   items={[
     { title: "Úvod", href: "/" },
-    { title: "Kategorie", href: "/categories" },
+    { title: "Kategorie", href: "/category" },
     { title: "Sport", current: true }
   ]}
 />

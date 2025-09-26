@@ -1,8 +1,8 @@
 'use client';
 
 import {useState, useEffect, useCallback} from 'react';
-import {usePlayerLoans} from '@/hooks/usePlayerLoans';
-import {useUnifiedPlayers} from '@/hooks/useUnifiedPlayers';
+import {usePlayerLoans} from '@/hooks/player/usePlayerLoans';
+import {useUnifiedPlayers} from '@/hooks/player/useUnifiedPlayers';
 import {PlayerLoanFilters} from '@/types/playerLoan';
 import PlayerLoansList from './PlayerLoansList';
 

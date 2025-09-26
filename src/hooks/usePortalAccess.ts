@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useUserRoles } from './useUserRoles';
+import {useState, useEffect, useCallback} from 'react';
+import {useUserRoles} from './user/useUserRoles';
 
 export interface PortalAccess {
   hasAdminAccess: boolean;
@@ -15,16 +15,13 @@ export function usePortalAccess() {
     hasBothAccess: false,
     loading: true,
   });
-  const { hasRole } = useUserRoles();
+  const {hasRole} = useUserRoles();
 
   const checkAccess = useCallback(async () => {
     try {
-      setAccess(prev => ({ ...prev, loading: true }));
+      setAccess((prev) => ({...prev, loading: true}));
 
-      const [isAdmin, isCoach] = await Promise.all([
-        hasRole('admin'),
-        hasRole('coach')
-      ]);
+      const [isAdmin, isCoach] = await Promise.all([hasRole('admin'), hasRole('coach')]);
 
       const hasBothAccess = isAdmin && isCoach;
 
@@ -49,5 +46,5 @@ export function usePortalAccess() {
     checkAccess();
   }, [checkAccess]);
 
-  return { ...access, refreshAccess: checkAccess };
+  return {...access, refreshAccess: checkAccess};
 }

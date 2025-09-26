@@ -21,7 +21,7 @@ export default function CoachesDashboard() {
   const {categories, fetchCategories} = useCategories();
   const {getCurrentUserCategories} = useUserRoles();
 
-  // Filter categories based on assigned categories
+  // Filter category based on assigned category
   const availableCategories = useMemo(() => {
     return categories.filter((cat) => assignedCategoryIds.includes(cat.id));
   }, [categories, assignedCategoryIds]);
@@ -38,7 +38,7 @@ export default function CoachesDashboard() {
     fetchCategories();
   }, [fetchCategories]);
 
-  // Fetch assigned categories if available
+  // Fetch assigned category if available
   useEffect(() => {
     if (getCurrentUserCategories) {
       getCurrentUserCategories().then(setAssignedCategoryIds);
