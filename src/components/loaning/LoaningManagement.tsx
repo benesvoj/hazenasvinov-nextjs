@@ -3,7 +3,7 @@
 import {useState, useEffect, useCallback} from 'react';
 import {usePlayerLoans} from '@/hooks/entities/player/usePlayerLoans';
 import {useUnifiedPlayers} from '@/hooks/entities/player/useUnifiedPlayers';
-import {PlayerLoanFilters} from '@/types/playerLoan';
+import {PlayerLoanFilters} from '@/types/entities/member/business/playerLoan';
 import PlayerLoansList from './PlayerLoansList';
 
 interface LoaningManagementProps {

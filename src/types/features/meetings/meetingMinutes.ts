@@ -12,7 +12,7 @@ export interface MeetingMinutes {
   updated_at: string;
   created_by?: string;
   updated_by?: string;
-  
+
   // Joined data
   season?: {
     id: string;
@@ -38,7 +38,7 @@ export interface MeetingAttendee {
   notes?: string;
   created_at: string;
   updated_at: string;
-  
+
   // Joined data
   member?: {
     id: string;
@@ -80,4 +80,3 @@ export interface MeetingMinutesStats {
   total_attendees: number;
   average_attendance: number;
 }
-

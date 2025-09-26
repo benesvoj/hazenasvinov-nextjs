@@ -1,6 +1,6 @@
 import {useState, useEffect, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
-import {Member} from '@/types/member';
+import {Member} from '@/types/entities/member/data/member';
 
 export function useFetchMembers() {
   const [members, setMembers] = useState<Member[]>([]);

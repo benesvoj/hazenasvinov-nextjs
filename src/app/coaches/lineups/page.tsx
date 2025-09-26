@@ -35,7 +35,10 @@ import {
   TableRow,
   TableCell,
 } from '@heroui/react';
-import {CategoryLineupFormData, AddMemberToLineupData} from '@/types/categoryLineup';
+import {
+  CategoryLineupFormData,
+  AddMemberToLineupData,
+} from '@/types/entities/category/data/categoryLineup';
 import AddMemberModal from './components/AddMemberModal';
 import {PageContainer} from '@/components';
 

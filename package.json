@@ -29,6 +29,7 @@
     "fix:meeting-attendees-fk": "node scripts/building-app/fix-meeting-attendees-fk.js",
     "fix:jakub-coach-access": "node scripts/fix-jakub-coach-access.js",
     "generate:hooks": "node scripts/generate-hook-exports.mjs",
+    "generate:types": "node scripts/generate-type-exports.mjs",
     "prepare": "husky"
   },
   "dependencies": {
@@ -103,6 +104,9 @@
     ],
     "src/hooks/**/*.ts": [
       "npm run generate:hooks"
+    ],
+    "src/types/**/*.ts": [
+      "npm run generate:types"
     ]
   }
 }

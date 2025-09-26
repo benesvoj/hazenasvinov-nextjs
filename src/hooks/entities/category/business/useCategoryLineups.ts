@@ -7,7 +7,7 @@ import {
   CategoryLineupFormData,
   AddMemberToLineupData,
   CategoryLineupFilters,
-} from '@/types/categoryLineup';
+} from '@/types/entities/category/data/categoryLineup';
 import {useUser} from '@/contexts/UserContext';
 
 export function useCategoryLineups() {

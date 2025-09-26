@@ -29,7 +29,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
 } from '@heroicons/react/24/outline';
-import {CoachAnalytics} from '@/types/statistics';
+import {CoachAnalytics} from '@/types/entities/trainingSession/business/statistics';
 import {formatDateString} from '@/helpers';
 import {LoadingSpinner} from '@/components';
 

@@ -11,7 +11,7 @@ import {
   cacheKeys,
   invalidateCache,
 } from '@/lib/performanceCache';
-import type {Match} from '@/types/match';
+import type {Match} from '@/types/entities/match/data/match';
 import type {MatchQueryOptions, MatchQueryResult, SeasonalMatchQueryResult} from './matchQueries';
 
 // Optimized query selectors with minimal data fetching

@@ -1,6 +1,10 @@
 import {useState, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
-import {UnifiedPlayer, PlayerSearchFilters, PlayerSearchResult} from '@/types/unifiedPlayer';
+import {
+  UnifiedPlayer,
+  PlayerSearchFilters,
+  PlayerSearchResult,
+} from '@/types/entities/member/data/unifiedPlayer';
 import {getClubName} from '@/constants';
 
 const supabase = createClient();

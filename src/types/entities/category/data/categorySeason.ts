@@ -1,5 +1,5 @@
 import {CompetitionTypes} from '@/enums';
-import {Season} from './season';
+import {Season} from '../../season/data/season';
 
 export interface CategorySeason {
   id: string;

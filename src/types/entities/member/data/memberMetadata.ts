@@ -65,7 +65,12 @@ export interface MemberWithMetadata {
   category_code?: string;
 }
 
-export interface MemberFormData {
+/**
+ *  @description Form data structure for member metadata, including personal, contact, medical, and additional information. Old name MemberFormData conflicts with another interface.
+ *  @interface MemberMetadaFormData
+ *
+ */
+export interface MemberMetadaFormData {
   // Basic Information
   name: string;
   surname: string;

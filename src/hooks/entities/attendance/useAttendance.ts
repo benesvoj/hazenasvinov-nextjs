@@ -10,7 +10,7 @@ import {
   TrainingSessionFormData,
   AttendanceFilters,
   AttendanceStats,
-} from '@/types/attendance';
+} from '@/types/entities/attendance/data/attendance';
 import {
   MemberAttendanceStats,
   TrainingSessionStats,
@@ -19,7 +19,7 @@ import {
   CategoryStats,
   CoachAnalytics,
   AttendanceFilter,
-} from '@/types/statistics';
+} from '@/types/entities/trainingSession/business/statistics';
 import {useUser} from '@/contexts/UserContext';
 import showToast, {ToastOptions} from '@/components/Toast';
 

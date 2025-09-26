@@ -3,7 +3,7 @@
 import {useState, useEffect} from 'react';
 import {useClubs} from '@/hooks/entities/club/useClubs';
 import {usePlayerLoans} from '@/hooks/entities/player/usePlayerLoans';
-import {CreatePlayerLoanData} from '@/types/playerLoan';
+import {CreatePlayerLoanData} from '@/types/entities/member/business/playerLoan';
 import {UnifiedModal} from '@/components';
 import {Input, Select, SelectItem, Button, Textarea} from '@heroui/react';
 

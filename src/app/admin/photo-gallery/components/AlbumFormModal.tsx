@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Textarea } from "@heroui/input";
-import { Switch } from "@heroui/switch";
-import { PhotoAlbum, CreateAlbumData, UpdateAlbumData } from "@/types/photoGallery";
+import React, {useState, useEffect} from 'react';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+import {Button} from '@heroui/button';
+import {Input} from '@heroui/input';
+import {Textarea} from '@heroui/input';
+import {Switch} from '@heroui/switch';
+import {PhotoAlbum, CreateAlbumData, UpdateAlbumData} from '@/types/features/gallery/photoGallery';
 
 interface AlbumFormModalProps {
   isOpen: boolean;
@@ -15,17 +15,12 @@ interface AlbumFormModalProps {
   album?: PhotoAlbum | null;
 }
 
-export default function AlbumFormModal({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
-  album 
-}: AlbumFormModalProps) {
+export default function AlbumFormModal({isOpen, onClose, onSubmit, album}: AlbumFormModalProps) {
   const [formData, setFormData] = useState<CreateAlbumData>({
     title: '',
     description: '',
     is_public: true,
-    sort_order: 0
+    sort_order: 0,
   });
   const [loading, setLoading] = useState(false);
 
@@ -36,14 +31,14 @@ export default function AlbumFormModal({
         title: album.title,
         description: album.description || '',
         is_public: album.is_public,
-        sort_order: album.sort_order
+        sort_order: album.sort_order,
       });
     } else {
       setFormData({
         title: '',
         description: '',
         is_public: true,
-        sort_order: 0
+        sort_order: 0,
       });
     }
   }, [album]);
@@ -51,7 +46,7 @@ export default function AlbumFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       await onSubmit(formData);
       onClose();
@@ -63,9 +58,9 @@ export default function AlbumFormModal({
   };
 
   const handleInputChange = (field: keyof CreateAlbumData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -93,9 +88,7 @@ export default function AlbumFormModal({
 
             {/* Description */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Popis
-              </label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Popis</label>
               <Textarea
                 placeholder="Zadejte popis alba (volitelné)"
                 value={formData.description}
@@ -107,9 +100,7 @@ export default function AlbumFormModal({
 
             {/* Sort Order */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Pořadí
-              </label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Pořadí</label>
               <Input
                 type="number"
                 placeholder="0"
@@ -117,9 +108,7 @@ export default function AlbumFormModal({
                 onChange={(e) => handleInputChange('sort_order', parseInt(e.target.value) || 0)}
                 min={0}
               />
-              <p className="text-xs text-gray-500">
-                Nižší číslo = vyšší priorita v seznamu
-              </p>
+              <p className="text-xs text-gray-500">Nižší číslo = vyšší priorita v seznamu</p>
             </div>
 
             {/* Public/Private Toggle */}
@@ -143,8 +132,8 @@ export default function AlbumFormModal({
             <Button variant="light" onPress={onClose}>
               Zrušit
             </Button>
-            <Button 
-              color="primary" 
+            <Button
+              color="primary"
               type="submit"
               isLoading={loading}
               isDisabled={!formData.title.trim()}

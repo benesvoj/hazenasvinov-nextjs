@@ -1,5 +1,5 @@
-import {ClubMemberRelationship} from './clubMemberRelationship';
-import {Member} from './member';
+import {ClubMemberRelationship} from '../../member/business/clubMemberRelationship';
+import {Member} from '../../member/data/member';
 
 export interface LineupPlayer {
   id?: string;

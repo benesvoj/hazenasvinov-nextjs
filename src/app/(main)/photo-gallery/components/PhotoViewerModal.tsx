@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useState } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Badge } from "@heroui/badge";
-import { 
+import React, {useState} from 'react';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+import {Button} from '@heroui/button';
+import {Badge} from '@heroui/badge';
+import {
   ChevronLeftIcon,
   ChevronRightIcon,
   XMarkIcon,
   StarIcon,
   CalendarIcon,
-  PhotoIcon
-} from "@heroicons/react/24/outline";
-import { Photo, PhotoAlbum } from "@/types/photoGallery";
-import { Image } from "@heroui/image";
+  PhotoIcon,
+} from '@heroicons/react/24/outline';
+import {Photo, PhotoAlbum} from '@/types/features/gallery/photoGallery';
+import {Image} from '@heroui/image';
 
 interface PhotoViewerModalProps {
   isOpen: boolean;
@@ -24,16 +24,16 @@ interface PhotoViewerModalProps {
   onPhotoChange: (index: number) => void;
 }
 
-export default function PhotoViewerModal({ 
-  isOpen, 
-  onClose, 
-  photos, 
-  currentPhotoIndex, 
+export default function PhotoViewerModal({
+  isOpen,
+  onClose,
+  photos,
+  currentPhotoIndex,
   album,
-  onPhotoChange
+  onPhotoChange,
 }: PhotoViewerModalProps) {
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const currentPhoto = photos[currentPhotoIndex];
   const hasPrevious = currentPhotoIndex > 0;
   const hasNext = currentPhotoIndex < photos.length - 1;
@@ -69,14 +69,14 @@ export default function PhotoViewerModal({
   if (!currentPhoto) return null;
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
       size="5xl"
       onKeyDown={handleKeyDown}
       classNames={{
-        base: "max-h-[90vh]",
-        body: "p-0"
+        base: 'max-h-[90vh]',
+        body: 'p-0',
       }}
     >
       <ModalContent>
@@ -95,7 +95,7 @@ export default function PhotoViewerModal({
                 </p>
               </div>
             </div>
-            
+
             <Button
               isIconOnly
               variant="light"
@@ -106,7 +106,7 @@ export default function PhotoViewerModal({
             </Button>
           </div>
         </ModalHeader>
-        
+
         <ModalBody className="p-0">
           <div className="relative bg-black">
             {/* Main Photo */}
@@ -116,11 +116,11 @@ export default function PhotoViewerModal({
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
                 </div>
               )}
-              
+
               <Image
                 src={currentPhoto.file_url}
                 alt={currentPhoto.title || `Fotografie ${currentPhotoIndex + 1}`}
-                  className={`max-w-full max-h-[70vh] object-contain transition-opacity duration-200 ${
+                className={`max-w-full max-h-[70vh] object-contain transition-opacity duration-200 ${
                   isLoading ? 'opacity-0' : 'opacity-100'
                 }`}
                 onLoad={handleImageLoad}
@@ -142,7 +142,7 @@ export default function PhotoViewerModal({
                 <ChevronLeftIcon className="w-6 h-6" />
               </Button>
             )}
-            
+
             {hasNext && (
               <Button
                 isIconOnly
@@ -162,28 +162,30 @@ export default function PhotoViewerModal({
                 {currentPhoto.title && (
                   <h3 className="text-xl font-semibold mb-2">{currentPhoto.title}</h3>
                 )}
-                
+
                 {currentPhoto.description && (
                   <p className="text-gray-200 mb-3">{currentPhoto.description}</p>
                 )}
-                
+
                 <div className="flex items-center space-x-4 text-sm text-gray-300">
                   <div className="flex items-center space-x-1">
                     <CalendarIcon className="w-4 h-4" />
                     <span>{new Date(currentPhoto.created_at).toLocaleDateString('cs-CZ')}</span>
                   </div>
-                  
+
                   {currentPhoto.is_featured && (
                     <Badge color="warning" variant="flat" size="sm">
                       <StarIcon className="w-3 h-3" />
                       Hlavní
                     </Badge>
                   )}
-                  
+
                   {currentPhoto.width && currentPhoto.height && (
                     <div className="flex items-center space-x-1">
                       <PhotoIcon className="w-4 h-4" />
-                      <span>{currentPhoto.width} × {currentPhoto.height} px</span>
+                      <span>
+                        {currentPhoto.width} × {currentPhoto.height} px
+                      </span>
                     </div>
                   )}
                 </div>
@@ -191,7 +193,7 @@ export default function PhotoViewerModal({
             </div>
           </div>
         </ModalBody>
-        
+
         <ModalFooter className="flex items-center justify-between pt-4">
           <div className="flex items-center space-x-2">
             <Button
@@ -202,7 +204,7 @@ export default function PhotoViewerModal({
             >
               Předchozí
             </Button>
-            
+
             <Button
               variant="light"
               onPress={goToNext}
@@ -212,7 +214,7 @@ export default function PhotoViewerModal({
               Další
             </Button>
           </div>
-          
+
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {currentPhotoIndex + 1} / {photos.length}
           </div>

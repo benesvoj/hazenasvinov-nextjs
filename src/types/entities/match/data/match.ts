@@ -1,7 +1,7 @@
-import {Category} from './category';
-import {Season} from './season';
-import {Team} from './team';
-import {Nullish} from './Nullish';
+import {Category} from '../../category/data/category';
+import {Season} from '../../season/data/season';
+import {Team} from '../../team/data/team';
+import {Nullish} from '../../../shared/Nullish';
 
 export type MatchStatus = 'upcoming' | 'completed';
 export interface Match {

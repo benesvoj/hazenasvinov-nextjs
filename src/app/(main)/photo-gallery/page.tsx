@@ -1,26 +1,22 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { 
-  PhotoIcon,
-  FolderIcon,
-  MagnifyingGlassIcon
-} from "@heroicons/react/24/outline";
-import { PhotoAlbum, Photo } from "@/types/photoGallery";
-import { getPhotoAlbums, getPhotosByAlbum } from "@/utils/supabase/photoGallery";
-import PhotoViewerModal from "./components/PhotoViewerModal";
-import PhotoGrid from "./components/PhotoGrid";
-import AlbumCard from "./components/AlbumCard";
+import React, {useState, useEffect, useCallback} from 'react';
+import {Button} from '@heroui/button';
+import {Input} from '@heroui/input';
+import {PhotoIcon, FolderIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
+import {PhotoAlbum, Photo} from '@/types/features/gallery/photoGallery';
+import {getPhotoAlbums, getPhotosByAlbum} from '@/utils/supabase/photoGallery';
+import PhotoViewerModal from './components/PhotoViewerModal';
+import PhotoGrid from './components/PhotoGrid';
+import AlbumCard from './components/AlbumCard';
 
 export default function PhotoGalleryPage() {
   const [albums, setAlbums] = useState<PhotoAlbum[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedAlbum, setSelectedAlbum] = useState<PhotoAlbum | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isPhotoViewerOpen, setIsPhotoViewerOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
@@ -41,15 +37,15 @@ export default function PhotoGalleryPage() {
       setLoading(true);
       const data = await getPhotoAlbums();
       // Only show public albums
-      const publicAlbums = data.filter(album => album.is_public);
+      const publicAlbums = data.filter((album) => album.is_public);
       setAlbums(publicAlbums);
-      
+
       // Load photos for the first album if available
       if (publicAlbums.length > 0) {
         await loadPhotosForAlbum(publicAlbums[0]);
       }
     } catch (err) {
-      setError("Chyba při načítání fotogalerie");
+      setError('Chyba při načítání fotogalerie');
       console.error(err);
     } finally {
       setLoading(false);
@@ -61,9 +57,10 @@ export default function PhotoGalleryPage() {
   }, [loadAlbums]);
 
   // Filter albums based on search term
-  const filteredAlbums = albums.filter(album =>
-    album.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (album.description && album.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredAlbums = albums.filter(
+    (album) =>
+      album.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (album.description && album.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (loading) {
@@ -104,9 +101,7 @@ export default function PhotoGalleryPage() {
           <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
             <PhotoIcon className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Fotogalerie
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Fotogalerie</h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Prohlížejte si fotografie z našich akcí, zápasů a událostí
           </p>
@@ -130,7 +125,7 @@ export default function PhotoGalleryPage() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
             Fotoalba
           </h2>
-          
+
           {filteredAlbums.length === 0 ? (
             <div className="text-center py-12">
               <FolderIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -139,15 +134,11 @@ export default function PhotoGalleryPage() {
               </div>
             </div>
           ) : (
-                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-               {filteredAlbums.map((album) => (
-                 <AlbumCard
-                   key={album.id}
-                   album={album}
-                   onAlbumClick={loadPhotosForAlbum}
-                 />
-               ))}
-             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredAlbums.map((album) => (
+                <AlbumCard key={album.id} album={album} onAlbumClick={loadPhotosForAlbum} />
+              ))}
+            </div>
           )}
         </div>
 
@@ -171,14 +162,14 @@ export default function PhotoGalleryPage() {
               </div>
             </div>
 
-                         {/* Photos Grid */}
-             <PhotoGrid 
-               photos={photos} 
-               onPhotoClick={(index) => {
-                 setSelectedPhotoIndex(index);
-                 setIsPhotoViewerOpen(true);
-               }} 
-             />
+            {/* Photos Grid */}
+            <PhotoGrid
+              photos={photos}
+              onPhotoClick={(index) => {
+                setSelectedPhotoIndex(index);
+                setIsPhotoViewerOpen(true);
+              }}
+            />
           </div>
         )}
 
@@ -187,7 +178,7 @@ export default function PhotoGalleryPage() {
           <Button
             color="primary"
             variant="flat"
-            onPress={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onPress={() => window.scrollTo({top: 0, behavior: 'smooth'})}
           >
             Zpět nahoru
           </Button>

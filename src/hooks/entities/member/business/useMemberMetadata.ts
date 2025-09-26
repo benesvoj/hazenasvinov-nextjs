@@ -1,6 +1,6 @@
 import {useState, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
-import {MemberMetadata, MemberWithMetadata} from '@/types/memberMetadata';
+import {MemberMetadata, MemberWithMetadata} from '@/types/entities/member/data/memberMetadata';
 
 export function useMemberMetadata() {
   const [loading, setLoading] = useState(false);

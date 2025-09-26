@@ -2,7 +2,10 @@
 
 import {useState, useEffect} from 'react';
 import {usePlayerLoans} from '@/hooks/entities/player/usePlayerLoans';
-import {PlayerLoanWithDetails, PlayerLoanFilters} from '@/types/playerLoan';
+import {
+  PlayerLoanWithDetails,
+  PlayerLoanFilters,
+} from '@/types/entities/member/business/playerLoan';
 
 interface PlayerLoansListProps {
   filters?: PlayerLoanFilters;

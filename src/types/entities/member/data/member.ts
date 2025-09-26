@@ -1,5 +1,5 @@
 import {Genders, MemberFunction as MemberFunctionEnum} from '@/enums';
-import {Category} from './category';
+import {Category} from '@/types';
 
 export interface Member {
   id: string;
@@ -72,15 +72,4 @@ export interface UpdateMemberData {
   functions?: MemberFunctionEnum[];
   category_id?: string;
   is_active?: boolean;
-}
-
-export interface MemberFunction {
-  id: string; // Can be either UUID or simple text ID like 'func_player'
-  name: string;
-  display_name: string;
-  description?: string;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
 }

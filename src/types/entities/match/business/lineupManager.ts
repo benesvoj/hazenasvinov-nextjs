@@ -1,5 +1,5 @@
 import {LineupPlayerFormData} from './lineup';
-import {Member} from './member';
+import {Member} from '../../member/data/member';
 
 export interface LineupManagerProps {
   matchId: string;

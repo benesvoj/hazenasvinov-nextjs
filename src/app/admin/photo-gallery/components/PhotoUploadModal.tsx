@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useState, useCallback } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Progress } from "@heroui/progress";
-import { Badge } from "@heroui/badge";
-import { 
+import React, {useState, useCallback} from 'react';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+import {Button} from '@heroui/button';
+import {Progress} from '@heroui/progress';
+import {Badge} from '@heroui/badge';
+import {
   PhotoIcon,
   XMarkIcon,
   CheckIcon,
-  ExclamationTriangleIcon
-} from "@heroicons/react/24/outline";
-import { Photo, CreatePhotoData } from "@/types/photoGallery";
-import { createPhoto } from "@/utils/supabase/photoGallery";
-import { uploadClubAsset } from "@/utils/supabase/storage";
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
+import {Photo, CreatePhotoData} from '@/types/features/gallery/photoGallery';
+import {createPhoto} from '@/utils/supabase/photoGallery';
+import {uploadClubAsset} from '@/utils/supabase/storage';
 
 interface PhotoUploadModalProps {
   isOpen: boolean;
@@ -30,11 +30,11 @@ interface UploadProgress {
   photo?: Photo;
 }
 
-export default function PhotoUploadModal({ 
-  isOpen, 
-  onClose, 
+export default function PhotoUploadModal({
+  isOpen,
+  onClose,
   albumId,
-  onPhotosUploaded
+  onPhotosUploaded,
 }: PhotoUploadModalProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
@@ -44,19 +44,19 @@ export default function PhotoUploadModal({
   // Handle file selection
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
-    
+    const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+
     if (imageFiles.length !== files.length) {
       alert('Některé soubory nejsou obrázky a byly vynechány.');
     }
-    
-    setSelectedFiles(prev => [...prev, ...imageFiles]);
+
+    setSelectedFiles((prev) => [...prev, ...imageFiles]);
   }, []);
 
   // Remove file from selection
   const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-    setUploadProgress(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setUploadProgress((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Clear all files
@@ -71,22 +71,24 @@ export default function PhotoUploadModal({
     if (selectedFiles.length === 0) return;
 
     setIsUploading(true);
-    setUploadProgress(selectedFiles.map(file => ({
-      file,
-      progress: 0,
-      status: 'pending'
-    })));
+    setUploadProgress(
+      selectedFiles.map((file) => ({
+        file,
+        progress: 0,
+        status: 'pending',
+      }))
+    );
 
     const uploadedPhotos: Photo[] = [];
 
     for (let i = 0; i < selectedFiles.length; i++) {
       const file = selectedFiles[i];
-      
+
       try {
         // Update status to uploading
-        setUploadProgress(prev => prev.map((item, index) => 
-          index === i ? { ...item, status: 'uploading' } : item
-        ));
+        setUploadProgress((prev) =>
+          prev.map((item, index) => (index === i ? {...item, status: 'uploading'} : item))
+        );
 
         // Generate unique file path
         const timestamp = Date.now();
@@ -96,18 +98,18 @@ export default function PhotoUploadModal({
 
         // Upload to storage
         const uploadResult = await uploadClubAsset(file, filePath);
-        
+
         if (uploadResult.error) {
           throw new Error(uploadResult.error);
         }
 
         // Get image dimensions
         const dimensions = await getImageDimensions(file);
-        
+
         // Create photo record
         const photoData: CreatePhotoData = {
           album_id: albumId,
-          title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
+          title: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
           file_path: uploadResult.path,
           file_url: uploadResult.url,
           file_size: file.size,
@@ -115,53 +117,61 @@ export default function PhotoUploadModal({
           width: dimensions.width,
           height: dimensions.height,
           sort_order: i,
-          is_featured: false
+          is_featured: false,
         };
 
         const photo = await createPhoto(photoData);
-        
+
         if (photo) {
           uploadedPhotos.push(photo);
-          
+
           // Update progress to success
-          setUploadProgress(prev => prev.map((item, index) => 
-            index === i ? { 
-              ...item, 
-              status: 'success', 
-              progress: 100,
-              photo 
-            } : item
-          ));
+          setUploadProgress((prev) =>
+            prev.map((item, index) =>
+              index === i
+                ? {
+                    ...item,
+                    status: 'success',
+                    progress: 100,
+                    photo,
+                  }
+                : item
+            )
+          );
         }
       } catch (error) {
         console.error('Upload error:', error);
-        
+
         // Update progress to error
-        setUploadProgress(prev => prev.map((item, index) => 
-          index === i ? { 
-            ...item, 
-            status: 'error', 
-            progress: 0,
-            error: error instanceof Error ? error.message : 'Upload failed'
-          } : item
-        ));
+        setUploadProgress((prev) =>
+          prev.map((item, index) =>
+            index === i
+              ? {
+                  ...item,
+                  status: 'error',
+                  progress: 0,
+                  error: error instanceof Error ? error.message : 'Upload failed',
+                }
+              : item
+          )
+        );
       }
     }
 
     setIsUploading(false);
     setUploadComplete(true);
-    
+
     if (uploadedPhotos.length > 0) {
       onPhotosUploaded(uploadedPhotos);
     }
   };
 
   // Get image dimensions
-  const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
+  const getImageDimensions = (file: File): Promise<{width: number; height: number}> => {
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        resolve({ width: img.width, height: img.height });
+        resolve({width: img.width, height: img.height});
       };
       img.src = URL.createObjectURL(file);
     });
@@ -173,16 +183,14 @@ export default function PhotoUploadModal({
     onClose();
   };
 
-  const successCount = uploadProgress.filter(p => p.status === 'success').length;
-  const errorCount = uploadProgress.filter(p => p.status === 'error').length;
-  const pendingCount = uploadProgress.filter(p => p.status === 'pending').length;
+  const successCount = uploadProgress.filter((p) => p.status === 'success').length;
+  const errorCount = uploadProgress.filter((p) => p.status === 'error').length;
+  const pendingCount = uploadProgress.filter((p) => p.status === 'pending').length;
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="4xl">
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">
-          Nahrát fotografie
-        </ModalHeader>
+        <ModalHeader className="flex flex-col gap-1">Nahrát fotografie</ModalHeader>
         <ModalBody className="space-y-6">
           {/* File Selection */}
           {!isUploading && !uploadComplete && (
@@ -214,15 +222,20 @@ export default function PhotoUploadModal({
               {selectedFiles.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium">Vybrané soubory ({selectedFiles.length})</h3>
+                    <h3 className="text-lg font-medium">
+                      Vybrané soubory ({selectedFiles.length})
+                    </h3>
                     <Button variant="light" color="danger" onPress={clearFiles}>
                       Vymazat vše
                     </Button>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
                     {selectedFiles.map((file, index) => (
-                      <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                      >
                         <PhotoIcon className="w-8 h-8 text-gray-400 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -270,10 +283,14 @@ export default function PhotoUploadModal({
                       </span>
                       <div className="flex items-center space-x-2">
                         {item.status === 'pending' && (
-                          <Badge color="default" variant="flat">Čeká</Badge>
+                          <Badge color="default" variant="flat">
+                            Čeká
+                          </Badge>
                         )}
                         {item.status === 'uploading' && (
-                          <Badge color="primary" variant="flat">Nahrává se</Badge>
+                          <Badge color="primary" variant="flat">
+                            Nahrává se
+                          </Badge>
                         )}
                         {item.status === 'success' && (
                           <Badge color="success" variant="flat">
@@ -289,17 +306,15 @@ export default function PhotoUploadModal({
                         )}
                       </div>
                     </div>
-                    
+
                     <Progress
                       value={item.progress}
                       color={item.status === 'error' ? 'danger' : 'primary'}
                       className="w-full"
                     />
-                    
+
                     {item.error && (
-                      <div className="text-sm text-red-600 dark:text-red-400">
-                        {item.error}
-                      </div>
+                      <div className="text-sm text-red-600 dark:text-red-400">{item.error}</div>
                     )}
                   </div>
                 ))}
@@ -313,7 +328,7 @@ export default function PhotoUploadModal({
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto">
                 <CheckIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
-              
+
               <div>
                 <div className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                   Nahrávání dokončeno
@@ -340,16 +355,12 @@ export default function PhotoUploadModal({
               <Button variant="light" onPress={handleClose}>
                 Zrušit
               </Button>
-              <Button
-                color="primary"
-                onPress={uploadFiles}
-                isDisabled={selectedFiles.length === 0}
-              >
+              <Button color="primary" onPress={uploadFiles} isDisabled={selectedFiles.length === 0}>
                 Nahrát {selectedFiles.length} fotografií
               </Button>
             </>
           )}
-          
+
           {uploadComplete && (
             <Button color="primary" onPress={handleClose}>
               Dokončit

@@ -24,7 +24,7 @@ import {
   CardBody,
 } from '@heroui/react';
 import {useFetchMembers} from '@/hooks';
-import {AddMemberToLineupData} from '@/types/categoryLineup';
+import {AddMemberToLineupData} from '@/types/entities/category/data/categoryLineup';
 import {MagnifyingGlassIcon as SearchIcon, UserPlusIcon} from '@heroicons/react/24/outline';
 import {CreateMemberModal} from './';
 

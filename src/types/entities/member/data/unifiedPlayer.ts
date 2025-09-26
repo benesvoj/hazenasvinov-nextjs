@@ -1,5 +1,5 @@
 import {Member} from './member';
-import {PlayerLoan} from './playerLoan';
+import {PlayerLoan} from '../business/playerLoan';
 
 export interface UnifiedPlayer extends Member {
   // Club information

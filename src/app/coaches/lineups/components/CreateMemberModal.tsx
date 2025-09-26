@@ -6,7 +6,7 @@ import {UserPlusIcon} from '@heroicons/react/24/outline';
 import {createClient} from '@/utils/supabase/client';
 import {useFetchMembers, useMemberMetadata} from '@/hooks';
 import {UnifiedModal} from '@/components';
-import {MemberFormData} from '@/types/memberMetadata';
+import {MemberMetadaFormData} from '@/types';
 import {Genders, getGenderOptions, MemberFunction} from '@/enums';
 
 interface CreateMemberModalProps {
@@ -24,7 +24,7 @@ export default function CreateMemberModal({
   selectedCategoryId,
   selectedCategoryName,
 }: CreateMemberModalProps) {
-  const [formData, setFormData] = useState<MemberFormData>({
+  const [formData, setFormData] = useState<MemberMetadaFormData>({
     // Basic Information
     name: '',
     surname: '',
@@ -60,7 +60,7 @@ export default function CreateMemberModal({
   const {fetchMembers} = useFetchMembers();
   const {createMemberMetadata} = useMemberMetadata();
 
-  const handleInputChange = (field: keyof MemberFormData, value: string) => {
+  const handleInputChange = (field: keyof MemberMetadaFormData, value: string) => {
     setFormData((prev) => ({...prev, [field]: value}));
   };
 
