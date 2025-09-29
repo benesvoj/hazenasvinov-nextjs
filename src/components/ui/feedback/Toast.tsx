@@ -1,14 +1,9 @@
 import {addToast} from '@heroui/toast';
 
+import {ToastOptions} from '@/types';
+
 // Toast types for consistent usage across the system
 export type ToastType = 'success' | 'danger' | 'warning';
-
-// Toast options interface
-export interface ToastOptions {
-  title?: string;
-  description: string;
-  duration?: number;
-}
 
 // Default toast configurations
 const toastConfigs = {

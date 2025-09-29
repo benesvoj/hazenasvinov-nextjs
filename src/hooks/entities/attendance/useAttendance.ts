@@ -1,31 +1,25 @@
-import {useState, useEffect, useCallback} from 'react';
+import {useState, useCallback} from 'react';
 
-import {
-  TrainingSession,
-  TrainingSessionStatus,
-  MemberAttendance,
-  AttendanceRecord,
-  RawAttendanceRecord,
-  AttendanceSummary,
-  TrainingSessionFormData,
-  AttendanceFilters,
-  AttendanceStats,
-} from '@/types/entities/attendance/data/attendance';
-import {
-  MemberAttendanceStats,
-  TrainingSessionStats,
-  AttendanceTrendData,
-  MonthlyStats,
-  CategoryStats,
-  CoachAnalytics,
-  AttendanceFilter,
-} from '@/types/entities/trainingSession/business/statistics';
-
-import showToast, {ToastOptions} from '@/components/ui/feedback/Toast';
+import {showToast} from '@/components/ui/feedback';
 
 import {createClient} from '@/utils/supabase/client';
 
 import {useUser} from '@/contexts/UserContext';
+
+import {
+  TrainingSession,
+  TrainingSessionStatus,
+  AttendanceRecord,
+  RawAttendanceRecord,
+  AttendanceSummary,
+  TrainingSessionFormData,
+  AttendanceStats,
+  MemberAttendanceStats,
+  TrainingSessionStats,
+  AttendanceTrendData,
+  CoachAnalytics,
+  ToastOptions,
+} from '@/types';
 
 export function useAttendance() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
