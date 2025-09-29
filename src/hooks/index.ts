@@ -1,4 +1,5 @@
 export * from './admin/useExcelImport';
+export * from './admin/usePerformanceMonitoring';
 export * from './auth/useAuth';
 export {useAuth as useAuthNew} from './auth/useAuthNew';
 export * from './coach/useStrategyPreparation';

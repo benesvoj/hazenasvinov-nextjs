@@ -23,7 +23,7 @@ import {PlusIcon, CalendarIcon, PencilIcon, TrashIcon} from '@heroicons/react/24
 import {useAppData} from '@/contexts/AppDataContext';
 import {useUser} from '@/contexts/UserContext';
 
-import {DeleteConfirmationModal, LoadingSpinner, PageContainer} from '@/components';
+import {DeleteConfirmationModal, LoadingSpinner, PageContainer, showToast} from '@/components';
 import {formatDateString, formatTime} from '@/helpers';
 import {useAttendance, useCategoryLineups} from '@/hooks';
 import {TrainingSessionFormData, TrainingSessionStatus} from '@/types';
@@ -380,7 +380,7 @@ export default function CoachesAttendancePage() {
         const fallbackMemberIds = fallbackMembers.map((m) => m.id);
 
         if (fallbackMemberIds.length === 0) {
-          alert('Žádní členové nejsou k dispozici pro vybranou kategorii');
+          showToast.warning('Žádní členové nejsou k dispozici pro vybranou kategorii');
           return;
         }
 

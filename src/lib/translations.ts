@@ -604,6 +604,7 @@ export const translations = {
     databaseError: 'Databáze',
     networkError: 'Síť',
     unknownError: 'Neznámá',
+    permissionError: 'Oprávnění',
   },
   common: {
     gender: {

@@ -1,10 +1,11 @@
 import {useState, useCallback, useRef} from 'react';
 
 import {showToast} from '@/components';
+import {LineupErrorType} from '@/enums';
 
 export interface LineupError {
   id: string;
-  type: 'validation' | 'network' | 'database' | 'permission' | 'unknown';
+  type: LineupErrorType;
   message: string;
   timestamp: Date;
   context?: Record<string, any>;
@@ -28,12 +29,12 @@ export function useLineupErrorHandler({
   const retryCountRef = useRef<Map<string, number>>(new Map());
 
   const generateErrorId = useCallback(() => {
-    return `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `error_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }, []);
 
   const addError = useCallback(
     (
-      type: LineupError['type'],
+      type: LineupErrorType,
       message: string,
       context?: Record<string, any>,
       retryable: boolean = false
@@ -59,16 +60,16 @@ export function useLineupErrorHandler({
 
       // Show appropriate toast based on error type
       switch (type) {
-        case 'validation':
+        case LineupErrorType.VALIDATION:
           showToast.warning(`⚠️ ${message}`);
           break;
-        case 'network':
+        case LineupErrorType.NETWORK:
           showToast.danger(`🌐 ${message}`);
           break;
-        case 'database':
+        case LineupErrorType.DATABASE:
           showToast.danger(`🗄️ ${message}`);
           break;
-        case 'permission':
+        case LineupErrorType.PERMISSION:
           showToast.danger(`🔒 ${message}`);
           break;
         default:
@@ -94,7 +95,7 @@ export function useLineupErrorHandler({
       const retryCount = retryCountRef.current.get(errorId) || 0;
 
       if (retryCount >= maxRetries) {
-        addError('unknown', 'Maximální počet opakování byl překročen');
+        addError(LineupErrorType.UNKNOWN, 'Maximální počet opakování byl překročen');
         return;
       }
 
@@ -111,10 +112,10 @@ export function useLineupErrorHandler({
         return result;
       } catch (error) {
         if (retryCount + 1 < maxRetries) {
-          addError('network', `Opakování selhalo (${retryCount + 1}/${maxRetries})`);
+          addError(LineupErrorType.NETWORK, `Opakování selhalo (${retryCount + 1}/${maxRetries})`);
           return retryOperation(operation, errorId, maxRetries);
         } else {
-          addError('unknown', 'Operace se nepodařila ani po opakování');
+          addError(LineupErrorType.UNKNOWN, 'Operace se nepodařila ani po opakování');
           throw error;
         }
       }
@@ -161,18 +162,18 @@ export function useLineupErrorHandler({
 
   const determineErrorType = useCallback((error: any): LineupError['type'] => {
     if (error?.message?.includes('validation') || error?.message?.includes('Validation')) {
-      return 'validation';
+      return LineupErrorType.VALIDATION;
     }
     if (error?.message?.includes('network') || error?.message?.includes('fetch')) {
-      return 'network';
+      return LineupErrorType.NETWORK;
     }
     if (error?.message?.includes('database') || error?.message?.includes('SQL')) {
-      return 'database';
+      return LineupErrorType.DATABASE;
     }
     if (error?.message?.includes('permission') || error?.message?.includes('unauthorized')) {
-      return 'permission';
+      return LineupErrorType.PERMISSION;
     }
-    return 'unknown';
+    return LineupErrorType.UNKNOWN;
   }, []);
 
   const getErrorsByType = useCallback(

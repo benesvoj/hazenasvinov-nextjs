@@ -327,7 +327,7 @@ export function useLineupDataManager({
           setAwayFormData(emptyFormData);
         }
 
-        alert('Sestava byla vymazána (neexistovala v databázi)');
+        showToast.warning('Sestava byla vymazána (neexistovala v databázi)');
         return;
       }
 
@@ -350,7 +350,7 @@ export function useLineupDataManager({
     } catch (error: unknown) {
       console.error('Error deleting lineup:', error);
       const errorMessage = error instanceof Error ? error.message : 'Neznámá chyba';
-      alert(`Chyba při mazání sestavy: ${errorMessage}`);
+      showToast.danger(`Chyba při mazání sestavy: ${errorMessage}`);
     }
   }, [matchId, homeTeamId, awayTeamId, selectedTeam, findLineupId, deleteLineup]);
 

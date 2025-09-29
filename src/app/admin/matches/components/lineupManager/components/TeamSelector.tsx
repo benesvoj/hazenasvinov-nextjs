@@ -1,5 +1,7 @@
 import React, {memo} from 'react';
 
+import {LINEUP_VALIDATION_RULES} from '@/app/constants/lineupValidationRules';
+
 import {UnifiedCard} from '@/components';
 import {TeamTypes} from '@/enums';
 import {LineupSummary} from '@/types';
@@ -44,16 +46,16 @@ const TeamSelector: React.FC<TeamSelectorProps> = memo(
             className="text-xs text-gray-600 space-x-2"
             role="status"
             aria-live="polite"
-            aria-label={`Sestava pro ${teamName}: ${summary.goalkeepers} brankářů z 2, ${summary.field_players} hráčů z 13, ${summary.coaches} trenérů z 3`}
+            aria-label={`Sestava pro ${teamName}: ${summary.goalkeepers} brankářů z ${LINEUP_VALIDATION_RULES.MAX_GOALKEEPERS}, ${summary.field_players} hráčů z ${LINEUP_VALIDATION_RULES.MAX_FIELD_PLAYERS}, ${summary.coaches} trenérů z ${LINEUP_VALIDATION_RULES.MAX_COACHES}`}
           >
             <span>
-              {t.goalkeepers}: {summary.goalkeepers}/2
+              {t.goalkeepers}: {summary.goalkeepers}/{LINEUP_VALIDATION_RULES.MAX_GOALKEEPERS}
             </span>
             <span>
-              {t.players}: {summary.field_players}/13
+              {t.players}: {summary.field_players}/{LINEUP_VALIDATION_RULES.MAX_FIELD_PLAYERS}
             </span>
             <span>
-              {t.coaches}: {summary.coaches}/3
+              {t.coaches}: {summary.coaches}/{LINEUP_VALIDATION_RULES.MAX_COACHES}
             </span>
           </div>
         </div>

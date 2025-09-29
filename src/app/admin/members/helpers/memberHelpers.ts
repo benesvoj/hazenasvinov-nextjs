@@ -32,7 +32,7 @@ export const getCategoryBadgeColor = (categoryId: string, categoriesData: Catego
   if (categoryData.gender === Genders.FEMALE) return 'secondary';
   if (categoryData.gender === Genders.MIXED) return 'success';
 
-  // Fallback for category without gender
+  // Fallback for categories without gender
   if (
     categoryData.name.toLowerCase().includes('kids') ||
     categoryData.name.toLowerCase().includes('prep')

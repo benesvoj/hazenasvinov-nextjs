@@ -9,6 +9,7 @@ export enum LineupErrorType {
   VALIDATION = 'VALIDATION',
   DATABASE = 'DATABASE',
   NETWORK = 'NETWORK',
+  PERMISSION = 'PERMISSION',
   UNKNOWN = 'UNKNOWN',
 }
 
@@ -16,6 +17,7 @@ export const LINEUP_ERROR_TYPE_LABELS: Record<LineupErrorType, string> = {
   [LineupErrorType.VALIDATION]: t.validationError,
   [LineupErrorType.DATABASE]: t.databaseError,
   [LineupErrorType.NETWORK]: t.networkError,
+  [LineupErrorType.PERMISSION]: t.permissionError,
   [LineupErrorType.UNKNOWN]: t.unknownError,
 };
 
