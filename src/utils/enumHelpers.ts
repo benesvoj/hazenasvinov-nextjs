@@ -1,5 +1,6 @@
 import {
   getAgeGroupsOptions,
+  getBlogPostStatusOptions,
   getCompetitionTypeOptions,
   getGenderOptions,
   getLineupCoachRoleOptions,
@@ -30,6 +31,7 @@ export const createOptionsRecord = <T extends string>(
 
 // Pre-built option records for common use cases
 export const ageGroupsOptions = createOptionsRecord(getAgeGroupsOptions());
+export const blogPostStatusOptions = createOptionsRecord(getBlogPostStatusOptions());
 export const competitionTypeOptions = createOptionsRecord(getCompetitionTypeOptions());
 export const genderOptions = createOptionsRecord(getGenderOptions());
 export const lineupCoachRoleOptions = createOptionsRecord(getLineupCoachRoleOptions());

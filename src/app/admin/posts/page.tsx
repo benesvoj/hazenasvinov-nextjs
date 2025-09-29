@@ -20,25 +20,18 @@ import {
   Chip,
 } from '@heroui/react';
 
-import {
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  TagIcon,
-  PhotoIcon,
-  DocumentTextIcon,
-} from '@heroicons/react/24/outline';
+import {PlusIcon, PencilIcon, TrashIcon, TagIcon, PhotoIcon} from '@heroicons/react/24/outline';
 
 import {useBlogPosts} from '@/hooks/entities/blog/useBlogPosts';
 
 import {translations} from '@/lib/translations';
 
-import {LoadingSpinner, AdminContainer} from '@/components';
+import {LoadingSpinner, AdminContainer, DeleteConfirmationModal} from '@/components';
 import {adminStatusFilterOptions} from '@/constants';
 import {formatDateString} from '@/helpers';
 import {BlogPost} from '@/types';
 
-import {AddPostModal, EditPostModal, DeletePostModal} from './components';
+import {AddPostModal, EditPostModal} from './components';
 
 export default function BlogPostsPage() {
   const t = translations.admin.posts;
@@ -94,7 +87,7 @@ export default function BlogPostsPage() {
   };
 
   const handleUpdatePostWrapper = async (
-    formData: Omit<BlogPost, 'id' | 'updated_at'>,
+    formData: Omit<BlogPost, 'id' | 'updated_at' | 'created_at'>,
     imageFile: File | null
   ) => {
     if (!selectedPost) return;
@@ -213,7 +206,6 @@ export default function BlogPostsPage() {
                           </div>
                         </div>
                       </TableCell>
-                      {/* TODO: Add category name instead of tag */}
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {post.category_id !== null
@@ -310,12 +302,12 @@ export default function BlogPostsPage() {
         categoriesLoading={categoriesLoading}
       />
 
-      {/* Delete Confirmation Modal */}
-      <DeletePostModal
+      <DeleteConfirmationModal
         isOpen={isDeleteOpen}
         onClose={onDeleteClose}
         onConfirm={handleDeleteConfirm}
-        post={selectedPost}
+        message={t.deletePostMessage}
+        title={t.deletePost}
       />
     </AdminContainer>
   );

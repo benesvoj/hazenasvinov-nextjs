@@ -86,6 +86,8 @@ export const translations = {
       title: 'Správa článků',
       description: 'Správa článků, které jsou dostupné v systému.',
       addPost: 'Nový článek',
+      deletePost: 'Smazat článek',
+      deletePostMessage: 'Opravdu chcete smazat článek? Tato akce je nevratná.',
     },
     photoGallery: {
       title: 'Správa fotogalerie',
@@ -623,6 +625,12 @@ export const translations = {
       league: 'Liga',
       league_playoff: 'Liga s playoff',
       tournament: 'Turnaj',
+    },
+    blogPostStatuses: {
+      draft: 'Koncept',
+      published: 'Publikováno',
+      archived: 'Archivováno',
+      all: 'Všechny stavy',
     },
   },
 } as const;

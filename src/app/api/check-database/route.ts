@@ -43,7 +43,7 @@ export async function GET() {
       checks.supabase.error = err instanceof Error ? err.message : 'Unknown error';
     }
 
-    // Check category table
+    // Check categories table
     try {
       const {data: categoriesData, error: categoriesError} = await supabase
         .from('categories')

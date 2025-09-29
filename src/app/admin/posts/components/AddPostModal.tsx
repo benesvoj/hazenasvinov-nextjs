@@ -20,7 +20,7 @@ import {PhotoIcon, XMarkIcon, MagnifyingGlassIcon} from '@heroicons/react/24/out
 
 import {generateSlug} from '@/utils/slugGenerator';
 
-import {postStatuses, postStatusLabels} from '@/constants';
+import {BLOG_POST_STATUSES, getBlogPostStatusOptions} from '@/enums';
 import {formatDateString} from '@/helpers';
 import {Category, Match, BlogPost} from '@/types';
 
@@ -55,7 +55,7 @@ export default function AddPostModal({
     slug: '',
     content: '',
     author_id: '',
-    status: postStatuses.draft,
+    status: BLOG_POST_STATUSES.draft,
     image_url: '',
     category_id: '',
     match_id: '',
@@ -117,7 +117,7 @@ export default function AddPostModal({
       slug: '',
       content: '',
       author_id: 'default-user',
-      status: postStatuses.draft,
+      status: BLOG_POST_STATUSES.draft,
       image_url: '',
       category_id: '',
       match_id: '',
@@ -183,10 +183,8 @@ export default function AddPostModal({
                 }
                 isRequired
               >
-                {Object.entries(postStatuses).map(([key, value]) => (
-                  <SelectItem key={value}>
-                    {postStatusLabels[key as keyof typeof postStatusLabels]}
-                  </SelectItem>
+                {getBlogPostStatusOptions().map(({value, label}) => (
+                  <SelectItem key={value}>{label}</SelectItem>
                 ))}
               </Select>
 

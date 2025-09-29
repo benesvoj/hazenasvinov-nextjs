@@ -295,7 +295,7 @@ export default function MatchesAdminPage() {
     fetchMembers();
   }, [fetchCategories, fetchAllSeasons, fetchTeams, fetchMembers]);
 
-  // Set first category as default when category are loaded
+  // Set first category as default when categories are loaded
   useEffect(() => {
     if (categories.length > 0 && !selectedCategory) {
       setSelectedCategory(categories[0].id);

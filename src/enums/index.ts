@@ -1,4 +1,5 @@
 export * from './ageGroups';
+export * from './blogPostStatutes';
 export * from './competitionTypes';
 export * from './genders';
 export * from './lineupCoachRole';
