@@ -4,98 +4,48 @@ import {useState, useEffect} from 'react';
 
 import {redirect} from 'next/navigation';
 
-import {Card, CardBody, Input, useDisclosure} from '@heroui/react';
-
-import {
-  CheckCircleIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  FireIcon,
-} from '@heroicons/react/24/outline';
-
-import {ReleaseNote, getReleaseNotes} from '@/utils/releaseNotes';
-import {createClient} from '@/utils/supabase/client';
-import {TodoItem} from '@/utils/todos';
-
 import {useUser} from '@/contexts/UserContext';
 
-import {showToast, ToDoList, CommentsZone, AdminContainer, UnifiedModal} from '@/components';
-import {Comment} from '@/types';
+import {
+  ToDoList,
+  CommentsZone,
+  AdminContainer,
+  LoadingSpinner,
+  DeleteConfirmationModal,
+} from '@/components';
+import {ModalMode} from '@/enums';
+import {useTodos, useComments} from '@/hooks';
+import {Comment, TodoItem} from '@/types';
+
+import {TodoModal, TodoStatsCards, CommentModal} from './components';
+
+interface DeleteItem {
+  type: 'todo' | 'comment';
+  id: string;
+  title: string;
+}
 
 export default function AdminDashboard() {
   const {user, userProfile, loading, isAuthenticated, isAdmin} = useUser();
-  const [todos, setTodos] = useState<TodoItem[]>([]);
-  const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [todosLoading, setTodosLoading] = useState(true);
-  const [commentsLoading, setCommentsLoading] = useState(true);
-  const [todoFilter, setTodoFilter] = useState<
-    'all' | 'todo' | 'in-progress' | 'done' | 'high-priority'
-  >('todo');
 
-  // Filter todos based on current filter
-  const filteredTodos = todos.filter((todo) => {
-    switch (todoFilter) {
-      case 'todo':
-        return todo.status === 'todo';
-      case 'in-progress':
-        return todo.status === 'in-progress';
-      case 'done':
-        return todo.status === 'done';
-      case 'high-priority':
-        return (todo.priority === 'high' || todo.priority === 'urgent') && todo.status !== 'done';
-      default:
-        return true;
-    }
-  });
+  // Use hooks
+  const todos = useTodos(user?.email);
+  const {loadTodos, updateTodo, selectedTodo} = todos;
 
-  // Calculate statistics
-  const todoStats = {
-    total: todos.length,
-    todo: todos.filter((t) => t.status === 'todo').length,
-    inProgress: todos.filter((t) => t.status === 'in-progress').length,
-    done: todos.filter((t) => t.status === 'done').length,
-    highPriority: todos.filter(
-      (t) => (t.priority === 'high' || t.priority === 'urgent') && t.status !== 'done'
-    ).length,
-  };
+  const comments = useComments(user?.email);
+  const {loadComments, updateComment, selectedComment} = comments;
 
-  // Modal states
-  const {isOpen: isAddTodoOpen, onOpen: onAddTodoOpen, onClose: onAddTodoClose} = useDisclosure();
-  const {
-    isOpen: isEditTodoOpen,
-    onOpen: onEditTodoOpen,
-    onClose: onEditTodoClose,
-  } = useDisclosure();
-  const {
-    isOpen: isAddCommentOpen,
-    onOpen: onAddCommentOpen,
-    onClose: onAddCommentClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditCommentOpen,
-    onOpen: onEditCommentOpen,
-    onClose: onEditCommentClose,
-  } = useDisclosure();
+  // Todo modal state
+  const [todoModalMode, setTodoModalMode] = useState<ModalMode>(ModalMode.ADD);
+  const [isTodoModalOpen, setIsTodoModalOpen] = useState(false);
 
-  const [selectedTodo, setSelectedTodo] = useState<TodoItem | null>(null);
-  const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
-  const [todoFormData, setTodoFormData] = useState({
-    title: '',
-    description: '',
-    priority: 'medium' as TodoItem['priority'],
-    status: 'todo' as TodoItem['status'],
-    category: 'improvement' as TodoItem['category'],
-    due_date: '',
-  });
-  const [commentFormData, setCommentFormData] = useState({
-    content: '',
-    type: 'general' as Comment['type'],
-  });
-  const [editCommentFormData, setEditCommentFormData] = useState({
-    content: '',
-    type: 'general' as Comment['type'],
-  });
+  // Comment modal state
+  const [commentModalMode, setCommentModalMode] = useState<ModalMode>(ModalMode.ADD);
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+
+  // Delete confirmation state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteItem, setDeleteItem] = useState<DeleteItem | null>(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -110,279 +60,104 @@ export default function AdminDashboard() {
 
     if (!loading && isAuthenticated && isAdmin) {
       // Load data after user is confirmed
-      loadReleaseNotes();
       loadTodos();
-    }
-  }, [loading, isAuthenticated, isAdmin]);
-
-  const loadTodos = async () => {
-    try {
-      setTodosLoading(true);
-      const supabase = createClient();
-
-      // First check if the todos table exists
-      const {data: tableCheck, error: tableError} = await supabase
-        .from('todos')
-        .select('id')
-        .limit(1);
-
-      if (tableError) {
-        if (tableError.message && tableError.message.includes('relation "todos" does not exist')) {
-          setTodos([]);
-          return;
-        }
-        throw tableError;
-      }
-
-      const {data, error} = await supabase
-        .from('todos')
-        .select('*')
-        .order('created_at', {ascending: false});
-
-      if (error) throw error;
-      setTodos(data || []);
-    } catch (error: any) {
-      setTodos([]);
-    } finally {
-      setTodosLoading(false);
-    }
-  };
-
-  const loadReleaseNotes = () => {
-    try {
-      const notes = getReleaseNotes();
-      setReleaseNotes(notes);
-    } catch (error) {
-      setReleaseNotes([]);
-    }
-  };
-
-  const handleAddTodo = () => {
-    setTodoFormData({
-      title: '',
-      description: '',
-      priority: 'medium',
-      status: 'todo',
-      category: 'improvement',
-      due_date: '',
-    });
-    onAddTodoOpen();
-  };
-
-  const addTodo = async () => {
-    try {
-      const supabase = createClient();
-      const {error} = await supabase.from('todos').insert({
-        title: todoFormData.title,
-        description: todoFormData.description,
-        priority: todoFormData.priority,
-        status: todoFormData.status,
-        category: todoFormData.category,
-        due_date: todoFormData.due_date || null,
-        user_email: user?.email || 'unknown@hazenasvinov.cz',
-      });
-
-      if (error) {
-        if (error.message.includes('relation "todos" does not exist')) {
-          return;
-        }
-        throw error;
-      }
-
-      onAddTodoClose();
-      loadTodos();
-    } catch (error) {}
-  };
-
-  const handleEditTodo = (todo: TodoItem) => {
-    setSelectedTodo(todo);
-    setTodoFormData({
-      title: todo.title,
-      description: todo.description || '',
-      priority: todo.priority,
-      status: todo.status,
-      category: todo.category,
-      due_date: todo.due_date || '',
-    });
-    onEditTodoOpen();
-  };
-
-  const updateTodo = async () => {
-    if (!selectedTodo) return;
-
-    try {
-      const supabase = createClient();
-      const {error} = await supabase
-        .from('todos')
-        .update({
-          title: todoFormData.title,
-          description: todoFormData.description,
-          priority: todoFormData.priority,
-          status: todoFormData.status,
-          category: todoFormData.category,
-          due_date: todoFormData.due_date || null,
-        })
-        .eq('id', selectedTodo.id);
-
-      if (error) throw error;
-
-      onEditTodoClose();
-      setSelectedTodo(null);
-      loadTodos();
-    } catch (error) {
-      console.error('Error updating todo:', error);
-    }
-  };
-
-  const deleteTodo = async (id: string) => {
-    try {
-      const supabase = createClient();
-      const {error} = await supabase.from('todos').delete().eq('id', id);
-
-      if (error) throw error;
-      loadTodos(); // Reload todos from database
-    } catch (error) {
-      console.error('Error deleting todo:', error);
-    }
-  };
-
-  const updateTodoStatus = async (id: string, status: string) => {
-    try {
-      const supabase = createClient();
-
-      const {error} = await supabase.from('todos').update({status}).eq('id', id);
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      showToast.success(`Todo marked as ${status}!`);
-
-      // Force reload todos with a small delay to ensure database consistency
-      setTimeout(() => {
-        loadTodos();
-      }, 100);
-    } catch (error) {
-      console.error('Error updating todo:', error);
-    }
-  };
-
-  const addComment = async () => {
-    try {
-      const supabase = createClient();
-      const {error} = await supabase.from('comments').insert({
-        content: commentFormData.content,
-        type: commentFormData.type,
-        author: user?.email || 'Unknown',
-        user_email: user?.email || 'unknown@hazenasvinov.cz',
-      });
-
-      if (error) {
-        if (error.message.includes('relation "comments" does not exist')) {
-          return;
-        }
-        throw error;
-      }
-
-      onAddCommentClose();
-      setCommentFormData({content: '', type: 'general'});
       loadComments();
-    } catch (error) {
-      console.error('Error adding comment:', error);
     }
+  }, [loading, isAuthenticated, isAdmin, loadTodos, loadComments]);
+
+  // Handle comment modal open for add
+  const handleAddCommentOpen = () => {
+    setCommentModalMode(ModalMode.ADD);
+    comments.handleAddComment();
+    setIsCommentModalOpen(true);
   };
 
-  const handleEditComment = (comment: Comment) => {
-    setSelectedComment(comment);
-    setEditCommentFormData({
-      content: comment.content,
-      type: comment.type,
-    });
-    onEditCommentOpen();
+  // Handle comment modal open for edit
+  const handleEditCommentOpen = (comment: Comment) => {
+    setCommentModalMode(ModalMode.EDIT);
+    comments.handleEditComment(comment);
+    setIsCommentModalOpen(true);
   };
 
-  const updateComment = async () => {
-    if (!selectedComment) return;
+  // Handle comment modal close
+  const handleCommentModalClose = () => {
+    setIsCommentModalOpen(false);
+    comments.resetCommentForm();
+  };
 
-    try {
-      const supabase = createClient();
-      const {error} = await supabase
-        .from('comments')
-        .update({
-          content: editCommentFormData.content,
-          type: editCommentFormData.type,
-        })
-        .eq('id', selectedComment.id);
-
-      if (error) throw error;
-
-      onEditCommentClose();
-      setSelectedComment(null);
-      loadComments();
-    } catch (error) {
-      console.error('Error updating comment:', error);
+  // Handle comment submission
+  const handleCommentSubmit = async () => {
+    if (commentModalMode === ModalMode.ADD) {
+      await comments.addComment(user?.email);
+    } else {
+      if (!selectedComment) return;
+      const {id, author, user_email, created_at, ...updateData} = comments.commentFormData;
+      await comments.updateComment(selectedComment.id, updateData);
     }
+    handleCommentModalClose();
   };
 
-  const deleteComment = async (id: string) => {
-    try {
-      const supabase = createClient();
-      const {error} = await supabase.from('comments').delete().eq('id', id);
+  // Handle delete confirmation
+  const handleDeleteClick = (type: 'todo' | 'comment', id: string, title: string) => {
+    setDeleteItem({type, id, title});
+    setIsDeleteModalOpen(true);
+  };
 
-      if (error) throw error;
-      loadComments();
-    } catch (error) {
-      console.error('Error deleting comment:', error);
+  const handleDeleteConfirm = async () => {
+    if (!deleteItem) return;
+
+    if (deleteItem.type === 'todo') {
+      await todos.deleteTodo(deleteItem.id);
+    } else {
+      await comments.deleteComment(deleteItem.id);
     }
+
+    setIsDeleteModalOpen(false);
+    setDeleteItem(null);
   };
 
-  const loadComments = async () => {
-    try {
-      const supabase = createClient();
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setDeleteItem(null);
+  };
 
-      // First check if the comments table exists
-      const {data: tableCheck, error: tableError} = await supabase
-        .from('comments')
-        .select('id')
-        .limit(1);
+  // Handle todo modal open for add
+  const handleAddTodoOpen = () => {
+    setTodoModalMode(ModalMode.ADD);
+    todos.resetTodoForm();
+    setIsTodoModalOpen(true);
+  };
 
-      if (tableError) {
-        console.error('Comments table error:', tableError);
-        if (
-          tableError.message &&
-          tableError.message.includes('relation "comments" does not exist')
-        ) {
-          console.error('Comments table does not exist. Run: npm run setup:missing-tables');
-          setComments([]);
-          return;
-        }
-        throw tableError;
-      }
+  // Handle todo modal open for edit
+  const handleEditTodoOpen = (todo: TodoItem) => {
+    setTodoModalMode(ModalMode.EDIT);
+    todos.handleEditTodo(todo);
+    setIsTodoModalOpen(true);
+  };
 
-      const {data, error} = await supabase
-        .from('comments')
-        .select('*')
-        .order('created_at', {ascending: false});
+  // Handle todo modal close
+  const handleTodoModalClose = () => {
+    setIsTodoModalOpen(false);
+    todos.resetTodoForm();
+  };
 
-      if (error) throw error;
-      setComments(data || []);
-    } catch (error: any) {
-      console.error('Error loading comments:', error);
-      setComments([]);
+  // Handle todo submission
+  const handleTodoSubmit = async () => {
+    if (todoModalMode === ModalMode.ADD) {
+      await todos.addTodo();
+    } else {
+      if (!selectedTodo) return;
+      const {id, created_at, updated_at, user_email, ...updateData} = todos.todoFormData;
+      await updateTodo(selectedTodo.id, updateData);
     }
+    handleTodoModalClose();
   };
-
-  useEffect(() => {
-    loadComments();
-  }, []);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <LoadingSpinner />
         </div>
       </div>
     );
@@ -390,312 +165,66 @@ export default function AdminDashboard() {
 
   return (
     <AdminContainer>
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${todoFilter === 'todo' ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
-        >
-          <CardBody
-            className="text-center"
-            onClick={() => setTodoFilter(todoFilter === 'todo' ? 'all' : 'todo')}
-          >
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <ExclamationTriangleIcon className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="text-2xl font-bold text-blue-600">{todoStats.todo}</div>
-            <div className="text-sm text-gray-600">To Do</div>
-          </CardBody>
-        </Card>
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${todoFilter === 'in-progress' ? 'ring-2 ring-orange-500 bg-orange-50' : ''}`}
-        >
-          <CardBody
-            className="text-center"
-            onClick={() => setTodoFilter(todoFilter === 'in-progress' ? 'all' : 'in-progress')}
-          >
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <ClockIcon className="w-6 h-6 text-orange-600" />
-            </div>
-            <div className="text-2xl font-bold text-orange-600">{todoStats.inProgress}</div>
-            <div className="text-sm text-gray-600">In Progress</div>
-          </CardBody>
-        </Card>
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${todoFilter === 'done' ? 'ring-2 ring-green-500 bg-green-50' : ''}`}
-        >
-          <CardBody
-            className="text-center"
-            onClick={() => setTodoFilter(todoFilter === 'done' ? 'all' : 'done')}
-          >
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <CheckCircleIcon className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="text-2xl font-bold text-green-600">{todoStats.done}</div>
-            <div className="text-sm text-gray-600">Completed</div>
-          </CardBody>
-        </Card>
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${todoFilter === 'high-priority' ? 'ring-2 ring-red-500 bg-red-50' : ''}`}
-        >
-          <CardBody
-            className="text-center"
-            onClick={() => setTodoFilter(todoFilter === 'high-priority' ? 'all' : 'high-priority')}
-          >
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <FireIcon className="w-6 h-6 text-red-600" />
-            </div>
-            <div className="text-2xl font-bold text-red-600">{todoStats.highPriority}</div>
-            <div className="text-sm text-gray-600">High Priority</div>
-          </CardBody>
-        </Card>
-      </div>
+      <TodoStatsCards todos={todos} />
 
-      {/* Two Zones Layout - 50:50 Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Todo List Zone */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <ToDoList
-          todos={filteredTodos}
-          todosLoading={todosLoading}
-          handleAddTodo={handleAddTodo}
-          updateTodoStatus={updateTodoStatus}
-          deleteTodo={deleteTodo}
-          handleEditTodo={handleEditTodo}
-          currentFilter={todoFilter}
+          todos={todos.filteredTodos}
+          todosLoading={todos.todosLoading}
+          handleAddTodo={handleAddTodoOpen}
+          updateTodoStatus={todos.updateTodoStatus}
+          deleteTodo={(id: string) => {
+            const todo = todos.todos.find((t) => t.id === id);
+            handleDeleteClick('todo', id, todo?.title || 'Todo');
+          }}
+          handleEditTodo={handleEditTodoOpen}
+          currentFilter={todos.todoFilter}
         />
 
-        {/* Comments Zone */}
         <CommentsZone
-          comments={comments}
-          commentsLoading={commentsLoading}
-          handleAddComment={addComment}
-          handleEditComment={handleEditComment}
-          deleteComment={deleteComment}
-          onAddCommentOpen={onAddCommentOpen}
+          comments={comments.comments}
+          commentsLoading={comments.commentsLoading}
+          handleAddComment={handleAddCommentOpen}
+          handleEditComment={handleEditCommentOpen}
+          deleteComment={(id: string) => {
+            const comment = comments.comments.find((c) => c.id === id);
+            handleDeleteClick(
+              'comment',
+              id,
+              comment?.content?.substring(0, 50) + '...' || 'Comment'
+            );
+          }}
+          onAddCommentOpen={handleAddCommentOpen}
         />
       </div>
 
-      {/* Modals */}
-      {/* Add Todo Modal */}
-      <UnifiedModal title="Add New Todo" isOpen={isAddTodoOpen} onClose={onAddTodoClose} size="2xl">
-        <div className="space-y-4">
-          <Input
-            label="Title"
-            value={todoFormData.title}
-            onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
-            isRequired
-            placeholder="Enter todo title"
-          />
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description
-            </label>
-            <textarea
-              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
-              value={todoFormData.description}
-              onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
-              placeholder="Enter description (optional)"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <select
-              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-              value={todoFormData.priority}
-              onChange={(e) =>
-                setTodoFormData({
-                  ...todoFormData,
-                  priority: e.target.value as TodoItem['priority'],
-                })
-              }
-            >
-              <option value="low">Low Priority</option>
-              <option value="medium">Medium Priority</option>
-              <option value="high">High Priority</option>
-              <option value="urgent">Urgent</option>
-            </select>
-            <select
-              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-              value={todoFormData.category}
-              onChange={(e) =>
-                setTodoFormData({
-                  ...todoFormData,
-                  category: e.target.value as TodoItem['category'],
-                })
-              }
-            >
-              <option value="feature">Feature</option>
-              <option value="bug">Bug</option>
-              <option value="improvement">Improvement</option>
-              <option value="technical">Technical</option>
-            </select>
-          </div>
-          <Input
-            label="Due Date"
-            type="date"
-            value={todoFormData.due_date}
-            onChange={(e) => setTodoFormData({...todoFormData, due_date: e.target.value})}
-          />
-        </div>
-      </UnifiedModal>
+      <TodoModal
+        isOpen={isTodoModalOpen}
+        onClose={handleTodoModalClose}
+        todoFormData={todos.todoFormData}
+        setTodoFormData={todos.setTodoFormData}
+        onSubmit={handleTodoSubmit}
+        mode={todoModalMode}
+      />
 
-      {/* Edit Todo Modal */}
-      <UnifiedModal title="Edit Todo" isOpen={isEditTodoOpen} onClose={onEditTodoClose} size="2xl">
-        <div className="space-y-4">
-          <Input
-            label="Title"
-            value={todoFormData.title}
-            onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
-            isRequired
-            placeholder="Enter todo title"
-          />
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description
-            </label>
-            <textarea
-              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
-              value={todoFormData.description}
-              onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
-              placeholder="Enter description (optional)"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <select
-              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-              value={todoFormData.priority}
-              onChange={(e) =>
-                setTodoFormData({
-                  ...todoFormData,
-                  priority: e.target.value as TodoItem['priority'],
-                })
-              }
-            >
-              <option value="low">Low Priority</option>
-              <option value="medium">Medium Priority</option>
-              <option value="high">High Priority</option>
-              <option value="urgent">Urgent</option>
-            </select>
-            <select
-              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-              value={todoFormData.status}
-              onChange={(e) =>
-                setTodoFormData({...todoFormData, status: e.target.value as TodoItem['status']})
-              }
-            >
-              <option value="todo">To Do</option>
-              <option value="in-progress">In Progress</option>
-              <option value="done">Done</option>
-            </select>
-          </div>
-          <select
-            className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-            value={todoFormData.category}
-            onChange={(e) =>
-              setTodoFormData({
-                ...todoFormData,
-                category: e.target.value as TodoItem['category'],
-              })
-            }
-          >
-            <option value="feature">Feature</option>
-            <option value="bug">Bug</option>
-            <option value="improvement">Improvement</option>
-            <option value="technical">Technical</option>
-          </select>
-          <Input
-            label="Due Date"
-            type="date"
-            value={todoFormData.due_date}
-            onChange={(e) => setTodoFormData({...todoFormData, due_date: e.target.value})}
-          />
-        </div>
-      </UnifiedModal>
+      {/* Comment Modal */}
+      <CommentModal
+        isOpen={isCommentModalOpen}
+        onClose={handleCommentModalClose}
+        onSubmit={handleCommentSubmit}
+        commentFormData={comments.commentFormData}
+        setCommentFormData={comments.setCommentFormData}
+        mode={commentModalMode}
+      />
 
-      {/* Add Comment Modal */}
-      <UnifiedModal
-        title="Add Comment"
-        isOpen={isAddCommentOpen}
-        onClose={onAddCommentClose}
-        size="lg"
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Comment Type
-            </label>
-            <select
-              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-              value={commentFormData.type}
-              onChange={(e) =>
-                setCommentFormData({
-                  ...commentFormData,
-                  type: e.target.value as Comment['type'],
-                })
-              }
-            >
-              <option value="general">ℹ️ General</option>
-              <option value="bug">🐛 Bug Report</option>
-              <option value="feature">✨ Feature Request</option>
-              <option value="improvement">🔧 Improvement</option>
-            </select>
-          </div>
-          <textarea
-            className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
-            value={commentFormData.content}
-            onChange={(e) => setCommentFormData({...commentFormData, content: e.target.value})}
-            placeholder="Enter your comment..."
-          />
-        </div>
-      </UnifiedModal>
-
-      {/* Edit Comment Modal */}
-      <UnifiedModal
-        title="Edit Comment"
-        isOpen={isEditCommentOpen}
-        onClose={onEditCommentClose}
-        size="lg"
-      >
-        <div className="space-y-4">
-          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              <strong>Author:</strong> {selectedComment?.user_email}
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              <strong>Created:</strong>{' '}
-              {selectedComment?.created_at
-                ? new Date(selectedComment.created_at).toLocaleDateString()
-                : 'N/A'}
-            </p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Comment Type
-            </label>
-            <select
-              className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
-              value={editCommentFormData.type}
-              onChange={(e) =>
-                setEditCommentFormData({
-                  ...editCommentFormData,
-                  type: e.target.value as Comment['type'],
-                })
-              }
-            >
-              <option value="general">ℹ️ General</option>
-              <option value="bug">🐛 Bug Report</option>
-              <option value="feature">✨ Feature Request</option>
-              <option value="improvement">🔧 Improvement</option>
-            </select>
-          </div>
-          <textarea
-            className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white min-h-[100px] resize-y"
-            value={editCommentFormData.content}
-            onChange={(e) =>
-              setEditCommentFormData({...editCommentFormData, content: e.target.value})
-            }
-            placeholder="Enter your comment..."
-          />
-        </div>
-      </UnifiedModal>
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title={`Delete ${deleteItem?.type === 'todo' ? 'Todo' : 'Comment'}`}
+        message={`Are you sure you want to delete "${deleteItem?.title}"? This action cannot be undone.`}
+      />
     </AdminContainer>
   );
 }

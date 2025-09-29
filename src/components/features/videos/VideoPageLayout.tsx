@@ -9,18 +9,9 @@ import {Video, VideoFilters as VideoFiltersType, Category, Club, Season} from '@
 import {VideoFilters} from './VideoFilters';
 import {VideoFormModal} from './VideoFormModal';
 import {VideoGrid} from './VideoGrid';
-import {VideoPageHeader} from './VideoPageHeader';
-
 interface VideoPageLayoutProps {
   // Header props
-  title: string;
-  description: string;
-  iconColor?: string;
-  buttonColor?: 'primary' | 'success';
-  buttonText: string;
   onAddVideo: () => void;
-  isAddDisabled?: boolean;
-  additionalInfo?: React.ReactNode;
 
   // Data props
   videos: Video[];
@@ -63,14 +54,7 @@ interface VideoPageLayoutProps {
 
 export function VideoPageLayout({
   // Header props
-  title,
-  description,
-  iconColor = 'text-blue-600',
-  buttonColor = 'primary',
-  buttonText,
   onAddVideo,
-  isAddDisabled = false,
-  additionalInfo,
 
   // Data props
   videos,
@@ -111,18 +95,6 @@ export function VideoPageLayout({
 }: VideoPageLayoutProps) {
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <VideoPageHeader
-        title={title}
-        description={description}
-        iconColor={iconColor}
-        buttonColor={buttonColor}
-        buttonText={buttonText}
-        onAddVideo={onAddVideo}
-        isAddDisabled={isAddDisabled}
-        additionalInfo={additionalInfo}
-      />
-
       {/* Access Control Message */}
       {showAccessControlMessage && accessControlMessage && (
         <Card className="border-yellow-200 bg-yellow-50">
@@ -139,38 +111,6 @@ export function VideoPageLayout({
         seasons={seasons}
         availableCategories={availableCategories}
       />
-
-      {/* Error Message */}
-      {error && (
-        <Card className="border-red-200 bg-red-50">
-          <CardBody>
-            <div className="space-y-3">
-              <p className="text-red-700 font-medium">{error}</p>
-              {error.includes('Tabulka videí neexistuje') && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Jak vyřešit:</h4>
-                  <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
-                    <li>Jděte do Supabase Dashboard</li>
-                    <li>Otevřete SQL Editor</li>
-                    <li>
-                      Zkopírujte obsah souboru{' '}
-                      <code className="bg-blue-100 px-1 rounded">
-                        scripts/create_videos_table.sql
-                      </code>
-                    </li>
-                    <li>Vložte do SQL Editor a spusťte</li>
-                    <li>Obnovte stránku</li>
-                  </ol>
-                  <p className="text-xs text-blue-600 mt-2">
-                    Podrobné instrukce najdete v{' '}
-                    <code className="bg-blue-100 px-1 rounded">docs/VIDEOS_MANUAL_SETUP.md</code>
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardBody>
-        </Card>
-      )}
 
       {/* Videos Grid */}
       <VideoGrid

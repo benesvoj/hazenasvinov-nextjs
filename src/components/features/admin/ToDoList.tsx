@@ -20,9 +20,11 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 
-import {TodoItem, getPriorityLabel, getStatusLabel, getCategoryLabel} from '@/utils/todos';
+import {getPriorityLabel, getStatusLabel, getCategoryLabel} from '@/utils/todos';
 
 import {LoadingSpinner, showToast} from '@/components';
+import {TodoCategories, TodoFilter, TodoPriorities, TodoStatuses} from '@/enums';
+import {TodoItem} from '@/types';
 
 interface ToDoListProps {
   todos: TodoItem[];
@@ -36,11 +38,11 @@ interface ToDoListProps {
 
 const getStatusIcon = (status: TodoItem['status']) => {
   switch (status) {
-    case 'done':
+    case TodoStatuses.DONE:
       return <CheckCircleIcon className="w-4 h-4" />;
-    case 'in-progress':
+    case TodoStatuses.IN_PROGRESS:
       return <ClockIcon className="w-4 h-4" />;
-    case 'todo':
+    case TodoStatuses.TODO:
       return <ExclamationTriangleIcon className="w-4 h-4" />;
     default:
       return <ExclamationTriangleIcon className="w-4 h-4" />;
@@ -49,13 +51,13 @@ const getStatusIcon = (status: TodoItem['status']) => {
 
 const getPriorityIcon = (priority: TodoItem['priority']) => {
   switch (priority) {
-    case 'urgent':
+    case TodoPriorities.URGENT:
       return <FireIcon className="w-4 h-4" />;
-    case 'high':
+    case TodoPriorities.HIGH:
       return <FlagIcon className="w-4 h-4" />;
-    case 'medium':
+    case TodoPriorities.MEDIUM:
       return <BoltIcon className="w-4 h-4" />;
-    case 'low':
+    case TodoPriorities.LOW:
       return <ExclamationTriangleIcon className="w-4 h-4" />;
     default:
       return <BoltIcon className="w-4 h-4" />;
@@ -64,13 +66,13 @@ const getPriorityIcon = (priority: TodoItem['priority']) => {
 
 const getCategoryIcon = (category: TodoItem['category']) => {
   switch (category) {
-    case 'feature':
+    case TodoCategories.FEATURE:
       return <SparklesIcon className="w-4 h-4" />;
-    case 'bug':
+    case TodoCategories.BUG:
       return <BugAntIcon className="w-4 h-4" />;
-    case 'improvement':
+    case TodoCategories.IMPROVEMENT:
       return <WrenchScrewdriverIcon className="w-4 h-4" />;
-    case 'technical':
+    case TodoCategories.TECHNICAL:
       return <Cog6ToothIcon className="w-4 h-4" />;
     default:
       return <WrenchScrewdriverIcon className="w-4 h-4" />;
@@ -84,7 +86,7 @@ export default function ToDoList({
   updateTodoStatus,
   deleteTodo,
   handleEditTodo,
-  currentFilter = 'all',
+  currentFilter = TodoFilter.ALL,
 }: ToDoListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -119,14 +121,14 @@ export default function ToDoList({
   // Get next status in the flow
   const getNextStatus = (currentStatus: TodoItem['status']): TodoItem['status'] | null => {
     switch (currentStatus) {
-      case 'todo':
-        return 'in-progress';
-      case 'in-progress':
-        return 'done';
-      case 'done':
+      case TodoStatuses.TODO:
+        return TodoStatuses.IN_PROGRESS;
+      case TodoStatuses.IN_PROGRESS:
+        return TodoStatuses.DONE;
+      case TodoStatuses.DONE:
         return null; // No next status for done
       default:
-        return 'in-progress';
+        return TodoStatuses.IN_PROGRESS;
     }
   };
 
@@ -136,13 +138,13 @@ export default function ToDoList({
     if (!nextStatus) return null;
 
     switch (nextStatus) {
-      case 'in-progress':
+      case TodoStatuses.IN_PROGRESS:
         return {
           text: 'Start',
           icon: <ClockIcon className="w-4 h-4" />,
           color: 'primary' as const,
         };
-      case 'done':
+      case TodoStatuses.DONE:
         return {
           text: 'Complete',
           icon: <CheckCircleIcon className="w-4 h-4" />,
@@ -161,7 +163,7 @@ export default function ToDoList({
             <ExclamationTriangleIcon className="w-5 h-5 text-blue-500" />
             <h2 className="text-xl font-semibold">
               Todo List ({todos.length})
-              {currentFilter !== 'all' && (
+              {currentFilter !== TodoFilter.ALL && (
                 <span className="text-sm font-normal text-blue-600 ml-2">
                   - Filtered by {currentFilter.replace('-', ' ')}
                 </span>

@@ -1,71 +1,100 @@
-export interface TodoItem {
-  id: string;
-  title: string;
-  description?: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'todo' | 'in-progress' | 'done';
-  category: 'feature' | 'bug' | 'improvement' | 'technical';
-  due_date?: string;
-  created_at: string;
-  updated_at: string;
-  created_by?: string;
-  user_email: string;
-}
+import {TodoCategories, TodoPriorities, TodoStatuses} from '@/enums';
+import {TodoItem} from '@/types';
 
 export const getPriorityColor = (priority: TodoItem['priority']) => {
   switch (priority) {
-    case 'urgent': return 'danger';
-    case 'high': return 'warning';
-    case 'medium': return 'primary';
-    case 'low': return 'default';
-    default: return 'default';
+    case TodoPriorities.URGENT:
+      return 'danger';
+    case TodoPriorities.HIGH:
+      return 'warning';
+    case TodoPriorities.MEDIUM:
+      return 'primary';
+    case TodoPriorities.LOW:
+      return 'default';
+    default:
+      return 'default';
   }
 };
 
 export const getStatusColor = (status: TodoItem['status']) => {
   switch (status) {
-    case 'done': return 'success';
-    case 'in-progress': return 'primary';
-    case 'todo': return 'default';
-    default: return 'default';
+    case TodoStatuses.DONE:
+      return 'success';
+    case TodoStatuses.IN_PROGRESS:
+      return 'primary';
+    case TodoStatuses.TODO:
+      return 'default';
+    default:
+      return 'default';
   }
 };
 
 export const getCategoryColor = (category: TodoItem['category']) => {
   switch (category) {
-    case 'feature': return 'success';
-    case 'bug': return 'danger';
-    case 'improvement': return 'primary';
-    case 'technical': return 'secondary';
-    default: return 'default';
+    case TodoCategories.FEATURE:
+      return 'success';
+    case TodoCategories.BUG:
+      return 'danger';
+    case TodoCategories.IMPROVEMENT:
+      return 'primary';
+    case TodoCategories.TECHNICAL:
+      return 'secondary';
+    default:
+      return 'default';
   }
 };
 
+/**
+ *
+ * @default use getTodoPrioritiesOptions
+ */
 export const getPriorityLabel = (priority: TodoItem['priority']) => {
   switch (priority) {
-    case 'urgent': return 'Urgent';
-    case 'high': return 'High';
-    case 'medium': return 'Medium';
-    case 'low': return 'Low';
-    default: return 'Unknown';
+    case TodoPriorities.URGENT:
+      return 'Urgent';
+    case TodoPriorities.HIGH:
+      return 'High';
+    case TodoPriorities.MEDIUM:
+      return 'Medium';
+    case TodoPriorities.LOW:
+      return 'Low';
+    default:
+      return 'Unknown';
   }
 };
 
+/**
+ *
+ * @default use getTodoStatusesOptions
+ */
 export const getStatusLabel = (status: TodoItem['status']) => {
   switch (status) {
-    case 'done': return 'Done';
-    case 'in-progress': return 'In Progress';
-    case 'todo': return 'To Do';
-    default: return 'Unknown';
+    case 'done':
+      return 'Done';
+    case 'in-progress':
+      return 'In Progress';
+    case 'todo':
+      return 'To Do';
+    default:
+      return 'Unknown';
   }
 };
 
+/**
+ *
+ * @default use getTodoCategoriesOptions
+ */
 export const getCategoryLabel = (category: TodoItem['category']) => {
   switch (category) {
-    case 'feature': return 'Feature';
-    case 'bug': return 'Bug';
-    case 'improvement': return 'Improvement';
-    case 'technical': return 'Technical';
-    default: return 'Unknown';
+    case 'feature':
+      return 'Feature';
+    case 'bug':
+      return 'Bug';
+    case 'improvement':
+      return 'Improvement';
+    case 'technical':
+      return 'Technical';
+    default:
+      return 'Unknown';
   }
 };

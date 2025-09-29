@@ -85,7 +85,7 @@ export default function UnifiedModal({
             <Button variant="flat" onPress={onClose} aria-label={t.cancel}>
               {t.cancel}
             </Button>
-            {isOnlyCloseButton && (
+            {!isOnlyCloseButton && (
               <Button
                 color="primary"
                 onPress={onPress}

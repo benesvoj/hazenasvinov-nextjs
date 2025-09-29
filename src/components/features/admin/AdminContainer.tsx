@@ -1,4 +1,4 @@
-import {LoadingSpinner, Heading} from '@/components';
+import {LoadingSpinner} from '@/components';
 
 import {AdminActions, AdminFilters, AdminContent, AdminHeader} from './';
 
@@ -26,10 +26,26 @@ export function AdminContainer({
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="flex flex-col gap-4 items-center justify-between">
-          {title && <AdminHeader title={title} description={description} icon={icon} />}
-          {actions && <AdminActions>{actions}</AdminActions>}
-          {filters && <AdminFilters>{filters}</AdminFilters>}
+        <div className="w-full space-y-4">
+          {(title || description || icon) && (
+            <AdminHeader title={title} description={description} icon={icon} />
+          )}
+
+          {(actions || filters) && (
+            <div className="flex flex-col gap-4">
+              {actions && (
+                <div className="w-full">
+                  <AdminActions>{actions}</AdminActions>
+                </div>
+              )}
+              {filters && (
+                <div className="w-full">
+                  <AdminFilters>{filters}</AdminFilters>
+                </div>
+              )}
+            </div>
+          )}
+
           <AdminContent>{children}</AdminContent>
         </div>
       )}
