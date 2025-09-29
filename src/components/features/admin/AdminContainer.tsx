@@ -1,4 +1,6 @@
-import {LoadingSpinner, Heading, UnifiedCard} from '@/components';
+import {LoadingSpinner, Heading} from '@/components';
+
+import {AdminActions, AdminFilters, AdminContent, AdminHeader} from './';
 
 interface AdminContainerProps {
   title?: string;
@@ -6,6 +8,7 @@ interface AdminContainerProps {
   icon?: React.ReactNode;
   children: React.ReactNode;
   actions?: React.ReactNode;
+  filters?: React.ReactNode;
   loading?: boolean;
 }
 
@@ -15,6 +18,7 @@ export function AdminContainer({
   description,
   icon,
   actions,
+  filters,
   loading,
 }: AdminContainerProps) {
   return (
@@ -22,20 +26,11 @@ export function AdminContainer({
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-2">
-              {title && (
-                <Heading size={1}>
-                  {icon && icon}
-                  {title}
-                </Heading>
-              )}
-              {description && <p className="text-gray-600 dark:text-gray-400">{description}</p>}
-            </div>
-            {actions && <UnifiedCard fullWidth>{actions}</UnifiedCard>}
-          </div>
-          {children}
+        <div className="flex flex-col gap-4 items-center justify-between">
+          {title && <AdminHeader title={title} description={description} icon={icon} />}
+          {actions && <AdminActions>{actions}</AdminActions>}
+          {filters && <AdminFilters>{filters}</AdminFilters>}
+          <AdminContent>{children}</AdminContent>
         </div>
       )}
     </>
