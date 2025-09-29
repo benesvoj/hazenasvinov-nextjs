@@ -1,15 +1,21 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Video, VideoFormData, VideoFilters } from "@/types";
-import { useVideos } from "@/hooks/useVideos";
-import { useAppData } from "@/contexts/AppDataContext";
-import { VideoCameraIcon } from "@heroicons/react/24/outline";
-import { DeleteConfirmationModal, VideoPageLayout } from "@/components";
-import { AdminContainer } from "../components/AdminContainer";
-import { translations } from "@/lib/translations";
-import { Button } from "@heroui/react";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import React, {useState, useEffect} from 'react';
+
+import {Button} from '@heroui/react';
+
+import {VideoCameraIcon, PlusIcon} from '@heroicons/react/24/outline';
+
+import {useVideos} from '@/hooks/entities/video/useVideos';
+
+import {AdminContainer} from '@/components/features/admin/AdminContainer';
+
+import {translations} from '@/lib/translations';
+
+import {useAppData} from '@/contexts/AppDataContext';
+
+import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
+import {Video, VideoFormData, VideoFilters} from '@/types';
 
 export default function VideosPage() {
   const [filters, setFilters] = useState<VideoFilters>({});
@@ -19,15 +25,9 @@ export default function VideosPage() {
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
 
   // Use AppDataContext for common data
-  const {
-    categories,
-    clubs,
-    seasons,
-    categoriesLoading,
-    clubsLoading,
-    seasonsLoading,
-  } = useAppData();
-  
+  const {categories, clubs, seasons, categoriesLoading, clubsLoading, seasonsLoading} =
+    useAppData();
+
   const {
     videos,
     loading,
@@ -42,7 +42,7 @@ export default function VideosPage() {
     totalCount,
     itemsPerPage,
     goToPage,
-  } = useVideos({ enableAccessControl: false, itemsPerPage: 20 });
+  } = useVideos({enableAccessControl: false, itemsPerPage: 20});
 
   const t = translations.admin.videos;
 
@@ -60,19 +60,19 @@ export default function VideosPage() {
       await createVideo(formData);
       setIsFormModalOpen(false);
     } catch (err: any) {
-      setError(`Chyba při vytváření videa: ${err?.message || "Neznámá chyba"}`);
+      setError(`Chyba při vytváření videa: ${err?.message || 'Neznámá chyba'}`);
     }
   };
 
   const handleUpdateVideo = async (formData: VideoFormData) => {
     if (!editingVideo) return;
-    
+
     try {
       await updateVideo(editingVideo.id, formData);
       setEditingVideo(null);
       setIsFormModalOpen(false);
     } catch (err: any) {
-      setError(`Chyba při aktualizaci videa: ${err?.message || "Neznámá chyba"}`);
+      setError(`Chyba při aktualizaci videa: ${err?.message || 'Neznámá chyba'}`);
     }
   };
 
@@ -82,8 +82,8 @@ export default function VideosPage() {
       setDeleteModalOpen(false);
       setVideoToDelete(null);
     } catch (err: any) {
-      console.error("Error deleting video:", err);
-      setError(`Chyba při mazání videa: ${err?.message || "Neznámá chyba"}`);
+      console.error('Error deleting video:', err);
+      setError(`Chyba při mazání videa: ${err?.message || 'Neznámá chyba'}`);
     }
   };
 
@@ -125,17 +125,15 @@ export default function VideosPage() {
       icon={<VideoCameraIcon className="w-8 h-8 text-blue-600" />}
       actions={
         <Button
-        color="primary"
-        startContent={<PlusIcon className="w-5 h-5" />}
-        onPress={openCreateModal}
-      >
-        {t.addVideo}
-      </Button>
+          color="primary"
+          startContent={<PlusIcon className="w-5 h-5" />}
+          onPress={openCreateModal}
+        >
+          {t.addVideo}
+        </Button>
       }
-
     >
-
-     {/* TODO: Remove header props after migration */}
+      {/* TODO: Remove header props after migration */}
       <VideoPageLayout
         // Header props
         title="Videa"
@@ -154,27 +152,23 @@ export default function VideosPage() {
         categories={categories}
         clubs={clubs}
         seasons={seasons}
-
         // Event handlers
         onFiltersChange={setFilters}
         onEdit={openEditModal}
         onDelete={openDeleteModal}
         onFormSubmit={handleFormSubmit}
-
         // Modal props
         isFormModalOpen={isFormModalOpen}
         editingVideo={editingVideo}
         onCloseModals={closeModals}
-
         // Empty state customization
         emptyStateTitle="Žádná videa"
         emptyStateDescription={
           filters.search || filters.category_id || filters.is_active !== undefined
-            ? "Nebyla nalezena žádná videa odpovídající filtru."
-            : "Zatím nejsou přidána žádná videa."
+            ? 'Nebyla nalezena žádná videa odpovídající filtru.'
+            : 'Zatím nejsou přidána žádná videa.'
         }
         showAddButton={!filters.search && !filters.category_id && filters.is_active === undefined}
-        
         // Pagination props
         currentPage={currentPage}
         totalPages={totalPages}

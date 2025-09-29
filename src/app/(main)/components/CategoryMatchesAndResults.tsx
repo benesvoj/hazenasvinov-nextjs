@@ -1,7 +1,11 @@
-import {Button, Card, CardHeader, CardBody} from '@heroui/react';
-import {ArrowRightIcon, CalendarIcon, TrophyIcon} from '@heroicons/react/24/outline';
 import Link from 'next/link';
+
+import {Button, Card, CardHeader, CardBody} from '@heroui/react';
+
+import {ArrowRightIcon, CalendarIcon, TrophyIcon} from '@heroicons/react/24/outline';
+
 import {translations} from '@/lib/translations';
+
 import {LoadingSpinner, MatchRow} from '@/components';
 
 interface CategoryMatchesAndResultsProps {

@@ -1,4 +1,5 @@
 import {Team, Video} from '@/types';
+
 import {CompactVideoList} from '.';
 
 interface TabWithVideosProps {

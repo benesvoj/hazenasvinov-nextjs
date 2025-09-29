@@ -1,6 +1,9 @@
 'use client';
 
 import React, {useState, useRef, useEffect} from 'react';
+
+import Image from 'next/image';
+
 import {
   Card,
   CardHeader,
@@ -14,6 +17,8 @@ import {
   TableRow,
   TableCell,
 } from '@heroui/react';
+
+import {ArrowDownTrayIcon} from '@heroicons/react/16/solid';
 import {
   ClipboardDocumentListIcon,
   XMarkIcon,
@@ -24,25 +29,22 @@ import {
   UserGroupIcon,
   DocumentIcon,
   TrashIcon,
-  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
-import {
-  Match,
-  MatchMetadata,
-  isPhotoMetadata,
-  isNoteMetadata,
-  isLineupMetadata,
-  isDocumentMetadata,
-} from '@/types';
-import Image from 'next/image';
+
 import {LoadingSpinner, showToast} from '@/components';
 import {
   useMatchMetadata,
   useAddMatchMetadata,
   useDeleteMatchMetadata,
   useSetPrimaryMatchMetadata,
-} from '@/hooks/useMatchMetadata';
-import {ArrowDownTrayIcon} from '@heroicons/react/16/solid';
+} from '@/hooks';
+import {
+  Match,
+  isPhotoMetadata,
+  isNoteMetadata,
+  isLineupMetadata,
+  isDocumentMetadata,
+} from '@/types';
 
 interface RecentMatchDetailsProps {
   selectedMatch: Match;

@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useState, useMemo} from 'react';
+
 import {
   Modal,
   ModalContent,
@@ -20,11 +21,13 @@ import {
   SelectItem,
   Spinner,
 } from '@heroui/react';
-import {Match} from '@/types';
-import {useFetchMatches, useSeasons} from '@/hooks';
-import {formatDateString} from '@/helpers';
+
 import {formatTime} from '@/helpers/formatTime';
+
 import {matchStatuses} from '@/constants';
+import {formatDateString} from '@/helpers';
+import {useFetchMatches, useSeasons} from '@/hooks';
+import {Match} from '@/types';
 
 interface MatchSelectionModalProps {
   isOpen: boolean;

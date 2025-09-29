@@ -232,12 +232,12 @@ export interface Category {
 **File**: `src/routes/routes.ts`
 ```typescript
 // BEFORE
-youngestKids: '/categories/youngest-kids',
-prepKids: '/categories/prep-kids',
+youngestKids: '/category/youngest-kids',
+prepKids: '/category/prep-kids',
 // ...
 
 // AFTER - Use dynamic routing or update to use IDs
-// Consider using /categories/[id] pattern
+// Consider using /category/[id] pattern
 ```
 
 ## 🔧 Implementation Order

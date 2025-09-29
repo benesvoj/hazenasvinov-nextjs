@@ -1,7 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Input, Textarea, Checkbox, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/react';
-import { MemberFunction } from '@/types';
-import { translations } from '@/lib/translations';
+import React, {useState, useEffect} from 'react';
+
+import {
+  Button,
+  Input,
+  Textarea,
+  Checkbox,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '@heroui/react';
+
+import {translations} from '@/lib/translations';
+
+import {MemberFunction} from '@/types';
 
 interface FunctionFormModalProps {
   isOpen: boolean;
@@ -18,14 +31,14 @@ export default function FunctionFormModal({
   onClose,
   onSubmit,
   loading,
-  initialData
+  initialData,
 }: FunctionFormModalProps) {
   const [formData, setFormData] = useState<Partial<MemberFunction>>({
     name: '',
     display_name: '',
     description: '',
     sort_order: 0,
-    is_active: true
+    is_active: true,
   });
 
   // Reset form when modal opens/closes or initialData changes
@@ -37,7 +50,7 @@ export default function FunctionFormModal({
           display_name: initialData.display_name || '',
           description: initialData.description || '',
           sort_order: initialData.sort_order || 0,
-          is_active: initialData.is_active ?? true
+          is_active: initialData.is_active ?? true,
         });
       } else {
         // Reset form for add mode
@@ -46,7 +59,7 @@ export default function FunctionFormModal({
           display_name: '',
           description: '',
           sort_order: 0,
-          is_active: true
+          is_active: true,
         });
       }
     }
@@ -65,62 +78,55 @@ export default function FunctionFormModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalContent>
-        <ModalHeader>
-          {isEdit ? "Upravit funkci" : "Přidat novou funkci"}
-        </ModalHeader>
+        <ModalHeader>{isEdit ? 'Upravit funkci' : 'Přidat novou funkci'}</ModalHeader>
         <ModalBody>
           <div className="space-y-4">
             <Input
               label="Název (kód)"
               placeholder="např. player, coach"
               value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({...prev, name: e.target.value}))}
               isRequired
             />
-            
+
             <Input
               label="Zobrazovaný název"
               placeholder="např. Hráč, Trenér"
               value={formData.display_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, display_name: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({...prev, display_name: e.target.value}))}
               isRequired
             />
-            
+
             <Textarea
               label="Popis"
               placeholder="Popis funkce (volitelné)"
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({...prev, description: e.target.value}))}
             />
-            
+
             <Input
               label="Řazení"
               type="number"
               placeholder="0"
               value={formData.sort_order?.toString() || '0'}
-              onChange={(e) => setFormData(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+              onChange={(e) =>
+                setFormData((prev) => ({...prev, sort_order: parseInt(e.target.value) || 0}))
+              }
             />
-            
+
             <Checkbox
               isSelected={formData.is_active}
-              onValueChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+              onValueChange={(checked) => setFormData((prev) => ({...prev, is_active: checked}))}
             >
               Aktivní
             </Checkbox>
           </div>
         </ModalBody>
         <ModalFooter>
-        <Button
-            variant="flat"
-            onPress={onClose}
-          >
+          <Button variant="flat" onPress={onClose}>
             {translations.button.cancel}
           </Button>
-          <Button
-            color="primary"
-            onPress={handleSubmit}
-            isLoading={loading}
-          >
+          <Button color="primary" onPress={handleSubmit} isLoading={loading}>
             {isEdit ? translations.button.save : translations.button.add}
           </Button>
         </ModalFooter>

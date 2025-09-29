@@ -104,7 +104,7 @@ GRANT INSERT, UPDATE, DELETE ON club_categories TO authenticated;
 2. **Run the automated script**:
    ```bash
    cd scripts
-   node fix-club-categories-rls.js
+   node fix-club-category-rls.js
    ```
 
 ### Option 2: Manual SQL Execution

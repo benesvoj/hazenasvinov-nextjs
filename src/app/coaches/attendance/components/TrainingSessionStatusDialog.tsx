@@ -1,9 +1,11 @@
 'use client';
 
 import React, {useState} from 'react';
+
 import {Select, SelectItem, Textarea, Card, CardBody} from '@heroui/react';
-import {TrainingSessionStatus} from '@/types';
+
 import {UnifiedModal} from '@/components';
+import {TrainingSessionStatus} from '@/types';
 
 interface TrainingSessionStatusDialogProps {
   isOpen: boolean;

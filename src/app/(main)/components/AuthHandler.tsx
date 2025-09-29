@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import {useEffect} from 'react';
+
+import {useRouter} from 'next/navigation';
+
+import {createClient} from '@/utils/supabase/client';
 
 export default function AuthHandler() {
   const router = useRouter();
@@ -28,14 +30,14 @@ export default function AuthHandler() {
           tokenType,
           type,
           expiresIn,
-          expiresAt
+          expiresAt,
         });
 
         if (accessToken && refreshToken) {
           const supabase = createClient();
-          
+
           console.log('Setting session from URL fragment');
-          const { data, error } = await supabase.auth.setSession({
+          const {data, error} = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
@@ -46,10 +48,14 @@ export default function AuthHandler() {
           }
 
           console.log('Session set successfully, redirecting based on type:', type);
-          
+
           // Clear the URL fragment
-          window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-          
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname + window.location.search
+          );
+
           // Handle different types of email confirmations
           if (type === 'recovery') {
             // Password reset - redirect to reset-password page

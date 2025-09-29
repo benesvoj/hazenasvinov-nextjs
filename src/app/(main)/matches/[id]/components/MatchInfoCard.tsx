@@ -1,12 +1,16 @@
 import {Card, CardBody, CardFooter, CardHeader} from '@heroui/card';
-import {TeamDisplay} from './';
-import {translations} from '@/lib/translations';
-import {formatTime} from '@/helpers/formatTime';
+
 import {CalendarIcon, ClockIcon, MapPinIcon} from '@heroicons/react/24/outline';
-import {Match} from '@/types';
-import {Heading} from '@/components';
+
+import {translations} from '@/lib/translations';
+
 import {formatDateWithWeekday} from '@/helpers/formatDate';
-import {MatchScore} from '@/components';
+import {formatTime} from '@/helpers/formatTime';
+
+import {Heading, MatchScore} from '@/components';
+import {Match} from '@/types';
+
+import {TeamDisplay} from './';
 
 interface MatchInfoCardProps {
   match: Match;
@@ -49,13 +53,11 @@ export default function MatchInfoCard({match}: MatchInfoCardProps) {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-gray-500" />
-            <div className="font-semibold text-sm sm:text-base">
-              {formatDateWithWeekday(match.date)}
-            </div>
+            <div className="text-sm sm:text-base">{formatDateWithWeekday(match.date)}</div>
           </div>
           <div className="flex items-center gap-2">
             <ClockIcon className="w-5 h-5 text-gray-500" />
-            <div className="font-semibold text-sm sm:text-base">{formatTime(match.time)}</div>
+            <div className="text-sm sm:text-base">{formatTime(match.time)}</div>
           </div>
         </div>
         <div className="flex items-center justify-center nowrap gap-2 text-sm text-gray-600 dark:text-gray-400">

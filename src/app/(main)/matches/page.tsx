@@ -1,15 +1,20 @@
 'use client';
 
 import React, {useState, useEffect, useMemo, useCallback} from 'react';
-import {TrophyIcon, FunnelIcon} from '@heroicons/react/24/outline';
-import {usePublicMatches, useSeasons, useCategories} from '@/hooks';
+
 import {Select, SelectItem, Card, CardBody, Button} from '@heroui/react';
-import MatchCard from '@/app/(main)/matches/components/MatchCard';
-import ClubSelector from '@/app/(main)/matches/components/ClubSelector';
-import {formatMonth} from '@/helpers';
-import {Match, Category} from '@/types';
+
+import {TrophyIcon, FunnelIcon} from '@heroicons/react/24/outline';
+
 import {translations} from '@/lib/translations';
+
+import ClubSelector from '@/app/(main)/matches/components/ClubSelector';
+import MatchCard from '@/app/(main)/matches/components/MatchCard';
+
 import {months as monthsConstants} from '@/constants';
+import {formatMonth} from '@/helpers';
+import {usePublicMatches, useSeasons, useCategories} from '@/hooks';
+import {Match, Category} from '@/types';
 
 export default function MatchesPage() {
   const [filterType, setFilterType] = useState('all');

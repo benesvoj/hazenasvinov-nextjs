@@ -1,35 +1,28 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { useDisclosure } from "@heroui/modal";
-import { Badge } from "@heroui/badge";
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@heroui/table";
-import {
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  CogIcon,
-} from "@heroicons/react/24/outline";
-import { useFetchMemberFunctions } from "@/hooks/useFetchMemberFunctions";
-import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
-import { MemberFunction } from "@/types";
-import FunctionFormModal from "./components/FunctionFormModal";
-import { showToast } from "@/components/Toast";
-import { translations } from "@/lib/translations";
+import React, {useState, useEffect} from 'react';
+
+import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {useDisclosure} from '@heroui/modal';
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@heroui/table';
+
+import {PlusIcon, PencilIcon, TrashIcon, CogIcon} from '@heroicons/react/24/outline';
+
+import {showToast} from '@/components/ui/feedback/Toast';
+import DeleteConfirmationModal from '@/components/ui/modals/DeleteConfirmationModal';
+
+import {translations} from '@/lib/translations';
+
+import {useFetchMemberFunctions} from '@/hooks';
+import {MemberFunction} from '@/types';
+
+import FunctionFormModal from './components/FunctionFormModal';
 
 export default function MemberFunctionsAdminPage() {
   const [functions, setFunctions] = useState<MemberFunction[]>([]);
   const [loading, setLoading] = useState(false);
-
 
   // Fetch functions from database
   const {
@@ -56,12 +49,11 @@ export default function MemberFunctionsAdminPage() {
     onClose: onDeleteFunctionClose,
   } = useDisclosure();
 
-  const [selectedFunction, setSelectedFunction] =
-    useState<MemberFunction | null>(null);
+  const [selectedFunction, setSelectedFunction] = useState<MemberFunction | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    display_name: "",
-    description: "",
+    name: '',
+    display_name: '',
+    description: '',
     sort_order: 0,
     is_active: true,
   });
@@ -73,8 +65,6 @@ export default function MemberFunctionsAdminPage() {
     }
   }, [functionsData]);
 
-
-
   // Show success message
   const showSuccess = (message: string) => {
     showToast.success(message);
@@ -83,9 +73,9 @@ export default function MemberFunctionsAdminPage() {
   // Open add modal
   const openAddModal = () => {
     setFormData({
-      name: "",
-      display_name: "",
-      description: "",
+      name: '',
+      display_name: '',
+      description: '',
       sort_order: 0,
       is_active: true,
     });
@@ -98,7 +88,7 @@ export default function MemberFunctionsAdminPage() {
     setFormData({
       name: functionItem.name,
       display_name: functionItem.display_name,
-      description: functionItem.description || "",
+      description: functionItem.description || '',
       sort_order: functionItem.sort_order,
       is_active: functionItem.is_active,
     });
@@ -125,32 +115,32 @@ export default function MemberFunctionsAdminPage() {
   const handleAddFunction = async (data?: Partial<MemberFunction>) => {
     const functionData = data || formData;
     if (!functionData.name || !functionData.display_name) {
-      showToast.danger("Název a zobrazovaný název jsou povinné");
+      showToast.danger('Název a zobrazovaný název jsou povinné');
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch("/api/manage-member-functions", {
-        method: "POST",
+      const response = await fetch('/api/manage-member-functions', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(functionData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Chyba při přidávání funkce");
+        throw new Error(errorData.error || 'Chyba při přidávání funkce');
       }
 
       const newFunction = await response.json();
       setFunctions((prev) => [...prev, newFunction]);
       handleAddModalClose();
-      showSuccess("Funkce byla úspěšně přidána.");
+      showSuccess('Funkce byla úspěšně přidána.');
       refetch(); // Refresh data
     } catch (error: any) {
-      showToast.danger(error.message || "Chyba při přidávání funkce");
+      showToast.danger(error.message || 'Chyba při přidávání funkce');
     } finally {
       setLoading(false);
     }
@@ -160,16 +150,16 @@ export default function MemberFunctionsAdminPage() {
   const handleUpdateFunction = async (data?: Partial<MemberFunction>) => {
     const functionData = data || formData;
     if (!selectedFunction || !functionData.name || !functionData.display_name) {
-      showToast.danger("Název a zobrazovaný název jsou povinné");
+      showToast.danger('Název a zobrazovaný název jsou povinné');
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch("/api/manage-member-functions", {
-        method: "PUT",
+      const response = await fetch('/api/manage-member-functions', {
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           id: selectedFunction.id,
@@ -179,18 +169,16 @@ export default function MemberFunctionsAdminPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Chyba při aktualizaci funkce");
+        throw new Error(errorData.error || 'Chyba při aktualizaci funkce');
       }
 
       const updatedFunction = await response.json();
-      setFunctions((prev) =>
-        prev.map((f) => (f.id === selectedFunction.id ? updatedFunction : f))
-      );
+      setFunctions((prev) => prev.map((f) => (f.id === selectedFunction.id ? updatedFunction : f)));
       handleEditModalClose();
-      showSuccess("Funkce byla úspěšně aktualizována.");
+      showSuccess('Funkce byla úspěšně aktualizována.');
       refetch(); // Refresh data
     } catch (error: any) {
-      showToast.danger(error.message || "Chyba při aktualizaci funkce");
+      showToast.danger(error.message || 'Chyba při aktualizaci funkce');
     } finally {
       setLoading(false);
     }
@@ -202,25 +190,22 @@ export default function MemberFunctionsAdminPage() {
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/manage-member-functions?id=${selectedFunction.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`/api/manage-member-functions?id=${selectedFunction.id}`, {
+        method: 'DELETE',
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Chyba při mazání funkce");
+        throw new Error(errorData.error || 'Chyba při mazání funkce');
       }
 
       setFunctions((prev) => prev.filter((f) => f.id !== selectedFunction.id));
       onDeleteFunctionClose();
       setSelectedFunction(null);
-      showSuccess("Funkce byla úspěšně smazána.");
+      showSuccess('Funkce byla úspěšně smazána.');
       refetch(); // Refresh data
     } catch (error: any) {
-      showToast.danger(error.message || "Chyba při mazání funkce");
+      showToast.danger(error.message || 'Chyba při mazání funkce');
     } finally {
       setLoading(false);
     }
@@ -228,19 +213,15 @@ export default function MemberFunctionsAdminPage() {
 
   // Get status badge color
   const getStatusBadgeColor = (isActive: boolean) => {
-    return isActive ? "success" : "danger";
+    return isActive ? 'success' : 'danger';
   };
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {translations.memberFunctions.title}
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900">{translations.memberFunctions.title}</h1>
       </div>
-
-
 
       {/* Functions Table */}
       <Card>
@@ -270,20 +251,16 @@ export default function MemberFunctionsAdminPage() {
             <TableBody
               items={functions}
               loadingContent={functionsLoading ? translations.loading : undefined}
-              loadingState={functionsLoading ? "loading" : "idle"}
+              loadingState={functionsLoading ? 'loading' : 'idle'}
               emptyContent={translations.table.emptyContent}
             >
               {(functionItem) => (
                 <TableRow key={functionItem.id}>
-                  <TableCell className="font-medium">
-                    {functionItem.name}
-                  </TableCell>
+                  <TableCell className="font-medium">{functionItem.name}</TableCell>
                   <TableCell>{functionItem.display_name}</TableCell>
                   <TableCell>
                     {functionItem.description ? (
-                      <span className="text-gray-600">
-                        {functionItem.description}
-                      </span>
+                      <span className="text-gray-600">{functionItem.description}</span>
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}
@@ -291,7 +268,7 @@ export default function MemberFunctionsAdminPage() {
                   <TableCell>{functionItem.sort_order}</TableCell>
                   <TableCell>
                     <Badge color={getStatusBadgeColor(functionItem.is_active)}>
-                      {functionItem.is_active ? "Aktivní" : "Neaktivní"}
+                      {functionItem.is_active ? 'Aktivní' : 'Neaktivní'}
                     </Badge>
                   </TableCell>
                   <TableCell>

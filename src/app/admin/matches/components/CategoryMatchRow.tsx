@@ -1,10 +1,19 @@
-import {Match} from '@/types';
 import {Button} from '@heroui/button';
-import {MapPinIcon} from '@heroicons/react/24/outline';
-import {formatDateString} from '@/helpers';
-import {formatTime} from '@/helpers/formatTime';
+
+import {
+  MapPinIcon,
+  EyeIcon,
+  PencilIcon,
+  UserGroupIcon,
+  TrashIcon,
+} from '@heroicons/react/24/outline';
+
 import {translations} from '@/lib/translations';
-import {EyeIcon, PencilIcon, UserGroupIcon, TrashIcon} from '@heroicons/react/24/outline';
+
+import {formatTime} from '@/helpers/formatTime';
+
+import {formatDateString} from '@/helpers';
+import {Match} from '@/types';
 
 interface CategoryMatchRowProps {
   match: Match;

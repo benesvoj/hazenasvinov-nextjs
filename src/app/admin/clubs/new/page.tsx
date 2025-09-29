@@ -1,14 +1,19 @@
 'use client';
 
 import React, {useState} from 'react';
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {Button} from '@heroui/button';
-import {Input} from '@heroui/input';
-import {BuildingOfficeIcon, ArrowLeftIcon} from '@heroicons/react/24/outline';
-import {createClient} from '@/utils/supabase/client';
-import {useRouter} from 'next/navigation';
+
 import Link from 'next/link';
-import LogoUpload from '@/components/LogoUpload';
+import {useRouter} from 'next/navigation';
+
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Input} from '@heroui/input';
+
+import {BuildingOfficeIcon, ArrowLeftIcon} from '@heroicons/react/24/outline';
+
+import LogoUpload from '@/components/ui/forms/LogoUpload';
+
+import {createClient} from '@/utils/supabase/client';
 
 export default function NewClubPage() {
   const router = useRouter();

@@ -1,44 +1,45 @@
-import { createClient } from '@/utils/supabase/server';
-import { NextResponse } from 'next/server';
+import {NextResponse} from 'next/server';
+
+import {createClient} from '@/utils/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    const { sql } = await request.json();
-    
+    const {sql} = await request.json();
+
     if (!sql) {
-      return NextResponse.json({ error: 'SQL query is required' }, { status: 400 });
+      return NextResponse.json({error: 'SQL query is required'}, {status: 400});
     }
 
     const supabase = await createClient();
-    
+
     // Execute the custom SQL query
-    const { data, error } = await supabase.rpc('exec_sql', { sql_query: sql });
-    
+    const {data, error} = await supabase.rpc('exec_sql', {sql_query: sql});
+
     if (error) {
       console.error('Error executing SQL:', error);
-      return NextResponse.json({ error: error.message, details: error }, { status: 500 });
+      return NextResponse.json({error: error.message, details: error}, {status: 500});
     }
 
     return NextResponse.json({
       success: true,
       data: data,
-      executed_at: new Date().toISOString()
+      executed_at: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Error executing SQL:', error);
-    return NextResponse.json({ error: 'Failed to execute SQL' }, { status: 500 });
+    return NextResponse.json({error: 'Failed to execute SQL'}, {status: 500});
   }
 }
 
 export async function GET() {
   try {
     const supabase = await createClient();
-    
+
     // Get all tables and their columns
-    const { data: tables, error: tablesError } = await supabase
+    const {data: tables, error: tablesError} = await supabase
       .from('information_schema.tables')
-      .select(`
+      .select(
+        `
         table_name,
         columns:information_schema.columns(
           column_name,
@@ -48,7 +49,8 @@ export async function GET() {
           character_maximum_length,
           ordinal_position
         )
-      `)
+      `
+      )
       .eq('table_schema', 'public')
       .eq('table_type', 'BASE TABLE')
       .not('table_name', 'like', 'pg_%')
@@ -56,11 +58,11 @@ export async function GET() {
 
     if (tablesError) {
       console.error('Error fetching tables:', tablesError);
-      return NextResponse.json({ error: 'Failed to fetch tables' }, { status: 500 });
+      return NextResponse.json({error: 'Failed to fetch tables'}, {status: 500});
     }
 
     // Get all functions
-    const { data: functions, error: functionsError } = await supabase
+    const {data: functions, error: functionsError} = await supabase
       .from('information_schema.routines')
       .select('routine_name, routine_type, data_type, routine_definition')
       .eq('routine_schema', 'public');
@@ -70,7 +72,7 @@ export async function GET() {
     }
 
     // Get all indexes
-    const { data: indexes, error: indexesError } = await supabase
+    const {data: indexes, error: indexesError} = await supabase
       .from('pg_indexes')
       .select('schemaname, tablename, indexname, indexdef')
       .eq('schemaname', 'public');
@@ -83,11 +85,10 @@ export async function GET() {
       tables: tables || [],
       functions: functions || [],
       indexes: indexes || [],
-      extracted_at: new Date().toISOString()
+      extracted_at: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Error extracting schema:', error);
-    return NextResponse.json({ error: 'Failed to extract schema' }, { status: 500 });
+    return NextResponse.json({error: 'Failed to extract schema'}, {status: 500});
   }
 }

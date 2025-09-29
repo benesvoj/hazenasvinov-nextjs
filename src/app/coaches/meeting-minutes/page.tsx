@@ -1,19 +1,7 @@
 'use client';
 
 import React from 'react';
-import {useMeetingMinutes} from '@/hooks/useMeetingMinutes';
-import {useSeasons} from '@/hooks/useSeasons';
-import {MeetingMinutes, MeetingMinutesFilters} from '@/types';
-import {
-  DocumentTextIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  CalendarIcon,
-  UserIcon,
-  DocumentArrowDownIcon,
-  EyeIcon,
-  ArrowDownTrayIcon,
-} from '@heroicons/react/24/outline';
+
 import {
   Button,
   Card,
@@ -26,8 +14,25 @@ import {
   Badge,
   Skeleton,
 } from '@heroui/react';
+
+import {
+  DocumentTextIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  CalendarIcon,
+  UserIcon,
+  DocumentArrowDownIcon,
+  EyeIcon,
+  ArrowDownTrayIcon,
+} from '@heroicons/react/24/outline';
+
+import {useMeetingMinutes} from '@/hooks/entities/meetingMinute/useMeetingMinutes';
+import {useSeasons} from '@/hooks/entities/season/useSeasons';
+
 import {translations} from '@/lib/translations';
+
 import {MeetingMinutesContainer, PageContainer} from '@/components';
+import {MeetingMinutes, MeetingMinutesFilters} from '@/types';
 
 export default function CoachMeetingMinutesPage() {
   const t = translations.components.meetingMinutes;

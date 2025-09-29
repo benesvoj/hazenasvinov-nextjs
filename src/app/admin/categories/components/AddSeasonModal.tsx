@@ -1,7 +1,10 @@
 import React from 'react';
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
 import {Button} from '@heroui/button';
 import {Input} from '@heroui/input';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
+import {CompetitionTypes} from '@/enums';
 
 interface AddSeasonModalProps {
   isOpen: boolean;
@@ -10,7 +13,7 @@ interface AddSeasonModalProps {
   seasonFormData: {
     season_id: string;
     matchweek_count: number;
-    competition_type: 'league' | 'league_playoff' | 'tournament';
+    competition_type: CompetitionTypes;
     team_count: number;
     allow_team_duplicates: boolean;
     is_active: boolean;
@@ -20,6 +23,7 @@ interface AddSeasonModalProps {
   competitionTypes: Record<string, string>;
 }
 
+// TODO: refactor this component to use proper components and types, standards
 export default function AddSeasonModal({
   isOpen,
   onClose,
@@ -65,7 +69,7 @@ export default function AddSeasonModal({
                 onChange={(e) =>
                   setSeasonFormData({
                     ...seasonFormData,
-                    competition_type: e.target.value as 'league' | 'league_playoff' | 'tournament',
+                    competition_type: e.target.value as CompetitionTypes,
                   })
                 }
               >

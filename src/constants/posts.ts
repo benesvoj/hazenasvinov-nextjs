@@ -1,18 +1,12 @@
-export const postStatuses = {
-  draft: 'draft',
-  published: 'published',
-  archived: 'archived',
-} as const;
+import {translations} from '@/lib/translations';
 
-export const postStatusLabels = {
-  draft: 'Koncept',
-  published: 'Publikováno',
-  archived: 'Archivováno',
-} as const;
+import {BLOG_POST_STATUSES} from '@/enums';
+
+const t = translations.common.blogPostStatuses;
 
 export const adminStatusFilterOptions = {
-  all: 'Všechny stavy',
-  ...postStatusLabels,
+  all: t.all,
+  ...BLOG_POST_STATUSES,
 } as const;
 
 // Mapping from filter keys to database values

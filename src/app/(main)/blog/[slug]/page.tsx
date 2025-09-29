@@ -1,13 +1,12 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useParams } from "next/navigation";
-import Image from "next/image";
-import { Card, CardBody, Button, Chip,Divider} from "@heroui/react";
-// TODO: Remove Link from here, use Heroui Link
-import Link from "@/components/Link";
-import { useCategories, useFetchBlogPost } from "@/hooks";
-import { useFetchPostMatch } from "@/hooks/useFetchPostMatch";
+import {useEffect} from 'react';
+
+import Image from 'next/image';
+import {useParams} from 'next/navigation';
+
+import {Card, CardBody, Button, Chip, Divider} from '@heroui/react';
+
 import {
   CalendarIcon,
   UserIcon,
@@ -15,20 +14,22 @@ import {
   ArrowLeftIcon,
   ShareIcon,
   BookmarkIcon,
-} from "@heroicons/react/24/outline";
-import { translations } from "@/lib/translations";
-import { BlogPostCard, Heading, MatchInfo } from "@/components";
-import BlogContent from "@/components/BlogContent";
+} from '@heroicons/react/24/outline';
+
+import {BlogContent, BlogPostCard} from '@/components/features';
+import {MatchInfo} from '@/components/shared';
+import {Link, Heading} from '@/components/ui';
+
+import {useCategories, useFetchBlogPost, useFetchPostMatch} from '@/hooks';
+import {translations} from '@/lib';
 
 export default function BlogPostPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const { post, relatedPosts, loading, error } = useFetchBlogPost(slug);
-  const { categories, fetchCategories } = useCategories();
-  const { match: relatedMatch, loading: matchLoading } = useFetchPostMatch(
-    post?.id || null
-  );
+  const {post, relatedPosts, loading, error} = useFetchBlogPost(slug);
+  const {categories, fetchCategories} = useCategories();
+  const {match: relatedMatch, loading: matchLoading} = useFetchPostMatch(post?.id || null);
 
   useEffect(() => {
     fetchCategories();
@@ -36,9 +37,7 @@ export default function BlogPostPage() {
 
   const t = translations.landingPage.posts;
 
-  const category = post
-    ? categories.find((category) => category.id === post.category_id)
-    : null;
+  const category = post ? categories.find((category) => category.id === post.category_id) : null;
 
   if (loading) {
     return (
@@ -64,7 +63,7 @@ export default function BlogPostPage() {
             <CardBody className="text-center">
               <TagIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
-                {error || "Článek nebyl nalezen"}
+                {error || 'Článek nebyl nalezen'}
               </h3>
               <p className="text-red-600 dark:text-red-400 mb-4">
                 Požadovaný článek nebyl nalezen nebo není dostupný.
@@ -97,36 +96,23 @@ export default function BlogPostPage() {
       <article>
         <header className="space-y-4">
           {/* Post Title */}
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-            {post.title}
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{post.title}</h1>
 
           {/* Post Meta */}
           <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-2">
               <UserIcon className="w-4 h-4" />
-              <span>
-                {post.author_id === "default-user"
-                  ? "Admin"
-                  : `ID: ${post.author_id}`}
-              </span>
+              <span>{post.author_id === 'default-user' ? 'Admin' : `ID: ${post.author_id}`}</span>
             </div>
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-4 h-4" />
               <span>
-                {new Date(
-                  post.published_at || post.created_at
-                ).toLocaleDateString("cs-CZ")}
+                {new Date(post.published_at || post.created_at).toLocaleDateString('cs-CZ')}
               </span>
             </div>
             {category && (
               <div className="flex flex-wrap gap-2">
-                <Chip
-                  size="sm"
-                  variant="solid"
-                  color="primary"
-                  className="px-2 py-1"
-                >
+                <Chip size="sm" variant="solid" color="primary" className="px-2 py-1">
                   {category.name}
                 </Chip>
               </div>
@@ -161,11 +147,7 @@ export default function BlogPostPage() {
         {/* Share and Bookmark */}
         <div className="flex items-center justify-between mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-4">
-            <Button
-              variant="bordered"
-              size="sm"
-              startContent={<ShareIcon className="w-4 h-4" />}
-            >
+            <Button variant="bordered" size="sm" startContent={<ShareIcon className="w-4 h-4" />}>
               Sdílet
             </Button>
             <Button

@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
+
 import {
   Card,
   CardBody,
@@ -18,6 +19,7 @@ import {
   Tab,
   Spinner,
 } from '@heroui/react';
+
 import {
   ChartBarIcon,
   UserGroupIcon,
@@ -29,9 +31,11 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
 } from '@heroicons/react/24/outline';
-import {CoachAnalytics} from '@/types/statistics';
-import {formatDateString} from '@/helpers';
+
+import {CoachAnalytics} from '@/types/entities/trainingSession/business/statistics';
+
 import {LoadingSpinner} from '@/components';
+import {formatDateString} from '@/helpers';
 
 interface AttendanceStatisticsProps {
   categoryId: string;

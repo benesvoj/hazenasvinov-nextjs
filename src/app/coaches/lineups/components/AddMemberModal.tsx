@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useState, useEffect, useMemo} from 'react';
+
 import {
   Modal,
   ModalContent,
@@ -23,9 +24,13 @@ import {
   Card,
   CardBody,
 } from '@heroui/react';
-import {useFetchMembers} from '@/hooks/useFetchMembers';
-import {AddMemberToLineupData} from '@/types/categoryLineup';
+
 import {MagnifyingGlassIcon as SearchIcon, UserPlusIcon} from '@heroicons/react/24/outline';
+
+import {AddMemberToLineupData} from '@/types/entities/category/data/categoryLineup';
+
+import {useFetchMembers} from '@/hooks';
+
 import {CreateMemberModal} from './';
 
 interface AddMemberModalProps {

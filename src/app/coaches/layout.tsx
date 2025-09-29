@@ -1,14 +1,17 @@
 'use client';
 
 import React from 'react';
+
 import {usePathname} from 'next/navigation';
+
+import ProtectedCoachRoute from '@/components/routes/ProtectedCoachRoute';
+
 import {
   CoachesTopBar,
   CoachesSidebarProvider,
   CoachesSidebar,
   useCoachesSidebar,
 } from '@/app/coaches/components';
-import ProtectedCoachRoute from '@/components/ProtectedCoachRoute';
 
 function CoachesLayoutContent({children}: {children: React.ReactNode}) {
   const sidebarContext = useCoachesSidebar();

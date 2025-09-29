@@ -1,8 +1,21 @@
 'use client';
 
-import { Card, CardHeader, CardBody, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Image } from '@heroui/react';
-import { CategoryStandingsFallback } from './CategoryStandingsFallback';
-import { LoadingSpinner } from '@/components';
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Image,
+} from '@heroui/react';
+
+import {LoadingSpinner} from '@/components';
+
+import {CategoryStandingsFallback} from './CategoryStandingsFallback';
 
 interface CategoryStandingsProps {
   categoryId: string;
@@ -10,24 +23,26 @@ interface CategoryStandingsProps {
   standings?: any[];
 }
 
-export function CategoryStandings({ categoryId, categoryName, standings = [] }: CategoryStandingsProps) {
+export function CategoryStandings({
+  categoryId,
+  categoryName,
+  standings = [],
+}: CategoryStandingsProps) {
   const loading = false;
   const error = null;
-
-
 
   // Helper function to check if suffixes are needed
   const checkIfSuffixesNeeded = (standings: any[]) => {
     const clubTeams = new Map<string, string[]>(); // club name -> array of team suffixes
-    
-    standings.forEach(standing => {
+
+    standings.forEach((standing) => {
       const team = standing.team;
       if (team?.name && team.name !== 'Neznámý tým') {
         const parts = team.name.split(' ');
         if (parts.length > 1) {
           const suffix = parts[parts.length - 1]; // Last part is the suffix
           const clubName = parts.slice(0, -1).join(' '); // Everything except suffix
-          
+
           if (!clubTeams.has(clubName)) {
             clubTeams.set(clubName, []);
           }
@@ -35,29 +50,28 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
         }
       }
     });
-    
+
     // Check if any club has multiple teams
     for (const [clubName, suffixes] of clubTeams) {
       if (suffixes.length > 1) {
         return true; // Need suffixes
       }
     }
-    
+
     return false; // No suffixes needed
   };
 
   // Process standings to determine if suffixes are needed
   const needsSuffixes = checkIfSuffixesNeeded(standings);
-  
+
   // Update team names based on suffix needs
   const processedStandings = standings.map((standing: any) => {
-
     const team = standing.team;
     if (!team?.name || team.name === 'Neznámý tým') return standing;
-    
+
     let displayName = team.name;
     let shortDisplayName = team.shortName;
-    
+
     if (needsSuffixes) {
       // Keep the full name with suffix
       displayName = team.name;
@@ -69,14 +83,14 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
       displayName = clubName || team.name;
       shortDisplayName = shortClubName || team.shortName;
     }
-    
+
     return {
       ...standing,
       team: {
         ...team,
         displayName: displayName,
-        shortDisplayName: shortDisplayName
-      }
+        shortDisplayName: shortDisplayName,
+      },
     };
   });
 
@@ -154,14 +168,14 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
                   <TableCell className="font-medium text-center">{team.position}</TableCell>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      <Image 
-                        src={team.team?.logo_url} 
-                        alt={team.team?.name} 
-                        width={20} 
-                        height={20} 
+                      <Image
+                        src={team.team?.logo_url}
+                        alt={team.team?.name}
+                        width={20}
+                        height={20}
                         className="hidden md:block"
                       />
-                      
+
                       <span className="md:hidden">
                         {team.team?.shortDisplayName || team.team?.shortName || 'Neznámý tým'}
                       </span>
@@ -170,15 +184,23 @@ export function CategoryStandings({ categoryId, categoryName, standings = [] }: 
                       </span>
                     </div>
                   </TableCell>
-                <TableCell className="text-center hidden md:table-cell">{team.matches}</TableCell>
-                <TableCell className="text-center text-green-600 hidden md:table-cell">{team.wins}</TableCell>
-                <TableCell className="text-center text-yellow-600 hidden md:table-cell">{team.draws}</TableCell>
-                <TableCell className="text-center text-red-600 hidden md:table-cell">{team.losses}</TableCell>
-                <TableCell className="text-center">
-                  {team.goals_for}:{team.goals_against}
-                </TableCell>
-                <TableCell className="text-center font-bold text-blue-600">{team.points}</TableCell>
-              </TableRow>
+                  <TableCell className="text-center hidden md:table-cell">{team.matches}</TableCell>
+                  <TableCell className="text-center text-green-600 hidden md:table-cell">
+                    {team.wins}
+                  </TableCell>
+                  <TableCell className="text-center text-yellow-600 hidden md:table-cell">
+                    {team.draws}
+                  </TableCell>
+                  <TableCell className="text-center text-red-600 hidden md:table-cell">
+                    {team.losses}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {team.goals_for}:{team.goals_against}
+                  </TableCell>
+                  <TableCell className="text-center font-bold text-blue-600">
+                    {team.points}
+                  </TableCell>
+                </TableRow>
               );
             })}
           </TableBody>

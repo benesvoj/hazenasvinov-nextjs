@@ -1,33 +1,36 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Button, Image } from '@heroui/react';
-import { BuildingOfficeIcon } from '@heroicons/react/24/outline';
-import { useSeasons, useCategories } from '@/hooks';
-import { ClubWithTeams } from '@/types';
+import React, {useState, useEffect, useMemo} from 'react';
+
+import {Button, Image} from '@heroui/react';
+
+import {BuildingOfficeIcon} from '@heroicons/react/24/outline';
+
+import {useSeasons, useCategories} from '@/hooks';
+import {ClubWithTeams} from '@/types';
 
 interface ClubSelectorProps {
   selectedCategory?: string;
   selectedClub?: string;
   onClubSelect: (clubId: string | undefined) => void;
-  onClubDataChange?: (clubData: { [clubId: string]: string[] }) => void;
+  onClubDataChange?: (clubData: {[clubId: string]: string[]}) => void;
   className?: string;
 }
 
-export default function ClubSelector({ 
-  selectedCategory, 
-  selectedClub, 
+export default function ClubSelector({
+  selectedCategory,
+  selectedClub,
   onClubSelect,
   onClubDataChange,
-  className = ''
+  className = '',
 }: ClubSelectorProps) {
   const [clubs, setClubs] = useState<ClubWithTeams[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Use existing hooks instead of custom fetch functions
-  const { activeSeason, fetchActiveSeason } = useSeasons();
-  const { categories, fetchCategories } = useCategories();
+  const {activeSeason, fetchActiveSeason} = useSeasons();
+  const {categories, fetchCategories} = useCategories();
 
   // Fetch required data when component mounts
   useEffect(() => {
@@ -52,26 +55,28 @@ export default function ClubSelector({
         setError(null);
 
         // Import Supabase client dynamically to avoid SSR issues
-        const { createClient } = await import('@/utils/supabase/client');
+        const {createClient} = await import('@/utils/supabase/client');
         const supabase = createClient();
 
         // Build query based on whether we have a selected category
         let clubQuery = supabase
           .from('clubs')
-          .select(`
+          .select(
+            `
             id,
             name,
             short_name,
             logo_url
-          `)
+          `
+          )
           .eq('is_active', true);
 
         // If a specific category is selected, only fetch clubs that have teams in that category
         if (selectedCategory && selectedCategory !== 'all') {
-          const selectedCategoryData = categories.find(cat => cat.id === selectedCategory);
+          const selectedCategoryData = categories.find((cat) => cat.id === selectedCategory);
           if (selectedCategoryData) {
             // First get club IDs that have teams in the selected category
-            const { data: clubIdsInCategory, error: clubIdsError } = await supabase
+            const {data: clubIdsInCategory, error: clubIdsError} = await supabase
               .from('club_categories')
               .select('club_id')
               .eq('category_id', selectedCategoryData.id)
@@ -93,17 +98,18 @@ export default function ClubSelector({
           }
         }
 
-        const { data: clubData, error: clubError } = await clubQuery.order('name');
+        const {data: clubData, error: clubError} = await clubQuery.order('name');
 
         if (clubError) {
           throw new Error(`Failed to fetch clubs: ${clubError.message}`);
         }
 
-        // Fetch club categories and teams for the fetched clubs
+        // Fetch club category and teams for the fetched clubs
         const clubIds = clubData?.map((club: any) => club.id) || [];
         let clubCategoriesQuery = supabase
           .from('club_categories')
-          .select(`
+          .select(
+            `
             id,
             club_id,
             category_id,
@@ -111,23 +117,24 @@ export default function ClubSelector({
               id,
               team_suffix
             )
-          `)
+          `
+          )
           .eq('is_active', true);
 
         // If a specific category is selected, only fetch teams from that category
         if (selectedCategory && selectedCategory !== 'all') {
-          const selectedCategoryData = categories.find(cat => cat.id === selectedCategory);
+          const selectedCategoryData = categories.find((cat) => cat.id === selectedCategory);
           if (selectedCategoryData) {
             clubCategoriesQuery = clubCategoriesQuery.eq('category_id', selectedCategoryData.id);
           }
         }
 
-        // Only fetch categories for the clubs we're interested in
+        // Only fetch category for the clubs we're interested in
         if (clubIds.length > 0) {
           clubCategoriesQuery = clubCategoriesQuery.in('club_id', clubIds);
         }
 
-        const { data: clubCategoriesData, error: clubCategoriesError } = await clubCategoriesQuery;
+        const {data: clubCategoriesData, error: clubCategoriesError} = await clubCategoriesQuery;
 
         if (clubCategoriesError) {
           throw new Error(`Failed to fetch club categories: ${clubCategoriesError.message}`);
@@ -137,19 +144,20 @@ export default function ClubSelector({
           throw new Error(`Failed to fetch clubs: ${clubError.message}`);
         }
 
-
         // Transform the data to match our Club interface
         const transformedClubs: ClubWithTeams[] = (clubData || []).map((club: any) => {
-          // Find all club categories for this club
-          const clubCategories = clubCategoriesData?.filter((cc: any) => cc.club_id === club.id) || [];
-          
-          // Get teams from the filtered categories (already filtered by selected category if applicable)
-          const teams = clubCategories.flatMap((cc: any) => 
-            cc.club_category_teams?.map((team: any) => ({
-              id: team.id,
-              team_suffix: team.team_suffix,
-              club_category_id: cc.category_id
-            })) || []
+          // Find all club category for this club
+          const clubCategories =
+            clubCategoriesData?.filter((cc: any) => cc.club_id === club.id) || [];
+
+          // Get teams from the filtered category (already filtered by selected category if applicable)
+          const teams = clubCategories.flatMap(
+            (cc: any) =>
+              cc.club_category_teams?.map((team: any) => ({
+                id: team.id,
+                team_suffix: team.team_suffix,
+                club_category_id: cc.category_id,
+              })) || []
           );
 
           return {
@@ -157,13 +165,12 @@ export default function ClubSelector({
             name: club.name,
             short_name: club.short_name,
             logo_url: club.logo_url,
-            teams
+            teams,
           };
         });
 
         setClubs(transformedClubs);
         setLoading(false);
-        
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to fetch clubs');
         setLoading(false);
@@ -176,22 +183,22 @@ export default function ClubSelector({
   // Update club-team mapping whenever category or clubs change
   useEffect(() => {
     if (onClubDataChange && clubs.length > 0) {
-      const clubTeamMap: { [clubId: string]: string[] } = {};
-      
-      clubs.forEach(club => {
+      const clubTeamMap: {[clubId: string]: string[]} = {};
+
+      clubs.forEach((club) => {
         if (selectedCategory && selectedCategory !== 'all') {
           // Filter teams by selected category
-          const categoryTeams = club.teams.filter(team => {
-            const category = categories.find(cat => cat.id === team.club_category_id);
+          const categoryTeams = club.teams.filter((team) => {
+            const category = categories.find((cat) => cat.id === team.club_category_id);
             return category?.id === selectedCategory;
           });
-          clubTeamMap[club.id] = categoryTeams.map(team => team.id);
+          clubTeamMap[club.id] = categoryTeams.map((team) => team.id);
         } else {
           // All teams if no category selected
-          clubTeamMap[club.id] = club.teams.map(team => team.id);
+          clubTeamMap[club.id] = club.teams.map((team) => team.id);
         }
       });
-      
+
       onClubDataChange(clubTeamMap);
     }
   }, [clubs, selectedCategory, categories, onClubDataChange]);
@@ -232,14 +239,8 @@ export default function ClubSelector({
   if (error) {
     return (
       <div className={`text-center py-4 ${className}`}>
-        <div className="text-red-600 dark:text-red-400 mb-2">
-          Chyba: {error}
-        </div>
-        <Button
-          size="sm"
-          color="primary"
-          onPress={() => window.location.reload()}
-        >
+        <div className="text-red-600 dark:text-red-400 mb-2">Chyba: {error}</div>
+        <Button size="sm" color="primary" onPress={() => window.location.reload()}>
           Zkusit znovu
         </Button>
       </div>
@@ -251,10 +252,9 @@ export default function ClubSelector({
       <div className={`text-center py-4 ${className}`}>
         <BuildingOfficeIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          {selectedCategory && selectedCategory !== 'all' 
+          {selectedCategory && selectedCategory !== 'all'
             ? 'Žádné kluby v této kategorii'
-            : 'Žádné kluby k dispozici'
-          }
+            : 'Žádné kluby k dispozici'}
         </p>
       </div>
     );
@@ -273,8 +273,8 @@ export default function ClubSelector({
             aria-label={`${selectedClub === club.id ? 'Zrušit filtr pro klub' : 'Filtrovat zápasy pro klub'} ${club.name}`}
             className={`flex items-center gap-1 md:flex-col md:gap-1 p-1 md:p-2 h-auto ${
               selectedClub === club.id
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
             }`}
           >
             {/* Club Logo */}
@@ -298,7 +298,6 @@ export default function ClubSelector({
             <span className="hidden md:block text-xs font-medium text-gray-600 dark:text-gray-400 text-center max-w-[80px]">
               {club.short_name || club.name}
             </span>
-
           </Button>
         ))}
       </div>

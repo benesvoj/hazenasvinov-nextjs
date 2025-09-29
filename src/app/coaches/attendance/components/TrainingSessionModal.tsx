@@ -1,5 +1,7 @@
 'use client';
 
+import {useState, useEffect} from 'react';
+
 import {
   Input,
   Textarea,
@@ -10,8 +12,8 @@ import {
   ModalBody,
   ModalFooter,
 } from '@heroui/react';
+
 import {TrainingSession, TrainingSessionFormData} from '@/types';
-import {useState, useEffect} from 'react';
 
 interface TrainingSessionModalProps {
   isOpen: boolean;

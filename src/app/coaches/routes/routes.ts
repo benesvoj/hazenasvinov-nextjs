@@ -5,6 +5,7 @@ import {
   VideoCameraIcon,
   ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
+
 import {translations} from '@/lib/translations';
 
 export const coachesRoutes = [

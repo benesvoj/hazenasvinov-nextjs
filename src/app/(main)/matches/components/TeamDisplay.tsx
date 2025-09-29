@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from "react";
+import React, {useState} from 'react';
+
 import Image from 'next/image';
 
 interface Team {
@@ -15,7 +16,7 @@ interface TeamDisplayProps {
   fallbackName: string;
 }
 
-export default function TeamDisplay({ team, fallbackName }: TeamDisplayProps) {
+export default function TeamDisplay({team, fallbackName}: TeamDisplayProps) {
   const [imageError, setImageError] = useState(false);
 
   const handleImageError = () => {
@@ -25,8 +26,8 @@ export default function TeamDisplay({ team, fallbackName }: TeamDisplayProps) {
   return (
     <div className="flex items-center gap-2">
       {team?.logo_url && !imageError && (
-        <Image 
-          src={team.logo_url} 
+        <Image
+          src={team.logo_url}
           alt={`${team?.name || fallbackName} logo`}
           width={20}
           height={20}
@@ -34,7 +35,9 @@ export default function TeamDisplay({ team, fallbackName }: TeamDisplayProps) {
           onError={handleImageError}
         />
       )}
-      <span className={`text-sm font-medium truncate ${team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+      <span
+        className={`text-sm font-medium truncate ${team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}
+      >
         {team?.name || fallbackName}
       </span>
     </div>

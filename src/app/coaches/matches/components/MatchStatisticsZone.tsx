@@ -1,7 +1,9 @@
 'use client';
 
 import React, {useState, useEffect, useMemo} from 'react';
+
 import {Card, CardHeader, CardBody, Button, Tabs, Tab, Chip, Progress} from '@heroui/react';
+
 import {
   ChartBarIcon,
   TrophyIcon,
@@ -11,9 +13,11 @@ import {
   CalendarIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
+
+import {useMatchLineupStats, PlayerMatchStats} from '@/hooks/entities/lineup/useMatchLineupStats';
+
 import {LoadingSpinner} from '@/components';
 import {useOptimizedOwnClubMatches} from '@/hooks';
-import {useMatchLineupStats, PlayerMatchStats} from '@/hooks/useMatchLineupStats';
 import {Match, LineupPlayer} from '@/types';
 
 interface MatchStatisticsZoneProps {

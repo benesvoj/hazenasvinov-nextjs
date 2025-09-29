@@ -1,20 +1,30 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
-import { Badge } from "@heroui/badge";
-import { 
+import React, {useState, useEffect, useCallback} from 'react';
+
+import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Input} from '@heroui/input';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from '@heroui/modal';
+
+import {
   CalendarIcon,
   PlusIcon,
   PencilIcon,
   TrashIcon,
   CheckIcon,
-  XMarkIcon
-} from "@heroicons/react/24/outline";
-import { createClient } from "@/utils/supabase/client";
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
+
+import {createClient} from '@/utils/supabase/client';
 
 interface Season {
   id: string;
@@ -30,20 +40,32 @@ interface Season {
 export default function SeasonsAdminPage() {
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null);
-  
+
   // Modal states
-  const { isOpen: isAddSeasonOpen, onOpen: onAddSeasonOpen, onClose: onAddSeasonClose } = useDisclosure();
-  const { isOpen: isEditSeasonOpen, onOpen: onEditSeasonOpen, onClose: onEditSeasonClose } = useDisclosure();
-  const { isOpen: isDeleteSeasonOpen, onOpen: onDeleteSeasonOpen, onClose: onDeleteSeasonClose } = useDisclosure();
-  
+  const {
+    isOpen: isAddSeasonOpen,
+    onOpen: onAddSeasonOpen,
+    onClose: onAddSeasonClose,
+  } = useDisclosure();
+  const {
+    isOpen: isEditSeasonOpen,
+    onOpen: onEditSeasonOpen,
+    onClose: onEditSeasonClose,
+  } = useDisclosure();
+  const {
+    isOpen: isDeleteSeasonOpen,
+    onOpen: onDeleteSeasonOpen,
+    onClose: onDeleteSeasonClose,
+  } = useDisclosure();
+
   const [formData, setFormData] = useState({
     name: '',
     start_date: '',
     end_date: '',
     is_active: false,
-    is_closed: false
+    is_closed: false,
   });
 
   const supabase = createClient();
@@ -52,10 +74,10 @@ export default function SeasonsAdminPage() {
   const fetchSeasons = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const {data, error} = await supabase
         .from('seasons')
         .select('*')
-        .order('name', { ascending: false });
+        .order('name', {ascending: false});
 
       if (error) throw error;
       setSeasons(data || []);
@@ -88,31 +110,26 @@ export default function SeasonsAdminPage() {
 
       // If setting as active, deactivate other seasons
       if (formData.is_active) {
-        await supabase
-          .from('seasons')
-          .update({ is_active: false })
-          .eq('is_active', true);
+        await supabase.from('seasons').update({is_active: false}).eq('is_active', true);
       }
 
-      const { error } = await supabase
-        .from('seasons')
-        .insert({
-          name: formData.name,
-          start_date: formData.start_date,
-          end_date: formData.end_date,
-          is_active: formData.is_active,
-          is_closed: formData.is_closed
-        });
+      const {error} = await supabase.from('seasons').insert({
+        name: formData.name,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        is_active: formData.is_active,
+        is_closed: formData.is_closed,
+      });
 
       if (error) throw error;
-      
+
       onAddSeasonClose();
       setFormData({
         name: '',
         start_date: '',
         end_date: '',
         is_active: false,
-        is_closed: false
+        is_closed: false,
       });
       fetchSeasons();
       setError('');
@@ -143,24 +160,24 @@ export default function SeasonsAdminPage() {
       if (formData.is_active) {
         await supabase
           .from('seasons')
-          .update({ is_active: false })
+          .update({is_active: false})
           .eq('is_active', true)
           .neq('id', selectedSeason.id);
       }
 
-      const { error } = await supabase
+      const {error} = await supabase
         .from('seasons')
         .update({
           name: formData.name,
           start_date: formData.start_date,
           end_date: formData.end_date,
           is_active: formData.is_active,
-          is_closed: formData.is_closed
+          is_closed: formData.is_closed,
         })
         .eq('id', selectedSeason.id);
 
       if (error) throw error;
-      
+
       onEditSeasonClose();
       setSelectedSeason(null);
       setFormData({
@@ -168,7 +185,7 @@ export default function SeasonsAdminPage() {
         start_date: '',
         end_date: '',
         is_active: false,
-        is_closed: false
+        is_closed: false,
       });
       fetchSeasons();
       setError('');
@@ -183,13 +200,10 @@ export default function SeasonsAdminPage() {
     if (!selectedSeason) return;
 
     try {
-      const { error } = await supabase
-        .from('seasons')
-        .delete()
-        .eq('id', selectedSeason.id);
+      const {error} = await supabase.from('seasons').delete().eq('id', selectedSeason.id);
 
       if (error) throw error;
-      
+
       onDeleteSeasonClose();
       setSelectedSeason(null);
       fetchSeasons();
@@ -207,7 +221,7 @@ export default function SeasonsAdminPage() {
       start_date: season.start_date,
       end_date: season.end_date,
       is_active: season.is_active,
-      is_closed: season.is_closed
+      is_closed: season.is_closed,
     });
     onEditSeasonOpen();
   };
@@ -225,14 +239,13 @@ export default function SeasonsAdminPage() {
       start_date: '',
       end_date: '',
       is_active: false,
-      is_closed: false
+      is_closed: false,
     });
     setError('');
   };
 
   return (
     <div className="p-6">
-
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
@@ -245,8 +258,8 @@ export default function SeasonsAdminPage() {
             <CalendarIcon className="w-5 h-5 text-blue-500" />
             <h2 className="text-xl font-semibold">Sezóny</h2>
           </div>
-          <Button 
-            color="primary" 
+          <Button
+            color="primary"
             startContent={<PlusIcon className="w-4 h-4" />}
             onPress={() => {
               resetForm();
@@ -273,10 +286,11 @@ export default function SeasonsAdminPage() {
                 </thead>
                 <tbody>
                   {seasons.map((season) => (
-                    <tr key={season.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="py-3 px-4 font-medium">
-                        {season.name}
-                      </td>
+                    <tr
+                      key={season.id}
+                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      <td className="py-3 px-4 font-medium">{season.name}</td>
                       <td className="py-3 px-4">
                         {new Date(season.start_date).toLocaleDateString('cs-CZ')}
                       </td>
@@ -285,10 +299,7 @@ export default function SeasonsAdminPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex flex-col gap-1">
-                          <Badge 
-                            color={season.is_active ? 'success' : 'default'} 
-                            variant="flat"
-                          >
+                          <Badge color={season.is_active ? 'success' : 'default'} variant="flat">
                             {season.is_active ? (
                               <>
                                 <CheckIcon className="w-3 h-3 mr-1" />
@@ -301,10 +312,7 @@ export default function SeasonsAdminPage() {
                               </>
                             )}
                           </Badge>
-                          <Badge 
-                            color={season.is_closed ? 'danger' : 'default'} 
-                            variant="flat"
-                          >
+                          <Badge color={season.is_closed ? 'danger' : 'default'} variant="flat">
                             {season.is_closed ? (
                               <>
                                 <XMarkIcon className="w-3 h-3 mr-1" />
@@ -346,9 +354,7 @@ export default function SeasonsAdminPage() {
                 </tbody>
               </table>
               {seasons.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  Žádné sezóny nebyly nalezeny
-                </div>
+                <div className="text-center py-8 text-gray-500">Žádné sezóny nebyly nalezeny</div>
               )}
             </div>
           )}
@@ -365,44 +371,48 @@ export default function SeasonsAdminPage() {
                 label="Název sezóny"
                 placeholder="např. 2024/2025"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
                 isRequired
               />
-              
+
               <Input
                 label="Datum začátku"
                 type="date"
                 value={formData.start_date}
-                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                onChange={(e) => setFormData({...formData, start_date: e.target.value})}
                 isRequired
               />
-              
+
               <Input
                 label="Datum konce"
                 type="date"
                 value={formData.end_date}
-                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                onChange={(e) => setFormData({...formData, end_date: e.target.value})}
                 isRequired
               />
-              
+
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní sezóna</span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  Aktivní sezóna
+                </span>
               </label>
-              
+
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   checked={formData.is_closed}
-                  onChange={(e) => setFormData({ ...formData, is_closed: e.target.checked })}
+                  onChange={(e) => setFormData({...formData, is_closed: e.target.checked})}
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Uzavřená sezóna</span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  Uzavřená sezóna
+                </span>
               </label>
             </div>
           </ModalBody>
@@ -427,44 +437,48 @@ export default function SeasonsAdminPage() {
                 label="Název sezóny"
                 placeholder="např. 2024/2025"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
                 isRequired
               />
-              
+
               <Input
                 label="Datum začátku"
                 type="date"
                 value={formData.start_date}
-                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                onChange={(e) => setFormData({...formData, start_date: e.target.value})}
                 isRequired
               />
-              
+
               <Input
                 label="Datum konce"
                 type="date"
                 value={formData.end_date}
-                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                onChange={(e) => setFormData({...formData, end_date: e.target.value})}
                 isRequired
               />
-              
+
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní sezóna</span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  Aktivní sezóna
+                </span>
               </label>
-              
+
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   checked={formData.is_closed}
-                  onChange={(e) => setFormData({ ...formData, is_closed: e.target.checked })}
+                  onChange={(e) => setFormData({...formData, is_closed: e.target.checked})}
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Uzavřená sezóna</span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  Uzavřená sezóna
+                </span>
               </label>
             </div>
           </ModalBody>
@@ -485,8 +499,8 @@ export default function SeasonsAdminPage() {
           <ModalHeader>Smazat sezónu</ModalHeader>
           <ModalBody>
             <p>
-              Opravdu chcete smazat sezónu <strong>{selectedSeason?.name}</strong>?
-              Tato akce je nevratná a může ovlivnit související data.
+              Opravdu chcete smazat sezónu <strong>{selectedSeason?.name}</strong>? Tato akce je
+              nevratná a může ovlivnit související data.
             </p>
           </ModalBody>
           <ModalFooter>

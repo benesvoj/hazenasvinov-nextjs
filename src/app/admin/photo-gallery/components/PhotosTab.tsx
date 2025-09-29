@@ -1,43 +1,54 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Select, SelectItem } from "@heroui/select";
-import { Badge } from "@heroui/badge";
-import { Image } from "@heroui/image";
-import { 
+import React, {useState, useEffect, useCallback} from 'react';
+
+import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Card, CardBody} from '@heroui/card';
+import {Image} from '@heroui/image';
+import {Select, SelectItem} from '@heroui/select';
+
+import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
   StarIcon,
   ArrowUpIcon,
   ArrowDownIcon,
-  PhotoIcon
-} from "@heroicons/react/24/outline";
-import { PhotoAlbum, Photo, CreatePhotoData, UpdatePhotoData } from "@/types/photoGallery";
-import { 
-  getPhotoAlbums, 
-  getPhotosByAlbum, 
-  createPhoto, 
-  updatePhoto, 
+  PhotoIcon,
+} from '@heroicons/react/24/outline';
+
+import {
+  PhotoAlbum,
+  Photo,
+  CreatePhotoData,
+  UpdatePhotoData,
+} from '@/types/features/gallery/photoGallery';
+
+import DeleteConfirmationModal from '@/components/ui/modals/DeleteConfirmationModal';
+
+import {
+  getPhotoAlbums,
+  getPhotosByAlbum,
+  createPhoto,
+  updatePhoto,
   deletePhoto,
-  reorderPhotos
-} from "@/utils/supabase/photoGallery";
-import { uploadClubAsset, deleteClubAsset } from "@/utils/supabase/storage";
-import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
-import PhotoFormModal from "./PhotoFormModal";
-import PhotoUploadModal from "./PhotoUploadModal";
+  reorderPhotos,
+} from '@/utils/supabase/photoGallery';
+import {uploadClubAsset, deleteClubAsset} from '@/utils/supabase/storage';
+
+import PhotoFormModal from './PhotoFormModal';
+import PhotoUploadModal from './PhotoUploadModal';
 
 export default function PhotosTab() {
   const [albums, setAlbums] = useState<PhotoAlbum[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedAlbumId, setSelectedAlbumId] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [reordering, setReordering] = useState(false);
-  
+
   // Modal states
   const [isPhotoFormOpen, setIsPhotoFormOpen] = useState(false);
   const [isPhotoUploadOpen, setIsPhotoUploadOpen] = useState(false);
@@ -54,21 +65,21 @@ export default function PhotosTab() {
         setSelectedAlbumId(data[0].id);
       }
     } catch (err) {
-      setError("Chyba při načítání alb");
+      setError('Chyba při načítání alb');
       console.error(err);
     }
   }, [selectedAlbumId]);
 
   const loadPhotos = async (albumId: string) => {
     if (!albumId) return;
-    
+
     try {
       setLoading(true);
       const data = await getPhotosByAlbum(albumId);
       //console.log('Loaded photos:', data); // Debug log
       setPhotos(data);
     } catch (err) {
-      setError("Chyba při načítání fotografií");
+      setError('Chyba při načítání fotografií');
       console.error(err);
     } finally {
       setLoading(false);
@@ -92,22 +103,22 @@ export default function PhotosTab() {
         // Update existing photo
         const updated = await updatePhoto(editingPhoto.id, photoData as UpdatePhotoData);
         if (updated) {
-          setPhotos(prev => prev.map(photo => 
-            photo.id === editingPhoto.id ? updated : photo
-          ));
+          setPhotos((prev) =>
+            prev.map((photo) => (photo.id === editingPhoto.id ? updated : photo))
+          );
         }
       } else {
         // Create new photo
         const created = await createPhoto(photoData as CreatePhotoData);
         if (created) {
-          setPhotos(prev => [created, ...prev]);
+          setPhotos((prev) => [created, ...prev]);
         }
       }
-      
+
       setIsPhotoFormOpen(false);
       setEditingPhoto(null);
     } catch (err) {
-      setError("Chyba při ukládání fotografie");
+      setError('Chyba při ukládání fotografie');
       console.error(err);
     }
   };
@@ -115,20 +126,20 @@ export default function PhotosTab() {
   // Handle photo deletion
   const handlePhotoDelete = async () => {
     if (!deletingPhoto) return;
-    
+
     try {
       // Delete from storage first
       await deleteClubAsset(deletingPhoto.file_path);
-      
+
       // Then delete from database
       const success = await deletePhoto(deletingPhoto.id);
       if (success) {
-        setPhotos(prev => prev.filter(photo => photo.id !== deletingPhoto.id));
+        setPhotos((prev) => prev.filter((photo) => photo.id !== deletingPhoto.id));
       }
       setIsDeleteModalOpen(false);
       setDeletingPhoto(null);
     } catch (err) {
-      setError("Chyba při mazání fotografie");
+      setError('Chyba při mazání fotografie');
       console.error(err);
     }
   };
@@ -136,40 +147,46 @@ export default function PhotosTab() {
   // Handle photo reordering
   const handleReorder = async (photoId: string, direction: 'up' | 'down') => {
     if (reordering) return; // Prevent multiple simultaneous reorder operations
-    
+
     try {
       setReordering(true);
-      setError(""); // Clear any previous errors
-      setSuccess(""); // Clear any previous success messages
-      const currentIndex = photos.findIndex(p => p.id === photoId);
+      setError(''); // Clear any previous errors
+      setSuccess(''); // Clear any previous success messages
+      const currentIndex = photos.findIndex((p) => p.id === photoId);
       if (currentIndex === -1) return;
 
       const newPhotos = [...photos];
       if (direction === 'up' && currentIndex > 0) {
-        [newPhotos[currentIndex], newPhotos[currentIndex - 1]] = [newPhotos[currentIndex - 1], newPhotos[currentIndex]];
+        [newPhotos[currentIndex], newPhotos[currentIndex - 1]] = [
+          newPhotos[currentIndex - 1],
+          newPhotos[currentIndex],
+        ];
       } else if (direction === 'down' && currentIndex < newPhotos.length - 1) {
-        [newPhotos[currentIndex], newPhotos[currentIndex + 1]] = [newPhotos[currentIndex + 1], newPhotos[currentIndex]];
+        [newPhotos[currentIndex], newPhotos[currentIndex + 1]] = [
+          newPhotos[currentIndex + 1],
+          newPhotos[currentIndex],
+        ];
       }
 
       // Optimistically update UI first
       setPhotos(newPhotos);
-      
+
       // Update sort order in database
-      const photoIds = newPhotos.map(p => p.id);
+      const photoIds = newPhotos.map((p) => p.id);
       const reorderSuccess = await reorderPhotos(photoIds);
-      
+
       if (!reorderSuccess) {
         // Revert UI changes if database update failed
         setPhotos(photos);
-        setError("Chyba při změně pořadí fotografií");
+        setError('Chyba při změně pořadí fotografií');
       } else {
-        setSuccess("Pořadí fotografií bylo úspěšně změněno");
+        setSuccess('Pořadí fotografií bylo úspěšně změněno');
         // Clear success message after 3 seconds
-        setTimeout(() => setSuccess(""), 3000);
+        setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
       console.error('Error reordering photos:', err);
-      setError("Chyba při změně pořadí fotografií");
+      setError('Chyba při změně pořadí fotografií');
     } finally {
       setReordering(false);
     }
@@ -198,7 +215,7 @@ export default function PhotosTab() {
     setIsPhotoUploadOpen(true);
   };
 
-  const selectedAlbum = albums.find(album => album.id === selectedAlbumId);
+  const selectedAlbum = albums.find((album) => album.id === selectedAlbumId);
 
   if (albums.length === 0) {
     return (
@@ -213,12 +230,8 @@ export default function PhotosTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Fotografie
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Správa fotografií v albu
-          </p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Fotografie</h2>
+          <p className="text-gray-600 dark:text-gray-400">Správa fotografií v albu</p>
         </div>
         <div className="flex items-center space-x-3">
           <Select
@@ -231,7 +244,7 @@ export default function PhotosTab() {
             className="w-64"
           >
             {albums.map((album) => (
-              <SelectItem 
+              <SelectItem
                 key={album.id}
                 textValue={`${album.title} (${album.photo_count || 0} fotek)`}
               >
@@ -294,9 +307,11 @@ export default function PhotosTab() {
                       {/* Fallback placeholder - only show if image fails */}
                       <div className="hidden w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
                         <PhotoIcon className="w-12 h-12 text-gray-400" />
-                        <div className="text-xs text-gray-500 mt-2">Obrázek se nepodařilo načíst</div>
+                        <div className="text-xs text-gray-500 mt-2">
+                          Obrázek se nepodařilo načíst
+                        </div>
                       </div>
-                      
+
                       {/* Overlay with actions */}
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center z-20">
                         <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -357,7 +372,7 @@ export default function PhotosTab() {
                         </Button>
                       </div>
                     </div>
-                    
+
                     {/* Photo info */}
                     <div className="mt-2 space-y-1">
                       {photo.title && (
@@ -414,12 +429,14 @@ export default function PhotosTab() {
                 {/* Test image display */}
                 <div className="mt-2">
                   <div className="text-xs font-medium">Test Image Display:</div>
-                  <Image 
-                    src={photo.file_url || photo.file_path} 
-                    alt="Test" 
+                  <Image
+                    src={photo.file_url || photo.file_path}
+                    alt="Test"
                     className="w-16 h-16 object-cover border rounded"
                     radius="sm"
-                    onError={() => console.error('Test image failed:', photo.file_url, photo.file_path)}
+                    onError={() =>
+                      console.error('Test image failed:', photo.file_url, photo.file_path)
+                    }
                   />
                 </div>
               </div>
@@ -445,7 +462,7 @@ export default function PhotosTab() {
         onClose={() => setIsPhotoUploadOpen(false)}
         albumId={selectedAlbumId}
         onPhotosUploaded={(newPhotos: Photo[]) => {
-          setPhotos(prev => [...newPhotos, ...prev]);
+          setPhotos((prev) => [...newPhotos, ...prev]);
         }}
       />
 

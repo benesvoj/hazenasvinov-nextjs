@@ -1,15 +1,23 @@
 'use client';
 
 import React, {useEffect, useState, useMemo} from 'react';
+
 import Link from 'next/link';
-import {useUser} from '@/contexts/UserContext';
-import {useCategories, useUserRoles} from '@/hooks';
-import {UserIcon, VideoCameraIcon, AcademicCapIcon} from '@heroicons/react/24/outline';
+
 import {Button, Card, CardBody, CardHeader, Tab, Tabs} from '@heroui/react';
-import MatchSchedule from '@/components/match/MatchSchedule';
-import {BirthdayCard, TopScorersCard, YellowCardsCard, RedCardsCard} from './components';
+
+import {UserIcon, VideoCameraIcon, AcademicCapIcon} from '@heroicons/react/24/outline';
+
+import MatchSchedule from '@/components/shared/match/MatchSchedule';
+
+import {useUser} from '@/contexts/UserContext';
+
 import {PageContainer, LoadingSpinner} from '@/components';
+import {useCategories, useUserRoles} from '@/hooks';
+
 import CoachMatchResultFlow from '../matches/components/CoachMatchResultFlow';
+
+import {BirthdayCard, TopScorersCard, YellowCardsCard, RedCardsCard} from './components';
 
 export default function CoachesDashboard() {
   const {user, userProfile, loading, error} = useUser();
@@ -21,7 +29,7 @@ export default function CoachesDashboard() {
   const {categories, fetchCategories} = useCategories();
   const {getCurrentUserCategories} = useUserRoles();
 
-  // Filter categories based on assigned categories
+  // Filter category based on assigned category
   const availableCategories = useMemo(() => {
     return categories.filter((cat) => assignedCategoryIds.includes(cat.id));
   }, [categories, assignedCategoryIds]);
@@ -38,7 +46,7 @@ export default function CoachesDashboard() {
     fetchCategories();
   }, [fetchCategories]);
 
-  // Fetch assigned categories if available
+  // Fetch assigned category if available
   useEffect(() => {
     if (getCurrentUserCategories) {
       getCurrentUserCategories().then(setAssignedCategoryIds);

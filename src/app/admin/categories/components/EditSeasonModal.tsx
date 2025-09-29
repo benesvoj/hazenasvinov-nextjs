@@ -1,14 +1,17 @@
 import React from 'react';
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
 import {Button} from '@heroui/button';
 import {Input} from '@heroui/input';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
+import {CompetitionTypes} from '@/enums';
 
 interface CategorySeason {
   id: string;
   category_id: string;
   season_id: string;
   matchweek_count: number;
-  competition_type: 'league' | 'league_playoff' | 'tournament';
+  competition_type: CompetitionTypes;
   team_count: number;
   allow_team_duplicates: boolean;
   is_active: boolean;
@@ -27,7 +30,7 @@ interface EditSeasonModalProps {
   selectedSeason: CategorySeason | null;
   editSeasonFormData: {
     matchweek_count: number;
-    competition_type: 'league' | 'league_playoff' | 'tournament';
+    competition_type: CompetitionTypes;
     team_count: number;
     allow_team_duplicates: boolean;
     is_active: boolean;
@@ -66,13 +69,14 @@ export default function EditSeasonModal({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Typ soutěže
               </label>
+              {/* TODO: refactor this component to use proper components and types, standards */}
               <select
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
                 value={editSeasonFormData.competition_type}
                 onChange={(e) =>
                   setEditSeasonFormData({
                     ...editSeasonFormData,
-                    competition_type: e.target.value as 'league' | 'league_playoff' | 'tournament',
+                    competition_type: e.target.value as CompetitionTypes,
                   })
                 }
               >

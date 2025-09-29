@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
+import React, {useState, useEffect, useCallback} from 'react';
+
+import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Input} from '@heroui/input';
 import {
   Modal,
   ModalContent,
@@ -11,17 +13,15 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Badge } from "@heroui/badge";
-import {
-  BuildingOfficeIcon,
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
-import { createClient } from "@/utils/supabase/client";
-import { AdminContainer } from "../components/AdminContainer";
-import { translations } from "@/lib/translations";
+} from '@heroui/modal';
+
+import {BuildingOfficeIcon, PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
+import {AdminContainer} from '@/components/features/admin/AdminContainer';
+
+import {translations} from '@/lib/translations';
+
+import {createClient} from '@/utils/supabase/client';
 
 interface Committee {
   id: string;
@@ -37,7 +37,7 @@ interface Committee {
 export default function CommitteesAdminPage() {
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const t = translations.admin.committees;
 
@@ -58,13 +58,11 @@ export default function CommitteesAdminPage() {
     onClose: onDeleteCommitteeClose,
   } = useDisclosure();
 
-  const [selectedCommittee, setSelectedCommittee] = useState<Committee | null>(
-    null
-  );
+  const [selectedCommittee, setSelectedCommittee] = useState<Committee | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    code: "",
-    description: "",
+    name: '',
+    code: '',
+    description: '',
     is_active: true,
     sort_order: 0,
   });
@@ -75,17 +73,17 @@ export default function CommitteesAdminPage() {
   const fetchCommittees = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("committees")
-        .select("*")
-        .order("sort_order", { ascending: true })
-        .order("name", { ascending: true });
+      const {data, error} = await supabase
+        .from('committees')
+        .select('*')
+        .order('sort_order', {ascending: true})
+        .order('name', {ascending: true});
 
       if (error) throw error;
       setCommittees(data || []);
     } catch (error) {
-      setError("Chyba při načítání komisí");
-      console.error("Error fetching committees:", error);
+      setError('Chyba při načítání komisí');
+      console.error('Error fetching committees:', error);
     } finally {
       setLoading(false);
     }
@@ -98,7 +96,7 @@ export default function CommitteesAdminPage() {
   // Add new committee
   const handleAddCommittee = async () => {
     try {
-      const { error } = await supabase.from("committees").insert({
+      const {error} = await supabase.from('committees').insert({
         name: formData.name,
         code: formData.code,
         description: formData.description || null,
@@ -111,8 +109,8 @@ export default function CommitteesAdminPage() {
       handleCloseAddCommittee();
       fetchCommittees();
     } catch (error) {
-      setError("Chyba při přidávání komise");
-      console.error("Error adding committee:", error);
+      setError('Chyba při přidávání komise');
+      console.error('Error adding committee:', error);
     }
   };
 
@@ -121,23 +119,23 @@ export default function CommitteesAdminPage() {
     if (!selectedCommittee) return;
 
     try {
-      const { error } = await supabase
-        .from("committees")
+      const {error} = await supabase
+        .from('committees')
         .update({
           name: formData.name,
           description: formData.description || null,
           is_active: formData.is_active,
           sort_order: formData.sort_order,
         })
-        .eq("id", selectedCommittee.id);
+        .eq('id', selectedCommittee.id);
 
       if (error) throw error;
 
       handleCloseEditCommittee();
       fetchCommittees();
     } catch (error) {
-      setError("Chyba při aktualizaci komise");
-      console.error("Error updating committee:", error);
+      setError('Chyba při aktualizaci komise');
+      console.error('Error updating committee:', error);
     }
   };
 
@@ -146,10 +144,7 @@ export default function CommitteesAdminPage() {
     if (!selectedCommittee) return;
 
     try {
-      const { error } = await supabase
-        .from("committees")
-        .delete()
-        .eq("id", selectedCommittee.id);
+      const {error} = await supabase.from('committees').delete().eq('id', selectedCommittee.id);
 
       if (error) throw error;
 
@@ -157,8 +152,8 @@ export default function CommitteesAdminPage() {
       setSelectedCommittee(null);
       fetchCommittees();
     } catch (error) {
-      setError("Chyba při mazání komise");
-      console.error("Error deleting committee:", error);
+      setError('Chyba při mazání komise');
+      console.error('Error deleting committee:', error);
     }
   };
 
@@ -168,7 +163,7 @@ export default function CommitteesAdminPage() {
     setFormData({
       name: committee.name,
       code: committee.code,
-      description: committee.description || "",
+      description: committee.description || '',
       is_active: committee.is_active,
       sort_order: committee.sort_order,
     });
@@ -178,9 +173,9 @@ export default function CommitteesAdminPage() {
   // Handle opening add committee modal with clean form
   const handleOpenAddCommittee = () => {
     setFormData({
-      name: "",
-      code: "",
-      description: "",
+      name: '',
+      code: '',
+      description: '',
       is_active: true,
       sort_order: 0,
     });
@@ -190,9 +185,9 @@ export default function CommitteesAdminPage() {
   // Handle closing add committee modal with clean form
   const handleCloseAddCommittee = () => {
     setFormData({
-      name: "",
-      code: "",
-      description: "",
+      name: '',
+      code: '',
+      description: '',
       is_active: true,
       sort_order: 0,
     });
@@ -202,9 +197,9 @@ export default function CommitteesAdminPage() {
   // Handle closing edit committee modal with clean form
   const handleCloseEditCommittee = () => {
     setFormData({
-      name: "",
-      code: "",
-      description: "",
+      name: '',
+      code: '',
+      description: '',
       is_active: true,
       sort_order: 0,
     });
@@ -219,14 +214,20 @@ export default function CommitteesAdminPage() {
   };
 
   return (
-    <AdminContainer title={t.title} description={t.description} icon={<BuildingOfficeIcon className="w-8 h-8 text-blue-600" />} actions={
-      <Button
-            color="primary"
-            startContent={<PlusIcon className="w-4 h-4" />}
-            onPress={handleOpenAddCommittee}
-          >
-            Přidat komisi
-          </Button>}>
+    <AdminContainer
+      title={t.title}
+      description={t.description}
+      icon={<BuildingOfficeIcon className="w-8 h-8 text-blue-600" />}
+      actions={
+        <Button
+          color="primary"
+          startContent={<PlusIcon className="w-4 h-4" />}
+          onPress={handleOpenAddCommittee}
+        >
+          Přidat komisi
+        </Button>
+      }
+    >
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
@@ -256,27 +257,21 @@ export default function CommitteesAdminPage() {
                       key={committee.id}
                       className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
-                      <td className="py-3 px-4 font-mono text-sm">
-                        {committee.code}
-                      </td>
-                      <td className="py-3 px-4 font-medium">
-                        {committee.name}
-                      </td>
+                      <td className="py-3 px-4 font-mono text-sm">{committee.code}</td>
+                      <td className="py-3 px-4 font-medium">{committee.name}</td>
                       <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                        {committee.description || "-"}
+                        {committee.description || '-'}
                       </td>
                       <td className="py-3 px-4">
                         <Badge
-                          color={committee.is_active ? "success" : "default"}
+                          color={committee.is_active ? 'success' : 'default'}
                           variant="flat"
                           size="sm"
                         >
-                          {committee.is_active ? "Aktivní" : "Neaktivní"}
+                          {committee.is_active ? 'Aktivní' : 'Neaktivní'}
                         </Badge>
                       </td>
-                      <td className="py-3 px-4 text-sm">
-                        {committee.sort_order}
-                      </td>
+                      <td className="py-3 px-4 text-sm">{committee.sort_order}</td>
                       <td className="py-3 px-4">
                         <div className="flex justify-center gap-2">
                           <Button
@@ -293,9 +288,7 @@ export default function CommitteesAdminPage() {
                             variant="light"
                             color="danger"
                             isIconOnly
-                            onPress={() =>
-                              handleDeleteCommitteeModal(committee)
-                            }
+                            onPress={() => handleDeleteCommitteeModal(committee)}
                           >
                             <TrashIcon className="w-4 h-4" />
                           </Button>
@@ -306,9 +299,7 @@ export default function CommitteesAdminPage() {
                 </tbody>
               </table>
               {committees.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  Žádné komise nebyly nalezeny
-                </div>
+                <div className="text-center py-8 text-gray-500">Žádné komise nebyly nalezeny</div>
               )}
             </div>
           )}
@@ -316,11 +307,7 @@ export default function CommitteesAdminPage() {
       </Card>
 
       {/* Add Committee Modal */}
-      <Modal
-        isOpen={isAddCommitteeOpen}
-        onClose={handleCloseAddCommittee}
-        size="2xl"
-      >
+      <Modal isOpen={isAddCommitteeOpen} onClose={handleCloseAddCommittee} size="2xl">
         <ModalContent>
           <ModalHeader>Přidat komisi</ModalHeader>
           <ModalBody>
@@ -328,27 +315,21 @@ export default function CommitteesAdminPage() {
               <Input
                 label="Kód"
                 value={formData.code}
-                onChange={(e) =>
-                  setFormData({ ...formData, code: e.target.value })
-                }
+                onChange={(e) => setFormData({...formData, code: e.target.value})}
                 isRequired
                 placeholder="např. OSK_OSTRAVA"
               />
               <Input
                 label="Název"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
                 isRequired
                 placeholder="např. Oblastní soutěžní komise Ostrava"
               />
               <Input
                 label="Popis"
                 value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
                 placeholder="Volitelný popis komise"
               />
               <Input
@@ -368,13 +349,9 @@ export default function CommitteesAdminPage() {
                   type="checkbox"
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   checked={formData.is_active}
-                  onChange={(e) =>
-                    setFormData({ ...formData, is_active: e.target.checked })
-                  }
+                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Aktivní
-                </span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
               </label>
             </div>
           </ModalBody>
@@ -390,11 +367,7 @@ export default function CommitteesAdminPage() {
       </Modal>
 
       {/* Edit Committee Modal */}
-      <Modal
-        isOpen={isEditCommitteeOpen}
-        onClose={handleCloseEditCommittee}
-        size="2xl"
-      >
+      <Modal isOpen={isEditCommitteeOpen} onClose={handleCloseEditCommittee} size="2xl">
         <ModalContent>
           <ModalHeader>Upravit komisi</ModalHeader>
           <ModalBody>
@@ -409,18 +382,14 @@ export default function CommitteesAdminPage() {
               <Input
                 label="Název"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
                 isRequired
                 placeholder="např. Oblastní soutěžní komise Ostrava"
               />
               <Input
                 label="Popis"
                 value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
                 placeholder="Volitelný popis komise"
               />
               <Input
@@ -440,13 +409,9 @@ export default function CommitteesAdminPage() {
                   type="checkbox"
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   checked={formData.is_active}
-                  onChange={(e) =>
-                    setFormData({ ...formData, is_active: e.target.checked })
-                  }
+                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Aktivní
-                </span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktivní</span>
               </label>
             </div>
           </ModalBody>
@@ -467,9 +432,8 @@ export default function CommitteesAdminPage() {
           <ModalHeader>Smazat komisi</ModalHeader>
           <ModalBody>
             <p>
-              Opravdu chcete smazat komisi{" "}
-              <strong>{selectedCommittee?.name}</strong>? Tato akce je nevratná
-              a může ovlivnit týmy přiřazené k této komisi.
+              Opravdu chcete smazat komisi <strong>{selectedCommittee?.name}</strong>? Tato akce je
+              nevratná a může ovlivnit týmy přiřazené k této komisi.
             </p>
           </ModalBody>
           <ModalFooter>
@@ -482,6 +446,6 @@ export default function CommitteesAdminPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      </AdminContainer>
+    </AdminContainer>
   );
 }

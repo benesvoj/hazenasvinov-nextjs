@@ -1,11 +1,17 @@
-"use client";
+'use client';
 
-import React, { useRef } from "react";
-import { DocumentTextIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { Button } from "@heroui/react";
-import { AdminContainer } from "../components/AdminContainer";
-import { translations } from "@/lib/translations";
-import { MeetingMinutesContainer, MeetingMinutesContainerRef } from "@/components";
+import React, {useRef} from 'react';
+
+import {Button} from '@heroui/react';
+
+import {DocumentTextIcon, PlusIcon} from '@heroicons/react/24/outline';
+
+import {MeetingMinutesContainer} from '@/components/features';
+import {AdminContainer} from '@/components/features/admin/AdminContainer';
+
+import {translations} from '@/lib/translations';
+
+import {MeetingMinutesContainerRef} from '@/types';
 
 export default function MeetingMinutesPage() {
   const t = translations.components.meetingMinutes;

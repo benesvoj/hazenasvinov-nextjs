@@ -1,22 +1,32 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
-import { 
-  PlusIcon, 
-  PencilIcon, 
-  TrashIcon, 
+import React, {useState, useEffect, useCallback} from 'react';
+
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Input} from '@heroui/input';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from '@heroui/modal';
+import {Select, SelectItem} from '@heroui/react';
+
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
   BuildingOfficeIcon,
   TrophyIcon,
-  CalendarIcon
-} from "@heroicons/react/24/outline";
-import { createClient } from "@/utils/supabase/client";
-import { Club, Category } from "@/types";
-import { Season } from "@/types";
+  CalendarIcon,
+} from '@heroicons/react/24/outline';
+
+import {createClient} from '@/utils/supabase/client';
+
+import {Club, Category, Season} from '@/types';
 
 interface ClubCategory {
   id: string;
@@ -36,48 +46,50 @@ export default function ClubCategoriesAdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSeason, setSelectedSeason] = useState<string>("");
-  
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSeason, setSelectedSeason] = useState<string>('');
+
   // Modal states
-  const { isOpen: isCreateOpen, onOpen: onCreateOpen, onClose: onCreateClose } = useDisclosure();
-  const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
-  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
-  
+  const {isOpen: isCreateOpen, onOpen: onCreateOpen, onClose: onCreateClose} = useDisclosure();
+  const {isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose} = useDisclosure();
+  const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
+
   // Form states
   const [createForm, setCreateForm] = useState({
     club_id: '',
     category_id: '',
     season_id: '',
-    max_teams: 1
+    max_teams: 1,
   });
-  
+
   const [editForm, setEditForm] = useState({
     id: '',
     club_id: '',
     category_id: '',
     season_id: '',
-    max_teams: 1
+    max_teams: 1,
   });
-  
+
   const [clubCategoryToDelete, setClubCategoryToDelete] = useState<ClubCategory | null>(null);
-  
+
   const supabase = createClient();
 
-  // Fetch club categories
+  // Fetch club category
   const fetchClubCategories = useCallback(async () => {
     try {
       setLoading(true);
       let query = supabase
         .from('club_categories')
-        .select(`
+        .select(
+          `
           *,
           club:clubs(*),
           category:categories(*),
           season:seasons(*)
-        `)
-        .order('season_id', { ascending: false })
+        `
+        )
+        .order('season_id', {ascending: false})
         .order('category_id')
         .order('club_id');
 
@@ -85,25 +97,25 @@ export default function ClubCategoriesAdminPage() {
         query = query.eq('season_id', selectedSeason);
       }
 
-      const { data, error } = await query;
+      const {data, error} = await query;
 
       if (error) throw error;
       setClubCategories(data || []);
     } catch (error) {
       setError('Chyba při načítání přiřazení klubů');
-      console.error('Error fetching club categories:', error);
+      console.error('Error fetching club category:', error);
     } finally {
       setLoading(false);
     }
   }, [supabase, selectedSeason]);
 
-  // Fetch clubs, categories, and seasons
+  // Fetch clubs, category, and seasons
   const fetchData = useCallback(async () => {
     try {
       const [clubsResult, categoriesResult, seasonsResult] = await Promise.all([
         supabase.from('clubs').select('*').eq('is_active', true).order('name'),
         supabase.from('categories').select('*').eq('is_active', true).order('name'),
-        supabase.from('seasons').select('*').order('name', { ascending: false })
+        supabase.from('seasons').select('*').order('name', {ascending: false}),
       ]);
 
       if (clubsResult.error) throw clubsResult.error;
@@ -113,7 +125,7 @@ export default function ClubCategoriesAdminPage() {
       setClubs(clubsResult.data || []);
       setCategories(categoriesResult.data || []);
       setSeasons(seasonsResult.data || []);
-      
+
       // Set first season as default
       if (seasonsResult.data && seasonsResult.data.length > 0 && !selectedSeason) {
         setSelectedSeason(seasonsResult.data[0].id);
@@ -132,7 +144,7 @@ export default function ClubCategoriesAdminPage() {
       }
 
       // Check if assignment already exists
-      const { data: existing, error: checkError } = await supabase
+      const {data: existing, error: checkError} = await supabase
         .from('club_categories')
         .select('id')
         .eq('club_id', createForm.club_id)
@@ -146,19 +158,17 @@ export default function ClubCategoriesAdminPage() {
         return;
       }
 
-      const { error } = await supabase
-        .from('club_categories')
-        .insert({
-          club_id: createForm.club_id,
-          category_id: createForm.category_id,
-          season_id: createForm.season_id,
-          max_teams: createForm.max_teams
-        });
+      const {error} = await supabase.from('club_categories').insert({
+        club_id: createForm.club_id,
+        category_id: createForm.category_id,
+        season_id: createForm.season_id,
+        max_teams: createForm.max_teams,
+      });
 
       if (error) throw error;
 
       onCreateClose();
-      setCreateForm({ club_id: '', category_id: '', season_id: '', max_teams: 1 });
+      setCreateForm({club_id: '', category_id: '', season_id: '', max_teams: 1});
       fetchClubCategories();
       setError('');
     } catch (error) {
@@ -175,20 +185,20 @@ export default function ClubCategoriesAdminPage() {
         return;
       }
 
-      const { error } = await supabase
+      const {error} = await supabase
         .from('club_categories')
         .update({
           club_id: editForm.club_id,
           category_id: editForm.category_id,
           season_id: editForm.season_id,
-          max_teams: editForm.max_teams
+          max_teams: editForm.max_teams,
         })
         .eq('id', editForm.id);
 
       if (error) throw error;
 
       onEditClose();
-      setEditForm({ id: '', club_id: '', category_id: '', season_id: '', max_teams: 1 });
+      setEditForm({id: '', club_id: '', category_id: '', season_id: '', max_teams: 1});
       fetchClubCategories();
       setError('');
     } catch (error) {
@@ -202,7 +212,7 @@ export default function ClubCategoriesAdminPage() {
     if (!clubCategoryToDelete) return;
 
     try {
-      const { error } = await supabase
+      const {error} = await supabase
         .from('club_categories')
         .delete()
         .eq('id', clubCategoryToDelete.id);
@@ -226,7 +236,7 @@ export default function ClubCategoriesAdminPage() {
       club_id: clubCategory.club_id,
       category_id: clubCategory.category_id,
       season_id: clubCategory.season_id,
-      max_teams: clubCategory.max_teams
+      max_teams: clubCategory.max_teams,
     });
     onEditOpen();
   };
@@ -237,11 +247,12 @@ export default function ClubCategoriesAdminPage() {
     onDeleteOpen();
   };
 
-  // Filtered club categories
-  const filteredClubCategories = clubCategories.filter(cc =>
-    cc.club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cc.category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cc.season.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filtered club category
+  const filteredClubCategories = clubCategories.filter(
+    (cc) =>
+      cc.club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cc.category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cc.season.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Initial fetch
@@ -249,7 +260,7 @@ export default function ClubCategoriesAdminPage() {
     fetchData();
   }, [fetchData]);
 
-  // Fetch club categories when season changes
+  // Fetch club category when season changes
   useEffect(() => {
     if (selectedSeason) {
       fetchClubCategories();
@@ -270,9 +281,9 @@ export default function ClubCategoriesAdminPage() {
             <BuildingOfficeIcon className="w-5 h-5 text-blue-500" />
             <h2 className="text-xl font-semibold">Přiřazení klubů ke kategoriím</h2>
           </div>
-          
-          <Button 
-            color="primary" 
+
+          <Button
+            color="primary"
             startContent={<PlusIcon className="w-4 h-4" />}
             onPress={onCreateOpen}
             size="sm"
@@ -280,7 +291,7 @@ export default function ClubCategoriesAdminPage() {
             Přiřadit klub
           </Button>
         </CardHeader>
-        
+
         <CardBody>
           {/* Season selector */}
           <div className="mb-6">
@@ -291,7 +302,7 @@ export default function ClubCategoriesAdminPage() {
                 selectedKeys={selectedSeason ? [selectedSeason] : []}
                 onSelectionChange={(keys) => {
                   const selectedKey = Array.from(keys)[0] as string;
-                  setSelectedSeason(selectedKey || "");
+                  setSelectedSeason(selectedKey || '');
                 }}
                 className="w-full"
               >
@@ -317,7 +328,10 @@ export default function ClubCategoriesAdminPage() {
           ) : (
             <div className="space-y-4">
               {filteredClubCategories.map((cc) => (
-                <div key={cc.id} className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div
+                  key={cc.id}
+                  className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
@@ -332,11 +346,9 @@ export default function ClubCategoriesAdminPage() {
                         <CalendarIcon className="w-4 h-4 text-purple-500" />
                         <span className="text-gray-700">{cc.season.name}</span>
                       </div>
-                      <div className="text-sm text-gray-600">
-                        Max týmů: {cc.max_teams}
-                      </div>
+                      <div className="text-sm text-gray-600">Max týmů: {cc.max_teams}</div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Button
                         size="sm"
@@ -360,7 +372,7 @@ export default function ClubCategoriesAdminPage() {
                   </div>
                 </div>
               ))}
-              
+
               {filteredClubCategories.length === 0 && (
                 <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                   <BuildingOfficeIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
@@ -368,7 +380,9 @@ export default function ClubCategoriesAdminPage() {
                     {searchTerm ? 'Žádná přiřazení nenalezena' : 'Žádná přiřazení'}
                   </h3>
                   <p className="text-gray-500">
-                    {searchTerm ? 'Zkuste změnit vyhledávací termín' : 'Začněte přiřazením prvního klubu ke kategorii'}
+                    {searchTerm
+                      ? 'Zkuste změnit vyhledávací termín'
+                      : 'Začněte přiřazením prvního klubu ke kategorii'}
                   </p>
                 </div>
               )}
@@ -427,7 +441,9 @@ export default function ClubCategoriesAdminPage() {
                 type="number"
                 min="1"
                 value={createForm.max_teams.toString()}
-                onChange={(e) => setCreateForm({...createForm, max_teams: parseInt(e.target.value) || 1})}
+                onChange={(e) =>
+                  setCreateForm({...createForm, max_teams: parseInt(e.target.value) || 1})
+                }
               />
             </div>
           </ModalBody>
@@ -492,7 +508,9 @@ export default function ClubCategoriesAdminPage() {
                 type="number"
                 min="1"
                 value={editForm.max_teams.toString()}
-                onChange={(e) => setEditForm({...editForm, max_teams: parseInt(e.target.value) || 1})}
+                onChange={(e) =>
+                  setEditForm({...editForm, max_teams: parseInt(e.target.value) || 1})
+                }
               />
             </div>
           </ModalBody>
@@ -513,11 +531,12 @@ export default function ClubCategoriesAdminPage() {
           <ModalHeader>Potvrdit smazání přiřazení</ModalHeader>
           <ModalBody>
             <p>
-              Opravdu chcete smazat přiřazení klubu <strong>{clubCategoryToDelete?.club.name}</strong> ke kategorii <strong>{clubCategoryToDelete?.category.name}</strong> v sezóně <strong>{clubCategoryToDelete?.season.name}</strong>?
+              Opravdu chcete smazat přiřazení klubu{' '}
+              <strong>{clubCategoryToDelete?.club.name}</strong> ke kategorii{' '}
+              <strong>{clubCategoryToDelete?.category.name}</strong> v sezóně{' '}
+              <strong>{clubCategoryToDelete?.season.name}</strong>?
             </p>
-            <p className="text-sm text-gray-600 mt-2">
-              Tato akce je nevratná.
-            </p>
+            <p className="text-sm text-gray-600 mt-2">Tato akce je nevratná.</p>
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="flat" onPress={onDeleteClose}>

@@ -1,8 +1,11 @@
 'use client';
 
 import React from 'react';
+
 import {Card, CardHeader, CardBody} from '@heroui/react';
+
 import {TrophyIcon} from '@heroicons/react/24/outline';
+
 import {LoadingSpinner, Heading, MatchRow} from '@/components';
 
 interface RecentResultsCardProps {

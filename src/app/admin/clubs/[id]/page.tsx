@@ -1,6 +1,10 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
+
+import Link from 'next/link';
+import {useParams} from 'next/navigation';
+
 import {
   Modal,
   ModalContent,
@@ -14,13 +18,16 @@ import {
   Button,
   Image,
 } from '@heroui/react';
+
 import {PencilIcon, UserGroupIcon, TrophyIcon} from '@heroicons/react/24/outline';
+
+import LogoUpload from '@/components/ui/forms/LogoUpload';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {Category, Season, Club, Team} from '@/types';
-import {useParams} from 'next/navigation';
-import Link from 'next/link';
+
 import {AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation} from './components';
-import LogoUpload from '@/components/LogoUpload';
 
 export default function ClubDetailPage() {
   const params = useParams();
@@ -171,7 +178,7 @@ export default function ClubDetailPage() {
     }
   }, [supabase, memoizedClubId]);
 
-  // Fetch categories and seasons
+  // Fetch category and seasons
   const fetchCategoriesAndSeasons = useCallback(async () => {
     try {
       const [categoriesResult, seasonsResult] = await Promise.all([
@@ -185,11 +192,11 @@ export default function ClubDetailPage() {
       setCategories(categoriesResult.data || []);
       setSeasons(seasonsResult.data || []);
     } catch (error) {
-      console.error('Error fetching categories and seasons:', error);
+      console.error('Error fetching category and seasons:', error);
     }
   }, [supabase]);
 
-  // Fetch club categories
+  // Fetch club category
   const fetchClubCategories = useCallback(async () => {
     try {
       const {data, error} = await supabase
@@ -266,7 +273,7 @@ export default function ClubDetailPage() {
     }
   };
 
-  // Note: Teams are now generated automatically when assigning categories
+  // Note: Teams are now generated automatically when assigning category
   // The old manual team creation is no longer needed
 
   // Delete team from club
@@ -282,7 +289,7 @@ export default function ClubDetailPage() {
       onDeleteTeamClose();
       setTeamToDelete(null);
       fetchClubTeams();
-      fetchClubCategories(); // Also refresh categories to update team counts
+      fetchClubCategories(); // Also refresh category to update team counts
       setError('');
     } catch (error) {
       setError('Chyba při mazání týmu');
@@ -330,7 +337,7 @@ export default function ClubDetailPage() {
 
       if (error) throw error;
 
-      // Refresh both teams and categories
+      // Refresh both teams and category
       fetchClubTeams();
       fetchClubCategories();
       setError('');
@@ -348,7 +355,7 @@ export default function ClubDetailPage() {
 
       if (error) throw error;
 
-      // Refresh both teams and categories
+      // Refresh both teams and category
       fetchClubTeams();
       fetchClubCategories();
       setError('');

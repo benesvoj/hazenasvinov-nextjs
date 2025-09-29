@@ -1,42 +1,79 @@
-export * from './useAuth';
-export * from './useClubConfig';
-export * from './usePortalAccess';
-export * from './useClubs';
-export * from './useUserRoles';
-export * from './useExcelImport';
-export {useFetchBlogPosts} from './useFetchBlogPosts';
-export {useFetchBlogPost} from './useFetchBlogPost';
-export {useFetchPostMatch} from './useFetchPostMatch';
-export {useFetchMatchPosts} from './useFetchMatchPosts';
-export * from './useFetchCategories';
-export {useFetchCategoryPosts} from './useFetchCategoryPosts';
-export * from './useFetchMatches';
-export * from './useAllCategoriesMatches';
-export * from './useFetchMemberFunctions';
-export * from './useFetchSeasons';
-export * from './useFetchUsers';
-export * from './useLineupData';
-export * from './usePageVisibility';
-export * from './useSponsorshipData';
-export * from './useSupabaseClient';
-export * from './useVisiblePages';
-export * from './useSeasons';
-export * from './useCategories';
-export * from './useStandings';
-export * from './usePublicMatches';
-export * from './useOwnClubMatches';
-export * from './useFetchMatch';
-export * from './useAttendance';
-export * from './useFetchMembers';
-export * from './useFetchMembers';
-export * from './useDebounce';
-export * from './useOptimizedMatches';
-export * from './useCategoryLineups';
-export * from './useVideos';
-export * from './useFetchMatchVideos';
-export * from './useFetchVideoMatch';
-export * from './useMatchVideos';
-export * from './useTeamDisplayLogic';
-export * from './useFilteredTeams';
-export * from './useTeams';
-export * from './useTeamClub';
+export * from './admin/useExcelImport';
+export * from './admin/usePerformanceMonitoring';
+export * from './auth/useAuth';
+export {useAuth as useAuthNew} from './auth/useAuthNew';
+export * from './coach/useStrategyPreparation';
+export * from './coach/useUpcomingBirthdays';
+export * from './entities/attendance/useAttendance';
+export * from './entities/blog/useBlogPosts';
+export * from './entities/blog/useFetchBlogPost';
+export * from './entities/blog/useFetchBlogPosts';
+export * from './entities/blog/useFetchPostMatch';
+export * from './entities/category/business/useCategoryLineups';
+export * from './entities/category/business/useCategoryPageData';
+export * from './entities/category/data/useFetchCategories';
+export * from './entities/category/data/useFetchCategoryPosts';
+export * from './entities/category/state/useCategories';
+export * from './entities/club/useClubConfig';
+export * from './entities/club/useClubs';
+export * from './entities/club/useClubsNavigation';
+export * from './entities/lineup/useLineupData';
+export * from './entities/lineup/useLineupManager';
+export * from './entities/lineup/useMatchLineupStats';
+export * from './entities/match/business/useHeadToHeadMatches';
+export * from './entities/match/business/useMatchMetadata';
+export * from './entities/match/data/useAllCategoriesMatches';
+export * from './entities/match/data/useAllCategoriesOwnClubMatches';
+export * from './entities/match/data/useFetchMatch';
+export * from './entities/match/data/useFetchMatchPosts';
+export * from './entities/match/data/useFetchMatchVideos';
+export * from './entities/match/data/useFetchMatches';
+export * from './entities/match/data/useFetchVideoMatch';
+export * from './entities/match/data/useOwnClubMatches';
+export * from './entities/match/data/usePublicMatches';
+export * from './entities/match/state/useCachedMatches';
+export * from './entities/match/state/useMatchVideos';
+export * from './entities/match/state/useOptimizedMatches';
+export * from './entities/meetingMinute/useMeetingMinutes';
+export * from './entities/member/business/useMemberClubRelationships';
+export * from './entities/member/business/useMemberMetadata';
+export * from './entities/member/data/useFetchMemberFunctions';
+export * from './entities/member/data/useFetchMembers';
+export * from './entities/member/state/useMembers';
+export * from './entities/player/useExternalPlayerCreation';
+export * from './entities/player/usePlayerLoans';
+export * from './entities/player/usePlayerStats';
+export * from './entities/player/useUnifiedPlayers';
+export * from './entities/season/useFetchSeasons';
+export * from './entities/season/useSeasons';
+export * from './entities/settings/useSectionVisibility';
+export * from './entities/settings/useSponsorshipData';
+export * from './entities/settings/useVisiblePages';
+export * from './entities/standings/useStandings';
+export * from './entities/team/useFilteredTeams';
+export * from './entities/team/useTeamClub';
+export * from './entities/team/useTeamClubId';
+export * from './entities/team/useTeamDisplayLogic';
+export * from './entities/team/useTeams';
+export * from './entities/user/useFetchUsers';
+export * from './entities/user/useUserRoles';
+export * from './entities/video/useVideos';
+export {
+  useMatchesWithTeams,
+  useMatchesSeasonal,
+  useMatchById,
+  useOwnClubMatches as useOwnClubMatchesQuery,
+  usePublicMatches as usePublicMatchesQuery,
+  useUpcomingMatches,
+  useCompletedMatches,
+  useMatchesByMatchweek,
+  useMatchesByDateRange,
+  useCreateMatch,
+  useUpdateMatch,
+  useDeleteMatch,
+  useOptimisticMatchUpdate,
+} from './shared/queries/useMatchQueries';
+export * from './shared/useDebounce';
+export * from './shared/usePageVisibility';
+export * from './shared/usePortalAccess';
+export * from './shared/useSupabaseClient';

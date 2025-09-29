@@ -1,1023 +1,331 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  Button,
-  Input,
-  Card, CardBody, CardHeader,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-  Select, SelectItem, Alert
-} from "@heroui/react";
-import {
-  UserGroupIcon,
-  PlusIcon,
-  TrashIcon,
-  PencilIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
-import { useLineupData, classifyLineupError, LineupErrorType } from "@/hooks/useLineupData";
-import {
-  LineupFormData,
-  LineupPlayerFormData,
-  LineupCoachFormData,
-  Member,
-  ExternalPlayer,
-} from "@/types";
-import { createClient } from "@/utils/supabase/client";
-import { DeleteConfirmationModal, showToast } from "@/components";
-import LineupManagerPlayerCard from "./LineupManagerPlayerCard";
-import { generateLineupId } from "@/utils/uuid";
-import { Heading } from "@/components";
+import React, {useEffect, forwardRef, useImperativeHandle} from 'react';
 
-interface LineupManagerProps {
-  matchId: string;
-  homeTeamId: string;
-  awayTeamId: string;
-  homeTeamName: string;
-  awayTeamName: string;
-  members: Member[];
-  categoryId: string;
-  onClose?: () => void;
-}
+import {Card} from '@heroui/react';
 
-export default function LineupManager({
-  matchId,
-  homeTeamId,
-  awayTeamId,
-  homeTeamName,
-  awayTeamName,
-  members,
-  categoryId,
-  onClose,
-}: LineupManagerProps) {
-  // Filter members by category
-  const filteredMembers = useMemo(() => {
-    if (!categoryId) {
-      return members;
-    }
+import {TeamTypes} from '@/enums';
+import {translations} from '@/lib';
+import {LineupManagerProps, LineupManagerRef} from '@/types';
 
-    // Try filtering by category_id first (new approach)
-    let filtered = members.filter(
-      (member) => member.category_id === categoryId
-    );
+import {TeamSelector, LineupErrorBoundary, LineupSkeleton} from './lineupManager/components';
+import {LineupHeader, LineupContent, LineupModals} from './lineupManager/components/utils';
+import {useLineupDataManager} from './lineupManager/hooks/useLineupDataManager';
+import {useLineupErrorHandler} from './lineupManager/hooks/useLineupErrorHandler';
+import {useLineupModals} from './lineupManager/hooks/useLineupModals';
+import {useLineupPerformance} from './lineupManager/hooks/useLineupPerformance';
 
-    // If no members found with category_id, fallback to legacy category code filtering
-    if (filtered.length === 0 && categoryId) {
-      filtered = members.filter((member) => member.category_id === categoryId);
-    }
-
-    // If still no members found, show all members as fallback
-    if (filtered.length === 0) {
-      return members;
-    }
-
-    return filtered;
-  }, [members, categoryId]);
-
-  const [selectedTeam, setSelectedTeam] = useState<"home" | "away">("home");
-  const [homeFormData, setHomeFormData] = useState<LineupFormData>({
-    match_id: matchId,
-    team_id: homeTeamId,
-    is_home_team: true,
-    players: [],
-    coaches: [],
-  });
-
-  const [awayFormData, setAwayFormData] = useState<LineupFormData>({
-    match_id: matchId,
-    team_id: awayTeamId,
-    is_home_team: false,
-    players: [],
-    coaches: [],
-  });
-
-  // Determine if the selected team is the user's own club
-  const isOwnClub = useMemo(() => {
-    // CONFIGURATION: Change this to determine which team is your own club
-    // Options:
-    // 1. Home team is always your club: return selectedTeam === 'home';
-    // 2. Away team is always your club: return selectedTeam === 'away';
-    // 3. Specific team ID: return selectedTeam === 'home' ? homeTeamId === 'YOUR_CLUB_ID' : awayTeamId === 'YOUR_CLUB_ID';
-    // 4. Based on team name: return selectedTeam === 'home' ? homeTeamName.includes('Your Club') : awayTeamName.includes('Your Club');
-
-    // FIXED: Home team is your club (internal players), Away team is other club (external players)
-    return selectedTeam === "home";
-
-    // Alternative configurations (uncomment one):
-    // return selectedTeam === 'away'; // Away team is your club
-    // return homeTeamName.includes('Baník Most') || awayTeamName.includes('Baník Most'); // Based on team name
-  }, [selectedTeam]);
-
-  // Debug: Log the own club determination
-  console.log("Own club determination:", {
-    selectedTeam,
-    isOwnClub,
-    homeTeamName,
-    awayTeamName,
-    willUseInternalPlayers: isOwnClub,
-    willUseExternalPlayers: !isOwnClub,
-  });
-
-  // Get the current form data based on selected team
-  const currentFormData = useMemo(() => {
-    return selectedTeam === "home" ? homeFormData : awayFormData;
-  }, [selectedTeam, homeFormData, awayFormData]);
-
-  // Get the setter function for current form data
-  const setCurrentFormData = useCallback(
-    (updater: (prev: LineupFormData) => LineupFormData) => {
-      if (selectedTeam === "home") {
-        setHomeFormData(updater);
-      } else {
-        setAwayFormData(updater);
-      }
+const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
+  (
+    {
+      matchId,
+      homeTeamId,
+      awayTeamId,
+      homeTeamName,
+      awayTeamName,
+      members,
+      categoryId,
+      onClose,
+      onMemberCreated,
     },
-    [selectedTeam]
-  );
-  const [homeLineupSummary, setHomeLineupSummary] = useState<any | null>(null);
-  const [awayLineupSummary, setAwayLineupSummary] = useState<any | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<ExternalPlayer[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
+    ref
+  ) => {
+    const t = translations.lineupManager;
 
-  const supabase = createClient();
+    // Use the data manager hook
+    const {
+      // Form data
+      homeFormData,
+      awayFormData,
+      selectedTeam,
+      setSelectedTeam,
 
-  const {
-    isOpen: isEditModalOpen,
-    onOpen: onEditModalOpen,
-    onClose: onEditModalClose,
-  } = useDisclosure();
+      // Current team data
+      currentTeamId,
+      currentTeamName,
+      currentFormData,
+      setCurrentFormData,
 
-  const handleEditModalOpen = () => {
-    setValidationError(null); // Clear any previous validation errors
-    onEditModalOpen();
-  };
+      // Club information
+      currentTeamClubId,
+      clubIdLoading,
+      clubIdError,
 
-  const {
-    isOpen: isDeleteModalOpen,
-    onOpen: onDeleteModalOpen,
-    onClose: onDeleteModalClose,
-  } = useDisclosure();
+      // Filtered members
+      filteredMembers,
+      availableCoaches,
 
-  const {
-    fetchLineup,
-    saveLineup,
-    deleteLineup,
-    getLineupSummary,
-    searchExternalPlayers,
-    loading,
-    error,
-  } = useLineupData();
+      // Validation
+      validationError,
+      setValidationError,
 
-  const currentTeamId = selectedTeam === "home" ? homeTeamId : awayTeamId;
-  const currentTeamName = selectedTeam === "home" ? homeTeamName : awayTeamName;
+      // CRUD operations
+      handleLoadLineup,
+      handleSaveLineup,
+      handleDeleteLineup,
 
-  // Load lineup data when team changes
-  const handleLoadLineup = useCallback(
-    async (isHome: boolean) => {
-      try {
-        const currentTeamId = isHome ? homeTeamId : awayTeamId;
-        const lineupData = await fetchLineup(matchId, currentTeamId);
+      // Player operations
+      handleAddPlayer,
+      handlePlayerSelected,
+      handleEditPlayer,
+      handlePlayerEditSave,
+      handleDeletePlayer,
+      confirmDeletePlayer,
 
-        const updatedFormData = {
-          match_id: matchId,
-          team_id: currentTeamId,
-          is_home_team: isHome,
-          players: lineupData.players || [],
-          coaches: lineupData.coaches || [],
-        };
+      // Coach operations
+      handleAddCoach,
+      handleCoachSelected,
+      handleEditCoach,
+      handleCoachEditSave,
+      handleDeleteCoach,
 
-        if (isHome) {
-          setHomeFormData(updatedFormData);
-        } else {
-          setAwayFormData(updatedFormData);
+      // Utility functions
+      getMemberName,
+      calculateLocalSummary,
+
+      // Modal states
+      editingPlayerIndex,
+      setEditingPlayerIndex,
+      deletingPlayerIndex,
+      setDeletingPlayerIndex,
+      editingCoachIndex,
+      setEditingCoachIndex,
+
+      // Loading and error states
+      loading,
+      error,
+    } = useLineupDataManager({
+      matchId,
+      homeTeamId,
+      awayTeamId,
+      homeTeamName,
+      awayTeamName,
+      members,
+      categoryId,
+      onClose,
+      onMemberCreated,
+    });
+
+    // Modal management
+    const {
+      isPlayerSelectionModalOpen,
+      onPlayerSelectionModalOpen,
+      onPlayerSelectionModalClose,
+      isPlayerEditModalOpen,
+      setIsPlayerEditModalOpen,
+      isCoachSelectionModalOpen,
+      setIsCoachSelectionModalOpen,
+      isCoachEditModalOpen,
+      setIsCoachEditModalOpen,
+      isDeleteModalOpen,
+      onDeleteModalOpen,
+      onDeleteModalClose,
+      isDeletePlayerModalOpen,
+      onDeletePlayerModalOpen,
+      onDeletePlayerModalClose,
+    } = useLineupModals();
+
+    // Performance monitoring
+    const {metrics: performanceMetrics} = useLineupPerformance({
+      componentName: 'LineupManager',
+      logPerformance: process.env.NODE_ENV === 'development',
+      threshold: 16,
+    });
+
+    // Error handling
+    const {handleAsyncOperation, hasErrors} = useLineupErrorHandler({
+      maxErrors: 5,
+      autoRetry: true,
+      retryDelay: 1000,
+    });
+
+    // Load lineup data when component mounts or team changes
+    useEffect(() => {
+      let isMounted = true;
+
+      const loadData = async () => {
+        if (isMounted) {
+          await handleLoadLineup(selectedTeam === TeamTypes.HOME);
         }
-      } catch (error) {
-        console.error("Error loading lineup:", error);
-        // Set empty form data if no lineup exists
-        const emptyFormData = {
-          match_id: matchId,
-          team_id: isHome ? homeTeamId : awayTeamId,
-          is_home_team: isHome,
-          players: [],
-          coaches: [],
-        };
-
-        if (isHome) {
-          setHomeFormData(emptyFormData);
-        } else {
-          setAwayFormData(emptyFormData);
-        }
-      }
-    },
-    [matchId, homeTeamId, awayTeamId, fetchLineup]
-  );
-
-  // Load lineup summaries
-  const loadLineupSummaries = useCallback(async () => {
-    try {
-      const homeSummary = await getLineupSummary(matchId, homeTeamId);
-      const awaySummary = await getLineupSummary(matchId, awayTeamId);
-
-      setHomeLineupSummary(homeSummary);
-      setAwayLineupSummary(awaySummary);
-    } catch (error) {
-      console.error("Error loading lineup summaries:", error);
-    }
-  }, [matchId, homeTeamId, awayTeamId, getLineupSummary]);
-
-  // Load lineup data when component mounts or team changes
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadData = async () => {
-      if (isMounted) {
-        await handleLoadLineup(selectedTeam === "home");
-      }
-    };
-
-    loadData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedTeam, handleLoadLineup]);
-
-  // Load lineup summaries when component mounts
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadSummaries = async () => {
-      if (isMounted) {
-        await loadLineupSummaries();
-      }
-    };
-
-    loadSummaries();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [loadLineupSummaries]);
-
-  // Search external players
-  const handleSearchExternalPlayers = useCallback(
-    async (term: string) => {
-      if (term.length < 2) {
-        setSearchResults([]);
-        return;
-      }
-
-      setIsSearching(true);
-      const results = await searchExternalPlayers(term);
-      setSearchResults(results);
-      setIsSearching(false);
-    },
-    [searchExternalPlayers]
-  );
-
-  // Debounced search
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      handleSearchExternalPlayers(searchTerm);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, handleSearchExternalPlayers]);
-
-  // Auto-fill external player data when registration number is entered
-  const handleExternalRegistrationNumberChange = useCallback(
-    (index: number, value: string) => {
-      const player = currentFormData.players[index];
-      if (!player) return;
-
-      // Search for existing player with this registration number
-      const existingPlayer = searchResults.find(
-        (p) => p.registration_number === value
-      );
-
-      if (existingPlayer) {
-        // Auto-fill the player data
-        const updatedPlayers = [...currentFormData.players];
-        updatedPlayers[index] = {
-          ...player,
-          external_name: existingPlayer.name,
-          external_surname: existingPlayer.surname,
-          external_registration_number: existingPlayer.registration_number,
-          display_name: `${existingPlayer.name} ${existingPlayer.surname} (${existingPlayer.registration_number})`,
-        };
-        setCurrentFormData((prev) => ({ ...prev, players: updatedPlayers }));
-      } else {
-        // Just update the registration number
-        const updatedPlayers = [...currentFormData.players];
-        updatedPlayers[index] = {
-          ...player,
-          external_registration_number: value,
-        };
-        setCurrentFormData((prev) => ({ ...prev, players: updatedPlayers }));
-      }
-    },
-    [currentFormData, searchResults, setCurrentFormData]
-  );
-
-  const handleSaveLineup = async (isHome: boolean) => {
-    try {
-      const currentTeamId = isHome ? homeTeamId : awayTeamId;
-
-      // First, check if lineup already exists and get its ID
-      const { data: existingLineup, error: fetchError } = await supabase
-        .from("lineups")
-        .select("id")
-        .eq("match_id", matchId)
-        .eq("team_id", currentTeamId)
-        .maybeSingle();
-
-      if (fetchError) {
-        throw new Error(
-          `Chyba při hledání sestavy: ${fetchError.message || "Neznámá chyba"}`
-        );
-      }
-
-      // Use existing ID or create a new deterministic UUID
-      const lineupId =
-        existingLineup?.id || generateLineupId(matchId, currentTeamId, isHome);
-
-      // Debug: Verify the match exists in database
-      console.log("Match ID being used:", matchId);
-      console.log("Team IDs being used:", { homeTeamId, awayTeamId });
-
-      await saveLineup(lineupId, {
-        ...currentFormData,
-        match_id: matchId,
-        team_id: currentTeamId,
-        is_home_team: isHome,
-      });
-
-      // Refresh summaries
-      await loadLineupSummaries();
-
-      // Show success message
-      showToast.success("Sestava byla úspěšně uložena!");
-      
-      // Close the dialog only on successful save
-      if (onClose) {
-        onClose();
-      }
-    } catch (error: any) {
-      console.error("Error saving lineup:", error);
-      
-      // Use robust error classification
-      const classifiedError = classifyLineupError(error);
-
-      // Handle validation errors (keep modal open)
-      if (classifiedError.type === LineupErrorType.VALIDATION_ERROR) {
-        setValidationError(classifiedError.message);
-        showToast.warning(
-          `⚠️ Pravidla sestavy:\n\n${classifiedError.message}\n\nOpravte chyby a zkuste to znovu.`
-        );
-        return; // Don't close the modal
-      }
-
-      // Handle database errors
-      if (classifiedError.type === LineupErrorType.DATABASE_ERROR) {
-        showToast.danger(
-          `❌ Chyba databáze:\n\n${classifiedError.message}\n\nKontaktujte podporu.`
-        );
-        return;
-      }
-
-      // Handle network errors
-      if (classifiedError.type === LineupErrorType.NETWORK_ERROR) {
-        showToast.danger(
-          `❌ Problém se sítí:\n\n${classifiedError.message}\n\nZkontrolujte připojení a zkuste to znovu.`
-        );
-        return;
-      }
-
-      // Handle unknown errors
-      showToast.danger(
-        `❌ Neznámá chyba:\n\n${classifiedError.message}\n\nKontaktujte podporu.`
-      );
-    }
-  };
-
-  const handleDeleteLineup = async () => {
-    try {
-      const currentTeamId = selectedTeam === "home" ? homeTeamId : awayTeamId;
-
-      // First, find the actual lineup ID from the database
-      console.log("Looking for lineup with:", { matchId, currentTeamId });
-
-      const { data: lineupData, error: fetchError } = await supabase
-        .from("lineups")
-        .select("id")
-        .eq("match_id", matchId)
-        .eq("team_id", currentTeamId)
-        .maybeSingle();
-
-      console.log("Lineup query result:", { lineupData, fetchError });
-
-      if (fetchError) {
-        throw new Error(
-          `Chyba při hledání sestavy: ${fetchError.message || "Neznámá chyba"}`
-        );
-      }
-
-      if (!lineupData) {
-        // If no lineup exists, just reset the form data and show success message
-        console.log("No lineup found, resetting form data");
-        const emptyFormData = {
-          match_id: matchId,
-          team_id: currentTeamId,
-          is_home_team: selectedTeam === "home",
-          players: [],
-          coaches: [],
-        };
-
-        if (selectedTeam === "home") {
-          setHomeFormData(emptyFormData);
-        } else {
-          setAwayFormData(emptyFormData);
-        }
-
-        await loadLineupSummaries();
-        onDeleteModalClose();
-        alert("Sestava byla vymazána (neexistovala v databázi)");
-        return;
-      }
-
-      await deleteLineup(lineupData.id);
-
-      // Reset form data
-      const emptyFormData = {
-        match_id: matchId,
-        team_id: currentTeamId,
-        is_home_team: selectedTeam === "home",
-        players: [],
-        coaches: [],
       };
 
-      if (selectedTeam === "home") {
-        setHomeFormData(emptyFormData);
-      } else {
-        setAwayFormData(emptyFormData);
-      }
+      loadData();
 
-      await loadLineupSummaries();
-      onDeleteModalClose();
-    } catch (error: any) {
-      console.error("Error deleting lineup:", error);
-      const errorMessage =
-        error?.message || error?.details || error?.hint || "Neznámá chyba";
-      alert(`Chyba při mazání sestavy: ${errorMessage}`);
-    }
-  };
+      return () => {
+        isMounted = false;
+      };
+    }, [selectedTeam, handleLoadLineup]);
 
-  const addPlayer = () => {
-    // Clear validation error when user adds players
-    if (validationError) {
-      setValidationError(null);
-    }
-    
-    const newPlayer: LineupPlayerFormData = {
-      is_external: !isOwnClub, // External if not own club, internal if own club
-      position: "field_player",
-      role: "player",
+    // Expose saveLineup function to parent component
+    useImperativeHandle(ref, () => ({
+      saveLineup: async () => {
+        await handleSaveLineup(selectedTeam === TeamTypes.HOME);
+      },
+    }));
+
+    // Enhanced handlers that include modal management
+    const handleAddPlayerWithModal = () => {
+      handleAddPlayer();
+      onPlayerSelectionModalOpen();
     };
 
-    setCurrentFormData((prev) => ({
-      ...prev,
-      players: [...prev.players, newPlayer],
-    }));
-  };
+    const handleEditPlayerWithModal = React.useCallback(
+      (index: number) => {
+        handleEditPlayer(index);
+        setIsPlayerEditModalOpen(true);
+      },
+      [handleEditPlayer, setIsPlayerEditModalOpen]
+    );
 
-  const removePlayer = (index: number) => {
-    // Clear validation error when user removes players
-    if (validationError) {
-      setValidationError(null);
-    }
-    
-    setCurrentFormData((prev) => ({
-      ...prev,
-      players: prev.players.filter((_, i) => i !== index),
-    }));
-  };
+    const handleDeletePlayerWithModal = React.useCallback(
+      (index: number) => {
+        handleDeletePlayer(index);
+        onDeletePlayerModalOpen();
+      },
+      [handleDeletePlayer, onDeletePlayerModalOpen]
+    );
 
-  const updatePlayer = (
-    index: number,
-    field: keyof LineupPlayerFormData,
-    value: any
-  ) => {
-    // Clear validation error when user makes changes
-    if (validationError) {
-      setValidationError(null);
-    }
-    
-    setCurrentFormData((prev) => ({
-      ...prev,
-      players: prev.players.map((player, i) =>
-        i === index ? { ...player, [field]: value } : player
-      ),
-    }));
-  };
+    const handleAddCoachWithModal = () => {
+      handleAddCoach();
+      setIsCoachSelectionModalOpen(true);
+    };
 
-  const addCoach = () => {
-    setCurrentFormData((prev) => ({
-      ...prev,
-      coaches: [
-        ...prev.coaches,
-        {
-          member_id: "",
-          role: "assistant_coach",
-        },
-      ],
-    }));
-  };
+    const handleEditCoachWithModal = React.useCallback(
+      (index: number) => {
+        handleEditCoach(index);
+        setIsCoachEditModalOpen(true);
+      },
+      [handleEditCoach, setIsCoachEditModalOpen]
+    );
 
-  const removeCoach = (index: number) => {
-    setCurrentFormData((prev) => ({
-      ...prev,
-      coaches: prev.coaches.filter((_, i) => i !== index),
-    }));
-  };
+    const handleModalClose = () => {
+      setEditingPlayerIndex(null);
+      onPlayerSelectionModalClose();
+    };
 
-  const updateCoach = (
-    index: number,
-    field: keyof LineupCoachFormData,
-    value: any
-  ) => {
-    setCurrentFormData((prev) => ({
-      ...prev,
-      coaches: prev.coaches.map((coach, i) =>
-        i === index ? { ...coach, [field]: value } : coach
-      ),
-    }));
-  };
+    const handlePlayerEditClose = () => {
+      setIsPlayerEditModalOpen(false);
+      setEditingPlayerIndex(null);
+    };
 
-  const getMemberName = (memberId: string) => {
-    const member = filteredMembers.find((m) => m.id === memberId);
-    return member ? `${member.name} ${member.surname}` : "Neznámý člen";
-  };
+    const handleCoachEditClose = () => {
+      setIsCoachEditModalOpen(false);
+      setEditingCoachIndex(null);
+    };
 
-  const getAvailableMembers = (type: "player" | "coach") => {
-    if (type === "player") {
-      return filteredMembers.filter((m) => m.functions?.includes("player"));
-    } else {
-      return filteredMembers.filter((m) => m.functions?.includes("coach"));
-    }
-  };
+    const handleCoachSelectionClose = () => {
+      setIsCoachSelectionModalOpen(false);
+      setEditingCoachIndex(null);
+    };
 
-  const getLineupSummaryDisplay = (summary: any | null, teamName: string) => {
-    if (!summary) {
-      return <div className="text-gray-500 text-sm">Žádná sestava</div>;
-    }
+    const confirmDeletePlayerWithModal = () => {
+      confirmDeletePlayer();
+      onDeletePlayerModalClose();
+    };
 
     return (
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{teamName}</span>
-        </div>
-        <div className="text-xs text-gray-600 space-x-2">
-          <span>Brankáři: {summary.goalkeepers}/2</span>
-          <span>Hráči: {summary.field_players}/13</span>
-          <span>Trenéři: {summary.coaches}/3</span>
-        </div>
-      </div>
-    );
-  };
+      <LineupErrorBoundary>
+        <div className="space-y-6">
+          <TeamSelector
+            selectedTeam={selectedTeam}
+            onTeamSelect={setSelectedTeam}
+            homeTeamName={homeTeamName}
+            awayTeamName={awayTeamName}
+            homeFormData={homeFormData}
+            awayFormData={awayFormData}
+            calculateLocalSummary={calculateLocalSummary}
+            t={t}
+          />
 
-  return (
-    <div className="space-y-6">
-      {/* Team Selection */}
-      <Card>
-        <CardHeader>
-          <Heading size={3}>Výběr týmu</Heading>
-        </CardHeader>
-        <CardBody>
-          <div className="flex gap-4">
-            <Button
-              variant={selectedTeam === "home" ? "solid" : "bordered"}
-              color={selectedTeam === "home" ? "primary" : "default"}
-              onPress={() => setSelectedTeam("home")}
-            >
-              {homeTeamName} (Domácí)
-            </Button>
-            <Button
-              variant={selectedTeam === "away" ? "solid" : "bordered"}
-              color={selectedTeam === "away" ? "primary" : "default"}
-              onPress={() => setSelectedTeam("away")}
-            >
-              {awayTeamName} (Hosté)
-            </Button>
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Lineup Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-            <CardHeader>
-              <Heading size={4}>Domácí tým</Heading>
-            </CardHeader>
-          <CardBody>
-            {getLineupSummaryDisplay(homeLineupSummary, homeTeamName)}
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <Heading size={4}>Hostující tým</Heading>
-          </CardHeader>
-          <CardBody>
-            {getLineupSummaryDisplay(awayLineupSummary, awayTeamName)}
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* Lineup Management */}
-      <Card>
-        <CardHeader className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <UserGroupIcon className="w-5 h-5 text-blue-500" />
-            <Heading size={3}>
-              Sestava: {currentTeamName}
-            </Heading>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              color="primary"
-              startContent={<PencilIcon className="w-4 h-4" />}
-              onPress={handleEditModalOpen}
-            >
-              Upravit sestavu
-            </Button>
-            {(currentFormData.players.length > 0 ||
-              currentFormData.coaches.length > 0) && (
-              <Button
-                color="danger"
-                variant="bordered"
-                startContent={<TrashIcon className="w-4 h-4" />}
-                onPress={onDeleteModalOpen}
-              >
-                Smazat sestavu
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardBody>
-          {currentFormData.players.length === 0 &&
-          currentFormData.coaches.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              Žádná sestava nebyla vytvořena
-            </div>
+          {/* Lineup Management */}
+          {loading ? (
+            <LineupSkeleton showHeader={true} showTabs={true} playerCount={5} coachCount={2} />
           ) : (
-            <div className="space-y-4">
-              {/* Players Section */}
-              {currentFormData.players.length > 0 && (
-                <div>
-                  <Heading size={4}>
-                    <UserIcon className="w-4 h-4" />
-                    Hráči ({currentFormData.players.length})
-                  </Heading>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {currentFormData.players.map((player, index) => (
-                      <div
-                        key={index}
-                        className="p-3 border rounded-lg bg-gray-50"
-                      >
-                        <div className="text-sm text-gray-600">
-                          {player.member_id
-                            ? getMemberName(player.member_id)
-                            : `${player.external_name} ${player.external_surname}`}
-                        </div>
-                        <div className="flex items-center justify-between gap-2">
-                        <div className="text-xs text-gray-500">
-                          {player.position === "goalkeeper"
-                            ? "Brankář"
-                            : "Hráč v poli"}
-                        </div>
-                        {player.is_captain && (
-                          <div className="text-xs text-gray-500">
-                            Kapitán
-                          </div>
-                        )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Coaches Section */}
-              {currentFormData.coaches.length > 0 && (
-                <div>
-                  <h4 className="text-md font-medium mb-3 flex items-center gap-2">
-                    <UserIcon className="w-4 h-4" />
-                    Trenéři ({currentFormData.coaches.length})
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {currentFormData.coaches.map((coach, index) => (
-                      <div
-                        key={index}
-                        className="p-3 border rounded-lg bg-blue-50"
-                      >
-                        <div className="text-sm font-medium">
-                          {getMemberName(coach.member_id)}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {coach.role === "head_coach"
-                            ? "Hlavní trenér"
-                            : coach.role === "assistant_coach"
-                            ? "Asistent"
-                            : coach.role === "goalkeeper_coach"
-                            ? "Trenér brankářů"
-                            : coach.role}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <Card>
+              <LineupHeader
+                currentTeamName={currentTeamName}
+                hasPlayersOrCoaches={
+                  currentFormData.players.length > 0 || currentFormData.coaches.length > 0
+                }
+                onAddPlayer={handleAddPlayerWithModal}
+                onAddCoach={handleAddCoachWithModal}
+                onDeleteLineup={onDeleteModalOpen}
+                t={t}
+              />
+              <LineupContent
+                loading={loading}
+                players={currentFormData.players}
+                coaches={currentFormData.coaches}
+                onAddPlayer={handleAddPlayerWithModal}
+                onEditPlayer={handleEditPlayerWithModal}
+                onDeletePlayer={handleDeletePlayerWithModal}
+                onEditCoach={handleEditCoachWithModal}
+                onDeleteCoach={handleDeleteCoach}
+                getMemberName={getMemberName}
+                t={t}
+              />
+            </Card>
           )}
-        </CardBody>
-      </Card>
 
-      {/* Lineup Edit Modal */}
-      <Modal
-        isOpen={isEditModalOpen}
-        onClose={onEditModalClose}
-        size="5xl"
-        scrollBehavior="inside"
-      >
-        <ModalContent>
-          <ModalHeader className="flex justify-between items-center gap-1">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-xl font-bold">
-                Upravit sestavu: {currentTeamName}
-              </h2>
-              <p className="text-sm text-gray-600">
-                {isOwnClub
-                  ? "Vlastní klub - výběr z členů"
-                  : "Hostující klub - externí hráči"}
-              </p>
-            </div>
-            <div>
-              <Button
-                color="primary"
-                startContent={<PlusIcon className="w-4 h-4" />}
-                onPress={addPlayer}
-                className="shrink-0"
-              >
-                Přidat hráče
-              </Button>
-            </div>
-          </ModalHeader>
-          <ModalBody className="max-h-[80vh] overflow-y-auto">
-            <div className="space-y-8">
-              {/* Players Section */}
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      Hráči
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      {currentFormData.players.length} hráčů • Minimálně 6 hráčů
-                      v poli
-                    </p>
-                  </div>
-                </div>
+          {/* All Modals */}
+          <LineupModals
+            // Player modals
+            isPlayerSelectionModalOpen={isPlayerSelectionModalOpen}
+            onPlayerSelectionModalClose={handleModalClose}
+            onPlayerSelected={handlePlayerSelected}
+            categoryId={categoryId}
+            editingPlayerIndex={editingPlayerIndex}
+            currentPlayer={
+              editingPlayerIndex !== null ? currentFormData.players[editingPlayerIndex] : null
+            }
+            teamName={currentTeamName}
+            clubId={currentTeamClubId || undefined}
+            currentLineupPlayers={currentFormData.players}
+            onMemberCreated={onMemberCreated}
+            // Player edit modal
+            isPlayerEditModalOpen={isPlayerEditModalOpen}
+            onPlayerEditClose={handlePlayerEditClose}
+            onPlayerEditSave={handlePlayerEditSave}
+            playerName={
+              editingPlayerIndex !== null
+                ? getMemberName(currentFormData.players[editingPlayerIndex].member_id || '')
+                : undefined
+            }
+            // Coach modals
+            isCoachSelectionModalOpen={isCoachSelectionModalOpen}
+            onCoachSelectionClose={handleCoachSelectionClose}
+            onCoachSelected={handleCoachSelected}
+            coaches={availableCoaches}
+            editingCoachIndex={editingCoachIndex}
+            currentCoach={
+              editingCoachIndex !== null ? currentFormData.coaches[editingCoachIndex] : null
+            }
+            // Coach edit modal
+            isCoachEditModalOpen={isCoachEditModalOpen}
+            onCoachEditClose={handleCoachEditClose}
+            onCoachEditSave={handleCoachEditSave}
+            coachIndex={editingCoachIndex}
+            coachName={
+              editingCoachIndex !== null
+                ? getMemberName(currentFormData.coaches[editingCoachIndex].member_id)
+                : ''
+            }
+            // Delete modals
+            isDeleteModalOpen={isDeleteModalOpen}
+            onDeleteModalClose={onDeleteModalClose}
+            onDeleteLineup={handleDeleteLineup}
+            isDeletePlayerModalOpen={isDeletePlayerModalOpen}
+            onDeletePlayerModalClose={onDeletePlayerModalClose}
+            onConfirmDeletePlayer={confirmDeletePlayerWithModal}
+            currentTeamName={currentTeamName}
+            t={t}
+          />
+        </div>
+      </LineupErrorBoundary>
+    );
+  }
+);
 
-                {/* Players Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {currentFormData.players.map((player, index) => (
-                    <LineupManagerPlayerCard
-                      key={index}
-                      index={index}
-                      player={player}
-                      isOwnClub={isOwnClub}
-                      filteredMembers={filteredMembers}
-                      updatePlayer={updatePlayer}
-                      removePlayer={removePlayer}
-                    />
-                  ))}
-                </div>
+LineupManager.displayName = 'LineupManager';
 
-                {/* Add Player Button (if no players) */}
-                {currentFormData.players.length === 0 && (
-                  <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                    <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">
-                      Žádní hráči nejsou přidáni
-                    </p>
-                    <Button
-                      color="primary"
-                      startContent={<PlusIcon className="w-4 h-4" />}
-                      onPress={addPlayer}
-                    >
-                      Přidat prvního hráče
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {/* Coaches Section */}
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      Trenéři
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      {currentFormData.coaches.length} trenérů • Maximálně 3
-                      trenéři
-                    </p>
-                  </div>
-                  <Button
-                    color="primary"
-                    variant="bordered"
-                    startContent={<PlusIcon className="w-4 h-4" />}
-                    onPress={addCoach}
-                    className="shrink-0"
-                    isDisabled={currentFormData.coaches.length >= 3}
-                  >
-                    Přidat trenéra
-                  </Button>
-                </div>
-
-                {/* Coaches Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {currentFormData.coaches.map((coach, index) => (
-                    <Card
-                      key={index}
-                      className="border border-blue-200 bg-blue-50"
-                    >
-                      <CardBody className="p-4">
-                        <div className="space-y-4">
-                          {/* Coach Header */}
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-blue-700">
-                                  {index + 1}
-                                </span>
-                              </div>
-                              <span className="text-sm font-medium text-blue-700">
-                                Trenér {index + 1}
-                              </span>
-                            </div>
-                            <Button
-                              size="sm"
-                              color="danger"
-                              variant="light"
-                              isIconOnly
-                              onPress={() => removeCoach(index)}
-                              className="min-w-8 w-8 h-8"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </Button>
-                          </div>
-
-                          {/* Coach Form */}
-                          <div className="grid grid-cols-1 gap-3">
-                            <Select
-                              label="Trenér"
-                              selectedKeys={
-                                coach.member_id ? [coach.member_id] : []
-                              }
-                              onSelectionChange={(keys: any) =>
-                                updateCoach(
-                                  index,
-                                  "member_id",
-                                  Array.from(keys)[0]
-                                )
-                              }
-                              isRequired
-                              classNames={{
-                                trigger: "min-h-12",
-                              }}
-                            >
-                              {getAvailableMembers("coach").map((member) => (
-                                <SelectItem
-                                  key={member.id}
-                                  textValue={`${member.name} ${member.surname} (${member.registration_number})`}
-                                >
-                                  {member.name} {member.surname} (
-                                  {member.registration_number})
-                                </SelectItem>
-                              ))}
-                            </Select>
-
-                            <Select
-                              label="Role"
-                              selectedKeys={coach.role ? [coach.role] : []}
-                              onSelectionChange={(keys: any) =>
-                                updateCoach(index, "role", Array.from(keys)[0])
-                              }
-                              isRequired
-                            >
-                              <SelectItem
-                                key="head_coach"
-                                textValue="Hlavní trenér"
-                              >
-                                Hlavní trenér
-                              </SelectItem>
-                              <SelectItem
-                                key="assistant_coach"
-                                textValue="Asistent"
-                              >
-                                Asistent
-                              </SelectItem>
-                              <SelectItem
-                                key="goalkeeper_coach"
-                                textValue="Trenér brankářů"
-                              >
-                                Trenér brankářů
-                              </SelectItem>
-                            </Select>
-                          </div>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Add Coach Button (if no coaches) */}
-                {currentFormData.coaches.length === 0 && (
-                  <div className="text-center py-6 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
-                    <UserIcon className="w-10 h-10 text-blue-400 mx-auto mb-3" />
-                    <p className="text-blue-600 mb-3">
-                      Žádní trenéři nejsou přidáni
-                    </p>
-                    <Button
-                      color="primary"
-                      variant="bordered"
-                      startContent={<PlusIcon className="w-4 h-4" />}
-                      onPress={addCoach}
-                    >
-                      Přidat prvního trenéra
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {/* Validation Summary */}
-              {error && (
-                <div className="p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg">
-                  <div className="font-medium">Chyba:</div>
-                  <div className="text-sm">{error}</div>
-                </div>
-              )}
-
-              {/* Validation Error Display */}
-              {validationError && (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg">
-                  <Alert
-                    color="warning"
-                    title="Pravidla sestavy"
-                    description={validationError}
-                  />
-                </div>
-              )}
-            </div>
-          </ModalBody>
-          <ModalFooter className="flex items-end gap-2">
-            <Button
-              color="danger"
-              variant="bordered"
-              onPress={onEditModalClose}
-            >
-              Zrušit
-            </Button>
-            <div className="flex gap-2">
-              <Button
-                color="primary"
-                onPress={() => handleSaveLineup(selectedTeam === "home")}
-                isLoading={loading}
-                className="min-w-32"
-              >
-                Uložit sestavu
-              </Button>
-            </div>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={onDeleteModalClose}
-        onConfirm={handleDeleteLineup}
-        title="Smazat sestavu"
-        message={`Opravdu chcete smazat sestavu pro tým ${currentTeamName}? Tato akce je nevratná.`}
-      />
-    </div>
-  );
-}
+export default LineupManager;

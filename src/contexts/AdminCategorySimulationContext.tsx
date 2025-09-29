@@ -1,8 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAppData } from '@/contexts/AppDataContext';
-import { Category } from '@/types';
+import React, {createContext, useContext, useState, useEffect} from 'react';
+
+import {useAppData} from '@/contexts/AppDataContext';
+
+import {Category} from '@/types';
 interface AdminCategorySimulationContextType {
   selectedCategories: string[];
   availableCategories: Array<Category>;
@@ -12,22 +14,24 @@ interface AdminCategorySimulationContextType {
   loading: boolean;
 }
 
-const AdminCategorySimulationContext = createContext<AdminCategorySimulationContextType | undefined>(undefined);
+const AdminCategorySimulationContext = createContext<
+  AdminCategorySimulationContextType | undefined
+>(undefined);
 
-export function AdminCategorySimulationProvider({ children }: { children: React.ReactNode }) {
+export function AdminCategorySimulationProvider({children}: {children: React.ReactNode}) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const { categories, categoriesLoading } = useAppData();
+  const {categories, categoriesLoading} = useAppData();
 
   const availableCategories = categories || [];
   const loading = categoriesLoading;
 
-  // Load selected categories from localStorage on mount
+  // Load selected category from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedState = localStorage.getItem('adminCategorySimulation');
       if (savedState) {
         try {
-          const { selectedCategories: savedCategories } = JSON.parse(savedState);
+          const {selectedCategories: savedCategories} = JSON.parse(savedState);
           setSelectedCategories(savedCategories || []);
         } catch (e) {
           // Ignore parsing errors
@@ -36,23 +40,24 @@ export function AdminCategorySimulationProvider({ children }: { children: React.
     }
   }, []);
 
-  // Save selected categories to localStorage whenever it changes
+  // Save selected category to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('adminCategorySimulation', JSON.stringify({
-        selectedCategories
-      }));
+      localStorage.setItem(
+        'adminCategorySimulation',
+        JSON.stringify({
+          selectedCategories,
+        })
+      );
     }
   }, [selectedCategories]);
 
   const selectCategory = (categoryId: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(categoryId) ? prev : [...prev, categoryId]
-    );
+    setSelectedCategories((prev) => (prev.includes(categoryId) ? prev : [...prev, categoryId]));
   };
 
   const deselectCategory = (categoryId: string) => {
-    setSelectedCategories(prev => prev.filter(id => id !== categoryId));
+    setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
   };
 
   const clearSelection = () => {
@@ -67,7 +72,7 @@ export function AdminCategorySimulationProvider({ children }: { children: React.
         selectCategory,
         deselectCategory,
         clearSelection,
-        loading
+        loading,
       }}
     >
       {children}
@@ -78,7 +83,9 @@ export function AdminCategorySimulationProvider({ children }: { children: React.
 export function useAdminCategorySimulation() {
   const context = useContext(AdminCategorySimulationContext);
   if (context === undefined) {
-    throw new Error('useAdminCategorySimulation must be used within an AdminCategorySimulationProvider');
+    throw new Error(
+      'useAdminCategorySimulation must be used within an AdminCategorySimulationProvider'
+    );
   }
   return context;
 }

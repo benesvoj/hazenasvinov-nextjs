@@ -1,10 +1,13 @@
 'use client';
 
 import React from 'react';
-import {Card, CardBody, CardHeader} from '@heroui/card';
+
 import {Button} from '@heroui/button';
-import {TrashIcon, TrophyIcon} from '@heroicons/react/24/outline';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+
 import {PlusCircleIcon} from '@heroicons/react/16/solid';
+import {TrashIcon, TrophyIcon} from '@heroicons/react/24/outline';
+
 import {translations} from '@/lib/translations';
 
 interface CategoriesTabProps {

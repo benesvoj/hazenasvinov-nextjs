@@ -1,10 +1,14 @@
 'use client';
 
 import React from 'react';
-import {Card, CardHeader, CardBody} from '@heroui/react';
-import {TrophyIcon} from '@heroicons/react/24/outline';
-import {LoadingSpinner} from '@/components';
+
 import Image from 'next/image';
+
+import {Card, CardHeader, CardBody} from '@heroui/react';
+
+import {TrophyIcon} from '@heroicons/react/24/outline';
+
+import {LoadingSpinner} from '@/components';
 
 interface StandingsCardProps {
   standings: any[];

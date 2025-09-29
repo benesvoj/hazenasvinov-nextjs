@@ -1,16 +1,12 @@
-import React from "react";
-import {
-  Button,
-  Tooltip
-} from "@heroui/react";
-import {
-  EyeIcon,
-  PencilIcon,
-  UserGroupIcon,
-  TrashIcon
-} from "@heroicons/react/24/outline";
-import { Match } from "@/types";
-import MobileActionsMenu, { ActionItem } from "@/components/MobileActionsMenu";
+import React from 'react';
+
+import {Button, Tooltip} from '@heroui/react';
+
+import {EyeIcon, PencilIcon, UserGroupIcon, TrashIcon} from '@heroicons/react/24/outline';
+
+import MobileActionsMenu, {ActionItem} from '@/components/ui/navigation/MobileActionsMenu';
+
+import {Match} from '@/types';
 
 interface MatchActionsMenuProps {
   match: Match;
@@ -29,20 +25,24 @@ export default function MatchActionsMenu({
   onLineupManager,
   onDeleteMatch,
   isSeasonClosed,
-  className = ""
+  className = '',
 }: MatchActionsMenuProps) {
   // Prepare actions for mobile menu
   const mobileActions: ActionItem[] = [
-    ...(match.status === 'upcoming' ? [{
-      key: 'add-result',
-      label: 'Přidat výsledek',
-      description: 'Zadat výsledek zápasu',
-      color: 'primary' as const,
-      variant: 'flat' as const,
-      icon: <EyeIcon className="w-4 h-4" />,
-      onClick: () => onAddResult(match),
-      isDisabled: isSeasonClosed
-    }] : []),
+    ...(match.status === 'upcoming'
+      ? [
+          {
+            key: 'add-result',
+            label: 'Přidat výsledek',
+            description: 'Zadat výsledek zápasu',
+            color: 'primary' as const,
+            variant: 'flat' as const,
+            icon: <EyeIcon className="w-4 h-4" />,
+            onClick: () => onAddResult(match),
+            isDisabled: isSeasonClosed,
+          },
+        ]
+      : []),
     {
       key: 'edit-match',
       label: 'Upravit zápas',
@@ -51,7 +51,7 @@ export default function MatchActionsMenu({
       variant: 'flat' as const,
       icon: <PencilIcon className="w-4 h-4" />,
       onClick: () => onEditMatch(match),
-      isDisabled: isSeasonClosed
+      isDisabled: isSeasonClosed,
     },
     {
       key: 'lineup-manager',
@@ -61,7 +61,7 @@ export default function MatchActionsMenu({
       variant: 'flat' as const,
       icon: <UserGroupIcon className="w-4 h-4" />,
       onClick: () => onLineupManager(match),
-      isDisabled: isSeasonClosed
+      isDisabled: isSeasonClosed,
     },
     {
       key: 'delete-match',
@@ -71,8 +71,8 @@ export default function MatchActionsMenu({
       variant: 'flat' as const,
       icon: <TrashIcon className="w-4 h-4" />,
       onClick: () => onDeleteMatch(match),
-      isDisabled: isSeasonClosed
-    }
+      isDisabled: isSeasonClosed,
+    },
   ];
 
   return (

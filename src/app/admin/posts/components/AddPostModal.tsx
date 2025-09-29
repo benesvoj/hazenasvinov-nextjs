@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useState} from 'react';
+
 import {
   Modal,
   ModalContent,
@@ -14,11 +15,15 @@ import {
   SelectItem,
   Image,
 } from '@heroui/react';
+
 import {PhotoIcon, XMarkIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
-import {Category, Match, BlogPost} from '@/types';
-import {postStatuses, postStatusLabels} from '@/constants';
+
 import {generateSlug} from '@/utils/slugGenerator';
+
+import {BLOG_POST_STATUSES, getBlogPostStatusOptions} from '@/enums';
 import {formatDateString} from '@/helpers';
+import {Category, Match, BlogPost} from '@/types';
+
 import MatchSelectionModal from './MatchSelectionModal';
 
 interface User {
@@ -50,7 +55,7 @@ export default function AddPostModal({
     slug: '',
     content: '',
     author_id: '',
-    status: postStatuses.draft,
+    status: BLOG_POST_STATUSES.draft,
     image_url: '',
     category_id: '',
     match_id: '',
@@ -112,7 +117,7 @@ export default function AddPostModal({
       slug: '',
       content: '',
       author_id: 'default-user',
-      status: postStatuses.draft,
+      status: BLOG_POST_STATUSES.draft,
       image_url: '',
       category_id: '',
       match_id: '',
@@ -178,10 +183,8 @@ export default function AddPostModal({
                 }
                 isRequired
               >
-                {Object.entries(postStatuses).map(([key, value]) => (
-                  <SelectItem key={value}>
-                    {postStatusLabels[key as keyof typeof postStatusLabels]}
-                  </SelectItem>
+                {getBlogPostStatusOptions().map(({value, label}) => (
+                  <SelectItem key={value}>{label}</SelectItem>
                 ))}
               </Select>
 

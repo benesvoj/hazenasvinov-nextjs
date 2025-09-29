@@ -1,4 +1,6 @@
-"use client";
+'use client';
+
+import {useRouter} from 'next/navigation';
 
 import {
   Tabs,
@@ -13,12 +15,13 @@ import {
   TableRow,
   TableCell,
   Image,
-} from "@heroui/react";
-import { Match } from "@/types";
-import { formatDateString, formatTime } from "@/helpers";
-import { CategoryMatchesFallback } from "./CategoryMatchesFallback";
-import { useRouter } from "next/navigation";
-import { LoadingSpinner } from "@/components";
+} from '@heroui/react';
+
+import {LoadingSpinner} from '@/components';
+import {formatDateString, formatTime} from '@/helpers';
+import {Match} from '@/types';
+
+import {CategoryMatchesFallback} from './CategoryMatchesFallback';
 
 interface CategoryMatchesProps {
   categoryId: string;
@@ -48,9 +51,7 @@ export function CategoryMatches({
       return (
         <div className="text-center text-gray-500 dark:text-gray-400 py-8">
           <p>Pro {seasonName} zatím nejsou k dispozici žádné zápasy.</p>
-          <p className="text-sm mt-2">
-            Zápasy se zobrazí po jejich naplánování.
-          </p>
+          <p className="text-sm mt-2">Zápasy se zobrazí po jejich naplánování.</p>
         </div>
       );
     }
@@ -67,32 +68,24 @@ export function CategoryMatches({
             >
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 {formatDateString(match.date)}
-                {match.time && (
-                  <span className="ml-2">{formatTime(match.time)}</span>
-                )}
+                {match.time && <span className="ml-2">{formatTime(match.time)}</span>}
               </div>
               <div className="flex justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="text-right no-wrap">
                     <div className="font-medium text-gray-900 dark:text-white no-wrap">
-                      {match.home_team?.short_name ||
-                        match.home_team?.name ||
-                        "Neznámý tým"}
+                      {match.home_team?.short_name || match.home_team?.name || 'Neznámý tým'}
                     </div>
                   </div>
-                  <div className="mx-3 text-gray-400 dark:text-gray-500 text-sm">
-                    vs
-                  </div>
+                  <div className="mx-3 text-gray-400 dark:text-gray-500 text-sm">vs</div>
                   <div className="text-left no-wrap">
                     <div className="font-medium text-gray-900 dark:text-white no-wrap">
-                      {match.away_team?.short_name ||
-                        match.away_team?.name ||
-                        "Neznámý tým"}
+                      {match.away_team?.short_name || match.away_team?.name || 'Neznámý tým'}
                     </div>
                   </div>
                 </div>
                 <div className="text-center mr-4">
-                  {match.status === "completed" ? (
+                  {match.status === 'completed' ? (
                     <span className="font-bold text-lg text-gray-900 dark:text-white">
                       {match.home_score} : {match.away_score}
                     </span>
@@ -134,7 +127,7 @@ export function CategoryMatches({
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    {matchweeks > 0 && match.matchweek !== null ? `${match.matchweek}. kolo` : ""}
+                    {matchweeks > 0 && match.matchweek !== null ? `${match.matchweek}. kolo` : ''}
                   </TableCell>
                   <TableCell className="font-medium text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -144,17 +137,15 @@ export function CategoryMatches({
                         width={20}
                         height={20}
                       />
-                      {match.home_team?.name || "Neznámý tým"}
+                      {match.home_team?.name || 'Neznámý tým'}
                     </div>
                   </TableCell>
                   <TableCell className="flex items-center justify-center">
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      vs
-                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">vs</span>
                   </TableCell>
                   <TableCell className="font-medium text-left">
                     <div className="flex items-center gap-2">
-                      {match.away_team?.name || "Neznámý tým"}
+                      {match.away_team?.name || 'Neznámý tým'}
                       <Image
                         src={match.away_team?.logo_url}
                         alt={match.away_team?.name}
@@ -164,14 +155,12 @@ export function CategoryMatches({
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    {match.status === "completed" ? (
+                    {match.status === 'completed' ? (
                       <span className="font-bold">
                         {match.home_score} : {match.away_score}
                       </span>
                     ) : (
-                      <span className="text-gray-400 dark:text-gray-500">
-                        -
-                      </span>
+                      <span className="text-gray-400 dark:text-gray-500">-</span>
                     )}
                   </TableCell>
                 </TableRow>
@@ -209,14 +198,10 @@ export function CategoryMatches({
       <CardBody>
         <Tabs aria-label="Sezónní zápasy">
           <Tab key="autumn" title="Podzim">
-            <div className="pt-4">
-              {renderMatchesTable(matches.autumn, "podzim")}
-            </div>
+            <div className="pt-4">{renderMatchesTable(matches.autumn, 'podzim')}</div>
           </Tab>
           <Tab key="spring" title="Jaro">
-            <div className="pt-4">
-              {renderMatchesTable(matches.spring, "jaro")}
-            </div>
+            <div className="pt-4">{renderMatchesTable(matches.spring, 'jaro')}</div>
           </Tab>
         </Tabs>
       </CardBody>

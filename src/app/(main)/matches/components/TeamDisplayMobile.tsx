@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from "react";
+import React, {useState} from 'react';
+
 import Image from 'next/image';
 
 interface Team {
@@ -16,7 +17,11 @@ interface TeamDisplayMobileProps {
   isHomeTeam?: boolean;
 }
 
-export default function TeamDisplayMobile({ team, fallbackName, isHomeTeam = false }: TeamDisplayMobileProps) {
+export default function TeamDisplayMobile({
+  team,
+  fallbackName,
+  isHomeTeam = false,
+}: TeamDisplayMobileProps) {
   const [imageError, setImageError] = useState(false);
 
   const handleImageError = () => {
@@ -29,8 +34,8 @@ export default function TeamDisplayMobile({ team, fallbackName, isHomeTeam = fal
         // Home team: logo first, then name
         <>
           {team?.logo_url && !imageError && (
-            <Image 
-              src={team.logo_url} 
+            <Image
+              src={team.logo_url}
               alt={`${team?.name || fallbackName} logo`}
               width={32}
               height={32}
@@ -38,19 +43,23 @@ export default function TeamDisplayMobile({ team, fallbackName, isHomeTeam = fal
               onError={handleImageError}
             />
           )}
-          <span className={`font-medium ${team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+          <span
+            className={`font-medium ${team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}
+          >
             {team?.name || fallbackName}
           </span>
         </>
       ) : (
         // Away team: name first, then logo
         <>
-          <span className={`font-medium ${team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+          <span
+            className={`font-medium ${team?.is_own_club ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}
+          >
             {team?.name || fallbackName}
           </span>
           {team?.logo_url && !imageError && (
-            <Image 
-              src={team.logo_url} 
+            <Image
+              src={team.logo_url}
               alt={`${team?.name || fallbackName} logo`}
               width={32}
               height={32}

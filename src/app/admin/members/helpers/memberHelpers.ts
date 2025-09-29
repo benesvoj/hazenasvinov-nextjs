@@ -1,5 +1,5 @@
+import {Genders} from '@/enums';
 import {Category} from '@/types';
-import {GenderType} from '@/constants';
 
 /**
  * Get the display name for a category code
@@ -28,9 +28,9 @@ export const getCategoryBadgeColor = (categoryId: string, categoriesData: Catego
   const categoryData = categoriesData.find((cat) => cat.id === categoryId);
   if (!categoryData) return 'default';
 
-  if (categoryData.gender === 'male') return 'primary';
-  if (categoryData.gender === 'female') return 'secondary';
-  if (categoryData.gender === 'mixed') return 'success';
+  if (categoryData.gender === Genders.MALE) return 'primary';
+  if (categoryData.gender === Genders.FEMALE) return 'secondary';
+  if (categoryData.gender === Genders.MIXED) return 'success';
 
   // Fallback for categories without gender
   if (
@@ -47,8 +47,8 @@ export const getCategoryBadgeColor = (categoryId: string, categoriesData: Catego
 /**
  * Get the appropriate badge color for sex
  */
-export const getSexBadgeColor = (sex: 'male' | 'female') => {
-  return sex === 'male' ? 'primary' : 'secondary';
+export const getSexBadgeColor = (sex: Genders) => {
+  return sex === Genders.MALE ? 'primary' : 'secondary';
 };
 
 /**
@@ -70,7 +70,7 @@ export const filterMembers = (
   members: any[],
   searchTerm: string,
   filters: {
-    sex: GenderType;
+    sex: Genders;
     category: string;
     function: string;
   }
@@ -157,7 +157,7 @@ export const sortMembers = (
 };
 
 /**
- * Convert categories array to Record format for compatibility
+ * Convert category array to Record format for compatibility
  * Uses category code as key for backward compatibility with existing components
  *
  * @deprecated Use convertCategoriesToRecordBySlug instead

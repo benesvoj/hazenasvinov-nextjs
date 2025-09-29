@@ -1,10 +1,7 @@
 'use client';
 
 import React, {useState, useEffect, useMemo} from 'react';
-import {useAttendance, useCategoryLineups} from '@/hooks';
-import {useUser} from '@/contexts/UserContext';
-import {useAppData} from '@/contexts/AppDataContext';
-import {PlusIcon, CalendarIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
 import {
   Button,
   Card,
@@ -20,14 +17,22 @@ import {
   TableRow,
   TableCell,
 } from '@heroui/react';
-import {TrainingSessionFormData, TrainingSessionStatus} from '@/types';
+
+import {PlusIcon, CalendarIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
+import {useAppData} from '@/contexts/AppDataContext';
+import {useUser} from '@/contexts/UserContext';
+
+import {DeleteConfirmationModal, LoadingSpinner, PageContainer, showToast} from '@/components';
 import {formatDateString, formatTime} from '@/helpers';
+import {useAttendance, useCategoryLineups} from '@/hooks';
+import {TrainingSessionFormData, TrainingSessionStatus} from '@/types';
+
 import {TrainingSessionModal, TrainingSessionGenerator} from './components';
-import {DeleteConfirmationModal, LoadingSpinner, PageContainer} from '@/components';
-import TrainingSessionStatusDialog from './components/TrainingSessionStatusDialog';
-import TrainingSessionStatusBadge from './components/TrainingSessionStatusBadge';
-import AttendanceStatistics from './components/AttendanceStatistics';
 import AttendanceChart from './components/AttendanceChart';
+import AttendanceStatistics from './components/AttendanceStatistics';
+import TrainingSessionStatusBadge from './components/TrainingSessionStatusBadge';
+import TrainingSessionStatusDialog from './components/TrainingSessionStatusDialog';
 
 export default function CoachesAttendancePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -100,23 +105,23 @@ export default function CoachesAttendancePage() {
     }
   }, [isAdmin]);
 
-  // Get user's assigned categories from UserContext
+  // Get user's assigned category from UserContext
   // const [userCategories, setUserCategories] = useState<string[]>([]);
 
   // No need to fetch initial data - AppDataContext handles this
 
-  // Compute available categories for this user
+  // Compute available category for this user
   const availableCategories = useMemo(() => {
     if (adminSimulationCategories.length > 0) {
-      // Admin simulation mode - show only selected categories from localStorage
+      // Admin simulation mode - show only selected category from localStorage
       return adminSimulationCategories
         .map((categoryId: string) => categories.find((c) => c.id === categoryId))
         .filter(Boolean);
     } else if (isAdmin) {
-      // Admin users can access all categories
+      // Admin users can access all category
       return categories;
     } else {
-      // Regular coaches use their assigned categories
+      // Regular coaches use their assigned category
       return userCategories
         .map((categoryId: string) => categories.find((c) => c.id === categoryId))
         .filter(Boolean);
@@ -375,7 +380,7 @@ export default function CoachesAttendancePage() {
         const fallbackMemberIds = fallbackMembers.map((m) => m.id);
 
         if (fallbackMemberIds.length === 0) {
-          alert('Žádní členové nejsou k dispozici pro vybranou kategorii');
+          showToast.warning('Žádní členové nejsou k dispozici pro vybranou kategorii');
           return;
         }
 

@@ -1,17 +1,20 @@
 'use client';
 
-import React from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { TrashIcon, UserGroupIcon } from "@heroicons/react/24/outline";
-import { translations } from "@/lib/translations";
+import React from 'react';
+
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+
+import {TrashIcon, UserGroupIcon} from '@heroicons/react/24/outline';
+
+import {translations} from '@/lib/translations';
 
 interface TeamsTabProps {
   teams: any[];
   onDeleteTeam: (team: any) => void;
 }
 
-export default function TeamsTab({ teams, onDeleteTeam }: TeamsTabProps) {
+export default function TeamsTab({teams, onDeleteTeam}: TeamsTabProps) {
   return (
     <Card className="mt-4">
       <CardHeader className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
@@ -35,9 +38,10 @@ export default function TeamsTab({ teams, onDeleteTeam }: TeamsTabProps) {
                   <div>
                     <h4 className="text-lg font-semibold text-gray-800">
                       {(() => {
-                        const teamsInSameCategory = teams.filter(t => 
-                          t.category_name === team.category_name && 
-                          t.season_name === team.season_name
+                        const teamsInSameCategory = teams.filter(
+                          (t) =>
+                            t.category_name === team.category_name &&
+                            t.season_name === team.season_name
                         );
                         if (teamsInSameCategory.length > 1) {
                           return `${team.category_name || 'Neznámá kategorie'} ${team.team_suffix}`;
@@ -48,9 +52,11 @@ export default function TeamsTab({ teams, onDeleteTeam }: TeamsTabProps) {
                     <div className="text-sm text-gray-600 space-y-1">
                       <p>Kategorie: {team.category_name || 'Neznámá'}</p>
                       <p>Sezóna: {team.season_name || 'Neznámá'}</p>
-                      {teams.filter(t => t.category_name === team.category_name && t.season_name === team.season_name).length > 1 && (
-                        <p>Suffix: {team.team_suffix}</p>
-                      )}
+                      {teams.filter(
+                        (t) =>
+                          t.category_name === team.category_name &&
+                          t.season_name === team.season_name
+                      ).length > 1 && <p>Suffix: {team.team_suffix}</p>}
                       <p>Status: {team.is_active ? 'Aktivní' : 'Neaktivní'}</p>
                     </div>
                   </div>

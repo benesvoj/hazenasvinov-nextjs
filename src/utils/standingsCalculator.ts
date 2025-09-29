@@ -1,4 +1,5 @@
 import {createClient} from '@/utils/supabase/client';
+
 import {Standing, Match} from '@/types';
 
 /**

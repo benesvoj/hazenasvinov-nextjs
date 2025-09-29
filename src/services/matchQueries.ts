@@ -1,6 +1,7 @@
 import {createClient} from '@/utils/supabase/client';
-import {Match} from '@/types';
 import {transformMatchWithTeamNames} from '@/utils/teamDisplay';
+
+import {Match} from '@/types';
 
 // Types for query options
 export interface MatchQueryOptions {

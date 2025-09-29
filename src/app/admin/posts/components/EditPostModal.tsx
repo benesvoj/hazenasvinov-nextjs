@@ -1,17 +1,23 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
+import Image from 'next/image';
+
 import {Button} from '@heroui/button';
 import {Input, Textarea} from '@heroui/input';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
 import {Select, SelectItem} from '@heroui/select';
+
 import {PhotoIcon, XMarkIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
-import Image from 'next/image';
-import {BlogPost, Category, Match} from '@/types';
+
 import {generateSlug} from '@/utils/slugGenerator';
+
+import {BLOG_POST_STATUSES, getBlogPostStatusOptions} from '@/enums';
 import {formatDateString} from '@/helpers';
+import {BlogPost, Category, Match} from '@/types';
+
 import MatchSelectionModal from './MatchSelectionModal';
-import {postStatuses, postStatusLabels} from '@/constants';
 
 interface User {
   id: string;
@@ -22,7 +28,7 @@ interface EditPostModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (
-    formData: Omit<BlogPost, 'id' | 'updated_at'>,
+    formData: Omit<BlogPost, 'id' | 'updated_at' | 'created_at'>,
     imageFile: File | null
   ) => Promise<void>;
   post: BlogPost | null;
@@ -30,6 +36,17 @@ interface EditPostModalProps {
   categories: Category[];
   categoriesLoading: boolean;
 }
+
+const initialFormData: Omit<BlogPost, 'id' | 'updated_at' | 'created_at'> = {
+  title: '',
+  slug: '',
+  content: '',
+  author_id: '',
+  status: BLOG_POST_STATUSES.draft,
+  image_url: '',
+  category_id: '',
+  match_id: '',
+};
 
 export default function EditPostModal({
   isOpen,
@@ -40,17 +57,7 @@ export default function EditPostModal({
   categories,
   categoriesLoading,
 }: EditPostModalProps) {
-  const [formData, setFormData] = useState<Omit<BlogPost, 'id' | 'updated_at'>>({
-    title: '',
-    slug: '',
-    content: '',
-    author_id: '',
-    status: postStatuses.draft,
-    image_url: '',
-    category_id: '',
-    match_id: '',
-    created_at: '',
-  });
+  const [formData, setFormData] = useState(initialFormData);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -103,17 +110,7 @@ export default function EditPostModal({
 
   // Reset form data
   const resetForm = () => {
-    setFormData({
-      title: '',
-      slug: '',
-      content: '',
-      author_id: 'default-user',
-      status: postStatuses.draft,
-      image_url: '',
-      category_id: '',
-      match_id: '',
-      created_at: '',
-    });
+    setFormData(initialFormData);
     setImageFile(null);
     setImagePreview('');
     setSelectedMatch(null);
@@ -144,11 +141,10 @@ export default function EditPostModal({
         slug: post.slug,
         content: post.content,
         author_id: post.author_id,
-        status: post.status || postStatuses.draft,
+        status: post.status || BLOG_POST_STATUSES.draft,
         image_url: post.image_url || '',
         category_id: post.category_id || '',
         match_id: post.match_id || '',
-        created_at: createdDate,
       });
 
       // Set image preview if post has an image
@@ -208,20 +204,10 @@ export default function EditPostModal({
                 }
                 isRequired
               >
-                {Object.entries(postStatuses).map(([key, value]) => (
-                  <SelectItem key={value}>
-                    {postStatusLabels[key as keyof typeof postStatusLabels]}
-                  </SelectItem>
+                {getBlogPostStatusOptions().map(({value, label}) => (
+                  <SelectItem key={value}>{label}</SelectItem>
                 ))}
               </Select>
-
-              <Input
-                label="Datum vytvoření"
-                type="datetime-local"
-                value={formData.created_at}
-                onChange={(e) => handleInputChange('created_at', e.target.value)}
-                description="Nechte prázdné pro aktuální datum"
-              />
 
               {/* Category Selection */}
               <Select

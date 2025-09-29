@@ -1,9 +1,18 @@
 'use client';
 
 import React from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react';
-import { EyeIcon, PencilIcon, UserGroupIcon, TrashIcon, DocumentIcon } from '@heroicons/react/24/outline';
-import { Match } from '@/types';
+
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button} from '@heroui/react';
+
+import {
+  EyeIcon,
+  PencilIcon,
+  UserGroupIcon,
+  TrashIcon,
+  DocumentIcon,
+} from '@heroicons/react/24/outline';
+
+import {Match} from '@/types';
 
 interface MatchActionsModalProps {
   isOpen: boolean;
@@ -26,7 +35,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
   onLineupModalOpen,
   onDeleteClick,
   onMatchProcessOpen,
-  isSeasonClosed
+  isSeasonClosed,
 }) => {
   const handleAddResult = () => {
     onClose();
@@ -58,16 +67,16 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
       size="sm"
       classNames={{
-        base: "max-w-[95vw] mx-2",
-        wrapper: "items-center justify-center p-2 sm:p-4",
-        body: "px-4 py-4",
-        header: "px-4 py-4",
-        footer: "px-4 py-4"
+        base: 'max-w-[95vw] mx-2',
+        wrapper: 'items-center justify-center p-2 sm:p-4',
+        body: 'px-4 py-4',
+        header: 'px-4 py-4',
+        footer: 'px-4 py-4',
       }}
       placement="center"
       scrollBehavior="inside"
@@ -97,7 +106,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
                 </div>
               </Button>
             )}
-            
+
             <Button
               color="warning"
               variant="light"
@@ -112,7 +121,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
                 <span className="text-xs text-gray-500 mt-1">Upravit informace o zápasu</span>
               </div>
             </Button>
-            
+
             <Button
               color="secondary"
               variant="light"
@@ -127,7 +136,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
                 <span className="text-xs text-gray-500 mt-1">Spravovat sestavy týmů</span>
               </div>
             </Button>
-            
+
             <Button
               color="danger"
               variant="light"
@@ -144,7 +153,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
                 </span>
               </div>
             </Button>
-            
+
             <Button
               color="success"
               variant="light"
@@ -161,13 +170,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
           </div>
         </ModalBody>
         <ModalFooter className="px-4 py-4">
-          <Button
-            color="default"
-            variant="light"
-            onPress={onClose}
-            className="w-full"
-            size="lg"
-          >
+          <Button color="default" variant="light" onPress={onClose} className="w-full" size="lg">
             Zavřít
           </Button>
         </ModalFooter>

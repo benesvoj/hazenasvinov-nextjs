@@ -1,28 +1,35 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Tabs, Tab } from "@heroui/tabs";
-import { PhotoIcon, FolderIcon } from "@heroicons/react/24/outline";
-import { translations } from "@/lib/translations";
-import AlbumsTab from "./components/AlbumsTab";
-import PhotosTab from "./components/PhotosTab";
-import { AdminContainer } from "../components/AdminContainer";
+import React, {useState, useEffect} from 'react';
 
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Tabs, Tab} from '@heroui/tabs';
+
+import {PhotoIcon, FolderIcon} from '@heroicons/react/24/outline';
+
+import {AdminContainer} from '@/components/features/admin/AdminContainer';
+
+import {translations} from '@/lib/translations';
+
+import AlbumsTab from './components/AlbumsTab';
+import PhotosTab from './components/PhotosTab';
 
 export default function PhotoGalleryAdminPage() {
-  const [selectedTab, setSelectedTab] = useState("albums");
-  
+  const [selectedTab, setSelectedTab] = useState('albums');
+
   const t = translations.admin.photoGallery;
 
   return (
-    <AdminContainer title={t.title} description={t.description} icon={<PhotoIcon className="w-8 h-8 text-blue-600" />} >
-
+    <AdminContainer
+      title={t.title}
+      description={t.description}
+      icon={<PhotoIcon className="w-8 h-8 text-blue-600" />}
+    >
       {/* Main Content */}
       <Card className="shadow-lg border-0">
         <CardHeader className="pb-0">
-          <Tabs 
-            selectedKey={selectedTab} 
+          <Tabs
+            selectedKey={selectedTab}
             onSelectionChange={(key) => setSelectedTab(key as string)}
             className="w-full"
             isVertical
@@ -51,9 +58,7 @@ export default function PhotoGalleryAdminPage() {
             </Tab>
           </Tabs>
         </CardHeader>
-        <CardBody className="pt-6">
-          {/* Tab content is rendered by the tab components */}
-        </CardBody>
+        <CardBody className="pt-6">{/* Tab content is rendered by the tab components */}</CardBody>
       </Card>
     </AdminContainer>
   );

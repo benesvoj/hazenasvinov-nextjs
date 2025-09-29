@@ -1,9 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, RadioGroup, Radio } from '@heroui/react';
-import { createClient } from '@/utils/supabase/client';
+import {useState, useEffect} from 'react';
+
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  RadioGroup,
+  Radio,
+} from '@heroui/react';
+
+import {XMarkIcon} from '@heroicons/react/24/outline';
+
+import {createClient} from '@/utils/supabase/client';
 
 interface RoleAssignmentModalProps {
   isOpen: boolean;
@@ -14,51 +26,52 @@ interface RoleAssignmentModalProps {
 }
 
 const ROLE_OPTIONS = [
-  { value: 'admin', label: 'Admin', description: 'Plný přístup ke všem funkcím' },
-  { value: 'head_coach', label: 'Hlavní trenér', description: 'Přístup k trenérským funkcím a správě týmů' },
-  { value: 'coach', label: 'Trenér', description: 'Přístup k trenérským funkcím' },
-  { value: 'member', label: 'Člen', description: 'Základní přístup pro členy' }
+  {value: 'admin', label: 'Admin', description: 'Plný přístup ke všem funkcím'},
+  {
+    value: 'head_coach',
+    label: 'Hlavní trenér',
+    description: 'Přístup k trenérským funkcím a správě týmů',
+  },
+  {value: 'coach', label: 'Trenér', description: 'Přístup k trenérským funkcím'},
+  {value: 'member', label: 'Člen', description: 'Základní přístup pro členy'},
 ];
 
-export default function RoleAssignmentModal({ 
-  isOpen, 
-  onClose, 
-  userId, 
-  userEmail, 
-  onRoleAssigned 
+export default function RoleAssignmentModal({
+  isOpen,
+  onClose,
+  userId,
+  userEmail,
+  onRoleAssigned,
 }: RoleAssignmentModalProps) {
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Category selection state
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<{id: string; name: string}[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [pendingRole, setPendingRole] = useState('');
 
-  // Load categories
+  // Load category
   const loadCategories = async () => {
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from('categories')
-        .select('id, name')
-        .order('name');
+      const {data, error} = await supabase.from('categories').select('id, name').order('name');
 
       if (error) throw error;
       setCategories(data || []);
     } catch (error) {
-      console.error('Error loading categories:', error);
+      console.error('Error loading category:', error);
     }
   };
 
-  // Check if role requires categories
+  // Check if role requires category
   const roleRequiresCategories = (role: string) => {
     return role === 'coach' || role === 'head_coach';
   };
 
-  // Load categories on component mount
+  // Load category on component mount
   useEffect(() => {
     if (isOpen) {
       loadCategories();
@@ -71,7 +84,7 @@ export default function RoleAssignmentModal({
       return;
     }
 
-    // If role requires categories, show category selection modal
+    // If role requires category, show category selection modal
     if (roleRequiresCategories(selectedRole)) {
       setPendingRole(selectedRole);
       setSelectedCategories([]);
@@ -79,7 +92,7 @@ export default function RoleAssignmentModal({
       return;
     }
 
-    // For roles that don't require categories, assign directly
+    // For roles that don't require category, assign directly
     await assignRoleToDatabase(selectedRole, null);
   };
 
@@ -90,15 +103,13 @@ export default function RoleAssignmentModal({
 
     try {
       const supabase = createClient();
-      
+
       // Create user profile with assigned role
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .insert({
-          user_id: userId,
-          role: role,
-          assigned_categories: categories
-        });
+      const {error: profileError} = await supabase.from('user_profiles').insert({
+        user_id: userId,
+        role: role,
+        assigned_categories: categories,
+      });
 
       if (profileError) {
         throw profileError;
@@ -117,7 +128,7 @@ export default function RoleAssignmentModal({
   // Handle category selection confirmation
   const handleCategorySelectionConfirm = async () => {
     if (!pendingRole) return;
-    
+
     await assignRoleToDatabase(pendingRole, selectedCategories);
     setShowCategoryModal(false);
     setPendingRole('');
@@ -137,37 +148,26 @@ export default function RoleAssignmentModal({
 
   return (
     <>
-      <Modal 
-        isOpen={isOpen} 
-        onOpenChange={onClose}
-        size="md"
-        placement="center"
-        backdrop="blur"
-      >
+      <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" backdrop="blur">
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <h3 className="text-lg font-semibold">
-                  Přiřazení role uživateli
-                </h3>
+                <h3 className="text-lg font-semibold">Přiřazení role uživateli</h3>
               </ModalHeader>
-              
+
               <ModalBody>
                 <div className="mb-4">
                   <p className="text-sm text-gray-600 mb-2">
                     Uživatel: <span className="font-medium">{userEmail}</span>
                   </p>
                   <p className="text-sm text-gray-500">
-                    Vyberte roli pro tohoto uživatele. Bez přiřazené role nebude mít přístup k aplikaci.
+                    Vyberte roli pro tohoto uživatele. Bez přiřazené role nebude mít přístup k
+                    aplikaci.
                   </p>
                 </div>
 
-                <RadioGroup
-                  value={selectedRole}
-                  onValueChange={setSelectedRole}
-                  className="gap-3"
-                >
+                <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="gap-3">
                   {ROLE_OPTIONS.map((role) => (
                     <Radio
                       key={role.value}
@@ -189,17 +189,13 @@ export default function RoleAssignmentModal({
                 )}
 
                 <p className="text-xs text-gray-500">
-                  Poznámka: Pokud přeskočíte, uživatel nebude mít přístup k aplikaci, dokud mu nebude přiřazena role.
+                  Poznámka: Pokud přeskočíte, uživatel nebude mít přístup k aplikaci, dokud mu
+                  nebude přiřazena role.
                 </p>
               </ModalBody>
-              
+
               <ModalFooter>
-                <Button
-                  color="default"
-                  variant="light"
-                  onPress={handleSkip}
-                  isDisabled={isLoading}
-                >
+                <Button color="default" variant="light" onPress={handleSkip} isDisabled={isLoading}>
                   Přeskočit
                 </Button>
                 <Button
@@ -224,19 +220,19 @@ export default function RoleAssignmentModal({
               <ModalHeader className="flex flex-col gap-1">
                 <h3 className="text-lg font-semibold">Výběr kategorií</h3>
                 <p className="text-sm text-gray-600">
-                  Vyberte kategorie pro roli: <strong>{ROLE_OPTIONS.find(r => r.value === pendingRole)?.label}</strong>
+                  Vyberte kategorie pro roli:{' '}
+                  <strong>{ROLE_OPTIONS.find((r) => r.value === pendingRole)?.label}</strong>
                 </p>
               </ModalHeader>
               <ModalBody>
                 <div className="space-y-4">
                   <p className="text-sm text-gray-700">
-                    Kategorie můžete vybrat později, ale pro správné fungování systému je doporučeno přiřadit alespoň jednu kategorii.
+                    Kategorie můžete vybrat později, ale pro správné fungování systému je doporučeno
+                    přiřadit alespoň jednu kategorii.
                   </p>
-                  
+
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      Dostupné kategorie:
-                    </label>
+                    <label className="text-sm font-medium text-gray-700">Dostupné kategorie:</label>
                     <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto border rounded-lg p-3">
                       {categories.map((category) => (
                         <label
@@ -250,7 +246,9 @@ export default function RoleAssignmentModal({
                               if (e.target.checked) {
                                 setSelectedCategories([...selectedCategories, category.id]);
                               } else {
-                                setSelectedCategories(selectedCategories.filter(id => id !== category.id));
+                                setSelectedCategories(
+                                  selectedCategories.filter((id) => id !== category.id)
+                                );
                               }
                             }}
                             className="rounded border-gray-300 text-primary focus:ring-primary"
@@ -274,8 +272,8 @@ export default function RoleAssignmentModal({
                 <Button color="default" variant="light" onPress={handleCategorySelectionCancel}>
                   Zrušit
                 </Button>
-                <Button 
-                  color="primary" 
+                <Button
+                  color="primary"
                   onPress={handleCategorySelectionConfirm}
                   isDisabled={selectedCategories.length === 0}
                 >

@@ -127,7 +127,7 @@ CREATE TABLE external_players (
 ```sql
 CREATE OR REPLACE FUNCTION validate_lineup_enhanced()
 -- Includes:
--- - Player count validation (goalkeepers: 1-2, field players: 6-13)
+-- - Player count validation (goalkeepers: 1-2, field player-manager: 6-13)
 -- - Coach count validation (maximum 3)
 -- - Coach role validation (minimum 1 head coach)
 -- - Total player validation (minimum 7)

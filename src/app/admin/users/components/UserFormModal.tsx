@@ -1,6 +1,10 @@
 'use client';
 
 import {useState, useEffect} from 'react';
+
+import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Input, Textarea} from '@heroui/input';
 import {
   Modal,
   ModalContent,
@@ -9,15 +13,16 @@ import {
   ModalFooter,
   useDisclosure,
 } from '@heroui/modal';
-import {Button} from '@heroui/button';
-import {Input, Textarea} from '@heroui/input';
-import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
 import {Select, SelectItem} from '@heroui/select';
-import {Badge} from '@heroui/badge';
-import {showToast} from '@/components/Toast';
+import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
 import {Tab, Tabs} from '@heroui/tabs';
-import {createClient} from '@/utils/supabase/client';
+
 import {TrashIcon, PlusIcon} from '@heroicons/react/24/outline';
+
+import {showToast} from '@/components/ui/feedback/Toast';
+
+import {createClient} from '@/utils/supabase/client';
+
 import {ROLE_OPTIONS} from '@/constants';
 
 interface UserFormData {
@@ -96,7 +101,7 @@ export default function UserFormModal({
     }
   };
 
-  // Load categories
+  // Load category
   const loadCategories = async () => {
     try {
       const supabase = createClient();
@@ -105,11 +110,11 @@ export default function UserFormModal({
       if (error) throw error;
       setCategories(data || []);
     } catch (error: any) {
-      console.error('Error loading categories:', error);
+      console.error('Error loading category:', error);
     }
   };
 
-  // Check if role requires categories
+  // Check if role requires category
   const roleRequiresCategories = (role: string) => {
     return role === 'coach' || role === 'head_coach';
   };
@@ -118,7 +123,7 @@ export default function UserFormModal({
   const handleAddRole = async () => {
     if (!newRole || !selectedUser) return;
 
-    // If role requires categories, show category selection modal
+    // If role requires category, show category selection modal
     if (roleRequiresCategories(newRole)) {
       setPendingRole(newRole);
       setSelectedCategories([]);
@@ -126,7 +131,7 @@ export default function UserFormModal({
       return;
     }
 
-    // For roles that don't require categories, add directly
+    // For roles that don't require category, add directly
     await addRoleToDatabase(newRole, null);
   };
 
@@ -243,7 +248,7 @@ export default function UserFormModal({
     }
   }, [selectedUser]);
 
-  // Load categories on component mount
+  // Load category on component mount
   useEffect(() => {
     loadCategories();
   }, []);

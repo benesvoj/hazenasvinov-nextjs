@@ -1,4 +1,5 @@
 import {Card, CardBody} from '@heroui/react';
+
 import {formatDateToDayAndMonth} from '@/helpers';
 
 interface MatchResultCardProps {

@@ -1,10 +1,12 @@
 'use client';
 
 import React, {ChangeEvent, useCallback} from 'react';
-import {Match} from '@/types';
-import {Heading, UnifiedModal, MatchResultInput} from '@/components';
+
 import {translations} from '@/lib/translations';
+
+import {Heading, UnifiedModal, MatchResultInput} from '@/components';
 import {formatDateString} from '@/helpers';
+import {Match} from '@/types';
 
 interface AddResultModalProps {
   isOpen: boolean;

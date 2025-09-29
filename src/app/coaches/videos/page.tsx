@@ -1,14 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Video, VideoFormData, VideoFilters } from '@/types';
-import { useAuth, useUserRoles } from '@/hooks';
-import { useVideos } from '@/hooks/useVideos';
-import { useAppData } from '@/contexts/AppDataContext';
-import { VideoCameraIcon } from '@heroicons/react/24/outline';
-import { Button } from '@heroui/react';
-import { DeleteConfirmationModal, VideoPageLayout } from '@/components';
+import React, {useState, useEffect, useCallback} from 'react';
 
+import {Button} from '@heroui/react';
+
+import {VideoCameraIcon} from '@heroicons/react/24/outline';
+
+import {useVideos} from '@/hooks/entities/video/useVideos';
+
+import {useAppData} from '@/contexts/AppDataContext';
+
+import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
+import {useAuth, useUserRoles} from '@/hooks';
+import {Video, VideoFormData, VideoFilters} from '@/types';
 
 export default function CoachesVideosPage() {
   const [filters, setFilters] = useState<VideoFilters>({});
@@ -19,17 +23,11 @@ export default function CoachesVideosPage() {
   const [assignedCategories, setAssignedCategories] = useState<string[]>([]);
 
   // Use AppDataContext for common data
-  const {
-    categories,
-    clubs,
-    seasons,
-    categoriesLoading,
-    clubsLoading,
-    seasonsLoading,
-  } = useAppData();
-  
-  const { user, loading: authLoading } = useAuth();
-  const { getCurrentUserCategories } = useUserRoles();
+  const {categories, clubs, seasons, categoriesLoading, clubsLoading, seasonsLoading} =
+    useAppData();
+
+  const {user, loading: authLoading} = useAuth();
+  const {getCurrentUserCategories} = useUserRoles();
 
   const {
     videos,
@@ -45,13 +43,13 @@ export default function CoachesVideosPage() {
     totalCount,
     itemsPerPage,
     goToPage,
-  } = useVideos({ 
-    assignedCategories, 
+  } = useVideos({
+    assignedCategories,
     enableAccessControl: true,
-    itemsPerPage: 20
+    itemsPerPage: 20,
   });
 
-  // Fetch coach's assigned categories using new role system
+  // Fetch coach's assigned category using new role system
   const fetchAssignedCategories = useCallback(async () => {
     if (!user?.id) return;
 
@@ -59,7 +57,7 @@ export default function CoachesVideosPage() {
       const categories = await getCurrentUserCategories();
       setAssignedCategories(categories);
     } catch (err) {
-      console.error('Error fetching assigned categories:', err);
+      console.error('Error fetching assigned category:', err);
       setAssignedCategories([]);
     }
   }, [user?.id, getCurrentUserCategories]);
@@ -73,7 +71,7 @@ export default function CoachesVideosPage() {
   // Categories, clubs, and seasons are now provided by AppDataContext
   // No need for individual fetching
 
-  // Fetch videos when filters or assigned categories change
+  // Fetch videos when filters or assigned category change
   useEffect(() => {
     if (assignedCategories.length > 0) {
       fetchVideos(filters);
@@ -93,7 +91,7 @@ export default function CoachesVideosPage() {
 
   const handleUpdateVideo = async (formData: VideoFormData) => {
     if (!editingVideo) return;
-    
+
     try {
       await updateVideo(editingVideo.id, formData);
       setEditingVideo(null);
@@ -146,32 +144,32 @@ export default function CoachesVideosPage() {
     fetchVideos(filters, page);
   };
 
-  // Filter categories to only show assigned ones
-  const availableCategories = categories.filter(cat => 
-    assignedCategories.includes(cat.id)
-  );
+  // Filter category to only show assigned ones
+  const availableCategories = categories.filter((cat) => assignedCategories.includes(cat.id));
 
   // Access control message
-  const accessControlMessage = assignedCategories.length === 0 ? (
-    <div className="flex items-center gap-3">
-      <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-        <VideoCameraIcon className="w-5 h-5 text-yellow-600" />
+  const accessControlMessage =
+    assignedCategories.length === 0 ? (
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+          <VideoCameraIcon className="w-5 h-5 text-yellow-600" />
+        </div>
+        <div>
+          <h3 className="font-medium text-yellow-900">Žádné přiřazené kategorie</h3>
+          <p className="text-sm text-yellow-700">
+            Nemáte přiřazené žádné kategorie. Kontaktujte administrátora pro přiřazení kategorií.
+          </p>
+        </div>
       </div>
-      <div>
-        <h3 className="font-medium text-yellow-900">Žádné přiřazené kategorie</h3>
-        <p className="text-sm text-yellow-700">
-          Nemáte přiřazené žádné kategorie. Kontaktujte administrátora pro přiřazení kategorií.
-        </p>
-      </div>
-    </div>
-  ) : null;
+    ) : null;
 
   // Additional info for header
-  const additionalInfo = assignedCategories.length > 0 ? (
-    <p className="text-sm text-gray-500">
-      Máte přístup k {availableCategories.length} kategoriím
-    </p>
-  ) : null;
+  const additionalInfo =
+    assignedCategories.length > 0 ? (
+      <p className="text-sm text-gray-500">
+        Máte přístup k {availableCategories.length} kategoriím
+      </p>
+    ) : null;
 
   if (authLoading || (loading && videos.length === 0)) {
     return (
@@ -182,7 +180,7 @@ export default function CoachesVideosPage() {
             <p className="text-gray-600">Správa videí pro vaše kategorie</p>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse" />
@@ -203,7 +201,6 @@ export default function CoachesVideosPage() {
         buttonText="Přidat video"
         onAddVideo={openCreateModal}
         isAddDisabled={assignedCategories.length === 0}
-
         // Data props
         videos={videos}
         loading={loading}
@@ -213,22 +210,18 @@ export default function CoachesVideosPage() {
         clubs={clubs}
         seasons={seasons}
         availableCategories={availableCategories}
-
         // Event handlers
         onFiltersChange={setFilters}
         onEdit={openEditModal}
         onDelete={openDeleteModal}
         onFormSubmit={handleFormSubmit}
-
         // Modal props
         isFormModalOpen={isFormModalOpen}
         editingVideo={editingVideo}
         onCloseModals={closeModals}
-
         // Access control
         showAccessControlMessage={assignedCategories.length === 0}
         accessControlMessage={accessControlMessage}
-
         // Empty state customization
         emptyStateTitle="Žádná videa"
         emptyStateDescription={
@@ -237,7 +230,6 @@ export default function CoachesVideosPage() {
             : 'Zatím nejsou přidána žádná videa pro vaše kategorie.'
         }
         showAddButton={!filters.search && !filters.category_id && filters.is_active === undefined}
-        
         // Pagination props
         currentPage={currentPage}
         totalPages={totalPages}

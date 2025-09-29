@@ -1,11 +1,6 @@
-import { createClient } from "@/utils/supabase/server";
-import {
-  Category,
-  Match,
-  BlogPost,
-  ProcessedStanding,
-  Season,
-} from "@/types";
+import {createClient} from '@/utils/supabase/server';
+
+import {Category, Match, BlogPost, ProcessedStanding, Season} from '@/types';
 
 export interface CategoryPageServerData {
   category: Category | null;
@@ -45,14 +40,14 @@ export async function getCategoryPageData(
     // Batch 1: Get category and active season in parallel
     const [categoryResult, seasonResult] = await Promise.all([
       supabase
-        .from("categories")
-        .select("id, name, description, is_active, sort_order, slug")
-        .eq("slug", categorySlug)
+        .from('categories')
+        .select('id, name, description, is_active, sort_order, slug')
+        .eq('slug', categorySlug)
         .single(),
       supabase
-        .from("seasons")
-        .select("id, name, is_active, start_date, end_date")
-        .eq("is_active", true)
+        .from('seasons')
+        .select('id, name, is_active, start_date, end_date')
+        .eq('is_active', true)
         .single(),
     ]);
 
@@ -68,25 +63,24 @@ export async function getCategoryPageData(
     const season = seasonResult.data;
 
     // Batch 2: Execute remaining queries in parallel
-    const [postsResult, matchesResult, standingsResult, clubCategoriesResult] =
-      await Promise.all([
-        // Posts query - filter by category
-        includePosts
-          ? supabase
-              .from("blog_posts")
-              .select("*")
-              .eq("status", "published")
-              .eq("category_id", category.id)
-              .order("created_at", { ascending: false })
-              .limit(postsLimit)
-          : Promise.resolve({ data: [], error: null }),
+    const [postsResult, matchesResult, standingsResult, clubCategoriesResult] = await Promise.all([
+      // Posts query - filter by category
+      includePosts
+        ? supabase
+            .from('blog_posts')
+            .select('*')
+            .eq('status', 'published')
+            .eq('category_id', category.id)
+            .order('created_at', {ascending: false})
+            .limit(postsLimit)
+        : Promise.resolve({data: [], error: null}),
 
-        // Matches query with team details
-        includeMatches
-          ? supabase
-              .from("matches")
-              .select(
-                `
+      // Matches query with team details
+      includeMatches
+        ? supabase
+            .from('matches')
+            .select(
+              `
           id,
           date,
           time,
@@ -130,18 +124,18 @@ export async function getCategoryPageData(
             )
           )
         `
-              )
-              .eq("category_id", category.id)
-              .eq("season_id", season.id)
-              .order("date", { ascending: true })
-          : Promise.resolve({ data: [], error: null }),
+            )
+            .eq('category_id', category.id)
+            .eq('season_id', season.id)
+            .order('date', {ascending: true})
+        : Promise.resolve({data: [], error: null}),
 
-        // Standings query with team details
-        includeStandings
-          ? supabase
-              .from("standings")
-              .select(
-                `
+      // Standings query with team details
+      includeStandings
+        ? supabase
+            .from('standings')
+            .select(
+              `
           id,
           team_id,
           matches,
@@ -166,17 +160,17 @@ export async function getCategoryPageData(
             )
           )
         `
-              )
-              .eq("category_id", category.id)
-              .eq("season_id", season.id)
-              .order("position", { ascending: true })
-          : Promise.resolve({ data: [], error: null }),
+            )
+            .eq('category_id', category.id)
+            .eq('season_id', season.id)
+            .order('position', {ascending: true})
+        : Promise.resolve({data: [], error: null}),
 
-        // Club categories query - moved from separate execution
-        supabase
-          .from("club_categories")
-          .select(
-            `
+      // Club category query - moved from separate execution
+      supabase
+        .from('club_categories')
+        .select(
+          `
           id,
           max_teams,
           club:clubs(
@@ -187,17 +181,17 @@ export async function getCategoryPageData(
             is_own_club
           )
         `
-          )
-          .eq("category_id", category.id)
-          .eq("season_id", season.id),
-      ]);
+        )
+        .eq('category_id', category.id)
+        .eq('season_id', season.id),
+    ]);
 
     // Process results
     let posts: BlogPost[] = [];
     let matches: Match[] = [];
     let standings: ProcessedStanding[] = [];
-    
-    // Get club categories to determine which clubs need suffixes (max_teams > 1)
+
+    // Get club category to determine which clubs need suffixes (max_teams > 1)
     const clubsNeedingSuffixes = new Set<string>();
     if (!clubCategoriesResult.error && clubCategoriesResult.data) {
       clubCategoriesResult.data.forEach((clubCategory: any) => {
@@ -214,7 +208,7 @@ export async function getCategoryPageData(
       // Posts are already filtered by category_id at the database level
       posts = allPosts.map((post: BlogPost) => ({
         ...post,
-        content: post.content?.substring(0, 150) + "..." || "Bez popisu",
+        content: post.content?.substring(0, 150) + '...' || 'Bez popisu',
         image_url: post.image_url || undefined,
       }));
     }
@@ -232,8 +226,8 @@ export async function getCategoryPageData(
         let homeShortName: string;
 
         if (!homeClub || !homeClub.name) {
-          homeTeamName = "Neznámý tým";
-          homeShortName = "Neznámý tým";
+          homeTeamName = 'Neznámý tým';
+          homeShortName = 'Neznámý tým';
         } else {
           const clubName = homeClub.name;
           const teamSuffix = homeTeamDetails.team_suffix;
@@ -262,8 +256,8 @@ export async function getCategoryPageData(
         let awayShortName: string;
 
         if (!awayClub || !awayClub.name) {
-          awayTeamName = "Neznámý tým";
-          awayShortName = "Neznámý tým";
+          awayTeamName = 'Neznámý tým';
+          awayShortName = 'Neznámý tým';
         } else {
           const clubName = awayClub.name;
           const teamSuffix = awayTeamDetails.team_suffix;
@@ -306,8 +300,7 @@ export async function getCategoryPageData(
       // Filter matches to only show those where the user's club is playing
       matches = processedMatches.filter(
         (match: any) =>
-          match.home_team?.is_own_club === true ||
-          match.away_team?.is_own_club === true
+          match.home_team?.is_own_club === true || match.away_team?.is_own_club === true
       ) as Match[];
     }
 
@@ -317,54 +310,11 @@ export async function getCategoryPageData(
       // Club analysis already done above
 
       // Process standings to include team names and club information
-      const transformedStandings = allStandings.map(
-        (standing: any): ProcessedStanding => {
-          const team = standing.team;
-          const club = team?.club_category?.club;
+      const transformedStandings = allStandings.map((standing: any): ProcessedStanding => {
+        const team = standing.team;
+        const club = team?.club_category?.club;
 
-          if (!club || !club.name) {
-            return {
-              id: standing.id,
-              team_id: standing.team_id,
-              matches: standing.matches,
-              wins: standing.wins,
-              draws: standing.draws,
-              losses: standing.losses,
-              goals_for: standing.goals_for,
-              goals_against: standing.goals_against,
-              points: standing.points,
-              position: standing.position,
-              team: {
-                id: team?.id,
-                name: "Neznámý tým",
-                shortName: "Neznámý tým",
-                displayName: "Neznámý tým",
-                shortDisplayName: "Neznámý tým",
-                logo_url: undefined,
-              },
-            };
-          }
-
-          const clubName = club.name;
-          const teamSuffix = team.team_suffix;
-          const thisClubNeedsSuffixes = clubsNeedingSuffixes.has(clubName);
-
-          // Create team names based on whether this club needs suffixes
-          let teamName: string;
-          let shortTeamName: string;
-
-          if (thisClubNeedsSuffixes) {
-            // Club has max_teams > 1 - include suffix
-            teamName = `${clubName} ${teamSuffix}`;
-            shortTeamName = club.short_name
-              ? `${club.short_name} ${teamSuffix}`
-              : teamName;
-          } else {
-            // Club has max_teams = 1 - no suffix needed
-            teamName = clubName;
-            shortTeamName = club.short_name || clubName;
-          }
-
+        if (!club || !club.name) {
           return {
             id: standing.id,
             team_id: standing.team_id,
@@ -378,15 +328,54 @@ export async function getCategoryPageData(
             position: standing.position,
             team: {
               id: team?.id,
-              name: teamName,
-              shortName: shortTeamName,
-              displayName: teamName,
-              shortDisplayName: shortTeamName,
-              logo_url: club?.logo_url,
+              name: 'Neznámý tým',
+              shortName: 'Neznámý tým',
+              displayName: 'Neznámý tým',
+              shortDisplayName: 'Neznámý tým',
+              logo_url: undefined,
             },
           };
         }
-      );
+
+        const clubName = club.name;
+        const teamSuffix = team.team_suffix;
+        const thisClubNeedsSuffixes = clubsNeedingSuffixes.has(clubName);
+
+        // Create team names based on whether this club needs suffixes
+        let teamName: string;
+        let shortTeamName: string;
+
+        if (thisClubNeedsSuffixes) {
+          // Club has max_teams > 1 - include suffix
+          teamName = `${clubName} ${teamSuffix}`;
+          shortTeamName = club.short_name ? `${club.short_name} ${teamSuffix}` : teamName;
+        } else {
+          // Club has max_teams = 1 - no suffix needed
+          teamName = clubName;
+          shortTeamName = club.short_name || clubName;
+        }
+
+        return {
+          id: standing.id,
+          team_id: standing.team_id,
+          matches: standing.matches,
+          wins: standing.wins,
+          draws: standing.draws,
+          losses: standing.losses,
+          goals_for: standing.goals_for,
+          goals_against: standing.goals_against,
+          points: standing.points,
+          position: standing.position,
+          team: {
+            id: team?.id,
+            name: teamName,
+            shortName: shortTeamName,
+            displayName: teamName,
+            shortDisplayName: shortTeamName,
+            logo_url: club?.logo_url,
+          },
+        };
+      });
 
       standings = transformedStandings;
     }
@@ -407,12 +396,8 @@ export async function getCategoryPageData(
     });
 
     // Sort matches by date
-    autumnMatches.sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-    springMatches.sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
+    autumnMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     return {
       category,

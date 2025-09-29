@@ -1,6 +1,9 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
+
+import Link from 'next/link';
+
 import {
   Input,
   Button,
@@ -15,6 +18,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from '@heroui/react';
+
 import {
   PlusIcon,
   PencilIcon,
@@ -22,10 +26,12 @@ import {
   EyeIcon,
   BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
+
+import LogoUpload from '@/components/ui/forms/LogoUpload';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {Club} from '@/types';
-import Link from 'next/link';
-import LogoUpload from '@/components/LogoUpload';
 
 export default function ClubsAdminPage() {
   const [clubs, setClubs] = useState<Club[]>([]);

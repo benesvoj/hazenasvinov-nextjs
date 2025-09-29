@@ -1,9 +1,12 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import { Button, Card, CardBody, CardHeader } from '@heroui/react';
-import { ShieldExclamationIcon, ArrowLeftIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+
+import {useRouter} from 'next/navigation';
+
+import {Button, Card, CardBody, CardHeader} from '@heroui/react';
+
+import {ShieldExclamationIcon, ArrowLeftIcon, EnvelopeIcon} from '@heroicons/react/24/outline';
 
 export default function BlockedPage() {
   const router = useRouter();
@@ -27,7 +30,8 @@ export default function BlockedPage() {
               <div>
                 <h3 className="text-sm font-medium text-red-800">Proč byl účet zablokován?</h3>
                 <p className="text-sm text-red-700 mt-1">
-                  Možné důvody zahrnují porušení pravidel, bezpečnostní riziko nebo dočasné omezení přístupu.
+                  Možné důvody zahrnují porušení pravidel, bezpečnostní riziko nebo dočasné omezení
+                  přístupu.
                 </p>
               </div>
             </div>
@@ -46,21 +50,17 @@ export default function BlockedPage() {
           </div>
 
           <div className="space-y-3">
-            <Button 
-              color="primary" 
-              variant="light" 
+            <Button
+              color="primary"
+              variant="light"
               onPress={() => router.push('/login')}
               className="w-full"
               startContent={<ArrowLeftIcon className="w-4 h-4" />}
             >
               Zpět na přihlášení
             </Button>
-            
-            <Button 
-              variant="light" 
-              onPress={() => router.push('/')}
-              className="w-full"
-            >
+
+            <Button variant="light" onPress={() => router.push('/')} className="w-full">
               Přejít na úvodní stránku
             </Button>
           </div>

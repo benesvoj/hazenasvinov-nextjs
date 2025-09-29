@@ -1,10 +1,14 @@
 'use client';
 
 import React, {useState} from 'react';
-import {Card, CardHeader, CardBody, Button} from '@heroui/react';
-import {VideoCameraIcon, PlayIcon, LinkIcon, CheckIcon} from '@heroicons/react/24/outline';
-import {LoadingSpinner} from '@/components';
+
 import Image from 'next/image';
+
+import {Card, CardHeader, CardBody, Button} from '@heroui/react';
+
+import {VideoCameraIcon, PlayIcon, LinkIcon, CheckIcon} from '@heroicons/react/24/outline';
+
+import {LoadingSpinner} from '@/components';
 import {formatDateString} from '@/helpers';
 
 interface Video {

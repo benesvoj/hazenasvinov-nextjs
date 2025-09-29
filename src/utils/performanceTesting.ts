@@ -3,14 +3,16 @@
  */
 
 import {performance} from 'perf_hooks';
+
+import {performanceMonitor} from '@/hooks/admin/usePerformanceMonitoring';
+
+import type {MatchQueryOptions} from '@/services/matchQueries';
 import {
   getMatchesBasicOptimized,
   getMatchesWithTeamsOptimized,
   getMatchesSeasonalOptimized,
   getOwnClubMatchesOptimized,
 } from '@/services/optimizedMatchQueries';
-import {performanceMonitor} from '@/lib/performanceMonitor';
-import type {MatchQueryOptions} from '@/services/matchQueries';
 
 interface PerformanceTestResult {
   testName: string;
@@ -255,7 +257,7 @@ export async function runPerformanceTestSuite(
 
   console.log('🚀 Starting performance test suite...');
 
-  // Run all test categories
+  // Run all test category
   const basicTests = await runBasicMatchTests(categoryId, seasonId);
   tests.push(...basicTests);
 

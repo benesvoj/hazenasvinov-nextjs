@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useState, useMemo, useEffect, useRef} from 'react';
+
 import {
   Modal,
   ModalContent,
@@ -21,10 +22,12 @@ import {
   Image,
   Pagination,
 } from '@heroui/react';
-import {Video} from '@/types';
-import {useVideos} from '@/hooks';
-import {formatDateString} from '@/helpers';
+
 import {MinusIcon, PlusIcon} from '@heroicons/react/24/outline';
+
+import {formatDateString} from '@/helpers';
+import {useVideos} from '@/hooks';
+import {Video} from '@/types';
 
 interface VideoSelectionModalProps {
   isOpen: boolean;
