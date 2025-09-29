@@ -1,7 +1,10 @@
 import React from 'react';
+
 import {CardBody} from '@heroui/react';
+
 import {LoadingSpinner} from '@/components';
 import {LineupPlayerFormData, LineupCoachFormData} from '@/types';
+
 import LineupEmptyState from '../LineupEmptyState';
 import LineupTabs from '../LineupTabs';
 

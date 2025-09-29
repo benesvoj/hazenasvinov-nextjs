@@ -1,8 +1,10 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
-import {Card, CardBody, CardHeader} from '@heroui/card';
+
+import {Badge} from '@heroui/badge';
 import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
 import {Input} from '@heroui/input';
 import {
   Modal,
@@ -12,11 +14,14 @@ import {
   ModalFooter,
   useDisclosure,
 } from '@heroui/modal';
-import {Badge} from '@heroui/badge';
+
 import {BuildingOfficeIcon, PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
-import {createClient} from '@/utils/supabase/client';
-import {AdminContainer} from '../../../components/admin/AdminContainer';
+
+import {AdminContainer} from '@/components/features/admin/AdminContainer';
+
 import {translations} from '@/lib/translations';
+
+import {createClient} from '@/utils/supabase/client';
 
 interface Committee {
   id: string;

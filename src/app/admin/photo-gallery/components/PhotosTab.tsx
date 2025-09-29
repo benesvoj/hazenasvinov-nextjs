@@ -1,11 +1,13 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
-import {Card, CardBody} from '@heroui/card';
-import {Button} from '@heroui/button';
-import {Select, SelectItem} from '@heroui/select';
+
 import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Card, CardBody} from '@heroui/card';
 import {Image} from '@heroui/image';
+import {Select, SelectItem} from '@heroui/select';
+
 import {
   PlusIcon,
   PencilIcon,
@@ -15,12 +17,16 @@ import {
   ArrowDownIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
+
 import {
   PhotoAlbum,
   Photo,
   CreatePhotoData,
   UpdatePhotoData,
 } from '@/types/features/gallery/photoGallery';
+
+import DeleteConfirmationModal from '@/components/ui/modals/DeleteConfirmationModal';
+
 import {
   getPhotoAlbums,
   getPhotosByAlbum,
@@ -30,7 +36,7 @@ import {
   reorderPhotos,
 } from '@/utils/supabase/photoGallery';
 import {uploadClubAsset, deleteClubAsset} from '@/utils/supabase/storage';
-import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+
 import PhotoFormModal from './PhotoFormModal';
 import PhotoUploadModal from './PhotoUploadModal';
 

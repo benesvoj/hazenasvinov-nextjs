@@ -1,41 +1,44 @@
-import "./globals.css";
+import './globals.css';
 
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { ConditionalProviders } from "@/components/ConditionalProviders";
-import React from "react";
+import React from 'react';
 
-const inter = Inter({ subsets: ["latin"] });
+import {Inter} from 'next/font/google';
+
+import type {Metadata} from 'next';
+
+import {ConditionalProviders} from '@/components/providers/ConditionalProviders';
+
+const inter = Inter({subsets: ['latin']});
 
 // Helper function to get the base URL based on environment
 function getBaseUrl() {
   // In production, use the production URL
-  if (process.env.NODE_ENV === "production") {
-    return "https://hazenasvinov.cz";
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://hazenasvinov.cz';
   }
 
   // In development, use localhost (hardcoded to avoid webpack serialization)
-  return "http://localhost:3000";
+  return 'http://localhost:3000';
 }
 
 export const metadata: Metadata = {
-  title: "TJ Sokol Svinov - Národní házená",
-  description: "Oficiální web oddílu národní házené TJ Sokol Svinov",
+  title: 'TJ Sokol Svinov - Národní házená',
+  description: 'Oficiální web oddílu národní házené TJ Sokol Svinov',
   metadataBase: new URL(getBaseUrl()),
   openGraph: {
-    title: "TJ Sokol Svinov",
-    description: "Oddíl národní házené s více než 90letou tradicí",
-    images: ["/og-image.jpg"],
+    title: 'TJ Sokol Svinov',
+    description: 'Oddíl národní házené s více než 90letou tradicí',
+    images: ['/og-image.jpg'],
     url: getBaseUrl(),
-    siteName: "TJ Sokol Svinov",
-    locale: "cs_CZ",
-    type: "website",
+    siteName: 'TJ Sokol Svinov',
+    locale: 'cs_CZ',
+    type: 'website',
   },
   twitter: {
-    card: "summary_large_image",
-    title: "TJ Sokol Svinov - Národní házená",
-    description: "Oddíl národní házené s více než 90letou tradicí",
-    images: ["/og-image.jpg"],
+    card: 'summary_large_image',
+    title: 'TJ Sokol Svinov - Národní házená',
+    description: 'Oddíl národní házené s více než 90letou tradicí',
+    images: ['/og-image.jpg'],
   },
   robots: {
     index: true,
@@ -51,9 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={inter.className}>
-        <ConditionalProviders>
-          {children}
-        </ConditionalProviders>
+        <ConditionalProviders>{children}</ConditionalProviders>
       </body>
     </html>
   );

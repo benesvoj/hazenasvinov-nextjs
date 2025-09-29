@@ -1,9 +1,10 @@
 'use client';
 
 import {useMemo} from 'react';
+
 import {UnifiedModal, UnifiedPlayerManager} from '@/components';
-import {PlayerSearchResult, LineupPlayerFormData, LineupPlayerSelectionModalProps} from '@/types';
 import {PlayerPosition} from '@/enums';
+import {PlayerSearchResult, LineupPlayerFormData, LineupPlayerSelectionModalProps} from '@/types';
 
 export default function LineupPlayerSelectionModal({
   isOpen,
@@ -21,7 +22,7 @@ export default function LineupPlayerSelectionModal({
     const lineupPlayer: LineupPlayerFormData = {
       position: player.position || PlayerPosition.FIELD_PLAYER,
       is_captain: player.is_captain,
-      member_id: player.id, // Most players have member_id (created in members table), but legacy external players may not during migration
+      member_id: player.id, // Most player-manager have member_id (created in members table), but legacy external player-manager may not during migration
       jersey_number: player.jersey_number,
     };
 
@@ -31,7 +32,7 @@ export default function LineupPlayerSelectionModal({
   const isEditing = editingPlayerIndex !== null && editingPlayerIndex !== undefined;
   const modalTitle = isEditing ? 'Upravit hráče' : 'Vybrat hráče';
 
-  // Get player IDs to exclude (current lineup players, excluding the one being edited)
+  // Get player IDs to exclude (current lineup player-manager, excluding the one being edited)
   const excludePlayerIds = useMemo(() => {
     return currentLineupPlayers
       .map((player) => player.member_id)

@@ -1,5 +1,6 @@
-import {Member} from './member';
 import {PlayerLoan} from '../business/playerLoan';
+
+import {Member} from './member';
 
 export interface UnifiedPlayer extends Member {
   // Club information
@@ -68,6 +69,6 @@ export interface UnifiedPlayerManagerProps {
   onPlayerSelected?: (player: PlayerSearchResult) => void;
   categoryId?: string;
   teamName?: string;
-  excludePlayerIds?: string[]; // IDs of players already in the lineup
+  excludePlayerIds?: string[]; // IDs of player-manager already in the lineup
   onMemberCreated?: () => void; // Callback when a new member is created
 }

@@ -103,7 +103,7 @@ Create enhanced player management page:
 
 ```tsx
 // New admin page
-import UnifiedPlayerManager from '@/components/players/UnifiedPlayerManager';
+import UnifiedPlayerManager from '@/components/player-manager/UnifiedPlayerManager';
 
 <UnifiedPlayerManager 
   clubId={currentClubId}
@@ -117,7 +117,7 @@ import UnifiedPlayerManager from '@/components/players/UnifiedPlayerManager';
 ```typescript
 // In component props
 <UnifiedPlayerManager 
-  showExternalPlayers={true}  // Show external players
+  showExternalPlayers={true}  // Show external player-manager
   onPlayerSelected={handleSelection}  // Player selection callback
 />
 

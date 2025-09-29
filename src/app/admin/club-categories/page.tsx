@@ -1,10 +1,10 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
-import {Card, CardBody, CardHeader} from '@heroui/card';
+
 import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
 import {Input} from '@heroui/input';
-import {Select, SelectItem} from '@heroui/react';
 import {
   Modal,
   ModalContent,
@@ -13,6 +13,8 @@ import {
   ModalFooter,
   useDisclosure,
 } from '@heroui/modal';
+import {Select, SelectItem} from '@heroui/react';
+
 import {
   PlusIcon,
   PencilIcon,
@@ -21,9 +23,10 @@ import {
   TrophyIcon,
   CalendarIcon,
 } from '@heroicons/react/24/outline';
+
 import {createClient} from '@/utils/supabase/client';
-import {Club, Category} from '@/types';
-import {Season} from '@/types';
+
+import {Club, Category, Season} from '@/types';
 
 interface ClubCategory {
   id: string;

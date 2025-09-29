@@ -1,7 +1,9 @@
 import {useState, useCallback} from 'react';
+
 import {createClient} from '@/utils/supabase/client';
-import {Category, CategorySeason} from '@/types';
+
 import {CompetitionTypes} from '@/enums';
+import {Category, CategorySeason} from '@/types';
 
 export interface UseCategoriesResult {
   // Data

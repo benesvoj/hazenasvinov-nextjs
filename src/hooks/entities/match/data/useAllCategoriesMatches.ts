@@ -1,7 +1,9 @@
 import {useState, useEffect} from 'react';
-import {useSeasons} from '@/hooks';
+
 import {createClient} from '@/utils/supabase/client';
 import {transformMatchWithTeamNames} from '@/utils/teamDisplay';
+
+import {useSeasons} from '@/hooks';
 
 export function useAllCategoriesMatches() {
   const {activeSeason} = useSeasons();

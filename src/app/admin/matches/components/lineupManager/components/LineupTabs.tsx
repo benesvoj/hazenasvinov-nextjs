@@ -1,8 +1,11 @@
 import React from 'react';
+
 import {Tabs, Tab} from '@heroui/react';
+
 import {LineupPlayerFormData, LineupCoachFormData} from '@/types';
-import PlayersTable from './PlayersTable';
+
 import CoachesTable from './CoachesTable';
+import PlayersTable from './PlayersTable';
 
 interface LineupTabsProps {
   players: LineupPlayerFormData[];

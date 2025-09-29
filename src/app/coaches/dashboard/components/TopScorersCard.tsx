@@ -1,9 +1,13 @@
 'use client';
 
 import React from 'react';
+
 import {Card, CardBody, CardHeader} from '@heroui/react';
+
 import {TrophyIcon, FireIcon} from '@heroicons/react/24/outline';
+
 import {usePlayerStats} from '@/hooks/entities/player/usePlayerStats';
+
 import {LoadingSpinner} from '@/components';
 
 interface TopScorersCardProps {

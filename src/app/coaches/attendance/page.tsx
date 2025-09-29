@@ -1,10 +1,7 @@
 'use client';
 
 import React, {useState, useEffect, useMemo} from 'react';
-import {useAttendance, useCategoryLineups} from '@/hooks';
-import {useUser} from '@/contexts/UserContext';
-import {useAppData} from '@/contexts/AppDataContext';
-import {PlusIcon, CalendarIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
 import {
   Button,
   Card,
@@ -20,14 +17,22 @@ import {
   TableRow,
   TableCell,
 } from '@heroui/react';
-import {TrainingSessionFormData, TrainingSessionStatus} from '@/types';
-import {formatDateString, formatTime} from '@/helpers';
-import {TrainingSessionModal, TrainingSessionGenerator} from './components';
+
+import {PlusIcon, CalendarIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
+import {useAppData} from '@/contexts/AppDataContext';
+import {useUser} from '@/contexts/UserContext';
+
 import {DeleteConfirmationModal, LoadingSpinner, PageContainer} from '@/components';
-import TrainingSessionStatusDialog from './components/TrainingSessionStatusDialog';
-import TrainingSessionStatusBadge from './components/TrainingSessionStatusBadge';
-import AttendanceStatistics from './components/AttendanceStatistics';
+import {formatDateString, formatTime} from '@/helpers';
+import {useAttendance, useCategoryLineups} from '@/hooks';
+import {TrainingSessionFormData, TrainingSessionStatus} from '@/types';
+
+import {TrainingSessionModal, TrainingSessionGenerator} from './components';
 import AttendanceChart from './components/AttendanceChart';
+import AttendanceStatistics from './components/AttendanceStatistics';
+import TrainingSessionStatusBadge from './components/TrainingSessionStatusBadge';
+import TrainingSessionStatusDialog from './components/TrainingSessionStatusDialog';
 
 export default function CoachesAttendancePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');

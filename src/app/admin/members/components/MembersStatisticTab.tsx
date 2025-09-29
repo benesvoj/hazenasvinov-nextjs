@@ -1,9 +1,11 @@
 import React, {useMemo} from 'react';
+
+import {Badge} from '@heroui/badge';
 import {Card, CardBody, CardHeader} from '@heroui/card';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@heroui/table';
-import {Badge} from '@heroui/badge';
-import {MembersStatisticTabProps} from '@/types';
+
 import {Genders, getMemberFunctionOptions} from '@/enums';
+import {MembersStatisticTabProps} from '@/types';
 
 export default function MembersStatisticTab({members, categoriesData}: MembersStatisticTabProps) {
   // Statistics calculations

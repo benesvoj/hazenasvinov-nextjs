@@ -1,16 +1,7 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {useCategoryLineups, useCategories} from '@/hooks';
-import {useSeasons} from '@/hooks/entities/season/useSeasons';
-import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
-import {
-  UserGroupIcon,
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  UserPlusIcon,
-} from '@heroicons/react/24/outline';
+
 import {
   Button,
   Card,
@@ -35,12 +26,27 @@ import {
   TableRow,
   TableCell,
 } from '@heroui/react';
+
+import {
+  UserGroupIcon,
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  UserPlusIcon,
+} from '@heroicons/react/24/outline';
+
 import {
   CategoryLineupFormData,
   AddMemberToLineupData,
 } from '@/types/entities/category/data/categoryLineup';
-import AddMemberModal from './components/AddMemberModal';
+
+import {useSeasons} from '@/hooks/entities/season/useSeasons';
+import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
+
 import {PageContainer} from '@/components';
+import {useCategoryLineups, useCategories} from '@/hooks';
+
+import AddMemberModal from './components/AddMemberModal';
 
 export default function CoachesLineupsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');

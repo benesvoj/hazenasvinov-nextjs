@@ -1,13 +1,18 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
+
 import {Input, NumberInput, Select, SelectItem, Button} from '@heroui/react';
+
 import {MagnifyingGlassIcon} from '@heroicons/react/24/outline';
-import {Match, Nullish, Video, EditMatchFormData} from '@/types';
-import {UnifiedModal, Heading, showToast} from '@/components';
+
 import {translations} from '@/lib/translations';
+
+import {UnifiedModal, Heading, showToast} from '@/components';
 import {matchStatuses} from '@/constants';
 import {useTeamClub, useMatchVideos} from '@/hooks';
+import {Match, Nullish, Video, EditMatchFormData} from '@/types';
+
 import VideoSelectionModal from './VideoSelectionModal';
 
 interface FilteredTeam {

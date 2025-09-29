@@ -1,6 +1,9 @@
 import {useState, useEffect, useCallback} from 'react';
-import {createClient} from '@/utils/supabase/client';
+
 import {translations} from '@/lib/translations';
+
+import {createClient} from '@/utils/supabase/client';
+
 import {Category, Season, Team} from '@/types';
 
 /**

@@ -1,19 +1,25 @@
 'use client';
 
 import React from 'react';
+
 import {Card, CardBody} from '@heroui/card';
-import Link from '@/components/Link';
-import {Match} from '@/types';
+
 import {MapPinIcon} from '@heroicons/react/24/outline';
+
+import Link from '@/components/ui/link/Link';
+
+import {MatchScore} from '@/components';
 import {
   formatDateToDayAndMonth,
   formatDateToWeekday,
   formatDateString,
   formatTime,
 } from '@/helpers';
+import {Match} from '@/types';
+
 import TeamDisplay from './TeamDisplay';
 import TeamDisplayMobile from './TeamDisplayMobile';
-import {MatchScore} from '@/components';
+
 interface MatchCardProps {
   match: Match;
 }

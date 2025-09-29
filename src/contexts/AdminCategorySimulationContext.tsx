@@ -1,7 +1,9 @@
 'use client';
 
 import React, {createContext, useContext, useState, useEffect} from 'react';
+
 import {useAppData} from '@/contexts/AppDataContext';
+
 import {Category} from '@/types';
 interface AdminCategorySimulationContextType {
   selectedCategories: string[];

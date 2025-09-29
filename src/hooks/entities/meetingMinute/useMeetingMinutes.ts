@@ -1,5 +1,7 @@
 import {useState, useCallback} from 'react';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {MeetingMinutes, MeetingMinutesFilters, MeetingAttendee} from '@/types';
 
 export function useMeetingMinutes() {

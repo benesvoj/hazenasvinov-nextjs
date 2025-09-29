@@ -138,7 +138,7 @@ lineupManager/
 
 ### **Basic Usage**
 ```tsx
-import {LineupManager} from './LineupManager';
+import {LineupManager} from './lineup-manager';
 
 <LineupManager
   matchId="match-123"
@@ -168,7 +168,7 @@ import {LineupManager} from './LineupManager';
 ### **Performance Monitoring**
 ```tsx
 const {metrics, resetMetrics} = useLineupPerformance({
-  componentName: 'LineupManager',
+  componentName: 'lineup-manager',
   logPerformance: true,
   threshold: 16,
 });

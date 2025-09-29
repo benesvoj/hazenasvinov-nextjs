@@ -1,12 +1,18 @@
 'use client';
 
 import {useState, useMemo} from 'react';
+
 import {Card, CardBody, Button, Input, Select, SelectItem} from '@heroui/react';
-import {BlogPostCard, BlogPostCardSkeleton} from '@/components';
+
 import {TagIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
-import {useFetchBlogPosts} from '@/hooks';
+
 import {useDebounce} from '@/hooks/shared/useDebounce';
+
+import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
+
 import {createSearchablePost, searchPosts} from '@/utils/contentSearch';
+
+import {useFetchBlogPosts} from '@/hooks';
 
 export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,4 +1,3 @@
-import {createClient} from './client';
 import {
   PhotoAlbum,
   Photo,
@@ -7,6 +6,8 @@ import {
   CreatePhotoData,
   UpdatePhotoData,
 } from '@/types/features/gallery/photoGallery';
+
+import {createClient} from './client';
 
 // Album operations
 export async function getPhotoAlbums(): Promise<PhotoAlbum[]> {

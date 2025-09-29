@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback, useMemo} from 'react';
-import {createClient} from '@/utils/supabase/client';
+
 import {
   CategoryLineup,
   CategoryLineupMember,
@@ -8,6 +8,9 @@ import {
   AddMemberToLineupData,
   CategoryLineupFilters,
 } from '@/types/entities/category/data/categoryLineup';
+
+import {createClient} from '@/utils/supabase/client';
+
 import {useUser} from '@/contexts/UserContext';
 
 export function useCategoryLineups() {

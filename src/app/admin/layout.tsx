@@ -1,15 +1,18 @@
 'use client';
 
 import React from 'react';
-import {ProtectedRoute} from '@/components';
+
+import {AdminTopBar, AdminSidebar, AdminSidebarContext} from '@/components/features';
+
 import {AdminCategorySimulationProvider} from '@/contexts/AdminCategorySimulationContext';
-import {AdminTopBar, AdminSidebar, AdminSidebarProvider} from '@/components/admin';
+
+import {ProtectedRoute} from '@/components';
 
 export default function AdminLayout({children}: {children: React.ReactNode}) {
   return (
     <ProtectedRoute>
       <AdminCategorySimulationProvider>
-        <AdminSidebarProvider>
+        <AdminSidebarContext>
           <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
             <AdminSidebar />
             <div className="flex-1 transition-all duration-300 ease-in-out w-full lg:ml-64">
@@ -19,7 +22,7 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
               </main>
             </div>
           </div>
-        </AdminSidebarProvider>
+        </AdminSidebarContext>
       </AdminCategorySimulationProvider>
     </ProtectedRoute>
   );

@@ -1,13 +1,15 @@
 'use client';
 
-import {Card, CardBody} from '@heroui/card';
 import {Button} from '@heroui/button';
-import Link from '@/components/Link';
-import {TagIcon} from '@heroicons/react/24/outline';
-import {BlogPostCardSkeleton} from '@/components/BlogPostCard';
-import BlogPostCard from '@/components/BlogPostCard';
-import {ArrowRightIcon} from '@heroicons/react/24/outline';
+import {Card, CardBody} from '@heroui/card';
+
+import {TagIcon, ArrowRightIcon} from '@heroicons/react/24/outline';
+
 import {useFetchBlogPosts} from '@/hooks/entities/blog/useFetchBlogPosts';
+
+import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
+import {Link} from '@/components/ui';
+
 import {translations} from '@/lib/translations';
 
 export default function PostSection() {

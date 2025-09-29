@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
+
 import {Badge} from '@heroui/badge';
 import {Image} from '@heroui/image';
+
 import {Photo} from '@/types/features/gallery/photoGallery';
 
 interface PhotoGridProps {

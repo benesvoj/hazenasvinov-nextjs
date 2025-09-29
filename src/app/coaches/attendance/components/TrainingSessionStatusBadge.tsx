@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
+
 import {Chip} from '@heroui/react';
+
 import {TrainingSessionStatus} from '@/types/entities/attendance/data/attendance';
 
 interface TrainingSessionStatusBadgeProps {

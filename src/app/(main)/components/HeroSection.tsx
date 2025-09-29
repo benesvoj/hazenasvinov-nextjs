@@ -1,9 +1,12 @@
 'use client';
 
-import {useClubConfig} from '@/hooks/entities/club/useClubConfig';
 import {Button} from '@heroui/button';
-import Link from '@/components/Link';
 import {Image} from '@heroui/image';
+
+import {useClubConfig} from '@/hooks/entities/club/useClubConfig';
+
+import Link from '@/components/ui/link/Link';
+
 import {translations} from '@/lib/translations';
 
 export default function HeroSection() {

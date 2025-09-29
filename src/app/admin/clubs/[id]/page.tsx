@@ -1,6 +1,10 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
+
+import Link from 'next/link';
+import {useParams} from 'next/navigation';
+
 import {
   Modal,
   ModalContent,
@@ -14,13 +18,16 @@ import {
   Button,
   Image,
 } from '@heroui/react';
+
 import {PencilIcon, UserGroupIcon, TrophyIcon} from '@heroicons/react/24/outline';
+
+import LogoUpload from '@/components/ui/forms/LogoUpload';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {Category, Season, Club, Team} from '@/types';
-import {useParams} from 'next/navigation';
-import Link from 'next/link';
+
 import {AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation} from './components';
-import LogoUpload from '@/components/LogoUpload';
 
 export default function ClubDetailPage() {
   const params = useParams();

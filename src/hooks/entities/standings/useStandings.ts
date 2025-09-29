@@ -1,7 +1,9 @@
 import {useState, useCallback} from 'react';
+
 import {createClient} from '@/utils/supabase/client';
-import {Standing} from '@/types';
 import {getTeamDisplayNameSafe} from '@/utils/teamDisplay';
+
+import {Standing} from '@/types';
 
 export interface EnhancedStanding extends Omit<Standing, 'club' | 'team'> {
   team: {

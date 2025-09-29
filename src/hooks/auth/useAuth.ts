@@ -1,6 +1,9 @@
-import {createClient} from '@/utils/supabase/client';
 import {useState, useEffect, useRef} from 'react';
+
 import {User, Session} from '@supabase/supabase-js';
+
+import {createClient} from '@/utils/supabase/client';
+
 import {showToast} from '@/components';
 
 // Global flag to prevent multiple login logs for the same session

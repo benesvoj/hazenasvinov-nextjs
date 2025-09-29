@@ -1,4 +1,8 @@
 import {useState, useCallback, useMemo} from 'react';
+
+import {showToast} from '@/components';
+import {TeamTypes, LineupCoachRole, MemberFunction, PlayerPosition, LineupErrorType} from '@/enums';
+import {classifyLineupError} from '@/helpers';
 import {useLineupData, useLineupManager, useTeamClubId} from '@/hooks';
 import {
   LineupFormData,
@@ -7,10 +11,6 @@ import {
   LineupSummary,
   UnknownErrorShape,
 } from '@/types';
-import {TeamTypes, LineupCoachRole, MemberFunction, PlayerPosition} from '@/enums';
-import {showToast} from '@/components';
-import {LineupErrorType} from '@/enums';
-import {classifyLineupError} from '@/helpers';
 
 interface UseLineupDataManagerProps {
   matchId: string;
@@ -356,7 +356,7 @@ export function useLineupDataManager({
 
   // Player operations
   const handleAddPlayer = useCallback(() => {
-    // Clear validation error when user adds players
+    // Clear validation error when user adds player-manager
     if (validationError) {
       setValidationError(null);
     }
@@ -475,7 +475,7 @@ export function useLineupDataManager({
 
   const confirmDeletePlayer = useCallback(() => {
     if (deletingPlayerIndex !== null) {
-      // Clear validation error when user removes players
+      // Clear validation error when user removes player-manager
       if (validationError) {
         setValidationError(null);
       }

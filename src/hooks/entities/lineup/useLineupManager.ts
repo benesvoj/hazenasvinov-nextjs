@@ -1,10 +1,11 @@
 import {useCallback} from 'react';
+
 import {createClient} from '@/utils/supabase/client';
 import {generateLineupId} from '@/utils/uuid';
 
 /**
  * Hook for managing lineup-related Supabase operations
- * Extracted from LineupManager component to separate business logic
+ * Extracted from lineup-manager component to separate business logic
  */
 export function useLineupManager() {
   const supabase = createClient();

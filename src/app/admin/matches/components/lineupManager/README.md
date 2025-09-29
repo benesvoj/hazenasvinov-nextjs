@@ -146,7 +146,7 @@ lineupManager/
 ## 🔄 Usage Example
 
 ```tsx
-import {LineupManager} from './LineupManager';
+import {LineupManager} from './lineup-manager';
 
 <LineupManager
   matchId="match-123"

@@ -9,8 +9,10 @@ import React, {
   useRef,
   useMemo,
 } from 'react';
-import {createClient} from '@/utils/supabase/client';
+
 import {User} from '@supabase/supabase-js';
+
+import {createClient} from '@/utils/supabase/client';
 
 // Types for user data
 export interface UserProfile {

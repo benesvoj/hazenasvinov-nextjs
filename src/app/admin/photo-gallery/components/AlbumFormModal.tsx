@@ -1,11 +1,12 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
 import {Button} from '@heroui/button';
-import {Input} from '@heroui/input';
-import {Textarea} from '@heroui/input';
+import {Input, Textarea} from '@heroui/input';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
 import {Switch} from '@heroui/switch';
+
 import {PhotoAlbum, CreateAlbumData, UpdateAlbumData} from '@/types/features/gallery/photoGallery';
 
 interface AlbumFormModalProps {

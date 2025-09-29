@@ -1,5 +1,7 @@
 import {useState, useEffect, useMemo} from 'react';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {useUser} from '@/contexts/UserContext';
 
 export interface PlayerStats {
@@ -92,7 +94,7 @@ export function usePlayerStats(categoryId?: string): UsePlayerStatsResult {
 
         // Process each player's statistics
         lineupPlayers.forEach((player: any) => {
-          if (!player.member) return; // Skip external players
+          if (!player.member) return; // Skip external player-manager
 
           const playerId = player.member.id;
           const playerName = player.member.name;

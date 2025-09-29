@@ -1,9 +1,11 @@
-import {Card, CardBody} from '@heroui/card';
 import {Button} from '@heroui/button';
-import {TrashIcon} from '@heroicons/react/24/outline';
+import {Card, CardBody} from '@heroui/card';
+import {Checkbox} from '@heroui/checkbox';
 import {Input} from '@heroui/input';
 import {Select, SelectItem} from '@heroui/select';
-import {Checkbox} from '@heroui/checkbox';
+
+import {TrashIcon} from '@heroicons/react/24/outline';
+
 import {LineupPlayerFormData, Member} from '@/types';
 
 interface LineupManagerPlayerCardProps {

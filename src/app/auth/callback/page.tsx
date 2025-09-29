@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import {useEffect} from 'react';
+
+import {useRouter} from 'next/navigation';
+
+import {createClient} from '@/utils/supabase/client';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -11,7 +13,7 @@ export default function AuthCallbackPage() {
     const handleAuthCallback = async () => {
       try {
         const supabase = createClient();
-        
+
         // Get the URL hash parameters
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
@@ -20,7 +22,7 @@ export default function AuthCallbackPage() {
         const type = hashParams.get('type');
         const expiresIn = hashParams.get('expires_in');
         const expiresAt = hashParams.get('expires_at');
-        
+
         // Also check for error parameters
         const error = hashParams.get('error');
         const errorCode = hashParams.get('error_code');
@@ -47,17 +49,17 @@ export default function AuthCallbackPage() {
           pkceType,
           fullUrl: window.location.href,
           hash: window.location.hash,
-          search: window.location.search
+          search: window.location.search,
         });
-        
+
         // Handle error cases first
         if (error) {
-          console.error('Auth callback error:', { error, errorCode, errorDescription });
+          console.error('Auth callback error:', {error, errorCode, errorDescription});
           // Redirect to error page with error parameters
           const errorParams = new URLSearchParams({
             error,
             error_code: errorCode || 'unknown',
-            error_description: errorDescription || error
+            error_description: errorDescription || error,
           });
           router.push(`/error?${errorParams.toString()}`);
           return;
@@ -65,18 +67,18 @@ export default function AuthCallbackPage() {
 
         // Handle PKCE tokens from query parameters
         if (pkceToken || pkceCode) {
-          console.log('Processing PKCE token/code:', { 
-            hasToken: !!pkceToken, 
-            hasCode: !!pkceCode, 
+          console.log('Processing PKCE token/code:', {
+            hasToken: !!pkceToken,
+            hasCode: !!pkceCode,
             type: pkceType,
             tokenLength: pkceToken?.length,
-            codeLength: pkceCode?.length
+            codeLength: pkceCode?.length,
           });
-          
+
           try {
             let result;
             let error;
-            
+
             if (pkceCode) {
               // Handle code parameter (newer PKCE format)
               console.log('Exchanging PKCE code for session');
@@ -94,23 +96,24 @@ export default function AuthCallbackPage() {
               const errorParams = new URLSearchParams({
                 error: error.message,
                 error_code: error.status?.toString() || 'pkce_exchange_failed',
-                error_description: error.message
+                error_description: error.message,
               });
               router.push(`/error?${errorParams.toString()}`);
               return;
             }
 
-            console.log('PKCE exchange successful:', { 
+            console.log('PKCE exchange successful:', {
               user: result.data?.user?.id,
-              session: !!result.data?.session
+              session: !!result.data?.session,
             });
 
             // Ensure user has a profile before proceeding
             if (result.data && result.data.user) {
               try {
                 // Use the safe profile function to ensure profile exists
-                const { error: profileError } = await supabase
-                  .rpc('get_user_profile_safe', { user_uuid: result.data.user.id });
+                const {error: profileError} = await supabase.rpc('get_user_profile_safe', {
+                  user_uuid: result.data.user.id,
+                });
 
                 if (profileError) {
                   console.error('Error ensuring user profile:', profileError);
@@ -144,7 +147,7 @@ export default function AuthCallbackPage() {
             const errorParams = new URLSearchParams({
               error: err instanceof Error ? err.message : 'PKCE processing failed',
               error_code: 'pkce_processing_error',
-              error_description: err instanceof Error ? err.message : 'PKCE processing failed'
+              error_description: err instanceof Error ? err.message : 'PKCE processing failed',
             });
             router.push(`/error?${errorParams.toString()}`);
             return;
@@ -153,7 +156,7 @@ export default function AuthCallbackPage() {
 
         if (accessToken && refreshToken) {
           // Set the session using the tokens from the URL
-          const { data, error } = await supabase.auth.setSession({
+          const {data, error} = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
@@ -170,8 +173,9 @@ export default function AuthCallbackPage() {
           if (data && data.user) {
             try {
               // Use the safe profile function to ensure profile exists
-              const { error: profileError } = await supabase
-                .rpc('get_user_profile_safe', { user_uuid: data.user.id });
+              const {error: profileError} = await supabase.rpc('get_user_profile_safe', {
+                user_uuid: data.user.id,
+              });
 
               if (profileError) {
                 console.error('Error ensuring user profile:', profileError);
@@ -208,7 +212,10 @@ export default function AuthCallbackPage() {
           // Check if we have any hash parameters at all
           const hasAnyParams = hashParams.toString().length > 0;
           if (hasAnyParams) {
-            console.log('Hash parameters found but no tokens:', Object.fromEntries(hashParams.entries()));
+            console.log(
+              'Hash parameters found but no tokens:',
+              Object.fromEntries(hashParams.entries())
+            );
           }
           router.push('/error');
         }

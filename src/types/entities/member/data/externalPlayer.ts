@@ -1,4 +1,5 @@
 import {Genders} from '@/enums';
+
 import {PlayerSearchResult} from './unifiedPlayer';
 
 export interface CreateExternalPlayerModalProps {

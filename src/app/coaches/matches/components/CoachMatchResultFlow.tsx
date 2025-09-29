@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useState, useEffect, useRef} from 'react';
+
 import {
   Modal,
   ModalContent,
@@ -15,6 +16,7 @@ import {
   Image,
   Input,
 } from '@heroui/react';
+
 import {
   XMarkIcon,
   ChevronLeftIcon,
@@ -24,16 +26,22 @@ import {
   DocumentTextIcon,
   TrophyIcon,
 } from '@heroicons/react/24/outline';
-import {Match} from '@/types';
-import {formatDateString} from '@/helpers';
-import {createClient} from '@/utils/supabase/client';
-import {translations} from '@/lib/translations';
-import {Heading, MatchResultInput} from '@/components';
-import {showToast} from '@/components/Toast';
-import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
+
 import {useQueryClient} from '@tanstack/react-query';
+
+import {showToast} from '@/components/ui/feedback/Toast';
+
+import {translations} from '@/lib/translations';
+
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
+import {createClient} from '@/utils/supabase/client';
+
+import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
+
+import {Heading, MatchResultInput} from '@/components';
+import {formatDateString} from '@/helpers';
 import {useAddMatchMetadata} from '@/hooks';
+import {Match} from '@/types';
 
 interface CoachMatchResultFlowProps {
   isOpen: boolean;

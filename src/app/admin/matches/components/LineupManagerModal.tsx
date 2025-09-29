@@ -1,10 +1,14 @@
 'use client';
 
 import {useRef} from 'react';
-import LineupManager from './LineupManager';
-import {Match, Member, LineupManagerRef} from '@/types';
-import {UnifiedModal} from '@/components';
+
 import {translations} from '@/lib/translations';
+
+import {UnifiedModal} from '@/components';
+import {Match, Member, LineupManagerRef} from '@/types';
+
+import LineupManager from './LineupManager';
+
 interface LineupManagerModalProps {
   isOpen: boolean;
   onClose: () => void;

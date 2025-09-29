@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useMemo, useCallback} from 'react';
+
 import {
   Pagination,
   useDisclosure,
@@ -17,17 +18,24 @@ import {
   TableCell,
   Chip,
 } from '@heroui/react';
+
 import {PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
-import {createClient} from '@/utils/supabase/client';
-import {translations} from '@/lib/translations';
-import {Member, Category} from '@/types';
-import {useAppData} from '@/contexts/AppDataContext';
-import {DeleteConfirmationModal, showToast} from '@/components';
+
 import {useDebounce} from '@/hooks/shared/useDebounce';
+
+import {translations} from '@/lib/translations';
+
+import {createClient} from '@/utils/supabase/client';
+
+import {useAppData} from '@/contexts/AppDataContext';
+
+import {DeleteConfirmationModal, showToast} from '@/components';
+import {getMemberFunctionOptions, Genders, MemberFunction} from '@/enums';
+import {Member, Category} from '@/types';
+
+import BulkEditModal from './BulkEditModal';
 import MemberFormModal from './MemberFormModal';
 import MembersCsvImport from './MembersCsvImport';
-import BulkEditModal from './BulkEditModal';
-import {getMemberFunctionOptions, Genders, MemberFunction} from '@/enums';
 
 interface MembersListTabProps {
   categoriesData: Category[] | null;

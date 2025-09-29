@@ -1,11 +1,13 @@
 'use client';
 
-import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {Button} from '@heroui/button';
+import {useState} from 'react';
+
 import {Badge} from '@heroui/badge';
-import {translations} from '@/lib/translations';
-import {useSponsorshipData, BusinessPartner} from '@/hooks/entities/settings/useSponsorshipData';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Image} from '@heroui/image';
+import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
+
 import {
   PlusIcon,
   PencilIcon,
@@ -16,8 +18,10 @@ import {
   PhoneIcon,
   EnvelopeIcon,
 } from '@heroicons/react/24/outline';
-import {useState} from 'react';
-import {Image} from '@heroui/image';
+
+import {useSponsorshipData, BusinessPartner} from '@/hooks/entities/settings/useSponsorshipData';
+
+import {translations} from '@/lib/translations';
 
 export const BusinessPartnersTab = () => {
   const {businessPartners, loading, error, refreshAll} = useSponsorshipData();

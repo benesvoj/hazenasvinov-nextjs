@@ -1,6 +1,8 @@
 import {useState, useEffect, useCallback} from 'react';
-import {createClient} from '@/utils/supabase/client';
+
 import {ClubCategoryTeams} from '@/types/entities/team/business/clubs';
+
+import {createClient} from '@/utils/supabase/client';
 
 interface Team {
   id: string;

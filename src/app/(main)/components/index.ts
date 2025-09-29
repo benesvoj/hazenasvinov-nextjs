@@ -6,6 +6,6 @@ export {default as PostSection} from './PostSection';
 export {default as LatestResultsSection} from './LatestResultsSection';
 export {default as CategoryMatchesAndResults} from './CategoryMatchesAndResults';
 export {default as CategoryStandingsTable} from './CategoryStandingsTable';
-export {default as MatchRow} from '../../../components/match/MatchRow';
-export {default as MatchSchedule} from '../../../components/match/MatchSchedule';
+export {default as MatchRow} from '../../../components/shared/match/MatchRow';
+export {default as MatchSchedule} from '../../../components/shared/match/MatchSchedule';
 export {default as MatchResultCard} from './MatchResultCard';

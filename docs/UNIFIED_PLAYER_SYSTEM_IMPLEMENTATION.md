@@ -69,7 +69,7 @@ The migration creates several useful functions:
 
 #### **Player Management:**
 ```sql
--- Search players with filters
+-- Search player-manager with filters
 SELECT * FROM search_players('search_term', club_id, is_external, position);
 
 -- Get player's current club
@@ -222,7 +222,7 @@ import LoaningManagement from '@/components/loaning/LoaningManagement';
 ### Unified Player Manager
 
 ```tsx
-import UnifiedPlayerManager from '@/components/players/UnifiedPlayerManager';
+import UnifiedPlayerManager from '@/components/player-manager/UnifiedPlayerManager';
 
 // Enhanced player selection and management
 <UnifiedPlayerManager 
@@ -254,7 +254,7 @@ console.log(stats);
 ### Club Player Summary
 
 ```typescript
-// Get unified view of all players
+// Get unified view of all player-manager
 const players = await searchPlayers({
   club_id: 'club-uuid',
   is_active: true

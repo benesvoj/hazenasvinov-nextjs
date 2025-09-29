@@ -3,14 +3,16 @@
  */
 
 import {performance} from 'perf_hooks';
+
+import {performanceMonitor} from '@/lib/performanceMonitor';
+
+import type {MatchQueryOptions} from '@/services/matchQueries';
 import {
   getMatchesBasicOptimized,
   getMatchesWithTeamsOptimized,
   getMatchesSeasonalOptimized,
   getOwnClubMatchesOptimized,
 } from '@/services/optimizedMatchQueries';
-import {performanceMonitor} from '@/lib/performanceMonitor';
-import type {MatchQueryOptions} from '@/services/matchQueries';
 
 interface PerformanceTestResult {
   testName: string;

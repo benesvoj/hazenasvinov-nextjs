@@ -1,6 +1,8 @@
 import {useState, useEffect, useMemo, useCallback} from 'react';
-import {useHeadToHeadMatches, useMatchesWithTeams} from '@/hooks';
+
 import {createClient} from '@/utils/supabase/client';
+
+import {useHeadToHeadMatches, useMatchesWithTeams} from '@/hooks';
 import {Match, Nullish} from '@/types';
 
 export function useStrategyPreparation(selectedMatch: Match | Nullish) {

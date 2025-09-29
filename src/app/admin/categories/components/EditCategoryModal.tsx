@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Button,
   Input,
@@ -14,8 +15,9 @@ import {
   SelectItem,
   Checkbox,
 } from '@heroui/react';
+
 import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
-import {EditCategoryModalProps} from '@/types';
+
 import {UnifiedModal} from '@/components';
 import {
   getAgeGroupsOptions,
@@ -24,6 +26,7 @@ import {
   AgeGroups,
   COMPETITION_TYPES,
 } from '@/enums';
+import {EditCategoryModalProps} from '@/types';
 
 export default function EditCategoryModal({
   isOpen,

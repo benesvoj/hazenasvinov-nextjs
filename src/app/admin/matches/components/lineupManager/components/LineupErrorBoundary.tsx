@@ -1,5 +1,7 @@
 import React, {Component, ErrorInfo, ReactNode} from 'react';
+
 import {Card, CardBody, Button} from '@heroui/react';
+
 import {ExclamationTriangleIcon, ArrowPathIcon} from '@heroicons/react/24/outline';
 
 interface Props {

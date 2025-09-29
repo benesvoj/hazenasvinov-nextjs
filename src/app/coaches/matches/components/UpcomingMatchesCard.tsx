@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
+
 import {Card, CardHeader, CardBody, Button} from '@heroui/react';
+
 import {CalendarIcon, TrophyIcon} from '@heroicons/react/24/outline';
-import {MatchRow} from '@/components';
-import {LoadingSpinner} from '@/components';
+
+import {MatchRow, LoadingSpinner} from '@/components';
 
 interface UpcomingMatchesCardProps {
   upcomingMatches: any[];

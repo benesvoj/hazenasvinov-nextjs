@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
+
 import {Card, CardBody, CardHeader} from '@heroui/react';
+
 import {AttendanceTrendData} from '@/types/entities/trainingSession/business/statistics';
 
 interface AttendanceChartProps {

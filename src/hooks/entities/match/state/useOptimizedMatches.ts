@@ -3,7 +3,16 @@
  */
 
 import {useState, useEffect, useCallback, useMemo} from 'react';
+
 import {useQuery, useQueryClient} from '@tanstack/react-query';
+
+import {cacheKeys} from '@/lib/performanceCache';
+
+import type {
+  MatchQueryOptions,
+  MatchQueryResult,
+  SeasonalMatchQueryResult,
+} from '@/services/matchQueries';
 import {
   getMatchesBasicOptimized,
   getMatchesWithTeamsOptimized,
@@ -12,12 +21,6 @@ import {
   preloadMatchData,
   invalidateMatchCache,
 } from '@/services/optimizedMatchQueries';
-import {cacheKeys} from '@/lib/performanceCache';
-import type {
-  MatchQueryOptions,
-  MatchQueryResult,
-  SeasonalMatchQueryResult,
-} from '@/services/matchQueries';
 
 // Memoized query options to prevent unnecessary re-renders
 const createQueryOptions = (options: MatchQueryOptions) =>

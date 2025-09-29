@@ -1,8 +1,8 @@
-import {translations} from '@/lib/translations';
-import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
-import {useFetchCategories} from '@/hooks';
-import {Skeleton} from '@heroui/skeleton';
-import {EditIcon} from '@/lib/icons';
+import React, {useEffect, useState} from 'react';
+
+import {Button} from '@heroui/button';
+import {Form} from '@heroui/form';
+import {Input} from '@heroui/input';
 import {
   Modal,
   ModalBody,
@@ -11,10 +11,17 @@ import {
   ModalHeader,
   useDisclosure,
 } from '@heroui/modal';
-import React, {useEffect, useState} from 'react';
-import {Button} from '@heroui/button';
-import {Form} from '@heroui/form';
-import {Input} from '@heroui/input';
+import {Skeleton} from '@heroui/skeleton';
+import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
+
+import {CategoryProps, ColumnType} from '@/types/types';
+
+import {EditIcon} from '@/lib/icons';
+import {translations} from '@/lib/translations';
+
+import {ExtractDate} from '@/helpers/helper';
+
+import {updateCategory} from '@/app/admin/actions/updateCategory';
 import {
   COLUMN_ACTIONS,
   COLUMN_CREATED_AT,
@@ -24,9 +31,8 @@ import {
   COLUMN_ROUTE,
   COLUMN_UPDATED_AT,
 } from '@/app/admin/competitions/helpers/columns';
-import {CategoryProps, ColumnType} from '@/types/types';
-import {updateCategory} from '@/app/admin/actions/updateCategory';
-import {ExtractDate} from '@/helpers/helper';
+
+import {useFetchCategories} from '@/hooks';
 
 type ActionsCellProps = {
   category: CategoryProps;

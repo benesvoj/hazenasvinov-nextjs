@@ -1,10 +1,13 @@
 import {useState, useCallback} from 'react';
-import {createClient} from '@/utils/supabase/client';
+
 import {
   UnifiedPlayer,
   PlayerSearchFilters,
   PlayerSearchResult,
 } from '@/types/entities/member/data/unifiedPlayer';
+
+import {createClient} from '@/utils/supabase/client';
+
 import {getClubName} from '@/constants';
 
 const supabase = createClient();
@@ -13,7 +16,7 @@ export function useUnifiedPlayers() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Search players with filters
+  // Search player-manager with filters
   const searchPlayers = useCallback(
     async (filters: PlayerSearchFilters = {}): Promise<PlayerSearchResult[]> => {
       try {
@@ -55,17 +58,17 @@ export function useUnifiedPlayers() {
           query = query.eq('category_id', filters.category_id);
         }
 
-        // Filter to show only players (members with 'player' function)
+        // Filter to show only player-manager (members with 'player' function)
         query = query.contains('functions', ['player']);
 
         // Apply external filter based on club relationship
         if (filters.is_external !== undefined) {
           if (filters.is_external) {
-            // For external players, exclude our club (assuming club_id filter is our club)
+            // For external player-manager, exclude our club (assuming club_id filter is our club)
             // This would need to be implemented based on your club ID
-            // For now, we'll show all players and filter in the transformation
+            // For now, we'll show all player-manager and filter in the transformation
           } else {
-            // For internal players, only show our club members
+            // For internal player-manager, only show our club members
             // This would need to be implemented based on your club ID
           }
         }
@@ -73,7 +76,7 @@ export function useUnifiedPlayers() {
         const {data, error: searchError} = await query.order('surname');
 
         if (searchError) {
-          console.error('Error searching players:', searchError);
+          console.error('Error searching player-manager:', searchError);
           throw searchError;
         }
 
@@ -105,7 +108,7 @@ export function useUnifiedPlayers() {
         return results;
       } catch (err) {
         console.error('Error in searchPlayers:', err);
-        setError(err instanceof Error ? err.message : 'Failed to search players');
+        setError(err instanceof Error ? err.message : 'Failed to search player-manager');
         return [];
       } finally {
         setLoading(false);
@@ -173,7 +176,7 @@ export function useUnifiedPlayers() {
     }
   }, []);
 
-  // Get players by club using member_club_relationships
+  // Get player-manager by club using member_club_relationships
   const getPlayersByClub = useCallback(async (clubId: string): Promise<UnifiedPlayer[]> => {
     try {
       setLoading(true);
@@ -205,7 +208,7 @@ export function useUnifiedPlayers() {
         .order('members(surname)');
 
       if (fetchError) {
-        console.error('Error fetching club players:', fetchError);
+        console.error('Error fetching club player-manager:', fetchError);
         throw fetchError;
       }
 
@@ -232,7 +235,7 @@ export function useUnifiedPlayers() {
       return players;
     } catch (err) {
       console.error('Error in getPlayersByClub:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch club players');
+      setError(err instanceof Error ? err.message : 'Failed to fetch club player-manager');
       return [];
     } finally {
       setLoading(false);
@@ -269,27 +272,27 @@ export function useUnifiedPlayers() {
     []
   );
 
-  // Get external players (players from other clubs)
-  // Note: External players are typically created on-the-fly in lineups
-  // This function returns empty array as external players don't exist in members table
+  // Get external player-manager (player-manager from other clubs)
+  // Note: External player-manager are typically created on-the-fly in lineups
+  // This function returns empty array as external player-manager don't exist in members table
   const getExternalPlayers = useCallback(async (): Promise<UnifiedPlayer[]> => {
     try {
       setLoading(true);
       setError(null);
 
-      // External players are created dynamically in lineups, not stored in members table
-      // Return empty array as external players are handled differently
+      // External player-manager are created dynamically in lineups, not stored in members table
+      // Return empty array as external player-manager are handled differently
       return [];
     } catch (err) {
       console.error('Error in getExternalPlayers:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch external players');
+      setError(err instanceof Error ? err.message : 'Failed to fetch external player-manager');
       return [];
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Get internal players (players from our club)
+  // Get internal player-manager (player-manager from our club)
   const getInternalPlayers = useCallback(async (): Promise<UnifiedPlayer[]> => {
     try {
       setLoading(true);
@@ -315,7 +318,7 @@ export function useUnifiedPlayers() {
         .order('surname');
 
       if (fetchError) {
-        console.error('Error fetching internal players:', fetchError);
+        console.error('Error fetching internal player-manager:', fetchError);
         throw fetchError;
       }
 
@@ -339,7 +342,7 @@ export function useUnifiedPlayers() {
       return players;
     } catch (err) {
       console.error('Error in getInternalPlayers:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch internal players');
+      setError(err instanceof Error ? err.message : 'Failed to fetch internal player-manager');
       return [];
     } finally {
       setLoading(false);

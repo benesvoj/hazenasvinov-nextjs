@@ -1,7 +1,11 @@
 import React from 'react';
+
 import {Card, CardHeader} from '@heroui/react';
+
 import {UserGroupIcon} from '@heroicons/react/24/outline';
+
 import {Heading} from '@/components';
+
 import LineupActions from '../LineupActions';
 
 interface LineupHeaderProps {

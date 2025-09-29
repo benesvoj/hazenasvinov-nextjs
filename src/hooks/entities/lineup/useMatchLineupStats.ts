@@ -1,5 +1,7 @@
 import {useState, useEffect} from 'react';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {Match} from '@/types';
 
 export interface PlayerMatchStats {
@@ -73,7 +75,7 @@ export function useMatchLineupStats(matches: Match[]): UseMatchLineupStatsResult
               continue;
             }
 
-            // Fetch players from lineup
+            // Fetch player-manager from lineup
             const {data: playersData, error: playersError} = await supabase
               .from('lineup_players')
               .select(
@@ -91,7 +93,7 @@ export function useMatchLineupStats(matches: Match[]): UseMatchLineupStatsResult
 
             // Process each player's statistics
             (playersData || []).forEach((player: any) => {
-              if (!player.member) return; // Skip external players for now
+              if (!player.member) return; // Skip external player-manager for now
 
               const playerId = player.member.id;
               const playerName = player.member.name;

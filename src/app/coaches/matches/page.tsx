@@ -1,6 +1,13 @@
 'use client';
 
 import React, {useState, useEffect, useMemo} from 'react';
+
+import {Tab, Tabs} from '@heroui/react';
+
+import {ChartBarIcon} from '@heroicons/react/24/outline';
+
+import {translations} from '@/lib/translations';
+
 import {LoadingSpinner, PageContainer} from '@/components';
 import {
   useSeasons,
@@ -9,6 +16,8 @@ import {
   useUserRoles,
   useOptimizedOwnClubMatches,
 } from '@/hooks';
+import {Match} from '@/types';
+
 import {
   UpcomingMatchesCard,
   RecentResultsCard,
@@ -18,10 +27,6 @@ import {
   MatchStatisticsZone,
 } from './components';
 import CoachMatchResultFlow from './components/CoachMatchResultFlow';
-import {Tab, Tabs} from '@heroui/react';
-import {ChartBarIcon} from '@heroicons/react/24/outline';
-import {Match} from '@/types';
-import {translations} from '@/lib/translations';
 
 export default function CoachesMatchesPage() {
   const [selectedMatch, setSelectedMatch] = useState<any>(null);

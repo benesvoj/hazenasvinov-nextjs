@@ -1,90 +1,89 @@
-import { NextResponse } from 'next/server'
-import supabaseAdmin from "@/utils/supabase/admin";
+import {NextResponse} from 'next/server';
+
+import supabaseAdmin from '@/utils/supabase/admin';
 
 export async function GET(request: Request) {
-	const { searchParams } = new URL(request.url);
-	const includeLogs = searchParams.get('includeLogs') === 'true';
-	
-	// Pagination parameters
-	const page = parseInt(searchParams.get('page') || '1');
-	const limit = parseInt(searchParams.get('limit') || '20');
-	const offset = (page - 1) * limit;
-	
-	// Filtering parameters
-	const userEmail = searchParams.get('userEmail') || '';
+  const {searchParams} = new URL(request.url);
+  const includeLogs = searchParams.get('includeLogs') === 'true';
 
-	try {
-		// Fetch users
-		const { data: users, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+  // Pagination parameters
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '20');
+  const offset = (page - 1) * limit;
 
-		if (usersError) {
-			return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
-		}
+  // Filtering parameters
+  const userEmail = searchParams.get('userEmail') || '';
 
-		// If logs are requested, also fetch login logs from the database
-		if (includeLogs) {
-			try {
-				// Build query with filters
-				let query = supabaseAdmin
-					.from('login_logs')
-					.select('*', { count: 'exact' });
+  try {
+    // Fetch users
+    const {data: users, error: usersError} = await supabaseAdmin.auth.admin.listUsers();
 
-				// Apply user filter
-				if (userEmail) {
-					query = query.eq('email', userEmail);
-				}
+    if (usersError) {
+      return NextResponse.json({error: 'Failed to fetch users'}, {status: 500});
+    }
 
-				// Get total count for pagination
-				const { count } = await query;
+    // If logs are requested, also fetch login logs from the database
+    if (includeLogs) {
+      try {
+        // Build query with filters
+        let query = supabaseAdmin.from('login_logs').select('*', {count: 'exact'});
 
-				// Apply pagination and ordering
-				const { data: loginLogs, error: logsError } = await query
-					.order('login_time', { ascending: false })
-					.range(offset, offset + limit - 1);
+        // Apply user filter
+        if (userEmail) {
+          query = query.eq('email', userEmail);
+        }
 
-				if (logsError) {
-					// Return users even if logs fail
-					return NextResponse.json({
-						users: users.users,
-						loginLogs: [],
-						pagination: {
-							page: 1,
-							limit: 20,
-							total: 0,
-							totalPages: 0
-						}
-					});
-				}
+        // Get total count for pagination
+        const {count} = await query;
 
-				const totalPages = Math.ceil((count || 0) / limit);
+        // Apply pagination and ordering
+        const {data: loginLogs, error: logsError} = await query
+          .order('login_time', {ascending: false})
+          .range(offset, offset + limit - 1);
 
-				return NextResponse.json({
-					users: users.users,
-					loginLogs: loginLogs || [],
-					pagination: {
-						page,
-						limit,
-						total: count || 0,
-						totalPages
-					}
-				});
-			} catch (logsError) {
-				// Return users even if logs fail
-				return NextResponse.json({
-					users: users.users,
-					loginLogs: [],
-					pagination: {
-						page: 1,
-						limit: 20,
-						total: 0,
-						totalPages: 0
-					}
-				});
-			}
-		}
+        if (logsError) {
+          // Return users even if logs fail
+          return NextResponse.json({
+            users: users.users,
+            loginLogs: [],
+            pagination: {
+              page: 1,
+              limit: 20,
+              total: 0,
+              totalPages: 0,
+            },
+          });
+        }
 
-		return NextResponse.json(users.users);
-	} catch (error) {
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-	}
+        const totalPages = Math.ceil((count || 0) / limit);
+
+        return NextResponse.json({
+          users: users.users,
+          loginLogs: loginLogs || [],
+          pagination: {
+            page,
+            limit,
+            total: count || 0,
+            totalPages,
+          },
+        });
+      } catch (logsError) {
+        // Return users even if logs fail
+        return NextResponse.json({
+          users: users.users,
+          loginLogs: [],
+          pagination: {
+            page: 1,
+            limit: 20,
+            total: 0,
+            totalPages: 0,
+          },
+        });
+      }
+    }
+
+    return NextResponse.json(users.users);
+  } catch (error) {
+    return NextResponse.json({error: 'Internal server error'}, {status: 500});
+  }
 }

@@ -1,5 +1,6 @@
-import {useUser} from '@/contexts/UserContext';
 import {createClient} from '@/utils/supabase/client';
+
+import {useUser} from '@/contexts/UserContext';
 
 // Simplified useAuth hook that uses UserContext
 export function useAuth() {

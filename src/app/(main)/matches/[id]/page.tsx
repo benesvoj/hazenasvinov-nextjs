@@ -1,15 +1,21 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {Button} from '@heroui/react';
-import {ArrowLeftIcon, TrophyIcon, ArrowTopRightOnSquareIcon} from '@heroicons/react/24/outline';
+
 import Link from 'next/link';
 import {useParams} from 'next/navigation';
+
+import {Button} from '@heroui/react';
+
+import {ArrowLeftIcon, TrophyIcon, ArrowTopRightOnSquareIcon} from '@heroicons/react/24/outline';
+
 import {translations} from '@/lib/translations';
-import {useLineupData, useFetchMatch} from '@/hooks';
+
 import {LoadingSpinner} from '@/components';
-import {LineupCard, MatchInfoCard} from './components';
 import {TeamTypes} from '@/enums';
+import {useLineupData, useFetchMatch} from '@/hooks';
+
+import {LineupCard, MatchInfoCard} from './components';
 
 export default function MatchDetailPage() {
   // TODO: Change to Lineup type

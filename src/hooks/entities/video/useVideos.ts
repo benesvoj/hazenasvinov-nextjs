@@ -1,6 +1,9 @@
 import {useState, useEffect, useCallback} from 'react';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {Video, VideoFormData, VideoFilters} from '@/types';
+
 import {useAuth} from '../../auth/useAuth';
 
 interface UseVideosOptions {

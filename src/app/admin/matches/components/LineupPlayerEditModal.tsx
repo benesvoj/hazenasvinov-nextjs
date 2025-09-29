@@ -1,11 +1,14 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {UnifiedModal, Heading} from '@/components';
+
 import {Input, Checkbox} from '@heroui/react';
-import {LineupPlayerFormData} from '@/types';
-import {PlayerPosition} from '@/enums';
+
 import {translations} from '@/lib/translations';
+
+import {UnifiedModal, Heading} from '@/components';
+import {PlayerPosition} from '@/enums';
+import {LineupPlayerFormData} from '@/types';
 
 interface LineupPlayerEditModalProps {
   isOpen: boolean;

@@ -1,9 +1,12 @@
 import React, {memo, useCallback} from 'react';
+
 import {Button, ButtonGroup} from '@heroui/react';
+
 import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
 import {UnifiedTable} from '@/components';
-import {LineupCoachFormData} from '@/types';
 import {getLineupCoachRoleOptions} from '@/enums';
+import {LineupCoachFormData} from '@/types';
 
 interface CoachesTableProps {
   coaches: LineupCoachFormData[];

@@ -1,15 +1,21 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {Video, VideoFormData, VideoFilters} from '@/types';
-import {useVideos} from '@/hooks/entities/video/useVideos';
-import {useAppData} from '@/contexts/AppDataContext';
-import {VideoCameraIcon} from '@heroicons/react/24/outline';
-import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
-import {AdminContainer} from '../../../components/admin/AdminContainer';
-import {translations} from '@/lib/translations';
+
 import {Button} from '@heroui/react';
-import {PlusIcon} from '@heroicons/react/24/outline';
+
+import {VideoCameraIcon, PlusIcon} from '@heroicons/react/24/outline';
+
+import {useVideos} from '@/hooks/entities/video/useVideos';
+
+import {AdminContainer} from '@/components/features/admin/AdminContainer';
+
+import {translations} from '@/lib/translations';
+
+import {useAppData} from '@/contexts/AppDataContext';
+
+import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
+import {Video, VideoFormData, VideoFilters} from '@/types';
 
 export default function VideosPage() {
   const [filters, setFilters] = useState<VideoFilters>({});

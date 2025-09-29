@@ -1,4 +1,5 @@
 import React, {useState, useCallback} from 'react';
+
 import {
   Modal,
   ModalContent,
@@ -8,12 +9,15 @@ import {
   useDisclosure,
 } from '@heroui/modal';
 import {Select, SelectItem, Button, Input, Checkbox} from '@heroui/react';
+
 import {
   DocumentArrowUpIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {Genders, getMemberFunctionOptions, MemberFunction, getGenderOptions} from '@/enums';
 
 interface CsvMember {

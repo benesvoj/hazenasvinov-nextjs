@@ -1,7 +1,9 @@
 import {createClient} from '@/utils/supabase/client';
-import {Match} from '@/types';
 import {transformMatchWithTeamNames} from '@/utils/teamDisplay';
+
 import {getClubTeamCounts} from '@/services/optimizedMatchQueries';
+
+import {Match} from '@/types';
 
 // Enhanced query options with more granular control
 export interface MatchQueryBuilderOptions {

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Modal,
   ModalContent,
@@ -10,8 +11,9 @@ import {
   SelectItem,
   Checkbox,
 } from '@heroui/react';
-import {Category} from '@/types';
+
 import {getMemberFunctionOptions, Genders} from '@/enums';
+import {Category} from '@/types';
 interface BulkEditFormData {
   sex: Genders;
   category: string;

@@ -30,6 +30,8 @@
     "fix:jakub-coach-access": "node scripts/fix-jakub-coach-access.js",
     "generate:hooks": "node scripts/generate-hook-exports.mjs",
     "generate:types": "node scripts/generate-type-exports.mjs",
+    "generate:components": "node scripts/generate-component-exports.mjs",
+    "fix:imports": "eslint src --ext .ts,.tsx --fix",
     "prepare": "husky"
   },
   "dependencies": {
@@ -87,6 +89,7 @@
     "@types/react-dom": "^18",
     "eslint": "^9.27.0",
     "eslint-config-next": "^15.4.0-canary.51",
+    "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
     "postcss": "^8",
@@ -107,6 +110,9 @@
     ],
     "src/types/**/*.ts": [
       "npm run generate:types"
+    ],
+    "src/components/**/*.{ts,tsx}": [
+      "npm run generate:components"
     ]
   }
 }

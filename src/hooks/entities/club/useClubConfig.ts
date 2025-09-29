@@ -1,6 +1,7 @@
 'use client';
 
 import {useState, useEffect, useCallback} from 'react';
+
 import {ClubConfig} from '@/types/types';
 
 export function useClubConfig() {

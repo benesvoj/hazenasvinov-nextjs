@@ -1,8 +1,10 @@
 import React from 'react';
+
 import {Checkbox, Input, Select, SelectItem} from '@heroui/react';
+
 import {Heading, UnifiedModal} from '@/components';
-import {AddCategoryModalProps} from '@/types';
 import {AgeGroups, Genders, getAgeGroupsOptions, getGenderOptions} from '@/enums';
+import {AddCategoryModalProps} from '@/types';
 
 export default function AddCategoryModal({
   isOpen,

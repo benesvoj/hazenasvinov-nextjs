@@ -1,8 +1,11 @@
 'use client';
 
 import React, {useState, useEffect, useMemo} from 'react';
+
 import {Button, Image} from '@heroui/react';
+
 import {BuildingOfficeIcon} from '@heroicons/react/24/outline';
+
 import {useSeasons, useCategories} from '@/hooks';
 import {ClubWithTeams} from '@/types';
 

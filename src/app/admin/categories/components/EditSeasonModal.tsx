@@ -1,7 +1,9 @@
 import React from 'react';
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
 import {Button} from '@heroui/button';
 import {Input} from '@heroui/input';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
 import {CompetitionTypes} from '@/enums';
 
 interface CategorySeason {

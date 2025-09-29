@@ -1,4 +1,5 @@
 import {createClient} from '@/utils/supabase/client';
+
 import {calculateStandings} from './standingsCalculator';
 
 /**

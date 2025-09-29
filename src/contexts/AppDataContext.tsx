@@ -9,7 +9,9 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {Season, Category, Member, Club} from '@/types';
 
 interface AppDataContextType {

@@ -1,5 +1,7 @@
 import React from 'react';
+
 import {Button} from '@heroui/react';
+
 import {UserGroupIcon, PlusIcon} from '@heroicons/react/24/outline';
 
 interface LineupEmptyStateProps {

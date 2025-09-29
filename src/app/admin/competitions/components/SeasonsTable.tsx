@@ -1,7 +1,11 @@
-import {translations} from '@/lib/translations';
 import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/react';
+
 import {useFetchSeasons} from '@/hooks/entities/season/useFetchSeasons';
+
+import {translations} from '@/lib/translations';
+
 import {formatDateString} from '@/helpers/formatDate';
+
 import {LoadingSpinner} from '@/components';
 
 export const SeasonsTable = () => {

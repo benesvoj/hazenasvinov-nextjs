@@ -1,11 +1,15 @@
 'use client';
 
 import React, {useState} from 'react';
-import {useAppData} from '@/contexts/AppDataContext';
+
 import {Tabs, Tab} from '@heroui/react';
-import MembersStatisticTab from './components/MembersStatisticTab';
-import MembersListTab from './components/MembersListTab';
+
+import {useAppData} from '@/contexts/AppDataContext';
+
 import {getGenderOptions} from '@/enums';
+
+import MembersListTab from './components/MembersListTab';
+import MembersStatisticTab from './components/MembersStatisticTab';
 
 export default function MembersAdminPage() {
   const genderOptions = getGenderOptions().reduce(

@@ -1,8 +1,10 @@
 'use client';
 
 import {useState, useEffect, useCallback, useRef} from 'react';
-import {UnifiedModal} from '@/components';
+
 import {Input, Select, SelectItem, Button} from '@heroui/react';
+
+import {UnifiedModal} from '@/components';
 import {Member} from '@/types';
 
 interface LineupCoachSelectionModalProps {

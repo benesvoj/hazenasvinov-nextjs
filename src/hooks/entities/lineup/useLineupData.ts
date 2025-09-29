@@ -1,8 +1,10 @@
 import {useState, useCallback} from 'react';
+
 import {createClient} from '@/utils/supabase/client';
-import {LineupFormData, LineupSummary, LineupValidation, LineupCoach, LineupPlayer} from '@/types';
 import {generateUUID} from '@/utils/uuid';
+
 import {PlayerPosition} from '@/enums';
+import {LineupFormData, LineupSummary, LineupValidation, LineupCoach, LineupPlayer} from '@/types';
 
 const supabase = createClient();
 
@@ -37,7 +39,7 @@ export const useLineupData = () => {
         };
       }
 
-      // Fetch players
+      // Fetch player-manager
       const {data: playersData, error: playersError} = await supabase
         .from('lineup_players')
         .select(
@@ -49,7 +51,10 @@ export const useLineupData = () => {
         .eq('lineup_id', lineupData.id);
 
       if (playersError) {
-        console.warn('Error fetching lineup players, table might not exist yet:', playersError);
+        console.warn(
+          'Error fetching lineup player-manager, table might not exist yet:',
+          playersError
+        );
         // Return empty data instead of throwing error
         return {
           players: [],
@@ -135,7 +140,7 @@ export const useLineupData = () => {
         throw lineupError;
       }
 
-      // Fetch players
+      // Fetch player-manager
       const {data: playersData, error: playersError} = await supabase
         .from('lineup_players')
         .select(
@@ -147,7 +152,10 @@ export const useLineupData = () => {
         .eq('lineup_id', lineupId);
 
       if (playersError) {
-        console.warn('Error fetching lineup players, table might not exist yet:', playersError);
+        console.warn(
+          'Error fetching lineup player-manager, table might not exist yet:',
+          playersError
+        );
         // Return empty data instead of throwing error
         return {
           players: [],
@@ -155,7 +163,7 @@ export const useLineupData = () => {
         };
       }
 
-      // Process players data to include display names
+      // Process player-manager data to include display names
       const processedPlayers = (playersData || []).map((player: any) => {
         if (player.member) {
           // Internal player
@@ -211,14 +219,14 @@ export const useLineupData = () => {
   // Delete lineup
   const deleteLineup = useCallback(async (lineupId: string): Promise<void> => {
     try {
-      // Delete players first
+      // Delete player-manager first
       const {error: playersError} = await supabase
         .from('lineup_players')
         .delete()
         .eq('lineup_id', lineupId);
 
       if (playersError) {
-        console.warn('Error deleting lineup players:', playersError);
+        console.warn('Error deleting lineup player-manager:', playersError);
       }
 
       // Delete coaches
@@ -345,7 +353,7 @@ export const useLineupData = () => {
           await deleteLineup(lineupId);
         }
 
-        // Always ensure the lineup record exists before inserting players
+        // Always ensure the lineup record exists before inserting player-manager
         // Check if lineup exists, if not create it
         const {data: lineupExists, error: checkError} = await supabase
           .from('lineups')
@@ -375,9 +383,9 @@ export const useLineupData = () => {
           }
         }
 
-        // Insert players - use different strategies based on skipValidation
+        // Insert player-manager - use different strategies based on skipValidation
         const playersToInsert = formData.players
-          .filter((player) => player.member_id) // All players should have member_id now
+          .filter((player) => player.member_id) // All player-manager should have member_id now
           .map((player) => ({
             lineup_id: finalLineupId,
             member_id: player.member_id,
@@ -393,7 +401,7 @@ export const useLineupData = () => {
 
         if (playersToInsert.length > 0) {
           if (skipValidation) {
-            // For automatic lineup creation, try to insert players one by one to avoid constraint issues
+            // For automatic lineup creation, try to insert player-manager one by one to avoid constraint issues
             let insertedCount = 0;
             for (const player of playersToInsert) {
               try {
@@ -413,7 +421,7 @@ export const useLineupData = () => {
             }
 
             if (insertedCount === 0) {
-              console.warn('No players could be inserted due to validation constraints');
+              console.warn('No player-manager could be inserted due to validation constraints');
             }
           } else {
             // For manual saves, use the original validation logic
@@ -422,7 +430,7 @@ export const useLineupData = () => {
               .insert(playersToInsert);
 
             if (playersError) {
-              console.error('Error inserting players:', playersError);
+              console.error('Error inserting player-manager:', playersError);
 
               // Check if it's a validation error (lineup rules)
               if (playersError.message && playersError.message.includes('Lineup must have')) {
@@ -511,7 +519,7 @@ export const useLineupData = () => {
         };
       }
 
-      // Get players count
+      // Get player-manager count
       const {data: playersData, error: playersError} = await supabase
         .from('lineup_players')
         .select('position')
@@ -560,7 +568,7 @@ export const useLineupData = () => {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // Partition players into valid and invalid positions in a single pass
+    // Partition player-manager into valid and invalid positions in a single pass
     const {validPlayers, invalidPlayers} = formData.players.reduce(
       (acc, p) => {
         if (p.position && p.position.trim() !== '') {
@@ -577,7 +585,7 @@ export const useLineupData = () => {
     );
 
     if (invalidPlayers.length > 0) {
-      console.warn('⚠️ Found players with invalid positions:', invalidPlayers);
+      console.warn('⚠️ Found player-manager with invalid positions:', invalidPlayers);
     }
 
     const goalkeepers = validPlayers.filter((p) => p.position === 'goalkeeper');

@@ -1,5 +1,7 @@
 'use client';
 
+import {useState} from 'react';
+
 import {
   Avatar,
   Input,
@@ -25,6 +27,7 @@ import {
   useDisclosure,
   Chip,
 } from '@heroui/react';
+
 import {
   PlusIcon,
   EllipsisVerticalIcon,
@@ -35,11 +38,13 @@ import {
   UserIcon,
   EnvelopeIcon,
 } from '@heroicons/react/24/outline';
+
 import {SupabaseUser} from '@/types/types';
-import {useState} from 'react';
-import {showToast, LoadingSpinner} from '@/components';
+
 import RoleAssignmentModal from '@/app/admin/users/components/RoleAssignmentModal';
 import UserFormModal from '@/app/admin/users/components/UserFormModal';
+
+import {showToast, LoadingSpinner} from '@/components';
 
 interface UsersTabProps {
   users: SupabaseUser[];

@@ -1,17 +1,21 @@
 'use client';
 
 import React, {useState, useCallback} from 'react';
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
-import {Button} from '@heroui/button';
-import {Progress} from '@heroui/progress';
+
 import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+import {Progress} from '@heroui/progress';
+
 import {
   PhotoIcon,
   XMarkIcon,
   CheckIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+
 import {Photo, CreatePhotoData} from '@/types/features/gallery/photoGallery';
+
 import {createPhoto} from '@/utils/supabase/photoGallery';
 import {uploadClubAsset} from '@/utils/supabase/storage';
 

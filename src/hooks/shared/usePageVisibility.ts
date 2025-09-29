@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+
 import {PageVisibility} from '@/types';
 
 export const usePageVisibility = () => {

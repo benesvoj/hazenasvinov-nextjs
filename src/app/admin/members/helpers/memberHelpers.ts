@@ -1,5 +1,5 @@
-import {Category} from '@/types';
 import {Genders} from '@/enums';
+import {Category} from '@/types';
 
 /**
  * Get the display name for a category code

@@ -1,12 +1,15 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {UnifiedModal} from '@/components';
+
 import {Input, Select, SelectItem} from '@heroui/react';
-import {useMembers} from '@/hooks';
+
 import {translations} from '@/lib/translations';
-import {CreateMemberModalProps, MemberFormData} from '@/types';
+
+import {UnifiedModal} from '@/components';
 import {Genders, MemberFunction} from '@/enums';
+import {useMembers} from '@/hooks';
+import {CreateMemberModalProps, MemberFormData} from '@/types';
 
 export default function CreateMemberModal({
   isOpen,

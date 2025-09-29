@@ -1,5 +1,7 @@
 import {useEffect, useState} from 'react';
+
 import {Api} from '@/app/api/api';
+
 import {Season} from '@/types';
 
 export function useFetchSeasons() {

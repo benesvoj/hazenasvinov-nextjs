@@ -1,7 +1,9 @@
+import MatchRow from '@/components/shared/match/MatchRow';
+
 import {LoadingSpinner} from '@/components';
-import {OpponentMatchStatistics} from '.';
 import {Match, Team, Nullish} from '@/types';
-import MatchRow from '@/components/match/MatchRow';
+
+import {OpponentMatchStatistics} from '.';
 
 interface TabWithPreviousMatchesProps {
   previousMatchesError: string | null;

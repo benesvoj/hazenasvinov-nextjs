@@ -1,11 +1,11 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
-import {Card, CardBody} from '@heroui/card';
-import {Button} from '@heroui/button';
-import {Input} from '@heroui/input';
-import {Switch} from '@heroui/switch';
+
 import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Card, CardBody} from '@heroui/card';
+import {Input} from '@heroui/input';
 import {
   Table,
   TableHeader,
@@ -15,6 +15,8 @@ import {
   TableCell,
   Image,
 } from '@heroui/react';
+import {Switch} from '@heroui/switch';
+
 import {
   PlusIcon,
   PencilIcon,
@@ -23,14 +25,18 @@ import {
   EyeSlashIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
+
 import {PhotoAlbum, CreateAlbumData, UpdateAlbumData} from '@/types/features/gallery/photoGallery';
+
+import DeleteConfirmationModal from '@/components/ui/modals/DeleteConfirmationModal';
+
 import {
   getPhotoAlbums,
   createPhotoAlbum,
   updatePhotoAlbum,
   deletePhotoAlbum,
 } from '@/utils/supabase/photoGallery';
-import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+
 import AlbumFormModal from './AlbumFormModal';
 
 export default function AlbumsTab() {

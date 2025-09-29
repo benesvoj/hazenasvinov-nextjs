@@ -1,4 +1,5 @@
 import {createClient} from '@/utils/supabase/server';
+
 import {Category, Match, BlogPost, ProcessedStanding, Season} from '@/types';
 
 export interface CategoryPageServerData {

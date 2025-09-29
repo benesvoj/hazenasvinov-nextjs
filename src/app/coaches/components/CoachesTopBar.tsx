@@ -1,13 +1,19 @@
 'use client';
 
 import React from 'react';
+
 import {usePathname} from 'next/navigation';
-import {useCoachesSidebar} from './CoachesSidebarContext';
-import {useUser} from '@/contexts/UserContext';
-import {UnifiedTopBar} from '@/components';
-import {coachesRoutes} from '../routes/routes';
+
 import {translations} from '@/lib/translations';
+
+import {useUser} from '@/contexts/UserContext';
+
+import {UnifiedTopBar} from '@/components';
 import {UserRoles} from '@/enums';
+
+import {coachesRoutes} from '../routes/routes';
+
+import {useCoachesSidebar} from './CoachesSidebarContext';
 
 const getPageInfo = (pathname: string) => {
   // Find the route that matches the current pathname

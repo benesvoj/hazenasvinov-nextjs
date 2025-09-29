@@ -1,10 +1,13 @@
 'use client';
 
 import React from 'react';
-import {Card, CardBody} from '@heroui/card';
+
 import {Badge} from '@heroui/badge';
+import {Card, CardBody} from '@heroui/card';
 import {Image} from '@heroui/image';
+
 import {PhotoIcon, EyeIcon, CalendarIcon} from '@heroicons/react/24/outline';
+
 import {PhotoAlbum} from '@/types/features/gallery/photoGallery';
 
 interface AlbumCardProps {

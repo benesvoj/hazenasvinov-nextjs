@@ -1,14 +1,19 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
+
 import {Button} from '@heroui/button';
 import {Input} from '@heroui/input';
+
 import {PhotoIcon, FolderIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
+
 import {PhotoAlbum, Photo} from '@/types/features/gallery/photoGallery';
+
 import {getPhotoAlbums, getPhotosByAlbum} from '@/utils/supabase/photoGallery';
-import PhotoViewerModal from './components/PhotoViewerModal';
-import PhotoGrid from './components/PhotoGrid';
+
 import AlbumCard from './components/AlbumCard';
+import PhotoGrid from './components/PhotoGrid';
+import PhotoViewerModal from './components/PhotoViewerModal';
 
 export default function PhotoGalleryPage() {
   const [albums, setAlbums] = useState<PhotoAlbum[]>([]);

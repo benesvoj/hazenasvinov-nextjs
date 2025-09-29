@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useEffect} from 'react';
+
 import {
   useDisclosure,
   Badge,
@@ -14,16 +15,20 @@ import {
   TableRow,
   TableCell,
 } from '@heroui/react';
-import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
 import {PlusCircleIcon} from '@heroicons/react/16/solid';
+import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
 import {translations} from '@/lib/translations';
-import {AddCategoryModal, AddSeasonModal, EditCategoryModal, EditSeasonModal} from './components';
+
 import {DeleteConfirmationModal, AdminContainer} from '@/components';
-import {Category, CategorySeason} from '@/types';
 import {AgeGroups, Genders} from '@/enums';
-import {ageGroupsOptions, genderOptions, competitionTypeOptions} from '@/utils';
-import {getAgeGroupBadgeColor, getGenderBadgeColor} from './constants';
 import {useCategories} from '@/hooks';
+import {Category, CategorySeason} from '@/types';
+import {ageGroupsOptions, genderOptions, competitionTypeOptions} from '@/utils';
+
+import {AddCategoryModal, AddSeasonModal, EditCategoryModal, EditSeasonModal} from './components';
+import {getAgeGroupBadgeColor, getGenderBadgeColor} from './constants';
 
 export default function CategoriesAdminPage() {
   // Use the custom hook for all business logic

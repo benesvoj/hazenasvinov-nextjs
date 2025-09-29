@@ -1,8 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Checkbox, Progress } from '@heroui/react';
-import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon, CheckIcon } from '@heroicons/react/24/outline';
+import React, {useState} from 'react';
+
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Input,
+  Textarea,
+  Checkbox,
+  Progress,
+} from '@heroui/react';
+
+import {XMarkIcon, ChevronLeftIcon, ChevronRightIcon, CheckIcon} from '@heroicons/react/24/outline';
 
 interface MatchProcessWizardModalProps {
   isOpen: boolean;
@@ -13,7 +26,7 @@ interface MatchProcessWizardModalProps {
 const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
   isOpen,
   onClose,
-  match
+  match,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -27,8 +40,8 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
       web: false,
       instagram: false,
       facebook: false,
-      whatsapp: false
-    }
+      whatsapp: false,
+    },
   });
 
   const totalSteps = 5;
@@ -58,40 +71,40 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
         web: false,
         instagram: false,
         facebook: false,
-        whatsapp: false
-      }
+        whatsapp: false,
+      },
     });
     onClose();
   };
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleDistributionChange = (platform: string, checked: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       distribution: {
         ...prev.distribution,
-        [platform]: checked
-      }
+        [platform]: checked,
+      },
     }));
   };
 
   const handleFileUpload = (field: string, files: FileList | null) => {
     if (files) {
       if (field === 'matchDocument') {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          matchDocument: files[0]
+          matchDocument: files[0],
         }));
       } else if (field === 'matchPhotos') {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          matchPhotos: Array.from(files)
+          matchPhotos: Array.from(files),
         }));
       }
     }
@@ -151,15 +164,25 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
               <label htmlFor="matchDocument" className="cursor-pointer">
                 <div className="space-y-2">
                   <div className="text-gray-400">
-                    <svg className="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      className="mx-auto h-12 w-12"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                    >
+                      <path
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </div>
                   <div className="text-sm text-gray-600">
                     <span className="font-medium text-blue-600 hover:text-blue-500">
                       Klikněte pro nahrání
-                    </span>
-                    {' '}nebo přetáhněte soubor
+                    </span>{' '}
+                    nebo přetáhněte soubor
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG až 10MB</p>
                 </div>
@@ -189,15 +212,25 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
               <label htmlFor="matchPhotos" className="cursor-pointer">
                 <div className="space-y-2">
                   <div className="text-gray-400">
-                    <svg className="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      className="mx-auto h-12 w-12"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                    >
+                      <path
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </div>
                   <div className="text-sm text-gray-600">
                     <span className="font-medium text-blue-600 hover:text-blue-500">
                       Klikněte pro nahrání
-                    </span>
-                    {' '}nebo přetáhněte soubory
+                    </span>{' '}
+                    nebo přetáhněte soubory
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG až 10MB (více souborů)</p>
                 </div>
@@ -216,9 +249,7 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Blog post</h3>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nadpis
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Nadpis</label>
               <Input
                 placeholder="Zadejte nadpis blog postu..."
                 value={formData.blogTitle}
@@ -229,9 +260,7 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Obsah
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Obsah</label>
               <Textarea
                 placeholder="Zadejte obsah blog postu..."
                 value={formData.blogContent}
@@ -247,9 +276,7 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Distribuce postu</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Vyberte, kde chcete zveřejnit blog post:
-            </p>
+            <p className="text-sm text-gray-600 mb-4">Vyberte, kde chcete zveřejnit blog post:</p>
             <div className="space-y-3">
               <Checkbox
                 isSelected={formData.distribution.web}
@@ -290,7 +317,7 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
       'Dokument zápasu',
       'Fotografie ze zápasu',
       'Blog post',
-      'Distribuce'
+      'Distribuce',
     ];
     return titles[currentStep - 1] || '';
   };
@@ -306,7 +333,7 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
       case 4:
         return formData.blogTitle.trim() !== '' && formData.blogContent.trim() !== '';
       case 5:
-        return Object.values(formData.distribution).some(value => value);
+        return Object.values(formData.distribution).some((value) => value);
       default:
         return false;
     }
@@ -319,14 +346,14 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
+    <Modal
+      isOpen={isOpen}
       onClose={handleClose}
       size="2xl"
       classNames={{
-        base: "max-w-[95vw] mx-2",
-        wrapper: "items-start justify-center p-2 sm:p-4 pt-20",
-        backdrop: "bg-black/50"
+        base: 'max-w-[95vw] mx-2',
+        wrapper: 'items-start justify-center p-2 sm:p-4 pt-20',
+        backdrop: 'bg-black/50',
       }}
     >
       <ModalContent>
@@ -343,21 +370,17 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
             </Button>
           </div>
           <div className="w-full">
-            <Progress 
-              value={(currentStep / totalSteps) * 100} 
-              className="w-full"
-              color="primary"
-            />
+            <Progress value={(currentStep / totalSteps) * 100} className="w-full" color="primary" />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>Krok {currentStep} z {totalSteps}</span>
+              <span>
+                Krok {currentStep} z {totalSteps}
+              </span>
               <span>{getStepTitle()}</span>
             </div>
           </div>
         </ModalHeader>
 
-        <ModalBody>
-          {renderStep()}
-        </ModalBody>
+        <ModalBody>{renderStep()}</ModalBody>
 
         <ModalFooter className="flex justify-between">
           <div className="flex gap-2">
@@ -371,7 +394,7 @@ const MatchProcessWizardModal: React.FC<MatchProcessWizardModalProps> = ({
               </Button>
             )}
           </div>
-          
+
           <div className="flex gap-2">
             {currentStep < totalSteps ? (
               <Button

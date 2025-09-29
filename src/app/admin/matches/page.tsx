@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
+
 import {
   Alert,
   Select,
@@ -12,6 +13,7 @@ import {
   Button,
   useDisclosure,
 } from '@heroui/react';
+
 import {
   TrophyIcon,
   PlusIcon,
@@ -19,7 +21,40 @@ import {
   DocumentArrowUpIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
+
+import {useQueryClient} from '@tanstack/react-query';
+
+import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
+
 import {translations} from '@/lib/translations';
+
+import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
+import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
+import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
+
+import {getCategoryInfo} from '@/helpers/getCategoryInfo';
+
+import {
+  DeleteConfirmationModal,
+  MobileActionsMenu,
+  showToast,
+  ButtonWithTooltip,
+  AdminContainer,
+} from '@/components';
+import {matchStatusesKeys} from '@/constants';
+import {
+  useSeasons,
+  useFilteredTeams,
+  useStandings,
+  useCategories,
+  useFetchMembers,
+  useTeams,
+  useExcelImport,
+  useTeamDisplayLogic,
+} from '@/hooks';
+import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
+import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
+
 import {
   AddMatchModal,
   AddResultModal,
@@ -32,32 +67,6 @@ import {
   StandingsTable,
   CategoryMatches,
 } from './components';
-import {
-  DeleteConfirmationModal,
-  MobileActionsMenu,
-  showToast,
-  ButtonWithTooltip,
-  AdminContainer,
-} from '@/components';
-import {getCategoryInfo} from '@/helpers/getCategoryInfo';
-import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
-import {
-  useSeasons,
-  useFilteredTeams,
-  useStandings,
-  useCategories,
-  useFetchMembers,
-  useTeams,
-  useExcelImport,
-  useTeamDisplayLogic,
-} from '@/hooks';
-import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
-import {useQueryClient} from '@tanstack/react-query';
-import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
-import {matchStatusesKeys} from '@/constants';
-import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
-import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
-import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');

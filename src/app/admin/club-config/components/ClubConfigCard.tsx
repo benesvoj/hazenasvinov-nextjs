@@ -1,8 +1,13 @@
-import {Card, CardHeader, CardBody} from '@heroui/react';
+import {useState, useEffect} from 'react';
+
+import Image from 'next/image';
+
 import {Button} from '@heroui/button';
-import {Cog6ToothIcon} from '@heroicons/react/24/outline';
 import {Input, Textarea} from '@heroui/input';
+import {Card, CardHeader, CardBody} from '@heroui/react';
+
 import {
+  Cog6ToothIcon,
   BuildingOfficeIcon,
   EnvelopeIcon,
   GlobeAltIcon,
@@ -10,12 +15,12 @@ import {
   PhoneIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
-import {useState} from 'react';
+
 import {useClubConfig} from '@/hooks/entities/club/useClubConfig';
-import {useEffect} from 'react';
+
+import Logo from '@/components/ui/layout/Logo';
+
 import {uploadClubAsset, deleteClubAsset} from '@/utils/supabase/storage';
-import Image from 'next/image';
-import Logo from '@/components/Logo';
 
 export default function ClubConfigCard() {
   const {clubConfig, loading, error, updateClubConfig} = useClubConfig();

@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback} from 'react';
-import {createClient} from '@/utils/supabase/client';
+
 import {
   TrainingSession,
   TrainingSessionStatus,
@@ -20,8 +20,12 @@ import {
   CoachAnalytics,
   AttendanceFilter,
 } from '@/types/entities/trainingSession/business/statistics';
+
+import showToast, {ToastOptions} from '@/components/ui/feedback/Toast';
+
+import {createClient} from '@/utils/supabase/client';
+
 import {useUser} from '@/contexts/UserContext';
-import showToast, {ToastOptions} from '@/components/Toast';
 
 export function useAttendance() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);

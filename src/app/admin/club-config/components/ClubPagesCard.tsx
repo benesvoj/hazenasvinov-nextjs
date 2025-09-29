@@ -1,10 +1,13 @@
 'use client';
-import {Card, CardHeader, CardBody, Switch, Button, Spinner, Input} from '@heroui/react';
-import {usePageVisibility} from '@/hooks';
 import {useState} from 'react';
+
+import {Card, CardHeader, CardBody, Switch, Button, Spinner, Input} from '@heroui/react';
+
 import {translations} from '@/lib/translations';
-import {PageVisibility} from '@/types';
+
 import {LoadingSpinner} from '@/components';
+import {usePageVisibility} from '@/hooks';
+import {PageVisibility} from '@/types';
 
 export default function ClubPagesCard() {
   const {

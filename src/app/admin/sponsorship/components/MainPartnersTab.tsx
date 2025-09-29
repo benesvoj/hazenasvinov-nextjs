@@ -1,12 +1,13 @@
 'use client';
 
-import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {Button} from '@heroui/button';
+import {useState} from 'react';
+
 import {Badge} from '@heroui/badge';
-import {translations} from '@/lib/translations';
-import {useSponsorshipData, MainPartner} from '@/hooks/entities/settings/useSponsorshipData';
-import {PartnerFormModal} from './PartnerFormModal';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Image} from '@heroui/image';
+import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
+
 import {
   PlusIcon,
   PencilIcon,
@@ -16,8 +17,12 @@ import {
   GlobeAltIcon,
   HeartIcon,
 } from '@heroicons/react/24/outline';
-import {useState} from 'react';
-import {Image} from '@heroui/image';
+
+import {useSponsorshipData, MainPartner} from '@/hooks/entities/settings/useSponsorshipData';
+
+import {translations} from '@/lib/translations';
+
+import {PartnerFormModal} from './PartnerFormModal';
 
 export const MainPartnersTab = () => {
   const {

@@ -1,16 +1,20 @@
 'use client';
 
 import React, {useEffect} from 'react';
+
+import Link from 'next/link';
+import {useRouter} from 'next/navigation';
+
 import {Button} from '@heroui/button';
 import {Select, SelectItem} from '@heroui/select';
+
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   BuildingOfficeIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import {useRouter} from 'next/navigation';
+
 import {useClubsNavigation} from '@/hooks/entities/club/useClubsNavigation';
 
 interface ClubsNavigationProps {

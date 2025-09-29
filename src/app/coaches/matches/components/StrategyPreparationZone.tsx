@@ -1,10 +1,15 @@
 'use client';
 
 import React, {useState} from 'react';
+
 import {Card, CardHeader, CardBody, Button, Tabs, Tab} from '@heroui/react';
+
 import {ClipboardDocumentListIcon, XMarkIcon} from '@heroicons/react/24/outline';
+
 import {useStrategyPreparation} from '@/hooks/coach/useStrategyPreparation';
+
 import {Match, Nullish} from '@/types';
+
 import {TabWithHeadToHead, TabWithStrategy, TabWithVideos, TabWithPreviousMatches} from './';
 
 interface StrategyPreparationZoneProps {

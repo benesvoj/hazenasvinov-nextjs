@@ -1,4 +1,5 @@
 import {AgeGroups, CompetitionTypes, Genders} from '@/enums';
+
 import {CategorySeason} from './categorySeason';
 /**
  * Enhanced Category interface for the new category system with URL-friendly routing.

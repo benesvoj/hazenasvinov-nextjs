@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useState} from 'react';
+
 import {
   Modal,
   ModalContent,
@@ -14,11 +15,15 @@ import {
   SelectItem,
   Image,
 } from '@heroui/react';
+
 import {PhotoIcon, XMarkIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
-import {Category, Match, BlogPost} from '@/types';
-import {postStatuses, postStatusLabels} from '@/constants';
+
 import {generateSlug} from '@/utils/slugGenerator';
+
+import {postStatuses, postStatusLabels} from '@/constants';
 import {formatDateString} from '@/helpers';
+import {Category, Match, BlogPost} from '@/types';
+
 import MatchSelectionModal from './MatchSelectionModal';
 
 interface User {

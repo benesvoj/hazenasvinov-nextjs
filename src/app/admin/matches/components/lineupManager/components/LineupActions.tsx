@@ -1,6 +1,9 @@
 import React from 'react';
+
 import {Button} from '@heroui/react';
+
 import {PlusCircleIcon, TrashIcon} from '@heroicons/react/24/solid';
+
 import {ButtonWithTooltip} from '@/components';
 
 interface LineupActionsProps {

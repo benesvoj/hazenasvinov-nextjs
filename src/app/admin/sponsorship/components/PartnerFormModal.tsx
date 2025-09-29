@@ -1,12 +1,20 @@
 'use client';
 
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Textarea } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { useState, useEffect } from "react";
-import { translations } from "@/lib/translations";
+import {useState, useEffect} from 'react';
+
+import {Button} from '@heroui/button';
+import {Input, Textarea} from '@heroui/input';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from '@heroui/modal';
+import {Select, SelectItem} from '@heroui/select';
+
+import {translations} from '@/lib/translations';
 
 interface PartnerFormData {
   name: string;
@@ -29,13 +37,13 @@ interface PartnerFormModalProps {
   partnerType: 'main' | 'business' | 'media';
 }
 
-export const PartnerFormModal = ({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
-  initialData, 
-  mode, 
-  partnerType 
+export const PartnerFormModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+  mode,
+  partnerType,
 }: PartnerFormModalProps) => {
   const [formData, setFormData] = useState<PartnerFormData>({
     name: '',
@@ -45,14 +53,17 @@ export const PartnerFormModal = ({
     contact_phone: '',
     level: 'silver',
     start_date: new Date().toISOString().split('T')[0],
-    end_date: partnerType === 'main' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : '',
-    status: 'active'
+    end_date:
+      partnerType === 'main'
+        ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        : '',
+    status: 'active',
   });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (initialData) {
-      setFormData(prev => ({ ...prev, ...initialData }));
+      setFormData((prev) => ({...prev, ...initialData}));
     }
   }, [initialData]);
 
@@ -66,9 +77,11 @@ export const PartnerFormModal = ({
         website_url: formData.website_url || null,
         contact_email: formData.contact_email || null,
         contact_phone: formData.contact_phone || null,
-        end_date: formData.end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        end_date:
+          formData.end_date ||
+          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       };
-      
+
       await onSubmit(cleanData);
       onClose();
     } catch (error) {
@@ -84,8 +97,11 @@ export const PartnerFormModal = ({
         contact_phone: '',
         level: 'silver',
         start_date: new Date().toISOString().split('T')[0],
-        end_date: partnerType === 'main' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : '',
-        status: 'active'
+        end_date:
+          partnerType === 'main'
+            ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+            : '',
+        status: 'active',
       });
     }
   };
@@ -94,19 +110,19 @@ export const PartnerFormModal = ({
     switch (partnerType) {
       case 'main':
         return [
-          { value: 'platinum', label: translations.sponsorship.levels.platinum },
-          { value: 'gold', label: translations.sponsorship.levels.gold }
+          {value: 'platinum', label: translations.sponsorship.levels.platinum},
+          {value: 'gold', label: translations.sponsorship.levels.gold},
         ];
       case 'business':
         return [
-          { value: 'silver', label: translations.sponsorship.levels.silver },
-          { value: 'bronze', label: translations.sponsorship.levels.bronze }
+          {value: 'silver', label: translations.sponsorship.levels.silver},
+          {value: 'bronze', label: translations.sponsorship.levels.bronze},
         ];
       case 'media':
         return [
-          { value: 'local', label: 'Místní' },
-          { value: 'regional', label: 'Regionální' },
-          { value: 'national', label: 'Národní' }
+          {value: 'local', label: 'Místní'},
+          {value: 'regional', label: 'Regionální'},
+          {value: 'national', label: 'Národní'},
         ];
       default:
         return [];
@@ -115,8 +131,12 @@ export const PartnerFormModal = ({
 
   const getTitle = () => {
     const action = mode === 'add' ? 'Přidat' : 'Upravit';
-    const type = partnerType === 'main' ? 'hlavního partnera' : 
-                 partnerType === 'business' ? 'obchodního partnera' : 'mediálního partnera';
+    const type =
+      partnerType === 'main'
+        ? 'hlavního partnera'
+        : partnerType === 'business'
+          ? 'obchodního partnera'
+          : 'mediálního partnera';
     return `${action} ${type}`;
   };
 
@@ -134,7 +154,7 @@ export const PartnerFormModal = ({
                   label="Název partnera"
                   placeholder="Zadejte název"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({...prev, name: e.target.value}))}
                   required
                 />
                 <Select
@@ -143,14 +163,12 @@ export const PartnerFormModal = ({
                   selectedKeys={[formData.level]}
                   onSelectionChange={(keys) => {
                     const selected = Array.from(keys)[0] as string;
-                    setFormData(prev => ({ ...prev, level: selected }));
+                    setFormData((prev) => ({...prev, level: selected}));
                   }}
                   required
                 >
                   {getLevelOptions().map((option) => (
-                    <SelectItem key={option.value}>
-                      {option.label}
-                    </SelectItem>
+                    <SelectItem key={option.value}>{option.label}</SelectItem>
                   ))}
                 </Select>
               </div>
@@ -159,7 +177,7 @@ export const PartnerFormModal = ({
                 label="Popis"
                 placeholder="Zadejte popis partnera"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({...prev, description: e.target.value}))}
                 required
               />
 
@@ -168,14 +186,16 @@ export const PartnerFormModal = ({
                   label="Webové stránky"
                   placeholder="https://example.com"
                   value={formData.website_url || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, website_url: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({...prev, website_url: e.target.value}))}
                   type="url"
                 />
                 <Input
                   label="Email"
                   placeholder="info@example.com"
                   value={formData.contact_email || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contact_email: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({...prev, contact_email: e.target.value}))
+                  }
                   type="email"
                 />
               </div>
@@ -185,13 +205,15 @@ export const PartnerFormModal = ({
                   label="Telefon"
                   placeholder="+420 123 456 789"
                   value={formData.contact_phone || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({...prev, contact_phone: e.target.value}))
+                  }
                 />
                 <Input
                   label="Datum začátku"
                   type="date"
                   value={formData.start_date}
-                  onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({...prev, start_date: e.target.value}))}
                   required
                 />
               </div>
@@ -201,7 +223,7 @@ export const PartnerFormModal = ({
                   label="Datum konce"
                   type="date"
                   value={formData.end_date || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({...prev, end_date: e.target.value}))}
                   required
                 />
               )}
@@ -212,19 +234,13 @@ export const PartnerFormModal = ({
                 selectedKeys={[formData.status]}
                 onSelectionChange={(keys) => {
                   const selected = Array.from(keys)[0] as string;
-                  setFormData(prev => ({ ...prev, status: selected }));
+                  setFormData((prev) => ({...prev, status: selected}));
                 }}
                 required
               >
-                <SelectItem key="active">
-                  {translations.sponsorship.status.active}
-                </SelectItem>
-                <SelectItem key="inactive">
-                  {translations.sponsorship.status.inactive}
-                </SelectItem>
-                <SelectItem key="pending">
-                  {translations.sponsorship.status.pending}
-                </SelectItem>
+                <SelectItem key="active">{translations.sponsorship.status.active}</SelectItem>
+                <SelectItem key="inactive">{translations.sponsorship.status.inactive}</SelectItem>
+                <SelectItem key="pending">{translations.sponsorship.status.pending}</SelectItem>
               </Select>
             </div>
           </ModalBody>
@@ -232,12 +248,10 @@ export const PartnerFormModal = ({
             <Button color="secondary" variant="bordered" onPress={onClose}>
               {translations.sponsorship.button.cancel}
             </Button>
-            <Button 
-              color="primary" 
-              type="submit" 
-              isLoading={loading}
-            >
-              {mode === 'add' ? translations.sponsorship.button.addPartner : translations.sponsorship.button.save}
+            <Button color="primary" type="submit" isLoading={loading}>
+              {mode === 'add'
+                ? translations.sponsorship.button.addPartner
+                : translations.sponsorship.button.save}
             </Button>
           </ModalFooter>
         </form>

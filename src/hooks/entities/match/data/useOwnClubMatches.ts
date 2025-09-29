@@ -1,7 +1,9 @@
 import {useState, useEffect} from 'react';
+
+import {createClient} from '@/utils/supabase/client';
+
 import {Match} from '@/types';
 import {createMatchQuery} from '@/utils';
-import {createClient} from '@/utils/supabase/client';
 
 interface SeasonalMatches {
   autumn: Match[];

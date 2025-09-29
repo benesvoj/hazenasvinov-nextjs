@@ -1,13 +1,18 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
-import {Video, VideoFormData, VideoFilters} from '@/types';
-import {useAuth, useUserRoles} from '@/hooks';
-import {useVideos} from '@/hooks/entities/video/useVideos';
-import {useAppData} from '@/contexts/AppDataContext';
-import {VideoCameraIcon} from '@heroicons/react/24/outline';
+
 import {Button} from '@heroui/react';
+
+import {VideoCameraIcon} from '@heroicons/react/24/outline';
+
+import {useVideos} from '@/hooks/entities/video/useVideos';
+
+import {useAppData} from '@/contexts/AppDataContext';
+
 import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
+import {useAuth, useUserRoles} from '@/hooks';
+import {Video, VideoFormData, VideoFilters} from '@/types';
 
 export default function CoachesVideosPage() {
   const [filters, setFilters] = useState<VideoFilters>({});

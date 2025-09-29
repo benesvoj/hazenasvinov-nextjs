@@ -1,7 +1,10 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
-import {useSupabaseClient} from '../../shared/useSupabaseClient';
+
 import {useUser} from '@/contexts/UserContext';
+
 import {UserRole, CoachCategory, UserRoleSummary, RoleAssignment} from '@/types';
+
+import {useSupabaseClient} from '../../shared/useSupabaseClient';
 
 export function useUserRoles() {
   const [userRoleSummaries, setUserRoleSummaries] = useState<UserRoleSummary[]>([]);

@@ -1,7 +1,10 @@
 import {useState, useCallback, useMemo, useEffect} from 'react';
-import {createClient} from '@/utils/supabase/client';
-import {Season} from '@/types';
+
 import {translations} from '@/lib/translations';
+
+import {createClient} from '@/utils/supabase/client';
+
+import {Season} from '@/types';
 
 export function useSeasons() {
   const [activeSeason, setActiveSeason] = useState<Season | null>(null);

@@ -1,6 +1,11 @@
 'use client';
 
-import MatchSchedule from '@/components/match/MatchSchedule';
+import {useSectionVisibility} from '@/hooks/entities/settings/useSectionVisibility';
+
+import MatchSchedule from '@/components/shared/match/MatchSchedule';
+
+import {translations} from '@/lib/translations';
+
 import {
   CallTheActionSection,
   SponsorsSection,
@@ -8,9 +13,8 @@ import {
   PostSection,
   LatestResultsSection,
 } from './components';
-import {useSectionVisibility} from '@/hooks/entities/settings/useSectionVisibility';
 import AuthHandler from './components/AuthHandler';
-import {translations} from '@/lib/translations';
+
 // import OptimizedMatchSchedule from "@/components/match/OptimizedMatchSchedule";
 
 export default function Page() {

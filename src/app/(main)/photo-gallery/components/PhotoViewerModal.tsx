@@ -1,9 +1,12 @@
 'use client';
 
 import React, {useState} from 'react';
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
-import {Button} from '@heroui/button';
+
 import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Image} from '@heroui/image';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -12,8 +15,8 @@ import {
   CalendarIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
+
 import {Photo, PhotoAlbum} from '@/types/features/gallery/photoGallery';
-import {Image} from '@heroui/image';
 
 interface PhotoViewerModalProps {
   isOpen: boolean;

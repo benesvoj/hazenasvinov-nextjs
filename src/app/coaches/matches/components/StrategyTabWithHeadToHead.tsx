@@ -1,7 +1,9 @@
+import MatchRow from '@/components/shared/match/MatchRow';
+
 import {LoadingSpinner} from '@/components';
-import {HeadToHeadStatistics} from '.';
-import MatchRow from '@/components/match/MatchRow';
 import {Match, Nullish, Team} from '@/types';
+
+import {HeadToHeadStatistics} from '.';
 
 interface TabWithHeadToHeadProps {
   headToHeadError: string | null;

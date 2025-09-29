@@ -1,9 +1,13 @@
 'use client';
 
 import React from 'react';
+
 import {Card, CardBody, CardHeader, Chip, Avatar} from '@heroui/react';
+
 import {GiftIcon, CalendarIcon} from '@heroicons/react/24/outline';
+
 import {useUpcomingBirthdays} from '@/hooks/coach/useUpcomingBirthdays';
+
 import {formatDateString} from '@/helpers';
 
 interface BirthdayCardProps {

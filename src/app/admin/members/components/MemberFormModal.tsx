@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Modal,
   ModalContent,
@@ -11,9 +12,11 @@ import {
   SelectItem,
   Chip,
 } from '@heroui/react';
+
 import {translations} from '@/lib/translations';
-import {Category, Member} from '@/types';
+
 import {Genders, MemberFunction, getMemberFunctionOptions} from '@/enums';
+import {Category, Member} from '@/types';
 
 interface MemberFormModalProps {
   isOpen: boolean;

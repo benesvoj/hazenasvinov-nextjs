@@ -1,20 +1,26 @@
 'use client';
 
 import React, {useState, useEffect, Suspense} from 'react';
+
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
-import {publicRoutes} from '@/routes/routes';
-import {createClient} from '@/utils/supabase/client';
-import {logSuccessfulLogin, logFailedLogin} from '@/utils/loginLogger';
+
+import {Button, Input, Tabs, Tab, Alert} from '@heroui/react';
+
 import {
   LockClosedIcon,
   UserIcon,
   AcademicCapIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
-import {Button, Input, Tabs, Tab, Alert} from '@heroui/react';
+
+import {PasswordInput} from '@/components/ui/inputs/PasswordInput';
+
+import {logSuccessfulLogin, logFailedLogin} from '@/utils/loginLogger';
+import {createClient} from '@/utils/supabase/client';
+
 import {LoadingSpinner} from '@/components';
-import {PasswordInput} from '@/components/PasswordInput';
+import {publicRoutes} from '@/routes/routes';
 
 function LoginForm() {
   const searchParams = useSearchParams();

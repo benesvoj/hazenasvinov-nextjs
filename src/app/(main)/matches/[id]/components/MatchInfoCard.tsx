@@ -1,12 +1,16 @@
 import {Card, CardBody, CardFooter, CardHeader} from '@heroui/card';
-import {TeamDisplay} from './';
-import {translations} from '@/lib/translations';
-import {formatTime} from '@/helpers/formatTime';
+
 import {CalendarIcon, ClockIcon, MapPinIcon} from '@heroicons/react/24/outline';
-import {Match} from '@/types';
-import {Heading} from '@/components';
+
+import {translations} from '@/lib/translations';
+
 import {formatDateWithWeekday} from '@/helpers/formatDate';
-import {MatchScore} from '@/components';
+import {formatTime} from '@/helpers/formatTime';
+
+import {Heading, MatchScore} from '@/components';
+import {Match} from '@/types';
+
+import {TeamDisplay} from './';
 
 interface MatchInfoCardProps {
   match: Match;

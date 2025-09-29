@@ -1,7 +1,9 @@
 import {useState, useEffect, useCallback, useMemo} from 'react';
-import {Match} from '@/types';
+
 import {getMatchesWithTeamsOptimized} from '@/services/optimizedMatchQueries';
+
 import {useSeasons} from '@/hooks';
+import {Match} from '@/types';
 
 interface AllCategoriesOwnClubMatchesResult {
   matches: Match[];

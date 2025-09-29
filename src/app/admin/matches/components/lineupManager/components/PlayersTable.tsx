@@ -1,9 +1,12 @@
 import React, {memo, useCallback} from 'react';
+
 import {Button, ButtonGroup} from '@heroui/react';
+
 import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
 import {UnifiedTable} from '@/components';
-import {LineupPlayerFormData} from '@/types';
 import {PlayerPosition} from '@/enums';
+import {LineupPlayerFormData} from '@/types';
 
 interface PlayersTableProps {
   players: LineupPlayerFormData[];

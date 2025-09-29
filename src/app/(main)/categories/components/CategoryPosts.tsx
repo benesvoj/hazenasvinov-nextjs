@@ -1,27 +1,27 @@
 'use client';
 
-import { Card, CardBody, CardFooter } from "@heroui/card";
-import { Button } from "@heroui/button";
-import Link from "@/components/Link";
-import { TagIcon } from "@heroicons/react/24/outline";
-import { BlogPostCardSkeleton } from "@/components/BlogPostCard";
-import BlogPostCard from '@/components/BlogPostCard'
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { BlogPost } from "@/types";
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardFooter} from '@heroui/card';
+
+import {TagIcon, ArrowRightIcon} from '@heroicons/react/24/outline';
+
+import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
+import Link from '@/components/ui/link/Link';
+
+import {BlogPost} from '@/types';
 
 interface CategoryPostsProps {
   categoryId: string;
   posts?: BlogPost[];
 }
 
-export function CategoryPosts({ categoryId, posts = [] }: CategoryPostsProps) {
+export function CategoryPosts({categoryId, posts = []}: CategoryPostsProps) {
   const latestPosts = posts.filter((post) => post.category_id === categoryId);
-  
+
   const postsLoading = false;
   const postsError = null;
   return (
     <section className="relative">
-
       {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {postsLoading ? (
@@ -42,11 +42,9 @@ export function CategoryPosts({ categoryId, posts = [] }: CategoryPostsProps) {
                 <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
                   Chyba při načítání novinek
                 </h3>
-                <p className="text-red-600 dark:text-red-400 mb-4 max-w-md mx-auto">
-                  {postsError}
-                </p>
-                <Button 
-                  color="primary" 
+                <p className="text-red-600 dark:text-red-400 mb-4 max-w-md mx-auto">{postsError}</p>
+                <Button
+                  color="primary"
                   variant="bordered"
                   onPress={() => window.location.reload()}
                   className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
@@ -59,12 +57,7 @@ export function CategoryPosts({ categoryId, posts = [] }: CategoryPostsProps) {
         ) : latestPosts && latestPosts.length > 0 ? (
           // Success State
           latestPosts.map((post, index) => (
-            <BlogPostCard 
-              key={post.id} 
-              post={post} 
-              index={index}
-              variant="landing"
-            />
+            <BlogPostCard key={post.id} post={post} index={index} variant="landing" />
           ))
         ) : (
           // No Posts State
@@ -82,9 +75,9 @@ export function CategoryPosts({ categoryId, posts = [] }: CategoryPostsProps) {
                 </p>
               </CardBody>
               <CardFooter className="flex justify-center">
-              <Button 
-                  as={Link} 
-                  href="/blog" 
+                <Button
+                  as={Link}
+                  href="/blog"
                   color="primary"
                   variant="bordered"
                   className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
@@ -100,9 +93,9 @@ export function CategoryPosts({ categoryId, posts = [] }: CategoryPostsProps) {
       {/* View All Button */}
       {latestPosts && latestPosts.length > 0 && (
         <div className="text-center mt-8">
-          <Button 
-            as={Link} 
-            href="/blog" 
+          <Button
+            as={Link}
+            href="/blog"
             size="md"
             color="primary"
             variant="bordered"

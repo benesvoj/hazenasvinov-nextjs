@@ -1,8 +1,11 @@
 'use client';
 
 import React from 'react';
+
 import {Card, CardHeader, CardBody} from '@heroui/react';
+
 import {ChartBarIcon, TrophyIcon, FireIcon, ShieldCheckIcon} from '@heroicons/react/24/outline';
+
 import {Match} from '@/types';
 
 interface MatchStats {

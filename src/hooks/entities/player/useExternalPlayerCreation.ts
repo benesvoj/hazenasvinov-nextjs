@@ -1,8 +1,11 @@
 import {useState, useCallback} from 'react';
+
 import {createClient} from '@/utils/supabase/client';
+
 import {showToast} from '@/components';
-import {ExternalPlayerFormData, PlayerSearchResult} from '@/types';
 import {Genders, MemberFunction} from '@/enums';
+import {ExternalPlayerFormData, PlayerSearchResult} from '@/types';
+
 import {useMemberClubRelationships} from '../member/business/useMemberClubRelationships';
 
 /**
@@ -95,7 +98,7 @@ export function useExternalPlayerCreation() {
           name: formData.name.trim(),
           surname: formData.surname.trim(),
           registration_number: formData.registration_number.trim(),
-          functions: MemberFunction.PLAYER, // External players are players
+          functions: MemberFunction.PLAYER, // External player-manager are player-manager
           sex: formData.sex, // Use explicit gender selection from form
           category_id: categoryId, // Set category_id from the match category
         })

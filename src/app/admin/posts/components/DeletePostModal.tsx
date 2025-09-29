@@ -1,9 +1,11 @@
 'use client';
 
-import React from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { BlogPost } from "@/types";
+import React from 'react';
+
+import {Button} from '@heroui/button';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@heroui/modal';
+
+import {BlogPost} from '@/types';
 
 interface DeletePostModalProps {
   isOpen: boolean;
@@ -12,12 +14,7 @@ interface DeletePostModalProps {
   post: BlogPost | null;
 }
 
-export default function DeletePostModal({
-  isOpen,
-  onClose,
-  onConfirm,
-  post
-}: DeletePostModalProps) {
+export default function DeletePostModal({isOpen, onClose, onConfirm, post}: DeletePostModalProps) {
   const handleConfirm = async () => {
     await onConfirm();
     onClose();
@@ -31,9 +28,7 @@ export default function DeletePostModal({
           <p>
             Opravdu chcete smazat článek <strong>&ldquo;{post?.title}&rdquo;</strong>?
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Tato akce je nevratná.
-          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Tato akce je nevratná.</p>
         </ModalBody>
         <ModalFooter>
           <Button variant="light" onPress={onClose}>

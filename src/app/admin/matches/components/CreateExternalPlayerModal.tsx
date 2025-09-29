@@ -1,11 +1,13 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {UnifiedModal} from '@/components';
+
 import {Input, Select, SelectItem, Checkbox} from '@heroui/react';
-import {CreateExternalPlayerModalProps, ExternalPlayerFormData} from '@/types';
-import {useExternalPlayerCreation} from '@/hooks';
+
+import {UnifiedModal} from '@/components';
 import {Genders, getGenderOptions, PlayerPosition} from '@/enums';
+import {useExternalPlayerCreation} from '@/hooks';
+import {CreateExternalPlayerModalProps, ExternalPlayerFormData} from '@/types';
 
 export default function CreateExternalPlayerModal({
   isOpen,

@@ -1,13 +1,17 @@
 'use client';
 
 import React, {useState} from 'react';
+
 import {Input, Select, SelectItem, Card, CardBody, Button, Textarea} from '@heroui/react';
+
 import {UserPlusIcon} from '@heroicons/react/24/outline';
+
 import {createClient} from '@/utils/supabase/client';
-import {useFetchMembers, useMemberMetadata} from '@/hooks';
+
 import {UnifiedModal} from '@/components';
-import {MemberMetadaFormData} from '@/types';
 import {Genders, getGenderOptions, MemberFunction} from '@/enums';
+import {useFetchMembers, useMemberMetadata} from '@/hooks';
+import {MemberMetadaFormData} from '@/types';
 
 interface CreateMemberModalProps {
   isOpen: boolean;

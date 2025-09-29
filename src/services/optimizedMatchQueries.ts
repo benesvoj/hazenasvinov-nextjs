@@ -2,8 +2,8 @@
  * Performance-optimized match query service with intelligent caching
  */
 
-import {createClient} from '@/utils/supabase/client';
-import {transformMatchWithTeamNames, getTeamDisplayNameSafe} from '@/utils/teamDisplay';
+import type {Match} from '@/types/entities/match/data/match';
+
 import {
   matchCache,
   teamCache,
@@ -11,7 +11,10 @@ import {
   cacheKeys,
   invalidateCache,
 } from '@/lib/performanceCache';
-import type {Match} from '@/types/entities/match/data/match';
+
+import {createClient} from '@/utils/supabase/client';
+import {transformMatchWithTeamNames, getTeamDisplayNameSafe} from '@/utils/teamDisplay';
+
 import type {MatchQueryOptions, MatchQueryResult, SeasonalMatchQueryResult} from './matchQueries';
 
 // Optimized query selectors with minimal data fetching

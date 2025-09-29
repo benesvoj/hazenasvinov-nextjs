@@ -1,16 +1,19 @@
 'use client';
 
 import React, {useEffect, forwardRef, useImperativeHandle} from 'react';
+
 import {Card} from '@heroui/react';
-import {LineupManagerProps, LineupManagerRef} from '@/types';
+
 import {TeamTypes} from '@/enums';
 import {translations} from '@/lib';
-import {useLineupDataManager} from './lineupManager/hooks/useLineupDataManager';
-import {useLineupModals} from './lineupManager/hooks/useLineupModals';
-import {useLineupPerformance} from './lineupManager/hooks/useLineupPerformance';
-import {useLineupErrorHandler} from './lineupManager/hooks/useLineupErrorHandler';
+import {LineupManagerProps, LineupManagerRef} from '@/types';
+
 import {TeamSelector, LineupErrorBoundary, LineupSkeleton} from './lineupManager/components';
 import {LineupHeader, LineupContent, LineupModals} from './lineupManager/components/utils';
+import {useLineupDataManager} from './lineupManager/hooks/useLineupDataManager';
+import {useLineupErrorHandler} from './lineupManager/hooks/useLineupErrorHandler';
+import {useLineupModals} from './lineupManager/hooks/useLineupModals';
+import {useLineupPerformance} from './lineupManager/hooks/useLineupPerformance';
 
 const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
   (

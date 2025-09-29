@@ -1,12 +1,16 @@
 'use client';
 
-import {Tabs, Tab} from '@heroui/tabs';
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {useFetchUsers} from '@/hooks/entities/user/useFetchUsers';
-import {UsersTab} from './components/UsersTab';
-import {LoginLogsTab} from './components/LoginLogsTab';
-import {translations} from '@/lib/translations';
 import {useState} from 'react';
+
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Tabs, Tab} from '@heroui/tabs';
+
+import {useFetchUsers} from '@/hooks/entities/user/useFetchUsers';
+
+import {translations} from '@/lib/translations';
+
+import {LoginLogsTab} from './components/LoginLogsTab';
+import {UsersTab} from './components/UsersTab';
 
 export default function Page() {
   const [selectedTab, setSelectedTab] = useState<string>('users');

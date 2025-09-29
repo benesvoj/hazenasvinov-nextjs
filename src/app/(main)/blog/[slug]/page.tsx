@@ -1,13 +1,12 @@
 'use client';
 
 import {useEffect} from 'react';
-import {useParams} from 'next/navigation';
+
 import Image from 'next/image';
+import {useParams} from 'next/navigation';
+
 import {Card, CardBody, Button, Chip, Divider} from '@heroui/react';
-// TODO: Remove Link from here, use Heroui Link
-import Link from '@/components/Link';
-import {useCategories, useFetchBlogPost} from '@/hooks';
-import {useFetchPostMatch} from '@/hooks/entities/blog/useFetchPostMatch';
+
 import {
   CalendarIcon,
   UserIcon,
@@ -16,9 +15,13 @@ import {
   ShareIcon,
   BookmarkIcon,
 } from '@heroicons/react/24/outline';
-import {translations} from '@/lib/translations';
-import {BlogPostCard, Heading, MatchInfo} from '@/components';
-import BlogContent from '@/components/BlogContent';
+
+import {BlogContent, BlogPostCard} from '@/components/features';
+import {MatchInfo} from '@/components/shared';
+import {Link, Heading} from '@/components/ui';
+
+import {useCategories, useFetchBlogPost, useFetchPostMatch} from '@/hooks';
+import {translations} from '@/lib';
 
 export default function BlogPostPage() {
   const params = useParams();

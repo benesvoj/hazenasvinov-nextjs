@@ -1,7 +1,7 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {XMarkIcon} from '@heroicons/react/24/outline';
+
 import {
   Modal,
   ModalContent,
@@ -12,6 +12,9 @@ import {
   RadioGroup,
   Radio,
 } from '@heroui/react';
+
+import {XMarkIcon} from '@heroicons/react/24/outline';
+
 import {createClient} from '@/utils/supabase/client';
 
 interface RoleAssignmentModalProps {

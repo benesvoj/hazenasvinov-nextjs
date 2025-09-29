@@ -1,18 +1,24 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {Button} from '@heroui/button';
-import {useDisclosure} from '@heroui/modal';
+
 import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {useDisclosure} from '@heroui/modal';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@heroui/table';
+
 import {PlusIcon, PencilIcon, TrashIcon, CogIcon} from '@heroicons/react/24/outline';
-import {useFetchMemberFunctions} from '@/hooks';
-import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
-import {MemberFunction} from '@/types';
-import FunctionFormModal from './components/FunctionFormModal';
-import {showToast} from '@/components/Toast';
+
+import {showToast} from '@/components/ui/feedback/Toast';
+import DeleteConfirmationModal from '@/components/ui/modals/DeleteConfirmationModal';
+
 import {translations} from '@/lib/translations';
+
+import {useFetchMemberFunctions} from '@/hooks';
+import {MemberFunction} from '@/types';
+
+import FunctionFormModal from './components/FunctionFormModal';
 
 export default function MemberFunctionsAdminPage() {
   const [functions, setFunctions] = useState<MemberFunction[]>([]);

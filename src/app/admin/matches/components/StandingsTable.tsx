@@ -1,8 +1,13 @@
 import React from 'react';
-import {Button} from '@heroui/button';
-import {TrophyIcon} from '@heroicons/react/24/outline';
+
 import Image from 'next/image';
+
+import {Button} from '@heroui/button';
+
+import {TrophyIcon} from '@heroicons/react/24/outline';
+
 import {EnhancedStanding} from '@/hooks/entities/standings/useStandings';
+
 import {getTeamDisplayNameSafe, createClubTeamCountsMap} from '@/utils';
 
 interface StandingsTableProps {

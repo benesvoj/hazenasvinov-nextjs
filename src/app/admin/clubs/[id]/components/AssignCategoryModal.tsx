@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
+
 import {
   Select,
   SelectItem,
@@ -12,10 +13,14 @@ import {
   Button,
   Input,
 } from '@heroui/react';
-import {LoadingSpinner} from '@/components';
-import {useAppData} from '@/contexts/AppDataContext';
-import {Category, Season} from '@/types';
+
 import {createClient} from '@/utils/supabase/client';
+
+import {useAppData} from '@/contexts/AppDataContext';
+
+import {LoadingSpinner} from '@/components';
+import {Category, Season} from '@/types';
+
 interface AssignCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
