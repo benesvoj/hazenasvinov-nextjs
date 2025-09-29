@@ -1,10 +1,12 @@
+'use client';
+
 /**
  * Performance monitoring component for development
  */
 
 import React from 'react';
 
-import {usePerformanceMonitoring} from '@/lib/performanceMonitor';
+import {usePerformanceMonitoring} from '@/hooks/admin/usePerformanceMonitoring';
 
 export function PerformanceMonitorPanel() {
   const {stats, clearMetrics, exportMetrics} = usePerformanceMonitoring();

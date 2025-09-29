@@ -4,7 +4,7 @@
 
 import {performance} from 'perf_hooks';
 
-import {performanceMonitor} from '@/lib/performanceMonitor';
+import {performanceMonitor} from '@/hooks/admin/usePerformanceMonitoring';
 
 import type {MatchQueryOptions} from '@/services/matchQueries';
 import {

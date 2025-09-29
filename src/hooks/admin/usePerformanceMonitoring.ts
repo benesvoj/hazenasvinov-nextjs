@@ -285,20 +285,4 @@ export function timed(metadata?: Record<string, any>) {
   };
 }
 
-/**
- * Performance monitoring component for development
- * Note: This component should be used in a .tsx file, not .ts
- */
-export function PerformanceMonitorPanel() {
-  const {stats, clearMetrics, exportMetrics} = usePerformanceMonitoring();
-
-  if (process.env.NODE_ENV !== 'development') {
-    return null;
-  }
-
-  // This component should be moved to a .tsx file for proper JSX support
-  // For now, return null to avoid parsing errors
-  return null;
-}
-
 export default performanceMonitor;

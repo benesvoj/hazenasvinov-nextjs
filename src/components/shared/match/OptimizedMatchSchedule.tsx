@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Performance-optimized MatchSchedule component with memoization
  */
