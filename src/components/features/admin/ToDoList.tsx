@@ -58,8 +58,7 @@ export default function ToDoList({
       {t.todoList.title} ({todos.length})
     </>
   );
-  const todoCardCurrentFilter =
-    currentFilter !== TodoFilter.ALL ? `${t.filteredBy} ${currentFilter.replace('-', ' ')}` : '';
+
   const todoCardTotalPages =
     totalPages > 1 ? `(${t.page} ${currentPage} ${t.of} ${totalPages})` : '';
 
@@ -79,7 +78,7 @@ export default function ToDoList({
   return (
     <UnifiedCard
       title={todoCardTitle}
-      subtitle={`${todoCardCurrentFilter} ${todoCardTotalPages}`}
+      subtitle={todoCardTotalPages}
       titleSize={2}
       footer={todoCardFooter}
       isLoading={todosLoading}
@@ -94,15 +93,17 @@ export default function ToDoList({
         },
       ]}
     >
-      {paginatedTodos.map((todo) => (
-        <TodoListItem
-          key={todo.id}
-          todo={todo}
-          handleEditTodo={handleEditTodo}
-          updateTodoStatus={updateTodoStatus}
-          deleteTodo={deleteTodo}
-        />
-      ))}
+      <div className="flex flex-col gap-4">
+        {paginatedTodos.map((todo) => (
+          <TodoListItem
+            key={todo.id}
+            todo={todo}
+            handleEditTodo={handleEditTodo}
+            updateTodoStatus={updateTodoStatus}
+            deleteTodo={deleteTodo}
+          />
+        ))}
+      </div>
     </UnifiedCard>
   );
 }

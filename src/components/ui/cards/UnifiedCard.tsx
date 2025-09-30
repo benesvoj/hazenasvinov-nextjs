@@ -2,8 +2,8 @@
 
 import {Button, Card, CardBody, CardFooter, CardHeader} from '@heroui/react';
 
-import {LoadingSpinner, Heading} from '@/components';
-import {getDefaultActionIcon} from '@/helpers';
+import {LoadingSpinner, Heading, showToast} from '@/components';
+import {getDefaultActionIcon, getNextStatus, getStatusButtonInfo, getStatusLabel} from '@/helpers';
 import {UnifiedCardProps} from '@/types';
 
 import {renderEmptyState} from '../feedback/EmptyState';
@@ -75,25 +75,62 @@ export default function UnifiedCard({
             <CardHeader className="flex justify-between items-center">
               <div className="flex flex-col gap-2">
                 <Heading size={titleSize}>{title}</Heading>
-                {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+                {subtitle && <div className="text-sm text-gray-500">{subtitle}</div>}
               </div>
               {actions && actions.length > 0 && (
                 <div className="flex gap-2">
-                  {actions.map((action, index) => (
-                    <Button
-                      key={index}
-                      size="sm"
-                      aria-label={action.label}
-                      title={action.label}
-                      onPress={action.onClick}
-                      variant={action.variant || 'bordered'}
-                      color={action.color || 'primary'}
-                      startContent={getDefaultActionIcon(action.buttonType)}
-                      isIconOnly={action.isIconOnly}
-                    >
-                      {!action.isIconOnly && action.label}
-                    </Button>
-                  ))}
+                  {actions.map((action, index) => {
+                    // Handle status transition actions
+                    if (action.statusTransition) {
+                      const {currentStatus, onStatusChange, itemId} = action.statusTransition;
+                      const buttonInfo = getStatusButtonInfo(currentStatus);
+
+                      if (!buttonInfo) return null;
+
+                      return (
+                        <Button
+                          key={index}
+                          size="sm"
+                          variant="light"
+                          color={buttonInfo.color}
+                          isDisabled={action.isDisabled}
+                          isIconOnly
+                          onPress={() => {
+                            const nextStatus = getNextStatus(currentStatus);
+                            if (nextStatus) {
+                              showToast.success(
+                                `Item moved from ${getStatusLabel(currentStatus)} to ${getStatusLabel(nextStatus)}`
+                              );
+                              onStatusChange(itemId, nextStatus);
+                            }
+                          }}
+                          title={`${buttonInfo.text} item`}
+                        >
+                          {buttonInfo.icon}
+                        </Button>
+                      );
+                    }
+
+                    // Handle regular actions
+                    if (!action.onClick) return null; // Skip if no onClick provided
+
+                    return (
+                      <Button
+                        key={index}
+                        size="sm"
+                        aria-label={action.label}
+                        title={action.label}
+                        onPress={action.onClick}
+                        variant={action.variant || 'bordered'}
+                        color={action.color || 'primary'}
+                        startContent={getDefaultActionIcon(action.buttonType)}
+                        isIconOnly={action.isIconOnly}
+                        isDisabled={action.isDisabled}
+                      >
+                        {!action.isIconOnly && action.label}
+                      </Button>
+                    );
+                  })}
                 </div>
               )}
             </CardHeader>

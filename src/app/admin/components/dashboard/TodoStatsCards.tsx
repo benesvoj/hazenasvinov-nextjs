@@ -9,9 +9,13 @@ import {
 
 import {UseTodosReturn} from '@/hooks/admin/useTodos';
 
+import {translations} from '@/lib/translations';
+
 import {TodoFilter} from '@/enums';
 
 export const TodoStatsCards = ({todos}: {todos: UseTodosReturn}) => {
+  const t = translations.common.todoFilter;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <Card
@@ -29,7 +33,7 @@ export const TodoStatsCards = ({todos}: {todos: UseTodosReturn}) => {
             <ExclamationTriangleIcon className="w-6 h-6 text-blue-600" />
           </div>
           <div className="text-2xl font-bold text-blue-600">{todos.todoStats.todo}</div>
-          <div className="text-sm text-gray-600">To Do</div>
+          <div className="text-sm text-gray-600">{t.todo}</div>
         </CardBody>
       </Card>
       <Card
@@ -47,7 +51,7 @@ export const TodoStatsCards = ({todos}: {todos: UseTodosReturn}) => {
             <ClockIcon className="w-6 h-6 text-orange-600" />
           </div>
           <div className="text-2xl font-bold text-orange-600">{todos.todoStats.inProgress}</div>
-          <div className="text-sm text-gray-600">In Progress</div>
+          <div className="text-sm text-gray-600">{t.in_progress}</div>
         </CardBody>
       </Card>
       <Card
@@ -65,7 +69,7 @@ export const TodoStatsCards = ({todos}: {todos: UseTodosReturn}) => {
             <CheckCircleIcon className="w-6 h-6 text-green-600" />
           </div>
           <div className="text-2xl font-bold text-green-600">{todos.todoStats.done}</div>
-          <div className="text-sm text-gray-600">Completed</div>
+          <div className="text-sm text-gray-600">{t.done}</div>
         </CardBody>
       </Card>
       <Card
@@ -85,7 +89,7 @@ export const TodoStatsCards = ({todos}: {todos: UseTodosReturn}) => {
             <FireIcon className="w-6 h-6 text-red-600" />
           </div>
           <div className="text-2xl font-bold text-red-600">{todos.todoStats.highPriority}</div>
-          <div className="text-sm text-gray-600">High Priority</div>
+          <div className="text-sm text-gray-600">{t.high_priority}</div>
         </CardBody>
       </Card>
     </div>

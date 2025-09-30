@@ -9,7 +9,7 @@ export interface UnifiedCardProps {
   onPress?: () => void;
   title?: string | React.ReactNode;
   titleSize?: HeadingLevel;
-  subtitle?: string;
+  subtitle?: string | React.ReactNode;
   isSelected?: boolean;
   fullWidth?: boolean;
   contentAlignment?: 'left' | 'center' | 'right' | 'justify-between';
@@ -21,11 +21,18 @@ export interface UnifiedCardProps {
   isPressable?: boolean;
   actions?: {
     label: string;
-    onClick: () => void;
+    onClick?: () => void; // Made optional since statusTransition handles its own click logic
     variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'ghost';
     color?: 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success' | undefined;
     icon?: React.ReactNode;
     buttonType: ButtonTypes;
     isIconOnly?: boolean;
+    isDisabled?: boolean;
+    // Status transition specific props
+    statusTransition?: {
+      currentStatus: any; // Generic status type
+      onStatusChange: (id: string, newStatus: any) => void;
+      itemId: string;
+    };
   }[];
 }

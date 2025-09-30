@@ -16,6 +16,7 @@ export enum ButtonTypes {
   FILTER = 'filter',
   SORT = 'sort',
   EXPORT = 'export',
+  STATUS_TRANSITION = 'status-transition',
 }
 
 export const BUTTON_TYPE_LABELS = {
@@ -32,6 +33,7 @@ export const BUTTON_TYPE_LABELS = {
   [ButtonTypes.FILTER]: t.filter,
   [ButtonTypes.SORT]: t.sort,
   [ButtonTypes.EXPORT]: t.export,
+  [ButtonTypes.STATUS_TRANSITION]: t.statusTransition,
 } as const;
 
 export const getButtonTypeOptions = () => {

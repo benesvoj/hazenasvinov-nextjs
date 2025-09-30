@@ -39,3 +39,10 @@ export interface ToDoListProps {
   handleEditTodo: (todo: TodoItem) => void;
   currentFilter?: string;
 }
+
+export interface TodoListItemProps {
+  todo: TodoItem;
+  handleEditTodo: (todo: TodoItem) => void;
+  updateTodoStatus: (id: string, status: TodoStatuses) => void;
+  deleteTodo: (id: string) => void;
+}

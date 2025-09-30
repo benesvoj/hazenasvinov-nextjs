@@ -2,8 +2,10 @@ import {Card, CardBody, Button} from '@heroui/react';
 
 import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
-import {showToast} from '@/components';
-import {TodoStatuses} from '@/enums';
+import {translations} from '@/lib/translations';
+
+import {showToast, UnifiedCard} from '@/components';
+import {ButtonTypes, TodoStatuses} from '@/enums';
 import {
   getPriorityLabel,
   getStatusLabel,
@@ -13,15 +15,9 @@ import {
   getCategoryIcon,
   getNextStatus,
   getStatusButtonInfo,
+  formatDateString,
 } from '@/helpers';
-import {TodoItem} from '@/types';
-
-export interface TodoListItemProps {
-  todo: TodoItem;
-  handleEditTodo: (todo: TodoItem) => void;
-  updateTodoStatus: (id: string, status: TodoStatuses) => void;
-  deleteTodo: (id: string) => void;
-}
+import {TodoListItemProps} from '@/types';
 
 export const TodoListItem = ({
   todo,
@@ -29,113 +25,100 @@ export const TodoListItem = ({
   updateTodoStatus,
   deleteTodo,
 }: TodoListItemProps) => {
-  return (
-    <Card key={todo.id} className="hover:shadow-md transition-shadow my-2">
-      <CardBody>
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className="flex items-center gap-1"
-                title={`Priority: ${getPriorityLabel(todo.priority)}`}
-              >
-                {getPriorityIcon(todo.priority)}
-                <span className="text-xs text-gray-500">{getPriorityLabel(todo.priority)}</span>
-              </div>
-              <div
-                className="flex items-center gap-1"
-                title={`Status: ${getStatusLabel(todo.status)}`}
-              >
-                {getStatusIcon(todo.status)}
-                <span className="text-xs text-gray-500">{getStatusLabel(todo.status)}</span>
-              </div>
-              <div
-                className="flex items-center gap-1"
-                title={`Category: ${getCategoryLabel(todo.category)}`}
-              >
-                {getCategoryIcon(todo.category)}
-                <span className="text-xs text-gray-500">{getCategoryLabel(todo.category)}</span>
-              </div>
-            </div>
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{todo.title}</h3>
-            {todo.description && (
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">{todo.description}</p>
-            )}
-            <div className="grid gap-4 text-xs text-gray-500 mt-3 grid-cols-1 md:grid-cols-12">
-              {todo.due_date && (
-                <div className="md:col-span-3 min-w-0">
-                  <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</div>
-                  <div className="truncate">{todo.due_date}</div>
-                </div>
-              )}
-              <div className={`min-w-0 ${todo.due_date ? 'md:col-span-6' : 'md:col-span-8'}`}>
-                <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Created by</div>
-                <div className="truncate">{todo.user_email}</div>
-              </div>
-              <div className={`min-w-0 ${todo.due_date ? 'md:col-span-3' : 'md:col-span-4'}`}>
-                <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Created</div>
-                <div className="truncate">
-                  {new Date(todo.created_at).toLocaleDateString('en-CA', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                  })}
-                </div>
-              </div>
-            </div>
+  const t = translations;
+
+  const todoListItemSubtitle = (
+    <div className="flex items-center gap-2 mb-2">
+      <div
+        className="flex items-center gap-1"
+        title={`${t.common.todoList.item.priority}: ${getPriorityLabel(todo.priority)}`}
+      >
+        {getPriorityIcon(todo.priority)}
+        <span className="text-xs text-gray-500">{getPriorityLabel(todo.priority)}</span>
+      </div>
+      <div
+        className="flex items-center gap-1"
+        title={`${t.common.todoList.item.status}: ${getStatusLabel(todo.status)}`}
+      >
+        {getStatusIcon(todo.status)}
+        <span className="text-xs text-gray-500">{getStatusLabel(todo.status)}</span>
+      </div>
+      <div
+        className="flex items-center gap-1"
+        title={`${t.common.todoList.item.category}: ${getCategoryLabel(todo.category)}`}
+      >
+        {getCategoryIcon(todo.category)}
+        <span className="text-xs text-gray-500">{getCategoryLabel(todo.category)}</span>
+      </div>
+    </div>
+  );
+
+  const todoListItemFooter = (
+    <div className="grid gap-4 text-xs text-gray-500 mt-3 grid-cols-1 md:grid-cols-12">
+      {todo.due_date && (
+        <div className="md:col-span-3 min-w-0">
+          <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {t.common.todoList.item.dueDate}
           </div>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="light"
-              color="primary"
-              isIconOnly
-              onPress={() => handleEditTodo(todo)}
-              title="Edit todo"
-            >
-              <PencilIcon className="w-4 h-4" />
-            </Button>
-
-            {/* Status transition button */}
-            {(() => {
-              const buttonInfo = getStatusButtonInfo(todo.status);
-              if (!buttonInfo) return null;
-
-              return (
-                <Button
-                  size="sm"
-                  variant="light"
-                  color={buttonInfo.color}
-                  isIconOnly
-                  onPress={() => {
-                    const nextStatus = getNextStatus(todo.status);
-                    if (nextStatus) {
-                      showToast.success(
-                        `Todo moved from ${getStatusLabel(todo.status)} to ${getStatusLabel(nextStatus)}`
-                      );
-                      updateTodoStatus(todo.id, nextStatus);
-                    }
-                  }}
-                  title={`${buttonInfo.text} todo`}
-                >
-                  {buttonInfo.icon}
-                </Button>
-              );
-            })()}
-
-            <Button
-              size="sm"
-              variant="light"
-              color="danger"
-              isIconOnly
-              onPress={() => deleteTodo(todo.id)}
-              title="Delete todo"
-            >
-              <TrashIcon className="w-4 h-4" />
-            </Button>
-          </div>
+          <div className="truncate">{todo.due_date}</div>
         </div>
-      </CardBody>
-    </Card>
+      )}
+      <div className={`min-w-0 ${todo.due_date ? 'md:col-span-6' : 'md:col-span-8'}`}>
+        <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+          {t.common.createdBy}
+        </div>
+        <div className="truncate">{todo.user_email}</div>
+      </div>
+      <div className={`min-w-0 ${todo.due_date ? 'md:col-span-3' : 'md:col-span-4'}`}>
+        <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+          {t.common.createdAt}
+        </div>
+        <div className="truncate">{formatDateString(todo.created_at)}</div>
+      </div>
+    </div>
+  );
+
+  return (
+    <UnifiedCard
+      key={todo.id}
+      title={todo.title}
+      titleSize={4}
+      subtitle={todoListItemSubtitle}
+      footer={todoListItemFooter}
+      actions={[
+        {
+          label: t.button.edit,
+          onClick: () => handleEditTodo(todo),
+          variant: 'light',
+          buttonType: ButtonTypes.UPDATE,
+          isIconOnly: true,
+          isDisabled: todo.status !== TodoStatuses.TODO,
+        },
+        {
+          label: t.button.statusTransition,
+          buttonType: ButtonTypes.STATUS_TRANSITION,
+          statusTransition: {
+            currentStatus: todo.status,
+            onStatusChange: updateTodoStatus,
+            itemId: todo.id,
+          },
+        },
+        {
+          label: t.button.delete,
+          onClick: () => deleteTodo(todo.id),
+          variant: 'light',
+          buttonType: ButtonTypes.DELETE,
+          color: 'danger',
+          isIconOnly: true,
+          isDisabled: todo.status !== TodoStatuses.TODO,
+        },
+      ]}
+    >
+      {todo.description ? (
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">{todo.description}</p>
+      ) : (
+        <></>
+      )}
+    </UnifiedCard>
   );
 };
