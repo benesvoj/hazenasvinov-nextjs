@@ -47,14 +47,16 @@ export default function CommentsZone({
         },
       ]}
     >
-      {comments.map((comment) => (
-        <CommentsZoneItem
-          key={comment.id}
-          comment={comment}
-          handleEditComment={handleEditComment}
-          deleteComment={deleteComment}
-        />
-      ))}
+      <div className="flex flex-col gap-4">
+        {comments.map((comment) => (
+          <CommentsZoneItem
+            key={comment.id}
+            comment={comment}
+            handleEditComment={handleEditComment}
+            deleteComment={deleteComment}
+          />
+        ))}
+      </div>
     </UnifiedCard>
   );
 }

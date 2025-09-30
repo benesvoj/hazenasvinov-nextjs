@@ -37,27 +37,25 @@ export const CommentModal = ({
       }
     >
       <div className="space-y-4">
-        <div>
-          <Select
-            label={t.commentType}
-            aria-label={t.commentType}
-            placeholder={t.commentTypePlaceholder}
-            selectedKeys={commentFormData.type ? [commentFormData.type] : []}
-            onSelectionChange={(keys) => {
-              const selectedKey = Array.from(keys)[0] as CommentTypes;
-              if (selectedKey) {
-                setCommentFormData({
-                  ...commentFormData,
-                  type: selectedKey,
-                });
-              }
-            }}
-          >
-            {getCommentTypesOptions().map(({value, label}) => (
-              <SelectItem key={value}>{label}</SelectItem>
-            ))}
-          </Select>
-        </div>
+        <Select
+          label={t.commentType}
+          aria-label={t.commentType}
+          placeholder={t.commentTypePlaceholder}
+          selectedKeys={commentFormData.type ? [commentFormData.type] : []}
+          onSelectionChange={(keys) => {
+            const selectedKey = Array.from(keys)[0] as CommentTypes;
+            if (selectedKey) {
+              setCommentFormData({
+                ...commentFormData,
+                type: selectedKey,
+              });
+            }
+          }}
+        >
+          {getCommentTypesOptions().map(({value, label}) => (
+            <SelectItem key={value}>{label}</SelectItem>
+          ))}
+        </Select>
         <Textarea
           value={commentFormData.content}
           onChange={(e) => setCommentFormData({...commentFormData, content: e.target.value})}
