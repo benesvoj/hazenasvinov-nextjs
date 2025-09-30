@@ -23,16 +23,7 @@ import {translations} from '@/lib/translations';
 
 import {createClient} from '@/utils/supabase/client';
 
-interface Committee {
-  id: string;
-  name: string;
-  code: string;
-  description?: string;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
+import {Committee} from '@/types';
 
 export default function CommitteesAdminPage() {
   const [committees, setCommittees] = useState<Committee[]>([]);
@@ -215,9 +206,6 @@ export default function CommitteesAdminPage() {
 
   return (
     <AdminContainer
-      title={t.title}
-      description={t.description}
-      icon={<BuildingOfficeIcon className="w-8 h-8 text-blue-600" />}
       actions={
         <Button
           color="primary"

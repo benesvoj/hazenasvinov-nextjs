@@ -20,11 +20,7 @@ export default function PhotoGalleryAdminPage() {
   const t = translations.admin.photoGallery;
 
   return (
-    <AdminContainer
-      title={t.title}
-      description={t.description}
-      icon={<PhotoIcon className="w-8 h-8 text-blue-600" />}
-    >
+    <AdminContainer>
       {/* Main Content */}
       <Card className="shadow-lg border-0">
         <CardHeader className="pb-0">

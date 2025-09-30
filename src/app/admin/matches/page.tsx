@@ -40,6 +40,7 @@ import {
   showToast,
   ButtonWithTooltip,
   AdminContainer,
+  LoadingSpinner,
 } from '@/components';
 import {matchStatusesKeys} from '@/constants';
 import {
@@ -925,9 +926,6 @@ export default function MatchesAdminPage() {
 
   return (
     <AdminContainer
-      title={t.title}
-      description={t.description}
-      icon={<TrophyIcon className="w-8 h-8 text-blue-600" />}
       actions={
         <>
           <div className="lg:hidden">
@@ -1061,6 +1059,34 @@ export default function MatchesAdminPage() {
           </div>
         </>
       }
+      filters={
+        <div className="w-full">
+          {sortedSeasons.length === 0 ? (
+            <div className="w-full flex justify-center items-center">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <Select
+                label={translations.season.title}
+                placeholder={translations.season.selectSeason}
+                selectedKeys={selectedSeason ? [selectedSeason] : []}
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] as string;
+                  setSelectedSeason(selectedKey || '');
+                }}
+                className="w-full"
+              >
+                {sortedSeasons.map((season) => (
+                  <SelectItem key={season.id} textValue={season.name}>
+                    {season.name} {season.is_closed ? `(${translations.season.closed})` : ''}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+          )}
+        </div>
+      }
     >
       {/* Season closed warning */}
       {selectedSeason && isSeasonClosed() && (
@@ -1074,31 +1100,6 @@ export default function MatchesAdminPage() {
           {error}
         </div>
       )}
-
-      {/* Season selector */}
-      <div className="mb-6">
-        <div className="w-full max-w-md">
-          <Select
-            label={translations.season.title}
-            placeholder={translations.season.selectSeason}
-            selectedKeys={selectedSeason ? [selectedSeason] : []}
-            onSelectionChange={(keys) => {
-              const selectedKey = Array.from(keys)[0] as string;
-              setSelectedSeason(selectedKey || '');
-            }}
-            className="w-full"
-          >
-            {sortedSeasons.map((season) => (
-              <SelectItem key={season.id} textValue={season.name}>
-                {season.name} {season.is_closed ? `(${translations.season.closed})` : ''}
-              </SelectItem>
-            ))}
-          </Select>
-          {sortedSeasons.length === 0 && (
-            <p className="text-sm text-red-600 mt-1">{translations.season.noSeasons}</p>
-          )}
-        </div>
-      </div>
 
       {selectedSeason && (
         <>
