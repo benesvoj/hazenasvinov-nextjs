@@ -46,7 +46,7 @@ export const privateRoutes = {
   admin: '/admin',
   users: '/admin/users',
   posts: '/admin/posts',
-  categories: '/admin/category',
+  categories: '/admin/categories',
   seasons: '/admin/seasons',
   matches: '/admin/matches',
   members: '/admin/members',

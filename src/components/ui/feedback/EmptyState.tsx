@@ -33,6 +33,8 @@ const getDefaultIcon = (type?: string) => {
       return <CogIcon className="w-12 h-12" />;
     case 'todos':
       return <CheckCircleIcon className="w-12 h-12" />;
+    case 'committees':
+      return <UserGroupIcon className="w-12 h-12" />;
     default:
       return <DocumentTextIcon className="w-12 h-12" />;
   }
@@ -105,6 +107,11 @@ const EMPTY_STATE_CONFIG = {
     title: 'Žádná nastavení',
     description: 'Zatím nejsou k dispozici žádná nastavení.',
     actionLabel: 'Konfigurovat',
+  },
+  [EmptyStateTypes.COMMITTEES]: {
+    title: 'Žádné komise',
+    description: 'Zatím nebyly vytvořeny žádné komise. Vytvořte první komisi.',
+    actionLabel: 'Vytvořit komisi',
   },
 };
 

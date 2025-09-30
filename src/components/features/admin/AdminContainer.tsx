@@ -1,16 +1,7 @@
 import {LoadingSpinner} from '@/components';
+import {AdminContainerProps} from '@/types';
 
-import {AdminActions, AdminFilters, AdminContent, AdminHeader} from './';
-
-interface AdminContainerProps {
-  title?: string;
-  description?: string;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-  actions?: React.ReactNode;
-  filters?: React.ReactNode;
-  loading?: boolean;
-}
+import {AdminFilters, AdminContent, AdminHeader, AdminActions} from './';
 
 export function AdminContainer({
   children,
@@ -33,16 +24,8 @@ export function AdminContainer({
 
           {(actions || filters) && (
             <div className="flex flex-col gap-4">
-              {actions && (
-                <div className="w-full">
-                  <AdminActions>{actions}</AdminActions>
-                </div>
-              )}
-              {filters && (
-                <div className="w-full">
-                  <AdminFilters>{filters}</AdminFilters>
-                </div>
-              )}
+              {actions && actions.length > 0 && <AdminActions actions={actions} />}
+              {filters && <AdminFilters>{filters}</AdminFilters>}
             </div>
           )}
 

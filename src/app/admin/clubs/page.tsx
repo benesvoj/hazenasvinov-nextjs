@@ -7,9 +7,6 @@ import Link from 'next/link';
 import {
   Input,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
   Image,
   Modal,
   ModalContent,
@@ -19,18 +16,16 @@ import {
   useDisclosure,
 } from '@heroui/react';
 
-import {
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  EyeIcon,
-  BuildingOfficeIcon,
-} from '@heroicons/react/24/outline';
+import {PencilIcon, TrashIcon, EyeIcon} from '@heroicons/react/24/outline';
 
 import LogoUpload from '@/components/ui/forms/LogoUpload';
 
+import {translations} from '@/lib/translations';
+
 import {createClient} from '@/utils/supabase/client';
 
+import {AdminContainer, UnifiedTable} from '@/components';
+import {ButtonTypes} from '@/enums';
 import {Club} from '@/types';
 
 export default function ClubsAdminPage() {
@@ -284,144 +279,108 @@ export default function ClubsAdminPage() {
     loadClubs();
   }, [fetchClubs]);
 
+  const t = translations.admin.clubs;
+
+  const filters = (
+    <Input
+      placeholder={t.filters.placeholder}
+      value={searchTerm}
+      onChange={handleSearchChange}
+      className="max-w-md"
+    />
+  );
+
+  const ActionsCell = ({club}: {club: Club}) => {
+    return (
+      <div className="flex justify-center gap-2">
+        <Link href={`/admin/clubs/${club.id}`} prefetch={true} scroll={false} replace={false}>
+          <Button
+            size="sm"
+            color="primary"
+            variant="light"
+            isIconOnly
+            startContent={<EyeIcon className="w-4 h-4" />}
+            aria-label={`Zobrazit detail klubu ${club.name}`}
+          />
+        </Link>
+        <Button
+          size="sm"
+          variant="light"
+          color="primary"
+          isIconOnly
+          onPress={() => openEditModal(club)}
+          startContent={<PencilIcon className="w-4 h-4" />}
+        />
+        <Button
+          size="sm"
+          variant="light"
+          color="danger"
+          isIconOnly
+          onPress={() => openDeleteModal(club)}
+          startContent={<TrashIcon className="w-4 h-4" />}
+        />
+      </div>
+    );
+  };
+
+  const clubColumns = [
+    {key: 'logo', label: t.table.logo},
+    {key: 'name', label: t.table.name},
+    {key: 'short_name', label: t.table.shortName},
+    {key: 'city', label: t.table.city},
+    {key: 'founded_year', label: t.table.foundedYear},
+    {key: 'venue', label: t.table.venue},
+    {key: 'actions', label: t.table.actions},
+  ];
+
+  const renderClubCell = (club: Club, columnKey: string) => {
+    switch (columnKey) {
+      case 'logo':
+        return <Image src={club.logo_url} alt={club.name} width={48} height={48} />;
+      case 'name':
+        return <span className="font-medium">{club.name}</span>;
+      case 'short_name':
+        return <span className="font-medium">{club.short_name}</span>;
+      case 'city':
+        return <span className="font-medium">{club.city}</span>;
+      case 'founded_year':
+        return <span className="font-medium">{club.founded_year}</span>;
+      case 'venue':
+        return <span className="font-medium">{club.venue}</span>;
+      case 'actions':
+        return <ActionsCell club={club} />;
+    }
+  };
+
   return (
-    <div className="p-3 sm:p-4 lg:p-6">
+    <AdminContainer
+      actions={[
+        {
+          label: t.addClub,
+          onClick: onCreateOpen,
+          variant: 'solid',
+          buttonType: ButtonTypes.CREATE,
+        },
+      ]}
+      loading={loading}
+      filters={filters}
+    >
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
         </div>
       )}
 
-      <Card>
-        <CardHeader className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-          <div className="flex items-center gap-2">
-            <BuildingOfficeIcon className="w-5 h-5 text-blue-500" />
-            <h2 className="text-xl font-semibold">Správa klubů</h2>
-          </div>
-
-          <Button
-            color="primary"
-            startContent={<PlusIcon className="w-4 h-4" />}
-            onPress={onCreateOpen}
-            size="sm"
-            aria-label="Přidat nový klub"
-          >
-            Přidat klub
-          </Button>
-        </CardHeader>
-
-        <CardBody>
-          {/* Search */}
-          <div className="mb-6">
-            <Input
-              placeholder="Hledat kluby..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="max-w-md"
-            />
-          </div>
-
-          {loading ? (
-            <div className="text-center py-8">Načítání...</div>
-          ) : (
-            <div className="space-y-4">
-              {filteredClubs.map((club) => (
-                <div
-                  key={club.id}
-                  className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      {club.logo_url && (
-                        <Image
-                          src={club.logo_url}
-                          alt={`${club.name} logo`}
-                          className="object-contain rounded"
-                          width={48}
-                          height={48}
-                        />
-                      )}
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-800">{club.name}</h3>
-                          {club.is_own_club && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              Domácí klub
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-600 space-y-1">
-                          {club.short_name && club.short_name !== club.name && (
-                            <p>Krátký název: {club.short_name}</p>
-                          )}
-                          {club.city && <p>Město: {club.city}</p>}
-                          {club.founded_year && <p>Založen: {club.founded_year}</p>}
-                          {club.venue && <p>Hřiště: {club.venue}</p>}
-                          {club.web && <p>Web: {club.web}</p>}
-                          {club.email && <p>Email: {club.email}</p>}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/admin/clubs/${club.id}`}
-                        prefetch={true}
-                        scroll={false}
-                        replace={false}
-                      >
-                        <Button
-                          size="sm"
-                          color="primary"
-                          variant="light"
-                          startContent={<EyeIcon className="w-4 h-4" />}
-                          aria-label={`Zobrazit detail klubu ${club.name}`}
-                        >
-                          Detail
-                        </Button>
-                      </Link>
-                      <Button
-                        size="sm"
-                        color="primary"
-                        variant="light"
-                        startContent={<PencilIcon className="w-4 h-4" />}
-                        onPress={() => openEditModal(club)}
-                        aria-label={`Upravit klub ${club.name}`}
-                      >
-                        Upravit
-                      </Button>
-                      <Button
-                        size="sm"
-                        color="danger"
-                        variant="light"
-                        startContent={<TrashIcon className="w-4 h-4" />}
-                        onPress={() => openDeleteModal(club)}
-                        aria-label={`Smazat klub ${club.name}`}
-                      >
-                        Smazat
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {filteredClubs.length === 0 && (
-                <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  <BuildingOfficeIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-700 mb-2">
-                    {searchTerm ? 'Žádné kluby nenalezeny' : 'Žádné kluby'}
-                  </h3>
-                  <p className="text-gray-500">
-                    {searchTerm
-                      ? 'Zkuste změnit vyhledávací termín'
-                      : 'Začněte přidáním prvního klubu'}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </CardBody>
-      </Card>
+      <UnifiedTable
+        isLoading={loading}
+        columns={clubColumns}
+        data={filteredClubs}
+        ariaLabel={t.title}
+        renderCell={renderClubCell}
+        getKey={(club: Club) => club.id}
+        emptyContent={t.table.noClubs}
+        isStriped
+      />
 
       {/* Create Club Modal */}
       <Modal isOpen={isCreateOpen} onClose={onCreateClose} size="2xl">
@@ -667,6 +626,6 @@ export default function ClubsAdminPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </div>
+    </AdminContainer>
   );
 }

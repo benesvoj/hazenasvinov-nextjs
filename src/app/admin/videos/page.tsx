@@ -2,10 +2,6 @@
 
 import React, {useState, useEffect} from 'react';
 
-import {Button} from '@heroui/react';
-
-import {VideoCameraIcon, PlusIcon} from '@heroicons/react/24/outline';
-
 import {useVideos} from '@/hooks/entities/video/useVideos';
 
 import {AdminContainer} from '@/components/features/admin/AdminContainer';
@@ -15,6 +11,7 @@ import {translations} from '@/lib/translations';
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
+import {ButtonTypes} from '@/enums';
 import {Video, VideoFormData, VideoFilters} from '@/types';
 
 export default function VideosPage() {
@@ -120,15 +117,14 @@ export default function VideosPage() {
 
   return (
     <AdminContainer
-      actions={
-        <Button
-          color="primary"
-          startContent={<PlusIcon className="w-5 h-5" />}
-          onPress={openCreateModal}
-        >
-          {t.addVideo}
-        </Button>
-      }
+      actions={[
+        {
+          label: t.addVideo,
+          onClick: openCreateModal,
+          variant: 'solid',
+          buttonType: ButtonTypes.CREATE,
+        },
+      ]}
     >
       {/* TODO: Remove header props after migration */}
       <VideoPageLayout

@@ -10,6 +10,7 @@ export enum EmptyStateTypes {
   PHOTOS = 'photos',
   CATEGORIES = 'categories',
   SETTINGS = 'settings',
+  COMMITTEES = 'committees',
 }
 
 export const EMPTY_STATE_TYPES_LABELS: Record<EmptyStateTypes, string> = {
@@ -20,6 +21,7 @@ export const EMPTY_STATE_TYPES_LABELS: Record<EmptyStateTypes, string> = {
   [EmptyStateTypes.PHOTOS]: t.photos,
   [EmptyStateTypes.CATEGORIES]: t.categories,
   [EmptyStateTypes.SETTINGS]: t.settings,
+  [EmptyStateTypes.COMMITTEES]: t.committees,
 };
 
 export const getEmptyStateTypeOptions = () => {

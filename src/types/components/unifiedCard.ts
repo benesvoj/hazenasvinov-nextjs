@@ -2,7 +2,8 @@ import React from 'react';
 
 import {HeadingLevel} from '@/components/ui/heading/Heading';
 
-import {ButtonTypes, EmptyStateTypes} from '@/enums';
+import {EmptyStateTypes} from '@/enums';
+import {ActionsProps} from '@/types';
 
 export interface UnifiedCardProps {
   children: React.ReactNode;
@@ -19,20 +20,5 @@ export interface UnifiedCardProps {
   isLoading?: boolean;
   emptyStateType?: EmptyStateTypes;
   isPressable?: boolean;
-  actions?: {
-    label: string;
-    onClick?: () => void; // Made optional since statusTransition handles its own click logic
-    variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'ghost';
-    color?: 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success' | undefined;
-    icon?: React.ReactNode;
-    buttonType: ButtonTypes;
-    isIconOnly?: boolean;
-    isDisabled?: boolean;
-    // Status transition specific props
-    statusTransition?: {
-      currentStatus: any; // Generic status type
-      onStatusChange: (id: string, newStatus: any) => void;
-      itemId: string;
-    };
-  }[];
+  actions?: ActionsProps[];
 }

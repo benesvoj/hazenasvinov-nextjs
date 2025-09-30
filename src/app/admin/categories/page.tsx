@@ -21,8 +21,8 @@ import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
-import {DeleteConfirmationModal, AdminContainer} from '@/components';
-import {AgeGroups, Genders} from '@/enums';
+import {DeleteConfirmationModal, AdminContainer, UnifiedTable} from '@/components';
+import {AgeGroups, ButtonTypes, Genders} from '@/enums';
 import {useCategories} from '@/hooks';
 import {Category, CategorySeason} from '@/types';
 import {ageGroupsOptions, genderOptions, competitionTypeOptions} from '@/utils';
@@ -147,19 +147,76 @@ export default function CategoriesAdminPage() {
     onEditSeasonOpen();
   };
 
+  const t = translations.categories;
+
+  const categoryColumns = [
+    {key: 'name', label: t.table.name},
+    {key: 'description', label: t.table.description},
+    {key: 'age_group', label: t.table.ageGroup},
+    {key: 'gender', label: t.table.gender},
+    {key: 'is_active', label: t.table.status},
+    {key: 'sort_order', label: t.table.sortOrder},
+    {key: 'actions', label: t.table.actions},
+  ];
+
+  const renderCategoryCell = (category: Category, columnKey: string) => {
+    switch (columnKey) {
+      case 'name':
+        return <span className="font-medium">{category.name}</span>;
+      case 'description':
+        return <span className="font-medium">{category.description || '-'}</span>;
+      case 'age_group':
+        return (
+          <span className="font-medium">{ageGroupsOptions[category.age_group as AgeGroups]}</span>
+        );
+      case 'gender':
+        return <span className="font-medium">{genderOptions[category.gender as Genders]}</span>;
+      case 'is_active':
+        return (
+          <span className="font-medium">
+            {category.is_active ? t.table.activeLabel : t.table.inactiveLabel}
+          </span>
+        );
+      case 'sort_order':
+        return <span className="font-medium">{category.sort_order}</span>;
+      case 'actions':
+        return (
+          <div className="flex justify-center gap-2">
+            <Button
+              size="sm"
+              variant="light"
+              color="primary"
+              isIconOnly
+              onPress={() => openEditModalWithModal(category)}
+              aria-label={`Upravit kategorii ${category.name}`}
+            >
+              <PencilIcon className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="light"
+              color="danger"
+              isIconOnly
+              onPress={() => openDeleteModalWithModal(category)}
+              aria-label={`Smazat kategorii ${category.name}`}
+            >
+              <TrashIcon className="w-4 h-4" />
+            </Button>
+          </div>
+        );
+    }
+  };
+
   return (
     <AdminContainer
-      actions={
-        <Button
-          size="sm"
-          color="primary"
-          startContent={<PlusCircleIcon className="w-4 h-4" />}
-          onPress={onAddCategoryOpen}
-          aria-label="Přidat novou kategorii"
-        >
-          Přidat kategorii
-        </Button>
-      }
+      actions={[
+        {
+          label: t.addCategory,
+          onClick: onAddCategoryOpen,
+          variant: 'solid',
+          buttonType: ButtonTypes.CREATE,
+        },
+      ]}
     >
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -167,95 +224,15 @@ export default function CategoriesAdminPage() {
         </div>
       )}
 
-      <Card>
-        <CardBody>
-          {loading ? (
-            <div className="text-center py-8">{translations.loading}</div>
-          ) : (
-            <Table aria-label="Categories table">
-              <TableHeader>
-                <TableColumn>NÁZEV</TableColumn>
-                <TableColumn>POPIS</TableColumn>
-                <TableColumn>VĚKOVÁ SKUPINA</TableColumn>
-                <TableColumn>POHLAVÍ</TableColumn>
-                <TableColumn>STATUS</TableColumn>
-                <TableColumn>POŘADÍ</TableColumn>
-                <TableColumn>AKCE</TableColumn>
-              </TableHeader>
-              <TableBody emptyContent="Žádné kategorie nebyly nalezeny">
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
-                      {category.description || '-'}
-                    </TableCell>
-                    <TableCell>
-                      {category.age_group ? (
-                        <Badge
-                          color={getAgeGroupBadgeColor(category.age_group as AgeGroups)}
-                          variant="flat"
-                          size="sm"
-                        >
-                          {ageGroupsOptions[category.age_group]}
-                        </Badge>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {category.gender ? (
-                        <Badge
-                          color={getGenderBadgeColor(category.gender as Genders)}
-                          variant="flat"
-                          size="sm"
-                        >
-                          {genderOptions[category.gender]}
-                        </Badge>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        color={category.is_active ? 'success' : 'default'}
-                        variant="flat"
-                        size="sm"
-                      >
-                        {category.is_active ? 'Aktivní' : 'Neaktivní'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{category.sort_order}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="light"
-                          color="primary"
-                          isIconOnly
-                          onPress={() => openEditModalWithModal(category)}
-                          aria-label={`Upravit kategorii ${category.name}`}
-                        >
-                          <PencilIcon className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="light"
-                          color="danger"
-                          isIconOnly
-                          onPress={() => openDeleteModalWithModal(category)}
-                          aria-label={`Smazat kategorii ${category.name}`}
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardBody>
-      </Card>
+      <UnifiedTable
+        columns={categoryColumns}
+        data={categories}
+        ariaLabel={t.title}
+        renderCell={renderCategoryCell}
+        getKey={(category: Category) => category.id}
+        emptyContent={t.table.noCategories}
+        isStriped
+      />
 
       {/* Add Category Modal */}
       <AddCategoryModal
@@ -284,11 +261,8 @@ export default function CategoriesAdminPage() {
         isOpen={isDeleteCategoryOpen}
         onClose={onDeleteCategoryClose}
         onConfirm={handleDeleteCategoryWithModal}
-        title="Smazat kategorii"
-        message={`
-          Opravdu chcete smazat kategorii <strong>${selectedCategory?.name}</strong>?<br><br>
-          <span class="text-sm text-gray-600">Tato akce je nevratná a může ovlivnit data v celém systému.</span>
-        `}
+        title={t.deleteCategory}
+        message={t.deleteCategoryMessage}
       />
 
       {/* Add Season Modal */}

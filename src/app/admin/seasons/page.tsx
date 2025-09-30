@@ -4,14 +4,14 @@ import React, {useEffect, useState} from 'react';
 
 import {useDisclosure, Chip, Button} from '@heroui/react';
 
-import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
 import {formatDateString} from '@/helpers/formatDate';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedCard, UnifiedTable} from '@/components';
-import {ModalMode} from '@/enums';
+import {ButtonTypes, ModalMode} from '@/enums';
 import {useSeasons} from '@/hooks';
 import {Season} from '@/types';
 
@@ -150,15 +150,15 @@ export default function SeasonsAdminPage() {
   };
   return (
     <AdminContainer
-      actions={
-        <Button
-          color="primary"
-          startContent={<PlusIcon className="w-4 h-4" />}
-          onPress={handleAddClick}
-        >
-          Přidat sezónu
-        </Button>
-      }
+      loading={loading}
+      actions={[
+        {
+          label: translations.season.addSeason,
+          onClick: handleAddClick,
+          variant: 'solid',
+          buttonType: ButtonTypes.CREATE,
+        },
+      ]}
     >
       <UnifiedCard>
         <UnifiedTable

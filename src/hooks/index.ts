@@ -19,6 +19,7 @@ export * from './entities/category/state/useCategories';
 export * from './entities/club/useClubConfig';
 export * from './entities/club/useClubs';
 export * from './entities/club/useClubsNavigation';
+export * from './entities/committee/useCommittees';
 export * from './entities/lineup/useLineupData';
 export * from './entities/lineup/useLineupManager';
 export * from './entities/lineup/useMatchLineupStats';

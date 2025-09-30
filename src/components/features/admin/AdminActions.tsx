@@ -1,14 +1,75 @@
-import {UnifiedCard} from '@/components';
+import {Button} from '@heroui/react';
+
+import {translations} from '@/lib/translations';
+
+import {UnifiedCard, showToast} from '@/components';
+import {getStatusButtonInfo, getNextStatus, getStatusLabel, getDefaultActionIcon} from '@/helpers';
+import {ActionsProps} from '@/types';
 
 interface AdminActionsProps {
-  children: React.ReactNode;
+  actions: ActionsProps[];
 }
 
-export const AdminActions = ({children}: AdminActionsProps) => {
+export const AdminActions = ({actions}: AdminActionsProps) => {
+  const t = translations;
+
   return (
     <div className="w-full">
       <UnifiedCard fullWidth variant="actions" contentAlignment="right" padding="sm">
-        <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">{children}</div>
+        <div className="flex gap-2 justify-end">
+          {actions.map((action, index) => {
+            // Handle status transition actions
+            if (action.statusTransition) {
+              const {currentStatus, onStatusChange, itemId} = action.statusTransition;
+              const buttonInfo = getStatusButtonInfo(currentStatus);
+
+              if (!buttonInfo) return null;
+
+              return (
+                <Button
+                  key={index}
+                  size="sm"
+                  variant="light"
+                  color={buttonInfo.color}
+                  isDisabled={action.isDisabled}
+                  isIconOnly
+                  onPress={() => {
+                    const nextStatus = getNextStatus(currentStatus);
+                    if (nextStatus) {
+                      showToast.success(
+                        `${t.button.moveStatusFrom} ${getStatusLabel(currentStatus)} ${t.button.moveStatusTo} ${getStatusLabel(nextStatus)}`
+                      );
+                      onStatusChange(itemId, nextStatus);
+                    }
+                  }}
+                  title={`${buttonInfo.text} ${t.button.item}`}
+                >
+                  {buttonInfo.icon}
+                </Button>
+              );
+            }
+
+            // Handle regular actions
+            if (!action.onClick) return null; // Skip if no onClick provided
+
+            return (
+              <Button
+                key={index}
+                size="sm"
+                aria-label={action.label}
+                title={action.label}
+                onPress={action.onClick}
+                variant={action.variant || 'bordered'}
+                color={action.color || 'primary'}
+                startContent={getDefaultActionIcon(action.buttonType)}
+                isIconOnly={action.isIconOnly}
+                isDisabled={action.isDisabled}
+              >
+                {!action.isIconOnly && action.label}
+              </Button>
+            );
+          })}
+        </div>
       </UnifiedCard>
     </div>
   );
