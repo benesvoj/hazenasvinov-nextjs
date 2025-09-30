@@ -1,41 +1,30 @@
 'use client';
 
-import {Card, CardBody, CardFooter, CardHeader} from '@heroui/react';
+import {Button, Card, CardBody, CardFooter, CardHeader} from '@heroui/react';
+
+import {PlusCircleIcon} from '@heroicons/react/16/solid';
 
 import {LoadingSpinner, Heading} from '@/components';
-import {EmptyStateTypes} from '@/enums';
+import {UnifiedCardProps} from '@/types';
 
 import {renderEmptyState} from '../feedback/EmptyState';
-import {HeadingLevel} from '../heading/Heading';
-
-export interface UnifiedCardProps {
-  children: React.ReactNode;
-  onPress?: () => void;
-  title?: string;
-  titleSize?: HeadingLevel;
-  isSelected?: boolean;
-  fullWidth?: boolean;
-  contentAlignment?: 'left' | 'center' | 'right' | 'justify-between';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'actions' | 'filters' | 'content';
-  footer?: React.ReactNode;
-  isLoading?: boolean;
-  emptyStateType?: EmptyStateTypes;
-}
 
 export default function UnifiedCard({
   children,
   onPress,
   title,
   titleSize = 2,
+  subtitle,
   isSelected = false,
   fullWidth = false,
   contentAlignment = 'left',
-  padding = 'md',
+  padding = 'sm',
   variant = 'default',
   footer,
   isLoading = false,
   emptyStateType,
+  isPressable = false,
+  action,
 }: UnifiedCardProps) {
   const selectedClass = isSelected
     ? 'bg-primary-50 border-2 border-primary-500 shadow-md'
@@ -72,10 +61,10 @@ export default function UnifiedCard({
         </Card>
       ) : (
         <Card
-          isPressable={!!onPress}
+          isPressable={isPressable ?? !!onPress}
           onPress={onPress}
           className={`
-        transition-all duration-200 ${onPress ? 'cursor-pointer' : ''}
+        transition-all duration-200 ${(isPressable ?? !!onPress) ? 'cursor-pointer' : ''}
         ${selectedClass}
         ${fullWidth ? 'w-full' : ''}
         ${contentAlignmentClasses[contentAlignment]}
@@ -84,20 +73,34 @@ export default function UnifiedCard({
       `}
         >
           {title && (
-            <CardHeader>
-              <Heading size={titleSize}>{title}</Heading>
+            <CardHeader className="flex justify-between items-center">
+              <div className="flex flex-col gap-2">
+                <Heading size={titleSize}>{title}</Heading>
+                {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+              </div>
+              {action && (
+                <Button
+                  size="sm"
+                  onPress={action.onClick}
+                  variant={action.variant || 'bordered'}
+                  color="primary"
+                  startContent={<PlusCircleIcon className="w-4 h-4" />}
+                >
+                  {action.label}
+                </Button>
+              )}
             </CardHeader>
           )}
           {emptyStateType ? (
             <CardBody className={fullWidth ? 'w-full' : ''}>
-              {renderEmptyState(emptyStateType, onPress || (() => {}))}
+              {renderEmptyState(emptyStateType, () => onPress)}
             </CardBody>
           ) : (
             <CardBody className={fullWidth ? 'w-full' : ''}>
               <div className={fullWidth ? 'flex flex-col gap-2 justify-end' : ''}>{children}</div>
             </CardBody>
           )}
-          {footer && <CardFooter>{footer}</CardFooter>}
+          {footer && <CardFooter className="flex justify-center">{footer}</CardFooter>}
         </Card>
       )}
     </>

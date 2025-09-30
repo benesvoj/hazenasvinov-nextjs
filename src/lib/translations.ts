@@ -609,6 +609,9 @@ export const translations = {
     permissionError: 'Oprávnění',
   },
   common: {
+    filteredBy: 'Filtrovat podle',
+    page: 'Stránka',
+    of: 'z',
     gender: {
       male: 'Muž',
       female: 'Žena',
@@ -700,6 +703,21 @@ export const translations = {
       photos: 'Fotky',
       categories: 'Kategorie',
       settings: 'Nastavení',
+    },
+    todoList: {
+      title: 'Úkoly',
+      description: 'Úkoly, které jsou dostupné v systému.',
+      addTodo: 'Přidat úkol',
+      deleteTodo: 'Smazat úkol',
+      deleteTodoMessage: 'Opravdu chcete smazat úkol? Tato akce je nevratná.',
+    },
+    commentList: {
+      title: 'Komentáře',
+      comments: 'komentářů',
+      description: 'Komentáře, které jsou dostupné v systému.',
+      addComment: 'Přidat komentář',
+      deleteComment: 'Smazat komentář',
+      deleteCommentMessage: 'Opravdu chcete smazat komentář? Tato akce je nevratná.',
     },
   },
 } as const;

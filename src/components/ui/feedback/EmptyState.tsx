@@ -12,20 +12,9 @@ import {
 
 import {EmptyStateTypes} from '@/enums/emptyStateTypes';
 
-import {Heading} from '../heading/Heading';
+import {EmptyStateProps} from '@/types';
 
-interface EmptyStateProps {
-  title: string;
-  description: string;
-  icon?: React.ReactNode;
-  action?: {
-    label: string;
-    onClick: () => void;
-    variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'ghost';
-  };
-  className?: string;
-  type?: EmptyStateTypes;
-}
+import {Heading} from '../heading/Heading';
 
 // Icon mapping for common empty states
 const getDefaultIcon = (type?: string) => {
@@ -60,7 +49,9 @@ export default function EmptyState({
   const defaultIcon = getDefaultIcon(type);
 
   return (
-    <div className={`text-center py-12 px-4 ${className}`}>
+    <div
+      className={` flex flex-col items-center justify-center text-center py-12 px-4 ${className}`}
+    >
       <div className="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-gray-100 dark:bg-gray-800 mb-6">
         {icon || defaultIcon}
       </div>
@@ -78,84 +69,75 @@ export default function EmptyState({
   );
 }
 
-// Specific empty state components
-export function EmptyPostsState({
-  onCreate,
-  className = '',
-}: {
-  onCreate: () => void;
-  className?: string;
-}) {
-  return (
-    <EmptyState
-      type={EmptyStateTypes.POSTS}
-      title="Žádné články"
-      description="Zatím nebyly vytvořeny žádné články. Vytvořte první článek pro váš klub."
-      action={{
-        label: 'Vytvořit článek',
-        onClick: onCreate,
-      }}
-      className={className}
-    />
-  );
-}
+// Generic empty state configuration
+const EMPTY_STATE_CONFIG = {
+  [EmptyStateTypes.TODOS]: {
+    title: 'Žádné úkoly',
+    description: 'Zatím nebyly vytvořeny žádné úkoly. Vytvořte první úkol.',
+    actionLabel: 'Vytvořit úkol',
+  },
+  [EmptyStateTypes.POSTS]: {
+    title: 'Žádné články',
+    description: 'Zatím nebyly vytvořeny žádné články. Vytvořte první článek pro váš klub.',
+    actionLabel: 'Vytvořit článek',
+  },
+  [EmptyStateTypes.MATCHES]: {
+    title: 'Žádné zápasy',
+    description: 'Zatím nebyly naplánovány žádné zápasy. Přidejte první zápas do kalendáře.',
+    actionLabel: 'Přidat zápas',
+  },
+  [EmptyStateTypes.USERS]: {
+    title: 'Žádní členové',
+    description: 'Zatím nebyli přidáni žádní členové klubu. Přidejte první členy.',
+    actionLabel: 'Přidat člena',
+  },
+  [EmptyStateTypes.PHOTOS]: {
+    title: 'Žádné fotky',
+    description: 'Zatím nebyly nahrány žádné fotky. Nahrajte první fotky.',
+    actionLabel: 'Nahrát fotky',
+  },
+  [EmptyStateTypes.CATEGORIES]: {
+    title: 'Žádné kategorie',
+    description: 'Zatím nebyly vytvořeny žádné kategorie. Vytvořte první kategorii.',
+    actionLabel: 'Vytvořit kategorii',
+  },
+  [EmptyStateTypes.SETTINGS]: {
+    title: 'Žádná nastavení',
+    description: 'Zatím nejsou k dispozici žádná nastavení.',
+    actionLabel: 'Konfigurovat',
+  },
+};
 
-export function EmptyMatchesState({
+// Generic empty state component
+export function GenericEmptyState({
+  emptyStateType,
   onCreate,
   className = '',
 }: {
+  emptyStateType: EmptyStateTypes;
   onCreate: () => void;
   className?: string;
 }) {
-  return (
-    <EmptyState
-      type={EmptyStateTypes.MATCHES}
-      title="Žádné zápasy"
-      description="Zatím nebyly naplánovány žádné zápasy. Přidejte první zápas do kalendáře."
-      action={{
-        label: 'Přidat zápas',
-        onClick: onCreate,
-      }}
-      className={className}
-    />
-  );
-}
+  const config = EMPTY_STATE_CONFIG[emptyStateType];
 
-export function EmptyMembersState({
-  onCreate,
-  className = '',
-}: {
-  onCreate: () => void;
-  className?: string;
-}) {
-  return (
-    <EmptyState
-      type={EmptyStateTypes.USERS}
-      title="Žádní členové"
-      description="Zatím nebyli přidáni žádní členové klubu. Přidejte první členy."
-      action={{
-        label: 'Přidat člena',
-        onClick: onCreate,
-      }}
-      className={className}
-    />
-  );
-}
+  if (!config) {
+    return (
+      <EmptyState
+        type={emptyStateType}
+        title="No data"
+        description="No items to display"
+        className={className}
+      />
+    );
+  }
 
-export function EmptyTodosState({
-  onCreate,
-  className = '',
-}: {
-  onCreate: () => void;
-  className?: string;
-}) {
   return (
     <EmptyState
-      type={EmptyStateTypes.TODOS}
-      title="Žádné úkoly"
-      description="Zatím nebyly vytvořeny žádné úkoly. Vytvořte první úkol."
+      type={emptyStateType}
+      title={config.title}
+      description={config.description}
       action={{
-        label: 'Vytvořit úkol',
+        label: config.actionLabel,
         onClick: onCreate,
       }}
       className={className}
@@ -166,18 +148,5 @@ export function EmptyTodosState({
 export const renderEmptyState = (emptyStateType: EmptyStateTypes, onCreate: () => void) => {
   if (!emptyStateType) return null;
 
-  switch (emptyStateType) {
-    case EmptyStateTypes.TODOS:
-      return <EmptyTodosState onCreate={onCreate || (() => {})} />;
-    case EmptyStateTypes.POSTS:
-      return <EmptyPostsState onCreate={onCreate || (() => {})} />;
-    case EmptyStateTypes.MATCHES:
-      return <EmptyMatchesState onCreate={onCreate || (() => {})} />;
-    case EmptyStateTypes.USERS:
-      return <EmptyMembersState onCreate={onCreate || (() => {})} />;
-    default:
-      return (
-        <EmptyState type={emptyStateType} title={'No data'} description={'No items to display'} />
-      );
-  }
+  return <GenericEmptyState emptyStateType={emptyStateType} onCreate={onCreate} />;
 };

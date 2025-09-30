@@ -30,7 +30,7 @@ export const TodoListItem = ({
   deleteTodo,
 }: TodoListItemProps) => {
   return (
-    <Card key={todo.id} className="hover:shadow-md transition-shadow">
+    <Card key={todo.id} className="hover:shadow-md transition-shadow my-2">
       <CardBody>
         <div className="flex justify-between items-start">
           <div className="flex-1">
