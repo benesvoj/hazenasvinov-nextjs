@@ -5,79 +5,21 @@ import {useState, useMemo, useEffect} from 'react';
 import {Card, CardHeader, CardBody, Button, Pagination} from '@heroui/react';
 
 import {PlusCircleIcon} from '@heroicons/react/16/solid';
+import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+
+import {LoadingSpinner, showToast, UnifiedCard, TodoListItem} from '@/components';
+import {EmptyStateTypes, TodoFilter} from '@/enums';
 import {
-  ClockIcon,
-  ExclamationTriangleIcon,
-  FireIcon,
-  FlagIcon,
-  BoltIcon,
-  WrenchScrewdriverIcon,
-  BugAntIcon,
-  SparklesIcon,
-  Cog6ToothIcon,
-  PencilIcon,
-  CheckCircleIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
-
-import {getPriorityLabel, getStatusLabel, getCategoryLabel} from '@/utils/todos';
-
-import {LoadingSpinner, showToast} from '@/components';
-import {TodoCategories, TodoFilter, TodoPriorities, TodoStatuses} from '@/enums';
-import {TodoItem} from '@/types';
-
-interface ToDoListProps {
-  todos: TodoItem[];
-  todosLoading: boolean;
-  handleAddTodo: () => void;
-  updateTodoStatus: (id: string, status: string) => void;
-  deleteTodo: (id: string) => void;
-  handleEditTodo: (todo: TodoItem) => void;
-  currentFilter?: string;
-}
-
-const getStatusIcon = (status: TodoItem['status']) => {
-  switch (status) {
-    case TodoStatuses.DONE:
-      return <CheckCircleIcon className="w-4 h-4" />;
-    case TodoStatuses.IN_PROGRESS:
-      return <ClockIcon className="w-4 h-4" />;
-    case TodoStatuses.TODO:
-      return <ExclamationTriangleIcon className="w-4 h-4" />;
-    default:
-      return <ExclamationTriangleIcon className="w-4 h-4" />;
-  }
-};
-
-const getPriorityIcon = (priority: TodoItem['priority']) => {
-  switch (priority) {
-    case TodoPriorities.URGENT:
-      return <FireIcon className="w-4 h-4" />;
-    case TodoPriorities.HIGH:
-      return <FlagIcon className="w-4 h-4" />;
-    case TodoPriorities.MEDIUM:
-      return <BoltIcon className="w-4 h-4" />;
-    case TodoPriorities.LOW:
-      return <ExclamationTriangleIcon className="w-4 h-4" />;
-    default:
-      return <BoltIcon className="w-4 h-4" />;
-  }
-};
-
-const getCategoryIcon = (category: TodoItem['category']) => {
-  switch (category) {
-    case TodoCategories.FEATURE:
-      return <SparklesIcon className="w-4 h-4" />;
-    case TodoCategories.BUG:
-      return <BugAntIcon className="w-4 h-4" />;
-    case TodoCategories.IMPROVEMENT:
-      return <WrenchScrewdriverIcon className="w-4 h-4" />;
-    case TodoCategories.TECHNICAL:
-      return <Cog6ToothIcon className="w-4 h-4" />;
-    default:
-      return <WrenchScrewdriverIcon className="w-4 h-4" />;
-  }
-};
+  getPriorityLabel,
+  getStatusLabel,
+  getCategoryLabel,
+  getStatusIcon,
+  getPriorityIcon,
+  getCategoryIcon,
+  getNextStatus,
+  getStatusButtonInfo,
+} from '@/helpers';
+import {ToDoListProps} from '@/types';
 
 export default function ToDoList({
   todos,
@@ -118,49 +60,49 @@ export default function ToDoList({
     setCurrentPage(1);
   }, [todos.length]);
 
-  // Get next status in the flow
-  const getNextStatus = (currentStatus: TodoItem['status']): TodoItem['status'] | null => {
-    switch (currentStatus) {
-      case TodoStatuses.TODO:
-        return TodoStatuses.IN_PROGRESS;
-      case TodoStatuses.IN_PROGRESS:
-        return TodoStatuses.DONE;
-      case TodoStatuses.DONE:
-        return null; // No next status for done
-      default:
-        return TodoStatuses.IN_PROGRESS;
-    }
-  };
+  const todoCardTitle = `Todo List (${todos.length})`;
+  const todoCardCurrentFilter =
+    currentFilter !== TodoFilter.ALL ? `- Filtered by ${currentFilter.replace('-', ' ')}` : '';
+  const todoCardTotalPages = totalPages > 1 ? `(Page ${currentPage} of ${totalPages})` : '';
 
-  // Get button text and icon for status transition
-  const getStatusButtonInfo = (currentStatus: TodoItem['status']) => {
-    const nextStatus = getNextStatus(currentStatus);
-    if (!nextStatus) return null;
-
-    switch (nextStatus) {
-      case TodoStatuses.IN_PROGRESS:
-        return {
-          text: 'Start',
-          icon: <ClockIcon className="w-4 h-4" />,
-          color: 'primary' as const,
-        };
-      case TodoStatuses.DONE:
-        return {
-          text: 'Complete',
-          icon: <CheckCircleIcon className="w-4 h-4" />,
-          color: 'success' as const,
-        };
-      default:
-        return null;
-    }
-  };
+  const todoCardFooter = !todosLoading && totalPages > 1 && (
+    <div className="flex justify-center p-4 border-t">
+      <Pagination
+        total={totalPages}
+        page={currentPage}
+        onChange={setCurrentPage}
+        showControls
+        showShadow
+        color="primary"
+      />
+    </div>
+  );
 
   return (
     <div>
+      <UnifiedCard
+        title={`${todoCardTitle} ${todoCardCurrentFilter} ${todoCardTotalPages}`}
+        titleSize={2}
+        footer={todoCardFooter}
+        isLoading={todosLoading}
+        emptyStateType={EmptyStateTypes.TODOS}
+      >
+        <div className="space-y-4 overflow-y-auto p-2">
+          {paginatedTodos.map((todo) => (
+            <TodoListItem
+              key={todo.id}
+              todo={todo}
+              handleEditTodo={handleEditTodo}
+              updateTodoStatus={updateTodoStatus}
+              deleteTodo={deleteTodo}
+            />
+          ))}
+        </div>
+      </UnifiedCard>
       <Card>
         <CardHeader className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <ExclamationTriangleIcon className="w-5 h-5 text-blue-500" />
+            <div className="w-5 h-5 text-blue-500">📝</div>
             <h2 className="text-xl font-semibold">
               Todo List ({todos.length})
               {currentFilter !== TodoFilter.ALL && (

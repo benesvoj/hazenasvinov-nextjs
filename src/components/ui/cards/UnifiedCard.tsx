@@ -1,8 +1,12 @@
 'use client';
 
-import {Card, CardBody, CardHeader} from '@heroui/react';
+import {Card, CardBody, CardFooter, CardHeader} from '@heroui/react';
 
-import {Heading, HeadingLevel} from '../heading/Heading';
+import {LoadingSpinner, Heading} from '@/components';
+import {EmptyStateTypes} from '@/enums';
+
+import {renderEmptyState} from '../feedback/EmptyState';
+import {HeadingLevel} from '../heading/Heading';
 
 export interface UnifiedCardProps {
   children: React.ReactNode;
@@ -14,6 +18,9 @@ export interface UnifiedCardProps {
   contentAlignment?: 'left' | 'center' | 'right' | 'justify-between';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   variant?: 'default' | 'actions' | 'filters' | 'content';
+  footer?: React.ReactNode;
+  isLoading?: boolean;
+  emptyStateType?: EmptyStateTypes;
 }
 
 export default function UnifiedCard({
@@ -26,6 +33,9 @@ export default function UnifiedCard({
   contentAlignment = 'left',
   padding = 'md',
   variant = 'default',
+  footer,
+  isLoading = false,
+  emptyStateType,
 }: UnifiedCardProps) {
   const selectedClass = isSelected
     ? 'bg-primary-50 border-2 border-primary-500 shadow-md'
@@ -53,10 +63,18 @@ export default function UnifiedCard({
   };
 
   return (
-    <Card
-      isPressable={!!onPress}
-      onPress={onPress}
-      className={`
+    <>
+      {isLoading ? (
+        <Card>
+          <CardBody>
+            <LoadingSpinner />
+          </CardBody>
+        </Card>
+      ) : (
+        <Card
+          isPressable={!!onPress}
+          onPress={onPress}
+          className={`
         transition-all duration-200 ${onPress ? 'cursor-pointer' : ''}
         ${selectedClass}
         ${fullWidth ? 'w-full' : ''}
@@ -64,16 +82,24 @@ export default function UnifiedCard({
         ${paddingClasses[padding]}
         ${variantClasses[variant]}
       `}
-    >
-      {title && (
-        <CardHeader>
-          {' '}
-          <Heading size={titleSize}>{title}</Heading>
-        </CardHeader>
+        >
+          {title && (
+            <CardHeader>
+              <Heading size={titleSize}>{title}</Heading>
+            </CardHeader>
+          )}
+          {emptyStateType ? (
+            <CardBody className={fullWidth ? 'w-full' : ''}>
+              {renderEmptyState(emptyStateType, onPress || (() => {}))}
+            </CardBody>
+          ) : (
+            <CardBody className={fullWidth ? 'w-full' : ''}>
+              <div className={fullWidth ? 'flex flex-col gap-2 justify-end' : ''}>{children}</div>
+            </CardBody>
+          )}
+          {footer && <CardFooter>{footer}</CardFooter>}
+        </Card>
       )}
-      <CardBody className={fullWidth ? 'w-full' : ''}>
-        <div className={fullWidth ? 'flex flex-col gap-2 justify-end' : ''}>{children}</div>
-      </CardBody>
-    </Card>
+    </>
   );
 }

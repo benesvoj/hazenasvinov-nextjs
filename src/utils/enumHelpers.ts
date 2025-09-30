@@ -3,6 +3,7 @@ import {
   getBlogPostStatusOptions,
   getCommentTypesOptions,
   getCompetitionTypeOptions,
+  getEmptyStateTypeOptions,
   getGenderOptions,
   getLineupCoachRoleOptions,
   getLineupErrorTypeOptions,
@@ -40,6 +41,7 @@ export const ageGroupsOptions = createOptionsRecord(getAgeGroupsOptions());
 export const blogPostStatusOptions = createOptionsRecord(getBlogPostStatusOptions());
 export const commentTypesOptions = createOptionsRecord(getCommentTypesOptions());
 export const competitionTypeOptions = createOptionsRecord(getCompetitionTypeOptions());
+export const emptyStateTypeOptions = createOptionsRecord(getEmptyStateTypeOptions());
 export const genderOptions = createOptionsRecord(getGenderOptions());
 export const lineupCoachRoleOptions = createOptionsRecord(getLineupCoachRoleOptions());
 export const lineupErrorTypeOptions = createOptionsRecord(getLineupErrorTypeOptions());

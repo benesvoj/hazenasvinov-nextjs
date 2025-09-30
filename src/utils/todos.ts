@@ -44,57 +44,7 @@ export const getCategoryColor = (category: TodoItem['category']) => {
   }
 };
 
-/**
- *
- * @default use getTodoPrioritiesOptions
- */
-export const getPriorityLabel = (priority: TodoItem['priority']) => {
-  switch (priority) {
-    case TodoPriorities.URGENT:
-      return 'Urgent';
-    case TodoPriorities.HIGH:
-      return 'High';
-    case TodoPriorities.MEDIUM:
-      return 'Medium';
-    case TodoPriorities.LOW:
-      return 'Low';
-    default:
-      return 'Unknown';
-  }
-};
-
-/**
- *
- * @default use getTodoStatusesOptions
- */
-export const getStatusLabel = (status: TodoItem['status']) => {
-  switch (status) {
-    case 'done':
-      return 'Done';
-    case 'in-progress':
-      return 'In Progress';
-    case 'todo':
-      return 'To Do';
-    default:
-      return 'Unknown';
-  }
-};
-
-/**
- *
- * @default use getTodoCategoriesOptions
- */
-export const getCategoryLabel = (category: TodoItem['category']) => {
-  switch (category) {
-    case 'feature':
-      return 'Feature';
-    case 'bug':
-      return 'Bug';
-    case 'improvement':
-      return 'Improvement';
-    case 'technical':
-      return 'Technical';
-    default:
-      return 'Unknown';
-  }
-};
+// Note: For labels, use the enum options instead:
+// - getTodoPrioritiesOptions() for priority labels
+// - getTodoStatusesOptions() for status labels
+// - getTodoCategoriesOptions() for category labels

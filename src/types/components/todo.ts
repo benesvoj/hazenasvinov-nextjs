@@ -29,3 +29,13 @@ export interface TodoStats {
   done: number;
   highPriority: number;
 }
+
+export interface ToDoListProps {
+  todos: TodoItem[];
+  todosLoading: boolean;
+  handleAddTodo: () => void;
+  updateTodoStatus: (id: string, status: string) => void;
+  deleteTodo: (id: string) => void;
+  handleEditTodo: (todo: TodoItem) => void;
+  currentFilter?: string;
+}

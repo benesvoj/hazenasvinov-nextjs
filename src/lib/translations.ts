@@ -692,5 +692,14 @@ export const translations = {
       feature: 'Feature',
       improvement: 'Improvement',
     },
+    emptyStateTypes: {
+      todos: 'Úkoly',
+      posts: 'Články',
+      users: 'Členové',
+      matches: 'Zápasy',
+      photos: 'Fotky',
+      categories: 'Kategorie',
+      settings: 'Nastavení',
+    },
   },
 } as const;
