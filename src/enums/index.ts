@@ -1,5 +1,6 @@
 export * from './ageGroups';
 export * from './blogPostStatutes';
+export * from './buttonTypes';
 export * from './commentTypes';
 export * from './competitionTypes';
 export * from './emptyStateTypes';

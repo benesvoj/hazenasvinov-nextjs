@@ -17,3 +17,9 @@ export interface CommentModalProps {
   setCommentFormData: (commentFormData: Comment) => void;
   mode: ModalMode;
 }
+
+export interface CommentsZoneItemProps {
+  comment: Comment;
+  handleEditComment: (comment: Comment) => void;
+  deleteComment: (id: string) => void;
+}

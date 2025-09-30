@@ -2,7 +2,7 @@ import React from 'react';
 
 import {HeadingLevel} from '@/components/ui/heading/Heading';
 
-import {EmptyStateTypes} from '@/enums';
+import {ButtonTypes, EmptyStateTypes} from '@/enums';
 
 export interface UnifiedCardProps {
   children: React.ReactNode;
@@ -19,9 +19,13 @@ export interface UnifiedCardProps {
   isLoading?: boolean;
   emptyStateType?: EmptyStateTypes;
   isPressable?: boolean;
-  action?: {
+  actions?: {
     label: string;
     onClick: () => void;
     variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'ghost';
-  };
+    color?: 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success' | undefined;
+    icon?: React.ReactNode;
+    buttonType: ButtonTypes;
+    isIconOnly?: boolean;
+  }[];
 }

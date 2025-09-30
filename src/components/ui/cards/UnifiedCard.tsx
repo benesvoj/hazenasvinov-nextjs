@@ -2,9 +2,8 @@
 
 import {Button, Card, CardBody, CardFooter, CardHeader} from '@heroui/react';
 
-import {PlusCircleIcon} from '@heroicons/react/16/solid';
-
 import {LoadingSpinner, Heading} from '@/components';
+import {getDefaultActionIcon} from '@/helpers';
 import {UnifiedCardProps} from '@/types';
 
 import {renderEmptyState} from '../feedback/EmptyState';
@@ -24,7 +23,7 @@ export default function UnifiedCard({
   isLoading = false,
   emptyStateType,
   isPressable = false,
-  action,
+  actions,
 }: UnifiedCardProps) {
   const selectedClass = isSelected
     ? 'bg-primary-50 border-2 border-primary-500 shadow-md'
@@ -78,16 +77,24 @@ export default function UnifiedCard({
                 <Heading size={titleSize}>{title}</Heading>
                 {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
               </div>
-              {action && (
-                <Button
-                  size="sm"
-                  onPress={action.onClick}
-                  variant={action.variant || 'bordered'}
-                  color="primary"
-                  startContent={<PlusCircleIcon className="w-4 h-4" />}
-                >
-                  {action.label}
-                </Button>
+              {actions && actions.length > 0 && (
+                <div className="flex gap-2">
+                  {actions.map((action, index) => (
+                    <Button
+                      key={index}
+                      size="sm"
+                      aria-label={action.label}
+                      title={action.label}
+                      onPress={action.onClick}
+                      variant={action.variant || 'bordered'}
+                      color={action.color || 'primary'}
+                      startContent={getDefaultActionIcon(action.buttonType)}
+                      isIconOnly={action.isIconOnly}
+                    >
+                      {!action.isIconOnly && action.label}
+                    </Button>
+                  ))}
+                </div>
               )}
             </CardHeader>
           )}

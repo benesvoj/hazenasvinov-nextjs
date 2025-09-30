@@ -112,6 +112,7 @@ export const translations = {
   button: {
     add: 'Přidat',
     edit: 'Upravit',
+    update: 'Upravit',
     delete: 'Smazat',
     save: 'Uložit',
     cancel: 'Zrušit',
@@ -121,6 +122,14 @@ export const translations = {
     unassign: 'Odebrat',
     assign: 'Přiřadit',
     tryAgain: 'Zkusit znovu',
+    search: 'Hledat',
+    filter: 'Filtrovat',
+    sort: 'Řadit',
+    export: 'Exportovat',
+    close: 'Zavřít',
+    apply: 'Použít',
+    reset: 'Resetovat',
+    read: 'Zobrazit',
   },
   sponsorship: {
     title: 'Sponzorství',
@@ -690,10 +699,10 @@ export const translations = {
       commentContentPlaceholder: 'Enter comment content',
     },
     commentTypes: {
-      general: 'General',
-      bug: 'Bug',
-      feature: 'Feature',
-      improvement: 'Improvement',
+      general: 'Obecný',
+      bug: 'Chyba',
+      feature: 'Funkce',
+      improvement: 'Vylepšení',
     },
     emptyStateTypes: {
       todos: 'Úkoly',
@@ -718,6 +727,10 @@ export const translations = {
       addComment: 'Přidat komentář',
       deleteComment: 'Smazat komentář',
       deleteCommentMessage: 'Opravdu chcete smazat komentář? Tato akce je nevratná.',
+    },
+    commentsZoneItem: {
+      createdBy: 'Vytvořil',
+      createdAt: 'Vytvořeno',
     },
   },
 } as const;

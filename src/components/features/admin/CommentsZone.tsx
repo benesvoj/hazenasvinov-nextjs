@@ -1,21 +1,11 @@
 'use client';
 
-import {Card, CardHeader, CardBody, Button} from '@heroui/react';
-
-import {PlusCircleIcon} from '@heroicons/react/16/solid';
-import {
-  ChatBubbleLeftRightIcon,
-  InformationCircleIcon,
-  WrenchScrewdriverIcon,
-  BugAntIcon,
-  SparklesIcon,
-  PencilIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import {ChatBubbleLeftRightIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
 import {UnifiedCard, CommentsZoneItem} from '@/components';
+import {ButtonTypes} from '@/enums';
 import {Comment} from '@/types';
 
 interface CommentsZoneProps {
@@ -26,36 +16,6 @@ interface CommentsZoneProps {
   deleteComment: (id: string) => void;
   onAddCommentOpen: () => void;
 }
-
-const getCommentTypeLabel = (type: Comment['type']) => {
-  switch (type) {
-    case 'general':
-      return 'General';
-    case 'bug':
-      return 'Bug Report';
-    case 'feature':
-      return 'Feature Request';
-    case 'improvement':
-      return 'Improvement';
-    default:
-      return 'General';
-  }
-};
-
-const getCommentTypeIcon = (type: Comment['type']) => {
-  switch (type) {
-    case 'general':
-      return <InformationCircleIcon className="w-4 h-4" />;
-    case 'bug':
-      return <BugAntIcon className="w-4 h-4" />;
-    case 'feature':
-      return <SparklesIcon className="w-4 h-4" />;
-    case 'improvement':
-      return <WrenchScrewdriverIcon className="w-4 h-4" />;
-    default:
-      return <InformationCircleIcon className="w-4 h-4" />;
-  }
-};
 
 export default function CommentsZone({
   comments,
@@ -78,11 +38,14 @@ export default function CommentsZone({
     <UnifiedCard
       title={commentCardTitle}
       onPress={onAddCommentOpen}
-      action={{
-        label: t.commentList.addComment,
-        onClick: onAddCommentOpen,
-        variant: 'solid',
-      }}
+      actions={[
+        {
+          label: t.commentList.addComment,
+          onClick: onAddCommentOpen,
+          variant: 'solid',
+          buttonType: ButtonTypes.CREATE,
+        },
+      ]}
     >
       {comments.map((comment) => (
         <CommentsZoneItem
