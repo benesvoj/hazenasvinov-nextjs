@@ -6,16 +6,7 @@ import {translations} from '@/lib/translations';
 
 import {UnifiedCard, CommentsZoneItem} from '@/components';
 import {ButtonTypes} from '@/enums';
-import {Comment} from '@/types';
-
-interface CommentsZoneProps {
-  comments: Comment[];
-  commentsLoading: boolean;
-  handleAddComment: () => void;
-  handleEditComment: (comment: Comment) => void;
-  deleteComment: (id: string) => void;
-  onAddCommentOpen: () => void;
-}
+import {CommentsZoneProps} from '@/types';
 
 export default function CommentsZone({
   comments,
@@ -38,6 +29,7 @@ export default function CommentsZone({
     <UnifiedCard
       title={commentCardTitle}
       onPress={onAddCommentOpen}
+      isLoading={commentsLoading}
       actions={[
         {
           label: t.commentList.addComment,

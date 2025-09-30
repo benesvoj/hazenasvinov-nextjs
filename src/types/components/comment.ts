@@ -23,3 +23,12 @@ export interface CommentsZoneItemProps {
   handleEditComment: (comment: Comment) => void;
   deleteComment: (id: string) => void;
 }
+
+export interface CommentsZoneProps {
+  comments: Comment[];
+  commentsLoading: boolean;
+  handleAddComment: () => void;
+  handleEditComment: (comment: Comment) => void;
+  deleteComment: (id: string) => void;
+  onAddCommentOpen: () => void;
+}
