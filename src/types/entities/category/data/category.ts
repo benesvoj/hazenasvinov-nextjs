@@ -52,17 +52,20 @@ export interface EditCategoryModalProps {
   categorySeasons: CategorySeason[];
 }
 
-// Old inteface from category.tsx
-// interface Category {
-//   id: string;
-//   code: string;
-//   name: string;
-//   description?: string;
-//   age_group?: string;
-//   gender?: string;
-//   is_active: boolean;
-//   sort_order: number;
-//   created_at: string;
-//   updated_at: string;
-//   category_seasons?: CategorySeason[];
-// }
+export interface UseCategoriesFilters {
+  searchTerm?: string;
+  isActive?: boolean;
+}
+
+export interface CreateCategoryData {
+  name: string;
+  description?: string;
+  age_group?: string;
+  gender?: string;
+  is_active?: boolean;
+  sort_order?: number;
+}
+
+export interface UpdateCategoryData extends CreateCategoryData {
+  id: string;
+}

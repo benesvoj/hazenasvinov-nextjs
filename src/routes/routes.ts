@@ -52,7 +52,6 @@ export const privateRoutes = {
   members: '/admin/members',
   memberFunctions: '/admin/member-functions',
   committees: '/admin/committees',
-  competitions: '/admin/competitions',
   sponsorship: '/admin/sponsorship',
   clubConfig: '/admin/club-config',
   photoGallery: '/admin/photo-gallery',
@@ -134,14 +133,6 @@ const routes: MenuItem[] = [
     title: 'Dashboard',
     isPrivate: true,
     description: 'Správa obsahu a nastavení systému.',
-  },
-  {
-    route: privateRoutes.competitions,
-    title: translations.competitions.title,
-    isPrivate: true,
-    description: translations.competitions.description,
-    hidden: true,
-    group: 'team-management',
   },
   {
     route: privateRoutes.committees,

@@ -22,6 +22,8 @@ export const TodoListItem = ({
   const t = translations;
   const tAction = translations.action;
 
+  const todoItemAfterDueDate = todo.due_date && new Date(todo.due_date) < new Date();
+
   const todoListItemSubtitle = (
     <div className="flex items-center gap-2 mb-2">
       <div
@@ -55,7 +57,9 @@ export const TodoListItem = ({
           <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
             {t.common.todoList.item.dueDate}
           </div>
-          <div className="truncate">{todo.due_date}</div>
+          <div className={`${todoItemAfterDueDate ? 'text-red-500' : ''} truncate`}>
+            {todo.due_date}
+          </div>
         </div>
       )}
       <div className={`min-w-0 ${todo.due_date ? 'md:col-span-6' : 'md:col-span-8'}`}>
