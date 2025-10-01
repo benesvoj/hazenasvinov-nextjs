@@ -1,13 +1,15 @@
 'use client';
 
-import {Tabs, Tab} from '@heroui/tabs';
+import {Tabs, Tab} from '@heroui/react';
+
+import {AdminContainer} from '@/components';
 
 import ClubConfigCard from './components/ClubConfigCard';
 import ClubPagesCard from './components/ClubPagesCard';
 
 export default function ClubConfigPage() {
   return (
-    <div className="space-y-6">
+    <AdminContainer>
       <Tabs aria-label="Konfigurace klubu">
         <Tab key="club-config" title="Konfigurace klubu">
           <ClubConfigCard />
@@ -16,6 +18,6 @@ export default function ClubConfigPage() {
           <ClubPagesCard />
         </Tab>
       </Tabs>
-    </div>
+    </AdminContainer>
   );
 }
