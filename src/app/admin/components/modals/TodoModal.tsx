@@ -37,23 +37,21 @@ export const TodoModal = ({
         </div>
       }
     >
-      <div className="space-y-4">
-        <Input
-          label={tTodoModal.title}
-          aria-label={tTodoModal.title}
-          value={todoFormData.title}
-          onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
-          isRequired
-          placeholder={tTodoModal.titlePlaceholder}
-        />
-        <Textarea
-          label={tTodoModal.description}
-          aria-label={tTodoModal.description}
-          value={todoFormData.description}
-          onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
-          placeholder={tTodoModal.descriptionPlaceholder}
-        />
-      </div>
+      <Input
+        label={tTodoModal.title}
+        aria-label={tTodoModal.title}
+        value={todoFormData.title}
+        onChange={(e) => setTodoFormData({...todoFormData, title: e.target.value})}
+        isRequired
+        placeholder={tTodoModal.titlePlaceholder}
+      />
+      <Textarea
+        label={tTodoModal.description}
+        aria-label={tTodoModal.description}
+        value={todoFormData.description}
+        onChange={(e) => setTodoFormData({...todoFormData, description: e.target.value})}
+        placeholder={tTodoModal.descriptionPlaceholder}
+      />
       <div className="grid grid-cols-2 gap-4">
         <Select
           label={tTodoModal.priority}

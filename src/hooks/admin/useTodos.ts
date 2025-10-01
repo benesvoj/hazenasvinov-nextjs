@@ -42,10 +42,10 @@ const getDefaultTodoFormData = (): TodoItem => ({
   priority: TodoPriorities.MEDIUM,
   status: TodoStatuses.TODO,
   category: TodoCategories.IMPROVEMENT,
-  due_date: '',
+  due_date: new Date().toISOString(),
   id: '',
-  created_at: '',
-  updated_at: '',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
   user_email: '',
 });
 
@@ -62,11 +62,11 @@ export const useTodos = (userEmail?: string): UseTodosReturn => {
     switch (todoFilter) {
       case TodoFilter.TODO:
         return todo.status === TodoStatuses.TODO;
-      case 'in-progress':
+      case TodoFilter.IN_PROGRESS:
         return todo.status === TodoStatuses.IN_PROGRESS;
       case TodoFilter.DONE:
         return todo.status === TodoStatuses.DONE;
-      case 'high-priority':
+      case TodoFilter.HIGH_PRIORITY:
         return (
           (todo.priority === TodoPriorities.HIGH || todo.priority === TodoPriorities.URGENT) &&
           todo.status !== TodoStatuses.DONE

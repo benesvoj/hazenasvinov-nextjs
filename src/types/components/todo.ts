@@ -6,7 +6,7 @@ export interface TodoItem {
   priority: TodoPriorities;
   status: TodoStatuses;
   category: TodoCategories;
-  due_date?: string;
+  due_date: string;
   created_at: string;
   updated_at: string;
   created_by?: string;
