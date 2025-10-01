@@ -1,9 +1,8 @@
 import {useEffect, useState, useCallback} from 'react';
 
-import {SupabaseUser} from '@/types/types';
-
 import {Api} from '@/app/api/api';
 
+import {SupabaseUser} from '@/types';
 export interface LoginLog {
   id: string;
   user_id: string;

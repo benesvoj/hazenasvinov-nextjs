@@ -35,7 +35,7 @@ export default function CategoriesTab({
           size="sm"
           startContent={<PlusCircleIcon className="w-4 h-4" />}
         >
-          {translations.button.assign}
+          {translations.action.assign}
         </Button>
       </CardHeader>
       <CardBody>
@@ -68,7 +68,7 @@ export default function CategoriesTab({
                         variant="light"
                         onPress={() => onGenerateTeams(clubCategory.id)}
                       >
-                        {translations.button.generate}
+                        {translations.action.generate}
                       </Button>
                     )}
                     <Button
@@ -78,7 +78,7 @@ export default function CategoriesTab({
                       startContent={<TrashIcon className="w-4 h-4" />}
                       onPress={() => onDeleteClubCategory(clubCategory.id)}
                     >
-                      {translations.button.delete}
+                      {translations.action.delete}
                     </Button>
                   </div>
                 </div>

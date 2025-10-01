@@ -85,8 +85,6 @@ const getAdminRouteIcon = (route: string) => {
       return <CogIcon className="w-5 h-5" />;
     case privateRoutes.committees:
       return <BuildingOfficeIcon className="w-5 h-5" />;
-    case privateRoutes.competitions:
-      return <TrophyIcon className="w-5 h-5" />;
     case privateRoutes.sponsorship:
       return <HeartIcon className="w-5 h-5" />;
     case privateRoutes.clubConfig:

@@ -2,25 +2,20 @@
 
 import React, {useState, useEffect} from 'react';
 
-import {Badge} from '@heroui/badge';
-import {Button} from '@heroui/button';
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {useDisclosure} from '@heroui/modal';
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@heroui/table';
-
-import {PlusIcon, PencilIcon, TrashIcon, CogIcon} from '@heroicons/react/24/outline';
-
-import {showToast} from '@/components/ui/feedback/Toast';
-import DeleteConfirmationModal from '@/components/ui/modals/DeleteConfirmationModal';
+import {useDisclosure} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
+import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
+import {ActionTypes, ColumnAlignType} from '@/enums';
 import {useFetchMemberFunctions} from '@/hooks';
 import {MemberFunction} from '@/types';
 
 import FunctionFormModal from './components/FunctionFormModal';
 
 export default function MemberFunctionsAdminPage() {
+  const tAction = translations.action;
+
   const [functions, setFunctions] = useState<MemberFunction[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -216,85 +211,66 @@ export default function MemberFunctionsAdminPage() {
     return isActive ? 'success' : 'danger';
   };
 
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">{translations.memberFunctions.title}</h1>
-      </div>
+  const functionColumns = [
+    {key: 'name', label: translations.memberFunctions.table.header.name},
+    {key: 'display_name', label: translations.memberFunctions.table.header.displayName},
+    {key: 'description', label: translations.memberFunctions.table.header.description},
+    {key: 'sort_order', label: translations.memberFunctions.table.header.sorting},
+    {key: 'is_active', label: translations.memberFunctions.table.header.status},
+    {
+      key: 'actions',
+      label: translations.memberFunctions.table.header.actions,
+      align: ColumnAlignType.CENTER,
+      isActionColumn: true,
+      actions: [
+        {type: ActionTypes.UPDATE, onPress: openEditModal, title: tAction.edit},
+        {type: ActionTypes.DELETE, onPress: openDeleteModal, title: tAction.delete},
+      ],
+    },
+  ];
 
-      {/* Functions Table */}
-      <Card>
-        <CardHeader className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <CogIcon className="w-5 h-5 text-blue-500" />
-            <h2 className="text-xl font-semibold">{translations.memberFunctions.list}</h2>
-          </div>
-          <Button
-            color="primary"
-            startContent={<PlusIcon className="w-4 h-4" />}
-            onPress={openAddModal}
-          >
-            {translations.button.add}
-          </Button>
-        </CardHeader>
-        <CardBody>
-          <Table aria-label={translations.memberFunctions.table.ariaLabel}>
-            <TableHeader>
-              <TableColumn>{translations.memberFunctions.table.header.name}</TableColumn>
-              <TableColumn>{translations.memberFunctions.table.header.displayName}</TableColumn>
-              <TableColumn>{translations.memberFunctions.table.header.description}</TableColumn>
-              <TableColumn>{translations.memberFunctions.table.header.sorting}</TableColumn>
-              <TableColumn>{translations.memberFunctions.table.header.status}</TableColumn>
-              <TableColumn>{translations.memberFunctions.table.header.actions}</TableColumn>
-            </TableHeader>
-            <TableBody
-              items={functions}
-              loadingContent={functionsLoading ? translations.loading : undefined}
-              loadingState={functionsLoading ? 'loading' : 'idle'}
-              emptyContent={translations.table.emptyContent}
-            >
-              {(functionItem) => (
-                <TableRow key={functionItem.id}>
-                  <TableCell className="font-medium">{functionItem.name}</TableCell>
-                  <TableCell>{functionItem.display_name}</TableCell>
-                  <TableCell>
-                    {functionItem.description ? (
-                      <span className="text-gray-600">{functionItem.description}</span>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>{functionItem.sort_order}</TableCell>
-                  <TableCell>
-                    <Badge color={getStatusBadgeColor(functionItem.is_active)}>
-                      {functionItem.is_active ? 'Aktivní' : 'Neaktivní'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="light"
-                        color="primary"
-                        startContent={<PencilIcon className="w-4 h-4" />}
-                        onPress={() => openEditModal(functionItem)}
-                      />
-                      <Button
-                        size="sm"
-                        variant="light"
-                        color="danger"
-                        startContent={<TrashIcon className="w-4 h-4" />}
-                        onPress={() => openDeleteModal(functionItem)}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardBody>
-      </Card>
+  const renderFunctionCell = (functionItem: MemberFunction, columnKey: string) => {
+    switch (columnKey) {
+      case 'name':
+        return <span className="font-medium">{functionItem.name}</span>;
+      case 'display_name':
+        return <span className="font-medium">{functionItem.display_name}</span>;
+      case 'description':
+        return <span className="font-medium">{functionItem.description || '-'}</span>;
+      case 'sort_order':
+        return <span className="font-medium">{functionItem.sort_order}</span>;
+      case 'is_active':
+        return (
+          <span className="font-medium">{functionItem.is_active ? 'Aktivní' : 'Neaktivní'}</span>
+        );
+    }
+    return null;
+  };
+
+  return (
+    <>
+      <AdminContainer
+        loading={functionsLoading}
+        actions={[
+          {
+            label: tAction.add,
+            onClick: openAddModal,
+            variant: 'solid',
+            buttonType: ActionTypes.CREATE,
+          },
+        ]}
+      >
+        <UnifiedTable
+          isLoading={functionsLoading}
+          columns={functionColumns}
+          data={functions}
+          ariaLabel={translations.memberFunctions.table.ariaLabel}
+          renderCell={renderFunctionCell}
+          getKey={(functionItem: MemberFunction) => functionItem.id}
+          emptyContent={translations.table.emptyContent}
+          isStriped
+        />
+      </AdminContainer>
 
       {/* Add Function Modal */}
       <FunctionFormModal
@@ -326,6 +302,6 @@ export default function MemberFunctionsAdminPage() {
         title="Smazat funkci"
         message={`Opravdu chcete smazat funkci "${selectedFunction?.display_name}"?`}
       />
-    </div>
+    </>
   );
 }

@@ -19,18 +19,14 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Select,
-  SelectItem,
   Checkbox,
   CheckboxGroup,
-  Spinner,
   Divider,
 } from '@heroui/react';
 
 import {PencilIcon, UserIcon} from '@heroicons/react/24/outline';
 
-import {showToast} from '@/components/ui/feedback/Toast';
-
+import {AdminContainer, showToast} from '@/components';
 import {useUserRoles, useCategories} from '@/hooks';
 import {UserRoleSummary, RoleAssignment} from '@/types';
 
@@ -109,14 +105,6 @@ export default function UserRolesPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <Card>
@@ -138,14 +126,7 @@ export default function UserRolesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Správa uživatelských rolí</h1>
-          <p className="text-gray-600 mt-1">Spravujte role a oprávnění uživatelů v systému</p>
-        </div>
-      </div>
-
+    <AdminContainer loading={loading}>
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -290,6 +271,6 @@ export default function UserRolesPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </div>
+    </AdminContainer>
   );
 }

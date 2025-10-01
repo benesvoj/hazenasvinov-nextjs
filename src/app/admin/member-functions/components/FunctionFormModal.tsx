@@ -33,6 +33,8 @@ export default function FunctionFormModal({
   loading,
   initialData,
 }: FunctionFormModalProps) {
+  const tAction = translations.action;
+
   const [formData, setFormData] = useState<Partial<MemberFunction>>({
     name: '',
     display_name: '',
@@ -124,10 +126,10 @@ export default function FunctionFormModal({
         </ModalBody>
         <ModalFooter>
           <Button variant="flat" onPress={onClose}>
-            {translations.button.cancel}
+            {tAction.cancel}
           </Button>
           <Button color="primary" onPress={handleSubmit} isLoading={loading}>
-            {isEdit ? translations.button.save : translations.button.add}
+            {isEdit ? tAction.save : tAction.add}
           </Button>
         </ModalFooter>
       </ModalContent>

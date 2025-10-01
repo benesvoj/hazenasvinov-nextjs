@@ -54,6 +54,7 @@ export function AttendeesModal({
 
   const {members, loading: membersLoading} = useFetchMembers();
   const t = translations.components.meetingMinutes;
+  const tAction = translations.action;
 
   // Filter members based on search
   const filteredMembers = useMemo(() => {
@@ -371,7 +372,7 @@ export function AttendeesModal({
 
         <ModalFooter>
           <Button color="primary" onPress={onClose}>
-            {translations.button.save}
+            {tAction.save}
           </Button>
         </ModalFooter>
       </ModalContent>

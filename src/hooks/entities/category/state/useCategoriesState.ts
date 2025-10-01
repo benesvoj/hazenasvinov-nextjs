@@ -67,7 +67,7 @@ const initialSeasonFormData = {
   is_active: true,
 };
 
-export function useCategories(): UseCategoriesResult {
+export function useCategoriesState(): UseCategoriesResult {
   const [categories, setCategories] = useState<Category[]>([]);
   const [seasons, setSeasons] = useState<{id: string; name: string}[]>([]);
   const [categorySeasons, setCategorySeasons] = useState<CategorySeason[]>([]);

@@ -39,12 +39,11 @@ import {
   EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 
-import {SupabaseUser} from '@/types/types';
-
 import RoleAssignmentModal from '@/app/admin/users/components/RoleAssignmentModal';
 import UserFormModal from '@/app/admin/users/components/UserFormModal';
 
 import {showToast, LoadingSpinner} from '@/components';
+import {SupabaseUser} from '@/types';
 
 interface UsersTabProps {
   users: SupabaseUser[];

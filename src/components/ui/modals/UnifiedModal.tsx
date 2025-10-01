@@ -52,7 +52,7 @@ export default function UnifiedModal({
   isOnlyCloseButton = false,
   ...props
 }: UnifiedModalProps) {
-  const t = translations.button;
+  const tAction = translations.action;
 
   return (
     <Modal
@@ -82,18 +82,18 @@ export default function UnifiedModal({
         {footer && <ModalFooter className="px-4 sm:px-6 py-4">{footer}</ModalFooter>}
         {isFooterWithActions && (
           <ModalFooter className="px-4 sm:px-6 py-4">
-            <Button variant="flat" onPress={onClose} aria-label={t.cancel}>
-              {t.cancel}
+            <Button variant="flat" onPress={onClose} aria-label={tAction.cancel}>
+              {tAction.cancel}
             </Button>
-            {isOnlyCloseButton && (
+            {!isOnlyCloseButton && (
               <Button
                 color="primary"
                 onPress={onPress}
                 isDisabled={isDisabled}
-                aria-label={t.save}
+                aria-label={tAction.save}
                 isLoading={isLoading}
               >
-                {t.save}
+                {tAction.save}
               </Button>
             )}
           </ModalFooter>

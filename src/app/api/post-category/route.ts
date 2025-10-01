@@ -1,21 +1,32 @@
-import {createClient} from '@supabase/supabase-js';
+import {createClient} from '@/utils/supabase/client';
 
-import {CategoryProps} from '@/types/types';
+import {Category} from '@/types';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createClient();
 
 export async function POST(request: Request) {
-  const {name, description, route, updated_at, id}: CategoryProps = await request.json();
+  const {
+    name,
+    description,
+    age_group,
+    gender,
+    is_active,
+    sort_order,
+    slug,
+    updated_at,
+    id,
+  }: Category = await request.json();
   const {error} = await supabase
     .from('categories')
     .update({
       name: name,
       description: description || '',
-      route: route || '',
+      slug: slug || '',
       update_at: updated_at,
+      age_group: age_group || '',
+      gender: gender || '',
+      is_active: is_active || false,
+      sort_order: sort_order || 0,
     })
     .eq('id', id);
 

@@ -1,7 +1,5 @@
 import {LineupCoachRole} from '@/enums';
-
-import {Member} from '../../member/data/member';
-
+import {Member} from '@/types';
 export interface LineupCoach {
   id: string;
   lineup_id: string;

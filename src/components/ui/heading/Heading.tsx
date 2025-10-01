@@ -52,6 +52,7 @@ export function Heading(props: HeadingProps) {
       aria-level={props.size}
       className={`
         text-gray-900 dark:text-gray-100
+        flex items-center gap-2
         ${headingClass}
         ${props.isSingleLine ? 'whitespace-nowrap' : ''}
         ${props.alternative ? 'font-semibold' : 'font-bold'}

@@ -194,13 +194,7 @@ export default function CoachesVideosPage() {
     <div className="space-y-6">
       <VideoPageLayout
         // Header props
-        title="Videa"
-        description="Správa videí pro vaše kategorie"
-        iconColor="text-green-600"
-        buttonColor="success"
-        buttonText="Přidat video"
         onAddVideo={openCreateModal}
-        isAddDisabled={assignedCategories.length === 0}
         // Data props
         videos={videos}
         loading={loading}
