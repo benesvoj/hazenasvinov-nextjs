@@ -1,8 +1,5 @@
 import React, {useEffect, useState} from 'react';
 
-import {Button} from '@heroui/button';
-import {Form} from '@heroui/form';
-import {Input} from '@heroui/input';
 import {
   Modal,
   ModalBody,
@@ -10,9 +7,17 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from '@heroui/modal';
-import {Skeleton} from '@heroui/skeleton';
-import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
+  Skeleton,
+  Input,
+  Form,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from '@heroui/react';
 
 import {CategoryProps, ColumnType} from '@/types/types';
 
@@ -141,10 +146,10 @@ const ActionsCell: React.FC<ActionsCellProps> = ({category}) => {
                 </ModalBody>
                 <ModalFooter>
                   <Button color={'secondary'} onPress={onClose}>
-                    {translations.button.cancel}
+                    {translations.action.cancel}
                   </Button>
                   <Button type="submit" color={'primary'} isLoading={loading}>
-                    {translations.button.save}
+                    {translations.action.save}
                   </Button>
                 </ModalFooter>
               </Form>

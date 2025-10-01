@@ -7,7 +7,7 @@ import {AdminContainer} from '@/components/features/admin/AdminContainer';
 
 import {translations} from '@/lib/translations';
 
-import {ButtonTypes} from '@/enums';
+import {ActionTypes} from '@/enums';
 import {MeetingMinutesContainerRef} from '@/types';
 
 export default function MeetingMinutesPage() {
@@ -21,7 +21,7 @@ export default function MeetingMinutesPage() {
           label: t.addMeetingMinutes,
           onClick: () => containerRef.current?.openCreateModal(),
           variant: 'solid',
-          buttonType: ButtonTypes.CREATE,
+          buttonType: ActionTypes.CREATE,
         },
       ]}
     >

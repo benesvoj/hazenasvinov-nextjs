@@ -5,7 +5,7 @@ import {ChatBubbleLeftRightIcon} from '@heroicons/react/24/outline';
 import {translations} from '@/lib/translations';
 
 import {UnifiedCard, CommentsZoneItem} from '@/components';
-import {ButtonTypes} from '@/enums';
+import {ActionTypes} from '@/enums';
 import {CommentsZoneProps} from '@/types';
 
 export default function CommentsZone({
@@ -35,7 +35,7 @@ export default function CommentsZone({
           label: t.commentList.addComment,
           onClick: onAddCommentOpen,
           variant: 'solid',
-          buttonType: ButtonTypes.CREATE,
+          buttonType: ActionTypes.CREATE,
         },
       ]}
     >

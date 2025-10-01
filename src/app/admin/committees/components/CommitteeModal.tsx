@@ -24,7 +24,7 @@ export const CommitteeModal = ({
   mode,
 }: CommitteeModalProps) => {
   const t = translations.admin.committees;
-  const tButton = translations.button;
+  const tAction = translations.action;
   const isEditMode = mode === ModalMode.EDIT;
   const modalTitle = isEditMode ? t.modal.titleEdit : t.modal.titleAdd;
 
@@ -37,10 +37,10 @@ export const CommitteeModal = ({
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="flat" onPress={onClose}>
-            {tButton.cancel}
+            {tAction.cancel}
           </Button>
           <Button color="primary" onPress={onSubmit}>
-            {isEditMode ? tButton.save : tButton.add}
+            {isEditMode ? tAction.save : tAction.add}
           </Button>
         </div>
       }

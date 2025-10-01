@@ -5,7 +5,7 @@ import {Button, ButtonGroup} from '@heroui/react';
 import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 import {UnifiedTable} from '@/components';
-import {getLineupCoachRoleOptions} from '@/enums';
+import {ColumnAlignType, getLineupCoachRoleOptions} from '@/enums';
 import {LineupCoachFormData} from '@/types';
 
 interface CoachesTableProps {
@@ -21,7 +21,7 @@ const CoachesTable: React.FC<CoachesTableProps> = memo(
     const coachesColumns = [
       {key: 'name', label: 'Trenér'},
       {key: 'role', label: 'Funkce'},
-      {key: 'actions', label: 'Akce', align: 'center' as const},
+      {key: 'actions', label: 'Akce', align: ColumnAlignType.CENTER},
     ];
 
     const renderCoachCell = useCallback(

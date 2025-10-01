@@ -57,7 +57,7 @@ export const privateRoutes = {
   clubConfig: '/admin/club-config',
   photoGallery: '/admin/photo-gallery',
   clubs: '/admin/clubs',
-  clubCategories: '/admin/club-category',
+  clubCategories: '/admin/club-categories',
   videos: '/admin/videos',
   userRoles: '/admin/user-roles',
   meetingMinutes: '/admin/meeting-minutes',

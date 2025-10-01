@@ -11,7 +11,7 @@ import {translations} from '@/lib/translations';
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
-import {ButtonTypes} from '@/enums';
+import {ActionTypes} from '@/enums';
 import {Video, VideoFormData, VideoFilters} from '@/types';
 
 export default function VideosPage() {
@@ -122,7 +122,7 @@ export default function VideosPage() {
           label: t.addVideo,
           onClick: openCreateModal,
           variant: 'solid',
-          buttonType: ButtonTypes.CREATE,
+          buttonType: ActionTypes.CREATE,
         },
       ]}
     >

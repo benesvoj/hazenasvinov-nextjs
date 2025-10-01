@@ -46,6 +46,8 @@ export default function AddMatchModal({
   selectedSeason,
   getMatchweekOptions,
 }: AddMatchModalProps) {
+  const tAction = translations.action;
+
   return (
     <>
       <Modal
@@ -174,10 +176,10 @@ export default function AddMatchModal({
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="flat" onPress={onClose}>
-              {translations.button.cancel}
+              {tAction.cancel}
             </Button>
             <Button color="primary" onPress={onAddMatch}>
-              {translations.button.add}
+              {tAction.add}
             </Button>
           </ModalFooter>
         </ModalContent>

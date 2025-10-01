@@ -18,7 +18,7 @@ import {getCategoryInfo} from '@/helpers/getCategoryInfo';
 
 import {DeleteConfirmationModal, showToast, AdminContainer, LoadingSpinner} from '@/components';
 import {matchStatusesKeys} from '@/constants';
-import {ButtonTypes} from '@/enums';
+import {ActionTypes} from '@/enums';
 import {
   useSeasons,
   useFilteredTeams,
@@ -913,42 +913,42 @@ export default function MatchesAdminPage() {
           label: translations.matches.actions.addMatch,
           onClick: onAddMatchOpen,
           variant: 'solid',
-          buttonType: ButtonTypes.CREATE,
+          buttonType: ActionTypes.CREATE,
           isDisabled: isSeasonClosed(),
         },
         {
           label: translations.matches.actions.bulkUpdateMatchweek,
           onClick: onBulkUpdateOpen,
           variant: 'solid',
-          buttonType: ButtonTypes.UPDATE,
+          buttonType: ActionTypes.UPDATE,
           isDisabled: isSeasonClosed(),
         },
         {
           label: generateStandingsLabel,
           onClick: handleStandingsAction,
           variant: 'solid',
-          buttonType: ButtonTypes.UPDATE,
+          buttonType: ActionTypes.UPDATE,
           isDisabled: isSeasonClosed(),
         },
         {
           label: translations.matches.actions.import,
           onClick: onExcelImportOpen,
           variant: 'solid',
-          buttonType: ButtonTypes.UPDATE,
+          buttonType: ActionTypes.UPDATE,
           isDisabled: isSeasonClosed(),
         },
         {
           label: translations.matches.actions.deleteAllMatches,
           onClick: onDeleteAllConfirmOpen,
           variant: 'solid',
-          buttonType: ButtonTypes.DELETE,
+          buttonType: ActionTypes.DELETE,
           isDisabled: isSeasonClosed() || !selectedSeason,
         },
         {
           label: translations.matches.actions.testMaterializedViewRefresh,
           onClick: testMaterializedViewRefresh,
           variant: 'solid',
-          buttonType: ButtonTypes.UPDATE,
+          buttonType: ActionTypes.UPDATE,
           isDisabled: isSeasonClosed(),
         },
       ]}

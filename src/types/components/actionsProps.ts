@@ -1,4 +1,4 @@
-import {ButtonTypes} from '@/enums';
+import {ActionTypes} from '@/enums';
 
 export interface ActionsProps {
   label: string;
@@ -6,7 +6,7 @@ export interface ActionsProps {
   variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'ghost';
   color?: 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success' | undefined;
   icon?: React.ReactNode;
-  buttonType: ButtonTypes;
+  buttonType: ActionTypes;
   isIconOnly?: boolean;
   isDisabled?: boolean;
   // Status transition specific props

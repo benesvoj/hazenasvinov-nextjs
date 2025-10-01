@@ -7,21 +7,38 @@ import {
   TableRow,
   Selection,
   SortDescriptor,
+  Button,
 } from '@heroui/react';
 
 import {translations} from '@/lib/translations';
+
+import {ColumnAlignType, ActionTypes} from '@/enums';
+import {getDefaultActionIcon} from '@/helpers';
+
+export interface ActionConfig<T = any> {
+  type: ActionTypes;
+  onPress: (item: T) => void;
+  icon?: React.ReactNode;
+  color?: 'primary' | 'danger' | 'warning' | 'success' | 'default';
+  variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'shadow' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  title?: string;
+  disabled?: (item: T) => boolean;
+}
 
 export type ColumnType<T = any> = {
   key: keyof T | string;
   label: React.ReactNode;
   allowsSorting?: boolean;
-  align?: 'start' | 'center' | 'end';
+  align?: ColumnAlignType;
   width?: string | number;
   minWidth?: string | number;
   maxWidth?: string | number;
   hideHeader?: boolean;
   isRowHeader?: boolean;
   textValue?: string;
+  isActionColumn?: boolean;
+  actions?: ActionConfig<T>[];
 };
 
 export interface UnifiedTableProps<T = any> {
@@ -85,6 +102,66 @@ export default function UnifiedTable<T = any>({
 
   const cellRenderer = renderCell || defaultRenderCell;
 
+  // Default icons for action types
+  const getDefaultIcon = (type: ActionTypes) => {
+    return getDefaultActionIcon(type);
+  };
+
+  // Default colors for action types
+  const getDefaultColor = (type: ActionTypes): ActionConfig['color'] => {
+    switch (type) {
+      case ActionTypes.UPDATE:
+        return 'primary';
+      case ActionTypes.DELETE:
+        return 'danger';
+      case ActionTypes.READ:
+        return 'primary';
+      default:
+        return 'default';
+    }
+  };
+
+  // Render action column
+  const renderActionColumn = (item: T, column: ColumnType<T>) => {
+    if (!column.actions || column.actions.length === 0) return null;
+
+    return (
+      <div className="flex justify-center gap-2">
+        {column.actions.map((action, index) => {
+          const isDisabled = action.disabled ? action.disabled(item) : false;
+          const icon = action.icon || getDefaultIcon(action.type);
+          const color = action.color || getDefaultColor(action.type);
+
+          return (
+            <Button
+              key={`${action.type}-${index}`}
+              size={action.size || 'sm'}
+              variant={action.variant || 'light'}
+              color={color}
+              isIconOnly
+              isDisabled={isDisabled}
+              title={action.title}
+              onPress={() => action.onPress(item)}
+            >
+              {icon}
+            </Button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Enhanced cell renderer that handles action columns
+  const enhancedCellRenderer = (item: T, columnKey: string) => {
+    const column = columns.find((col) => col.key === columnKey);
+
+    if (column?.isActionColumn && column.actions) {
+      return renderActionColumn(item, column);
+    }
+
+    return cellRenderer(item, columnKey);
+  };
+
   return (
     <Table
       aria-label={ariaLabel}
@@ -125,7 +202,9 @@ export default function UnifiedTable<T = any>({
       >
         {(item) => (
           <TableRow key={getKey(item)}>
-            {(columnKey) => <TableCell>{cellRenderer(item, columnKey as string)}</TableCell>}
+            {(columnKey) => (
+              <TableCell>{enhancedCellRenderer(item, columnKey as string)}</TableCell>
+            )}
           </TableRow>
         )}
       </TableBody>

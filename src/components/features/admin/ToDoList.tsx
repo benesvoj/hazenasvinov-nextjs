@@ -9,7 +9,7 @@ import {RectangleStackIcon} from '@heroicons/react/24/outline';
 import {translations} from '@/lib/translations';
 
 import {UnifiedCard, TodoListItem} from '@/components';
-import {ButtonTypes, EmptyStateTypes, TodoFilter} from '@/enums';
+import {ActionTypes, EmptyStateTypes, TodoFilter} from '@/enums';
 import {ToDoListProps} from '@/types';
 
 export default function ToDoList({
@@ -89,7 +89,7 @@ export default function ToDoList({
           label: t.todoList.addTodo,
           onClick: handleAddTodo,
           variant: 'solid',
-          buttonType: ButtonTypes.CREATE,
+          buttonType: ActionTypes.CREATE,
         },
       ]}
     >

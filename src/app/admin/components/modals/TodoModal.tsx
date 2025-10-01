@@ -14,7 +14,7 @@ export const TodoModal = ({
   setTodoFormData,
   mode,
 }: TodoModalProps) => {
-  const t = translations.button;
+  const tAction = translations.action;
   const tTodoModal = translations.common.todoModal;
 
   const isEditMode = mode === ModalMode.EDIT;
@@ -29,10 +29,10 @@ export const TodoModal = ({
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="flat" onPress={onClose}>
-            {t.cancel}
+            {tAction.cancel}
           </Button>
           <Button color="primary" onPress={onSubmit}>
-            {isEditMode ? t.save : t.add}
+            {isEditMode ? tAction.save : tAction.add}
           </Button>
         </div>
       }

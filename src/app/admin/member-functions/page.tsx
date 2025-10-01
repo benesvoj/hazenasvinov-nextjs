@@ -2,25 +2,34 @@
 
 import React, {useState, useEffect} from 'react';
 
-import {Badge} from '@heroui/badge';
-import {Button} from '@heroui/button';
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {useDisclosure} from '@heroui/modal';
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@heroui/table';
+import {
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  useDisclosure,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from '@heroui/react';
 
 import {PlusIcon, PencilIcon, TrashIcon, CogIcon} from '@heroicons/react/24/outline';
 
-import {showToast} from '@/components/ui/feedback/Toast';
-import DeleteConfirmationModal from '@/components/ui/modals/DeleteConfirmationModal';
-
 import {translations} from '@/lib/translations';
 
+import {DeleteConfirmationModal, showToast} from '@/components';
 import {useFetchMemberFunctions} from '@/hooks';
 import {MemberFunction} from '@/types';
 
 import FunctionFormModal from './components/FunctionFormModal';
 
 export default function MemberFunctionsAdminPage() {
+  const tAction = translations.action;
+
   const [functions, setFunctions] = useState<MemberFunction[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -235,7 +244,7 @@ export default function MemberFunctionsAdminPage() {
             startContent={<PlusIcon className="w-4 h-4" />}
             onPress={openAddModal}
           >
-            {translations.button.add}
+            {tAction.add}
           </Button>
         </CardHeader>
         <CardBody>

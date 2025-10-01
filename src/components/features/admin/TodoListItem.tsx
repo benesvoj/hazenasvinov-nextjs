@@ -1,11 +1,7 @@
-import {Card, CardBody, Button} from '@heroui/react';
-
-import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
-
 import {translations} from '@/lib/translations';
 
-import {showToast, UnifiedCard} from '@/components';
-import {ButtonTypes, TodoStatuses} from '@/enums';
+import {UnifiedCard} from '@/components';
+import {ActionTypes, TodoStatuses} from '@/enums';
 import {
   getPriorityLabel,
   getStatusLabel,
@@ -13,8 +9,6 @@ import {
   getStatusIcon,
   getPriorityIcon,
   getCategoryIcon,
-  getNextStatus,
-  getStatusButtonInfo,
   formatDateString,
 } from '@/helpers';
 import {TodoListItemProps} from '@/types';
@@ -26,6 +20,7 @@ export const TodoListItem = ({
   deleteTodo,
 }: TodoListItemProps) => {
   const t = translations;
+  const tAction = translations.action;
 
   const todoListItemSubtitle = (
     <div className="flex items-center gap-2 mb-2">
@@ -87,16 +82,16 @@ export const TodoListItem = ({
       footer={todoListItemFooter}
       actions={[
         {
-          label: t.button.edit,
+          label: tAction.edit,
           onClick: () => handleEditTodo(todo),
           variant: 'light',
-          buttonType: ButtonTypes.UPDATE,
+          buttonType: ActionTypes.UPDATE,
           isIconOnly: true,
           isDisabled: todo.status !== TodoStatuses.TODO,
         },
         {
-          label: t.button.statusTransition,
-          buttonType: ButtonTypes.STATUS_TRANSITION,
+          label: tAction.statusTransition,
+          buttonType: ActionTypes.STATUS_TRANSITION,
           statusTransition: {
             currentStatus: todo.status,
             onStatusChange: updateTodoStatus,
@@ -104,10 +99,10 @@ export const TodoListItem = ({
           },
         },
         {
-          label: t.button.delete,
+          label: tAction.delete,
           onClick: () => deleteTodo(todo.id),
           variant: 'light',
-          buttonType: ButtonTypes.DELETE,
+          buttonType: ActionTypes.DELETE,
           color: 'danger',
           isIconOnly: true,
           isDisabled: todo.status !== TodoStatuses.TODO,

@@ -11,7 +11,8 @@ interface AdminActionsProps {
 }
 
 export const AdminActions = ({actions}: AdminActionsProps) => {
-  const t = translations;
+  const tAction = translations.action;
+  const tCommon = translations.common;
 
   return (
     <div className="w-full">
@@ -37,12 +38,12 @@ export const AdminActions = ({actions}: AdminActionsProps) => {
                     const nextStatus = getNextStatus(currentStatus);
                     if (nextStatus) {
                       showToast.success(
-                        `${t.button.moveStatusFrom} ${getStatusLabel(currentStatus)} ${t.button.moveStatusTo} ${getStatusLabel(nextStatus)}`
+                        `${tAction.moveStatusFrom} ${getStatusLabel(currentStatus)} ${tAction.moveStatusTo} ${getStatusLabel(nextStatus)}`
                       );
                       onStatusChange(itemId, nextStatus);
                     }
                   }}
-                  title={`${buttonInfo.text} ${t.button.item}`}
+                  title={`${buttonInfo.text} ${tCommon.item}`}
                 >
                   {buttonInfo.icon}
                 </Button>

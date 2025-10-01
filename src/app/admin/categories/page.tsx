@@ -2,33 +2,19 @@
 
 import React, {useEffect} from 'react';
 
-import {
-  useDisclosure,
-  Badge,
-  Button,
-  Card,
-  CardBody,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-} from '@heroui/react';
+import {useDisclosure, Button} from '@heroui/react';
 
-import {PlusCircleIcon} from '@heroicons/react/16/solid';
 import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
 import {DeleteConfirmationModal, AdminContainer, UnifiedTable} from '@/components';
-import {AgeGroups, ButtonTypes, Genders} from '@/enums';
+import {AgeGroups, ActionTypes, Genders} from '@/enums';
 import {useCategories} from '@/hooks';
 import {Category, CategorySeason} from '@/types';
 import {ageGroupsOptions, genderOptions, competitionTypeOptions} from '@/utils';
 
 import {AddCategoryModal, AddSeasonModal, EditCategoryModal, EditSeasonModal} from './components';
-import {getAgeGroupBadgeColor, getGenderBadgeColor} from './constants';
 
 export default function CategoriesAdminPage() {
   // Use the custom hook for all business logic
@@ -148,6 +134,7 @@ export default function CategoriesAdminPage() {
   };
 
   const t = translations.categories;
+  const tAction = translations.action;
 
   const categoryColumns = [
     {key: 'name', label: t.table.name},
@@ -156,7 +143,15 @@ export default function CategoriesAdminPage() {
     {key: 'gender', label: t.table.gender},
     {key: 'is_active', label: t.table.status},
     {key: 'sort_order', label: t.table.sortOrder},
-    {key: 'actions', label: t.table.actions},
+    {
+      key: 'actions',
+      label: t.table.actions,
+      isActionColumn: true,
+      actions: [
+        {type: ActionTypes.UPDATE, onPress: openEditModalWithModal, title: tAction.edit},
+        {type: ActionTypes.DELETE, onPress: openDeleteModalWithModal, title: tAction.delete},
+      ],
+    },
   ];
 
   const renderCategoryCell = (category: Category, columnKey: string) => {
@@ -179,31 +174,6 @@ export default function CategoriesAdminPage() {
         );
       case 'sort_order':
         return <span className="font-medium">{category.sort_order}</span>;
-      case 'actions':
-        return (
-          <div className="flex justify-center gap-2">
-            <Button
-              size="sm"
-              variant="light"
-              color="primary"
-              isIconOnly
-              onPress={() => openEditModalWithModal(category)}
-              aria-label={`Upravit kategorii ${category.name}`}
-            >
-              <PencilIcon className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="light"
-              color="danger"
-              isIconOnly
-              onPress={() => openDeleteModalWithModal(category)}
-              aria-label={`Smazat kategorii ${category.name}`}
-            >
-              <TrashIcon className="w-4 h-4" />
-            </Button>
-          </div>
-        );
     }
   };
 
@@ -214,7 +184,7 @@ export default function CategoriesAdminPage() {
           label: t.addCategory,
           onClick: onAddCategoryOpen,
           variant: 'solid',
-          buttonType: ButtonTypes.CREATE,
+          buttonType: ActionTypes.CREATE,
         },
       ]}
     >

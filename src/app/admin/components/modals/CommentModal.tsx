@@ -14,7 +14,7 @@ export const CommentModal = ({
   mode,
 }: CommentModalProps) => {
   const t = translations.common.commentModal;
-  const tButton = translations.button;
+  const tAction = translations.action;
 
   const isEditMode = mode === ModalMode.EDIT;
   const modalTitle = isEditMode ? t.titleEdit : t.titleAdd;
@@ -28,10 +28,10 @@ export const CommentModal = ({
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="flat" onPress={onClose}>
-            {tButton.cancel}
+            {tAction.cancel}
           </Button>
           <Button color="primary" onPress={onSubmit}>
-            {isEditMode ? tButton.save : tButton.add}
+            {isEditMode ? tAction.save : tAction.add}
           </Button>
         </div>
       }

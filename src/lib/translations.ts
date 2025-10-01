@@ -134,6 +134,40 @@ export const translations = {
         noClubs: 'Žádné kluby nebyly nalezeny',
       },
     },
+    clubCategories: {
+      title: 'Správa kategorií klubů',
+      description: 'Správa kategorií klubů, které jsou dostupné v systému.',
+      addClubCategory: 'Přidat kategorii klubu',
+      editClubCategory: 'Upravit kategorii klubu',
+      deleteClubCategory: 'Smazat kategorii klubu',
+      deleteClubCategoryMessage: 'Opravdu chcete smazat kategorii klubu? Tato akce je nevratná.',
+      filters: {
+        searchLabel: 'Hledat klub, kategorii nebo sezónu...',
+        searchPlaceholder: 'Vyberte klub, kategorii nebo sezónu...',
+        season: 'Sezóna',
+        seasonPlaceholder: 'Vyberte sezónu',
+      },
+      table: {
+        noClubCategories: 'Žádné kategorie klubů nebyly nalezeny',
+        club: 'Klub',
+        category: 'Kategorie',
+        season: 'Sezóna',
+        maxTeams: 'Maximální počet týmů',
+        actions: 'Akce',
+      },
+      modal: {
+        title: 'Přidat kategorii klubu',
+        description: 'Přidejte novou kategorii klubu pro organizaci soutěží a týmů.',
+        club: 'Klub',
+        clubPlaceholder: 'Vyberte klub',
+        category: 'Kategorie',
+        categoryPlaceholder: 'Vyberte kategorii',
+        season: 'Sezóna',
+        seasonPlaceholder: 'Vyberte sezónu',
+        maxTeams: 'Maximální počet týmů',
+        maxTeamsPlaceholder: 'Vyberte maximální počet týmů',
+      },
+    },
     committees: {
       title: 'Správa komisí',
       description: 'Správa komisí, které jsou dostupné v systému.',
@@ -165,7 +199,7 @@ export const translations = {
       },
     },
   },
-  button: {
+  action: {
     add: 'Přidat',
     edit: 'Upravit',
     update: 'Upravit',
@@ -189,7 +223,6 @@ export const translations = {
     statusTransition: 'Změna stavu',
     moveStatusTo: 'Přesunout ze stavu',
     moveStatusFrom: 'do stavu',
-    item: 'položka',
   },
   sponsorship: {
     title: 'Sponzorství',
@@ -706,6 +739,7 @@ export const translations = {
     permissionError: 'Oprávnění',
   },
   common: {
+    item: 'položka',
     filteredBy: 'Filtrovat podle',
     page: 'Stránka',
     of: 'z',

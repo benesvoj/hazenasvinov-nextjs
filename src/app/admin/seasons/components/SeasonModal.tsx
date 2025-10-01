@@ -31,7 +31,7 @@ export const SeasonModal = ({
   mode,
 }: SeasonModalProps) => {
   const t = translations.season;
-  const tButton = translations.button;
+  const tAction = translations.action;
   const isEditMode = mode === ModalMode.EDIT;
   const modalTitle = isEditMode ? t.editSeason : t.addSeason;
 
@@ -44,10 +44,10 @@ export const SeasonModal = ({
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="flat" onPress={onClose}>
-            {tButton.cancel}
+            {tAction.cancel}
           </Button>
           <Button color="primary" onPress={onSubmit}>
-            {isEditMode ? tButton.save : tButton.add}
+            {isEditMode ? tAction.save : tAction.add}
           </Button>
         </div>
       }

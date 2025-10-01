@@ -9,7 +9,7 @@ import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 import {translations} from '@/lib/translations';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
-import {ButtonTypes, ModalMode} from '@/enums';
+import {ActionTypes, ModalMode} from '@/enums';
 import {useCommittees} from '@/hooks';
 import {Committee} from '@/types';
 
@@ -20,7 +20,6 @@ export default function CommitteesAdminPage() {
     committees,
     loading,
     error,
-    selectedCommittee,
     formData,
     fetchCommittees,
     addCommittee,
@@ -33,6 +32,7 @@ export default function CommitteesAdminPage() {
   } = useCommittees();
 
   const t = translations.admin.committees;
+  const tAction = translations.action;
 
   useEffect(() => {
     fetchCommittees();
@@ -98,33 +98,16 @@ export default function CommitteesAdminPage() {
     {key: 'description', label: t.table.description},
     {key: 'status', label: t.table.status},
     {key: 'sort_order', label: t.table.sortOrder},
-    {key: 'actions', label: t.table.actions},
+    {
+      key: 'actions',
+      label: t.table.actions,
+      isActionColumn: true,
+      actions: [
+        {type: ActionTypes.UPDATE, onPress: handleEditClick, title: tAction.edit},
+        {type: ActionTypes.DELETE, onPress: handleDeleteClick, title: tAction.delete},
+      ],
+    },
   ];
-
-  const ActionsCell = ({committee}: {committee: Committee}) => {
-    return (
-      <div className="flex justify-center gap-2">
-        <Button
-          size="sm"
-          variant="light"
-          color="primary"
-          isIconOnly
-          onPress={() => handleEditClick(committee)}
-        >
-          <PencilIcon className="w-4 h-4" />
-        </Button>
-        <Button
-          size="sm"
-          variant="light"
-          color="danger"
-          isIconOnly
-          onPress={() => handleDeleteClick(committee)}
-        >
-          <TrashIcon className="w-4 h-4" />
-        </Button>
-      </div>
-    );
-  };
 
   const renderCommitteeCell = (committee: Committee, columnKey: string) => {
     switch (columnKey) {
@@ -142,8 +125,6 @@ export default function CommitteesAdminPage() {
         );
       case 'sort_order':
         return <span className="font-medium">{committee.sort_order}</span>;
-      case 'actions':
-        return <ActionsCell committee={committee} />;
     }
   };
 
@@ -154,7 +135,7 @@ export default function CommitteesAdminPage() {
           label: t.addCommittee,
           onClick: handleAddClick,
           variant: 'solid',
-          buttonType: ButtonTypes.CREATE,
+          buttonType: ActionTypes.CREATE,
         },
       ]}
     >

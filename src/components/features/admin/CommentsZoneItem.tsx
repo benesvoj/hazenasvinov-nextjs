@@ -1,11 +1,7 @@
-import {Button} from '@heroui/react';
-
-import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
-
 import {translations} from '@/lib/translations';
 
 import {UnifiedCard} from '@/components';
-import {ButtonTypes} from '@/enums';
+import {ActionTypes} from '@/enums';
 import {getCommentTypeLabel, getCommentTypeIcon, formatDateString} from '@/helpers';
 import {CommentsZoneItemProps} from '@/types';
 
@@ -14,7 +10,8 @@ export const CommentsZoneItem = ({
   handleEditComment,
   deleteComment,
 }: CommentsZoneItemProps) => {
-  const t = translations;
+  const tAction = translations.action;
+  const tCommon = translations.common;
 
   const commentTitle = () => (
     <>
@@ -29,19 +26,19 @@ export const CommentsZoneItem = ({
       title={commentTitle()}
       actions={[
         {
-          label: t.button.edit,
+          label: tAction.edit,
           onClick: () => handleEditComment(comment),
           variant: 'light',
-          buttonType: ButtonTypes.UPDATE,
+          buttonType: ActionTypes.UPDATE,
           isIconOnly: true,
         },
         {
-          label: t.button.delete,
+          label: tAction.delete,
           onClick: () => deleteComment(comment.id),
           variant: 'light',
           isIconOnly: true,
           color: 'danger',
-          buttonType: ButtonTypes.DELETE,
+          buttonType: ActionTypes.DELETE,
         },
       ]}
     >
@@ -51,13 +48,13 @@ export const CommentsZoneItem = ({
           <div className="grid gap-4 text-xs text-gray-500 mt-3 grid-cols-1 md:grid-cols-12">
             <div className="md:col-span-6 min-w-0">
               <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t.common.commentsZoneItem.createdBy}
+                {tCommon.commentsZoneItem.createdBy}
               </div>
               <div className="truncate">{comment.user_email}</div>
             </div>
             <div className="md:col-span-6 min-w-0">
               <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t.common.commentsZoneItem.createdAt}
+                {tCommon.commentsZoneItem.createdAt}
               </div>
               <div className="truncate">{formatDateString(comment.created_at)}</div>
             </div>

@@ -9,32 +9,32 @@ import {
   CheckIcon,
 } from '@heroicons/react/24/outline';
 
-import {ButtonTypes} from '@/enums';
+import {ActionTypes} from '@/enums';
 
 // Helper function to get default icon for common actions
-export const getDefaultActionIcon = (type: ButtonTypes) => {
-  if (type === ButtonTypes.CREATE) {
+export const getDefaultActionIcon = (type: ActionTypes) => {
+  if (type === ActionTypes.CREATE) {
     return <PlusCircleIcon className="w-4 h-4" />;
   }
-  if (type === ButtonTypes.UPDATE) {
+  if (type === ActionTypes.UPDATE) {
     return <PencilIcon className="w-4 h-4" />;
   }
-  if (type === ButtonTypes.DELETE) {
+  if (type === ActionTypes.DELETE) {
     return <TrashIcon className="w-4 h-4" />;
   }
-  if (type === ButtonTypes.READ) {
+  if (type === ActionTypes.READ) {
     return <EyeIcon className="w-4 h-4" />;
   }
-  if (type === ButtonTypes.CANCEL) {
+  if (type === ActionTypes.CANCEL) {
     return <Cog6ToothIcon className="w-4 h-4" />;
   }
-  if (type === ButtonTypes.SAVE) {
+  if (type === ActionTypes.SAVE) {
     return <BookmarkIcon className="w-4 h-4" />;
   }
-  if (type === ButtonTypes.CLOSE) {
+  if (type === ActionTypes.CLOSE) {
     return <XMarkIcon className="w-4 h-4" />;
   }
-  if (type === ButtonTypes.APPLY) {
+  if (type === ActionTypes.APPLY) {
     return <CheckIcon className="w-4 h-4" />;
   }
   return <PlusCircleIcon className="w-4 h-4" />; // Default fallback

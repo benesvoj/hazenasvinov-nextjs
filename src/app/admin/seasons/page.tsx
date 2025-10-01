@@ -11,13 +11,14 @@ import {translations} from '@/lib/translations';
 import {formatDateString} from '@/helpers/formatDate';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedCard, UnifiedTable} from '@/components';
-import {ButtonTypes, ModalMode} from '@/enums';
+import {ActionTypes, ModalMode} from '@/enums';
 import {useSeasons} from '@/hooks';
 import {Season} from '@/types';
 
 import {SeasonModal} from './components/SeasonModal';
 
 export default function SeasonsAdminPage() {
+  const tAction = translations.action;
   const {
     seasons,
     loading,
@@ -98,6 +99,15 @@ export default function SeasonsAdminPage() {
     {key: 'end_date', label: translations.season.table.endDate},
     {key: 'status', label: translations.season.table.status},
     {key: 'actions', label: translations.season.table.actions},
+    {
+      key: 'actions',
+      label: translations.season.table.actions,
+      isActionColumn: true,
+      actions: [
+        {type: ActionTypes.UPDATE, onPress: handleEditClick, title: tAction.edit},
+        {type: ActionTypes.DELETE, onPress: handleDeleteClick, title: tAction.delete},
+      ],
+    },
   ];
 
   const renderSeasonCell = (season: Season, columnKey: string) => {
@@ -121,29 +131,6 @@ export default function SeasonsAdminPage() {
             </Chip>
           </div>
         );
-      case 'actions':
-        return (
-          <div className="flex justify-center gap-2">
-            <Button
-              title={translations.season.editSeason}
-              size="sm"
-              variant="light"
-              color="primary"
-              isIconOnly
-              startContent={<PencilIcon className="w-4 h-4" />}
-              onPress={() => handleEditClick(season)}
-            />
-            <Button
-              title={translations.season.deleteSeason}
-              size="sm"
-              variant="light"
-              color="danger"
-              isIconOnly
-              startContent={<TrashIcon className="w-4 h-4" />}
-              onPress={() => handleDeleteClick(season)}
-            />
-          </div>
-        );
       default:
         return null;
     }
@@ -156,7 +143,7 @@ export default function SeasonsAdminPage() {
           label: translations.season.addSeason,
           onClick: handleAddClick,
           variant: 'solid',
-          buttonType: ButtonTypes.CREATE,
+          buttonType: ActionTypes.CREATE,
         },
       ]}
     >

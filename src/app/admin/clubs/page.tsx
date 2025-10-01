@@ -2,8 +2,6 @@
 
 import React, {useState, useEffect, useCallback} from 'react';
 
-import Link from 'next/link';
-
 import {
   Input,
   Button,
@@ -16,23 +14,43 @@ import {
   useDisclosure,
 } from '@heroui/react';
 
-import {PencilIcon, TrashIcon, EyeIcon} from '@heroicons/react/24/outline';
-
 import LogoUpload from '@/components/ui/forms/LogoUpload';
 
 import {translations} from '@/lib/translations';
 
 import {createClient} from '@/utils/supabase/client';
 
-import {AdminContainer, UnifiedTable} from '@/components';
-import {ButtonTypes} from '@/enums';
+import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
+import {ActionTypes} from '@/enums';
 import {Club} from '@/types';
+
+const initialFormData: Club = {
+  id: '',
+  name: '',
+  short_name: '',
+  city: '',
+  founded_year: null,
+  logo_url: '',
+  venue: '',
+  web: '',
+  email: '',
+  phone: '',
+  address: '',
+  description: '',
+  contact_person: '',
+  is_own_club: false,
+  is_active: true,
+  created_at: '',
+  updated_at: '',
+};
 
 export default function ClubsAdminPage() {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const tAction = translations.action;
 
   // Memoize filtered clubs to prevent unnecessary re-renders
   const filteredClubs = React.useMemo(() => {
@@ -56,38 +74,9 @@ export default function ClubsAdminPage() {
   const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
 
   // Form states
-  const [createForm, setCreateForm] = useState({
-    name: '',
-    short_name: '',
-    city: '',
-    founded_year: '',
-    logo_url: '',
-    venue: '',
-    web: '',
-    email: '',
-    phone: '',
-    address: '',
-    description: '',
-    contact_person: '',
-    is_own_club: false,
-  });
+  const [createForm, setCreateForm] = useState(initialFormData);
 
-  const [editForm, setEditForm] = useState({
-    id: '',
-    name: '',
-    short_name: '',
-    city: '',
-    founded_year: '',
-    logo_url: '',
-    venue: '',
-    web: '',
-    email: '',
-    phone: '',
-    address: '',
-    description: '',
-    contact_person: '',
-    is_own_club: false,
-  });
+  const [editForm, setEditForm] = useState(initialFormData);
 
   const [clubToDelete, setClubToDelete] = useState<Club | null>(null);
 
@@ -119,38 +108,24 @@ export default function ClubsAdminPage() {
 
       const {error} = await supabase.from('clubs').insert({
         name: createForm.name.trim(),
-        short_name: createForm.short_name.trim() || null,
-        city: createForm.city.trim() || null,
-        founded_year: createForm.founded_year ? parseInt(createForm.founded_year) : null,
-        logo_url: createForm.logo_url.trim() || null,
-        venue: createForm.venue.trim() || null,
-        web: createForm.web.trim() || null,
-        email: createForm.email.trim() || null,
-        phone: createForm.phone.trim() || null,
-        address: createForm.address.trim() || null,
-        description: createForm.description.trim() || null,
-        contact_person: createForm.contact_person.trim() || null,
+        short_name: createForm.short_name?.trim() || null,
+        city: createForm.city?.trim() || null,
+        founded_year: createForm.founded_year ? createForm.founded_year : null,
+        logo_url: createForm.logo_url?.trim() || null,
+        venue: createForm.venue?.trim() || null,
+        web: createForm.web?.trim() || null,
+        email: createForm.email?.trim() || null,
+        phone: createForm.phone?.trim() || null,
+        address: createForm.address?.trim() || null,
+        description: createForm.description?.trim() || null,
+        contact_person: createForm.contact_person?.trim() || null,
         is_own_club: createForm.is_own_club,
       });
 
       if (error) throw error;
 
       onCreateClose();
-      setCreateForm({
-        name: '',
-        short_name: '',
-        city: '',
-        founded_year: '',
-        logo_url: '',
-        venue: '',
-        web: '',
-        email: '',
-        phone: '',
-        address: '',
-        description: '',
-        contact_person: '',
-        is_own_club: false,
-      });
+      setCreateForm(initialFormData);
       fetchClubs();
       setError('');
     } catch (error) {
@@ -171,17 +146,17 @@ export default function ClubsAdminPage() {
         .from('clubs')
         .update({
           name: editForm.name.trim(),
-          short_name: editForm.short_name.trim() || null,
-          city: editForm.city.trim() || null,
-          founded_year: editForm.founded_year ? parseInt(editForm.founded_year) : null,
+          short_name: editForm.short_name?.trim() || null,
+          city: editForm.city?.trim() || null,
+          founded_year: editForm.founded_year ? editForm.founded_year : null,
           logo_url: editForm.logo_url && editForm.logo_url.trim() ? editForm.logo_url.trim() : null,
-          venue: editForm.venue.trim() || null,
-          web: editForm.web.trim() || null,
-          email: editForm.email.trim() || null,
-          phone: editForm.phone.trim() || null,
-          address: editForm.address.trim() || null,
-          description: editForm.description.trim() || null,
-          contact_person: editForm.contact_person.trim() || null,
+          venue: editForm.venue?.trim() || null,
+          web: editForm.web?.trim() || null,
+          email: editForm.email?.trim() || null,
+          phone: editForm.phone?.trim() || null,
+          address: editForm.address?.trim() || null,
+          description: editForm.description?.trim() || null,
+          contact_person: editForm.contact_person?.trim() || null,
           is_own_club: editForm.is_own_club,
         })
         .eq('id', editForm.id);
@@ -195,22 +170,7 @@ export default function ClubsAdminPage() {
 
       // Then close the modal and reset form
       onEditClose();
-      setEditForm({
-        id: '',
-        name: '',
-        short_name: '',
-        city: '',
-        founded_year: '',
-        logo_url: '',
-        venue: '',
-        web: '',
-        email: '',
-        phone: '',
-        address: '',
-        description: '',
-        contact_person: '',
-        is_own_club: false,
-      });
+      setEditForm(initialFormData);
       setError('');
     } catch (error) {
       setError('Chyba při aktualizaci klubu');
@@ -244,7 +204,7 @@ export default function ClubsAdminPage() {
       name: club.name,
       short_name: club.short_name || '',
       city: club.city || '',
-      founded_year: club.founded_year?.toString() || '',
+      founded_year: club.founded_year || null,
       logo_url: club.logo_url || '',
       venue: club.venue || '',
       web: club.web || '',
@@ -254,6 +214,9 @@ export default function ClubsAdminPage() {
       description: club.description || '',
       contact_person: club.contact_person || '',
       is_own_club: club.is_own_club || false,
+      is_active: club.is_active,
+      created_at: club.created_at,
+      updated_at: club.updated_at,
     });
     onEditOpen();
   };
@@ -290,39 +253,6 @@ export default function ClubsAdminPage() {
     />
   );
 
-  const ActionsCell = ({club}: {club: Club}) => {
-    return (
-      <div className="flex justify-center gap-2">
-        <Link href={`/admin/clubs/${club.id}`} prefetch={true} scroll={false} replace={false}>
-          <Button
-            size="sm"
-            color="primary"
-            variant="light"
-            isIconOnly
-            startContent={<EyeIcon className="w-4 h-4" />}
-            aria-label={`Zobrazit detail klubu ${club.name}`}
-          />
-        </Link>
-        <Button
-          size="sm"
-          variant="light"
-          color="primary"
-          isIconOnly
-          onPress={() => openEditModal(club)}
-          startContent={<PencilIcon className="w-4 h-4" />}
-        />
-        <Button
-          size="sm"
-          variant="light"
-          color="danger"
-          isIconOnly
-          onPress={() => openDeleteModal(club)}
-          startContent={<TrashIcon className="w-4 h-4" />}
-        />
-      </div>
-    );
-  };
-
   const clubColumns = [
     {key: 'logo', label: t.table.logo},
     {key: 'name', label: t.table.name},
@@ -330,7 +260,15 @@ export default function ClubsAdminPage() {
     {key: 'city', label: t.table.city},
     {key: 'founded_year', label: t.table.foundedYear},
     {key: 'venue', label: t.table.venue},
-    {key: 'actions', label: t.table.actions},
+    {
+      key: 'actions',
+      label: t.table.actions,
+      isActionColumn: true,
+      actions: [
+        {type: ActionTypes.UPDATE, onPress: openEditModal, title: tAction.edit},
+        {type: ActionTypes.DELETE, onPress: openDeleteModal, title: tAction.delete},
+      ],
+    },
   ];
 
   const renderClubCell = (club: Club, columnKey: string) => {
@@ -347,8 +285,6 @@ export default function ClubsAdminPage() {
         return <span className="font-medium">{club.founded_year}</span>;
       case 'venue':
         return <span className="font-medium">{club.venue}</span>;
-      case 'actions':
-        return <ActionsCell club={club} />;
     }
   };
 
@@ -359,7 +295,7 @@ export default function ClubsAdminPage() {
           label: t.addClub,
           onClick: onCreateOpen,
           variant: 'solid',
-          buttonType: ButtonTypes.CREATE,
+          buttonType: ActionTypes.CREATE,
         },
       ]}
       loading={loading}
@@ -410,8 +346,10 @@ export default function ClubsAdminPage() {
                 label="Rok založení"
                 type="number"
                 placeholder="např. 1920"
-                value={createForm.founded_year}
-                onChange={(e) => setCreateForm({...createForm, founded_year: e.target.value})}
+                value={createForm.founded_year?.toString() || ''}
+                onChange={(e) =>
+                  setCreateForm({...createForm, founded_year: parseInt(e.target.value)})
+                }
               />
               <LogoUpload
                 value={createForm.logo_url}
@@ -525,8 +463,8 @@ export default function ClubsAdminPage() {
                 label="Rok založení"
                 type="number"
                 placeholder="např. 1920"
-                value={editForm.founded_year}
-                onChange={(e) => setEditForm({...editForm, founded_year: e.target.value})}
+                value={editForm.founded_year?.toString() || ''}
+                onChange={(e) => setEditForm({...editForm, founded_year: parseInt(e.target.value)})}
               />
               <LogoUpload
                 value={editForm.logo_url}
@@ -605,27 +543,13 @@ export default function ClubsAdminPage() {
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={isDeleteOpen} onClose={onDeleteClose} size="md">
-        <ModalContent>
-          <ModalHeader>Potvrdit smazání klubu</ModalHeader>
-          <ModalBody>
-            <p>
-              Opravdu chcete smazat klub <strong>{clubToDelete?.name}</strong>?
-            </p>
-            <p className="text-sm text-gray-600 mt-2">
-              Tato akce je nevratná a smaže všechny související údaje o klubu.
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onDeleteClose}>
-              Zrušit
-            </Button>
-            <Button color="danger" onPress={handleDeleteClub}>
-              Smazat klub
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <DeleteConfirmationModal
+        isOpen={isDeleteOpen}
+        onClose={onDeleteClose}
+        onConfirm={handleDeleteClub}
+        title={t.deleteClub}
+        message={t.deleteClubMessage}
+      />
     </AdminContainer>
   );
 }
