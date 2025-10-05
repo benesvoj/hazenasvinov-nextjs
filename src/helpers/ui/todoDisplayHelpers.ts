@@ -4,6 +4,7 @@ import {TodoItem} from '@/types';
 /**
  * UI helper functions for todo display and formatting
  * These functions handle the presentation layer concerns for todos
+ * @deprecated maybe we should remove this file and use the categoryDisplayHelpers.ts file instead
  */
 
 /**
