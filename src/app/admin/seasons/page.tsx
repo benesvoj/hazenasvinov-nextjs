@@ -2,9 +2,7 @@
 
 import React, {useEffect, useState} from 'react';
 
-import {useDisclosure, Chip, Button} from '@heroui/react';
-
-import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {useDisclosure, Chip} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
@@ -22,8 +20,6 @@ export default function SeasonsAdminPage() {
   const {
     seasons,
     loading,
-    error,
-    selectedSeason,
     formData,
     fetchAllSeasons,
     addSeason,
@@ -98,7 +94,6 @@ export default function SeasonsAdminPage() {
     {key: 'start_date', label: translations.season.table.startDate},
     {key: 'end_date', label: translations.season.table.endDate},
     {key: 'status', label: translations.season.table.status},
-    {key: 'actions', label: translations.season.table.actions},
     {
       key: 'actions',
       label: translations.season.table.actions,
