@@ -4,12 +4,13 @@ import React, {useEffect, useState} from 'react';
 
 import {useDisclosure, Input} from '@heroui/react';
 
+import {getAgeGroupLabel, getGenderLabel, getStatusLabel, getStatusClasses} from '@/helpers/ui';
+
 import {DeleteConfirmationModal, AdminContainer, UnifiedTable} from '@/components';
 import {AgeGroups, ActionTypes, Genders, ModalMode} from '@/enums';
 import {useCategories} from '@/hooks';
 import {translations} from '@/lib';
 import {Category} from '@/types';
-import {ageGroupsOptions, genderOptions} from '@/utils';
 
 import CategoryModal from './components/CategoryModal';
 
@@ -167,15 +168,13 @@ export default function CategoriesAdminPage() {
       case 'description':
         return <span className="font-medium">{category.description || '-'}</span>;
       case 'age_group':
-        return (
-          <span className="font-medium">{ageGroupsOptions[category.age_group as AgeGroups]}</span>
-        );
+        return <span className="font-medium">{getAgeGroupLabel(category.age_group)}</span>;
       case 'gender':
-        return <span className="font-medium">{genderOptions[category.gender as Genders]}</span>;
+        return <span className="font-medium">{getGenderLabel(category.gender)}</span>;
       case 'is_active':
         return (
-          <span className="font-medium">
-            {category.is_active ? t.table.activeLabel : t.table.inactiveLabel}
+          <span className={`font-medium ${getStatusClasses(category.is_active)}`}>
+            {getStatusLabel(category.is_active)}
           </span>
         );
       case 'sort_order':
