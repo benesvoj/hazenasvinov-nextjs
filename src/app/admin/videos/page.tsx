@@ -2,10 +2,6 @@
 
 import React, {useState, useEffect} from 'react';
 
-import {Button} from '@heroui/react';
-
-import {VideoCameraIcon, PlusIcon} from '@heroicons/react/24/outline';
-
 import {useVideos} from '@/hooks/entities/video/useVideos';
 
 import {AdminContainer} from '@/components/features/admin/AdminContainer';
@@ -15,6 +11,7 @@ import {translations} from '@/lib/translations';
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
+import {ActionTypes} from '@/enums';
 import {Video, VideoFormData, VideoFilters} from '@/types';
 
 export default function VideosPage() {
@@ -120,30 +117,19 @@ export default function VideosPage() {
 
   return (
     <AdminContainer
-      title={t.title}
-      description={t.description}
-      icon={<VideoCameraIcon className="w-8 h-8 text-blue-600" />}
-      actions={
-        <Button
-          color="primary"
-          startContent={<PlusIcon className="w-5 h-5" />}
-          onPress={openCreateModal}
-        >
-          {t.addVideo}
-        </Button>
-      }
+      actions={[
+        {
+          label: t.addVideo,
+          onClick: openCreateModal,
+          variant: 'solid',
+          buttonType: ActionTypes.CREATE,
+        },
+      ]}
     >
       {/* TODO: Remove header props after migration */}
       <VideoPageLayout
-        // Header props
-        title="Videa"
-        description="Správa videí pro jednotlivé kategorie"
-        iconColor="text-blue-600"
-        buttonColor="primary"
-        buttonText={t.addVideo}
-        onAddVideo={openCreateModal}
-        isAddDisabled={false}
         isHeaderVisible={false}
+        onAddVideo={openCreateModal}
         // Data props
         videos={videos}
         loading={loading}

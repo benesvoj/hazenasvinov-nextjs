@@ -6,6 +6,7 @@ import {Tabs, Tab} from '@heroui/react';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
+import {AdminContainer} from '@/components';
 import {getGenderOptions} from '@/enums';
 
 import MembersListTab from './components/MembersListTab';
@@ -28,8 +29,7 @@ export default function MembersAdminPage() {
     useAppData();
 
   return (
-    <div className="p-6">
-      {/* Tabs */}
+    <AdminContainer loading={membersLoading}>
       <Tabs
         selectedKey={activeTab}
         onSelectionChange={(key) => setActiveTab(key as string)}
@@ -46,6 +46,6 @@ export default function MembersAdminPage() {
           </div>
         </Tab>
       </Tabs>
-    </div>
+    </AdminContainer>
   );
 }

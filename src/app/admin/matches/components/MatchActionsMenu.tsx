@@ -4,9 +4,9 @@ import {Button, Tooltip} from '@heroui/react';
 
 import {EyeIcon, PencilIcon, UserGroupIcon, TrashIcon} from '@heroicons/react/24/outline';
 
-import MobileActionsMenu, {ActionItem} from '@/components/ui/navigation/MobileActionsMenu';
+import MobileActionsMenu from '@/components/ui/navigation/MobileActionsMenu';
 
-import {Match} from '@/types';
+import {Match, ActionItem} from '@/types';
 
 interface MatchActionsMenuProps {
   match: Match;

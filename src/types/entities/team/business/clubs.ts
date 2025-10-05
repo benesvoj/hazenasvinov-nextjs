@@ -4,7 +4,7 @@ export interface Club {
   short_name?: string;
   logo_url?: string;
   city?: string;
-  founded_year?: number;
+  founded_year?: number | null;
   venue?: string;
   web?: string;
   email?: string;
@@ -28,17 +28,6 @@ export interface ClubTeam {
   is_primary?: boolean;
   created_at?: string;
   updated_at?: string;
-}
-
-// @deprecated('Use ClubCategoryTeams instead')
-export interface ClubCategory {
-  id: string;
-  club_id: string;
-  category_id: string;
-  season_id: string;
-  max_teams: number;
-  is_active: boolean;
-  created_at: string;
 }
 
 export interface ClubCategoryWithClub {

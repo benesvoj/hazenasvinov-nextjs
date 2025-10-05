@@ -1,8 +1,5 @@
 'use client';
 
-import {Badge} from '@heroui/badge';
-import {Button} from '@heroui/button';
-import {Card, CardBody, CardHeader} from '@heroui/card';
 import {
   Modal,
   ModalContent,
@@ -10,9 +7,19 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from '@heroui/modal';
-import {Select, SelectItem} from '@heroui/select';
-import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
+  Card,
+  CardBody,
+  CardHeader,
+  Button,
+  Select,
+  SelectItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from '@heroui/react';
 
 import {
   ArrowRightOnRectangleIcon,
@@ -26,11 +33,10 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-import {SupabaseUser} from '@/types/types';
-
 import {LoginLog, PaginationInfo} from '@/hooks/entities/user/useFetchUsers';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib';
+import {SupabaseUser} from '@/types';
 
 interface LoginLogsTabProps {
   loginLogs: LoginLog[];

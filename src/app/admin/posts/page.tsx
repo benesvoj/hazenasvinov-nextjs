@@ -20,7 +20,7 @@ import {
   Chip,
 } from '@heroui/react';
 
-import {PlusIcon, PencilIcon, TrashIcon, TagIcon, PhotoIcon} from '@heroicons/react/24/outline';
+import {PencilIcon, TrashIcon, TagIcon, PhotoIcon} from '@heroicons/react/24/outline';
 
 import {useBlogPosts} from '@/hooks/entities/blog/useBlogPosts';
 
@@ -28,6 +28,7 @@ import {translations} from '@/lib/translations';
 
 import {LoadingSpinner, AdminContainer, DeleteConfirmationModal} from '@/components';
 import {adminStatusFilterOptions} from '@/constants';
+import {ActionTypes} from '@/enums';
 import {formatDateString} from '@/helpers';
 import {BlogPost} from '@/types';
 
@@ -122,15 +123,14 @@ export default function BlogPostsPage() {
 
   return (
     <AdminContainer
-      actions={
-        <Button
-          color="primary"
-          startContent={<PlusIcon className="w-5 h-5" />}
-          onPress={handleAddPostClick}
-        >
-          {t.addPost}
-        </Button>
-      }
+      actions={[
+        {
+          label: t.addPost,
+          onClick: handleAddPostClick,
+          variant: 'solid',
+          buttonType: ActionTypes.CREATE,
+        },
+      ]}
     >
       {/* Filters */}
       <Card>

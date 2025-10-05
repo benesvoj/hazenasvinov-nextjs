@@ -5,7 +5,7 @@ import {Button, ButtonGroup} from '@heroui/react';
 import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 import {UnifiedTable} from '@/components';
-import {PlayerPosition} from '@/enums';
+import {ColumnAlignType, PlayerPosition} from '@/enums';
 import {LineupPlayerFormData} from '@/types';
 
 interface PlayersTableProps {
@@ -21,13 +21,18 @@ const PlayersTable: React.FC<PlayersTableProps> = memo(
     const playersColumns = [
       {key: 'name', label: 'Hráč', allowsSorting: true},
       {key: 'position', label: 'Pozice', allowsSorting: true},
-      {key: 'jersey_number', label: 'Dres', allowsSorting: true, align: 'center' as const},
-      {key: 'goals', label: 'Góly', allowsSorting: true, align: 'center' as const},
-      {key: 'yellow_cards', label: 'ŽK', allowsSorting: true, align: 'center' as const},
-      {key: 'red_cards_5min', label: 'ČK5', allowsSorting: true, align: 'center' as const},
-      {key: 'red_cards_10min', label: 'ČK10', allowsSorting: true, align: 'center' as const},
-      {key: 'red_cards_personal', label: 'ČKOT', allowsSorting: true, align: 'center' as const},
-      {key: 'actions', label: 'Akce', align: 'center' as const},
+      {key: 'jersey_number', label: 'Dres', allowsSorting: true, align: ColumnAlignType.CENTER},
+      {key: 'goals', label: 'Góly', allowsSorting: true, align: ColumnAlignType.CENTER},
+      {key: 'yellow_cards', label: 'ŽK', allowsSorting: true, align: ColumnAlignType.CENTER},
+      {key: 'red_cards_5min', label: 'ČK5', allowsSorting: true, align: ColumnAlignType.CENTER},
+      {key: 'red_cards_10min', label: 'ČK10', allowsSorting: true, align: ColumnAlignType.CENTER},
+      {
+        key: 'red_cards_personal',
+        label: 'ČKOT',
+        allowsSorting: true,
+        align: ColumnAlignType.CENTER,
+      },
+      {key: 'actions', label: 'Akce', align: ColumnAlignType.CENTER},
     ];
 
     const renderPlayerCell = useCallback(
@@ -54,7 +59,7 @@ const PlayersTable: React.FC<PlayersTableProps> = memo(
           case 'actions':
             const playerIndex = players.findIndex((p) => p.member_id === player.member_id);
             return (
-              <ButtonGroup>
+              <div className="flex gap-2">
                 <Button
                   size="sm"
                   color="primary"
@@ -75,7 +80,7 @@ const PlayersTable: React.FC<PlayersTableProps> = memo(
                   title="Odebrat hráče"
                   startContent={<TrashIcon className="w-4 h-4" />}
                 />
-              </ButtonGroup>
+              </div>
             );
           default:
             return cellValue;

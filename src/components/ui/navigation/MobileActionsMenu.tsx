@@ -10,35 +10,9 @@ import {
   useDisclosure,
 } from '@heroui/react';
 
-import {Bars3Icon, XMarkIcon} from '@heroicons/react/24/outline';
+import {Bars3Icon} from '@heroicons/react/24/outline';
 
-export interface ActionItem {
-  key: string;
-  label: string;
-  icon?: React.ReactNode;
-  color?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
-  variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  isDisabled?: boolean;
-  onClick: () => void;
-  description?: string;
-}
-
-interface MobileActionsMenuProps {
-  actions: ActionItem[];
-  title?: string;
-  description?: string;
-  triggerLabel?: string;
-  triggerIcon?: React.ReactNode;
-  triggerColor?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
-  triggerVariant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'ghost';
-  triggerSize?: 'sm' | 'md' | 'lg';
-  className?: string;
-  showCloseButton?: boolean;
-  closeOnAction?: boolean;
-  fullWidth?: boolean;
-  showOnDesktop?: boolean;
-}
+import {MobileActionsMenuProps, ActionItem} from '@/types';
 
 export default function MobileActionsMenu({
   actions,

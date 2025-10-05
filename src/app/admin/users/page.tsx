@@ -2,12 +2,12 @@
 
 import {useState} from 'react';
 
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {Tabs, Tab} from '@heroui/tabs';
-
-import {useFetchUsers} from '@/hooks/entities/user/useFetchUsers';
+import {Card, CardBody, Tabs, Tab} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
+
+import {AdminContainer} from '@/components';
+import {useFetchUsers} from '@/hooks';
 
 import {LoginLogsTab} from './components/LoginLogsTab';
 import {UsersTab} from './components/UsersTab';
@@ -48,7 +48,7 @@ export default function Page() {
   }
 
   return (
-    <div className="space-y-6">
+    <AdminContainer loading={loading}>
       {/* Tabs */}
       <Tabs
         selectedKey={selectedTab}
@@ -85,6 +85,6 @@ export default function Page() {
           onClearFilters={clearFilters}
         />
       )}
-    </div>
+    </AdminContainer>
   );
 }

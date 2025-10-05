@@ -2,9 +2,9 @@
 
 import {useState} from 'react';
 
-import {Tabs, Tab} from '@heroui/tabs';
+import {Tabs, Tab} from '@heroui/react';
 
-import {translations} from '@/lib/translations';
+import {AdminContainer} from '@/components';
 
 import {BusinessPartnersTab} from './components/BusinessPartnersTab';
 import {MainPartnersTab} from './components/MainPartnersTab';
@@ -14,7 +14,7 @@ export default function SponsorshipPage() {
   const [selectedTab, setSelectedTab] = useState<string>('main-partners');
 
   return (
-    <div className="space-y-6">
+    <AdminContainer>
       {/* Tabs */}
       <Tabs
         selectedKey={selectedTab}
@@ -35,6 +35,6 @@ export default function SponsorshipPage() {
       {selectedTab === 'business-partners' && <BusinessPartnersTab />}
 
       {selectedTab === 'media-partners' && <MediaPartnersTab />}
-    </div>
+    </AdminContainer>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, {ChangeEvent, useCallback} from 'react';
+import React, {useCallback} from 'react';
 
 import {translations} from '@/lib/translations';
 

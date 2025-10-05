@@ -1,165 +1,213 @@
 'use client';
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
-import {
-  useDisclosure,
-  Badge,
-  Button,
-  Card,
-  CardBody,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-} from '@heroui/react';
+import {useDisclosure, Input} from '@heroui/react';
 
-import {PlusCircleIcon} from '@heroicons/react/16/solid';
-import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {getAgeGroupLabel, getGenderLabel, getStatusLabel, getStatusClasses} from '@/helpers/ui';
 
-import {translations} from '@/lib/translations';
-
-import {DeleteConfirmationModal, AdminContainer} from '@/components';
-import {AgeGroups, Genders} from '@/enums';
+import {DeleteConfirmationModal, AdminContainer, UnifiedTable} from '@/components';
+import {AgeGroups, ActionTypes, Genders, ModalMode} from '@/enums';
 import {useCategories} from '@/hooks';
-import {Category, CategorySeason} from '@/types';
-import {ageGroupsOptions, genderOptions, competitionTypeOptions} from '@/utils';
+import {translations} from '@/lib';
+import {Category} from '@/types';
 
-import {AddCategoryModal, AddSeasonModal, EditCategoryModal, EditSeasonModal} from './components';
-import {getAgeGroupBadgeColor, getGenderBadgeColor} from './constants';
+import CategoryModal from './components/CategoryModal';
 
 export default function CategoriesAdminPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.ADD);
+  const [formData, setFormData] = useState<Category>({
+    id: '',
+    name: '',
+    description: '',
+    age_group: undefined,
+    gender: undefined,
+    is_active: true,
+    sort_order: 0,
+  });
+
   // Use the custom hook for all business logic
   const {
     categories,
-    seasons,
-    categorySeasons,
-    selectedCategory,
-    selectedSeason,
     loading,
     error,
-    formData,
-    seasonFormData,
-    editSeasonFormData,
+    createCategory,
+    updateCategory,
+    deleteCategory,
     fetchCategories,
-    fetchSeasons,
-    fetchCategorySeasons,
-    handleAddCategory,
-    handleUpdateCategory,
-    handleDeleteCategory,
-    handleAddSeason,
-    handleUpdateSeason,
-    handleRemoveSeason,
-    handleEditSeason,
-    openEditModal,
-    openDeleteModal,
-    setFormData,
-    setSeasonFormData,
-    setEditSeasonFormData,
-    setSelectedCategory,
-    setSelectedSeason,
-    setError,
-    resetFormData,
-    resetSeasonFormData,
-    resetEditSeasonFormData,
-  } = useCategories();
+    clearError,
+  } = useCategories({
+    searchTerm,
+  });
 
   // Modal states
   const {
-    isOpen: isAddCategoryOpen,
-    onOpen: onAddCategoryOpen,
-    onClose: onAddCategoryClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditCategoryOpen,
-    onOpen: onEditCategoryOpen,
-    onClose: onEditCategoryClose,
+    isOpen: isCategoryModalOpen,
+    onOpen: onCategoryModalOpen,
+    onClose: onCategoryModalClose,
   } = useDisclosure();
   const {
     isOpen: isDeleteCategoryOpen,
     onOpen: onDeleteCategoryOpen,
     onClose: onDeleteCategoryClose,
   } = useDisclosure();
-  const {
-    isOpen: isAddSeasonOpen,
-    onOpen: onAddSeasonOpen,
-    onClose: onAddSeasonClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditSeasonOpen,
-    onOpen: onEditSeasonOpen,
-    onClose: onEditSeasonClose,
-  } = useDisclosure();
 
   // Initialize data on component mount
   useEffect(() => {
-    fetchSeasons();
     fetchCategories();
-  }, [fetchSeasons, fetchCategories]);
+  }, [fetchCategories]);
 
   // Enhanced handlers that include modal management
-  const handleAddCategoryWithModal = async () => {
-    await handleAddCategory();
-    onAddCategoryClose();
-    resetFormData();
+  const handleCategorySubmit = async () => {
+    if (modalMode === ModalMode.ADD) {
+      const result = await createCategory({
+        name: formData.name,
+        description: formData.description,
+        age_group: formData.age_group,
+        gender: formData.gender,
+        is_active: formData.is_active,
+        sort_order: formData.sort_order,
+      });
+
+      if (result.success) {
+        onCategoryModalClose();
+        resetFormData();
+        clearError();
+      }
+    } else {
+      if (!selectedCategory) return;
+
+      const result = await updateCategory({
+        id: selectedCategory.id,
+        name: formData.name,
+        description: formData.description,
+        age_group: formData.age_group,
+        gender: formData.gender,
+        is_active: formData.is_active,
+        sort_order: formData.sort_order,
+      });
+
+      if (result.success) {
+        onCategoryModalClose();
+        setSelectedCategory(null);
+        resetFormData();
+        clearError();
+      }
+    }
   };
 
-  const handleUpdateCategoryWithModal = async () => {
-    await handleUpdateCategory();
-    onEditCategoryClose();
-    setSelectedCategory(null);
-    resetFormData();
+  const resetFormData = () => {
+    setFormData({
+      id: '',
+      name: '',
+      description: '',
+      age_group: undefined,
+      gender: undefined,
+      is_active: true,
+      sort_order: 0,
+    });
   };
 
   const handleDeleteCategoryWithModal = async () => {
-    await handleDeleteCategory();
-    onDeleteCategoryClose();
-    setSelectedCategory(null);
+    if (!selectedCategory) return;
+
+    const result = await deleteCategory(selectedCategory.id);
+
+    if (result.success) {
+      onDeleteCategoryClose();
+      setSelectedCategory(null);
+      clearError();
+    }
   };
 
-  const handleAddSeasonWithModal = async () => {
-    await handleAddSeason();
-    onAddSeasonClose();
-    resetSeasonFormData();
+  const openCreateModal = () => {
+    setModalMode(ModalMode.ADD);
+    resetFormData();
+    onCategoryModalOpen();
   };
 
-  const handleUpdateSeasonWithModal = async () => {
-    await handleUpdateSeason();
-    onEditSeasonClose();
-    setSelectedSeason(null);
-    resetEditSeasonFormData();
+  const openEditModal = (category: Category) => {
+    setModalMode(ModalMode.EDIT);
+    setSelectedCategory(category);
+    setFormData(category);
+    onCategoryModalOpen();
   };
 
-  const openEditModalWithModal = (category: Category) => {
-    openEditModal(category);
-    onEditCategoryOpen();
-  };
-
-  const openDeleteModalWithModal = (category: Category) => {
-    openDeleteModal(category);
+  const openDeleteModal = (category: Category) => {
+    setSelectedCategory(category);
     onDeleteCategoryOpen();
   };
 
-  const handleEditSeasonWithModal = (categorySeason: CategorySeason) => {
-    handleEditSeason(categorySeason);
-    onEditSeasonOpen();
+  const t = translations.categories;
+  const tAction = translations.action;
+
+  const categoryColumns = [
+    {key: 'name', label: t.table.name},
+    {key: 'description', label: t.table.description},
+    {key: 'age_group', label: t.table.ageGroup},
+    {key: 'gender', label: t.table.gender},
+    {key: 'is_active', label: t.table.status},
+    {key: 'sort_order', label: t.table.sortOrder},
+    {
+      key: 'actions',
+      label: t.table.actions,
+      isActionColumn: true,
+      actions: [
+        {type: ActionTypes.UPDATE, onPress: openEditModal, title: tAction.edit},
+        {type: ActionTypes.DELETE, onPress: openDeleteModal, title: tAction.delete},
+      ],
+    },
+  ];
+
+  const renderCategoryCell = (category: Category, columnKey: string) => {
+    switch (columnKey) {
+      case 'name':
+        return <span className="font-medium">{category.name}</span>;
+      case 'description':
+        return <span className="font-medium">{category.description || '-'}</span>;
+      case 'age_group':
+        return <span className="font-medium">{getAgeGroupLabel(category.age_group)}</span>;
+      case 'gender':
+        return <span className="font-medium">{getGenderLabel(category.gender)}</span>;
+      case 'is_active':
+        return (
+          <span className={`font-medium ${getStatusClasses(category.is_active)}`}>
+            {getStatusLabel(category.is_active)}
+          </span>
+        );
+      case 'sort_order':
+        return <span className="font-medium">{category.sort_order}</span>;
+    }
+  };
+
+  const filters = () => {
+    return (
+      <div className="w-full max-w-md">
+        <Input
+          label="Hledat kategorie"
+          placeholder="Zadejte název kategorie..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          size="sm"
+        />
+      </div>
+    );
   };
 
   return (
     <AdminContainer
-      actions={
-        <Button
-          size="sm"
-          color="primary"
-          startContent={<PlusCircleIcon className="w-4 h-4" />}
-          onPress={onAddCategoryOpen}
-          aria-label="Přidat novou kategorii"
-        >
-          Přidat kategorii
-        </Button>
-      }
+      loading={loading}
+      filters={filters()}
+      actions={[
+        {
+          label: t.addCategory,
+          onClick: openCreateModal,
+          variant: 'solid',
+          buttonType: ActionTypes.CREATE,
+        },
+      ]}
     >
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -167,116 +215,24 @@ export default function CategoriesAdminPage() {
         </div>
       )}
 
-      <Card>
-        <CardBody>
-          {loading ? (
-            <div className="text-center py-8">{translations.loading}</div>
-          ) : (
-            <Table aria-label="Categories table">
-              <TableHeader>
-                <TableColumn>NÁZEV</TableColumn>
-                <TableColumn>POPIS</TableColumn>
-                <TableColumn>VĚKOVÁ SKUPINA</TableColumn>
-                <TableColumn>POHLAVÍ</TableColumn>
-                <TableColumn>STATUS</TableColumn>
-                <TableColumn>POŘADÍ</TableColumn>
-                <TableColumn>AKCE</TableColumn>
-              </TableHeader>
-              <TableBody emptyContent="Žádné kategorie nebyly nalezeny">
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
-                      {category.description || '-'}
-                    </TableCell>
-                    <TableCell>
-                      {category.age_group ? (
-                        <Badge
-                          color={getAgeGroupBadgeColor(category.age_group as AgeGroups)}
-                          variant="flat"
-                          size="sm"
-                        >
-                          {ageGroupsOptions[category.age_group]}
-                        </Badge>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {category.gender ? (
-                        <Badge
-                          color={getGenderBadgeColor(category.gender as Genders)}
-                          variant="flat"
-                          size="sm"
-                        >
-                          {genderOptions[category.gender]}
-                        </Badge>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        color={category.is_active ? 'success' : 'default'}
-                        variant="flat"
-                        size="sm"
-                      >
-                        {category.is_active ? 'Aktivní' : 'Neaktivní'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{category.sort_order}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="light"
-                          color="primary"
-                          isIconOnly
-                          onPress={() => openEditModalWithModal(category)}
-                          aria-label={`Upravit kategorii ${category.name}`}
-                        >
-                          <PencilIcon className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="light"
-                          color="danger"
-                          isIconOnly
-                          onPress={() => openDeleteModalWithModal(category)}
-                          aria-label={`Smazat kategorii ${category.name}`}
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardBody>
-      </Card>
-
-      {/* Add Category Modal */}
-      <AddCategoryModal
-        isOpen={isAddCategoryOpen}
-        onClose={onAddCategoryClose}
-        onAddCategory={handleAddCategoryWithModal}
-        formData={formData}
-        setFormData={setFormData}
+      <UnifiedTable
+        columns={categoryColumns}
+        data={categories}
+        ariaLabel={t.title}
+        renderCell={renderCategoryCell}
+        getKey={(category: Category) => category.id}
+        emptyContent={t.table.noCategories}
+        isStriped
       />
 
-      {/* Edit Category Modal */}
-      <EditCategoryModal
-        isOpen={isEditCategoryOpen}
-        onClose={onEditCategoryClose}
-        onUpdateCategory={handleUpdateCategoryWithModal}
-        onAddSeason={onAddSeasonOpen}
-        onEditSeason={handleEditSeasonWithModal}
-        onRemoveSeason={handleRemoveSeason}
+      {/* Category Modal (Create/Edit) */}
+      <CategoryModal
+        isOpen={isCategoryModalOpen}
+        onClose={onCategoryModalClose}
+        onSubmit={handleCategorySubmit}
         formData={formData}
         setFormData={setFormData}
-        categorySeasons={categorySeasons}
+        mode={modalMode}
       />
 
       {/* Delete Category Modal */}
@@ -284,33 +240,8 @@ export default function CategoriesAdminPage() {
         isOpen={isDeleteCategoryOpen}
         onClose={onDeleteCategoryClose}
         onConfirm={handleDeleteCategoryWithModal}
-        title="Smazat kategorii"
-        message={`
-          Opravdu chcete smazat kategorii <strong>${selectedCategory?.name}</strong>?<br><br>
-          <span class="text-sm text-gray-600">Tato akce je nevratná a může ovlivnit data v celém systému.</span>
-        `}
-      />
-
-      {/* Add Season Modal */}
-      <AddSeasonModal
-        isOpen={isAddSeasonOpen}
-        onClose={onAddSeasonClose}
-        onAddSeason={handleAddSeasonWithModal}
-        seasonFormData={seasonFormData}
-        setSeasonFormData={setSeasonFormData}
-        seasons={seasons}
-        competitionTypes={competitionTypeOptions}
-      />
-
-      {/* Edit Season Modal */}
-      <EditSeasonModal
-        isOpen={isEditSeasonOpen}
-        onClose={onEditSeasonClose}
-        onUpdateSeason={handleUpdateSeasonWithModal}
-        selectedSeason={selectedSeason}
-        editSeasonFormData={editSeasonFormData}
-        setEditSeasonFormData={setEditSeasonFormData}
-        competitionTypes={competitionTypeOptions}
+        title={t.deleteCategory}
+        message={t.deleteCategoryMessage}
       />
     </AdminContainer>
   );

@@ -9,3 +9,5 @@ export * from './matchQueryBuilder';
 export * from './loginLogger';
 export * from './releaseNotes';
 export * from './enumHelpers';
+export * from './autoStandingsRecalculation';
+export * from './refreshMaterializedView';

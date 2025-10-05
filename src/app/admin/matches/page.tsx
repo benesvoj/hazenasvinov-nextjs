@@ -2,25 +2,7 @@
 
 import React, {useState, useEffect, useCallback} from 'react';
 
-import {
-  Alert,
-  Select,
-  SelectItem,
-  Tabs,
-  Tab,
-  Card,
-  CardBody,
-  Button,
-  useDisclosure,
-} from '@heroui/react';
-
-import {
-  TrophyIcon,
-  PlusIcon,
-  ArrowPathIcon,
-  DocumentArrowUpIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import {Alert, Select, SelectItem, Tabs, Tab, Card, CardBody, useDisclosure} from '@heroui/react';
 
 import {useQueryClient} from '@tanstack/react-query';
 
@@ -34,14 +16,9 @@ import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
 
 import {getCategoryInfo} from '@/helpers/getCategoryInfo';
 
-import {
-  DeleteConfirmationModal,
-  MobileActionsMenu,
-  showToast,
-  ButtonWithTooltip,
-  AdminContainer,
-} from '@/components';
+import {DeleteConfirmationModal, showToast, AdminContainer, LoadingSpinner} from '@/components';
 import {matchStatusesKeys} from '@/constants';
+import {ActionTypes} from '@/enums';
 import {
   useSeasons,
   useFilteredTeams,
@@ -923,143 +900,85 @@ export default function MatchesAdminPage() {
     ]
   );
 
+  const generateStandingsLabel =
+    standings.filter((s) => s.category_id === selectedCategory && s.season_id === selectedSeason)
+      .length === 0
+      ? translations.matches.actions.generateStandings
+      : translations.matches.actions.recalculateStandings;
+
   return (
     <AdminContainer
-      title={t.title}
-      description={t.description}
-      icon={<TrophyIcon className="w-8 h-8 text-blue-600" />}
-      actions={
-        <>
-          <div className="lg:hidden">
-            <MobileActionsMenu
-              actions={[
-                {
-                  key: 'add-match',
-                  label: translations.matches.actions.addMatch,
-                  description: translations.matches.actions.addMatchDescription,
-                  color: 'primary',
-                  variant: 'flat',
-                  icon: <PlusIcon className="w-4 h-4" />,
-                  onClick: onAddMatchOpen,
-                  isDisabled: isSeasonClosed(),
-                },
-                {
-                  key: 'bulk-update',
-                  label: translations.matches.actions.bulkUpdateMatchweek,
-                  description: translations.matches.actions.bulkUpdateMatchweekDescription,
-                  color: 'warning',
-                  variant: 'flat',
-                  icon: <ArrowPathIcon className="w-4 h-4" />,
-                  onClick: onBulkUpdateOpen,
-                  isDisabled: isSeasonClosed(),
-                },
-                {
-                  key: 'generate-standings',
-                  label:
-                    standings.filter((s) => s.season_id === selectedSeason).length === 0
-                      ? translations.matches.actions.generateStandings
-                      : translations.matches.actions.recalculateStandings,
-                  description:
-                    standings.filter((s) => s.season_id === selectedSeason).length === 0
-                      ? translations.matches.actions.generateStandingsDescription
-                      : translations.matches.actions.recalculateStandingsDescription,
-                  color: 'success',
-                  variant: 'flat',
-                  onClick: handleStandingsAction,
-                  isDisabled: isSeasonClosed(),
-                },
-                {
-                  key: 'excel-import',
-                  label: translations.matches.actions.import,
-                  description: translations.matches.actions.importDescription,
-                  color: 'secondary',
-                  variant: 'flat',
-                  icon: <DocumentArrowUpIcon className="w-4 h-4" />,
-                  onClick: onExcelImportOpen,
-                },
-                {
-                  key: 'delete-all-matches',
-                  label: translations.matches.actions.deleteAllMatches,
-                  description: translations.matches.actions.deleteAllMatchesDescription,
-                  color: 'danger',
-                  variant: 'flat',
-                  icon: <TrashIcon className="w-4 h-4" />,
-                  onClick: onDeleteAllConfirmOpen,
-                  isDisabled: isSeasonClosed() || !selectedSeason,
-                },
-              ]}
-              description="Vyberte akci, kterou chcete provést se zápasy"
-              triggerColor="primary"
-              triggerVariant="light"
-              className="w-auto"
-            />
-          </div>
-
-          {/* Desktop: Show all buttons horizontally */}
-          <div className="hidden lg:flex flex-wrap gap-2">
-            <Button
-              color="primary"
-              startContent={<PlusIcon className="w-4 h-4" />}
-              onPress={onAddMatchOpen}
-              isDisabled={isSeasonClosed()}
-              size="sm"
-              aria-label="Přidat nový zápas"
-            >
-              {translations.matches.actions.addMatch}
-            </Button>
-            <Button
-              color="warning"
-              startContent={<ArrowPathIcon className="w-4 h-4" />}
-              onPress={onBulkUpdateOpen}
-              isDisabled={isSeasonClosed()}
-              size="sm"
-              aria-label="Hromadná aktualizace matchweek"
-            >
-              {translations.matches.actions.bulkUpdateMatchweek}
-            </Button>
-            <Button
-              color="success"
-              onPress={handleStandingsAction}
-              isDisabled={isSeasonClosed()}
-              size="sm"
-              aria-label="Generovat nebo přepočítat tabulku"
-            >
-              {standings.filter(
-                (s) => s.category_id === selectedCategory && s.season_id === selectedSeason
-              ).length === 0
-                ? translations.matches.actions.generateStandings
-                : translations.matches.actions.recalculateStandings}
-            </Button>
-            <Button
-              color="secondary"
-              startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
-              onPress={onExcelImportOpen}
-              size="sm"
-              aria-label="Import zápasů z Excel souboru"
-            >
-              {translations.matches.actions.import}
-            </Button>
-            <ButtonWithTooltip
-              tooltip={t.actions.deleteAllMatches}
-              onPress={onDeleteAllConfirmOpen}
-              isDisabled={isSeasonClosed() || !selectedSeason}
-              ariaLabel={t.actions.deleteAllMatches}
-              isIconOnly
-              isDanger
-              variant="ghost"
-            >
-              <TrashIcon className="w-4 h-4" />
-            </ButtonWithTooltip>
-            <Button
-              color="primary"
-              onPress={testMaterializedViewRefresh}
-              size="sm"
-              aria-label="Test materialized view refresh"
-            >
-              🔍 Test MV Refresh
-            </Button>
-          </div>
-        </>
+      actions={[
+        {
+          label: translations.matches.actions.addMatch,
+          onClick: onAddMatchOpen,
+          variant: 'solid',
+          buttonType: ActionTypes.CREATE,
+          isDisabled: isSeasonClosed(),
+        },
+        {
+          label: translations.matches.actions.bulkUpdateMatchweek,
+          onClick: onBulkUpdateOpen,
+          variant: 'solid',
+          buttonType: ActionTypes.UPDATE,
+          isDisabled: isSeasonClosed(),
+        },
+        {
+          label: generateStandingsLabel,
+          onClick: handleStandingsAction,
+          variant: 'solid',
+          buttonType: ActionTypes.UPDATE,
+          isDisabled: isSeasonClosed(),
+        },
+        {
+          label: translations.matches.actions.import,
+          onClick: onExcelImportOpen,
+          variant: 'solid',
+          buttonType: ActionTypes.UPDATE,
+          isDisabled: isSeasonClosed(),
+        },
+        {
+          label: translations.matches.actions.deleteAllMatches,
+          onClick: onDeleteAllConfirmOpen,
+          variant: 'solid',
+          buttonType: ActionTypes.DELETE,
+          isDisabled: isSeasonClosed() || !selectedSeason,
+        },
+        {
+          label: translations.matches.actions.testMaterializedViewRefresh,
+          onClick: testMaterializedViewRefresh,
+          variant: 'solid',
+          buttonType: ActionTypes.UPDATE,
+          isDisabled: isSeasonClosed(),
+        },
+      ]}
+      filters={
+        <div className="w-full">
+          {sortedSeasons.length === 0 ? (
+            <div className="w-full flex justify-center items-center">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <Select
+                label={translations.season.title}
+                placeholder={translations.season.selectSeason}
+                selectedKeys={selectedSeason ? [selectedSeason] : []}
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] as string;
+                  setSelectedSeason(selectedKey || '');
+                }}
+                className="w-full"
+              >
+                {sortedSeasons.map((season) => (
+                  <SelectItem key={season.id} textValue={season.name}>
+                    {season.name} {season.is_closed ? `(${translations.season.closed})` : ''}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+          )}
+        </div>
       }
     >
       {/* Season closed warning */}
@@ -1074,31 +993,6 @@ export default function MatchesAdminPage() {
           {error}
         </div>
       )}
-
-      {/* Season selector */}
-      <div className="mb-6">
-        <div className="w-full max-w-md">
-          <Select
-            label={translations.season.title}
-            placeholder={translations.season.selectSeason}
-            selectedKeys={selectedSeason ? [selectedSeason] : []}
-            onSelectionChange={(keys) => {
-              const selectedKey = Array.from(keys)[0] as string;
-              setSelectedSeason(selectedKey || '');
-            }}
-            className="w-full"
-          >
-            {sortedSeasons.map((season) => (
-              <SelectItem key={season.id} textValue={season.name}>
-                {season.name} {season.is_closed ? `(${translations.season.closed})` : ''}
-              </SelectItem>
-            ))}
-          </Select>
-          {sortedSeasons.length === 0 && (
-            <p className="text-sm text-red-600 mt-1">{translations.season.noSeasons}</p>
-          )}
-        </div>
-      </div>
 
       {selectedSeason && (
         <>

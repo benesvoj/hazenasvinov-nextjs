@@ -2,7 +2,7 @@
 
 import {useState, useEffect, useCallback} from 'react';
 
-import {ClubConfig} from '@/types/types';
+import {ClubConfig} from '@/types';
 
 export function useClubConfig() {
   const [clubConfig, setClubConfig] = useState<ClubConfig | null>(null);

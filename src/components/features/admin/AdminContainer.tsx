@@ -1,13 +1,7 @@
-import {LoadingSpinner, Heading, UnifiedCard} from '@/components';
+import {LoadingSpinner} from '@/components';
+import {AdminContainerProps} from '@/types';
 
-interface AdminContainerProps {
-  title?: string;
-  description?: string;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-  actions?: React.ReactNode;
-  loading?: boolean;
-}
+import {AdminFilters, AdminContent, AdminHeader, AdminActions} from './';
 
 export function AdminContainer({
   children,
@@ -15,6 +9,7 @@ export function AdminContainer({
   description,
   icon,
   actions,
+  filters,
   loading,
 }: AdminContainerProps) {
   return (
@@ -22,20 +17,19 @@ export function AdminContainer({
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-2">
-              {title && (
-                <Heading size={1}>
-                  {icon && icon}
-                  {title}
-                </Heading>
-              )}
-              {description && <p className="text-gray-600 dark:text-gray-400">{description}</p>}
+        <div className="w-full space-y-4">
+          {(title || description || icon) && (
+            <AdminHeader title={title} description={description} icon={icon} />
+          )}
+
+          {(actions || filters) && (
+            <div className="flex flex-col gap-4">
+              {actions && actions.length > 0 && <AdminActions actions={actions} />}
+              {filters && <AdminFilters>{filters}</AdminFilters>}
             </div>
-            {actions && <UnifiedCard fullWidth>{actions}</UnifiedCard>}
-          </div>
-          {children}
+          )}
+
+          <AdminContent>{children}</AdminContent>
         </div>
       )}
     </>
