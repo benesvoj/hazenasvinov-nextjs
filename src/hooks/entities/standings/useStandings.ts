@@ -1,26 +1,8 @@
 import {useState, useCallback} from 'react';
 
 import {createClient} from '@/utils/supabase/client';
-import {getTeamDisplayNameSafe} from '@/utils/teamDisplay';
 
-import {Standing} from '@/types';
-
-export interface EnhancedStanding extends Omit<Standing, 'club' | 'team'> {
-  team: {
-    id: string;
-    team_suffix: string;
-    club_name: string;
-    club_id: string | null;
-    name?: string;
-    logo_url?: string;
-  } | null;
-  club: {
-    id: string;
-    name: string;
-    short_name?: string;
-    logo_url?: string;
-  } | null;
-}
+import {EnhancedStanding} from '@/types';
 
 /**
  * Hook for fetching standings for a specific category and season

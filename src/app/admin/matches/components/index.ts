@@ -8,7 +8,6 @@ export {default as MatchActionsMenu} from './MatchActionsMenu';
 export {default as MatchActionsModal} from './MatchActionsModal';
 export {default as MatchProcessWizardModal} from './MatchProcessWizardModal';
 export {default as LineupManagerModal} from './LineupManagerModal';
-export {default as StandingsTable} from './StandingsTable';
 export {default as CategoryMatches} from './CategoryMatches';
 export {default as LineupManagerPlayerCard} from './LineupManagerPlayerCard';
 export {default as LineupPlayerSelectionModal} from './LineupPlayerSelectionModal';

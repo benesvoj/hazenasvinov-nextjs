@@ -2,16 +2,13 @@
 
 import React, {useState, useEffect, useRef, useMemo} from 'react';
 
-import {Alert} from '@heroui/react';
-import {Skeleton} from '@heroui/skeleton';
-import {Tabs, Tab} from '@heroui/tabs';
+import {Alert, Skeleton, Tabs, Tab} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
 import CategoryMatchesAndResults from '@/app/(main)/components/CategoryMatchesAndResults';
-import CategoryStandingsTable from '@/app/(main)/components/CategoryStandingsTable';
 
-import {Heading} from '@/components';
+import {Heading, LoadingSpinner, UnifiedStandingTable} from '@/components';
 import {
   useSeasons,
   useCategories,
@@ -19,8 +16,6 @@ import {
   useUserRoles,
   useOptimizedOwnClubMatches,
 } from '@/hooks';
-
-import LoadingSpinner from '../../ui/feedback/LoadingSpinner';
 
 interface MatchScheduleProps {
   title?: string;
@@ -263,10 +258,7 @@ export default function MatchSchedule({
             />
 
             {/* Right Column - Standings */}
-            <CategoryStandingsTable
-              standings={categoryStandings}
-              standingsLoading={standingsLoading}
-            />
+            <UnifiedStandingTable standings={categoryStandings} loading={standingsLoading} />
           </div>
         )}
       </div>

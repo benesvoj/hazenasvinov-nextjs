@@ -2,11 +2,9 @@
 
 import React, {useEffect, useState, useMemo} from 'react';
 
-import Link from 'next/link';
+import {Button, Tab, Tabs} from '@heroui/react';
 
-import {Button, Card, CardBody, CardHeader, Tab, Tabs} from '@heroui/react';
-
-import {UserIcon, VideoCameraIcon, AcademicCapIcon} from '@heroicons/react/24/outline';
+import {AcademicCapIcon} from '@heroicons/react/24/outline';
 
 import MatchSchedule from '@/components/shared/match/MatchSchedule';
 
@@ -138,12 +136,6 @@ export default function CoachesDashboard() {
             selectedCategoryId={selectedCategory}
           />
         </div>
-      </div>
-
-      {/* Coming Soon Section */}
-      <div className="mt-12 text-center">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Více funkcí brzy k dispozici</h3>
-        <p className="text-gray-600">Průběžně přidáváme nové možnosti pro trenéry</p>
       </div>
 
       {/* Match Result Flow Modal */}
