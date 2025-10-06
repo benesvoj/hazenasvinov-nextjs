@@ -9,6 +9,7 @@ export interface ActionsProps {
   buttonType: ActionTypes;
   isIconOnly?: boolean;
   isDisabled?: boolean;
+  priority?: 'primary' | 'secondary'; // Controls whether action is shown directly or hidden under 3 dots menu
   // Status transition specific props
   statusTransition?: {
     currentStatus: any; // Generic status type

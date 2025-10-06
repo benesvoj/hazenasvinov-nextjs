@@ -237,13 +237,7 @@ export default function MatchesAdminPage() {
   } = useFilteredTeams(selectedCategory, selectedSeason);
 
   // Use the standings hook
-  const {
-    standings,
-    loading: standingsLoading,
-    error: standingsError,
-    fetchStandings,
-    clearStandings,
-  } = useStandings();
+  const {standings, fetchStandings} = useStandings();
 
   // Derive loading state from all async operations
   const loading =
@@ -915,41 +909,47 @@ export default function MatchesAdminPage() {
           variant: 'solid',
           buttonType: ActionTypes.CREATE,
           isDisabled: isSeasonClosed(),
+          priority: 'primary', // Most important action - always visible
         },
         {
           label: translations.matches.actions.bulkUpdateMatchweek,
           onClick: onBulkUpdateOpen,
-          variant: 'solid',
           buttonType: ActionTypes.UPDATE,
+          color: 'secondary',
           isDisabled: isSeasonClosed(),
+          priority: 'secondary', // Less important - hidden under 3 dots menu
         },
         {
           label: generateStandingsLabel,
           onClick: handleStandingsAction,
-          variant: 'solid',
           buttonType: ActionTypes.UPDATE,
+          color: 'secondary',
           isDisabled: isSeasonClosed(),
+          priority: 'secondary', // Less important - hidden under 3 dots menu
         },
         {
           label: translations.matches.actions.import,
           onClick: onExcelImportOpen,
-          variant: 'solid',
           buttonType: ActionTypes.UPDATE,
+          color: 'secondary',
           isDisabled: isSeasonClosed(),
-        },
-        {
-          label: translations.matches.actions.deleteAllMatches,
-          onClick: onDeleteAllConfirmOpen,
-          variant: 'solid',
-          buttonType: ActionTypes.DELETE,
-          isDisabled: isSeasonClosed() || !selectedSeason,
+          priority: 'secondary', // Less important - hidden under 3 dots menu
         },
         {
           label: translations.matches.actions.testMaterializedViewRefresh,
           onClick: testMaterializedViewRefresh,
-          variant: 'solid',
+          color: 'secondary',
           buttonType: ActionTypes.UPDATE,
           isDisabled: isSeasonClosed(),
+          priority: 'secondary', // Less important - hidden under 3 dots menu
+        },
+        {
+          label: translations.matches.actions.deleteAllMatches,
+          onClick: onDeleteAllConfirmOpen,
+          buttonType: ActionTypes.DELETE,
+          color: 'danger',
+          isDisabled: isSeasonClosed() || !selectedSeason,
+          priority: 'secondary', // Less important - hidden under 3 dots menu
         },
       ]}
       filters={
