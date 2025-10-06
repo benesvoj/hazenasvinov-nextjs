@@ -1,5 +1,7 @@
 import {Button} from '@heroui/react';
 
+import {EllipsisVerticalIcon} from '@heroicons/react/24/outline';
+
 import {translations} from '@/lib/translations';
 
 import {UnifiedCard, showToast, MobileActionsMenu} from '@/components';
@@ -55,17 +57,27 @@ const convertToActionItems = (actions: ActionsProps[]): ActionItem[] => {
     .filter(Boolean) as ActionItem[];
 };
 
+// Helper function to separate actions by priority
+const separateActionsByPriority = (actions: ActionsProps[]) => {
+  const primaryActions = actions.filter((action) => action.priority !== 'secondary');
+  const secondaryActions = actions.filter((action) => action.priority === 'secondary');
+  return {primaryActions, secondaryActions};
+};
+
 export const AdminActions = ({actions}: AdminActionsProps) => {
   const tAction = translations.action;
   const tCommon = translations.common;
+  const {primaryActions, secondaryActions} = separateActionsByPriority(actions);
   const mobileActions = convertToActionItems(actions);
+  const secondaryActionItems = convertToActionItems(secondaryActions);
 
   return (
     <div className="w-full">
       <UnifiedCard fullWidth variant="actions" contentAlignment="right" padding="sm">
         {/* Desktop Actions - Hidden on mobile */}
         <div className="hidden lg:flex gap-2 justify-end">
-          {actions.map((action, index) => {
+          {/* Primary Actions - Always visible */}
+          {primaryActions.map((action, index) => {
             // Handle status transition actions
             if (action.statusTransition) {
               const {currentStatus, onStatusChange, itemId} = action.statusTransition;
@@ -117,6 +129,21 @@ export const AdminActions = ({actions}: AdminActionsProps) => {
               </Button>
             );
           })}
+
+          {/* Secondary Actions - Hidden under 3 dots menu */}
+          {secondaryActionItems.length > 0 && (
+            <MobileActionsMenu
+              actions={secondaryActionItems}
+              title="Další akce"
+              description="Vyberte další dostupnou akci"
+              triggerLabel=""
+              triggerIcon={<EllipsisVerticalIcon className="w-4 h-4" />}
+              triggerColor="default"
+              triggerSize="sm"
+              fullWidth={false}
+              showOnDesktop={true}
+            />
+          )}
         </div>
 
         {/* Mobile Actions Menu - Only visible on mobile */}

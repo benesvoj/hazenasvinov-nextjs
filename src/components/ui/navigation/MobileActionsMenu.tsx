@@ -62,7 +62,7 @@ export default function MobileActionsMenu({
         onClose={onClose}
         size="sm"
         classNames={{
-          base: 'max-w-[95vw] mx-2',
+          base: 'max-w-[95vw] lg:max-w-[400px] mx-2',
           wrapper: 'items-center justify-center p-2 sm:p-4',
         }}
       >
