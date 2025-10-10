@@ -69,6 +69,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = memo(
           title={t.homeTeam}
           titleSize={4}
           isSelected={selectedTeam === TeamTypes.HOME}
+          isPressable
         >
           {getLineupSummaryDisplay(calculateLocalSummary(homeFormData), homeTeamName)}
         </UnifiedCard>
@@ -77,6 +78,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = memo(
           title={t.awayTeam}
           titleSize={4}
           isSelected={selectedTeam === TeamTypes.AWAY}
+          isPressable
         >
           {getLineupSummaryDisplay(calculateLocalSummary(awayFormData), awayTeamName)}
         </UnifiedCard>
