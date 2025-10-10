@@ -1,16 +1,18 @@
 'use client';
 
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
+
+import {useRouter} from 'next/navigation';
 
 import {
-  Input,
   Button,
   Image,
+  Input,
   Modal,
-  ModalContent,
-  ModalHeader,
   ModalBody,
+  ModalContent,
   ModalFooter,
+  ModalHeader,
   useDisclosure,
 } from '@heroui/react';
 
@@ -49,7 +51,7 @@ export default function ClubsAdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-
+  const router = useRouter();
   const tAction = translations.action;
 
   // Memoize filtered clubs to prevent unnecessary re-renders
@@ -227,6 +229,10 @@ export default function ClubsAdminPage() {
     onDeleteOpen();
   };
 
+  const openViewModal = (club: Club) => {
+    router.push(`/admin/clubs/${club.id}`);
+  };
+
   // Filtered clubs
 
   // Initial fetch
@@ -265,6 +271,7 @@ export default function ClubsAdminPage() {
       label: t.table.actions,
       isActionColumn: true,
       actions: [
+        {type: ActionTypes.READ, onPress: openViewModal, title: tAction.read},
         {type: ActionTypes.UPDATE, onPress: openEditModal, title: tAction.edit},
         {type: ActionTypes.DELETE, onPress: openDeleteModal, title: tAction.delete},
       ],

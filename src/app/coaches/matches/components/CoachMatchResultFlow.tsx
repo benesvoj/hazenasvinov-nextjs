@@ -234,17 +234,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         updated_at: new Date().toISOString(),
       };
 
-      console.log('Updating match with data:', updateData);
-      console.log('Match ID:', match.id);
-      console.log('Match before update:', {
-        id: match.id,
-        status: match.status,
-        home_score: match.home_score,
-        away_score: match.away_score,
-        home_score_halftime: match.home_score_halftime,
-        away_score_halftime: match.away_score_halftime,
-      });
-
       const {error: updateError} = await supabase
         .from('matches')
         .update(updateData)
@@ -254,9 +243,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         console.error('Update error:', updateError);
         throw updateError;
       }
-
-      console.log('Match updated successfully');
-      console.log('Updated match data:', updateData);
 
       // Add metadata (photo and notes) using the new system
       if (photoUrl) {
@@ -293,10 +279,8 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         const standingsResult = await autoRecalculateStandings(match.id);
 
         if (standingsResult.success && standingsResult.recalculated) {
-          console.log('Standings recalculated successfully');
           showToast.success('Výsledek zápasu byl uložen a tabulka byla automaticky přepočítána!');
         } else if (standingsResult.success && !standingsResult.recalculated) {
-          console.log('Standings recalculation skipped (no standings exist or season closed)');
           showToast.success('Výsledek zápasu byl úspěšně uložen!');
         } else {
           console.warn('Standings recalculation failed:', standingsResult.error);
@@ -307,21 +291,10 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
       }
 
-      // Refresh materialized view to ensure it has the latest data
-      console.log('Refreshing materialized view...');
       try {
         const {error: refreshError} = await supabase.rpc('refresh_materialized_view', {
           view_name: 'own_club_matches',
         });
-
-        if (refreshError) {
-          console.warn('Failed to refresh materialized view via RPC:', refreshError);
-          // Fallback: try to force refresh by querying the view
-          await supabase.from('own_club_matches').select('id').limit(1);
-          console.log('Materialized view refreshed via query fallback');
-        } else {
-          console.log('Materialized view refreshed successfully via RPC');
-        }
       } catch (error) {
         console.warn('Materialized view refresh failed:', error);
         // Continue anyway - the cache invalidation should still work
@@ -329,13 +302,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
 
       // Invalidate cache to ensure fresh data
       if (match?.category_id && match?.season_id) {
-        console.log(
-          'Invalidating cache for category:',
-          match.category_id,
-          'season:',
-          match.season_id
-        );
-
         // Clear the service cache completely to force fresh data
         await invalidateMatchCache(match.category_id, match.season_id);
 
@@ -530,10 +496,10 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={undefined}
-      size="2xl"
+      size="md"
       classNames={{
-        base: 'max-w-[95vw] mx-2 max-h-[85vh]',
-        wrapper: 'items-start justify-start p-2 sm:p-4 pt-4 pb-4',
+        base: 'max-w-md mx-2 max-h-[85vh]',
+        wrapper: 'items-center justify-center p-2 sm:p-4 pt-4 pb-4',
         backdrop: 'bg-black/50',
       }}
       scrollBehavior="inside"
@@ -572,6 +538,9 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
             <Button color="secondary" variant="light" onPress={handleClose} isDisabled={isLoading}>
               Zrušit
             </Button>
+          </div>
+
+          <div className="flex gap-2">
             {currentStep > 1 && (
               <Button
                 variant="bordered"
@@ -582,9 +551,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
                 Zpět
               </Button>
             )}
-          </div>
-
-          <div className="flex gap-2">
             {currentStep < totalSteps ? (
               <Button
                 color="primary"
