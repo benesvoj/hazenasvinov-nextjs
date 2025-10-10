@@ -72,7 +72,7 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     categoryId: selectedMatch?.category_id,
     opponentTeamId: opponentTeam?.id,
     ownClubTeamId: ownClubTeamId,
-    limit: 5,
+    limit: 10,
   });
 
   // Get our club team IDs for statistics calculation

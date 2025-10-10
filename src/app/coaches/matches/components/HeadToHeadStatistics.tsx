@@ -197,7 +197,7 @@ export default function HeadToHeadStatistics({
       ourGoalDifference,
       avgOurGoalsScored,
       avgOurGoalsConceded,
-      recentForm: recentForm.slice(0, 5), // Last 5 matches
+      recentForm: recentForm.slice(0, 10), // Last 10 matches
       homeRecord,
       awayRecord,
       halftimeLeads,
