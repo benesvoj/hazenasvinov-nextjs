@@ -192,7 +192,7 @@ export default function OpponentMatchStatistics({
       goalDifference,
       avgGoalsScored,
       avgGoalsConceded,
-      recentForm: recentForm.slice(0, 5), // Last 5 matches
+      recentForm: recentForm.slice(0, 10), // Last 10 matches
       homeRecord,
       awayRecord,
       halftimeLeads,
@@ -425,11 +425,8 @@ export default function OpponentMatchStatistics({
             <h4 className="text-md font-semibold mb-3 text-gray-900 dark:text-white">
               Poslední zápasy
             </h4>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center gap-3">
               <FormIndicator form={stats.recentForm} />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {stats.recentForm.length} posledních zápasů
-              </span>
             </div>
           </div>
 

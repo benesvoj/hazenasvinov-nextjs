@@ -1,4 +1,4 @@
-<h2 style="text-align: center;"><strong style="font-size: 1.5em;">1.LIGA 2023/2024 -------&gt;<span style="font-size: 1.5em; font-weight: normal;"> </h2>
+1.LIGA 2023/2024
 
 Přeštice X Svinov 4.5.2025 – Výsledek 19:16 (12:10)
 
@@ -7,9 +7,6 @@ Svinov X Příchovice 3.5.2025 – Výsledek 18:14 (6:7)
 1.NH Brno X TJ Sokol Svinov 27.4.2025 – Výsledek 16:16 (8:9)
 
 TJ Sokol Svinov x Baník Most 24.4.2025 – Výsledek 20:15 (9:8)
-
-
-TJ Sokol Svinov X Sokol Nezvěstice 13.4.2024 – Výsledek 25:22 (12:12)
 
 
 TJ Sokol Svinov X Sokol Tymákov 12.4.2024 – Výsledek 18:17 (9:6)
@@ -538,9 +535,6 @@ Celý zápas – <a href="https://www.youtube.com/watch?v=vUkkuz_RKdM">https://w
 
 TJ Sokol Svinov – TJ Stará Ves 29.9.2013 – výsledek utkání 16:13 (6:5)
 Celý zápas – <a href="https://www.youtube.com/watch?v=tL5OJ1qMIK8">https://www.youtube.com/watch…
-
-TJ Sokol Svinov – Sokol Nezvěstice 8.9.2013 – výsledek utkání 18:22 (8:12)
-Celý zápas – <a href="https://www.youtube.com/watch?v=G6E1Xc1_0Tg">https://www.youtube.com/watch…
 
 TJ Sokol Svinov – Tymákov 7.9.2013 – výsledek utkání 12:13 (6:9)
 Celý zápas – <a href="https://www.youtube.com/watch?v=pzjmaR1f6lI">https://www.youtube.com/watch…

@@ -57,7 +57,7 @@ export default function StrategyTabWithHeadToHead({
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Detailní přehled vzájemných zápasů:
             </p>
-            {headToHeadMatches.map((match: any) => {
+            {headToHeadMatches.map((match: Match) => {
               return (
                 <MatchRow key={match.id} match={match} redirectionLinks={false} showSeason={true} />
               );
