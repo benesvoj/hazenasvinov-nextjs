@@ -2,7 +2,7 @@
 
 import React, {useEffect, useState} from 'react';
 
-import {useDisclosure, Chip} from '@heroui/react';
+import {Chip, useDisclosure} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 

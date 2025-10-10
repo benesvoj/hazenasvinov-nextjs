@@ -832,13 +832,19 @@ export default function MatchesAdminPage() {
     }
   };
 
+  /**
+   * @description Generates matchweek options based on the selected category.
+   * @param categoryId
+   * @deprecated Matchweek count is now fixed to 22 for all categories, needs to be refactored, this should be combo of season+category in future
+   * @returns Array of matchweek options
+   */
   // Helper function to generate matchweek options based on category
   const getMatchweekOptions = (categoryId?: string) => {
     const options = [];
     // Add "No matchweek" option
     options.push({value: '', label: 'Bez kola'});
 
-    const maxMatchweeks = 20; // Default to 20 matchweeks since column doesn't exist
+    const maxMatchweeks = 22; // Default to 20 matchweeks since column doesn't exist
 
     // Add matchweek numbers based on category setting
     for (let i = 1; i <= maxMatchweeks; i++) {
