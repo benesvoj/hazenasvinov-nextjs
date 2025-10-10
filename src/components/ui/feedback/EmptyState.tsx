@@ -10,11 +10,9 @@ import {
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 
-import {EmptyStateTypes} from '@/enums/emptyStateTypes';
-
+import {Heading} from '@/components';
+import {EmptyStateTypes} from '@/enums';
 import {EmptyStateProps} from '@/types';
-
-import {Heading} from '../heading/Heading';
 
 // Icon mapping for common empty states
 const getDefaultIcon = (type?: string) => {

@@ -7,7 +7,6 @@ import {
   CategoryMatches,
   CategoryPosts,
 } from '@/app/(main)/categories/components';
-
 interface CategoryPageProps {
   params: Promise<{
     slug: string;

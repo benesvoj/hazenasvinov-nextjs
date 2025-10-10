@@ -5,77 +5,21 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-  Selection,
-  SortDescriptor,
   Button,
 } from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
-import {ColumnAlignType, ActionTypes} from '@/enums';
+import {ActionTypes} from '@/enums';
 import {getDefaultActionIcon} from '@/helpers';
-
-export interface ActionConfig<T = any> {
-  type: ActionTypes;
-  onPress: (item: T) => void;
-  icon?: React.ReactNode;
-  color?: 'primary' | 'danger' | 'warning' | 'success' | 'default';
-  variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'shadow' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  title?: string;
-  disabled?: (item: T) => boolean;
-}
-
-export type ColumnType<T = any> = {
-  key: keyof T | string;
-  label: React.ReactNode;
-  allowsSorting?: boolean;
-  align?: ColumnAlignType;
-  width?: string | number;
-  minWidth?: string | number;
-  maxWidth?: string | number;
-  hideHeader?: boolean;
-  isRowHeader?: boolean;
-  textValue?: string;
-  isActionColumn?: boolean;
-  actions?: ActionConfig<T>[];
-};
-
-export interface UnifiedTableProps<T = any> {
-  columns: ColumnType<T>[];
-  data: T[];
-  ariaLabel: string;
-  renderCell?: (item: T, columnKey: string) => React.ReactNode;
-  getKey?: (item: T) => string | number;
-  emptyContent?: React.ReactNode;
-  isLoading?: boolean;
-  loadingContent?: React.ReactNode;
-  isStriped?: boolean;
-  isCompact?: boolean;
-  hideHeader?: boolean;
-  removeWrapper?: boolean;
-  selectionMode?: 'single' | 'multiple' | 'none';
-  selectedKeys?: Selection;
-  onSelectionChange?: (keys: Selection) => void;
-  onRowAction?: (key: React.Key) => void;
-  sortDescriptor?: SortDescriptor;
-  onSortChange?: (descriptor: SortDescriptor) => void;
-  classNames?: {
-    base?: string;
-    table?: string;
-    thead?: string;
-    tbody?: string;
-    tr?: string;
-    th?: string;
-    td?: string;
-  };
-}
+import {UnifiedTableProps, ColumnType, ActionConfig} from '@/types';
 
 export default function UnifiedTable<T = any>({
   columns,
   data,
   ariaLabel,
   renderCell,
+  getCellColor,
   getKey = (item: T) => (item as any).id || (item as any).key || Math.random().toString(),
   emptyContent,
   isLoading = false,
@@ -91,6 +35,7 @@ export default function UnifiedTable<T = any>({
   sortDescriptor,
   onSortChange,
   classNames,
+  topContent,
 }: UnifiedTableProps<T>) {
   const t = translations.unifiedTable;
 
@@ -176,6 +121,7 @@ export default function UnifiedTable<T = any>({
       sortDescriptor={sortDescriptor}
       onSortChange={onSortChange}
       classNames={classNames}
+      topContent={topContent}
     >
       <TableHeader columns={columns}>
         {(column) => (
@@ -189,6 +135,7 @@ export default function UnifiedTable<T = any>({
             hideHeader={column.hideHeader}
             isRowHeader={column.isRowHeader}
             textValue={column.textValue}
+            className={column.className}
           >
             {column.label}
           </TableColumn>
@@ -202,9 +149,19 @@ export default function UnifiedTable<T = any>({
       >
         {(item) => (
           <TableRow key={getKey(item)}>
-            {(columnKey) => (
-              <TableCell>{enhancedCellRenderer(item, columnKey as string)}</TableCell>
-            )}
+            {(columnKey) => {
+              const cellColor = getCellColor?.(item, columnKey as string);
+              const column = columns.find((col) => col.key === columnKey);
+              const cellClassName = [cellColor ? `text-${cellColor}` : undefined, column?.className]
+                .filter(Boolean)
+                .join(' ');
+
+              return (
+                <TableCell className={cellClassName || undefined}>
+                  {enhancedCellRenderer(item, columnKey as string)}
+                </TableCell>
+              );
+            }}
           </TableRow>
         )}
       </TableBody>

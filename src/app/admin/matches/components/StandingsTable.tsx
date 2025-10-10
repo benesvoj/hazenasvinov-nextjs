@@ -6,8 +6,7 @@ import {Button} from '@heroui/button';
 
 import {TrophyIcon} from '@heroicons/react/24/outline';
 
-import {EnhancedStanding} from '@/hooks/entities/standings/useStandings';
-
+import {EnhancedStanding} from '@/types';
 import {getTeamDisplayNameSafe, createClubTeamCountsMap} from '@/utils';
 
 interface StandingsTableProps {
@@ -19,6 +18,11 @@ interface StandingsTableProps {
   hasStandings: boolean;
 }
 
+/**
+ * @description StandingsTable component, keep for legacy reasons
+ * @deprecated Use UnifiedStandingTable instead
+ *
+ */
 export default function StandingsTable({
   standings,
   categoryId,
@@ -29,39 +33,8 @@ export default function StandingsTable({
 }: StandingsTableProps) {
   const categoryStandings = standings.filter((standing) => standing.category_id === categoryId);
 
-  // Debug: Check if standings have team data
-  // const standingsWithTeams = categoryStandings.filter(
-  //   (standing) => standing.team || standing.club
-  // );
-  // const standingsWithoutTeams = categoryStandings.filter(
-  //   (standing) => !standing.team && !standing.club
-  // );
-
   // Smart suffix logic: determine team counts per club in this category
   const clubTeamCounts = createClubTeamCountsMap(categoryStandings);
-
-  // console.log("🔍 StandingsTable Debug:", {
-  //   categoryId,
-  //   categoryName,
-  //   totalStandings: categoryStandings.length,
-  //   standingsWithTeams: standingsWithTeams.length,
-  //   standingsWithoutTeams: standingsWithoutTeams.length,
-  //   clubTeamCounts: Object.fromEntries(clubTeamCounts),
-  //   sampleStanding: categoryStandings[0],
-  // });
-
-  // Debug: Show which teams will show suffixes
-  // categoryStandings.forEach((standing, index) => {
-  //   if (standing.club) {
-  //     const teamCount = clubTeamCounts.get(standing.club.id) || 0;
-  //     const willShowSuffix = teamCount > 1;
-  //     console.log(
-  //       `🔍 Standing ${index}: ${standing.club.name} - Team count: ${teamCount}, Will show suffix: ${willShowSuffix}`
-  //     );
-  //   } else {
-  //     console.log(`🔍 Standing ${index}: No club data - team:`, standing.team);
-  //   }
-  // });
 
   if (!hasStandings) {
     return (

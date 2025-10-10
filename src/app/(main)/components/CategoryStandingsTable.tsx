@@ -4,9 +4,8 @@ import {Card, CardHeader, CardBody} from '@heroui/react';
 
 import {TrophyIcon} from '@heroicons/react/24/outline';
 
-import {EnhancedStanding} from '@/hooks/entities/standings/useStandings';
-
-import {LoadingSpinner} from '@/components';
+import {LoadingSpinner, UnifiedStandingTable} from '@/components';
+import {EnhancedStanding} from '@/types';
 import {getTeamDisplayNameSafe, createClubTeamCountsMap} from '@/utils';
 
 export default function CategoryStandingsTable({
@@ -165,6 +164,7 @@ export default function CategoryStandingsTable({
           )}
         </CardBody>
       </Card>
+      <UnifiedStandingTable standings={standings} loading={standingsLoading} />
     </div>
   );
 }

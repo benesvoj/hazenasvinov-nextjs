@@ -613,6 +613,17 @@ export const translations = {
         delete: 'Smazat video',
       },
     },
+    unifiedStandingTable: {
+      title: 'Tabulka',
+      position: 'Poř',
+      team: 'Tým',
+      matches: 'Z',
+      wins: 'V',
+      draws: 'R',
+      losses: 'P',
+      score: 'Skóre',
+      points: 'Body',
+    },
   },
   coaches: {
     title: 'Trenérský Portal',

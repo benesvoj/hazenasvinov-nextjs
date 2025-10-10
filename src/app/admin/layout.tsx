@@ -23,7 +23,7 @@ function AdminMainContent({children}: {children: React.ReactNode}) {
       }`}
     >
       <AdminTopBar />
-      <main className="pt-18 p-3 sm:p-4 lg:p-6 mt-20">
+      <main className="pt-4 p-3 sm:p-4 lg:p-6 mt-20">
         <div className={`max-w-7xl ${isMobile ? 'ml-0' : 'ml-4'}`}>{children}</div>
       </main>
     </div>

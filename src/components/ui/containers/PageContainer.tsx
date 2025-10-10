@@ -1,4 +1,7 @@
+import React from 'react';
+
 import {Alert} from '@heroui/react';
+
 export interface PageContainerProps {
   children: React.ReactNode;
   isUnderConstruction?: boolean;

@@ -10,7 +10,7 @@ import {useVideos} from '@/hooks/entities/video/useVideos';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
-import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
+import {DeleteConfirmationModal, PageContainer, VideoPageLayout} from '@/components';
 import {useAuth, useUserRoles} from '@/hooks';
 import {Video, VideoFormData, VideoFilters} from '@/types';
 
@@ -191,48 +191,49 @@ export default function CoachesVideosPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <VideoPageLayout
-        // Header props
-        onAddVideo={openCreateModal}
-        // Data props
-        videos={videos}
-        loading={loading}
-        error={error}
-        filters={filters}
-        categories={categories}
-        clubs={clubs}
-        seasons={seasons}
-        availableCategories={availableCategories}
-        // Event handlers
-        onFiltersChange={setFilters}
-        onEdit={openEditModal}
-        onDelete={openDeleteModal}
-        onFormSubmit={handleFormSubmit}
-        // Modal props
-        isFormModalOpen={isFormModalOpen}
-        editingVideo={editingVideo}
-        onCloseModals={closeModals}
-        // Access control
-        showAccessControlMessage={assignedCategories.length === 0}
-        accessControlMessage={accessControlMessage}
-        // Empty state customization
-        emptyStateTitle="Žádná videa"
-        emptyStateDescription={
-          filters.search || filters.category_id || filters.is_active !== undefined
-            ? 'Nebyla nalezena žádná videa odpovídající filtru.'
-            : 'Zatím nejsou přidána žádná videa pro vaše kategorie.'
-        }
-        showAddButton={!filters.search && !filters.category_id && filters.is_active === undefined}
-        // Pagination props
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalCount={totalCount}
-        itemsPerPage={itemsPerPage}
-        onPageChange={handlePageChange}
-      />
+    <>
+      <PageContainer>
+        <VideoPageLayout
+          // Header props
+          onAddVideo={openCreateModal}
+          // Data props
+          videos={videos}
+          loading={loading}
+          error={error}
+          filters={filters}
+          categories={categories}
+          clubs={clubs}
+          seasons={seasons}
+          availableCategories={availableCategories}
+          // Event handlers
+          onFiltersChange={setFilters}
+          onEdit={openEditModal}
+          onDelete={openDeleteModal}
+          onFormSubmit={handleFormSubmit}
+          // Modal props
+          isFormModalOpen={isFormModalOpen}
+          editingVideo={editingVideo}
+          onCloseModals={closeModals}
+          // Access control
+          showAccessControlMessage={assignedCategories.length === 0}
+          accessControlMessage={accessControlMessage}
+          // Empty state customization
+          emptyStateTitle="Žádná videa"
+          emptyStateDescription={
+            filters.search || filters.category_id || filters.is_active !== undefined
+              ? 'Nebyla nalezena žádná videa odpovídající filtru.'
+              : 'Zatím nejsou přidána žádná videa pro vaše kategorie.'
+          }
+          showAddButton={!filters.search && !filters.category_id && filters.is_active === undefined}
+          // Pagination props
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+        />
+      </PageContainer>
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={deleteModalOpen}
         onClose={closeModals}
@@ -240,6 +241,6 @@ export default function CoachesVideosPage() {
         title="Smazat video"
         message={`Opravdu chcete smazat video "${videoToDelete?.title}"? Tato akce je nevratná.`}
       />
-    </div>
+    </>
   );
 }

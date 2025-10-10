@@ -2,11 +2,9 @@
 
 import React, {useEffect, useState, useMemo} from 'react';
 
-import Link from 'next/link';
+import {Button, Tab, Tabs} from '@heroui/react';
 
-import {Button, Card, CardBody, CardHeader, Tab, Tabs} from '@heroui/react';
-
-import {UserIcon, VideoCameraIcon, AcademicCapIcon} from '@heroicons/react/24/outline';
+import {AcademicCapIcon} from '@heroicons/react/24/outline';
 
 import MatchSchedule from '@/components/shared/match/MatchSchedule';
 
@@ -96,63 +94,58 @@ export default function CoachesDashboard() {
   }
 
   return (
-    <PageContainer>
-      {/* Category Selection */}
-      {availableCategories.length > 1 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-          <div className="overflow-x-auto">
-            <Tabs
-              selectedKey={selectedCategory}
-              onSelectionChange={(key) => setSelectedCategory(key as string)}
-              className="w-full min-w-max"
-            >
-              {availableCategories.map((category) => (
-                <Tab key={category.id} title={category.name} />
-              ))}
-            </Tabs>
+    <>
+      <PageContainer>
+        {/* Category Selection */}
+        {availableCategories.length > 1 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
+            <div className="overflow-x-auto">
+              <Tabs
+                selectedKey={selectedCategory}
+                onSelectionChange={(key) => setSelectedCategory(key as string)}
+                className="w-full min-w-max"
+              >
+                {availableCategories.map((category) => (
+                  <Tab key={category.id} title={category.name} />
+                ))}
+              </Tabs>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-6">
+          {/* Birthday Card */}
+          <div className=" hidden sm:block md:col-span-2 xl:col-span-1">
+            <BirthdayCard categoryId={selectedCategory} />
+          </div>
+
+          <TopScorersCard categoryId={selectedCategory} />
+
+          <YellowCardsCard categoryId={selectedCategory} />
+
+          <RedCardsCard categoryId={selectedCategory} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="lg:col-span-2">
+            <MatchSchedule
+              showOnlyAssignedCategories={true}
+              redirectionLinks={false}
+              onStartResultFlow={handleStartResultFlow}
+              showResultButton={true}
+              selectedCategoryId={selectedCategory}
+            />
           </div>
         </div>
-      )}
+      </PageContainer>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-6">
-        {/* Birthday Card */}
-        <div className=" hidden sm:block md:col-span-2 xl:col-span-1">
-          <BirthdayCard categoryId={selectedCategory} />
-        </div>
-
-        <TopScorersCard categoryId={selectedCategory} />
-
-        <YellowCardsCard categoryId={selectedCategory} />
-
-        <RedCardsCard categoryId={selectedCategory} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="lg:col-span-2">
-          <MatchSchedule
-            showOnlyAssignedCategories={true}
-            redirectionLinks={false}
-            onStartResultFlow={handleStartResultFlow}
-            showResultButton={true}
-            selectedCategoryId={selectedCategory}
-          />
-        </div>
-      </div>
-
-      {/* Coming Soon Section */}
-      <div className="mt-12 text-center">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Více funkcí brzy k dispozici</h3>
-        <p className="text-gray-600">Průběžně přidáváme nové možnosti pro trenéry</p>
-      </div>
-
-      {/* Match Result Flow Modal */}
       <CoachMatchResultFlow
         isOpen={isResultFlowOpen}
         onClose={handleCloseResultFlow}
         match={resultFlowMatch}
         onResultSaved={handleResultSaved}
       />
-    </PageContainer>
+    </>
   );
 }

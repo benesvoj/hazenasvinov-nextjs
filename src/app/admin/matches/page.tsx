@@ -16,7 +16,13 @@ import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
 
 import {getCategoryInfo} from '@/helpers/getCategoryInfo';
 
-import {DeleteConfirmationModal, showToast, AdminContainer, LoadingSpinner} from '@/components';
+import {
+  DeleteConfirmationModal,
+  showToast,
+  AdminContainer,
+  LoadingSpinner,
+  UnifiedStandingTable,
+} from '@/components';
 import {matchStatusesKeys} from '@/constants';
 import {ActionTypes} from '@/enums';
 import {
@@ -41,7 +47,6 @@ import {
   MatchActionsModal,
   MatchProcessWizardModal,
   LineupManagerModal,
-  StandingsTable,
   CategoryMatches,
 } from './components';
 
@@ -237,7 +242,7 @@ export default function MatchesAdminPage() {
   } = useFilteredTeams(selectedCategory, selectedSeason);
 
   // Use the standings hook
-  const {standings, fetchStandings} = useStandings();
+  const {standings, fetchStandings, loading: standingsLoading} = useStandings();
 
   // Derive loading state from all async operations
   const loading =
@@ -1010,7 +1015,7 @@ export default function MatchesAdminPage() {
                 >
                   {categories.map((category) => (
                     <Tab key={category.id} title={category.name}>
-                      <div className="mt-4">
+                      <div className="mt-4 space-y-4">
                         <h3 className="text-lg font-semibold mb-4">
                           {category.name} - {getCategoryInfo(category.id, categories).competition}
                         </h3>
@@ -1058,17 +1063,7 @@ export default function MatchesAdminPage() {
                         )}
 
                         {/* Standings for this category */}
-                        <StandingsTable
-                          standings={standings}
-                          categoryId={category.id}
-                          categoryName={category.name}
-                          isSeasonClosed={isSeasonClosed()}
-                          onGenerateStandings={handleStandingsAction}
-                          hasStandings={
-                            standings.filter((standing) => standing.category_id === category.id)
-                              .length > 0
-                          }
-                        />
+                        <UnifiedStandingTable standings={standings} loading={standingsLoading} />
                       </div>
                     </Tab>
                   ))}

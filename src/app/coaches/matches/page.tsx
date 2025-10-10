@@ -6,6 +6,8 @@ import {Tab, Tabs} from '@heroui/react';
 
 import {ChartBarIcon} from '@heroicons/react/24/outline';
 
+import UnifiedStandingTable from '@/components/shared/standing-table/UnifiedStandingTable';
+
 import {translations} from '@/lib/translations';
 
 import {LoadingSpinner, PageContainer} from '@/components';
@@ -21,7 +23,6 @@ import {Match} from '@/types';
 import {
   UpcomingMatchesCard,
   RecentResultsCard,
-  StandingsCard,
   StrategyPreparationZone,
   RecentMatchDetails,
   MatchStatisticsZone,
@@ -202,7 +203,7 @@ export default function CoachesMatchesPage() {
                 />
               </Tab>
               <Tab key="standings" title={t.standings}>
-                <StandingsCard standings={categoryStandings} loading={standingsLoading} />
+                <UnifiedStandingTable standings={categoryStandings} loading={standingsLoading} />
               </Tab>
               <Tab key="statistics" title={t.statistics}>
                 <div className="text-center py-8 text-gray-500">
