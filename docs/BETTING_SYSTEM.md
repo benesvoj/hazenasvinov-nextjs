@@ -47,7 +47,7 @@ src/
 │   ├── MatchBettingCard.tsx # Match betting interface
 │   ├── WalletBalance.tsx   # Wallet display
 │   └── LeaderboardTable.tsx # Leaderboard display
-└── app/(main)/betting/
+└── app/(betting)/betting/
     └── page.tsx            # Main betting page
 ```
 

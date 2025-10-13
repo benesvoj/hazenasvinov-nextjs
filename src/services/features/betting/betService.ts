@@ -1,5 +1,3 @@
-import {LegacyCharacterEncoding} from 'node:crypto';
-
 import {
   Bet,
   BetLeg,
@@ -12,13 +10,15 @@ import {
 
 import {createClient} from '@/utils/supabase/client';
 
-import {calculateTotalOdds, calculateReturn, validateStake} from './oddsCalculator';
 import {
+  calculateTotalOdds,
+  calculateReturn,
+  validateStake,
   deductBetStake,
   creditBetWinnings,
   refundVoidBet,
   hasSufficientBalance,
-} from './walletService';
+} from '@/services';
 
 /**
  * Bet Service

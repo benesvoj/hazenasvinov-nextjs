@@ -133,9 +133,9 @@ export default function BetHistory({userId}: BetHistoryProps) {
                         </p>
                         <div className="flex items-center gap-2 text-xs text-gray-600">
                           <span>{getBetTypeMetadata(leg.bet_type).name}</span>
-                          <span>`&quot;</span>
+                          <span>&quot;</span>
                           <span>{leg.selection}</span>
-                          <span>`&quot;</span>
+                          <span>&quot;</span>
                           <span className="font-semibold">{formatOdds(leg.odds)}</span>
                         </div>
                       </div>
