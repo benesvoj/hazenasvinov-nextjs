@@ -1,10 +1,11 @@
 'use client';
 
-import {Card, CardBody, CardHeader, Button, Chip, Image} from '@heroui/react';
+import {Card, CardBody, CardHeader, Button, Chip, Image, Spinner} from '@heroui/react';
 
-import {Calendar, MapPin} from 'lucide-react';
+import {Calendar, MapPin, AlertCircle} from 'lucide-react';
 
 import {formatDateWithTime} from '@/helpers';
+import {useMatchOdds, useMatchTeamsForm} from '@/hooks';
 import {translations} from '@/lib';
 import {formatOdds} from '@/services';
 import {
@@ -21,7 +22,7 @@ interface MatchBettingCardProps {
   selectedBets?: BetSlipItem[];
 }
 
-// Mock odds data - in production, this would come from an odds provider
+// Fallback mock odds - used only when database odds are not available
 const getMockOdds = (matchId: string) => ({
   '1X2': {
     '1': 2.1,
@@ -43,10 +44,56 @@ export default function MatchBettingCard({
   onAddToBetSlip,
   selectedBets = [],
 }: MatchBettingCardProps) {
-  const odds = getMockOdds(match.id);
+  // Fetch real odds from database
+  const {data: matchOdds, isLoading: loadingOdds} = useMatchOdds(match.id);
+
+  // Fetch team form data
+  const {
+    homeForm,
+    awayForm,
+    isLoading: loadingForm,
+  } = useMatchTeamsForm(match.home_team_id, match.away_team_id);
+
+  // Use real odds if available, otherwise fall back to mock odds
+  const odds = matchOdds || getMockOdds(match.id);
+  const isUsingMockOdds = !matchOdds;
 
   const t = translations.betting.matchBettingCard;
-  const isHidden = true;
+
+  // Helper to get color for form result
+  const getFormColor = (result: string): 'success' | 'warning' | 'danger' | 'default' => {
+    switch (result) {
+      case 'W':
+        return 'success';
+      case 'D':
+        return 'warning';
+      case 'L':
+        return 'danger';
+      default:
+        return 'default';
+    }
+  };
+
+  // Render form badges
+  const renderForm = (form: string) => {
+    if (!form) return null;
+
+    return (
+      <div className="flex gap-0.5">
+        {form.split('').map((result, index) => (
+          <Chip
+            key={index}
+            size="sm"
+            color={getFormColor(result)}
+            variant="flat"
+            className="min-w-[20px] h-5 px-1 text-[10px] font-semibold"
+          >
+            {result}
+          </Chip>
+        ))}
+      </div>
+    );
+  };
 
   const isSelected = (betType: BetTypeId, selection: BetSelection) => {
     return selectedBets.some(
@@ -85,7 +132,17 @@ export default function MatchBettingCard({
     return null; // Don't show past matches
   }
 
-  console.log('match', match);
+  // Show loading state
+  if (loadingOdds) {
+    return (
+      <Card className="w-full">
+        <CardBody className="flex items-center justify-center py-8">
+          <Spinner size="sm" />
+          <p className="text-sm text-gray-500 mt-2">Loading odds...</p>
+        </CardBody>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full">
@@ -105,32 +162,78 @@ export default function MatchBettingCard({
             {match.venue}
           </div>
         )}
+        {isUsingMockOdds && (
+          <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+            <AlertCircle className="w-3 h-3" />
+            <span>Using estimated odds - Generate real odds for accurate pricing</span>
+          </div>
+        )}
       </CardHeader>
 
       <CardBody className="pt-0">
         {/* Teams Display */}
-        <div className="flex justify-between items-center mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <div className="flex items-center gap-2 flex-1">
-            {match.home_team.club_category.club.logo_url && (
-              <Image
-                src={match.home_team.club_category.club.logo_url}
-                alt={match.home_team.club_category.club.name}
-                className="w-8 h-8 object-contain"
-              />
-            )}
-            <span className="font-semibold">{match.home_team.club_category.club.name}</span>
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2 flex-1">
+              {match.home_team.club_category.club.logo_url && (
+                <Image
+                  src={match.home_team.club_category.club.logo_url}
+                  alt={match.home_team.club_category.club.name}
+                  className="w-8 h-8 object-contain"
+                />
+              )}
+              <span className="font-semibold">{match.home_team.club_category.club.name}</span>
+            </div>
+            <span className="text-gray-400 mx-4">vs</span>
+            <div className="flex items-center gap-2 flex-1 justify-end">
+              <span className="font-semibold">{match.away_team.club_category.club.name}</span>
+              {match.away_team.club_category.club.logo_url && (
+                <Image
+                  src={match.away_team.club_category.club.logo_url}
+                  alt={match.away_team.club_category.club.name}
+                  className="w-8 h-8 object-contain"
+                />
+              )}
+            </div>
           </div>
-          <span className="text-gray-400 mx-4">vs</span>
-          <div className="flex items-center gap-2 flex-1 justify-end">
-            <span className="font-semibold">{match.away_team.club_category.club.name}</span>
-            {match.away_team.club_category.club.logo_url && (
-              <Image
-                src={match.away_team.club_category.club.logo_url}
-                alt={match.away_team.club_category.club.name}
-                className="w-8 h-8 object-contain"
-              />
-            )}
-          </div>
+
+          {/* Team Form - Show only when loaded */}
+          {!loadingForm && (homeForm || awayForm) && (
+            <div className="flex justify-between items-center text-xs pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col gap-1 flex-1">
+                {homeForm && (
+                  <>
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-500 text-[10px]">{t.form}:</span>
+                      {renderForm(homeForm.form)}
+                    </div>
+                    <div className="text-gray-500 text-[10px]">
+                      {homeForm.wins}
+                      {t.winKey}-{homeForm.draws}
+                      {t.drawKey}-{homeForm.losses}
+                      {t.lossKey} ({homeForm.points} {t.points})
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className="flex flex-col gap-1 flex-1 items-end">
+                {awayForm && (
+                  <>
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-500 text-[10px]">{t.form}:</span>
+                      {renderForm(awayForm.form)}
+                    </div>
+                    <div className="text-gray-500 text-[10px]">
+                      {awayForm.wins}
+                      {t.winKey}-{awayForm.draws}
+                      {t.drawKey}-{awayForm.losses}
+                      {t.lossKey} ({awayForm.points} {t.points})
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 1X2 Betting Options */}
@@ -183,64 +286,6 @@ export default function MatchBettingCard({
             </Button>
           </div>
         </div>
-
-        {/* Both Teams Score */}
-        {!isHidden && (
-          <div className="mb-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Both Teams to Score</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                size="sm"
-                variant={isSelected('BOTH_TEAMS_SCORE', 'YES') ? 'solid' : 'bordered'}
-                color={isSelected('BOTH_TEAMS_SCORE', 'YES') ? 'primary' : 'default'}
-                onPress={() => handleBetClick('BOTH_TEAMS_SCORE', 'YES', odds.BOTH_TEAMS_SCORE.YES)}
-                className="flex flex-col py-2"
-              >
-                <span className="text-xs">Yes</span>
-                <span className="font-bold">{formatOdds(odds.BOTH_TEAMS_SCORE.YES)}</span>
-              </Button>
-              <Button
-                size="sm"
-                variant={isSelected('BOTH_TEAMS_SCORE', 'NO') ? 'solid' : 'bordered'}
-                color={isSelected('BOTH_TEAMS_SCORE', 'NO') ? 'primary' : 'default'}
-                onPress={() => handleBetClick('BOTH_TEAMS_SCORE', 'NO', odds.BOTH_TEAMS_SCORE.NO)}
-                className="flex flex-col py-2"
-              >
-                <span className="text-xs">No</span>
-                <span className="font-bold">{formatOdds(odds.BOTH_TEAMS_SCORE.NO)}</span>
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Over/Under 2.5 Goals */}
-        {!isHidden && (
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Total Goals (2.5)</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                size="sm"
-                variant={isSelected('OVER_UNDER', 'OVER') ? 'solid' : 'bordered'}
-                color={isSelected('OVER_UNDER', 'OVER') ? 'primary' : 'default'}
-                onPress={() => handleBetClick('OVER_UNDER', 'OVER', odds.OVER_UNDER.OVER)}
-                className="flex flex-col py-2"
-              >
-                <span className="text-xs">Over 2.5</span>
-                <span className="font-bold">{formatOdds(odds.OVER_UNDER.OVER)}</span>
-              </Button>
-              <Button
-                size="sm"
-                variant={isSelected('OVER_UNDER', 'UNDER') ? 'solid' : 'bordered'}
-                color={isSelected('OVER_UNDER', 'UNDER') ? 'primary' : 'default'}
-                onPress={() => handleBetClick('OVER_UNDER', 'UNDER', odds.OVER_UNDER.UNDER)}
-                className="flex flex-col py-2"
-              >
-                <span className="text-xs">Under 2.5</span>
-                <span className="font-bold">{formatOdds(odds.OVER_UNDER.UNDER)}</span>
-              </Button>
-            </div>
-          </div>
-        )}
       </CardBody>
     </Card>
   );

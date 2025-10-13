@@ -65,7 +65,9 @@ export * from './entities/user/useUserRoles';
 export * from './entities/video/useVideos';
 export * from './features/betting/useBets';
 export * from './features/betting/useLeaderboard';
+export * from './features/betting/useMatchOdds';
 export * from './features/betting/useMatches';
+export * from './features/betting/useTeamFormAndStandings';
 export * from './features/betting/useWallet';
 export {
   useMatchesWithTeams,

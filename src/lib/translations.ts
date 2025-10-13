@@ -987,6 +987,11 @@ export const translations = {
     matchBettingCard: {
       draw: 'Remíza',
       matchResult: 'Výsledek zápasu',
+      form: 'Forma',
+      points: 'bodů',
+      winKey: 'V',
+      drawKey: 'R',
+      lossKey: 'P',
     },
     betHistory: {
       stake: 'Sázka',
