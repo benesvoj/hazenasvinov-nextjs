@@ -11,7 +11,7 @@ export interface BettingOdd {
   bookmaker_margin?: number | null;
   implied_probability?: number | null;
   effective_from?: string | null;
-  efective_until?: string | null;
+  effective_until?: string | null;
   created_at: string;
   updated_at: string;
   previous_odds?: number | null;
