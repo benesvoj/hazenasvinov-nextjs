@@ -28,6 +28,7 @@
     "fix:meeting-attendees-fk": "node scripts/building-app/fix-meeting-attendees-fk.js",
     "fix:jakub-coach-access": "node scripts/fix-jakub-coach-access.js",
     "setup:betting": "node scripts/building-app/setup-betting-tables.js",
+    "betting:generate-odds": "tsx scripts/generate-odds.ts",
     "generate:enums": "node scripts/generate-enum-exports.mjs",
     "generate:hooks": "node scripts/generate-hook-exports.mjs",
     "generate:types": "node scripts/generate-type-exports.mjs",
@@ -107,6 +108,7 @@
     "postcss": "^8",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
+    "tsx": "^4.20.6",
     "typescript": "^5",
     "vitest": "^3.2.4"
   },

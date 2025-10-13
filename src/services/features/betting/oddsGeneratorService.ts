@@ -160,13 +160,23 @@ function generate1X2Odds(
   X: number;
   '2': number;
 } {
-  // Apply margin to probabilities
+  // Normalize probabilities to sum to 1
   const totalProb = probabilities.home_win + probabilities.draw + probabilities.away_win;
-  const marginMultiplier = 1 + margin;
+  const homeWinNorm = probabilities.home_win / totalProb;
+  const drawNorm = probabilities.draw / totalProb;
+  const awayWinNorm = probabilities.away_win / totalProb;
 
-  const odds1 = (totalProb / probabilities.home_win) * marginMultiplier;
-  const oddsX = (totalProb / probabilities.draw) * marginMultiplier;
-  const odds2 = (totalProb / probabilities.away_win) * marginMultiplier;
+  // Convert to fair odds (no margin)
+  const fairOdds1 = 1 / homeWinNorm;
+  const fairOddsX = 1 / drawNorm;
+  const fairOdds2 = 1 / awayWinNorm;
+
+  // Apply margin by reducing odds proportionally
+  // This ensures implied probabilities sum to (1 + margin)
+  const marginFactor = 1 / (1 + margin);
+  const odds1 = fairOdds1 * marginFactor;
+  const oddsX = fairOddsX * marginFactor;
+  const odds2 = fairOdds2 * marginFactor;
 
   return {
     '1': Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, odds1)).toFixed(2)),
@@ -188,13 +198,17 @@ function generateBothTeamsScoreOdds(
   YES: number;
   NO: number;
 } {
-  const marginMultiplier = 1 + margin;
-
   const yesProb = probabilities.both_teams_score;
   const noProb = 1 - yesProb;
 
-  const oddsYes = (1 / yesProb) * marginMultiplier;
-  const oddsNo = (1 / noProb) * marginMultiplier;
+  // Convert to fair odds
+  const fairOddsYes = 1 / yesProb;
+  const fairOddsNo = 1 / noProb;
+
+  // Apply margin by reducing odds
+  const marginFactor = 1 / (1 + margin);
+  const oddsYes = fairOddsYes * marginFactor;
+  const oddsNo = fairOddsNo * marginFactor;
 
   return {
     YES: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsYes)).toFixed(2)),
@@ -218,13 +232,17 @@ function generateOverUnderOdds(
   UNDER: number;
   line: number;
 } {
-  const marginMultiplier = 1 + margin;
-
   const overProb = probabilities.over_2_5;
   const underProb = probabilities.under_2_5;
 
-  const oddsOver = (1 / overProb) * marginMultiplier;
-  const oddsUnder = (1 / underProb) * marginMultiplier;
+  // Convert to fair odds
+  const fairOddsOver = 1 / overProb;
+  const fairOddsUnder = 1 / underProb;
+
+  // Apply margin by reducing odds
+  const marginFactor = 1 / (1 + margin);
+  const oddsOver = fairOddsOver * marginFactor;
+  const oddsUnder = fairOddsUnder * marginFactor;
 
   return {
     OVER: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsOver)).toFixed(2)),

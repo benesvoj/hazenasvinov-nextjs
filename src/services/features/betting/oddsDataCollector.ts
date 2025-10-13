@@ -164,18 +164,21 @@ export async function getTeamStats(
  * @returns Expected goals
  */
 export function getExpectedGoals(stats: TeamStats, isHome: boolean): number {
-  if (!stats) return 1.5; // Default
+  if (!stats) return 1.3; // Default for amateur/youth leagues
 
   const record = isHome ? stats.home_record : stats.away_record;
 
   // Calculate expected goals based on historical average
   if (record.matches > 0) {
     const avgGoals = record.goals_scored / record.matches;
-    return Number(avgGoals.toFixed(2));
+    // Ensure reasonable bounds: 0.8 to 4.0 goals per team
+    // This prevents extreme probabilities in Poisson calculations
+    return Number(Math.max(0.8, Math.min(4.0, avgGoals)).toFixed(2));
   }
 
-  // Fallback to overall average
-  return stats.avg_goals_scored;
+  // Fallback to overall average (with safety bounds)
+  const overallAvg = stats.avg_goals_scored;
+  return Number(Math.max(0.8, Math.min(4.0, overallAvg > 0 ? overallAvg : 1.3)).toFixed(2));
 }
 
 /**
