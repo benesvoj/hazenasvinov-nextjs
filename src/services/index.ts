@@ -1,5 +1,7 @@
 export * from './matchQueries';
 
+export * from './features/betting';
+
 // Performance-optimized exports
 export {
   getMatchesBasicOptimized,

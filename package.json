@@ -27,6 +27,7 @@
     "setup:meeting-minutes": "node scripts/building-app/setup-meeting-minutes-table.js",
     "fix:meeting-attendees-fk": "node scripts/building-app/fix-meeting-attendees-fk.js",
     "fix:jakub-coach-access": "node scripts/fix-jakub-coach-access.js",
+    "setup:betting": "node scripts/building-app/setup-betting-tables.js",
     "generate:enums": "node scripts/generate-enum-exports.mjs",
     "generate:hooks": "node scripts/generate-hook-exports.mjs",
     "generate:types": "node scripts/generate-type-exports.mjs",

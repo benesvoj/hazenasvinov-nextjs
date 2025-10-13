@@ -4,6 +4,7 @@ import {Season} from '../../season/data/season';
 import {Team} from '../../team/data/team';
 
 export type MatchStatus = 'upcoming' | 'completed';
+
 export interface Match {
   id: string;
   category_id: string;
@@ -35,4 +36,43 @@ export interface Match {
   away_team_is_own_club?: boolean;
   home_team_logo?: string;
   away_team_logo?: string;
+}
+
+export interface TeamBettingData {
+  club_category: {
+    club: {
+      id: string;
+      is_own_club?: boolean;
+      logo_url?: string;
+      name: string;
+      short_name?: string;
+    };
+    id: string;
+    team_suffix: string;
+  };
+}
+
+export interface MatchBettingData {
+  away_team: TeamBettingData;
+  away_team_id: string;
+  category: {
+    age_group: string;
+    description: string;
+    id: string;
+    name: string;
+  };
+  category_id: string;
+  competition: string;
+  date: string;
+  home_team: TeamBettingData;
+  home_team_id: string;
+  id: string;
+  time: string;
+  season: {
+    id: string;
+    name: string;
+  };
+  season_id: string;
+  status: MatchStatus;
+  venue: string;
 }
