@@ -1,20 +1,20 @@
 'use client';
 
-import {Card, CardBody, CardHeader, Button, Chip, Image, Spinner} from '@heroui/react';
+import {useCallback, useMemo} from 'react';
 
-import {Calendar, MapPin, AlertCircle} from 'lucide-react';
+import {Card, CardBody, CardHeader, Chip, Image, Spinner} from '@heroui/react';
+
+import {Calendar, MapPin} from 'lucide-react';
+
+import {
+  BettingOptionButton,
+  BettingOptionButtonProps,
+} from '@/components/features/betting/BettingOptionButton';
 
 import {formatDateWithTime} from '@/helpers';
 import {useMatchOdds, useMatchTeamsForm} from '@/hooks';
 import {translations} from '@/lib';
-import {formatOdds} from '@/services';
-import {
-  BetTypeId,
-  BetSelection,
-  BetSlipItem,
-  getSelectionDisplayName,
-  MatchBettingData,
-} from '@/types';
+import {BetSelection, BetSlipItem, BetTypeId, MatchBettingData} from '@/types';
 
 interface MatchBettingCardProps {
   match: MatchBettingData;
@@ -74,29 +74,98 @@ export default function MatchBettingCard({
     );
   };
 
-  const isSelected = (betType: BetTypeId, selection: BetSelection) => {
-    return selectedBets.some(
-      (bet) => bet.match_id === match.id && bet.bet_type === betType && bet.selection === selection
-    );
-  };
+  const isSelected = useCallback(
+    (betType: BetTypeId, selection: BetSelection) => {
+      return selectedBets.some(
+        (bet) =>
+          bet.match_id === match.id && bet.bet_type === betType && bet.selection === selection
+      );
+    },
+    [selectedBets, match.id]
+  );
 
-  const handleBetClick = (betType: BetTypeId, selection: BetSelection, oddsValue: number) => {
-    const categoryDisplay = match.category?.description
-      ? `${match.category.name} - ${match.category.description}`
-      : match.category?.name || 'Unknown';
+  const handleBetClick = useCallback(
+    (betType: BetTypeId, selection: BetSelection, oddsValue: number) => {
+      const categoryDisplay = match.category?.description
+        ? `${match.category.name} - ${match.category.description}`
+        : match.category?.name || 'Unknown';
 
-    const betSlipItem: BetSlipItem = {
-      match_id: match.id,
-      bet_type: betType,
-      selection: selection,
-      odds: oddsValue,
-      home_team: match.home_team.club_category.club.name,
-      away_team: match.away_team.club_category.club.name,
-      match_date: match.date,
-      competition: categoryDisplay,
-    };
-    onAddToBetSlip(betSlipItem);
-  };
+      const betSlipItem: BetSlipItem = {
+        match_id: match.id,
+        bet_type: betType,
+        selection: selection,
+        odds: oddsValue,
+        home_team: match.home_team.club_category.club.name,
+        away_team: match.away_team.club_category.club.name,
+        match_date: match.date,
+        competition: categoryDisplay,
+      };
+      onAddToBetSlip(betSlipItem);
+    },
+    [match, onAddToBetSlip]
+  );
+
+  // Prepare betting options (must be before early returns per Rules of Hooks)
+  const matchOddsOptions = useMemo<BettingOptionButtonProps[]>(() => {
+    if (!matchOdds) return [];
+    return [
+      {
+        betType: '1X2',
+        selection: '1',
+        odds: matchOdds['1X2']['1'],
+        isSelected: isSelected('1X2', '1'),
+        onPress: () => handleBetClick('1X2', '1', matchOdds['1X2']['1']),
+        homeTeamShortName: match.home_team.club_category.club.short_name,
+        awayTeamShortName: match.away_team.club_category.club.short_name,
+      },
+      {
+        betType: 'DOUBLE_CHANCE',
+        selection: '1X',
+        odds: matchOdds['DOUBLE_CHANCE']?.['1X'] || 0,
+        isSelected: isSelected('DOUBLE_CHANCE', '1X'),
+        onPress: () =>
+          handleBetClick('DOUBLE_CHANCE', '1X', matchOdds['DOUBLE_CHANCE']?.['1X'] || 0),
+        homeTeamShortName: match.home_team.club_category.club.short_name,
+        awayTeamShortName: match.away_team.club_category.club.short_name,
+        color: 'success',
+      },
+      {
+        betType: '1X2',
+        selection: 'X',
+        odds: matchOdds['1X2']['X'],
+        isSelected: isSelected('1X2', 'X'),
+        onPress: () => handleBetClick('1X2', 'X', matchOdds['1X2']['X']),
+        label: t.draw,
+      },
+      {
+        betType: 'DOUBLE_CHANCE',
+        selection: 'X2',
+        odds: matchOdds['DOUBLE_CHANCE']?.['X2'] || 0,
+        isSelected: isSelected('DOUBLE_CHANCE', 'X2'),
+        onPress: () =>
+          handleBetClick('DOUBLE_CHANCE', 'X2', matchOdds['DOUBLE_CHANCE']?.['X2'] || 0),
+        homeTeamShortName: match.home_team.club_category.club.short_name,
+        awayTeamShortName: match.away_team.club_category.club.short_name,
+        color: 'success',
+      },
+      {
+        betType: '1X2',
+        selection: '2',
+        odds: matchOdds['1X2']['2'],
+        isSelected: isSelected('1X2', '2'),
+        onPress: () => handleBetClick('1X2', '2', matchOdds['1X2']['2']),
+        homeTeamShortName: match.home_team.club_category.club.short_name,
+        awayTeamShortName: match.away_team.club_category.club.short_name,
+      },
+    ];
+  }, [
+    handleBetClick,
+    isSelected,
+    match.away_team.club_category.club.short_name,
+    match.home_team.club_category.club.short_name,
+    matchOdds,
+    t.draw,
+  ]);
 
   // Only show matches that haven't started yet
   const matchDate = new Date(match.date);
@@ -207,131 +276,15 @@ export default function MatchBettingCard({
             </div>
           )}
         </div>
-
-        {/* 1X2 Betting Options */}
+        {/* Betting Options */}
         <div className="mb-4">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{t.matchResult}</p>
-          <div className="grid grid-cols-3 gap-2">
-            <Button
-              size="sm"
-              variant={isSelected('1X2', '1') ? 'solid' : 'bordered'}
-              color={isSelected('1X2', '1') ? 'primary' : 'default'}
-              onPress={() => handleBetClick('1X2', '1', matchOdds['1X2']['1'])}
-              className="flex flex-col py-6"
-            >
-              <span className="text-xs">
-                {getSelectionDisplayName(
-                  '1X2',
-                  '1',
-                  match.home_team.club_category.club.short_name,
-                  match.away_team.club_category.club.short_name
-                )}
-              </span>
-              <span className="font-bold">{formatOdds(matchOdds['1X2']['1'])}</span>
-            </Button>
-            <Button
-              size="sm"
-              variant={isSelected('1X2', 'X') ? 'solid' : 'bordered'}
-              color={isSelected('1X2', 'X') ? 'primary' : 'default'}
-              onPress={() => handleBetClick('1X2', 'X', matchOdds['1X2']['X'])}
-              className="flex flex-col py-6"
-            >
-              <span className="text-xs">{t.draw}</span>
-              <span className="font-bold">{formatOdds(matchOdds['1X2']['X'])}</span>
-            </Button>
-            <Button
-              size="sm"
-              variant={isSelected('1X2', '2') ? 'solid' : 'bordered'}
-              color={isSelected('1X2', '2') ? 'primary' : 'default'}
-              onPress={() => handleBetClick('1X2', '2', matchOdds['1X2']['2'])}
-              className="flex flex-col py-6"
-            >
-              <span className="text-xs">
-                {getSelectionDisplayName(
-                  '1X2',
-                  '2',
-                  match.home_team.club_category.club.short_name,
-                  match.away_team.club_category.club.short_name
-                )}
-              </span>
-              <span className="font-bold">{formatOdds(matchOdds['1X2']['2'])}</span>
-            </Button>
+          <div className="grid grid-cols-5 gap-2">
+            {matchOddsOptions.map((item, index) => (
+              <BettingOptionButton key={index} {...item} />
+            ))}
           </div>
         </div>
-
-        {/* Double Chance Betting Options */}
-        {matchOdds['DOUBLE_CHANCE'] && (
-          <div className="mb-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-              Double Chance (cover 2 outcomes)
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <Button
-                size="sm"
-                variant={isSelected('DOUBLE_CHANCE', '1X') ? 'solid' : 'bordered'}
-                color={isSelected('DOUBLE_CHANCE', '1X') ? 'success' : 'default'}
-                onPress={() =>
-                  handleBetClick('DOUBLE_CHANCE', '1X', matchOdds['DOUBLE_CHANCE']?.['1X'] || 0)
-                }
-                className="flex flex-col py-6"
-              >
-                <span className="text-xs">
-                  {getSelectionDisplayName(
-                    'DOUBLE_CHANCE',
-                    '1X',
-                    match.home_team.club_category.club.short_name,
-                    match.away_team.club_category.club.short_name
-                  )}
-                </span>
-                <span className="font-bold text-xs">
-                  {formatOdds(matchOdds['DOUBLE_CHANCE']?.['1X'])}
-                </span>
-              </Button>
-              <Button
-                size="sm"
-                variant={isSelected('DOUBLE_CHANCE', 'X2') ? 'solid' : 'bordered'}
-                color={isSelected('DOUBLE_CHANCE', 'X2') ? 'success' : 'default'}
-                onPress={() =>
-                  handleBetClick('DOUBLE_CHANCE', 'X2', matchOdds['DOUBLE_CHANCE']?.['X2'] || 0)
-                }
-                className="flex flex-col py-6"
-              >
-                <span className="text-xs">
-                  {getSelectionDisplayName(
-                    'DOUBLE_CHANCE',
-                    'X2',
-                    match.home_team.club_category.club.short_name,
-                    match.away_team.club_category.club.short_name
-                  )}
-                </span>
-                <span className="font-bold text-xs">
-                  {formatOdds(matchOdds['DOUBLE_CHANCE']?.['X2'])}
-                </span>
-              </Button>
-              <Button
-                size="sm"
-                variant={isSelected('DOUBLE_CHANCE', '12') ? 'solid' : 'bordered'}
-                color={isSelected('DOUBLE_CHANCE', '12') ? 'success' : 'default'}
-                onPress={() =>
-                  handleBetClick('DOUBLE_CHANCE', '12', matchOdds['DOUBLE_CHANCE']?.['12'] || 0)
-                }
-                className="flex flex-col py-6"
-              >
-                <span className="text-xs">
-                  {getSelectionDisplayName(
-                    'DOUBLE_CHANCE',
-                    '12',
-                    match.home_team.club_category.club.short_name,
-                    match.away_team.club_category.club.short_name
-                  )}
-                </span>
-                <span className="font-bold text-xs">
-                  {formatOdds(matchOdds['DOUBLE_CHANCE']?.['12'])}
-                </span>
-              </Button>
-            </div>
-          </div>
-        )}
       </CardBody>
     </Card>
   );

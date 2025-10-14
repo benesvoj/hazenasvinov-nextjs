@@ -103,7 +103,7 @@ export default function BettingPage() {
   const matches = filteredMatches;
 
   const handleAddToBetSlip = (item: BetSlipItem) => {
-    // Check if item already exists
+    // Check if the exact same bet already exists
     const existingIndex = betSlipItems.findIndex(
       (existing) =>
         existing.match_id === item.match_id &&
@@ -112,11 +112,13 @@ export default function BettingPage() {
     );
 
     if (existingIndex !== -1) {
-      // Remove if already selected (toggle behavior)
+      // Remove if already selected (toggle off behavior)
       setBetSlipItems(betSlipItems.filter((_, index) => index !== existingIndex));
     } else {
-      // Add new item
-      setBetSlipItems([...betSlipItems, item]);
+      // Remove any existing bets from the same match (only one bet per match allowed)
+      const filteredItems = betSlipItems.filter((existing) => existing.match_id !== item.match_id);
+      // Add the new item
+      setBetSlipItems([...filteredItems, item]);
     }
   };
 
