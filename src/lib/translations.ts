@@ -979,7 +979,7 @@ export const translations = {
         single: {
           title: 'Jednotlivé sázky',
           description:
-            'You&apos;re betting on one match outcome. Simple and straightforward! Add more selections to create an accumulator bet with higher potential winnings.',
+            'Sázíte na výsledek jednoho zápasu. Jednoduché a přímočaré! Přidejte více výběrů a vytvořte kumulativní sázku s vyššími potenciálními výhrami.',
         },
         accumulator: {
           title: 'Kumulativní sázky',

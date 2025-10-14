@@ -144,21 +144,34 @@ export async function createBet(input: CreateBetInput): Promise<Bet | null> {
       return null;
     }
 
-    // Fetch match data for each leg to populate team names and dates
-    const legPromises = input.legs.map(async (leg) => {
-      const {data: match} = await supabase
-        .from('matches')
-        .select(
-          `
-          id,
-          date,
-          home_team:home_team_id(club_category:club_category_id(club:club_id(name))),
-          away_team:away_team_id(club_category:club_category_id(club:club_id(name)))
+    // Fetch match data for all legs in a single batch query
+    const matchIds = [...new Set(input.legs.map((leg) => leg.match_id))];
+    const {data: matches} = await supabase
+      .from('matches')
+      .select(
         `
-        )
-        .eq('id', leg.match_id)
-        .single();
+        id,
+        date,
+        home_team:home_team_id(club_category:club_category_id(club:club_id(name))),
+        away_team:away_team_id(club_category:club_category_id(club:club_id(name)))
+      `
+      )
+      .in('id', matchIds);
 
+    // Create a lookup map for O(1) access
+    type MatchData = {
+      id: string;
+      date: string;
+      home_team?: {club_category?: {club?: {name: string}}};
+      away_team?: {club_category?: {club?: {name: string}}};
+    };
+    const matchMap = new Map<string, MatchData>(
+      matches?.map((match: MatchData) => [match.id, match]) || []
+    );
+
+    // Map legs with match data
+    const betLegs = input.legs.map((leg) => {
+      const match = matchMap.get(leg.match_id);
       return {
         bet_id: bet.id,
         match_id: leg.match_id,
@@ -172,8 +185,6 @@ export async function createBet(input: CreateBetInput): Promise<Bet | null> {
         match_date: match?.date || null,
       };
     });
-
-    const betLegs = await Promise.all(legPromises);
 
     const {data: createdLegs, error: legsError} = await supabase
       .from('betting_bet_legs')
@@ -343,30 +354,54 @@ export async function getUserBets(
     );
 
     if (betsWithMissingData.length > 0) {
-      // Fetch match data for legs with missing team names
-      for (const bet of betsWithMissingData) {
-        for (const leg of bet.legs) {
+      // Collect all match IDs that need data in a single batch
+      const missingMatchIds = new Set<string>();
+      betsWithMissingData.forEach((bet: Bet) => {
+        bet.legs.forEach((leg: BetLeg) => {
           if (!leg.home_team || !leg.away_team) {
-            const {data: match} = await supabase
-              .from('matches')
-              .select(
-                `
-                id,
-                date,
-                home_team:home_team_id(club_category:club_category_id(club:club_id(name))),
-                away_team:away_team_id(club_category:club_category_id(club:club_id(name)))
-              `
-              )
-              .eq('id', leg.match_id)
-              .single();
-
-            if (match) {
-              leg.home_team = match.home_team?.club_category?.club?.name || 'Home';
-              leg.away_team = match.away_team?.club_category?.club?.name || 'Away';
-              leg.match_date = match.date || leg.match_date;
-            }
+            missingMatchIds.add(leg.match_id);
           }
-        }
+        });
+      });
+
+      // Fetch all missing match data in a single query
+      if (missingMatchIds.size > 0) {
+        const {data: matches} = await supabase
+          .from('matches')
+          .select(
+            `
+            id,
+            date,
+            home_team:home_team_id(club_category:club_category_id(club:club_id(name))),
+            away_team:away_team_id(club_category:club_category_id(club:club_id(name)))
+          `
+          )
+          .in('id', Array.from(missingMatchIds));
+
+        // Create a lookup map for O(1) access
+        type MatchData = {
+          id: string;
+          date: string;
+          home_team?: {club_category?: {club?: {name: string}}};
+          away_team?: {club_category?: {club?: {name: string}}};
+        };
+        const matchMap = new Map<string, MatchData>(
+          matches?.map((match: MatchData) => [match.id, match]) || []
+        );
+
+        // Update legs with match data
+        betsWithMissingData.forEach((bet: Bet) => {
+          bet.legs.forEach((leg: BetLeg) => {
+            if (!leg.home_team || !leg.away_team) {
+              const match = matchMap.get(leg.match_id);
+              if (match) {
+                leg.home_team = match.home_team?.club_category?.club?.name || 'Home';
+                leg.away_team = match.away_team?.club_category?.club?.name || 'Away';
+                leg.match_date = match.date || leg.match_date;
+              }
+            }
+          });
+        });
       }
     }
 

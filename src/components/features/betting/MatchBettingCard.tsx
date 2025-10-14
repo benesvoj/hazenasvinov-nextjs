@@ -154,14 +154,7 @@ export default function MatchBettingCard({
         label: '2',
       },
     ];
-  }, [
-    handleBetClick,
-    isSelected,
-    match.away_team.club_category.club.short_name,
-    match.home_team.club_category.club.short_name,
-    matchOdds,
-    t.draw,
-  ]);
+  }, [handleBetClick, isSelected, matchOdds]);
 
   // Only show matches that haven't started yet
   const matchDate = new Date(match.date);

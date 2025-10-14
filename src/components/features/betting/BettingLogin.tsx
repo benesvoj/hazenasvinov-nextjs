@@ -123,8 +123,8 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                // NOTE: explicitly ignore the promise return value and silence the TypeScript warning
-                void handleLogin();
+                // Handle potential promise rejection to avoid unhandled errors
+                handleLogin().catch(console.error);
               }}
               className="space-y-4"
             >

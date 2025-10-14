@@ -1,3 +1,6 @@
+import {formatOddsValue} from '@/components/features/betting/helpers/formatOddsValue';
+
+import {getTeamStats, getExpectedGoals, calculateTeamStrength} from '@/services';
 import {
   TeamStats,
   MatchProbabilities,
@@ -7,15 +10,14 @@ import {
   OddsValidationResult,
   calculateMargin,
   hasArbitrageOpportunity,
-} from '@/types/features/betting/odds';
-
-import {getTeamStats, getExpectedGoals, calculateTeamStrength} from './oddsDataCollector';
+} from '@/types';
 
 /**
  * Odds Generator Service
  * Generates betting odds using statistical models and Poisson distribution
  */
 
+// Configuration to add on different place in app
 const DEFAULT_MARGIN = 0.05; // 5% bookmaker margin
 const MIN_ODDS = 1.01;
 const MAX_ODDS = 100.0;
@@ -181,9 +183,9 @@ function generate1X2Odds(
   const odds2 = fairOdds2 * marginFactor;
 
   return {
-    '1': Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, odds1)).toFixed(2)),
-    X: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsX)).toFixed(2)),
-    '2': Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, odds2)).toFixed(2)),
+    '1': formatOddsValue(odds1),
+    X: formatOddsValue(oddsX),
+    '2': formatOddsValue(odds2),
   };
 }
 
@@ -224,9 +226,9 @@ function generateDoubleChanceOdds(
   const odds12 = fairOdds12 * marginFactor;
 
   return {
-    '1X': Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, odds1X)).toFixed(2)),
-    X2: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsX2)).toFixed(2)),
-    '12': Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, odds12)).toFixed(2)),
+    '1X': formatOddsValue(odds1X),
+    X2: formatOddsValue(oddsX2),
+    '12': formatOddsValue(odds12),
   };
 }
 
@@ -256,8 +258,8 @@ function generateBothTeamsScoreOdds(
   const oddsNo = fairOddsNo * marginFactor;
 
   return {
-    YES: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsYes)).toFixed(2)),
-    NO: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsNo)).toFixed(2)),
+    YES: formatOddsValue(oddsYes),
+    NO: formatOddsValue(oddsNo),
   };
 }
 
@@ -290,8 +292,8 @@ function generateOverUnderOdds(
   const oddsUnder = fairOddsUnder * marginFactor;
 
   return {
-    OVER: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsOver)).toFixed(2)),
-    UNDER: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsUnder)).toFixed(2)),
+    OVER: formatOddsValue(oddsOver),
+    UNDER: formatOddsValue(oddsUnder),
     line,
   };
 }
