@@ -115,8 +115,7 @@ export default function MatchBettingCard({
         odds: matchOdds['1X2']['1'],
         isSelected: isSelected('1X2', '1'),
         onPress: () => handleBetClick('1X2', '1', matchOdds['1X2']['1']),
-        homeTeamShortName: match.home_team.club_category.club.short_name,
-        awayTeamShortName: match.away_team.club_category.club.short_name,
+        label: '1',
       },
       {
         betType: 'DOUBLE_CHANCE',
@@ -125,8 +124,7 @@ export default function MatchBettingCard({
         isSelected: isSelected('DOUBLE_CHANCE', '1X'),
         onPress: () =>
           handleBetClick('DOUBLE_CHANCE', '1X', matchOdds['DOUBLE_CHANCE']?.['1X'] || 0),
-        homeTeamShortName: match.home_team.club_category.club.short_name,
-        awayTeamShortName: match.away_team.club_category.club.short_name,
+        label: '10',
         color: 'success',
       },
       {
@@ -135,7 +133,7 @@ export default function MatchBettingCard({
         odds: matchOdds['1X2']['X'],
         isSelected: isSelected('1X2', 'X'),
         onPress: () => handleBetClick('1X2', 'X', matchOdds['1X2']['X']),
-        label: t.draw,
+        label: 'X',
       },
       {
         betType: 'DOUBLE_CHANCE',
@@ -144,8 +142,7 @@ export default function MatchBettingCard({
         isSelected: isSelected('DOUBLE_CHANCE', 'X2'),
         onPress: () =>
           handleBetClick('DOUBLE_CHANCE', 'X2', matchOdds['DOUBLE_CHANCE']?.['X2'] || 0),
-        homeTeamShortName: match.home_team.club_category.club.short_name,
-        awayTeamShortName: match.away_team.club_category.club.short_name,
+        label: '02',
         color: 'success',
       },
       {
@@ -154,8 +151,7 @@ export default function MatchBettingCard({
         odds: matchOdds['1X2']['2'],
         isSelected: isSelected('1X2', '2'),
         onPress: () => handleBetClick('1X2', '2', matchOdds['1X2']['2']),
-        homeTeamShortName: match.home_team.club_category.club.short_name,
-        awayTeamShortName: match.away_team.club_category.club.short_name,
+        label: '2',
       },
     ];
   }, [

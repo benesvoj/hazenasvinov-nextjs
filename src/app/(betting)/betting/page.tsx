@@ -16,10 +16,6 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-import {useUpcomingBettingMatches} from '@/hooks/features/betting/useMatches';
-
-import {bettingLogout} from '@/utils/supabase/bettingAuth';
-
 import {
   LeaderboardTable,
   BetHistory,
@@ -27,10 +23,14 @@ import {
   MatchBettingCard,
   WalletBalance,
   BettingLogin,
+  BetSlipModal,
+  FloatingBetSlipButton,
 } from '@/components';
 import {useUser} from '@/contexts';
+import {useUpcomingBettingMatches} from '@/hooks';
 import {translations} from '@/lib';
 import {BetSlipItem} from '@/types';
+import {bettingLogout} from '@/utils';
 
 // Helper to get Monday of current week
 function getMonday(d: Date) {
@@ -56,6 +56,7 @@ export default function BettingPage() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [weekOffset, setWeekOffset] = useState<number>(0); // 0 = current week, 1 = next week, etc.
+  const [isBetSlipModalOpen, setIsBetSlipModalOpen] = useState(false);
 
   const t = translations.betting;
 
@@ -356,8 +357,8 @@ export default function BettingPage() {
           </Tabs>
         </div>
 
-        {/* Right Column - Bet Slip (Sticky) */}
-        <div className="lg:col-span-1">
+        {/* Right Column - Bet Slip (Sticky) - Hidden on mobile */}
+        <div className="hidden lg:block lg:col-span-1">
           <div className="sticky top-4">
             <BetSlip
               userId={userId}
@@ -369,6 +370,23 @@ export default function BettingPage() {
           </div>
         </div>
       </div>
+
+      {/* Floating Bet Slip Button (Mobile only) */}
+      <FloatingBetSlipButton
+        itemCount={betSlipItems.length}
+        onClick={() => setIsBetSlipModalOpen(true)}
+      />
+
+      {/* Bet Slip Modal (Mobile only) */}
+      <BetSlipModal
+        isOpen={isBetSlipModalOpen}
+        onClose={() => setIsBetSlipModalOpen(false)}
+        userId={userId}
+        items={betSlipItems}
+        onRemoveItem={handleRemoveFromBetSlip}
+        onClearAll={handleClearBetSlip}
+        onBetPlaced={handleBetPlaced}
+      />
 
       {/* Info Section */}
       <div className="mt-8 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">

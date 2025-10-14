@@ -11,3 +11,4 @@ export * from './releaseNotes';
 export * from './enumHelpers';
 export * from './autoStandingsRecalculation';
 export * from './refreshMaterializedView';
+export * from './supabase';
