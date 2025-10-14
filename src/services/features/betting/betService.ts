@@ -144,16 +144,36 @@ export async function createBet(input: CreateBetInput): Promise<Bet | null> {
       return null;
     }
 
-    // Create bet legs
-    const betLegs = input.legs.map((leg) => ({
-      bet_id: bet.id,
-      match_id: leg.match_id,
-      bet_type: leg.bet_type,
-      selection: leg.selection,
-      odds: leg.odds,
-      parameter: leg.parameter,
-      status: 'PENDING' as BetStatus,
-    }));
+    // Fetch match data for each leg to populate team names and dates
+    const legPromises = input.legs.map(async (leg) => {
+      const {data: match} = await supabase
+        .from('matches')
+        .select(
+          `
+          id,
+          date,
+          home_team:home_team_id(club_category:club_category_id(club:club_id(name))),
+          away_team:away_team_id(club_category:club_category_id(club:club_id(name)))
+        `
+        )
+        .eq('id', leg.match_id)
+        .single();
+
+      return {
+        bet_id: bet.id,
+        match_id: leg.match_id,
+        bet_type: leg.bet_type,
+        selection: leg.selection,
+        odds: leg.odds,
+        parameter: leg.parameter,
+        status: 'PENDING' as BetStatus,
+        home_team: match?.home_team?.club_category?.club?.name || 'Home',
+        away_team: match?.away_team?.club_category?.club?.name || 'Away',
+        match_date: match?.date || null,
+      };
+    });
+
+    const betLegs = await Promise.all(legPromises);
 
     const {data: createdLegs, error: legsError} = await supabase
       .from('betting_bet_legs')
@@ -253,7 +273,25 @@ export async function getUserBets(
   try {
     let query = supabase
       .from('betting_bets')
-      .select('*, betting_bet_legs(*)')
+      .select(
+        `
+        *,
+        betting_bet_legs(
+          id,
+          bet_id,
+          match_id,
+          bet_type,
+          selection,
+          odds,
+          parameter,
+          status,
+          result_determined_at,
+          home_team,
+          away_team,
+          match_date
+        )
+      `
+      )
       .eq('user_id', userId)
       .order('placed_at', {ascending: false});
 
@@ -292,13 +330,47 @@ export async function getUserBets(
       return [];
     }
 
-    // Transform data to match Bet type
-    return (
+    // Transform data to match Bet type and fetch missing team names if needed
+    const bets =
       data?.map((bet: any) => ({
         ...bet,
         legs: bet.betting_bet_legs || [],
-      })) || []
+      })) || [];
+
+    // Check if any legs are missing team names and fetch them if needed
+    const betsWithMissingData = bets.filter((bet: Bet) =>
+      bet.legs.some((leg) => !leg.home_team || !leg.away_team)
     );
+
+    if (betsWithMissingData.length > 0) {
+      // Fetch match data for legs with missing team names
+      for (const bet of betsWithMissingData) {
+        for (const leg of bet.legs) {
+          if (!leg.home_team || !leg.away_team) {
+            const {data: match} = await supabase
+              .from('matches')
+              .select(
+                `
+                id,
+                date,
+                home_team:home_team_id(club_category:club_category_id(club:club_id(name))),
+                away_team:away_team_id(club_category:club_category_id(club:club_id(name)))
+              `
+              )
+              .eq('id', leg.match_id)
+              .single();
+
+            if (match) {
+              leg.home_team = match.home_team?.club_category?.club?.name || 'Home';
+              leg.away_team = match.away_team?.club_category?.club?.name || 'Away';
+              leg.match_date = match.date || leg.match_date;
+            }
+          }
+        }
+      }
+    }
+
+    return bets;
   } catch (error) {
     console.error('Error in getUserBets:', error);
     return [];

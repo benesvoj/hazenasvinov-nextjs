@@ -16,6 +16,19 @@ export function formatDateTime(date: Date): string {
   }).format(date);
 }
 
+export function formatDateTimeFromString(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original string if invalid
+    }
+    return formatDateTime(date);
+  } catch {
+    return dateString;
+  }
+}
+
 export const formatDateString = (dateString: string) => {
   try {
     const date = new Date(dateString);

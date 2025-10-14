@@ -15,7 +15,15 @@ import {ChunkErrorBoundary, DatabaseErrorBoundary} from '@/components';
 const EXCLUDED_PAGES = ['/reset-password', '/set-password', '/login', '/', '/error', '/blocked'];
 
 // Pages that should NOT load AppDataContext (but can load UserContext)
-const NO_APP_DATA_PAGES = ['/reset-password', '/set-password', '/login', '/', '/error', '/blocked'];
+const NO_APP_DATA_PAGES = [
+  '/reset-password',
+  '/set-password',
+  '/login',
+  '/',
+  '/error',
+  '/blocked',
+  '/betting',
+];
 
 // Public pages that don't need user context
 const PUBLIC_PAGES = ['/category', '/blog', '/matches', '/about', '/contact'];

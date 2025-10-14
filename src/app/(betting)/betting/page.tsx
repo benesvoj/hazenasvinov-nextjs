@@ -4,9 +4,17 @@ import {useState} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {Tabs, Tab, Button, Spinner} from '@heroui/react';
+import {Tabs, Tab, Button, Spinner, Chip, ButtonGroup} from '@heroui/react';
 
-import {TrendingUp, History, Trophy, LogOut, Calendar} from 'lucide-react';
+import {
+  TrendingUp,
+  History,
+  Trophy,
+  LogOut,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 
 import {useUpcomingBettingMatches} from '@/hooks/features/betting/useMatches';
 
@@ -24,87 +32,21 @@ import {useUser} from '@/contexts';
 import {translations} from '@/lib';
 import {BetSlipItem} from '@/types';
 
-// Keep mock matches as fallback (remove once tested)
-const mockMatches = [
-  {
-    id: '1',
-    category_id: 'cat1',
-    season_id: 'season1',
-    date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
-    time: '18:00',
-    home_team_id: 'team1',
-    away_team_id: 'team2',
-    home_team: {
-      team_suffix: 'A',
-      club_category: {
-        club: {
-          id: 'club1',
-          name: 'Team A',
-          short_name: 'TMA',
-          logo_url: null,
-          is_own_club: true,
-        },
-      },
-    },
-    away_team: {
-      team_suffix: 'B',
-      club_category: {
-        club: {
-          id: 'club2',
-          name: 'Team B',
-          short_name: 'TMB',
-          logo_url: null,
-          is_own_club: false,
-        },
-      },
-    },
-    venue: 'Stadium A',
-    competition: 'League Cup',
-    is_home: true,
-    status: 'upcoming' as const,
-    category: {name: 'Category A', id: 'cat1'},
-    season: {name: '2024/2025', id: 'season1'},
-  },
-  {
-    id: '2',
-    category_id: 'cat1',
-    season_id: 'season1',
-    date: new Date(Date.now() + 172800000).toISOString().split('T')[0], // Day after tomorrow
-    time: '20:00',
-    home_team_id: 'team3',
-    away_team_id: 'team4',
-    home_team: {
-      team_suffix: 'C',
-      club_category: {
-        club: {
-          id: 'club3',
-          name: 'Team C',
-          short_name: 'TMC',
-          logo_url: null,
-          is_own_club: false,
-        },
-      },
-    },
-    away_team: {
-      team_suffix: 'A',
-      club_category: {
-        club: {
-          id: 'club1',
-          name: 'Team A',
-          short_name: 'TMA',
-          logo_url: null,
-          is_own_club: true,
-        },
-      },
-    },
-    venue: 'Stadium C',
-    competition: 'League Cup',
-    is_home: false,
-    status: 'upcoming' as const,
-    category: {name: 'Category A', id: 'cat1'},
-    season: {name: '2024/2025', id: 'season1'},
-  },
-];
+// Helper to get Monday of current week
+function getMonday(d: Date) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  return new Date(date.setDate(diff));
+}
+
+// Helper to get Sunday of current week
+function getSunday(d: Date) {
+  const monday = getMonday(d);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  return sunday;
+}
 
 export default function BettingPage() {
   const router = useRouter();
@@ -112,23 +54,53 @@ export default function BettingPage() {
   const [selectedTab, setSelectedTab] = useState<string>('matches');
   const [betSlipItems, setBetSlipItems] = useState<BetSlipItem[]>([]);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [weekOffset, setWeekOffset] = useState<number>(0); // 0 = current week, 1 = next week, etc.
 
   const t = translations.betting;
 
   const userId = user?.id || '';
 
-  // Fetch real matches data
+  // Calculate current week's Monday and Sunday
+  const currentWeekMonday = getMonday(new Date());
+  currentWeekMonday.setDate(currentWeekMonday.getDate() + weekOffset * 7);
+  const currentWeekSunday = getSunday(currentWeekMonday);
+
+  // Only fetch matches if user is logged in
   const {
     data: realMatches,
     isLoading: matchesLoading,
     error: matchesError,
-  } = useUpcomingBettingMatches({
-    limit: 20,
-    daysAhead: 30, // Fetch matches in the next 30 days
+  } = useUpcomingBettingMatches(
+    {
+      limit: 100,
+      daysAhead: 365, // Fetch all upcoming matches
+    },
+    !!user // Only enable if user exists
+  );
+
+  // Filter matches by current week and category
+  const filteredMatches = (realMatches || []).filter((match) => {
+    const matchDate = new Date(match.date);
+    const isInWeek = matchDate >= currentWeekMonday && matchDate <= currentWeekSunday;
+    const matchesCategory = selectedCategory === 'all' || match.category_id === selectedCategory;
+    return isInWeek && matchesCategory;
   });
 
-  // Use real matches if available, fallback to mock data during development
-  const matches = realMatches && realMatches.length > 0 ? realMatches : mockMatches;
+  // Get unique categories from matches
+  const categories = realMatches
+    ? Array.from(
+        new Map(
+          realMatches.map((match) => [
+            match.category_id,
+            {id: match.category_id, name: match.category.name},
+          ])
+        ).values()
+      )
+    : [];
+
+  // Use only real matches (no mock data)
+  const matches = filteredMatches;
 
   const handleAddToBetSlip = (item: BetSlipItem) => {
     // Check if item already exists
@@ -239,6 +211,75 @@ export default function BettingPage() {
               }
             >
               <div className="space-y-4 mt-4">
+                {/* Week Navigation */}
+                <div className="flex items-center justify-between bg-gray-800/50 p-4 rounded-lg">
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    startContent={<ChevronLeft className="w-4 h-4" />}
+                    onPress={() => setWeekOffset(Math.max(0, weekOffset - 1))}
+                    isDisabled={weekOffset === 0}
+                  >
+                    Previous Week
+                  </Button>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-400">Week of</p>
+                    <p className="font-semibold text-white">
+                      {currentWeekMonday.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}{' '}
+                      -{' '}
+                      {currentWeekSunday.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    {weekOffset === 0 && (
+                      <Chip size="sm" color="primary" variant="flat" className="mt-1">
+                        Current Week
+                      </Chip>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    endContent={<ChevronRight className="w-4 h-4" />}
+                    onPress={() => setWeekOffset(weekOffset + 1)}
+                  >
+                    Next Week
+                  </Button>
+                </div>
+
+                {/* Category Tabs */}
+                {!matchesLoading && categories.length > 0 && (
+                  <div className="bg-gray-800/50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-400 mb-2">Filter by Category:</p>
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        size="sm"
+                        variant="solid"
+                        color={selectedCategory === 'all' ? 'primary' : 'default'}
+                        onPress={() => setSelectedCategory('all')}
+                      >
+                        {t.matches.filters.all}
+                      </Button>
+                      {categories.map((category) => (
+                        <Button
+                          key={category.id}
+                          size="sm"
+                          variant="solid"
+                          color={selectedCategory === category.id ? 'primary' : 'default'}
+                          onPress={() => setSelectedCategory(category.id)}
+                        >
+                          {category.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Loading State */}
                 {matchesLoading && (
                   <div className="flex flex-col items-center justify-center py-12 gap-4">
@@ -252,7 +293,7 @@ export default function BettingPage() {
                   <div className="text-center py-12 text-red-400">
                     <p>Error loading matches: {matchesError.message}</p>
                     <p className="text-sm text-gray-500 mt-2">
-                      Showing mock data for demonstration
+                      Please try refreshing the page or contact support if the issue persists.
                     </p>
                   </div>
                 )}
@@ -261,8 +302,12 @@ export default function BettingPage() {
                 {!matchesLoading && !matchesError && matches.length === 0 && (
                   <div className="text-center py-12 text-gray-400">
                     <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-semibold mb-2">No Upcoming Matches</p>
-                    <p className="text-sm">Check back soon for new betting opportunities!</p>
+                    <p className="text-lg font-semibold mb-2">No Matches This Week</p>
+                    <p className="text-sm">
+                      {selectedCategory !== 'all'
+                        ? 'Try selecting a different category or check another week.'
+                        : 'Try checking other weeks for new betting opportunities!'}
+                    </p>
                   </div>
                 )}
 
@@ -277,16 +322,6 @@ export default function BettingPage() {
                       selectedBets={betSlipItems}
                     />
                   ))}
-
-                {/* Info when using real data */}
-                {!matchesLoading && realMatches && realMatches.length > 0 && (
-                  <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-                    <p className="text-sm text-green-300">
-                      ✓ Showing {realMatches.length} real upcoming match
-                      {realMatches.length !== 1 ? 'es' : ''} from your database
-                    </p>
-                  </div>
-                )}
               </div>
             </Tab>
 

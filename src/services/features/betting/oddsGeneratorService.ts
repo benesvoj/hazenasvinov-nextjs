@@ -46,12 +46,14 @@ export async function generateMatchOdds(
 
     // Step 3: Generate odds for all markets
     const odds1X2 = generate1X2Odds(probabilities, margin);
+    const oddsDoubleChance = generateDoubleChanceOdds(probabilities, margin);
     const oddsBTTS = generateBothTeamsScoreOdds(probabilities, margin);
     const oddsOU = generateOverUnderOdds(probabilities, margin);
 
     const matchOdds: MatchOdds = {
       match_id: input.match_id,
       '1X2': odds1X2,
+      DOUBLE_CHANCE: oddsDoubleChance,
       BOTH_TEAMS_SCORE: oddsBTTS,
       OVER_UNDER: oddsOU,
       last_updated: new Date().toISOString(),
@@ -182,6 +184,49 @@ function generate1X2Odds(
     '1': Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, odds1)).toFixed(2)),
     X: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsX)).toFixed(2)),
     '2': Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, odds2)).toFixed(2)),
+  };
+}
+
+/**
+ * Generate Double Chance odds
+ * @param probabilities Match probabilities
+ * @param margin Bookmaker margin
+ * @returns Double Chance odds (1X, X2, 12)
+ */
+function generateDoubleChanceOdds(
+  probabilities: MatchProbabilities,
+  margin: number
+): {
+  '1X': number;
+  X2: number;
+  '12': number;
+} {
+  // Normalize probabilities to sum to 1
+  const totalProb = probabilities.home_win + probabilities.draw + probabilities.away_win;
+  const homeWinNorm = probabilities.home_win / totalProb;
+  const drawNorm = probabilities.draw / totalProb;
+  const awayWinNorm = probabilities.away_win / totalProb;
+
+  // Calculate combined probabilities for each double chance outcome
+  const prob1X = homeWinNorm + drawNorm; // Home or Draw
+  const probX2 = drawNorm + awayWinNorm; // Draw or Away
+  const prob12 = homeWinNorm + awayWinNorm; // Home or Away (no draw)
+
+  // Convert to fair odds (no margin)
+  const fairOdds1X = 1 / prob1X;
+  const fairOddsX2 = 1 / probX2;
+  const fairOdds12 = 1 / prob12;
+
+  // Apply margin
+  const marginFactor = 1 / (1 + margin);
+  const odds1X = fairOdds1X * marginFactor;
+  const oddsX2 = fairOddsX2 * marginFactor;
+  const odds12 = fairOdds12 * marginFactor;
+
+  return {
+    '1X': Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, odds1X)).toFixed(2)),
+    X2: Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, oddsX2)).toFixed(2)),
+    '12': Number(Math.max(MIN_ODDS, Math.min(MAX_ODDS, odds12)).toFixed(2)),
   };
 }
 

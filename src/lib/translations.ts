@@ -970,6 +970,18 @@ export const translations = {
       potentialReturn: 'Potenciální návratnost',
       single: 'Jednotlivé',
       accumulator: 'Kumulativní',
+      alerts: {
+        single: {
+          title: 'Jednotlivé sázky',
+          description:
+            'You&apos;re betting on one match outcome. Simple and straightforward! Add more selections to create an accumulator bet with higher potential winnings.',
+        },
+        accumulator: {
+          title: 'Kumulativní sázky',
+          description:
+            'Kumulativní sázky kombinují více výběrů do jedné sázky, což zvyšuje potenciální výhry. Všechny vaše výběry musí být správné, aby vaše sázka vyhrála. Přidejte více výběrů pro zvýšení kurzu a potenciálních výher!',
+        },
+      },
     },
     betType: {
       matchResult: 'Výsledek zápasu',
@@ -992,6 +1004,7 @@ export const translations = {
       winKey: 'V',
       drawKey: 'R',
       lossKey: 'P',
+      loadingOdds: 'Načítání kurzů...',
     },
     betHistory: {
       stake: 'Sázka',
@@ -999,6 +1012,16 @@ export const translations = {
       potentialWin: 'Potenciální výhra',
       payout: 'Výplata',
       noBedsFound: 'Žádné sázky nebyly nalezeny',
+      tabs: {
+        active: 'Aktivní',
+        settled: 'Vyřízené',
+        all: 'Všechny',
+      },
+    },
+    matches: {
+      filters: {
+        all: 'Všechny zápasy',
+      },
     },
   },
 } as const;

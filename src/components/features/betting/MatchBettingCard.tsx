@@ -22,23 +22,6 @@ interface MatchBettingCardProps {
   selectedBets?: BetSlipItem[];
 }
 
-// Fallback mock odds - used only when database odds are not available
-const getMockOdds = (matchId: string) => ({
-  '1X2': {
-    '1': 2.1,
-    X: 3.2,
-    '2': 3.8,
-  },
-  BOTH_TEAMS_SCORE: {
-    YES: 1.85,
-    NO: 1.95,
-  },
-  OVER_UNDER: {
-    OVER: 1.9,
-    UNDER: 1.9,
-  },
-});
-
 export default function MatchBettingCard({
   match,
   onAddToBetSlip,
@@ -53,10 +36,6 @@ export default function MatchBettingCard({
     awayForm,
     isLoading: loadingForm,
   } = useMatchTeamsForm(match.home_team_id, match.away_team_id);
-
-  // Use real odds if available, otherwise fall back to mock odds
-  const odds = matchOdds || getMockOdds(match.id);
-  const isUsingMockOdds = !matchOdds;
 
   const t = translations.betting.matchBettingCard;
 
@@ -137,11 +116,15 @@ export default function MatchBettingCard({
     return (
       <Card className="w-full">
         <CardBody className="flex items-center justify-center py-8">
-          <Spinner size="sm" />
-          <p className="text-sm text-gray-500 mt-2">Loading odds...</p>
+          <Spinner size="sm" title={t.loadingOdds} />
         </CardBody>
       </Card>
     );
+  }
+
+  // Don't show match if no odds are available
+  if (!matchOdds) {
+    return null;
   }
 
   return (
@@ -160,12 +143,6 @@ export default function MatchBettingCard({
           <div className="flex items-center gap-1 text-xs text-gray-500">
             <MapPin className="w-3 h-3" />
             {match.venue}
-          </div>
-        )}
-        {isUsingMockOdds && (
-          <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-            <AlertCircle className="w-3 h-3" />
-            <span>Using estimated odds - Generate real odds for accurate pricing</span>
           </div>
         )}
       </CardHeader>
@@ -244,7 +221,7 @@ export default function MatchBettingCard({
               size="sm"
               variant={isSelected('1X2', '1') ? 'solid' : 'bordered'}
               color={isSelected('1X2', '1') ? 'primary' : 'default'}
-              onPress={() => handleBetClick('1X2', '1', odds['1X2']['1'])}
+              onPress={() => handleBetClick('1X2', '1', matchOdds['1X2']['1'])}
               className="flex flex-col py-6"
             >
               <span className="text-xs">
@@ -255,23 +232,23 @@ export default function MatchBettingCard({
                   match.away_team.club_category.club.short_name
                 )}
               </span>
-              <span className="font-bold">{formatOdds(odds['1X2']['1'])}</span>
+              <span className="font-bold">{formatOdds(matchOdds['1X2']['1'])}</span>
             </Button>
             <Button
               size="sm"
               variant={isSelected('1X2', 'X') ? 'solid' : 'bordered'}
               color={isSelected('1X2', 'X') ? 'primary' : 'default'}
-              onPress={() => handleBetClick('1X2', 'X', odds['1X2']['X'])}
+              onPress={() => handleBetClick('1X2', 'X', matchOdds['1X2']['X'])}
               className="flex flex-col py-6"
             >
               <span className="text-xs">{t.draw}</span>
-              <span className="font-bold">{formatOdds(odds['1X2']['X'])}</span>
+              <span className="font-bold">{formatOdds(matchOdds['1X2']['X'])}</span>
             </Button>
             <Button
               size="sm"
               variant={isSelected('1X2', '2') ? 'solid' : 'bordered'}
               color={isSelected('1X2', '2') ? 'primary' : 'default'}
-              onPress={() => handleBetClick('1X2', '2', odds['1X2']['2'])}
+              onPress={() => handleBetClick('1X2', '2', matchOdds['1X2']['2'])}
               className="flex flex-col py-6"
             >
               <span className="text-xs">
@@ -282,10 +259,87 @@ export default function MatchBettingCard({
                   match.away_team.club_category.club.short_name
                 )}
               </span>
-              <span className="font-bold">{formatOdds(odds['1X2']['2'])}</span>
+              <span className="font-bold">{formatOdds(matchOdds['1X2']['2'])}</span>
             </Button>
           </div>
         </div>
+
+        {/* Double Chance Betting Options */}
+        {matchOdds['DOUBLE_CHANCE'] && (
+          <div className="mb-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+              Double Chance (cover 2 outcomes)
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                size="sm"
+                variant={isSelected('DOUBLE_CHANCE', '1X') ? 'solid' : 'bordered'}
+                color={isSelected('DOUBLE_CHANCE', '1X') ? 'success' : 'default'}
+                onPress={() =>
+                  handleBetClick('DOUBLE_CHANCE', '1X', matchOdds['DOUBLE_CHANCE']?.['1X'] || 0)
+                }
+                className="flex flex-col py-4"
+              >
+                <span className="text-[10px] font-semibold">1X</span>
+                <span className="text-xs">
+                  {getSelectionDisplayName(
+                    'DOUBLE_CHANCE',
+                    '1X',
+                    match.home_team.club_category.club.short_name,
+                    match.away_team.club_category.club.short_name
+                  )}
+                </span>
+                <span className="font-bold text-sm mt-1">
+                  {formatOdds(matchOdds['DOUBLE_CHANCE']?.['1X'])}
+                </span>
+              </Button>
+              <Button
+                size="sm"
+                variant={isSelected('DOUBLE_CHANCE', 'X2') ? 'solid' : 'bordered'}
+                color={isSelected('DOUBLE_CHANCE', 'X2') ? 'success' : 'default'}
+                onPress={() =>
+                  handleBetClick('DOUBLE_CHANCE', 'X2', matchOdds['DOUBLE_CHANCE']?.['X2'] || 0)
+                }
+                className="flex flex-col py-4"
+              >
+                <span className="text-[10px] font-semibold">X2</span>
+                <span className="text-xs">
+                  {getSelectionDisplayName(
+                    'DOUBLE_CHANCE',
+                    'X2',
+                    match.home_team.club_category.club.short_name,
+                    match.away_team.club_category.club.short_name
+                  )}
+                </span>
+                <span className="font-bold text-sm mt-1">
+                  {formatOdds(matchOdds['DOUBLE_CHANCE']?.['X2'])}
+                </span>
+              </Button>
+              <Button
+                size="sm"
+                variant={isSelected('DOUBLE_CHANCE', '12') ? 'solid' : 'bordered'}
+                color={isSelected('DOUBLE_CHANCE', '12') ? 'success' : 'default'}
+                onPress={() =>
+                  handleBetClick('DOUBLE_CHANCE', '12', matchOdds['DOUBLE_CHANCE']?.['12'] || 0)
+                }
+                className="flex flex-col py-4"
+              >
+                <span className="text-[10px] font-semibold">12</span>
+                <span className="text-xs">
+                  {getSelectionDisplayName(
+                    'DOUBLE_CHANCE',
+                    '12',
+                    match.home_team.club_category.club.short_name,
+                    match.away_team.club_category.club.short_name
+                  )}
+                </span>
+                <span className="font-bold text-sm mt-1">
+                  {formatOdds(matchOdds['DOUBLE_CHANCE']?.['12'])}
+                </span>
+              </Button>
+            </div>
+          </div>
+        )}
       </CardBody>
     </Card>
   );
