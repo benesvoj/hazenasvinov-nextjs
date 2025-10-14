@@ -255,7 +255,7 @@ export default function BettingPage() {
                 {/* Category Tabs */}
                 {!matchesLoading && categories.length > 0 && (
                   <div className="bg-gray-800/50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-400 mb-2">Filter by Category:</p>
+                    <p className="text-xs text-gray-400 mb-2">{t.filterByCategory}:</p>
                     <div className="flex gap-2 flex-wrap">
                       <Button
                         size="sm"
@@ -283,8 +283,7 @@ export default function BettingPage() {
                 {/* Loading State */}
                 {matchesLoading && (
                   <div className="flex flex-col items-center justify-center py-12 gap-4">
-                    <Spinner size="lg" color="primary" />
-                    <p className="text-gray-400">{t.tabs.matchesLoading}</p>
+                    <Spinner size="lg" color="primary" title={t.tabs.matchesLoading} />
                   </div>
                 )}
 

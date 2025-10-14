@@ -98,11 +98,6 @@ export default function MatchBettingCard({
     onAddToBetSlip(betSlipItem);
   };
 
-  const formatDate = (dateString: string, timeString: string) => {
-    const date = new Date(dateString);
-    return `${date.toLocaleDateString()} ${timeString}`;
-  };
-
   // Only show matches that haven't started yet
   const matchDate = new Date(match.date);
   const isUpcoming = matchDate > new Date();
@@ -278,9 +273,8 @@ export default function MatchBettingCard({
                 onPress={() =>
                   handleBetClick('DOUBLE_CHANCE', '1X', matchOdds['DOUBLE_CHANCE']?.['1X'] || 0)
                 }
-                className="flex flex-col py-4"
+                className="flex flex-col py-6"
               >
-                <span className="text-[10px] font-semibold">1X</span>
                 <span className="text-xs">
                   {getSelectionDisplayName(
                     'DOUBLE_CHANCE',
@@ -289,7 +283,7 @@ export default function MatchBettingCard({
                     match.away_team.club_category.club.short_name
                   )}
                 </span>
-                <span className="font-bold text-sm mt-1">
+                <span className="font-bold text-xs">
                   {formatOdds(matchOdds['DOUBLE_CHANCE']?.['1X'])}
                 </span>
               </Button>
@@ -300,9 +294,8 @@ export default function MatchBettingCard({
                 onPress={() =>
                   handleBetClick('DOUBLE_CHANCE', 'X2', matchOdds['DOUBLE_CHANCE']?.['X2'] || 0)
                 }
-                className="flex flex-col py-4"
+                className="flex flex-col py-6"
               >
-                <span className="text-[10px] font-semibold">X2</span>
                 <span className="text-xs">
                   {getSelectionDisplayName(
                     'DOUBLE_CHANCE',
@@ -311,7 +304,7 @@ export default function MatchBettingCard({
                     match.away_team.club_category.club.short_name
                   )}
                 </span>
-                <span className="font-bold text-sm mt-1">
+                <span className="font-bold text-xs">
                   {formatOdds(matchOdds['DOUBLE_CHANCE']?.['X2'])}
                 </span>
               </Button>
@@ -322,9 +315,8 @@ export default function MatchBettingCard({
                 onPress={() =>
                   handleBetClick('DOUBLE_CHANCE', '12', matchOdds['DOUBLE_CHANCE']?.['12'] || 0)
                 }
-                className="flex flex-col py-4"
+                className="flex flex-col py-6"
               >
-                <span className="text-[10px] font-semibold">12</span>
                 <span className="text-xs">
                   {getSelectionDisplayName(
                     'DOUBLE_CHANCE',
@@ -333,7 +325,7 @@ export default function MatchBettingCard({
                     match.away_team.club_category.club.short_name
                   )}
                 </span>
-                <span className="font-bold text-sm mt-1">
+                <span className="font-bold text-xs">
                   {formatOdds(matchOdds['DOUBLE_CHANCE']?.['12'])}
                 </span>
               </Button>

@@ -941,6 +941,7 @@ export const translations = {
     contactSupport: 'Kontaktujte podporu',
     contactSupportDescription:
       'Máte otázky nebo potřebujete pomoc? Kontaktujte náš tým podpory a rádi vám pomůžeme.',
+    filterByCategory: 'Filtrovat podle kategorie',
     wallet: {
       title: 'Peněženka',
       description: 'Správa vaší virtuální měny a transakcí.',

@@ -66,6 +66,23 @@ export async function saveOddsToDatabase(
       });
     });
 
+    // Add Double Chance odds
+    if (matchOdds.DOUBLE_CHANCE) {
+      Object.entries(matchOdds.DOUBLE_CHANCE).forEach(([selection, oddsValue]) => {
+        oddsEntries.push({
+          match_id: matchOdds.match_id,
+          bet_type: 'DOUBLE_CHANCE',
+          selection: selection,
+          odds: oddsValue,
+          parameter: null,
+          source,
+          bookmaker_margin: margin,
+          implied_probability: Number(calculateImpliedProbabilityFromOdds(oddsValue).toFixed(2)),
+          effective_from: now,
+        });
+      });
+    }
+
     // Add Both Teams Score odds
     if (matchOdds.BOTH_TEAMS_SCORE) {
       Object.entries(matchOdds.BOTH_TEAMS_SCORE).forEach(([selection, oddsValue]) => {
@@ -150,6 +167,13 @@ export async function getOddsForMatch(matchId: string): Promise<MatchOdds | null
       switch (odd.bet_type) {
         case '1X2':
           matchOdds['1X2'][odd.selection as '1' | 'X' | '2'] = odd.odds;
+          break;
+
+        case 'DOUBLE_CHANCE':
+          if (!matchOdds.DOUBLE_CHANCE) {
+            matchOdds.DOUBLE_CHANCE = {'1X': 0, X2: 0, '12': 0};
+          }
+          matchOdds.DOUBLE_CHANCE[odd.selection as '1X' | 'X2' | '12'] = odd.odds;
           break;
 
         case 'BOTH_TEAMS_SCORE':
