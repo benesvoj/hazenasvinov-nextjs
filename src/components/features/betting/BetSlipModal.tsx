@@ -1,6 +1,8 @@
 'use client';
 
-import {Modal, ModalContent, ModalBody} from '@heroui/react';
+import {Modal, ModalContent, ModalBody, ModalHeader, Button} from '@heroui/react';
+
+import {X} from 'lucide-react';
 
 import {BetSlip} from '@/components';
 import {BetSlipItem} from '@/types';
@@ -62,6 +64,7 @@ export default function BetSlipModal({
       }}
     >
       <ModalContent>
+        <ModalHeader className="flex justify-between items-center"></ModalHeader>
         <ModalBody>
           <div className="pb-6">
             <BetSlip
