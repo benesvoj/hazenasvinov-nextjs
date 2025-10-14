@@ -39,7 +39,6 @@ export default function BetSlip({
   onBetPlaced,
 }: BetSlipProps) {
   const [stake, setStake] = useState<string>('10');
-  const [betStructure, setBetStructure] = useState<BetStructure>('SINGLE');
 
   const t = translations.betting.betSlip;
 
@@ -49,7 +48,8 @@ export default function BetSlip({
   const stakeAmount = parseFloat(stake) || 0;
 
   // Determine bet structure based on items count
-  const effectiveStructure: BetStructure = items.length <= 1 ? 'SINGLE' : betStructure;
+  // When there are 2+ items, must be ACCUMULATOR (backend only allows single bets with 1 selection)
+  const effectiveStructure: BetStructure = items.length <= 1 ? 'SINGLE' : 'ACCUMULATOR';
 
   // Calculate odds and potential returns
   const totalOdds = calculateTotalOdds(
@@ -128,30 +128,6 @@ export default function BetSlip({
       </CardHeader>
 
       <CardBody className="gap-4">
-        {/* Bet Structure Selector (only show if multiple selections) */}
-        {items.length > 1 && (
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant={effectiveStructure === 'SINGLE' ? 'solid' : 'bordered'}
-              color={effectiveStructure === 'SINGLE' ? 'primary' : 'default'}
-              onPress={() => setBetStructure('SINGLE')}
-              className="flex-1"
-            >
-              {t.single}
-            </Button>
-            <Button
-              size="sm"
-              variant={effectiveStructure === 'ACCUMULATOR' ? 'solid' : 'bordered'}
-              color={effectiveStructure === 'ACCUMULATOR' ? 'primary' : 'default'}
-              onPress={() => setBetStructure('ACCUMULATOR')}
-              className="flex-1"
-            >
-              {t.accumulator}
-            </Button>
-          </div>
-        )}
-
         {/* Bet Items */}
         <div className="space-y-2 max-h-80 overflow-y-auto">
           {items.map((item, index) => (

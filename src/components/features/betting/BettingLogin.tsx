@@ -2,14 +2,13 @@
 
 import {useState} from 'react';
 
-import {useRouter} from 'next/navigation';
-
 import {Card, CardBody, CardHeader, Input, Button, Divider, Chip, Alert} from '@heroui/react';
 
 import {Lock, Mail, TrendingUp, Trophy, DollarSign, AlertCircle, CheckCircle} from 'lucide-react';
 
 import {bettingLogin} from '@/utils/supabase/bettingAuth';
 
+import {showToast} from '@/components';
 import {translations} from '@/lib';
 
 interface BettingLoginProps {
@@ -21,23 +20,18 @@ interface BettingLoginProps {
  * Real authentication for the betting system using Supabase
  */
 export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const t = translations.betting;
 
   const handleLogin = async () => {
     setIsLoading(true);
-    setError(null);
-    setSuccess(null);
 
     // Validate inputs
     if (!email || !password) {
-      setError('Please enter both email and password');
+      showToast.warning(t.loginFailedEmailPassword);
       setIsLoading(false);
       return;
     }
@@ -46,34 +40,27 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
       const result = await bettingLogin(email, password);
 
       if (result.success) {
-        setSuccess('Login successful! Redirecting...');
+        showToast.success(t.loginSuccess);
 
         // Call success callback if provided
         if (onLoginSuccess) {
           onLoginSuccess();
         }
 
-        // Small delay to show success message, then redirect
+        // Use window.location.href for hard redirect to ensure
+        // full page reload and auth state refresh
         setTimeout(() => {
-          // Force a hard redirect to ensure page reloads with new auth state
           window.location.href = '/betting';
         }, 500);
       } else {
-        setError(result.error || 'Login failed. Please check your credentials.');
+        showToast.warning(t.loginFailed);
         setIsLoading(false);
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      showToast.danger(t.loginFailedUnexpected);
       console.error('Login error:', err);
       setIsLoading(false);
     }
-  };
-
-  const handleDemoLogin = () => {
-    setEmail('demo@betting.com');
-    setPassword('demo123');
-    setError(null);
-    setSuccess(null);
   };
 
   return (
@@ -120,8 +107,8 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
             </div>
           </div>
 
-          <div className="p-4">
-            <Alert color="warning" description={t.responsibleGamingDescription} />
+          <div className="py-4">
+            <Alert color="warning" description={t.responsibleGamingDescription} variant="faded" />
           </div>
         </div>
 
@@ -136,34 +123,11 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                handleLogin();
+                // Handle potential promise rejection to avoid unhandled errors
+                handleLogin().catch(console.error);
               }}
               className="space-y-4"
             >
-              {/* Error Message */}
-              {error && (
-                <Chip
-                  color="danger"
-                  variant="flat"
-                  startContent={<AlertCircle className="w-4 h-4" />}
-                  className="w-full"
-                >
-                  {error}
-                </Chip>
-              )}
-
-              {/* Success Message */}
-              {success && (
-                <Chip
-                  color="success"
-                  variant="flat"
-                  startContent={<CheckCircle className="w-4 h-4" />}
-                  className="w-full"
-                >
-                  {success}
-                </Chip>
-              )}
-
               <Input
                 type="email"
                 label={t.email}
@@ -171,7 +135,6 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
-                  setError(null);
                 }}
                 startContent={<Mail className="w-4 h-4 text-gray-400" />}
                 variant="bordered"
@@ -186,7 +149,6 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  setError(null);
                 }}
                 startContent={<Lock className="w-4 h-4 text-gray-400" />}
                 variant="bordered"
@@ -200,7 +162,7 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
                 className="w-full font-semibold"
                 size="lg"
                 isLoading={isLoading}
-                isDisabled={isLoading || success !== null}
+                isDisabled={isLoading}
               >
                 {isLoading ? t.loginLoading : t.login}
               </Button>

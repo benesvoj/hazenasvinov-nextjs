@@ -11,7 +11,10 @@ import {MatchBettingData} from '@/types';
 /**
  * Hook to fetch upcoming matches for betting
  */
-export function useUpcomingBettingMatches(options: BettingMatchOptions = {}) {
+export function useUpcomingBettingMatches(
+  options: BettingMatchOptions = {},
+  enabled: boolean = true
+) {
   return useQuery<MatchBettingData[]>({
     queryKey: ['betting', 'matches', 'upcoming', options],
     queryFn: async () => {
@@ -21,6 +24,7 @@ export function useUpcomingBettingMatches(options: BettingMatchOptions = {}) {
       }
       return matches;
     },
+    enabled, // Only fetch if enabled is true
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
   });

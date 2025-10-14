@@ -891,6 +891,10 @@ export const translations = {
     registerQuestion: 'Ještě nemáte účet?',
     login: 'Přihlásit se',
     loginLoading: 'Probíhá přihlášení...',
+    loginSuccess: 'Úspěšně přihlášeni. Probíhá přesměrování...',
+    loginFailed: 'Přihlášení se nezdařilo. Zkontrolujte své údaje a zkuste to znovu.',
+    loginFailedUnexpected: 'Nastala neočekávaná chyba. Zkuste to prosím znovu později.',
+    loginFailedEmailPassword: 'Neplatný email nebo heslo.',
     logout: 'Odhlásit se',
     logoutLoading: 'Probíhá odhlášení...',
     password: 'Heslo',
@@ -937,6 +941,7 @@ export const translations = {
     contactSupport: 'Kontaktujte podporu',
     contactSupportDescription:
       'Máte otázky nebo potřebujete pomoc? Kontaktujte náš tým podpory a rádi vám pomůžeme.',
+    filterByCategory: 'Filtrovat podle kategorie',
     wallet: {
       title: 'Peněženka',
       description: 'Správa vaší virtuální měny a transakcí.',
@@ -970,6 +975,18 @@ export const translations = {
       potentialReturn: 'Potenciální návratnost',
       single: 'Jednotlivé',
       accumulator: 'Kumulativní',
+      alerts: {
+        single: {
+          title: 'Jednotlivé sázky',
+          description:
+            'Sázíte na výsledek jednoho zápasu. Jednoduché a přímočaré! Přidejte více výběrů a vytvořte kumulativní sázku s vyššími potenciálními výhrami.',
+        },
+        accumulator: {
+          title: 'Kumulativní sázky',
+          description:
+            'Kumulativní sázky kombinují více výběrů do jedné sázky, což zvyšuje potenciální výhry. Všechny vaše výběry musí být správné, aby vaše sázka vyhrála. Přidejte více výběrů pro zvýšení kurzu a potenciálních výher!',
+        },
+      },
     },
     betType: {
       matchResult: 'Výsledek zápasu',
@@ -992,6 +1009,7 @@ export const translations = {
       winKey: 'V',
       drawKey: 'R',
       lossKey: 'P',
+      loadingOdds: 'Načítání kurzů...',
     },
     betHistory: {
       stake: 'Sázka',
@@ -999,6 +1017,16 @@ export const translations = {
       potentialWin: 'Potenciální výhra',
       payout: 'Výplata',
       noBedsFound: 'Žádné sázky nebyly nalezeny',
+      tabs: {
+        active: 'Aktivní',
+        settled: 'Vyřízené',
+        all: 'Všechny',
+      },
+    },
+    matches: {
+      filters: {
+        all: 'Všechny zápasy',
+      },
     },
   },
 } as const;

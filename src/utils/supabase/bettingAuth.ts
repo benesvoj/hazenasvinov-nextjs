@@ -28,9 +28,8 @@ export async function bettingLogin(email: string, password: string) {
   // Revalidate betting page to clear any cached data
   revalidatePath('/betting', 'layout');
 
-  // Note: Redirect is handled on client-side with window.location.href
-  // to ensure cookies are properly set before page reload
-
+  // Return success - client will handle redirect with window.location.href
+  // to ensure full page reload and auth state refresh
   return {
     success: true,
     user: data.user,

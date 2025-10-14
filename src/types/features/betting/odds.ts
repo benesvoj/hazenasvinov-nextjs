@@ -48,6 +48,11 @@ export interface MatchOdds {
     X: number;
     '2': number;
   };
+  DOUBLE_CHANCE?: {
+    '1X': number;
+    X2: number;
+    '12': number;
+  };
   BOTH_TEAMS_SCORE?: {
     YES: number;
     NO: number;
