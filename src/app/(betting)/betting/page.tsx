@@ -215,7 +215,7 @@ export default function BettingPage() {
                     <Button
                       size="sm"
                       isIconOnly
-                      startContent={<ChevronLeftIcon className="w-4 h-4" />}
+                      endContent={<ChevronLeftIcon className="w-4 h-4" />}
                       onPress={() => setWeekOffset(Math.max(0, weekOffset - 1))}
                       isDisabled={weekOffset === 0}
                     />

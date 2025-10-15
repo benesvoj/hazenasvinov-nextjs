@@ -1,15 +1,15 @@
 import {formatOddsValue} from '@/components/features/betting/helpers/formatOddsValue';
 
-import {getTeamStats, getExpectedGoals, calculateTeamStrength} from '@/services';
+import {calculateTeamStrength, getExpectedGoals, getTeamStats} from '@/services';
 import {
-  TeamStats,
-  MatchProbabilities,
+  calculateMargin,
+  hasArbitrageOpportunity,
   MatchOdds,
+  MatchProbabilities,
   OddsGenerationInput,
   OddsGenerationResult,
   OddsValidationResult,
-  calculateMargin,
-  hasArbitrageOpportunity,
+  TeamStats,
 } from '@/types';
 
 /**
@@ -22,6 +22,14 @@ const DEFAULT_MARGIN = 0.05; // 5% bookmaker margin
 const MIN_ODDS = 1.01;
 const MAX_ODDS = 100.0;
 const DEFAULT_DRAW_PROBABILITY = 0.27; // 27% draw rate in football
+const DEFENSE_FACTOR_WEIGHT = 0.15; // Weight for defensive strength in draw probability
+const HISTORICAL_DRAW_RATE_WEIGHT = 0.25; // Weight for historical draw rate in draw probability
+const STRENGTH_DIFF_WEIGHT = 0.6; // Weight for strength difference in draw probability
+const STRENGTH_DIFF_RANGES_WEIGHT = 0.7; // Strength diff: ranges from 0.7 to 1.3 of base
+const DEFENSIVE_FACTOR_MIN = 0.9;
+const DEFENSIVE_FACTOR_MAX = 1.1;
+const DEFENSIVE_FACTOR_BASE = 1.5; // Average goals conceded per match
+const DEFENSIVE_FACTOR_SCALE = 10; // Scale to adjust sensitivity
 
 /**
  * Generate complete odds for a match
@@ -125,14 +133,21 @@ function calculateDynamicDrawProbability(
 
   // Lower goals conceded (stronger defense) = slightly higher draw probability
   // Normalize to a factor between 0.9 and 1.1
-  const defensiveFactor = Math.max(0.9, Math.min(1.1, 1 + (1.5 - avgGoalsConceded) / 10));
-
+  const defensiveFactor = Math.max(
+    DEFENSIVE_FACTOR_MIN,
+    Math.min(
+      DEFENSIVE_FACTOR_MAX,
+      1 + (DEFENSIVE_FACTOR_BASE - avgGoalsConceded) / DEFENSIVE_FACTOR_SCALE
+    )
+  );
   // Combine factors
   // Weight: 60% strength difference, 25% historical draw rate, 15% defensive factor
   const dynamicDrawProb =
-    baseDrawProb * (0.6 * (0.7 + 0.6 * strengthDiffFactor)) + // Strength diff: ranges from 0.7 to 1.3 of base
-    0.25 * avgDrawRate + // Historical draw rate contribution
-    0.15 * baseDrawProb * defensiveFactor; // Defensive factor contribution
+    baseDrawProb *
+      (STRENGTH_DIFF_WEIGHT *
+        (STRENGTH_DIFF_RANGES_WEIGHT + STRENGTH_DIFF_WEIGHT * strengthDiffFactor)) + // Strength diff: ranges from 0.7 to 1.3 of base
+    HISTORICAL_DRAW_RATE_WEIGHT * avgDrawRate + // Historical draw rate contribution
+    DEFENSE_FACTOR_WEIGHT * baseDrawProb * defensiveFactor; // Defensive factor contribution
 
   // Ensure draw probability is within reasonable bounds (15% to 40%)
   return Math.max(0.15, Math.min(0.4, dynamicDrawProb));
