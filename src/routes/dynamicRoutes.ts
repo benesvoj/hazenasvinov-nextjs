@@ -117,4 +117,5 @@ export const privateRoutes = {
   sponsorship: '/admin/sponsorship',
   clubConfig: '/admin/club-config',
   photoGallery: '/admin/photo-gallery',
+  grantCalendar: '/admin/grant-calendar',
 };

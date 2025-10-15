@@ -22,6 +22,7 @@ export * from './entities/club/useClubs';
 export * from './entities/club/useClubsNavigation';
 export * from './entities/club-category/useClubCategories';
 export * from './entities/committee/useCommittees';
+export * from './entities/grant/useGrants';
 export * from './entities/lineup/useLineupData';
 export * from './entities/lineup/useLineupManager';
 export * from './entities/lineup/useMatchLineupStats';

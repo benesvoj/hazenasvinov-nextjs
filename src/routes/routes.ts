@@ -60,6 +60,7 @@ export const privateRoutes = {
   videos: '/admin/videos',
   userRoles: '/admin/user-roles',
   meetingMinutes: '/admin/meeting-minutes',
+  grantCalendar: '/admin/grant-calendar',
 };
 
 const routes: MenuItem[] = [
@@ -241,6 +242,13 @@ const routes: MenuItem[] = [
     title: 'Zápisy z výborových schůzí',
     isPrivate: true,
     description: 'Správa zápisů z výborových schůzí a jejich účastníků.',
+    group: 'club-management',
+  },
+  {
+    route: privateRoutes.grantCalendar,
+    title: 'Kalendář dotací',
+    isPrivate: true,
+    description: 'Správa dotací a jejich termínů.',
     group: 'club-management',
   },
 ];
