@@ -4,27 +4,21 @@ import {useState} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {Tabs, Tab, Button, Spinner, Chip, ButtonGroup} from '@heroui/react';
+import {Button, Card, CardBody, Chip, Spinner, Tab, Tabs} from '@heroui/react';
+
+import {ChevronLeftIcon, ChevronRightIcon} from '@heroicons/react/20/solid';
+
+import {Calendar, History, LogOut, TrendingUp, Trophy} from 'lucide-react';
 
 import {
-  TrendingUp,
-  History,
-  Trophy,
-  LogOut,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
-
-import {
-  LeaderboardTable,
   BetHistory,
   BetSlip,
+  BetSlipModal,
+  BettingLogin,
+  FloatingBetSlipButton,
+  LeaderboardTable,
   MatchBettingCard,
   WalletBalance,
-  BettingLogin,
-  BetSlipModal,
-  FloatingBetSlipButton,
 } from '@/components';
 import {useUser} from '@/contexts';
 import {useUpcomingBettingMatches} from '@/hooks';
@@ -179,12 +173,13 @@ export default function BettingPage() {
         <Button
           color="secondary"
           variant="solid"
+          className="sm:w-auto"
           startContent={<LogOut className="w-4 h-4" />}
           onPress={handleLogout}
           isLoading={isLoggingOut}
           isDisabled={isLoggingOut}
         >
-          {isLoggingOut ? t.logoutLoading : t.logout}
+          <span className="hidden sm:inline">{isLoggingOut ? t.logoutLoading : t.logout}</span>
         </Button>
       </div>
 
@@ -215,45 +210,43 @@ export default function BettingPage() {
             >
               <div className="space-y-4 mt-4">
                 {/* Week Navigation */}
-                <div className="flex items-center justify-between bg-gray-800/50 p-4 rounded-lg">
-                  <Button
-                    size="sm"
-                    variant="flat"
-                    startContent={<ChevronLeft className="w-4 h-4" />}
-                    onPress={() => setWeekOffset(Math.max(0, weekOffset - 1))}
-                    isDisabled={weekOffset === 0}
-                  >
-                    Previous Week
-                  </Button>
-                  <div className="text-center">
-                    <p className="text-sm text-gray-400">Week of</p>
-                    <p className="font-semibold text-white">
-                      {currentWeekMonday.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      })}{' '}
-                      -{' '}
-                      {currentWeekSunday.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </p>
-                    {weekOffset === 0 && (
-                      <Chip size="sm" color="primary" variant="flat" className="mt-1">
-                        Current Week
-                      </Chip>
-                    )}
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="flat"
-                    endContent={<ChevronRight className="w-4 h-4" />}
-                    onPress={() => setWeekOffset(weekOffset + 1)}
-                  >
-                    Next Week
-                  </Button>
-                </div>
+                <Card>
+                  <CardBody className="flex flex-row items-center justify-center gap-4">
+                    <Button
+                      size="sm"
+                      isIconOnly
+                      startContent={<ChevronLeftIcon className="w-4 h-4" />}
+                      onPress={() => setWeekOffset(Math.max(0, weekOffset - 1))}
+                      isDisabled={weekOffset === 0}
+                    />
+                    <div className="text-center">
+                      <p className="font-semibold">
+                        {currentWeekMonday.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}{' '}
+                        -{' '}
+                        {currentWeekSunday.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </p>
+                      {weekOffset === 0 && (
+                        <Chip size="sm" color="primary" variant="flat" className="mt-1">
+                          {t.currentWeek}
+                        </Chip>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      endContent={<ChevronRightIcon className="w-4 h-4" />}
+                      onPress={() => setWeekOffset(weekOffset + 1)}
+                      isIconOnly
+                    />
+                  </CardBody>
+                </Card>
 
                 {/* Category Tabs */}
                 {!matchesLoading && categories.length > 0 && (

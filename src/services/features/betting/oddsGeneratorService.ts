@@ -86,6 +86,59 @@ export async function generateMatchOdds(
 }
 
 /**
+ * Calculate dynamic draw probability based on team characteristics
+ * @param homeStrength Home team strength (adjusted with home advantage)
+ * @param awayStrength Away team strength
+ * @param homeTeam Home team statistics
+ * @param awayTeam Away team statistics
+ * @returns Draw probability
+ */
+function calculateDynamicDrawProbability(
+  homeStrength: number,
+  awayStrength: number,
+  homeTeam: TeamStats,
+  awayTeam: TeamStats
+): number {
+  // Base draw probability
+  const baseDrawProb = DEFAULT_DRAW_PROBABILITY; // 0.27 (27%)
+
+  // Calculate absolute strength difference
+  const strengthDiff = Math.abs(homeStrength - awayStrength);
+
+  // Factor 1: Strength difference impact
+  // If teams are evenly matched (small diff) -> higher draw probability
+  // If there's a clear favorite (large diff) -> lower draw probability
+  // Use exponential decay: larger difference = more reduction in draw probability
+  const strengthDiffFactor = Math.exp(-strengthDiff / 20); // Decay constant of 20
+
+  // Factor 2: Team draw rates (if available)
+  // Teams with higher historical draw rates are more likely to draw
+  const homeDrawRate = homeTeam.draws / Math.max(homeTeam.matches_played, 1);
+  const awayDrawRate = awayTeam.draws / Math.max(awayTeam.matches_played, 1);
+  const avgDrawRate = (homeDrawRate + awayDrawRate) / 2;
+
+  // Factor 3: Defensive strength
+  // Teams with strong defenses and similar defensive capabilities tend to draw more
+  const homeDefStrength = homeTeam.goals_conceded / Math.max(homeTeam.matches_played, 1);
+  const awayDefStrength = awayTeam.goals_conceded / Math.max(awayTeam.matches_played, 1);
+  const avgGoalsConceded = (homeDefStrength + awayDefStrength) / 2;
+
+  // Lower goals conceded (stronger defense) = slightly higher draw probability
+  // Normalize to a factor between 0.9 and 1.1
+  const defensiveFactor = Math.max(0.9, Math.min(1.1, 1 + (1.5 - avgGoalsConceded) / 10));
+
+  // Combine factors
+  // Weight: 60% strength difference, 25% historical draw rate, 15% defensive factor
+  const dynamicDrawProb =
+    baseDrawProb * (0.6 * (0.7 + 0.6 * strengthDiffFactor)) + // Strength diff: ranges from 0.7 to 1.3 of base
+    0.25 * avgDrawRate + // Historical draw rate contribution
+    0.15 * baseDrawProb * defensiveFactor; // Defensive factor contribution
+
+  // Ensure draw probability is within reasonable bounds (15% to 40%)
+  return Math.max(0.15, Math.min(0.4, dynamicDrawProb));
+}
+
+/**
  * Calculate match probabilities using statistical model
  * @param homeTeam Home team statistics
  * @param awayTeam Away team statistics
@@ -116,9 +169,15 @@ export function calculateMatchProbabilities(
   // Calculate away win probability (mirror of home)
   let awayWinProb = 1 / (1 + Math.exp(k * strengthDiff));
 
-  // Adjust for draw probability
-  // In football, draws are common (typically 25-30%)
-  const drawProb = DEFAULT_DRAW_PROBABILITY;
+  // Calculate dynamic draw probability based on team strength difference
+  // When teams are evenly matched (small strength diff) -> higher draw probability
+  // When there's a clear favorite (large strength diff) -> lower draw probability
+  const drawProb = calculateDynamicDrawProbability(
+    adjustedHomeStrength,
+    awayStrength,
+    homeTeam,
+    awayTeam
+  );
 
   // Normalize probabilities
   const totalProb = homeWinProb + awayWinProb + drawProb;

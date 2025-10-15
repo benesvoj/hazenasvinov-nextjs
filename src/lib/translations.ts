@@ -901,6 +901,10 @@ export const translations = {
     passwordPlaceholder: 'Zadejte své heslo',
     email: 'Email',
     emailPlaceholder: 'Zadejte svůj email',
+    previousWeek: 'Předchozí',
+    nextWeek: 'Následující',
+    currentWeek: 'Aktuální týden',
+    noMatches: 'Žádné zápasy k zobrazení',
     dashboard: 'Dashboard',
     howToPlay: 'Jak hrát',
     howToPlayList: {
