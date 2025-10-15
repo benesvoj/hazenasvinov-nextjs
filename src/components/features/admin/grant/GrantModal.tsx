@@ -129,7 +129,7 @@ export default function GrantModal({isOpen, onClose, onSave, grant, mode}: Grant
           label={t.form.month}
           placeholder={t.form.monthPlaceholder}
           selectedKeys={[month.toString()]}
-          onChange={(e) => setMonth(parseInt(e.target.value))}
+          onChange={(e) => setMonth(parseInt(e.target.value, 10))}
           isRequired
           errorMessage={errors.month}
           isInvalid={!!errors.month}

@@ -1050,7 +1050,7 @@ export const translations = {
       editTitle: 'Upravit dotaci',
       editSubtitle: 'Upravte existující dotaci',
       deleteTitle: 'Smazat dotaci',
-      deleteMessage: 'Opravdu chcete smazat dotaci "{name}"? Tuto akci nelze vrátit zpět.',
+      deleteMessage: 'Opravdu chcete smazat dotaci? Tuto akci nelze vrátit zpět.',
     },
     form: {
       name: 'Název dotace',

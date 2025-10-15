@@ -46,7 +46,8 @@ export function useGrants() {
       }
 
       if (filters.search) {
-        query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+        const searchPattern = `%${filters.search}%`;
+        query = query.or(`name.ilike.${searchPattern},description.ilike.${searchPattern}`);
       }
 
       const {data, error} = await query;

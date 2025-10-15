@@ -150,7 +150,7 @@ export default function GrantCalendar() {
         onClose={deleteModal.onClose}
         onConfirm={handleConfirmDelete}
         title={t.modal.deleteTitle}
-        message={t.modal.deleteMessage.replace('{name}', selectedGrant?.name || '')}
+        message={t.modal.deleteMessage}
       />
     </>
   );
