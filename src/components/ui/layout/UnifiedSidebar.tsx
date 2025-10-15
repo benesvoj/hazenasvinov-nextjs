@@ -101,6 +101,8 @@ const getAdminRouteIcon = (route: string) => {
       return <ShieldCheckIcon className="w-5 h-5" />;
     case privateRoutes.meetingMinutes:
       return <ClipboardDocumentListIcon className="w-5 h-5" />;
+    case privateRoutes.grantCalendar:
+      return <CalendarIcon className="w-5 h-5" />;
     default:
       return <Cog6ToothIcon className="w-5 h-5" />;
   }
