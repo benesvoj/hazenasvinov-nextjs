@@ -724,18 +724,18 @@ export default function MatchesAdminPage() {
             if (selectedCategory && selectedSeason) {
               await fetchStandings(selectedCategory, selectedSeason);
             }
-            showToast.success('Zápas byl upraven a tabulka byla automaticky přepočítána!');
+            showToast.success(t.toasts.matchSavedWithUpdateStandingTable);
           } else if (standingsResult.success && !standingsResult.recalculated) {
-            showToast.success('Zápas byl úspěšně upraven!');
+            showToast.success(t.toasts.matchSavedSuccessfully);
           } else {
-            showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
+            showToast.warning(t.toasts.matchSavedWithoutUpdateStandingTable);
           }
         } catch (standingsError) {
-          showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
+          showToast.warning(t.toasts.matchSavedWithoutUpdateStandingTable);
         }
       } else {
         // Scores weren't updated, just show success
-        showToast.success('Zápas byl úspěšně upraven!');
+        showToast.warning(t.toasts.matchSavedWithoutUpdatedScore);
       }
 
       onEditMatchClose();

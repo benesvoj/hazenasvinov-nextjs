@@ -367,6 +367,13 @@ export const translations = {
       teamsScore: 'Týmy & Skóre',
       relatedVideos: 'Související videa',
     },
+    toasts: {
+      matchSavedSuccessfully: 'Zápas byl úspěšně uložen',
+      matchSavedWithUpdateStandingTable: 'Zápas byl uložen a tabulka byla přepočítána',
+      matchSavedWithoutUpdatedScore: 'Zápas byl uložen bez aktualizace skóre',
+      matchSavedWithoutUpdateStandingTable:
+        'Zápas byl upraven, ale nepodařilo se přepočítat tabulku',
+    },
     actions: {
       addMatch: 'Přidat zápas',
       addMatchDescription: 'Přidat nový zápas do vybrané sezóny',
