@@ -618,8 +618,6 @@ export default function MatchesAdminPage() {
 
   // Update match
   const handleUpdateMatch = async () => {
-    console.log('handleUpdateMatch called', {editData, selectedMatch});
-
     if (isSeasonClosed()) {
       setError('Nelze upravit zápas v uzavřené sezóně');
       showToast.danger('Nelze upravit zápas v uzavřené sezóně');
