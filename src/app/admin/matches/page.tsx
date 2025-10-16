@@ -494,14 +494,14 @@ export default function MatchesAdminPage() {
           if (selectedCategory && selectedSeason) {
             await fetchStandings(selectedCategory, selectedSeason);
           }
-          showToast.success('Výsledek zápasu byl uložen a tabulka byla automaticky přepočítána!');
+          showToast.success(t.toasts.matchWithResultWasSaved);
         } else if (standingsResult.success && !standingsResult.recalculated) {
-          showToast.success('Výsledek zápasu byl úspěšně uložen!');
+          showToast.success(t.toasts.matchResultWasSaved);
         } else {
-          showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
+          showToast.warning(t.toasts.matchResultSavedWithoutUpdateStandingTable);
         }
       } catch (standingsError) {
-        showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
+        showToast.warning(t.toasts.matchResultSavedWithoutUpdateStandingTable);
       }
 
       onAddResultClose();
@@ -619,22 +619,35 @@ export default function MatchesAdminPage() {
   // Update match
   const handleUpdateMatch = async () => {
     if (isSeasonClosed()) {
-      setError('Nelze upravit zápas v uzavřené sezóně');
+      setError(t.toasts.matchNotSavedClosedSeason);
+      showToast.warning(t.toasts.matchNotSavedClosedSeason);
       return;
     }
 
-    if (!selectedMatch) return;
+    if (!selectedMatch) {
+      showToast.danger(t.toasts.noMatchSelected);
+      return;
+    }
 
     try {
       // Validate required fields
       if (!editData.date || !editData.time || !editData.venue) {
-        setError('Prosím vyplňte všechna povinná pole');
+        setError(t.toasts.mandatoryFieldsMissing);
+        showToast.danger(t.toasts.mandatoryFieldsMissing);
+        return;
+      }
+
+      // Validate team selection
+      if (!editData.home_team_id || !editData.away_team_id) {
+        setError(t.toasts.selectBothTeams);
+        showToast.danger(t.toasts.selectBothTeams);
         return;
       }
 
       // Validate teams are different
       if (editData.home_team_id === editData.away_team_id) {
-        setError('Domácí a hostující tým musí být různé');
+        setError(t.toasts.selectDifferentTeams);
+        showToast.danger(t.toasts.selectDifferentTeams);
         return;
       }
 
@@ -663,12 +676,22 @@ export default function MatchesAdminPage() {
         updateData.match_number = 0;
       }
 
-      // Only update scores if they are provided
-      if (editData.home_score && editData.away_score) {
+      // Only update scores if they are provided (check for null/undefined, not falsiness since 0 is valid)
+      if (
+        editData.home_score !== null &&
+        editData.home_score !== undefined &&
+        editData.away_score !== null &&
+        editData.away_score !== undefined
+      ) {
         updateData.home_score = editData.home_score;
         updateData.away_score = editData.away_score;
       }
-      if (editData.home_score_halftime && editData.away_score_halftime) {
+      if (
+        editData.home_score_halftime !== null &&
+        editData.home_score_halftime !== undefined &&
+        editData.away_score_halftime !== null &&
+        editData.away_score_halftime !== undefined
+      ) {
         updateData.home_score_halftime = editData.home_score_halftime;
         updateData.away_score_halftime = editData.away_score_halftime;
       }
@@ -698,15 +721,18 @@ export default function MatchesAdminPage() {
             if (selectedCategory && selectedSeason) {
               await fetchStandings(selectedCategory, selectedSeason);
             }
-            showToast.success('Zápas byl upraven a tabulka byla automaticky přepočítána!');
+            showToast.success(t.toasts.matchSavedWithUpdateStandingTable);
           } else if (standingsResult.success && !standingsResult.recalculated) {
-            showToast.success('Zápas byl úspěšně upraven!');
+            showToast.success(t.toasts.matchSavedSuccessfully);
           } else {
-            showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
+            showToast.warning(t.toasts.matchSavedWithoutUpdateStandingTable);
           }
         } catch (standingsError) {
-          showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
+          showToast.warning(t.toasts.matchSavedWithoutUpdateStandingTable);
         }
+      } else {
+        // Scores weren't updated, just show success
+        showToast.warning(t.toasts.matchSavedWithoutUpdatedScore);
       }
 
       onEditMatchClose();
@@ -877,11 +903,7 @@ export default function MatchesAdminPage() {
           setError('');
 
           // Show success message
-          showToast.success(
-            `Import dokončen! Úspěšně importováno ${result.success} zápasů.${
-              result.failed > 0 ? ` ${result.failed} zápasů selhalo.` : ''
-            }`
-          );
+          showToast.success(t.toasts.matchSuccessImport);
         }
 
         if (result.errors.length > 0) {

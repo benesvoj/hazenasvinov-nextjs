@@ -11,7 +11,7 @@ import {translations} from '@/lib/translations';
 import {UnifiedModal, Heading, showToast} from '@/components';
 import {matchStatuses} from '@/constants';
 import {useTeamClub, useMatchVideos} from '@/hooks';
-import {Match, Nullish, Video, EditMatchFormData} from '@/types';
+import {Match, Video, EditMatchFormData} from '@/types';
 
 import VideoSelectionModal from './VideoSelectionModal';
 
@@ -158,9 +158,7 @@ export default function EditMatchModal({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column - Basic Info */}
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">
-                    Základní údaje
-                  </h4>
+                  <Heading size={4}>{t.modal.basicInfo}</Heading>
                   <Input
                     label="Datum"
                     type="date"
@@ -223,9 +221,7 @@ export default function EditMatchModal({
 
                 {/* Right Column - Teams & Scores */}
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2">
-                    Týmy & Skóre
-                  </h4>
+                  <Heading size={4}>{t.modal.teamsScore}</Heading>
                   <div>
                     <Select
                       label="Domácí tým"
@@ -299,9 +295,7 @@ export default function EditMatchModal({
 
               {/* Video Selection Section */}
               <div className="col-span-1 lg:col-span-2">
-                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">
-                  Související videa
-                </h4>
+                <Heading size={4}>{t.modal.relatedVideos}</Heading>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Videa (volitelné)
