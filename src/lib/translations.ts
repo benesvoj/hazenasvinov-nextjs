@@ -1102,4 +1102,14 @@ export const translations = {
       december: 'Prosinec',
     },
   },
+  membershipFees: {
+    toasts: {
+      feeCreated: 'Členský příspěvek byl úspěšně vytvořen',
+      feeUpdated: 'Členský příspěvek byl úspěšně aktualizován',
+      feeDeleted: 'Členský příspěvek byl úspěšně smazán',
+      paymentsCreated: 'Platby byly úspěšně vytvořeny',
+      paymentsUpdated: 'Platby byly úspěšně aktualizovány',
+      paymentsDeleted: 'Platby byly úspěšně smazány',
+    },
+  },
 } as const;

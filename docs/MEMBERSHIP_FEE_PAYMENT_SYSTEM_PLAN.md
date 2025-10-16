@@ -452,7 +452,6 @@ LEFT JOIN category_membership_fees cf ON (
     AND cf.is_active = TRUE
 )
 LEFT JOIN membership_fee_payments p ON m.id = p.member_id
-WHERE m.is_active = TRUE
 GROUP BY
     m.id,
     m.registration_number,
