@@ -31,6 +31,7 @@ export interface MemberPaymentStatus {
   payment_status: 'paid' | 'partial' | 'unpaid' | 'not_required';
   last_payment_date?: string;
   payment_count: number;
+  currency?: string;
 }
 
 export interface CreatePaymentData {

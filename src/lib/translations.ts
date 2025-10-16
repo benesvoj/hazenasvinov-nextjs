@@ -480,6 +480,7 @@ export const translations = {
       dateOfBirth: 'Datum narození',
       category: 'Kategorie',
       sex: 'Pohlaví',
+      membershipFee: 'Členský příspěvek',
       functions: 'Funkce',
       actions: 'Akce',
     },
