@@ -370,9 +370,20 @@ export const translations = {
     toasts: {
       matchSavedSuccessfully: 'Zápas byl úspěšně uložen',
       matchSavedWithUpdateStandingTable: 'Zápas byl uložen a tabulka byla přepočítána',
+      matchWithResultWasSaved: 'Výsledek zápasu byl uložen a tabulka byla automaticky přepočítána!',
+      matchResultWasSaved: 'Výsledek zápasu byl uložen',
+      matchResultSavedWithoutUpdateStandingTable:
+        'Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku',
       matchSavedWithoutUpdatedScore: 'Zápas byl uložen bez aktualizace skóre',
       matchSavedWithoutUpdateStandingTable:
         'Zápas byl upraven, ale nepodařilo se přepočítat tabulku',
+      matchNotSavedClosedSeason: 'Zápas nemohl být uložen, sezóna je uzavřená',
+      noMatchSelected: 'Není vybrán žádný zápas',
+      mandatoryFieldsMissing: 'Prosím vyplňte všechna povinná pole',
+      selectBothTeams: 'Prosím vyberte oba týmy',
+      selectDifferentTeams: 'Domácí a hostující tým musí být různé',
+      matchSuccessImport: 'Import dokončen!',
+      matchUnsuccessImport: 'Import dokončen s chybami.',
     },
     actions: {
       addMatch: 'Přidat zápas',
