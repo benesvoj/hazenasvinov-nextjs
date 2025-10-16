@@ -625,7 +625,6 @@ export default function MatchesAdminPage() {
     }
 
     if (!selectedMatch) {
-      console.error(t.toasts.noMatchSelected);
       showToast.danger(t.toasts.noMatchSelected);
       return;
     }
