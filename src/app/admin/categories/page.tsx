@@ -2,12 +2,14 @@
 
 import React, {useEffect, useState} from 'react';
 
-import {useDisclosure, Input} from '@heroui/react';
+import {Input, Tab, Tabs, useDisclosure} from '@heroui/react';
 
-import {getAgeGroupLabel, getGenderLabel, getStatusLabel, getStatusClasses} from '@/helpers/ui';
+import {getAgeGroupLabel, getGenderLabel, getStatusClasses, getStatusLabel} from '@/helpers/ui';
 
-import {DeleteConfirmationModal, AdminContainer, UnifiedTable} from '@/components';
-import {AgeGroups, ActionTypes, Genders, ModalMode} from '@/enums';
+import CategoryFeesTab from '@/app/admin/categories/components/CategoryFeesTab';
+
+import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
+import {ActionTypes, ModalMode} from '@/enums';
 import {useCategories} from '@/hooks';
 import {translations} from '@/lib';
 import {Category} from '@/types';
@@ -186,8 +188,8 @@ export default function CategoriesAdminPage() {
     return (
       <div className="w-full max-w-md">
         <Input
-          label="Hledat kategorie"
-          placeholder="Zadejte název kategorie..."
+          label={t.searchCategory}
+          placeholder={t.searchCategoryPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           size="sm"
@@ -214,16 +216,22 @@ export default function CategoriesAdminPage() {
           {error}
         </div>
       )}
-
-      <UnifiedTable
-        columns={categoryColumns}
-        data={categories}
-        ariaLabel={t.title}
-        renderCell={renderCategoryCell}
-        getKey={(category: Category) => category.id}
-        emptyContent={t.table.noCategories}
-        isStriped
-      />
+      <Tabs aria-label="Categories admin tabs">
+        <Tab key="categories" title={t.title}>
+          <UnifiedTable
+            columns={categoryColumns}
+            data={categories}
+            ariaLabel={t.title}
+            renderCell={renderCategoryCell}
+            getKey={(category: Category) => category.id}
+            emptyContent={t.table.noCategories}
+            isStriped
+          />
+        </Tab>
+        <Tab key="membershipFees" title={t.modal.membershipFeesTab}>
+          <CategoryFeesTab />
+        </Tab>
+      </Tabs>
 
       {/* Category Modal (Create/Edit) */}
       <CategoryModal

@@ -23,11 +23,33 @@ export const translations = {
   },
   categories: {
     addCategory: 'Přidat kategorii',
+    editCategory: 'Upravit kategorii',
     title: 'Kategorie',
     description: 'Správa kategorií, které jsou dostupné v systému.',
     edit: 'Upravit kategorii',
+    searchCategory: 'Hledat kategorii...',
+    searchCategoryPlaceholder: 'Zadejte název kategorie...',
     editDescription:
       'Upravte informace o kategorii. Změny budou uloženy po kliknutí na tlačítko "Uložit". Úpravy se projeví na všech stránkách, které tuto kategorii používají.',
+    modal: {
+      basicInfoTab: 'Základní údaje',
+      seasonTab: 'Sezóny',
+      membershipFeesTab: 'Členské příspěvky',
+      input: {
+        name: 'Název',
+        namePlaceholder: 'např. Muži, Ženy, Dorostenci',
+        description: 'Popis',
+        descriptionPlaceholder: 'Volitelný popis kategorie',
+        ageGroup: 'Věková skupina',
+        ageGroupPlaceholder: 'Vyberte věkovou skupinu',
+        gender: 'Pohlaví',
+        genderPlaceholder: 'Vyberte pohlaví',
+        genderDescription: 'Smíšené týmy mohou být pouze pro mládežnické kategorie',
+        sortOrder: 'Pořadí',
+        sortOrderDescription: 'Nižší číslo = vyšší priorita v seznamu',
+        isActive: 'Aktivní',
+      },
+    },
     table: {
       id: 'ID',
       name: 'Název',
