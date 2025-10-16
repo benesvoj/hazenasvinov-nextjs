@@ -362,6 +362,11 @@ export const translations = {
     matchScore: 'Skóre',
     matchResult: 'Výsledek',
     noMatches: 'Žádné odehrané zápasy',
+    modal: {
+      basicInfo: 'Základní údaje',
+      teamsScore: 'Týmy & Skóre',
+      relatedVideos: 'Související videa',
+    },
     actions: {
       addMatch: 'Přidat zápas',
       addMatchDescription: 'Přidat nový zápas do vybrané sezóny',

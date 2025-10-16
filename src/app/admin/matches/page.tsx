@@ -618,23 +618,39 @@ export default function MatchesAdminPage() {
 
   // Update match
   const handleUpdateMatch = async () => {
+    console.log('handleUpdateMatch called', {editData, selectedMatch});
+
     if (isSeasonClosed()) {
       setError('Nelze upravit zápas v uzavřené sezóně');
+      showToast.danger('Nelze upravit zápas v uzavřené sezóně');
       return;
     }
 
-    if (!selectedMatch) return;
+    if (!selectedMatch) {
+      console.error('No selected match');
+      showToast.danger('Nebyl vybrán žádný zápas');
+      return;
+    }
 
     try {
       // Validate required fields
       if (!editData.date || !editData.time || !editData.venue) {
         setError('Prosím vyplňte všechna povinná pole');
+        showToast.danger('Prosím vyplňte všechna povinná pole');
+        return;
+      }
+
+      // Validate team selection
+      if (!editData.home_team_id || !editData.away_team_id) {
+        setError('Prosím vyberte oba týmy');
+        showToast.danger('Prosím vyberte oba týmy');
         return;
       }
 
       // Validate teams are different
       if (editData.home_team_id === editData.away_team_id) {
         setError('Domácí a hostující tým musí být různé');
+        showToast.danger('Domácí a hostující tým musí být různé');
         return;
       }
 
@@ -663,12 +679,22 @@ export default function MatchesAdminPage() {
         updateData.match_number = 0;
       }
 
-      // Only update scores if they are provided
-      if (editData.home_score && editData.away_score) {
+      // Only update scores if they are provided (check for null/undefined, not falsiness since 0 is valid)
+      if (
+        editData.home_score !== null &&
+        editData.home_score !== undefined &&
+        editData.away_score !== null &&
+        editData.away_score !== undefined
+      ) {
         updateData.home_score = editData.home_score;
         updateData.away_score = editData.away_score;
       }
-      if (editData.home_score_halftime && editData.away_score_halftime) {
+      if (
+        editData.home_score_halftime !== null &&
+        editData.home_score_halftime !== undefined &&
+        editData.away_score_halftime !== null &&
+        editData.away_score_halftime !== undefined
+      ) {
         updateData.home_score_halftime = editData.home_score_halftime;
         updateData.away_score_halftime = editData.away_score_halftime;
       }
@@ -707,6 +733,9 @@ export default function MatchesAdminPage() {
         } catch (standingsError) {
           showToast.warning('Zápas byl upraven, ale nepodařilo se přepočítat tabulku');
         }
+      } else {
+        // Scores weren't updated, just show success
+        showToast.success('Zápas byl úspěšně upraven!');
       }
 
       onEditMatchClose();
