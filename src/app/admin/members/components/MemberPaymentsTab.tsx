@@ -107,17 +107,21 @@ export default function MemberPaymentsTab({member}: MemberPaymentsTabProps) {
       <div className="flex justify-between items-center">
         <Select
           label="Kalendářní rok"
+          size="sm"
           selectedKeys={[selectedYear.toString()]}
           onSelectionChange={(keys) => setSelectedYear(parseInt(Array.from(keys)[0] as string))}
           className="max-w-xs"
         >
           {yearOptions.map((year) => (
-            <SelectItem key={year.toString()}>{year}</SelectItem>
+            <SelectItem key={year.toString()} textValue={year.toString()}>
+              {year}
+            </SelectItem>
           ))}
         </Select>
 
         <Button
           color="primary"
+          size="sm"
           startContent={<PlusIcon className="w-5 h-5" />}
           onPress={() => {
             setSelectedPayment(null);

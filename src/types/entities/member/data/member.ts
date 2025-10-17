@@ -1,25 +1,9 @@
 import {Genders, MemberFunction as MemberFunctionEnum} from '@/enums';
-import {Category} from '@/types';
+import {Category, MemberSchema} from '@/types';
 
-export interface Member {
-  id: string;
-  registration_number: string;
-  name: string;
-  surname: string;
-  date_of_birth?: string;
-  category_id?: string;
+export interface Member extends MemberSchema {
   sex: Genders;
   functions: MemberFunctionEnum[];
-  // New unified player system fields
-  is_external: boolean;
-  core_club_id?: string;
-  current_club_id?: string;
-  external_club_name?: string;
-  position?: string;
-  jersey_number?: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
 }
 export interface MembersListTabProps {
   members: Member[];
@@ -72,4 +56,12 @@ export interface UpdateMemberData {
   functions?: MemberFunctionEnum[];
   category_id?: string;
   is_active?: boolean;
+}
+
+/**
+ * New types for Member to refactor system
+ */
+export interface MemberNew extends MemberSchema {
+  sex: Genders;
+  functions: MemberFunctionEnum[];
 }

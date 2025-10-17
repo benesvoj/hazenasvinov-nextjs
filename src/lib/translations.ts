@@ -493,6 +493,8 @@ export const translations = {
       description:
         'Přidejte nového člena, který se může přihlásit do systému. Na uvedený email bude odeslán odkaz pro nastavení hesla.',
     },
+    activeMember: 'Aktivní člen',
+    inactiveMember: 'Neaktivní člen',
   },
   memberFunctions: {
     title: 'Správa funkcí členů',

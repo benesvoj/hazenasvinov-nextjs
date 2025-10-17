@@ -2,20 +2,9 @@
 
 import React from 'react';
 
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Card,
-  CardBody,
-  Divider,
-  Tabs,
-  Tab,
-} from '@heroui/react';
+import {Tab, Tabs} from '@heroui/react';
 
+import {UnifiedModal} from '@/components';
 import {Member} from '@/types';
 
 import MemberInfoTab from './MemberInfoTab';
@@ -33,32 +22,20 @@ export default function MemberDetailModal({isOpen, onClose, member}: MemberDetai
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="5xl" scrollBehavior="inside">
-      <ModalContent>
-        <ModalHeader>
-          <div className="flex flex-col">
-            <h2 className="text-2xl font-bold">
-              {member.name} {member.surname}
-            </h2>
-            <p className="text-sm text-gray-500">{member.registration_number}</p>
-          </div>
-        </ModalHeader>
-        <ModalBody>
-          <Tabs aria-label="Member details">
-            <Tab key="info" title="Informace">
-              <MemberInfoTab member={member} />
-            </Tab>
-            <Tab key="payments" title="Členské poplatky">
-              <MemberPaymentsTab member={member} />
-            </Tab>
-          </Tabs>
-        </ModalBody>
-        <ModalFooter>
-          <Button variant="light" onPress={onClose}>
-            Zavřít
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+    <UnifiedModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={'4xl'}
+      title={`${member.registration_number} - ${member.name} ${member.surname}`}
+    >
+      <Tabs aria-label="Member details">
+        <Tab key="info" title="Informace">
+          <MemberInfoTab member={member} />
+        </Tab>
+        <Tab key="payments" title="Členské poplatky">
+          <MemberPaymentsTab member={member} />
+        </Tab>
+      </Tabs>
+    </UnifiedModal>
   );
 }

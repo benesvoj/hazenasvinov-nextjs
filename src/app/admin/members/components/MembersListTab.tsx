@@ -34,6 +34,7 @@ import {createClient} from '@/utils/supabase/client';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
+import {StatusCell} from '@/app/admin/members/components/cells/StatusCell';
 import MemberDetailModal from '@/app/admin/members/components/MemberDetailModal';
 
 import {DeleteConfirmationModal, showToast} from '@/components';
@@ -103,14 +104,13 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     registration_number: '',
     name: '',
     surname: '',
-    date_of_birth: undefined,
+    date_of_birth: null,
     category_id: '',
     sex: Genders.MALE,
     functions: [],
     id: '',
     created_at: '',
     updated_at: '',
-    is_external: false,
     is_active: true,
   });
 
@@ -193,7 +193,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
   };
 
   const sortedMembers = useMemo(() => {
-    const sorted = [...filteredMembers].sort((a, b) => {
+    return [...filteredMembers].sort((a, b) => {
       const first = a[sortDescriptor.column as keyof Member];
       const second = b[sortDescriptor.column as keyof Member];
 
@@ -226,8 +226,6 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
       return 0;
     });
-
-    return sorted;
   }, [filteredMembers, sortDescriptor]);
 
   const items = useMemo(() => {
@@ -309,14 +307,13 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       registration_number: '',
       name: '',
       surname: '',
-      date_of_birth: undefined, // Changed to undefined for optional field
+      date_of_birth: null,
       category_id: '',
       sex: Genders.MALE,
       functions: [],
       id: '',
       created_at: '',
       updated_at: '',
-      is_external: false,
       is_active: true,
     });
     onAddMemberOpen();
@@ -335,7 +332,6 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       id: member.id,
       created_at: member.created_at,
       updated_at: member.updated_at,
-      is_external: member.is_external || false,
       is_active: member.is_active !== undefined ? member.is_active : true,
     });
     onEditMemberOpen();
@@ -436,26 +432,37 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     return categories[categoryId] || categoryId;
   };
 
-  const getMemberPaymentStatus = (memberId: string) => {
-    return statusData.find((s) => s.member_id === memberId);
-  };
+  const getMemberPaymentStatus = useMemo(() => {
+    // Debug once when data changes
+    console.log('getMemberPaymentStatus created', {
+      membersCount: members.length,
+      statusDataCount: statusData.length,
+      firstMember: members[0] ? {id: members[0].id, name: members[0].name} : null,
+      firstStatus: statusData[0]
+        ? {member_id: statusData[0].member_id, name: statusData[0].name}
+        : null,
+      // Check if first member has a match
+      firstMemberHasMatch:
+        members[0] && statusData.length > 0
+          ? statusData.some((s) => s.member_id === members[0].id)
+          : null,
+    });
+
+    let callCount = 0;
+    return (memberId: string) => {
+      const status = statusData.find((s) => s.member_id === memberId);
+      if (callCount < 3 && statusData.length > 0) {
+        console.log(`Call ${callCount++}: Looking for ${memberId}, found:`, status ? 'YES' : 'NO');
+      }
+      return status;
+    };
+  }, [members, statusData]);
 
   // Render cell content based on column key
   const renderCell = (member: Member, columnKey: string) => {
     switch (columnKey) {
       case 'status':
-        return (
-          <div className="flex items-center justify-center">
-            <div
-              className={`w-3 h-3 rounded-full ${
-                member.functions && member.functions.length > 0 ? 'bg-green-500' : 'bg-red-500'
-              }`}
-              title={
-                member.functions && member.functions.length > 0 ? 'Aktivní člen' : 'Neaktivní člen'
-              }
-            />
-          </div>
-        );
+        return <StatusCell isActive={member.is_active} />;
       case 'registration_number':
         return <span className="font-medium">{member.registration_number || 'N/A'}</span>;
       case 'name':
@@ -471,30 +478,28 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
           </span>
         );
       case 'category':
-        return getCategoryName(member.category_id);
+        return getCategoryName(member.category_id || undefined);
       case 'sex':
         return member.sex === Genders.MALE ? 'Muž' : 'Žena';
       case 'membershipFee': {
-        return (() => {
-          const status = getMemberPaymentStatus(member.id);
-          if (!status) return <span className="text-gray-400">-</span>;
+        const status = getMemberPaymentStatus(member.id);
+        if (!status) return <span className="text-gray-400">-</span>;
 
-          return (
-            <div className="flex flex-col gap-1">
-              <Chip color={getPaymentStatusColor(status.payment_status)} size="sm" variant="flat">
-                {getPaymentStatusLabel(status.payment_status)}
-              </Chip>
-              {status.payment_status !== 'not_required' && (
-                <span className="text-xs text-gray-500">
-                  {status.net_paid} / {status.expected_fee_amount} {status.currency || 'CZK'}
-                </span>
-              )}
-            </div>
-          );
-        })();
+        return (
+          <div className="flex flex-col gap-1">
+            <Chip color={getPaymentStatusColor(status.payment_status)} size="sm" variant="flat">
+              {getPaymentStatusLabel(status.payment_status)}
+            </Chip>
+            {status.payment_status !== 'not_required' && (
+              <span className="text-xs text-gray-500">
+                {status.net_paid} / {status.expected_fee_amount} {status.currency || 'CZK'}
+              </span>
+            )}
+          </div>
+        );
       }
       case 'functions':
-        if (!member.functions || member.functions.length === 0) {
+        if (!member.is_active) {
           return <span className="text-gray-500">Žádné funkce</span>;
         }
         return (
@@ -575,7 +580,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     {
       key: 'membershipFee',
       label: translations.members.membersTable.membershipFee,
-      sortable: true,
+      sortable: false,
     },
     {
       key: 'functions',
@@ -737,6 +742,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
       {/* Members Table */}
       <Table
+        key={`table-${statusData.length}`}
         aria-label="Tabulka členů"
         selectionMode="multiple"
         selectedKeys={selectedMembers}
