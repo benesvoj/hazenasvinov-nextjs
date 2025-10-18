@@ -23,11 +23,33 @@ export const translations = {
   },
   categories: {
     addCategory: 'Přidat kategorii',
+    editCategory: 'Upravit kategorii',
     title: 'Kategorie',
     description: 'Správa kategorií, které jsou dostupné v systému.',
     edit: 'Upravit kategorii',
+    searchCategory: 'Hledat kategorii...',
+    searchCategoryPlaceholder: 'Zadejte název kategorie...',
     editDescription:
       'Upravte informace o kategorii. Změny budou uloženy po kliknutí na tlačítko "Uložit". Úpravy se projeví na všech stránkách, které tuto kategorii používají.',
+    modal: {
+      basicInfoTab: 'Základní údaje',
+      seasonTab: 'Sezóny',
+      membershipFeesTab: 'Členské příspěvky',
+      input: {
+        name: 'Název',
+        namePlaceholder: 'např. Muži, Ženy, Dorostenci',
+        description: 'Popis',
+        descriptionPlaceholder: 'Volitelný popis kategorie',
+        ageGroup: 'Věková skupina',
+        ageGroupPlaceholder: 'Vyberte věkovou skupinu',
+        gender: 'Pohlaví',
+        genderPlaceholder: 'Vyberte pohlaví',
+        genderDescription: 'Smíšené týmy mohou být pouze pro mládežnické kategorie',
+        sortOrder: 'Pořadí',
+        sortOrderDescription: 'Nižší číslo = vyšší priorita v seznamu',
+        isActive: 'Aktivní',
+      },
+    },
     table: {
       id: 'ID',
       name: 'Název',
@@ -458,6 +480,7 @@ export const translations = {
       dateOfBirth: 'Datum narození',
       category: 'Kategorie',
       sex: 'Pohlaví',
+      membershipFee: 'Členský příspěvek',
       functions: 'Funkce',
       actions: 'Akce',
     },
@@ -469,6 +492,15 @@ export const translations = {
       title: 'Přidat člena',
       description:
         'Přidejte nového člena, který se může přihlásit do systému. Na uvedený email bude odeslán odkaz pro nastavení hesla.',
+    },
+    activeMember: 'Aktivní člen',
+    inactiveMember: 'Neaktivní člen',
+    tabs: {
+      members: 'Členové',
+      statistics: 'Statistiky',
+    },
+    toasts: {
+      selectMember: 'Vyberte alespoň jednoho člena pro hromadnou úpravu',
     },
   },
   memberFunctions: {
@@ -1100,6 +1132,16 @@ export const translations = {
       october: 'Říjen',
       november: 'Listopad',
       december: 'Prosinec',
+    },
+  },
+  membershipFees: {
+    toasts: {
+      feeCreated: 'Členský příspěvek byl úspěšně vytvořen',
+      feeUpdated: 'Členský příspěvek byl úspěšně aktualizován',
+      feeDeleted: 'Členský příspěvek byl úspěšně smazán',
+      paymentsCreated: 'Platby byly úspěšně vytvořeny',
+      paymentsUpdated: 'Platby byly úspěšně aktualizovány',
+      paymentsDeleted: 'Platby byly úspěšně smazány',
     },
   },
 } as const;

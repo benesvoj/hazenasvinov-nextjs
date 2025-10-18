@@ -1,27 +1,32 @@
-import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 
 import {
-  Pagination,
-  useDisclosure,
+  Button,
   Card,
   CardBody,
-  Badge,
-  Button,
+  Chip,
   Input,
+  Pagination,
   Select,
   SelectItem,
   Table,
-  TableHeader,
-  TableColumn,
   TableBody,
-  TableRow,
   TableCell,
-  Chip,
+  TableColumn,
+  TableHeader,
+  TableRow,
+  useDisclosure,
 } from '@heroui/react';
 
-import {PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
+import {
+  EyeIcon,
+  MagnifyingGlassIcon,
+  PencilIcon,
+  PlusIcon,
+  TrashIcon,
+} from '@heroicons/react/24/outline';
 
-import {useDebounce} from '@/hooks/shared/useDebounce';
+import {getPaymentStatusColor, getPaymentStatusLabel} from '@/enums/membershipFeeStatus';
 
 import {translations} from '@/lib/translations';
 
@@ -29,9 +34,13 @@ import {createClient} from '@/utils/supabase/client';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
+import {StatusCell} from '@/app/admin/members/components/cells/StatusCell';
+import MemberDetailModal from '@/app/admin/members/components/MemberDetailModal';
+
 import {DeleteConfirmationModal, showToast} from '@/components';
-import {getMemberFunctionOptions, Genders, MemberFunction} from '@/enums';
-import {Member, Category} from '@/types';
+import {Genders, getMemberFunctionOptions, MemberFunction} from '@/enums';
+import {useDebounce, usePaymentStatus} from '@/hooks';
+import {Category, Member} from '@/types';
 
 import BulkEditModal from './BulkEditModal';
 import MemberFormModal from './MemberFormModal';
@@ -44,9 +53,11 @@ interface MembersListTabProps {
 
 export default function MembersListTab({categoriesData, sexOptions}: MembersListTabProps) {
   // Use AppDataContext for members data
-  const {members, membersLoading, membersError, refreshMembers} = useAppData();
+  const {members, membersLoading, refreshMembers} = useAppData();
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const {statusData} = usePaymentStatus();
+  const t = translations.members;
 
   // Debounce search term to improve performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -77,6 +88,11 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     onOpen: onBulkEditOpen,
     onClose: onBulkEditClose,
   } = useDisclosure();
+  const {
+    isOpen: isDetailMemberOpen,
+    onOpen: onDetailMemberOpen,
+    onClose: onDetailMemberClose,
+  } = useDisclosure();
 
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
@@ -89,14 +105,13 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     registration_number: '',
     name: '',
     surname: '',
-    date_of_birth: undefined,
+    date_of_birth: null,
     category_id: '',
     sex: Genders.MALE,
     functions: [],
     id: '',
     created_at: '',
     updated_at: '',
-    is_external: false,
     is_active: true,
   });
 
@@ -179,7 +194,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
   };
 
   const sortedMembers = useMemo(() => {
-    const sorted = [...filteredMembers].sort((a, b) => {
+    return [...filteredMembers].sort((a, b) => {
       const first = a[sortDescriptor.column as keyof Member];
       const second = b[sortDescriptor.column as keyof Member];
 
@@ -212,8 +227,6 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
       return 0;
     });
-
-    return sorted;
   }, [filteredMembers, sortDescriptor]);
 
   const items = useMemo(() => {
@@ -225,7 +238,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
   // Bulk edit functions
   const handleBulkEdit = async () => {
     if (selectedMembers.size === 0) {
-      showToast.danger('Vyberte alespoň jednoho člena pro hromadnou úpravu');
+      showToast.warning(t.toasts.selectMember);
       return;
     }
 
@@ -273,7 +286,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
   const openBulkEditModal = () => {
     if (selectedMembers.size === 0) {
-      showToast.danger('Vyberte alespoň jednoho člena pro hromadnou úpravu');
+      showToast.warning(t.toasts.selectMember);
       return;
     }
     onBulkEditOpen();
@@ -295,14 +308,13 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       registration_number: '',
       name: '',
       surname: '',
-      date_of_birth: undefined, // Changed to undefined for optional field
+      date_of_birth: null,
       category_id: '',
       sex: Genders.MALE,
       functions: [],
       id: '',
       created_at: '',
       updated_at: '',
-      is_external: false,
       is_active: true,
     });
     onAddMemberOpen();
@@ -321,7 +333,6 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       id: member.id,
       created_at: member.created_at,
       updated_at: member.updated_at,
-      is_external: member.is_external || false,
       is_active: member.is_active !== undefined ? member.is_active : true,
     });
     onEditMemberOpen();
@@ -411,28 +422,28 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     }
   };
 
+  const openDetailMember = async (member: Member) => {
+    setSelectedMember(member);
+    onDetailMemberOpen();
+  };
+
   // Helper functions
   const getCategoryName = (categoryId: string | undefined) => {
     if (!categoryId) return 'default';
     return categories[categoryId] || categoryId;
   };
 
+  const getMemberPaymentStatus = useMemo(() => {
+    return (memberId: string) => {
+      return statusData.find((s) => s.member_id === memberId);
+    };
+  }, [statusData]);
+
   // Render cell content based on column key
   const renderCell = (member: Member, columnKey: string) => {
     switch (columnKey) {
       case 'status':
-        return (
-          <div className="flex items-center justify-center">
-            <div
-              className={`w-3 h-3 rounded-full ${
-                member.functions && member.functions.length > 0 ? 'bg-green-500' : 'bg-red-500'
-              }`}
-              title={
-                member.functions && member.functions.length > 0 ? 'Aktivní člen' : 'Neaktivní člen'
-              }
-            />
-          </div>
-        );
+        return <StatusCell isActive={member.is_active} />;
       case 'registration_number':
         return <span className="font-medium">{member.registration_number || 'N/A'}</span>;
       case 'name':
@@ -448,11 +459,28 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
           </span>
         );
       case 'category':
-        return getCategoryName(member.category_id);
+        return getCategoryName(member.category_id || undefined);
       case 'sex':
         return member.sex === Genders.MALE ? 'Muž' : 'Žena';
+      case 'membershipFee': {
+        const status = getMemberPaymentStatus(member.id);
+        if (!status) return <span className="text-gray-400">-</span>;
+
+        return (
+          <div className="flex flex-col gap-1">
+            <Chip color={getPaymentStatusColor(status.payment_status)} size="sm" variant="flat">
+              {getPaymentStatusLabel(status.payment_status)}
+            </Chip>
+            {status.payment_status !== 'not_required' && (
+              <span className="text-xs text-gray-500">
+                {status.net_paid} / {status.expected_fee_amount} {status.currency || 'CZK'}
+              </span>
+            )}
+          </div>
+        );
+      }
       case 'functions':
-        if (!member.functions || member.functions.length === 0) {
+        if (!member.is_active) {
           return <span className="text-gray-500">Žádné funkce</span>;
         }
         return (
@@ -467,6 +495,13 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       case 'actions':
         return (
           <div className="flex items-center gap-2">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              startContent={<EyeIcon className="w-4 h-4" />}
+              onPress={() => openDetailMember(member)}
+            />
             <Button isIconOnly size="sm" variant="light" onPress={() => openEditModal(member)}>
               <PencilIcon className="w-4 h-4" />
             </Button>
@@ -522,6 +557,11 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       key: 'sex',
       label: translations.members.membersTable.sex,
       sortable: true,
+    },
+    {
+      key: 'membershipFee',
+      label: translations.members.membersTable.membershipFee,
+      sortable: false,
     },
     {
       key: 'functions',
@@ -683,6 +723,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
       {/* Members Table */}
       <Table
+        key={`table-${statusData.length}`}
         aria-label="Tabulka členů"
         selectionMode="multiple"
         selectedKeys={selectedMembers}
@@ -769,6 +810,12 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
         sexOptions={sexOptions}
         submitButtonText="Uložit změny"
         isEditMode={true}
+      />
+
+      <MemberDetailModal
+        isOpen={isDetailMemberOpen}
+        onClose={onDetailMemberClose}
+        member={selectedMember}
       />
 
       <DeleteConfirmationModal

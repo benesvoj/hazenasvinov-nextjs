@@ -86,9 +86,7 @@ export default function MemberFormModal({
                 label="Datum narození"
                 type="date"
                 value={formData.date_of_birth || ''}
-                onChange={(e) =>
-                  setFormData({...formData, date_of_birth: e.target.value || undefined})
-                }
+                onChange={(e) => setFormData({...formData, date_of_birth: e.target.value || null})}
                 placeholder="Vyberte datum narození"
               />
               <Select
