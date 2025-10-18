@@ -495,6 +495,13 @@ export const translations = {
     },
     activeMember: 'Aktivní člen',
     inactiveMember: 'Neaktivní člen',
+    tabs: {
+      members: 'Členové',
+      statistics: 'Statistiky',
+    },
+    toasts: {
+      selectMember: 'Vyberte alespoň jednoho člena pro hromadnou úpravu',
+    },
   },
   memberFunctions: {
     title: 'Správa funkcí členů',

@@ -57,6 +57,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const {statusData} = usePaymentStatus();
+  const t = translations.members;
 
   // Debounce search term to improve performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -237,7 +238,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
   // Bulk edit functions
   const handleBulkEdit = async () => {
     if (selectedMembers.size === 0) {
-      showToast.danger('Vyberte alespoň jednoho člena pro hromadnou úpravu');
+      showToast.warning(t.toasts.selectMember);
       return;
     }
 
@@ -285,7 +286,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
   const openBulkEditModal = () => {
     if (selectedMembers.size === 0) {
-      showToast.danger('Vyberte alespoň jednoho člena pro hromadnou úpravu');
+      showToast.warning(t.toasts.selectMember);
       return;
     }
     onBulkEditOpen();
@@ -433,30 +434,10 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
   };
 
   const getMemberPaymentStatus = useMemo(() => {
-    // Debug once when data changes
-    console.log('getMemberPaymentStatus created', {
-      membersCount: members.length,
-      statusDataCount: statusData.length,
-      firstMember: members[0] ? {id: members[0].id, name: members[0].name} : null,
-      firstStatus: statusData[0]
-        ? {member_id: statusData[0].member_id, name: statusData[0].name}
-        : null,
-      // Check if first member has a match
-      firstMemberHasMatch:
-        members[0] && statusData.length > 0
-          ? statusData.some((s) => s.member_id === members[0].id)
-          : null,
-    });
-
-    let callCount = 0;
     return (memberId: string) => {
-      const status = statusData.find((s) => s.member_id === memberId);
-      if (callCount < 3 && statusData.length > 0) {
-        console.log(`Call ${callCount++}: Looking for ${memberId}, found:`, status ? 'YES' : 'NO');
-      }
-      return status;
+      return statusData.find((s) => s.member_id === memberId);
     };
-  }, [members, statusData]);
+  }, [statusData]);
 
   // Render cell content based on column key
   const renderCell = (member: Member, columnKey: string) => {

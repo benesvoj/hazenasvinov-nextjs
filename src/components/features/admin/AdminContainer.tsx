@@ -73,7 +73,7 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
 
     // Check for tab-specific filters
     if ('filters' in currentTab) {
-      return filters;
+      return currentTab.filters;
     }
 
     // Default: no filters
