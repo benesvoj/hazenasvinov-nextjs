@@ -1,50 +1,41 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo} from 'react';
 
 import {
   Button,
-  Card,
-  CardBody,
-  Chip,
-  Input,
   Pagination,
-  Select,
-  SelectItem,
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
   TableRow,
-  useDisclosure,
 } from '@heroui/react';
 
-import {
-  EyeIcon,
-  MagnifyingGlassIcon,
-  PencilIcon,
-  PlusIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import {PencilIcon, PlusIcon} from '@heroicons/react/24/outline';
 
-import {getPaymentStatusColor, getPaymentStatusLabel} from '@/enums/membershipFeeStatus';
+import {PaymentStatus} from '@/enums/membershipFeeStatus';
 
 import {translations} from '@/lib/translations';
 
-import {createClient} from '@/utils/supabase/client';
-
 import {useAppData} from '@/contexts/AppDataContext';
 
-import {StatusCell} from '@/app/admin/members/components/cells/StatusCell';
+import BulkEditModal from '@/app/admin/members/components/BulkEditModal';
+import {renderMemberCell} from '@/app/admin/members/components/cells/MemberTableCells';
 import MemberDetailModal from '@/app/admin/members/components/MemberDetailModal';
+import MemberFormModal from '@/app/admin/members/components/MemberFormModal';
+import MembersCsvImport from '@/app/admin/members/components/MembersCsvImport';
+import {MembersListFilters} from '@/app/admin/members/components/MembersListFilters';
 
-import {DeleteConfirmationModal, showToast} from '@/components';
-import {Genders, getMemberFunctionOptions, MemberFunction} from '@/enums';
-import {useDebounce, usePaymentStatus} from '@/hooks';
+import {DeleteConfirmationModal} from '@/components';
+import {Genders} from '@/enums';
+import {
+  useBulkEditMembers,
+  useMemberModals,
+  useMembers,
+  useMembersTable,
+  usePaymentStatus,
+} from '@/hooks';
 import {Category, Member} from '@/types';
-
-import BulkEditModal from './BulkEditModal';
-import MemberFormModal from './MemberFormModal';
-import MembersCsvImport from './MembersCsvImport';
 
 interface MembersListTabProps {
   categoriesData: Category[] | null;
@@ -52,72 +43,136 @@ interface MembersListTabProps {
 }
 
 export default function MembersListTab({categoriesData, sexOptions}: MembersListTabProps) {
-  // Use AppDataContext for members data
+  // Data context
   const {members, membersLoading, refreshMembers} = useAppData();
-  const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const {statusData} = usePaymentStatus();
-  const t = translations.members;
 
-  // Debounce search term to improve performance
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const [filters, setFilters] = useState({
-    sex: Genders.EMPTY,
-    category_id: '',
-    function: '',
+  // CRUD operations
+  const {createMember, updateMember, deleteMember} = useMembers();
+
+  // Combine members with payment status
+  const membersWithStatus = useMemo(() => {
+    return members.map((member) => {
+      const status = statusData.find((s) => s.member_id === member.id);
+
+      // Convert string payment_status to PaymentStatus enum
+      let paymentStatus = PaymentStatus.NOT_REQUIRED;
+      if (status?.payment_status === 'paid') paymentStatus = PaymentStatus.PAID;
+      else if (status?.payment_status === 'partial') paymentStatus = PaymentStatus.PARTIAL;
+      else if (status?.payment_status === 'unpaid') paymentStatus = PaymentStatus.UNPAID;
+
+      return {
+        ...member,
+        category_name: null,
+        payment_status: paymentStatus,
+        expected_fee_amount: status?.expected_fee_amount || 0,
+        net_paid: status?.net_paid || 0,
+        total_paid: status?.total_paid || 0,
+        total_refunded: 0,
+        last_payment_date: status?.last_payment_date || null,
+        payment_count: status?.payment_count || 0,
+        calendar_year: new Date().getFullYear(),
+        currency: status?.currency || 'CZK',
+      };
+    });
+  }, [members, statusData]);
+
+  // Table state and logic
+  const {
+    searchTerm,
+    setSearchTerm,
+    filters,
+    setFilters,
+    clearFilters,
+    page,
+    setPage,
+    sortDescriptor,
+    setSortDescriptor,
+    paginatedMembers,
+    totalPages,
+  } = useMembersTable(membersWithStatus);
+
+  // Modal state
+  const {
+    addModal,
+    editModal,
+    deleteModal,
+    detailModal,
+    bulkEditModal,
+    openAdd,
+    openEdit,
+    openDelete,
+    openDetail,
+    openBulkEdit,
+    selectedMember,
+    selectedMembers,
+    setSelectedMembers,
+    formData,
+    setFormData,
+    bulkEditFormData,
+    setBulkEditFormData,
+  } = useMemberModals({
+    onSuccess: refreshMembers,
   });
 
-  // Modal states
-  const {
-    isOpen: isAddMemberOpen,
-    onOpen: onAddMemberOpen,
-    onClose: onAddMemberClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditMemberOpen,
-    onOpen: onEditMemberOpen,
-    onClose: onEditMemberClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteMemberOpen,
-    onOpen: onDeleteMemberOpen,
-    onClose: onDeleteMemberClose,
-  } = useDisclosure();
-  const {
-    isOpen: isBulkEditOpen,
-    onOpen: onBulkEditOpen,
-    onClose: onBulkEditClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDetailMemberOpen,
-    onOpen: onDetailMemberOpen,
-    onClose: onDetailMemberClose,
-  } = useDisclosure();
-
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
-  const [bulkEditFormData, setBulkEditFormData] = useState({
-    sex: Genders.EMPTY,
-    category: '',
-    functions: [] as string[],
-  });
-  const [formData, setFormData] = useState<Member>({
-    registration_number: '',
-    name: '',
-    surname: '',
-    date_of_birth: null,
-    category_id: '',
-    sex: Genders.MALE,
-    functions: [],
-    id: '',
-    created_at: '',
-    updated_at: '',
-    is_active: true,
+  // Bulk edit operation
+  const {bulkEditMembers} = useBulkEditMembers({
+    onSuccess: refreshMembers,
   });
 
-  // Members are loaded by AppDataContext, no need for manual fetching
+  // Handlers
+  const handleAddMember = async () => {
+    await createMember(
+      {
+        name: formData.name,
+        surname: formData.surname,
+        registration_number: formData.registration_number,
+        date_of_birth: formData.date_of_birth || undefined,
+        sex: formData.sex,
+        functions: formData.functions,
+      },
+      formData.category_id || undefined
+    );
 
-  // Convert category array to Record format for compatibility
+    addModal.onClose();
+    await refreshMembers();
+  };
+
+  const handleUpdateMember = async () => {
+    if (!selectedMember) return;
+    await updateMember({
+      id: selectedMember.id,
+      name: formData.name,
+      surname: formData.surname,
+      registration_number: formData.registration_number,
+      date_of_birth: formData.date_of_birth,
+      sex: formData.sex,
+      functions: formData.functions,
+      category_id: formData.category_id || undefined,
+    });
+    editModal.onClose();
+    await refreshMembers();
+  };
+
+  const handleDeleteMember = async () => {
+    if (!selectedMember) return;
+
+    await deleteMember(selectedMember.id);
+    deleteModal.onClose();
+    await refreshMembers();
+  };
+
+  const handleBulkEdit = async () => {
+    const success = await bulkEditMembers(Array.from(selectedMembers), bulkEditFormData);
+
+    if (success) {
+      setSelectedMembers(new Set());
+      setBulkEditFormData({sex: Genders.EMPTY, category: '', functions: []});
+      bulkEditModal.onClose();
+    }
+  };
+
+  // Helper functions
   const categories = useMemo(() => {
     if (!categoriesData) return {};
     return categoriesData.reduce(
@@ -129,62 +184,23 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     );
   }, [categoriesData]);
 
-  // Update filtered members when members data changes
-  useEffect(() => {
-    setFilteredMembers(members);
-  }, [members]);
+  const getMemberPaymentStatus = useMemo(() => {
+    return (memberId: string) => {
+      return statusData.find((s) => s.member_id === memberId);
+    };
+  }, [statusData]);
 
-  // Filter members based on debounced search term and filters
-  useEffect(() => {
-    let filtered = members;
-
-    // Filter by debounced search term (name, surname, or registration number)
-    if (debouncedSearchTerm) {
-      filtered = filtered.filter(
-        (member) =>
-          member.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-          member.surname.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-          (member.registration_number &&
-            member.registration_number.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
-      );
-    }
-
-    // Filter by sex
-    if (filters.sex && filters.sex !== Genders.EMPTY) {
-      filtered = filtered.filter((member) => member.sex === filters.sex);
-    }
-
-    // Filter by category
-    if (filters.category_id) {
-      filtered = filtered.filter((member) => member.category_id === filters.category_id);
-    }
-
-    // Filter by function
-    if (filters.function) {
-      filtered = filtered.filter(
-        (member) =>
-          member.functions && member.functions.includes(filters.function as MemberFunction)
-      );
-    }
-
-    setFilteredMembers(filtered);
-    setPage(1); // Reset to first page when filters change
-  }, [members, debouncedSearchTerm, filters]);
-
-  // Pagination
-  const [page, setPage] = useState(1);
-  const rowsPerPage = 10;
-
-  const pages = Math.ceil(filteredMembers.length / rowsPerPage);
-
-  // Sorting
-  const [sortDescriptor, setSortDescriptor] = useState<{
-    column: string;
-    direction: 'ascending' | 'descending';
-  }>({
-    column: 'surname',
-    direction: 'ascending',
-  });
+  const renderCell = (member: Member, columnKey: string) => {
+    return renderMemberCell({
+      member,
+      columnKey,
+      categories,
+      getMemberPaymentStatus,
+      onView: openDetail,
+      onEdit: openEdit,
+      onDelete: openDelete,
+    });
+  };
 
   const handleSortChange = (descriptor: any) => {
     setSortDescriptor({
@@ -193,389 +209,23 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     });
   };
 
-  const sortedMembers = useMemo(() => {
-    return [...filteredMembers].sort((a, b) => {
-      const first = a[sortDescriptor.column as keyof Member];
-      const second = b[sortDescriptor.column as keyof Member];
-
-      if (first === null || second === null) {
-        return 0;
-      }
-
-      if (typeof first === 'string' && typeof second === 'string') {
-        return sortDescriptor.direction === 'ascending'
-          ? first.localeCompare(second)
-          : second.localeCompare(first);
-      }
-
-      if (typeof first === 'number' && typeof second === 'number') {
-        return sortDescriptor.direction === 'ascending' ? first - second : second - first;
-      }
-
-      // Handle registration number sorting
-      if (sortDescriptor.column === 'registration_number') {
-        const extractNumber = (str: string) => {
-          const match = str.match(/\d+/);
-          return match ? parseInt(match[0]) : 0;
-        };
-
-        const numA = extractNumber(first as string);
-        const numB = extractNumber(second as string);
-
-        return sortDescriptor.direction === 'ascending' ? numA - numB : numB - numA;
-      }
-
-      return 0;
-    });
-  }, [filteredMembers, sortDescriptor]);
-
-  const items = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    return sortedMembers.slice(start, end);
-  }, [page, sortedMembers, rowsPerPage]);
-
-  // Bulk edit functions
-  const handleBulkEdit = async () => {
-    if (selectedMembers.size === 0) {
-      showToast.warning(t.toasts.selectMember);
-      return;
-    }
-
-    // Check if at least one field is being updated
-    if (
-      !bulkEditFormData.sex &&
-      !bulkEditFormData.category &&
-      bulkEditFormData.functions.length === 0
-    ) {
-      showToast.danger('Vyberte alespoň jedno pole pro úpravu');
-      return;
-    }
-
-    try {
-      // Prepare update data (only include fields that are being updated)
-      const updateData: any = {};
-      if (bulkEditFormData.sex) updateData.sex = bulkEditFormData.sex;
-      if (bulkEditFormData.category) updateData.category_id = bulkEditFormData.category;
-      if (bulkEditFormData.functions.length > 0) updateData.functions = bulkEditFormData.functions;
-
-      // Update all selected members
-      const memberIds = Array.from(selectedMembers);
-      const supabase = createClient();
-      const {error} = await supabase.from('members').update(updateData).in('id', memberIds);
-
-      if (error) {
-        throw error;
-      }
-
-      // Clear selection and form
-      setSelectedMembers(new Set());
-      setBulkEditFormData({
-        sex: Genders.EMPTY,
-        category: '',
-        functions: [],
-      });
-
-      onBulkEditClose();
-      refreshMembers();
-      showToast.success(`Úspěšně upraveno ${memberIds.length} členů`);
-    } catch (error: any) {
-      showToast.danger(`Chyba při hromadné úpravě: ${error.message || 'Neznámá chyba'}`);
-    }
-  };
-
-  const openBulkEditModal = () => {
-    if (selectedMembers.size === 0) {
-      showToast.warning(t.toasts.selectMember);
-      return;
-    }
-    onBulkEditOpen();
-  };
-
-  const closeBulkEditModal = () => {
-    setSelectedMembers(new Set());
-    setBulkEditFormData({
-      sex: Genders.EMPTY,
-      category: '',
-      functions: [],
-    });
-    onBulkEditClose();
-  };
-
-  // Member form functions
-  const openAddModal = () => {
-    setFormData({
-      registration_number: '',
-      name: '',
-      surname: '',
-      date_of_birth: null,
-      category_id: '',
-      sex: Genders.MALE,
-      functions: [],
-      id: '',
-      created_at: '',
-      updated_at: '',
-      is_active: true,
-    });
-    onAddMemberOpen();
-  };
-
-  const openEditModal = (member: Member) => {
-    setSelectedMember(member);
-    setFormData({
-      registration_number: member.registration_number || '',
-      name: member.name,
-      surname: member.surname,
-      date_of_birth: member.date_of_birth || '',
-      category_id: member.category_id,
-      sex: member.sex,
-      functions: member.functions || [],
-      id: member.id,
-      created_at: member.created_at,
-      updated_at: member.updated_at,
-      is_active: member.is_active !== undefined ? member.is_active : true,
-    });
-    onEditMemberOpen();
-  };
-
-  const openDeleteModal = (member: Member) => {
-    setSelectedMember(member);
-    onDeleteMemberOpen();
-  };
-
-  const handleAddMember = async () => {
-    try {
-      const supabase = createClient();
-
-      const {error} = await supabase.from('members').insert([
-        {
-          name: formData.name,
-          surname: formData.surname,
-          date_of_birth: formData.date_of_birth || null, // Handle optional birth date
-          category_id: formData.category_id,
-          sex: formData.sex,
-          functions: formData.functions,
-          registration_number: formData.registration_number || undefined,
-        },
-      ]);
-
-      if (error) {
-        throw error;
-      }
-
-      showToast.success('Člen byl úspěšně přidán');
-      onAddMemberClose();
-      refreshMembers();
-    } catch (error: any) {
-      showToast.danger(`Chyba při přidávání člena: ${error.message || 'Neznámá chyba'}`);
-    }
-  };
-
-  const handleUpdateMember = async () => {
-    if (!selectedMember) return;
-
-    try {
-      const supabase = createClient();
-
-      const {error} = await supabase
-        .from('members')
-        .update({
-          name: formData.name,
-          surname: formData.surname,
-          date_of_birth: formData.date_of_birth || null, // Handle optional birth date
-          category_id: formData.category_id,
-          sex: formData.sex,
-          functions: formData.functions,
-          registration_number: formData.registration_number || null,
-        })
-        .eq('id', selectedMember.id);
-
-      if (error) {
-        throw error;
-      }
-
-      showToast.success('Člen byl úspěšně upraven');
-      onEditMemberClose();
-      refreshMembers();
-    } catch (error: any) {
-      showToast.danger(`Chyba při úpravě člena: ${error.message || 'Neznámá chyba'}`);
-    }
-  };
-
-  const handleDeleteMember = async () => {
-    if (!selectedMember) return;
-
-    try {
-      const supabase = createClient();
-
-      const {error} = await supabase.from('members').delete().eq('id', selectedMember.id);
-
-      if (error) {
-        throw error;
-      }
-
-      showToast.success('Člen byl úspěšně smazán');
-      onDeleteMemberClose();
-      refreshMembers();
-    } catch (error: any) {
-      showToast.danger(`Chyba při mazání člena: ${error.message || 'Neznámá chyba'}`);
-    }
-  };
-
-  const openDetailMember = async (member: Member) => {
-    setSelectedMember(member);
-    onDetailMemberOpen();
-  };
-
-  // Helper functions
-  const getCategoryName = (categoryId: string | undefined) => {
-    if (!categoryId) return 'default';
-    return categories[categoryId] || categoryId;
-  };
-
-  const getMemberPaymentStatus = useMemo(() => {
-    return (memberId: string) => {
-      return statusData.find((s) => s.member_id === memberId);
-    };
-  }, [statusData]);
-
-  // Render cell content based on column key
-  const renderCell = (member: Member, columnKey: string) => {
-    switch (columnKey) {
-      case 'status':
-        return <StatusCell isActive={member.is_active} />;
-      case 'registration_number':
-        return <span className="font-medium">{member.registration_number || 'N/A'}</span>;
-      case 'name':
-        return <span className="font-medium">{member.name}</span>;
-      case 'surname':
-        return <span className="font-medium">{member.surname}</span>;
-      case 'date_of_birth':
-        const birthDate = new Date(member.date_of_birth || '');
-        const age = new Date().getFullYear() - birthDate.getFullYear();
-        return (
-          <span>
-            {birthDate.toLocaleDateString('cs-CZ')} ({age})
-          </span>
-        );
-      case 'category':
-        return getCategoryName(member.category_id || undefined);
-      case 'sex':
-        return member.sex === Genders.MALE ? 'Muž' : 'Žena';
-      case 'membershipFee': {
-        const status = getMemberPaymentStatus(member.id);
-        if (!status) return <span className="text-gray-400">-</span>;
-
-        return (
-          <div className="flex flex-col gap-1">
-            <Chip color={getPaymentStatusColor(status.payment_status)} size="sm" variant="flat">
-              {getPaymentStatusLabel(status.payment_status)}
-            </Chip>
-            {status.payment_status !== 'not_required' && (
-              <span className="text-xs text-gray-500">
-                {status.net_paid} / {status.expected_fee_amount} {status.currency || 'CZK'}
-              </span>
-            )}
-          </div>
-        );
-      }
-      case 'functions':
-        if (!member.is_active) {
-          return <span className="text-gray-500">Žádné funkce</span>;
-        }
-        return (
-          <div className="flex flex-wrap gap-1">
-            {member.functions.map((func) => (
-              <Chip key={func} color="primary" variant="solid" size="sm">
-                {getMemberFunctionOptions().find((option) => option.value === func)?.label || func}
-              </Chip>
-            ))}
-          </div>
-        );
-      case 'actions':
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              startContent={<EyeIcon className="w-4 h-4" />}
-              onPress={() => openDetailMember(member)}
-            />
-            <Button isIconOnly size="sm" variant="light" onPress={() => openEditModal(member)}>
-              <PencilIcon className="w-4 h-4" />
-            </Button>
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              color="danger"
-              onPress={() => openDeleteModal(member)}
-            >
-              <TrashIcon className="w-4 h-4" />
-            </Button>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   // Table columns
   const columns = [
-    {
-      key: 'status',
-      label: translations.members.membersTable.status,
-      sortable: false,
-    },
+    {key: 'status', label: translations.members.membersTable.status, sortable: false},
     {
       key: 'registration_number',
       label: translations.members.membersTable.registrationNumber,
       sortable: true,
     },
-    {
-      key: 'name',
-      label: translations.members.membersTable.name,
-      sortable: true,
-    },
-    {
-      key: 'surname',
-      label: translations.members.membersTable.surname,
-      sortable: true,
-    },
-    {
-      key: 'date_of_birth',
-      label: translations.members.membersTable.dateOfBirth,
-      sortable: true,
-    },
-    {
-      key: 'category',
-      label: translations.members.membersTable.category,
-      sortable: true,
-    },
-    {
-      key: 'sex',
-      label: translations.members.membersTable.sex,
-      sortable: true,
-    },
-    {
-      key: 'membershipFee',
-      label: translations.members.membersTable.membershipFee,
-      sortable: false,
-    },
-    {
-      key: 'functions',
-      label: translations.members.membersTable.functions,
-      sortable: false,
-    },
-    {
-      key: 'actions',
-      label: translations.members.membersTable.actions,
-      sortable: false,
-    },
+    {key: 'name', label: translations.members.membersTable.name, sortable: true},
+    {key: 'surname', label: translations.members.membersTable.surname, sortable: true},
+    {key: 'date_of_birth', label: translations.members.membersTable.dateOfBirth, sortable: true},
+    {key: 'category', label: translations.members.membersTable.category, sortable: true},
+    {key: 'sex', label: translations.members.membersTable.sex, sortable: true},
+    {key: 'membershipFee', label: translations.members.membersTable.membershipFee, sortable: false},
+    {key: 'functions', label: translations.members.membersTable.functions, sortable: false},
+    {key: 'actions', label: translations.members.membersTable.actions, sortable: false},
   ];
-
-  // Members are loaded by AppDataContext, no need for manual fetching
 
   return (
     <div className="flex flex-col gap-6">
@@ -586,7 +236,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
           <Button
             color="secondary"
             variant="flat"
-            onPress={openBulkEditModal}
+            onPress={openBulkEdit}
             isDisabled={selectedMembers.size === 0}
             startContent={<PencilIcon className="w-4 h-4" />}
           >
@@ -600,7 +250,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
           <Button
             color="primary"
             startContent={<PlusIcon className="w-4 h-4" />}
-            onPress={openAddModal}
+            onPress={openAdd}
             isDisabled={Object.keys(categories).length === 0}
           >
             Přidat člena
@@ -609,117 +259,14 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       </div>
 
       {/* Search and Filters */}
-      <Card>
-        <CardBody>
-          <div className="flex flex-col gap-4">
-            {/* Search and Filters - Single Row on Desktop */}
-            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-end">
-              {/* Search Input - Smaller on desktop */}
-              <div className="w-full lg:w-80">
-                <Input
-                  placeholder={translations.members.membersTable.searchPlaceholder}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
-                  className="w-full"
-                  size="sm"
-                  aria-label="Search members"
-                />
-              </div>
-
-              {/* Filter Controls - All on one row */}
-              <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-                {/* Sex Filter */}
-                <div className="w-full sm:w-40">
-                  <Select
-                    aria-label="Filter by gender"
-                    placeholder="Všechna pohlaví"
-                    selectedKeys={filters.sex && filters.sex !== Genders.EMPTY ? [filters.sex] : []}
-                    onSelectionChange={(keys) => {
-                      const selectedKey = Array.from(keys)[0] as Genders;
-                      setFilters((prev) => ({
-                        ...prev,
-                        sex: selectedKey || Genders.EMPTY,
-                      }));
-                    }}
-                    className="w-full"
-                    size="sm"
-                  >
-                    <SelectItem key="male">Muži</SelectItem>
-                    <SelectItem key="female">Ženy</SelectItem>
-                  </Select>
-                </div>
-
-                {/* Category Filter */}
-                <div className="w-full sm:w-48">
-                  <Select
-                    aria-label="Filter by category"
-                    placeholder="Všechny kategorie"
-                    selectedKeys={filters.category_id ? [filters.category_id] : []}
-                    onSelectionChange={(keys) => {
-                      const selectedKey = Array.from(keys)[0] as string;
-                      setFilters((prev) => ({
-                        ...prev,
-                        category_id: selectedKey || '',
-                      }));
-                    }}
-                    className="w-full"
-                    size="sm"
-                  >
-                    {categoriesData?.map((category) => (
-                      <SelectItem key={category.id} aria-label={`Select category ${category.name}`}>
-                        {category.name}
-                      </SelectItem>
-                    )) || []}
-                  </Select>
-                </div>
-
-                {/* Function Filter */}
-                <div className="w-full sm:w-48">
-                  <Select
-                    aria-label="Filter by function"
-                    placeholder="Všechny funkce"
-                    selectedKeys={filters.function ? [filters.function] : []}
-                    onSelectionChange={(keys) => {
-                      const selectedKey = Array.from(keys)[0] as string;
-                      setFilters((prev) => ({
-                        ...prev,
-                        function: selectedKey || '',
-                      }));
-                    }}
-                    className="w-full"
-                    size="sm"
-                  >
-                    {getMemberFunctionOptions().map(({value, label}) => (
-                      <SelectItem key={value} aria-label={`Select function ${label}`}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </div>
-
-                {/* Clear Filters Button */}
-                {(filters.sex || filters.category_id || filters.function) && (
-                  <div className="w-full sm:w-auto">
-                    <Button
-                      variant="light"
-                      size="sm"
-                      onPress={() =>
-                        setFilters({sex: Genders.EMPTY, category_id: '', function: ''})
-                      }
-                      className="w-full sm:w-auto"
-                      aria-label="Clear all filters"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                      Vymazat filtry
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
+      <MembersListFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filters={filters}
+        onFiltersChange={setFilters}
+        onClearFilters={clearFilters}
+        categories={categoriesData || []}
+      />
 
       {/* Members Table */}
       <Table
@@ -736,9 +283,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
         }}
         sortDescriptor={sortDescriptor}
         onSortChange={handleSortChange}
-        classNames={{
-          wrapper: 'min-h-[400px]',
-        }}
+        classNames={{wrapper: 'min-h-[400px]'}}
         bottomContent={
           <div className="flex w-full justify-center">
             <Pagination
@@ -748,8 +293,8 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
               showShadow
               color="secondary"
               page={page}
-              total={pages}
-              onChange={(page) => setPage(page)}
+              total={totalPages}
+              onChange={setPage}
             />
           </div>
         }
@@ -766,15 +311,13 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
           )}
         </TableHeader>
         <TableBody
-          items={items}
+          items={paginatedMembers}
           loadingContent={membersLoading ? translations.loading : 'Načítání dat...'}
           loadingState={membersLoading ? 'loading' : 'idle'}
           emptyContent={
             searchTerm
               ? 'Žádní členové nebyli nalezeni pro zadaný vyhledávací termín.'
-              : false
-                ? "Žádní členové nebyli nalezeni. Pro přidání členů je potřeba nejprve nastavit funkce v sekci 'Funkce členů'."
-                : 'Žádní členové nebyli nalezeni.'
+              : 'Žádní členové nebyli nalezeni.'
           }
         >
           {(member) => (
@@ -787,8 +330,8 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
       {/* Modals */}
       <MemberFormModal
-        isOpen={isAddMemberOpen}
-        onClose={onAddMemberClose}
+        isOpen={addModal.isOpen}
+        onClose={addModal.onClose}
         onSubmit={handleAddMember}
         title="Přidat nového člena"
         formData={formData}
@@ -800,8 +343,8 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       />
 
       <MemberFormModal
-        isOpen={isEditMemberOpen}
-        onClose={onEditMemberClose}
+        isOpen={editModal.isOpen}
+        onClose={editModal.onClose}
         onSubmit={handleUpdateMember}
         title="Upravit člena"
         formData={formData}
@@ -813,22 +356,22 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
       />
 
       <MemberDetailModal
-        isOpen={isDetailMemberOpen}
-        onClose={onDetailMemberClose}
+        isOpen={detailModal.isOpen}
+        onClose={detailModal.onClose}
         member={selectedMember}
       />
 
       <DeleteConfirmationModal
-        isOpen={isDeleteMemberOpen}
-        onClose={onDeleteMemberClose}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
         onConfirm={handleDeleteMember}
         title="Smazat člena"
         message={`Opravdu chcete smazat člena <strong>${selectedMember?.name} ${selectedMember?.surname}</strong> (Reg. číslo: ${selectedMember?.registration_number})? Tato akce je nevratná.`}
       />
 
       <BulkEditModal
-        isOpen={isBulkEditOpen}
-        onClose={closeBulkEditModal}
+        isOpen={bulkEditModal.isOpen}
+        onClose={bulkEditModal.onClose}
         onSubmit={handleBulkEdit}
         selectedCount={selectedMembers.size}
         formData={bulkEditFormData}

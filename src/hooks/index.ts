@@ -41,6 +41,7 @@ export * from './entities/match/state/useCachedMatches';
 export * from './entities/match/state/useMatchVideos';
 export * from './entities/match/state/useOptimizedMatches';
 export * from './entities/meetingMinute/useMeetingMinutes';
+export * from './entities/member/business/useBulkEditMembers';
 export * from './entities/member/business/useMemberClubRelationships';
 export * from './entities/member/business/useMemberMetadata';
 export * from './entities/member/business/useMemberModals';
