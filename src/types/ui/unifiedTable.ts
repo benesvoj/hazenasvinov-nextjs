@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {SortDescriptor, Selection} from '@heroui/react';
 
 import {ActionTypes, ColumnAlignType} from '@/enums';
@@ -59,4 +61,9 @@ export interface UnifiedTableProps<T = any> {
     td?: string;
   };
   topContent?: React.ReactNode;
+  // Pagination props
+  enablePagination?: boolean;
+  rowsPerPage?: number;
+  page?: number;
+  onPageChange?: (page: number) => void;
 }

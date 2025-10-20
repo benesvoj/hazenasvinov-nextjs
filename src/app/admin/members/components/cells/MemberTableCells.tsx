@@ -1,10 +1,9 @@
-import {Button, Chip} from '@heroui/react';
-
-import {TrashIcon, PencilIcon, EyeIcon} from '@heroicons/react/24/solid';
+import {Chip} from '@heroui/react';
 
 import {getPaymentStatusColor, getPaymentStatusLabel} from '@/enums/membershipFeeStatus';
 
-import {Genders, getMemberFunctionOptions} from '@/enums';
+import {GENDER_LABELS, Genders, getMemberFunctionOptions} from '@/enums';
+import {translations} from '@/lib';
 import {Member, MemberPaymentStatus} from '@/types';
 
 import {StatusCell} from './StatusCell';
@@ -14,9 +13,6 @@ interface RenderCellProps {
   columnKey: string;
   categories: Record<string, string>;
   getMemberPaymentStatus: (memberId: string) => MemberPaymentStatus | undefined;
-  onView: (member: Member) => void;
-  onEdit: (member: Member) => void;
-  onDelete: (member: Member) => void;
 }
 
 export function renderMemberCell({
@@ -24,16 +20,15 @@ export function renderMemberCell({
   columnKey,
   categories,
   getMemberPaymentStatus,
-  onView,
-  onEdit,
-  onDelete,
 }: RenderCellProps) {
+  const t = translations.members.table;
+
   switch (columnKey) {
     case 'status':
       return <StatusCell isActive={member.is_active} />;
 
     case 'registration_number':
-      return <span className="font-medium">{member.registration_number || 'N/A'}</span>;
+      return <span className="font-medium">{member.registration_number || '-'}</span>;
 
     case 'name':
       return <span className="font-medium">{member.name}</span>;
@@ -43,6 +38,9 @@ export function renderMemberCell({
 
     case 'date_of_birth': {
       const birthDate = new Date(member.date_of_birth || '');
+      if (isNaN(birthDate.getTime())) {
+        return <span className="text-gray-400">-</span>;
+      }
       const age = new Date().getFullYear() - birthDate.getFullYear();
       return (
         <span>
@@ -52,10 +50,10 @@ export function renderMemberCell({
     }
 
     case 'category':
-      return categories[member.category_id || ''] || 'N/A';
+      return categories[member.category_id || ''] || '-';
 
     case 'sex':
-      return member.sex === Genders.MALE ? 'Muž' : 'Žena';
+      return member.sex === Genders.MALE ? GENDER_LABELS.male : GENDER_LABELS.female;
 
     case 'membershipFee': {
       const status = getMemberPaymentStatus(member.id);
@@ -77,7 +75,7 @@ export function renderMemberCell({
 
     case 'functions':
       if (!member.is_active) {
-        return <span className="text-gray-500">Žádné funkce</span>;
+        return <span className="text-gray-500">{t.noFunctionsFound}</span>;
       }
       return (
         <div className="flex flex-wrap gap-1">
@@ -86,31 +84,6 @@ export function renderMemberCell({
               {getMemberFunctionOptions().find((option) => option.value === func)?.label || func}
             </Chip>
           ))}
-        </div>
-      );
-
-    case 'actions':
-      return (
-        <div className="flex items-center gap-2">
-          <Button
-            isIconOnly
-            size="sm"
-            variant="light"
-            startContent={<EyeIcon className="w-4 h-4" />}
-            onPress={() => onView(member)}
-          />
-          <Button isIconOnly size="sm" variant="light" onPress={() => onEdit(member)}>
-            <PencilIcon className="w-4 h-4" />
-          </Button>
-          <Button
-            isIconOnly
-            size="sm"
-            variant="light"
-            color="danger"
-            onPress={() => onDelete(member)}
-          >
-            <TrashIcon className="w-4 h-4" />
-          </Button>
         </div>
       );
 

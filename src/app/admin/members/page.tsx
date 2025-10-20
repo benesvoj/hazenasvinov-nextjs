@@ -6,6 +6,7 @@ import {useAppData} from '@/contexts/AppDataContext';
 import BulkEditModal from '@/app/admin/members/components/BulkEditModal';
 import MemberDetailModal from '@/app/admin/members/components/MemberDetailModal';
 import MemberFormModal from '@/app/admin/members/components/MemberFormModal';
+import MembersCsvImport from '@/app/admin/members/components/MembersCsvImport';
 import {MembersListFilters} from '@/app/admin/members/components/MembersListFilters';
 import MembersStatisticTab from '@/app/admin/members/components/MembersStatisticTab';
 
@@ -169,6 +170,17 @@ export default function MembersAdminPage() {
                 onClick: () => openBulkEdit(),
               },
               {
+                label: 'Import CSV',
+                buttonType: ActionTypes.CREATE,
+                color: 'secondary',
+                variant: 'flat',
+                onClick: () => {
+                  // This will be handled by the MembersCsvImport modal component
+                  document.getElementById('csv-import-trigger')?.click();
+                },
+                priority: 'secondary',
+              },
+              {
                 label: t.buttons.addMember,
                 onClick: () => openAdd(),
                 color: 'primary',
@@ -236,6 +248,23 @@ export default function MembersAdminPage() {
         categories={categories || []}
         isLoading={membersLoading}
       />
+
+      {/* CSV Import - Hidden trigger */}
+      <div className="hidden">
+        <MembersCsvImport
+          onImportComplete={refreshMembers}
+          categories={
+            categories?.reduce(
+              (acc, cat) => {
+                acc[cat.id] = cat.name;
+                return acc;
+              },
+              {} as Record<string, string>
+            ) || {}
+          }
+          sexOptions={genderOptions}
+        />
+      </div>
     </>
   );
 }
