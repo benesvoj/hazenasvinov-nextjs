@@ -143,7 +143,7 @@ export default function UnifiedTable<T = any>({
         isCompact
         showControls
         showShadow
-        color="secondary"
+        color="default"
         page={page}
         total={totalPages}
         onChange={setPage}

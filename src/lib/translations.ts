@@ -719,6 +719,7 @@ export const translations = {
       attendance: 'Docházka členů',
       statistics: 'Statistiky',
       meetingMinutes: 'Zápisy z výborových schůzí',
+      members: 'Seznam členů',
     },
     descriptions: {
       dashboard: 'Přehled vašich týmů a aktivit',

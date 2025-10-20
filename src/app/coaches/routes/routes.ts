@@ -4,6 +4,7 @@ import {
   UserGroupIcon,
   VideoCameraIcon,
   ClipboardDocumentListIcon,
+  UsersIcon,
 } from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
@@ -28,6 +29,11 @@ export const coachesRoutes = [
     name: translations.coaches.routes.attendance,
     href: '/coaches/attendance',
     icon: ClipboardDocumentListIcon,
+  },
+  {
+    name: translations.coaches.routes.members,
+    href: '/coaches/members',
+    icon: UsersIcon,
   },
   {
     name: translations.coaches.routes.videos,
