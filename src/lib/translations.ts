@@ -238,6 +238,8 @@ export const translations = {
     filter: 'Filtrovat',
     sort: 'Řadit',
     export: 'Exportovat',
+    import: 'Importovat',
+    bulk: 'Hromadná úprava',
     close: 'Zavřít',
     apply: 'Použít',
     reset: 'Resetovat',
@@ -465,9 +467,6 @@ export const translations = {
     cancelButtonText: 'Zrušit',
   },
   members: {
-    deleteMember: 'Smazat člena',
-    deleteMemberMessage:
-      'Opravdu chcete smazat člena <strong>{name} {surname}</strong> (Reg. číslo: {registration_number})? Tato akce je nevratná.',
     members: 'Členové',
     membersDescription: 'Správa členů, které jsou dostupné v systému.',
     membersTable: {
@@ -501,6 +500,17 @@ export const translations = {
     },
     toasts: {
       selectMember: 'Vyberte alespoň jednoho člena pro hromadnou úpravu',
+    },
+    buttons: {
+      bulkChange: 'Hromadná změna',
+      importFromCsv: 'Import z CSV',
+      addMember: 'Přidat člena',
+    },
+    modals: {
+      addMember: 'Přidat člena',
+      editMember: 'Upravit člena',
+      deleteMember: 'Smazat člena',
+      deleteMemberMessage: 'Opravdu chcete smazat člena? Tato akce je nevratná.',
     },
   },
   memberFunctions: {
@@ -1143,5 +1153,12 @@ export const translations = {
       paymentsUpdated: 'Platby byly úspěšně aktualizovány',
       paymentsDeleted: 'Platby byly úspěšně smazány',
     },
+  },
+  buttons: {
+    save: 'Uložit',
+    cancel: 'Zrušit',
+    edit: 'Upravit',
+    delete: 'Smazat',
+    add: 'Přidat',
   },
 } as const;

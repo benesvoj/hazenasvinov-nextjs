@@ -27,7 +27,6 @@ interface MemberFormModalProps {
   setFormData: (data: Member) => void;
   categories: Category[];
   sexOptions: Record<string, string>;
-  submitButtonText: string;
   isEditMode?: boolean;
 }
 
@@ -40,9 +39,10 @@ export default function MemberFormModal({
   setFormData,
   categories,
   sexOptions,
-  submitButtonText,
   isEditMode = false,
 }: MemberFormModalProps) {
+  const t = translations;
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalContent>
@@ -194,10 +194,10 @@ export default function MemberFormModal({
         </ModalBody>
         <ModalFooter>
           <Button variant="light" onPress={onClose}>
-            {translations.DeleteConfirmationModal.cancelButtonText}
+            {t.buttons.cancel}
           </Button>
           <Button color="primary" onPress={onSubmit}>
-            {submitButtonText}
+            {isEditMode ? t.buttons.save : t.buttons.add}
           </Button>
         </ModalFooter>
       </ModalContent>

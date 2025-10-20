@@ -1,7 +1,6 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useState} from 'react';
 
 import {
-  Button,
   Pagination,
   Table,
   TableBody,
@@ -11,44 +10,43 @@ import {
   TableRow,
 } from '@heroui/react';
 
-import {PencilIcon, PlusIcon} from '@heroicons/react/24/outline';
-
 import {PaymentStatus} from '@/enums/membershipFeeStatus';
 
 import {translations} from '@/lib/translations';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
-import BulkEditModal from '@/app/admin/members/components/BulkEditModal';
 import {renderMemberCell} from '@/app/admin/members/components/cells/MemberTableCells';
-import MemberDetailModal from '@/app/admin/members/components/MemberDetailModal';
-import MemberFormModal from '@/app/admin/members/components/MemberFormModal';
-import MembersCsvImport from '@/app/admin/members/components/MembersCsvImport';
-import {MembersListFilters} from '@/app/admin/members/components/MembersListFilters';
 
-import {DeleteConfirmationModal} from '@/components';
-import {Genders} from '@/enums';
-import {
-  useBulkEditMembers,
-  useMemberModals,
-  useMembers,
-  useMembersTable,
-  usePaymentStatus,
-} from '@/hooks';
-import {Category, Member} from '@/types';
+import {Genders, MemberFunction} from '@/enums';
+import {useDebounce, usePaymentStatus} from '@/hooks';
+import {Category, Member, MemberFilters, MemberSortDescriptor} from '@/types';
 
 interface MembersListTabProps {
   categoriesData: Category[] | null;
   sexOptions: Record<string, string>;
+  openEdit: (member: Member) => void;
+  openDelete: (member: Member) => void;
+  openDetail: (member: Member) => void;
+  selectedMembers: Set<string>;
+  setSelectedMembers: React.Dispatch<React.SetStateAction<Set<string>>>;
+  searchTerm: string;
+  filters: MemberFilters;
 }
 
-export default function MembersListTab({categoriesData, sexOptions}: MembersListTabProps) {
+export default function MembersListTab({
+  categoriesData,
+  openEdit,
+  openDelete,
+  openDetail,
+  selectedMembers,
+  setSelectedMembers,
+  searchTerm: externalSearchTerm,
+  filters: externalFilters,
+}: MembersListTabProps) {
   // Data context
   const {members, membersLoading, refreshMembers} = useAppData();
   const {statusData} = usePaymentStatus();
-
-  // CRUD operations
-  const {createMember, updateMember, deleteMember} = useMembers();
 
   // Combine members with payment status
   const membersWithStatus = useMemo(() => {
@@ -77,100 +75,93 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
     });
   }, [members, statusData]);
 
-  // Table state and logic
-  const {
-    searchTerm,
-    setSearchTerm,
-    filters,
-    setFilters,
-    clearFilters,
-    page,
-    setPage,
-    sortDescriptor,
-    setSortDescriptor,
-    paginatedMembers,
-    totalPages,
-  } = useMembersTable(membersWithStatus);
-
-  // Modal state
-  const {
-    addModal,
-    editModal,
-    deleteModal,
-    detailModal,
-    bulkEditModal,
-    openAdd,
-    openEdit,
-    openDelete,
-    openDetail,
-    openBulkEdit,
-    selectedMember,
-    selectedMembers,
-    setSelectedMembers,
-    formData,
-    setFormData,
-    bulkEditFormData,
-    setBulkEditFormData,
-  } = useMemberModals({
-    onSuccess: refreshMembers,
+  // Pagination and sorting state
+  const [page, setPage] = useState(1);
+  const [sortDescriptor, setSortDescriptor] = useState<MemberSortDescriptor>({
+    column: 'surname',
+    direction: 'ascending',
   });
 
-  // Bulk edit operation
-  const {bulkEditMembers} = useBulkEditMembers({
-    onSuccess: refreshMembers,
-  });
+  const ROWS_PER_PAGE = 10;
+  const debouncedSearchTerm = useDebounce(externalSearchTerm, 300);
 
-  // Handlers
-  const handleAddMember = async () => {
-    await createMember(
-      {
-        name: formData.name,
-        surname: formData.surname,
-        registration_number: formData.registration_number,
-        date_of_birth: formData.date_of_birth || undefined,
-        sex: formData.sex,
-        functions: formData.functions,
-      },
-      formData.category_id || undefined
-    );
+  // Filtered members
+  const filteredMembers = useMemo(() => {
+    let filtered = membersWithStatus;
 
-    addModal.onClose();
-    await refreshMembers();
-  };
-
-  const handleUpdateMember = async () => {
-    if (!selectedMember) return;
-    await updateMember({
-      id: selectedMember.id,
-      name: formData.name,
-      surname: formData.surname,
-      registration_number: formData.registration_number,
-      date_of_birth: formData.date_of_birth,
-      sex: formData.sex,
-      functions: formData.functions,
-      category_id: formData.category_id || undefined,
-    });
-    editModal.onClose();
-    await refreshMembers();
-  };
-
-  const handleDeleteMember = async () => {
-    if (!selectedMember) return;
-
-    await deleteMember(selectedMember.id);
-    deleteModal.onClose();
-    await refreshMembers();
-  };
-
-  const handleBulkEdit = async () => {
-    const success = await bulkEditMembers(Array.from(selectedMembers), bulkEditFormData);
-
-    if (success) {
-      setSelectedMembers(new Set());
-      setBulkEditFormData({sex: Genders.EMPTY, category: '', functions: []});
-      bulkEditModal.onClose();
+    // Search filter
+    if (debouncedSearchTerm) {
+      const term = debouncedSearchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (member) =>
+          member.name.toLowerCase().includes(term) ||
+          member.surname.toLowerCase().includes(term) ||
+          (member.registration_number && member.registration_number.toLowerCase().includes(term))
+      );
     }
-  };
+
+    // Sex filter
+    if (externalFilters.sex && externalFilters.sex !== Genders.EMPTY) {
+      filtered = filtered.filter((member) => member.sex === externalFilters.sex);
+    }
+
+    // Category filter
+    if (externalFilters.category_id) {
+      filtered = filtered.filter((member) => member.category_id === externalFilters.category_id);
+    }
+
+    // Function filter
+    if (externalFilters.function) {
+      filtered = filtered.filter(
+        (member) =>
+          member.functions && member.functions.includes(externalFilters.function as MemberFunction)
+      );
+    }
+
+    return filtered;
+  }, [membersWithStatus, debouncedSearchTerm, externalFilters]);
+
+  // Sorted members
+  const sortedMembers = useMemo(() => {
+    return [...filteredMembers].sort((a, b) => {
+      const first = a[sortDescriptor.column as keyof typeof a];
+      const second = b[sortDescriptor.column as keyof typeof b];
+
+      if (first === null || second === null) return 0;
+
+      if (typeof first === 'string' && typeof second === 'string') {
+        return sortDescriptor.direction === 'ascending'
+          ? first.localeCompare(second)
+          : second.localeCompare(first);
+      }
+
+      if (typeof first === 'number' && typeof second === 'number') {
+        return sortDescriptor.direction === 'ascending' ? first - second : second - first;
+      }
+
+      // Special handling for registration numbers
+      if (sortDescriptor.column === 'registration_number') {
+        const extractNumber = (str: string) => {
+          const match = str.match(/\d+/);
+          return match ? parseInt(match[0]) : 0;
+        };
+        const numA = extractNumber(first as string);
+        const numB = extractNumber(second as string);
+        return sortDescriptor.direction === 'ascending' ? numA - numB : numB - numA;
+      }
+
+      return 0;
+    });
+  }, [filteredMembers, sortDescriptor]);
+
+  // Paginated members
+  const paginatedMembers = useMemo(() => {
+    const start = (page - 1) * ROWS_PER_PAGE;
+    const end = start + ROWS_PER_PAGE;
+    return sortedMembers.slice(start, end);
+  }, [sortedMembers, page]);
+
+  const totalPages = Math.ceil(filteredMembers.length / ROWS_PER_PAGE);
 
   // Helper functions
   const categories = useMemo(() => {
@@ -229,45 +220,6 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header with Action Buttons */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Seznam členů</h2>
-        <div className="flex gap-2">
-          <Button
-            color="secondary"
-            variant="flat"
-            onPress={openBulkEdit}
-            isDisabled={selectedMembers.size === 0}
-            startContent={<PencilIcon className="w-4 h-4" />}
-          >
-            Hromadná úprava ({selectedMembers.size})
-          </Button>
-          <MembersCsvImport
-            onImportComplete={refreshMembers}
-            categories={categories}
-            sexOptions={sexOptions}
-          />
-          <Button
-            color="primary"
-            startContent={<PlusIcon className="w-4 h-4" />}
-            onPress={openAdd}
-            isDisabled={Object.keys(categories).length === 0}
-          >
-            Přidat člena
-          </Button>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <MembersListFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        filters={filters}
-        onFiltersChange={setFilters}
-        onClearFilters={clearFilters}
-        categories={categoriesData || []}
-      />
-
       {/* Members Table */}
       <Table
         key={`table-${statusData.length}`}
@@ -315,7 +267,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
           loadingContent={membersLoading ? translations.loading : 'Načítání dat...'}
           loadingState={membersLoading ? 'loading' : 'idle'}
           emptyContent={
-            searchTerm
+            externalSearchTerm
               ? 'Žádní členové nebyli nalezeni pro zadaný vyhledávací termín.'
               : 'Žádní členové nebyli nalezeni.'
           }
@@ -327,58 +279,6 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
           )}
         </TableBody>
       </Table>
-
-      {/* Modals */}
-      <MemberFormModal
-        isOpen={addModal.isOpen}
-        onClose={addModal.onClose}
-        onSubmit={handleAddMember}
-        title="Přidat nového člena"
-        formData={formData}
-        setFormData={setFormData}
-        categories={categoriesData || []}
-        sexOptions={sexOptions}
-        submitButtonText="Přidat člena"
-        isEditMode={false}
-      />
-
-      <MemberFormModal
-        isOpen={editModal.isOpen}
-        onClose={editModal.onClose}
-        onSubmit={handleUpdateMember}
-        title="Upravit člena"
-        formData={formData}
-        setFormData={setFormData}
-        categories={categoriesData || []}
-        sexOptions={sexOptions}
-        submitButtonText="Uložit změny"
-        isEditMode={true}
-      />
-
-      <MemberDetailModal
-        isOpen={detailModal.isOpen}
-        onClose={detailModal.onClose}
-        member={selectedMember}
-      />
-
-      <DeleteConfirmationModal
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
-        onConfirm={handleDeleteMember}
-        title="Smazat člena"
-        message={`Opravdu chcete smazat člena <strong>${selectedMember?.name} ${selectedMember?.surname}</strong> (Reg. číslo: ${selectedMember?.registration_number})? Tato akce je nevratná.`}
-      />
-
-      <BulkEditModal
-        isOpen={bulkEditModal.isOpen}
-        onClose={bulkEditModal.onClose}
-        onSubmit={handleBulkEdit}
-        selectedCount={selectedMembers.size}
-        formData={bulkEditFormData}
-        setFormData={setBulkEditFormData}
-        categories={categoriesData || []}
-        isLoading={membersLoading}
-      />
     </div>
   );
 }

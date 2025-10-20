@@ -22,63 +22,48 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
 }: AdminContainerProps<T>) {
   const effectiveActiveTab = activeTab || tabs?.[0]?.key || '';
 
-  const currentTab = useMemo(
-    () => tabs?.find((tab) => tab.key === effectiveActiveTab) || tabs?.[0],
-    [tabs, effectiveActiveTab]
-  );
-
-  // Determine which actions to display
-  const displayActions = useMemo(() => {
-    // No tabs mode: use global actions
-    if (!tabs) {
-      return actions;
-    }
-
-    // No current tab: show nothing
-    if (!currentTab) {
-      return undefined;
-    }
-
+  // Helper function to get actions for a specific tab
+  const getTabActions = (tab: TabConfig) => {
     // Check if tab has inheritGlobalActions flag
-    // TypeScript knows this could be from TabWithInheritedActions or TabWithMixedConfig
-    if ('inheritGlobalActions' in currentTab && currentTab.inheritGlobalActions) {
+    if ('inheritGlobalActions' in tab && tab.inheritGlobalActions) {
       return actions;
     }
 
     // Check for tab-specific actions
-    if ('actions' in currentTab) {
-      return currentTab.actions;
+    if ('actions' in tab) {
+      return tab.actions;
     }
 
     // Default: no actions
     return undefined;
-  }, [tabs, currentTab, actions]);
+  };
 
-  // Determine which filters to display
-  const displayFilters = useMemo(() => {
-    // No tabs mode: use global filters
-    if (!tabs) {
-      return filters;
-    }
-
-    // No current tab: show nothing
-    if (!currentTab) {
-      return undefined;
-    }
-
+  // Helper function to get filters for a specific tab
+  const getTabFilters = (tab: TabConfig) => {
     // Check if tab has inheritGlobalFilters flag
-    if ('inheritGlobalFilters' in currentTab && currentTab.inheritGlobalFilters) {
+    if ('inheritGlobalFilters' in tab && tab.inheritGlobalFilters) {
       return filters;
     }
 
     // Check for tab-specific filters
-    if ('filters' in currentTab) {
-      return currentTab.filters;
+    if ('filters' in tab) {
+      return tab.filters;
     }
 
     // Default: no filters
     return undefined;
-  }, [tabs, currentTab, filters]);
+  };
+
+  // For non-tab mode, use global actions/filters
+  const displayActions = useMemo(() => {
+    if (!tabs) return actions;
+    return undefined;
+  }, [tabs, actions]);
+
+  const displayFilters = useMemo(() => {
+    if (!tabs) return filters;
+    return undefined;
+  }, [tabs, filters]);
 
   return (
     <>
@@ -90,15 +75,6 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
             <AdminHeader title={title} description={description} icon={icon} />
           )}
 
-          {(displayActions || displayFilters) && (
-            <div className="flex flex-col gap-4">
-              {displayActions && displayActions.length > 0 && (
-                <AdminActions actions={displayActions} />
-              )}
-              {displayFilters && <AdminFilters>{displayFilters}</AdminFilters>}
-            </div>
-          )}
-
           <AdminContent>
             {tabs && tabs.length > 0 ? (
               <Tabs
@@ -107,14 +83,35 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
                 aria-label={tabsAriaLabel}
                 className="w-full"
               >
-                {tabs.map((tab) => (
-                  <Tab key={tab.key} title={tab.title}>
-                    {tab.content}
-                  </Tab>
-                ))}
+                {tabs.map((tab) => {
+                  const tabActions = getTabActions(tab);
+                  const tabFilters = getTabFilters(tab);
+
+                  return (
+                    <Tab key={tab.key} title={tab.title}>
+                      <div className="flex flex-col gap-4 pt-4">
+                        {tabActions && tabActions.length > 0 && (
+                          <AdminActions actions={tabActions} />
+                        )}
+                        {tabFilters && <AdminFilters>{tabFilters}</AdminFilters>}
+                        {tab.content}
+                      </div>
+                    </Tab>
+                  );
+                })}
               </Tabs>
             ) : (
-              children
+              <>
+                {(displayActions || displayFilters) && (
+                  <div className="flex flex-col gap-4">
+                    {displayActions && displayActions.length > 0 && (
+                      <AdminActions actions={displayActions} />
+                    )}
+                    {displayFilters && <AdminFilters>{displayFilters}</AdminFilters>}
+                  </div>
+                )}
+                {children}
+              </>
             )}
           </AdminContent>
         </div>

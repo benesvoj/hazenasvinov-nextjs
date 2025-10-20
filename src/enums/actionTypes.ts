@@ -16,6 +16,8 @@ export enum ActionTypes {
   FILTER = 'filter',
   SORT = 'sort',
   EXPORT = 'export',
+  IMPORT = 'import',
+  BULK = 'bulk',
   STATUS_TRANSITION = 'status-transition',
 }
 
@@ -33,6 +35,8 @@ export const ACTION_TYPE_LABELS = {
   [ActionTypes.FILTER]: t.filter,
   [ActionTypes.SORT]: t.sort,
   [ActionTypes.EXPORT]: t.export,
+  [ActionTypes.IMPORT]: t.import,
+  [ActionTypes.BULK]: t.bulk,
   [ActionTypes.STATUS_TRANSITION]: t.statusTransition,
 } as const;
 

@@ -1,13 +1,15 @@
-import {PlusCircleIcon} from '@heroicons/react/16/solid';
 import {
+  BookmarkIcon,
+  CheckIcon,
+  Cog6ToothIcon,
+  EyeIcon,
   PencilIcon,
   TrashIcon,
-  EyeIcon,
-  Cog6ToothIcon,
-  BookmarkIcon,
   XMarkIcon,
-  CheckIcon,
-} from '@heroicons/react/24/outline';
+  ArrowLeftEndOnRectangleIcon,
+  PlusCircleIcon,
+  Square3Stack3DIcon,
+} from '@heroicons/react/24/solid';
 
 import {ActionTypes} from '@/enums';
 
@@ -36,6 +38,12 @@ export const getDefaultActionIcon = (type: ActionTypes) => {
   }
   if (type === ActionTypes.APPLY) {
     return <CheckIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.BULK) {
+    return <Square3Stack3DIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.IMPORT) {
+    return <ArrowLeftEndOnRectangleIcon className="w-4 h-4" />;
   }
   return <PlusCircleIcon className="w-4 h-4" />; // Default fallback
 };

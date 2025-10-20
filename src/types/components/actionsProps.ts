@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {ActionTypes} from '@/enums';
 
 export interface ActionsProps {
