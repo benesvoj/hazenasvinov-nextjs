@@ -89,7 +89,7 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
 
                   return (
                     <Tab key={tab.key} title={tab.title}>
-                      <div className="flex flex-col gap-4 pt-4">
+                      <div className="flex flex-col gap-4">
                         {tabActions && tabActions.length > 0 && (
                           <AdminActions actions={tabActions} />
                         )}

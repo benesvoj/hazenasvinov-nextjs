@@ -72,95 +72,93 @@ export const AdminActions = ({actions}: AdminActionsProps) => {
   const secondaryActionItems = convertToActionItems(secondaryActions);
 
   return (
-    <div className="w-full">
-      <UnifiedCard fullWidth variant="actions" contentAlignment="right" padding="sm">
-        {/* Desktop Actions - Hidden on mobile */}
-        <div className="hidden lg:flex gap-2 justify-end">
-          {/* Primary Actions - Always visible */}
-          {primaryActions.map((action, index) => {
-            // Handle status transition actions
-            if (action.statusTransition) {
-              const {currentStatus, onStatusChange, itemId} = action.statusTransition;
-              const buttonInfo = getStatusButtonInfo(currentStatus);
+    <UnifiedCard fullWidth variant="actions" contentAlignment="right" padding="sm">
+      {/* Desktop Actions - Hidden on mobile */}
+      <div className="hidden lg:flex gap-2 justify-end">
+        {/* Primary Actions - Always visible */}
+        {primaryActions.map((action, index) => {
+          // Handle status transition actions
+          if (action.statusTransition) {
+            const {currentStatus, onStatusChange, itemId} = action.statusTransition;
+            const buttonInfo = getStatusButtonInfo(currentStatus);
 
-              if (!buttonInfo) return null;
-
-              return (
-                <Button
-                  key={index}
-                  size="sm"
-                  variant="light"
-                  color={buttonInfo.color}
-                  isDisabled={action.isDisabled}
-                  isIconOnly
-                  onPress={() => {
-                    const nextStatus = getNextStatus(currentStatus);
-                    if (nextStatus) {
-                      showToast.success(
-                        `${tAction.moveStatusFrom} ${getStatusLabel(currentStatus)} ${tAction.moveStatusTo} ${getStatusLabel(nextStatus)}`
-                      );
-                      onStatusChange(itemId, nextStatus);
-                    }
-                  }}
-                  title={`${buttonInfo.text} ${tCommon.item}`}
-                >
-                  {buttonInfo.icon}
-                </Button>
-              );
-            }
-
-            // Handle regular actions
-            if (!action.onClick) return null; // Skip if no onClick provided
+            if (!buttonInfo) return null;
 
             return (
               <Button
                 key={index}
                 size="sm"
-                aria-label={action.label}
-                title={action.label}
-                onPress={action.onClick}
-                variant={action.variant || 'bordered'}
-                color={action.color || 'primary'}
-                startContent={getDefaultActionIcon(action.buttonType)}
-                isIconOnly={action.isIconOnly}
+                variant="light"
+                color={buttonInfo.color}
                 isDisabled={action.isDisabled}
+                isIconOnly
+                onPress={() => {
+                  const nextStatus = getNextStatus(currentStatus);
+                  if (nextStatus) {
+                    showToast.success(
+                      `${tAction.moveStatusFrom} ${getStatusLabel(currentStatus)} ${tAction.moveStatusTo} ${getStatusLabel(nextStatus)}`
+                    );
+                    onStatusChange(itemId, nextStatus);
+                  }
+                }}
+                title={`${buttonInfo.text} ${tCommon.item}`}
               >
-                {!action.isIconOnly && action.label}
+                {buttonInfo.icon}
               </Button>
             );
-          })}
+          }
 
-          {/* Secondary Actions - Hidden under 3 dots menu */}
-          {secondaryActionItems.length > 0 && (
-            <MobileActionsMenu
-              actions={secondaryActionItems}
-              title="Další akce"
-              description="Vyberte další dostupnou akci"
-              triggerLabel=""
-              triggerIcon={<EllipsisVerticalIcon className="w-4 h-4" />}
-              triggerColor="default"
-              triggerSize="sm"
-              fullWidth={false}
-              showOnDesktop={true}
-            />
-          )}
-        </div>
+          // Handle regular actions
+          if (!action.onClick) return null; // Skip if no onClick provided
 
-        {/* Mobile Actions Menu - Only visible on mobile */}
-        <div className="lg:hidden flex justify-end">
+          return (
+            <Button
+              key={index}
+              size="sm"
+              aria-label={action.label}
+              title={action.label}
+              onPress={action.onClick}
+              variant={action.variant || 'bordered'}
+              color={action.color || 'primary'}
+              startContent={getDefaultActionIcon(action.buttonType)}
+              isIconOnly={action.isIconOnly}
+              isDisabled={action.isDisabled}
+            >
+              {!action.isIconOnly && action.label}
+            </Button>
+          );
+        })}
+
+        {/* Secondary Actions - Hidden under 3 dots menu */}
+        {secondaryActionItems.length > 0 && (
           <MobileActionsMenu
-            actions={mobileActions}
-            title="Dostupné akce"
-            description="Vyberte akci, kterou chcete provést"
-            triggerLabel="Akce"
-            triggerColor="primary"
-            triggerVariant="bordered"
+            actions={secondaryActionItems}
+            title="Další akce"
+            description="Vyberte další dostupnou akci"
+            triggerLabel=""
+            triggerIcon={<EllipsisVerticalIcon className="w-4 h-4" />}
+            triggerColor="default"
             triggerSize="sm"
             fullWidth={false}
-            showOnDesktop={false}
+            showOnDesktop={true}
           />
-        </div>
-      </UnifiedCard>
-    </div>
+        )}
+      </div>
+
+      {/* Mobile Actions Menu - Only visible on mobile */}
+      <div className="lg:hidden flex justify-end">
+        <MobileActionsMenu
+          actions={mobileActions}
+          title="Dostupné akce"
+          description="Vyberte akci, kterou chcete provést"
+          triggerLabel="Akce"
+          triggerColor="primary"
+          triggerVariant="bordered"
+          triggerSize="sm"
+          fullWidth={false}
+          showOnDesktop={false}
+        />
+      </div>
+    </UnifiedCard>
   );
 };
