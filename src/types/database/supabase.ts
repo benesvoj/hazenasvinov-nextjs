@@ -609,7 +609,35 @@ export type Database = {
             foreignKeyName: 'category_lineup_members_member_id_fkey';
             columns: ['member_id'];
             isOneToOne: false;
+            referencedRelation: 'members_external';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'category_lineup_members_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_internal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'category_lineup_members_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_on_loan';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'category_lineup_members_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
             referencedRelation: 'members_with_metadata';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'category_lineup_members_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
           },
         ];
@@ -1508,7 +1536,35 @@ export type Database = {
             foreignKeyName: 'lineup_coaches_member_id_fkey';
             columns: ['member_id'];
             isOneToOne: false;
+            referencedRelation: 'members_external';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lineup_coaches_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_internal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lineup_coaches_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_on_loan';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lineup_coaches_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
             referencedRelation: 'members_with_metadata';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lineup_coaches_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
           },
         ];
@@ -1585,7 +1641,35 @@ export type Database = {
             foreignKeyName: 'lineup_players_member_id_fkey';
             columns: ['member_id'];
             isOneToOne: false;
+            referencedRelation: 'members_external';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lineup_players_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_internal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lineup_players_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_on_loan';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lineup_players_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
             referencedRelation: 'members_with_metadata';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lineup_players_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
           },
         ];
@@ -2266,7 +2350,35 @@ export type Database = {
             foreignKeyName: 'meeting_attendees_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'members_external';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'meeting_attendees_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_internal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'meeting_attendees_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_on_loan';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'meeting_attendees_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'members_with_metadata';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'meeting_attendees_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
           },
         ];
@@ -2422,7 +2534,35 @@ export type Database = {
             foreignKeyName: 'member_attendance_member_id_fkey';
             columns: ['member_id'];
             isOneToOne: false;
+            referencedRelation: 'members_external';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_attendance_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_internal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_attendance_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_on_loan';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_attendance_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
             referencedRelation: 'members_with_metadata';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_attendance_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
           },
           {
@@ -2563,7 +2703,35 @@ export type Database = {
             foreignKeyName: 'member_club_relationships_member_id_fkey';
             columns: ['member_id'];
             isOneToOne: false;
+            referencedRelation: 'members_external';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_club_relationships_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_internal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_club_relationships_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_on_loan';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_club_relationships_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
             referencedRelation: 'members_with_metadata';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_club_relationships_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
           },
         ];
@@ -2681,7 +2849,35 @@ export type Database = {
             foreignKeyName: 'member_metadata_member_id_fkey';
             columns: ['member_id'];
             isOneToOne: true;
+            referencedRelation: 'members_external';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_metadata_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: true;
+            referencedRelation: 'members_internal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_metadata_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: true;
+            referencedRelation: 'members_on_loan';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_metadata_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: true;
             referencedRelation: 'members_with_metadata';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'member_metadata_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: true;
+            referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
           },
         ];
@@ -2880,7 +3076,35 @@ export type Database = {
             foreignKeyName: 'membership_fee_payments_member_id_fkey';
             columns: ['member_id'];
             isOneToOne: false;
+            referencedRelation: 'members_external';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'membership_fee_payments_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_internal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'membership_fee_payments_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_on_loan';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'membership_fee_payments_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
             referencedRelation: 'members_with_metadata';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'membership_fee_payments_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
           },
           {
@@ -4184,6 +4408,7 @@ export type Database = {
           calendar_year: number | null;
           category_id: string | null;
           category_name: string | null;
+          currency: string | null;
           expected_fee_amount: number | null;
           last_payment_date: string | null;
           member_id: string | null;
@@ -4195,6 +4420,191 @@ export type Database = {
           surname: string | null;
           total_paid: number | null;
           total_refunded: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['category_id_full'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['category_id'];
+          },
+        ];
+      };
+      members_external: {
+        Row: {
+          category_id: string | null;
+          created_at: string | null;
+          date_of_birth: string | null;
+          functions: string[] | null;
+          id: string | null;
+          is_active: boolean | null;
+          name: string | null;
+          notes: string | null;
+          origin_club_name: string | null;
+          origin_club_short_name: string | null;
+          registration_number: string | null;
+          relationship_status: string | null;
+          relationship_type: string | null;
+          sex: string | null;
+          surname: string | null;
+          updated_at: string | null;
+          valid_from: string | null;
+          valid_to: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['category_id_full'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['category_id'];
+          },
+        ];
+      };
+      members_internal: {
+        Row: {
+          calendar_year: number | null;
+          category_id: string | null;
+          category_name: string | null;
+          club_name: string | null;
+          created_at: string | null;
+          currency: string | null;
+          date_of_birth: string | null;
+          expected_fee_amount: number | null;
+          functions: string[] | null;
+          id: string | null;
+          is_active: boolean | null;
+          last_payment_date: string | null;
+          name: string | null;
+          net_paid: number | null;
+          payment_count: number | null;
+          payment_status: string | null;
+          registration_number: string | null;
+          relationship_status: string | null;
+          relationship_type: string | null;
+          sex: string | null;
+          surname: string | null;
+          total_paid: number | null;
+          total_refunded: number | null;
+          updated_at: string | null;
+          valid_from: string | null;
+          valid_to: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['category_id_full'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['category_id'];
+          },
+        ];
+      };
+      members_on_loan: {
+        Row: {
+          category_id: string | null;
+          created_at: string | null;
+          date_of_birth: string | null;
+          functions: string[] | null;
+          id: string | null;
+          is_active: boolean | null;
+          name: string | null;
+          notes: string | null;
+          origin_club_name: string | null;
+          origin_club_short_name: string | null;
+          registration_number: string | null;
+          relationship_status: string | null;
+          relationship_type: string | null;
+          sex: string | null;
+          surname: string | null;
+          updated_at: string | null;
+          valid_from: string | null;
+          valid_to: string | null;
         };
         Relationships: [
           {
@@ -4260,6 +4670,68 @@ export type Database = {
           sex: string | null;
           shoe_size: string | null;
           surname: string | null;
+          updated_at: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['category_id_full'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'members_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['category_id'];
+          },
+        ];
+      };
+      members_with_payment_status: {
+        Row: {
+          category_id: string | null;
+          category_name: string | null;
+          created_at: string | null;
+          currency: string | null;
+          date_of_birth: string | null;
+          expected_fee_amount: number | null;
+          functions: string[] | null;
+          id: string | null;
+          is_active: boolean | null;
+          last_payment_date: string | null;
+          name: string | null;
+          net_paid: number | null;
+          payment_count: number | null;
+          payment_status: string | null;
+          payment_year: number | null;
+          registration_number: string | null;
+          sex: string | null;
+          surname: string | null;
+          total_paid: number | null;
+          total_refunded: number | null;
           updated_at: string | null;
         };
         Relationships: [

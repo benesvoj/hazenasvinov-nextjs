@@ -1,5 +1,5 @@
 import {Genders, MemberFunction as MemberFunctionEnum} from '@/enums';
-import {Category, MemberSchema} from '@/types';
+import {Category, MemberInternal, MemberSchema} from '@/types';
 
 export interface Member extends MemberSchema {
   sex: Genders;
@@ -13,7 +13,7 @@ export interface MembersListTabProps {
 }
 
 export interface MembersStatisticTabProps {
-  members: Member[];
+  members: MemberInternal[];
   categoriesData: Category[] | null;
 }
 

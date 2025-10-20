@@ -370,7 +370,7 @@ app/admin/components/modals/TodoModal.tsx
 ```
 app/admin/members/components/
 ├── MemberFormModal.tsx        # Used only in members page
-├── MembersListTab.tsx         # Used only in members page
+├── MembersInternalTab.tsx         # Used only in members page
 └── MembersStatisticTab.tsx    # Used only in members page
 ```
 

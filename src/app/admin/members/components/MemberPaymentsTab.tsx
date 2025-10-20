@@ -25,12 +25,12 @@ import {getPaymentStatusColor, getPaymentStatusLabel} from '@/enums/membershipFe
 
 import {DeleteConfirmationModal} from '@/components';
 import {useMemberPayments} from '@/hooks';
-import {Member, MembershipFeePayment} from '@/types';
+import {BaseMember, Member, MembershipFeePayment} from '@/types';
 
 import PaymentFormModal from './PaymentFormModal';
 
 interface MemberPaymentsTabProps {
-  member: Member;
+  member: BaseMember;
 }
 
 export default function MemberPaymentsTab({member}: MemberPaymentsTabProps) {

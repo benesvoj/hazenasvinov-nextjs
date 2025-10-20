@@ -38,7 +38,7 @@ The following category codes are currently used throughout the system:
 - `src/app/(main)/matches/[id]/page.tsx` - Match detail URLs
 
 #### 3. **Admin Interface**
-- `src/app/admin/members/components/MembersListTab.tsx` - Member filtering
+- `src/app/admin/members/components/MembersInternalTab.tsx` - Member filtering
 - `src/app/admin/members/components/MemberFormModal.tsx` - Member forms
 - `src/app/admin/members/components/BulkEditModal.tsx` - Bulk operations
 - `src/app/admin/members/components/MembersStatisticTab.tsx` - Statistics
@@ -329,7 +329,7 @@ prepKids: '/category/prep-kids',
 - [ ] `src/app/admin/members/helpers/memberHelpers.ts`
 
 ### Low Priority Files
-- [ ] `src/app/admin/members/components/MembersListTab.tsx`
+- [ ] `src/app/admin/members/components/MembersInternalTab.tsx`
 - [ ] `src/app/admin/members/components/MemberFormModal.tsx`
 - [ ] `src/app/admin/members/components/BulkEditModal.tsx`
 - [ ] `src/app/admin/members/components/MembersStatisticTab.tsx`

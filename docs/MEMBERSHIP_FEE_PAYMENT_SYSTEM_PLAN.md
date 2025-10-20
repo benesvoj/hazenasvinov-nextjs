@@ -132,7 +132,7 @@ Location: `src/app/admin/members/page.tsx`
 - No payment/fee tracking
 
 **Components:**
-- `MembersListTab` - Table view with filters
+- `MembersInternalTab` - Table view with filters
 - `MembersStatisticTab` - Statistics dashboard
 - `MemberFormModal` - Add/Edit member modal
 - `BulkEditModal` - Bulk operations
@@ -1707,9 +1707,9 @@ export default function CategoryFeeFormModal({
 
 ### Phase 8: UI Components - Member List Payment Status
 
-#### 8.1 Update MembersListTab Component
+#### 8.1 Update MembersInternalTab Component
 
-File: `src/app/admin/members/components/MembersListTab.tsx`
+File: `src/app/admin/members/components/MembersInternalTab.tsx`
 
 **Changes needed:**
 1. Add payment status column to the table

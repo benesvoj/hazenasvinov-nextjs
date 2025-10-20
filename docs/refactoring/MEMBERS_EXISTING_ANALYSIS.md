@@ -181,7 +181,7 @@ export function useMemberClubRelationships() {
 
 ## Current Usage in AppDataContext
 
-Looking at MembersListTab.tsx:
+Looking at MembersInternalTab.tsx:
 ```typescript
 const {members, membersLoading, refreshMembers} = useAppData();
 ```
@@ -296,10 +296,10 @@ export function useFetchMembersWithPaymentStatus() {
 
 ---
 
-### **Option C: Add to AppDataContext** (Best for MembersListTab)
+### **Option C: Add to AppDataContext** (Best for MembersInternalTab)
 
 **Pros**:
-- ✅ Matches current MembersListTab usage
+- ✅ Matches current MembersInternalTab usage
 - ✅ Centralized data management
 - ✅ Request deduplication
 - ✅ Caching built-in
@@ -360,7 +360,7 @@ Since `is_active` exists in TypeScript but likely not in database:
 Decision needed:
 - [ ] Option A: Extend `useMembers`
 - [ ] Option B: Create separate `useFetchMembersWithPaymentStatus`
-- [x] Option C: Add to AppDataContext (recommended for MembersListTab)
+- [x] Option C: Add to AppDataContext (recommended for MembersInternalTab)
 
 ### **Phase 1.3: Create Database View**
 
@@ -383,7 +383,7 @@ Same as original plan - no changes needed.
 2. Create database view `members_with_payment_status`
 3. Add API endpoint
 4. Integrate with AppDataContext or create new hook
-5. Update MembersListTab to use new data source
+5. Update MembersInternalTab to use new data source
 6. Extract components as planned
 
 ---
@@ -392,7 +392,7 @@ Same as original plan - no changes needed.
 
 ### **Before Migration**
 - [ ] `src/types/entities/member/data/member.ts` - Already correct ✅
-- [ ] `src/app/admin/members/components/MembersListTab.tsx` - Update status indicator (line 461)
+- [ ] `src/app/admin/members/components/MembersInternalTab.tsx` - Update status indicator (line 461)
 - [ ] Search codebase: `grep -r "member.functions && member.functions.length" src/`
 
 ### **During Migration**
@@ -403,7 +403,7 @@ Same as original plan - no changes needed.
 - [ ] Create view: `20251017_create_members_with_payment_status_view.sql`
 - [ ] Create API: `src/app/api/members-with-payment-status/route.ts`
 - [ ] Update Context/Hook based on chosen strategy
-- [ ] Update MembersListTab
+- [ ] Update MembersInternalTab
 
 ---
 

@@ -18,13 +18,13 @@ import {
 import {PaymentMethod, FeeType} from '@/enums/membershipFeeStatus';
 
 import {useMemberPayments} from '@/hooks';
-import {Member, MembershipFeePayment} from '@/types';
+import {BaseMember, Member, MembershipFeePayment} from '@/types';
 
 interface PaymentFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   payment?: MembershipFeePayment | null;
-  member: Member;
+  member: BaseMember;
   defaultYear: number;
 }
 

@@ -1,7 +1,7 @@
-# MembersListTab Refactoring Plan
+# MembersInternalTab Refactoring Plan
 
 **Date**: 2025-10-17
-**Component**: `src/app/admin/members/components/MembersListTab.tsx`
+**Component**: `src/app/admin/members/components/MembersInternalTab.tsx`
 **Current Size**: 865 lines
 **Status**: ⚠️ Needs Refactoring
 
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-The `MembersListTab` component violates project standards and best practices. It mixes data fetching, business logic, UI rendering, and state management in a single 865-line file. This refactoring plan outlines how to bring it in line with the codebase's established patterns.
+The `MembersInternalTab` component violates project standards and best practices. It mixes data fetching, business logic, UI rendering, and state management in a single 865-line file. This refactoring plan outlines how to bring it in line with the codebase's established patterns.
 
 ---
 
@@ -124,7 +124,7 @@ src/
 │               ├── useMembersTable.ts
 │               └── useMemberModals.ts
 ├── app/admin/members/components/
-│   ├── MembersListTab.tsx             # Main component (~200 lines)
+│   ├── MembersInternalTab.tsx             # Main component (~200 lines)
 │   ├── MembersTableHeader.tsx
 │   ├── MembersTableFilters.tsx
 │   ├── MembersTable.tsx
@@ -333,7 +333,7 @@ ALTER VIEW members_with_payment_status SET (security_invoker = on);
    ```
 
 3. **Common locations** (use `grep -r "member.functions && member.functions.length" src/`):
-   - `MembersListTab.tsx` line 461-462 (status indicator)
+   - `MembersInternalTab.tsx` line 461-462 (status indicator)
    - Any other components checking "active" status
    - Form validation logic
    - Filtering logic
@@ -341,7 +341,7 @@ ALTER VIEW members_with_payment_status SET (security_invoker = on);
 **Migration Code Example**:
 
 ```typescript
-// In MembersListTab.tsx (line ~461)
+// In MembersInternalTab.tsx (line ~461)
 
 // ❌ BEFORE
 case 'status':
@@ -982,7 +982,7 @@ export const MembersTableHeader: React.FC<MembersTableHeaderProps> = ({
 
 ### **Phase 6: Main Component Refactoring**
 
-**File**: `src/app/admin/members/components/MembersListTab.tsx` (Refactored - ~200 lines)
+**File**: `src/app/admin/members/components/MembersInternalTab.tsx` (Refactored - ~200 lines)
 
 ```typescript
 import React from 'react';
@@ -1000,7 +1000,7 @@ interface MembersListTabProps {
   sexOptions: Record<string, string>;
 }
 
-export default function MembersListTab({categoriesData, sexOptions}: MembersListTabProps) {
+export default function MembersInternalTab({categoriesData, sexOptions}: MembersListTabProps) {
   // Data fetching
   const {data: members, loading, error, refresh} = useMembersWithPaymentStatus();
 
@@ -1234,7 +1234,7 @@ After refactoring, these become easier:
 
 ## References
 
-- Original component: `src/app/admin/members/components/MembersListTab.tsx`
+- Original component: `src/app/admin/members/components/MembersInternalTab.tsx`
 - Project patterns documentation: Codebase exploration (Oct 17, 2025)
 - Database view plan: `docs/MEMBERSHIP_FEE_PAYMENT_SYSTEM_PLAN.md`
 

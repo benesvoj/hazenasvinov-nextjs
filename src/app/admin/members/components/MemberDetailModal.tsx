@@ -5,7 +5,7 @@ import React from 'react';
 import {Tab, Tabs} from '@heroui/react';
 
 import {UnifiedModal} from '@/components';
-import {Member} from '@/types';
+import {BaseMember, Member} from '@/types';
 
 import MemberInfoTab from './MemberInfoTab';
 import MemberPaymentsTab from './MemberPaymentsTab';
@@ -13,7 +13,7 @@ import MemberPaymentsTab from './MemberPaymentsTab';
 interface MemberDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  member: Member | null;
+  member: BaseMember | null;
 }
 
 export default function MemberDetailModal({isOpen, onClose, member}: MemberDetailModalProps) {

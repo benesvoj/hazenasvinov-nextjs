@@ -9,7 +9,7 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-10-17
+ * Last generated: 2025-10-20
  */
 
 export interface MembershipFeePaymentSchema {

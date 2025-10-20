@@ -3,27 +3,17 @@ import {useState} from 'react';
 import {useDisclosure} from '@heroui/react';
 
 import {Genders} from '@/enums';
-import {Member} from '@/types';
+import {BaseMember, Member} from '@/types';
+
+export type MemberContext = 'internal' | 'external' | 'on_loan';
 
 interface UseMemberModalsProps {
   onSuccess: () => void;
 }
 
-const formInitData: Member = {
-  registration_number: '',
-  name: '',
-  surname: '',
-  date_of_birth: null,
-  category_id: '',
-  sex: Genders.MALE,
-  functions: [],
-  id: '',
-  created_at: '',
-  updated_at: '',
-  is_active: true,
-};
-
-export const useMemberModals = ({onSuccess}: UseMemberModalsProps) => {
+export const useMemberModals = <T extends BaseMember = Member>({
+  onSuccess,
+}: UseMemberModalsProps) => {
   // Modal states
   const addModal = useDisclosure();
   const editModal = useDisclosure();
@@ -32,74 +22,99 @@ export const useMemberModals = ({onSuccess}: UseMemberModalsProps) => {
   const bulkEditModal = useDisclosure();
 
   // Selected data
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [selectedMember, setSelectedMember] = useState<T | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
 
-  // Form data
-  const [formData, setFormData] = useState<Member>({...formInitData});
+  // NEW: Context tracking
+  const [modalContext, setModalContext] = useState<MemberContext | null>(null);
 
+  // Form data (always use Member type for forms)
+  const formInitData: Member = {
+    registration_number: '',
+    name: '',
+    surname: '',
+    date_of_birth: null,
+    category_id: '',
+    sex: Genders.MALE,
+    functions: [],
+    id: '',
+    created_at: '',
+    updated_at: '',
+    is_active: true,
+  };
+
+  const [formData, setFormData] = useState<Member>({...formInitData});
   const [bulkEditFormData, setBulkEditFormData] = useState({
     sex: Genders.EMPTY,
     category: '',
     functions: [] as string[],
   });
 
-  // Open handlers
+  // Open handlers with context
   const openAdd = () => {
     setFormData({...formInitData});
+    setModalContext('internal'); // Add is always for internal
     addModal.onOpen();
   };
 
-  const openEdit = (member: Member) => {
+  const openEdit = (member: T, context: MemberContext) => {
     setSelectedMember(member);
+    setModalContext(context);
     setFormData({
       registration_number: member.registration_number || '',
       name: member.name,
       surname: member.surname,
       date_of_birth: member.date_of_birth || '',
-      category_id: member.category_id,
-      sex: member.sex,
-      functions: member.functions || [],
+      category_id: member.category_id || '',
+      sex: (member.sex as Genders) || Genders.MALE,
+      functions: (member.functions as any[]) || [],
       id: member.id,
-      created_at: member.created_at,
-      updated_at: member.updated_at,
-      is_active: member.is_active !== undefined ? member.is_active : true,
+      created_at: member.created_at || '',
+      updated_at: member.updated_at || '',
+      is_active: member.is_active ?? true,
     });
     editModal.onOpen();
   };
 
-  const openDelete = (member: Member) => {
+  const openDelete = (member: T, context: MemberContext) => {
     setSelectedMember(member);
+    setModalContext(context);
     deleteModal.onOpen();
   };
 
-  const openDetail = (member: Member) => {
+  const openDetail = (member: T, context: MemberContext) => {
     setSelectedMember(member);
+    setModalContext(context);
     detailModal.onOpen();
   };
 
   const openBulkEdit = () => {
     if (selectedMembers.size === 0) return;
+    setModalContext('internal'); // Bulk edit only for internal
     bulkEditModal.onOpen();
   };
 
   // Close handlers with cleanup
   const closeAdd = () => {
+    setModalContext(null);
     addModal.onClose();
   };
 
   const closeEdit = () => {
     setSelectedMember(null);
+    setModalContext(null);
     editModal.onClose();
   };
 
   const closeDelete = () => {
     setSelectedMember(null);
+    setModalContext(null);
     deleteModal.onClose();
   };
 
   const closeDetail = () => {
     setSelectedMember(null);
+    setModalContext(null);
     detailModal.onClose();
   };
 
@@ -110,6 +125,7 @@ export const useMemberModals = ({onSuccess}: UseMemberModalsProps) => {
       category: '',
       functions: [],
     });
+    setModalContext(null);
     bulkEditModal.onClose();
   };
 
@@ -138,6 +154,9 @@ export const useMemberModals = ({onSuccess}: UseMemberModalsProps) => {
     setFormData,
     bulkEditFormData,
     setBulkEditFormData,
+
+    // Context
+    modalContext, // NEW: Expose context
 
     // Success callback
     onSuccess,

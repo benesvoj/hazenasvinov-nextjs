@@ -1,8 +1,13 @@
 'use client';
-import React from 'react';
+import React, {useMemo} from 'react';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
+import {
+  MembersExternalTab,
+  MembersInternalTab,
+  MembersOnLoanTab,
+} from '@/app/admin/members/components';
 import BulkEditModal from '@/app/admin/members/components/BulkEditModal';
 import MemberDetailModal from '@/app/admin/members/components/MemberDetailModal';
 import MemberFormModal from '@/app/admin/members/components/MemberFormModal';
@@ -12,10 +17,16 @@ import MembersStatisticTab from '@/app/admin/members/components/MembersStatistic
 
 import {AdminContainer, DeleteConfirmationModal} from '@/components';
 import {ActionTypes, Genders, getGenderOptions} from '@/enums';
-import {useBulkEditMembers, useMemberModals, useMembers} from '@/hooks';
+import {
+  useBulkEditMembers,
+  useFetchMembersExternal,
+  useFetchMembersInternal,
+  useFetchMembersOnLoan,
+  useMemberModals,
+  useMembers,
+} from '@/hooks';
 import {translations} from '@/lib';
-
-import MembersListTab from './components/MembersListTab';
+import {BaseMember, Member, MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
 
 export default function MembersAdminPage() {
   const t = translations.members;
@@ -31,7 +42,18 @@ export default function MembersAdminPage() {
   );
 
   // Use AppDataContext for members and category data
-  const {members, membersLoading, refreshMembers, categories} = useAppData();
+  const {categories} = useAppData();
+
+  // Add hooks for all three tab types (for refresh functionality)
+  const {
+    data: membersInternalData,
+    refresh: refreshInternal,
+    loading: membersInternalLoading,
+  } = useFetchMembersInternal();
+  const {refresh: refreshExternal, loading: membersExternalLoading} = useFetchMembersExternal();
+  const {refresh: refreshOnLoan, loading: membersOnLoanLoading} = useFetchMembersOnLoan();
+
+  const anyLoading = membersInternalLoading || membersExternalLoading || membersOnLoanLoading;
 
   // CRUD operations
   const {createMember, updateMember, deleteMember} = useMembers();
@@ -56,10 +78,11 @@ export default function MembersAdminPage() {
     deleteModal,
     detailModal,
     bulkEditModal,
+    modalContext, // Get the context
     openAdd,
-    openEdit,
-    openDelete,
-    openDetail,
+    openEdit: openEditBase,
+    openDelete: openDeleteBase,
+    openDetail: openDetailBase,
     openBulkEdit,
     selectedMember,
     selectedMembers,
@@ -68,35 +91,69 @@ export default function MembersAdminPage() {
     setFormData,
     bulkEditFormData,
     setBulkEditFormData,
-  } = useMemberModals({
-    onSuccess: refreshMembers,
+  } = useMemberModals<BaseMember>({
+    onSuccess: () => {
+      // Use context to refresh correct tab
+      if (modalContext === 'internal') refreshInternal();
+      else if (modalContext === 'external') refreshExternal();
+      else if (modalContext === 'on_loan') refreshOnLoan();
+    },
   });
+
+  // Context-aware wrappers for each tab
+  const openEditInternal = (member: MemberInternal) =>
+    openEditBase(member as BaseMember, 'internal');
+  const openDeleteInternal = (member: MemberInternal) => {
+    openDeleteBase(member as BaseMember, 'internal');
+  };
+  const openDetailInternal = (member: MemberInternal) => {
+    openDetailBase(member as BaseMember, 'internal');
+  };
+
+  const openEditExternal = (member: MemberExternal) =>
+    openEditBase(member as BaseMember, 'external');
+  const openDeleteExternal = (member: MemberExternal) => {
+    openDeleteBase(member as BaseMember, 'external');
+  };
+  const openDetailExternal = (member: MemberExternal) => {
+    openDetailBase(member as BaseMember, 'external');
+  };
+
+  const openEditOnLoan = (member: MemberOnLoan) => openEditBase(member as BaseMember, 'on_loan');
+  const openDeleteOnLoan = (member: MemberOnLoan) => {
+    openDeleteBase(member as BaseMember, 'on_loan');
+  };
+  const openDetailOnLoan = (member: MemberOnLoan) => {
+    openDetailBase(member as BaseMember, 'on_loan');
+  };
 
   // Bulk edit operation
   const {bulkEditMembers} = useBulkEditMembers({
-    onSuccess: refreshMembers,
+    onSuccess: refreshInternal,
   });
 
   // Handlers
   const handleAddMember = async () => {
-    await createMember(
-      {
-        name: formData.name,
-        surname: formData.surname,
-        registration_number: formData.registration_number,
-        date_of_birth: formData.date_of_birth || undefined,
-        sex: formData.sex,
-        functions: formData.functions,
-      },
-      formData.category_id || undefined
-    );
+    // Extract only MemberFormData fields
+    const memberFormData = {
+      name: formData.name,
+      surname: formData.surname,
+      registration_number: formData.registration_number,
+      date_of_birth: formData.date_of_birth || undefined,
+      sex: formData.sex,
+      functions: formData.functions,
+    };
+
+    await createMember(memberFormData, formData.category_id || undefined);
 
     addModal.onClose();
-    await refreshMembers();
+
+    refreshInternal();
   };
 
   const handleUpdateMember = async () => {
     if (!selectedMember) return;
+
     await updateMember({
       id: selectedMember.id,
       name: formData.name,
@@ -108,15 +165,21 @@ export default function MembersAdminPage() {
       category_id: formData.category_id || undefined,
     });
     editModal.onClose();
-    await refreshMembers();
+
+    // Context determines which tab to refresh
+    if (modalContext === 'internal') refreshInternal();
+    else if (modalContext === 'external') refreshExternal();
+    else if (modalContext === 'on_loan') refreshOnLoan();
   };
 
   const handleDeleteMember = async () => {
     if (!selectedMember) return;
-
     await deleteMember(selectedMember.id);
     deleteModal.onClose();
-    await refreshMembers();
+
+    if (modalContext === 'internal') refreshInternal();
+    else if (modalContext === 'external') refreshExternal();
+    else if (modalContext === 'on_loan') refreshOnLoan();
   };
 
   const handleBulkEdit = async () => {
@@ -129,21 +192,32 @@ export default function MembersAdminPage() {
     }
   };
 
+  const categoriesMap = useMemo(() => {
+    if (!categories) return {};
+    return categories.reduce(
+      (acc, cat) => {
+        acc[cat.id] = cat.name;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+  }, [categories]);
+
   return (
     <>
       <AdminContainer
-        loading={membersLoading}
+        loading={anyLoading}
         tabs={[
           {
             key: 'members',
             title: t.tabs.members,
             content: (
-              <MembersListTab
+              <MembersInternalTab
                 categoriesData={categories}
                 sexOptions={genderOptions}
-                openEdit={openEdit}
-                openDelete={openDelete}
-                openDetail={openDetail}
+                openEdit={openEditInternal}
+                openDelete={openDeleteInternal}
+                openDetail={openDetailInternal}
                 selectedMembers={selectedMembers}
                 setSelectedMembers={setSelectedMembers}
                 searchTerm={searchTerm}
@@ -190,9 +264,35 @@ export default function MembersAdminPage() {
             ],
           },
           {
+            key: 'members-on-loan',
+            title: t.tabs.membersOnLoan,
+            content: (
+              <MembersOnLoanTab
+                categoriesData={categoriesMap}
+                openEdit={openEditOnLoan}
+                openDelete={openDeleteOnLoan}
+                openDetail={openDetailOnLoan}
+              />
+            ),
+          },
+          {
+            key: 'members-external',
+            title: t.tabs.membersExternal,
+            content: (
+              <MembersExternalTab
+                categoriesData={categoriesMap}
+                openEdit={openEditExternal}
+                openDelete={openDeleteExternal}
+                openDetail={openDetailExternal}
+              />
+            ),
+          },
+          {
             key: 'statistics',
             title: t.tabs.statistics,
-            content: <MembersStatisticTab members={members} categoriesData={categories} />,
+            content: (
+              <MembersStatisticTab members={membersInternalData} categoriesData={categories} />
+            ),
           },
         ]}
         activeTab={activeTab}
@@ -246,13 +346,13 @@ export default function MembersAdminPage() {
         formData={bulkEditFormData}
         setFormData={setBulkEditFormData}
         categories={categories || []}
-        isLoading={membersLoading}
+        isLoading={anyLoading}
       />
 
       {/* CSV Import - Hidden trigger */}
       <div className="hidden">
         <MembersCsvImport
-          onImportComplete={refreshMembers}
+          onImportComplete={() => refreshInternal()}
           categories={
             categories?.reduce(
               (acc, cat) => {

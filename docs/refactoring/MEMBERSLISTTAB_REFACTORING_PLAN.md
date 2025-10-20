@@ -1,8 +1,8 @@
-# MembersListTab Component Refactoring Plan
+# MembersInternalTab Component Refactoring Plan
 
 ## Executive Summary
 
-**Current State:** The `MembersListTab.tsx` component is a 840+ line monolithic component that mixes business logic, data fetching, UI rendering, and state management.
+**Current State:** The `MembersInternalTab.tsx` component is a 840+ line monolithic component that mixes business logic, data fetching, UI rendering, and state management.
 
 **Target State:** A lean, maintainable component (~150-200 lines) that follows project standards by leveraging existing hooks, API patterns, and proper separation of concerns.
 
@@ -1080,7 +1080,7 @@ export function MembersListFilters({
 
 ### Files to Modify
 
-1. **`src/app/admin/members/components/MembersListTab.tsx`**
+1. **`src/app/admin/members/components/MembersInternalTab.tsx`**
    - **Current:** 840 lines
    - **Target:** 150-200 lines
    - **Changes:**
@@ -1097,7 +1097,7 @@ export function MembersListFilters({
 ### Dependency Tree (After Refactoring)
 
 ```
-MembersListTab.tsx (~180 lines)
+MembersInternalTab.tsx (~180 lines)
 ├── useAppData (context)
 ├── useMembers (state hook)
 ├── useMembersTable (business hook)
@@ -1117,7 +1117,7 @@ MembersListTab.tsx (~180 lines)
 
 ## Final Component Structure
 
-### Refactored MembersListTab.tsx (~180 lines)
+### Refactored MembersInternalTab.tsx (~180 lines)
 
 ```typescript
 'use client';
@@ -1148,7 +1148,7 @@ interface MembersListTabProps {
   sexOptions: Record<string, string>;
 }
 
-export default function MembersListTab({categoriesData, sexOptions}: MembersListTabProps) {
+export default function MembersInternalTab({categoriesData, sexOptions}: MembersListTabProps) {
   const t = translations.members;
 
   // Data context
@@ -1660,7 +1660,7 @@ export default function MembersListTab({categoriesData, sexOptions}: MembersList
 
 ## Conclusion
 
-This refactoring plan transforms `MembersListTab.tsx` from a monolithic 840-line component into a clean, maintainable 180-line component that follows project standards. By leveraging existing hooks and properly separating concerns, we achieve:
+This refactoring plan transforms `MembersInternalTab.tsx` from a monolithic 840-line component into a clean, maintainable 180-line component that follows project standards. By leveraging existing hooks and properly separating concerns, we achieve:
 
 1. **78% reduction in component size**
 2. **Consistency with project architecture**

@@ -124,7 +124,7 @@ const {data, error} = await supabase
 
 ### `is_external` Field
 
-**Usage Count**: 3 occurrences (all in `MembersListTab.tsx`)
+**Usage Count**: 3 occurrences (all in `MembersInternalTab.tsx`)
 
 **All usages are for initialization only**:
 ```typescript
@@ -330,7 +330,7 @@ const currency = 'CZK';
    }
    ```
 
-2. **Update MembersListTab** - Remove is_external initialization:
+2. **Update MembersInternalTab** - Remove is_external initialization:
    ```typescript
    // Remove or default to undefined
    // is_external: false,
@@ -477,7 +477,7 @@ export interface MemberWithPaymentStatus {
 
 ### 2. Component Files to Update
 
-- ✅ `src/app/admin/members/components/MembersListTab.tsx` - Remove `is_external` initialization
+- ✅ `src/app/admin/members/components/MembersInternalTab.tsx` - Remove `is_external` initialization
 
 ### 3. Refactoring Plan to Update
 
@@ -502,7 +502,7 @@ After making these changes:
 - [ ] `Member` type only contains fields that exist in database
 - [ ] `UnifiedPlayer` type exists for lineup features
 - [ ] `MemberWithPaymentStatus` correctly combines member + payment data
-- [ ] No TypeScript errors in MembersListTab
+- [ ] No TypeScript errors in MembersInternalTab
 - [ ] Member CRUD operations work
 - [ ] Payment status displays correctly
 - [ ] `is_active` filtering works

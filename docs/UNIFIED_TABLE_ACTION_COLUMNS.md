@@ -203,7 +203,7 @@ const renderCell = (user: User, columnKey: string) => {
 Based on the codebase analysis, these files should be migrated:
 
 - `src/app/admin/committees/page.tsx`
-- `src/app/admin/members/components/MembersListTab.tsx`
+- `src/app/admin/members/components/MembersInternalTab.tsx`
 - `src/app/admin/clubs/page.tsx`
 - `src/app/admin/posts/page.tsx`
 - `src/app/admin/seasons/page.tsx`

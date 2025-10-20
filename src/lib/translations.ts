@@ -471,6 +471,9 @@ export const translations = {
     membersDescription: 'Správa členů, které jsou dostupné v systému.',
     table: {
       ariaLabel: 'Seznam členů',
+      membersInternalAriaLabel: 'Seznam interních členů',
+      membersExternalAriaLabel: 'Seznam externích členů',
+      membersOnLoanAriaLabel: 'Seznam členů na hostování',
       filters: {
         searchPlaceholder: 'Hledat podle jména, příjmení nebo registračního čísla...',
         clearAll: 'Vymazat filtry',
@@ -510,6 +513,8 @@ export const translations = {
     tabs: {
       members: 'Členové',
       statistics: 'Statistiky',
+      membersExternal: 'Externí členové',
+      membersOnLoan: 'Členové na hostování',
     },
     toasts: {
       selectMember: 'Vyberte alespoň jednoho člena pro hromadnou úpravu',
