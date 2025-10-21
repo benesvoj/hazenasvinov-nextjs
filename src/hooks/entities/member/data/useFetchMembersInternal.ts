@@ -4,7 +4,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {showToast} from '@/components';
 import {API_ROUTES} from '@/lib';
-import {convertToInternalMemberWithPayment, MemberInternal} from '@/types';
+import {convertToInternalMemberWithPayment, MemberInternal, MembersInternalSchema} from '@/types';
 
 interface PaginationInfo {
   page: number;
@@ -83,7 +83,11 @@ export const useFetchMembersInternal = (options: UseFetchMembersInternalOptions 
         throw new Error(result.error);
       }
 
-      setData(result.data.map(convertToInternalMemberWithPayment) || []);
+      setData(
+        result.data.map((schema: MembersInternalSchema) =>
+          convertToInternalMemberWithPayment(schema)
+        ) || []
+      );
       setPagination(result.pagination || {page, limit, total: null});
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load members';

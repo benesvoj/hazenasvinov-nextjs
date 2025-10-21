@@ -1,6 +1,6 @@
-import {useState, useEffect, useCallback} from 'react';
+'use client';
 
-import {ClubCategoryTeams} from '@/types/entities/team/business/clubs';
+import {useState, useEffect, useCallback} from 'react';
 
 import {createClient} from '@/utils/supabase/client';
 

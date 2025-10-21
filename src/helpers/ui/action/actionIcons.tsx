@@ -9,6 +9,7 @@ import {
   ArrowLeftEndOnRectangleIcon,
   PlusCircleIcon,
   Square3Stack3DIcon,
+  WalletIcon,
 } from '@heroicons/react/24/solid';
 
 import {ActionTypes} from '@/enums';
@@ -44,6 +45,9 @@ export const getDefaultActionIcon = (type: ActionTypes) => {
   }
   if (type === ActionTypes.IMPORT) {
     return <ArrowLeftEndOnRectangleIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.PAYMENT) {
+    return <WalletIcon className="w-4 h-4" />;
   }
   return <PlusCircleIcon className="w-4 h-4" />; // Default fallback
 };

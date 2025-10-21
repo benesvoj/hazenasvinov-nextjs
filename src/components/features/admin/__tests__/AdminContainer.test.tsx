@@ -3,11 +3,10 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 
+import {AdminContainer} from '@/components';
 import {ActionTypes} from '@/enums';
 import {render, screen} from '@/test/utils';
 import {ActionsProps, TabConfig} from '@/types';
-
-import {AdminContainer} from '../AdminContainer';
 
 // Mock child components
 vi.mock('../AdminHeader', () => ({

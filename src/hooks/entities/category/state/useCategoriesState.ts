@@ -1,4 +1,6 @@
-import {useState, useCallback} from 'react';
+'use client';
+
+import {useCallback, useState} from 'react';
 
 import {createClient} from '@/utils/supabase/client';
 
@@ -158,11 +160,12 @@ export function useCategoriesState(): UseCategoriesResult {
       if (error) throw error;
 
       resetSeasonFormData();
-      fetchCategorySeasons(selectedCategory.id);
+      await fetchCategorySeasons(selectedCategory.id);
     } catch (error) {
       setError('Chyba při přidávání sezóny');
       console.error('Error adding season:', error);
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [selectedCategory, seasonFormData, supabase, fetchCategorySeasons]);
 
   // Remove season from category
@@ -175,7 +178,7 @@ export function useCategoriesState(): UseCategoriesResult {
 
         if (error) throw error;
 
-        fetchCategorySeasons(selectedCategory.id);
+        await fetchCategorySeasons(selectedCategory.id);
       } catch (error) {
         setError('Chyba při odstraňování sezóny');
         console.error('Error removing season:', error);
@@ -216,7 +219,7 @@ export function useCategoriesState(): UseCategoriesResult {
       if (error) throw error;
 
       setSelectedSeason(null);
-      fetchCategorySeasons(selectedCategory.id);
+      await fetchCategorySeasons(selectedCategory.id);
     } catch (error) {
       setError('Chyba při aktualizaci sezóny');
       console.error('Error updating season:', error);
@@ -226,7 +229,7 @@ export function useCategoriesState(): UseCategoriesResult {
   // Add new category
   const handleAddCategory = useCallback(async () => {
     try {
-      const {data: newCategory, error} = await supabase
+      const {error} = await supabase
         .from('categories')
         .insert({
           name: formData.name,
@@ -242,11 +245,12 @@ export function useCategoriesState(): UseCategoriesResult {
       if (error) throw error;
 
       resetFormData();
-      fetchCategories();
+      await fetchCategories();
     } catch (error) {
       setError('Chyba při přidávání kategorie');
       console.error('Error adding category:', error);
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [formData, supabase, fetchCategories]);
 
   // Update category
@@ -270,11 +274,12 @@ export function useCategoriesState(): UseCategoriesResult {
 
       setSelectedCategory(null);
       resetFormData();
-      fetchCategories();
+      await fetchCategories();
     } catch (error) {
       setError('Chyba při aktualizaci kategorie');
       console.error('Error updating category:', error);
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [selectedCategory, formData, supabase, fetchCategories]);
 
   // Delete category
@@ -287,7 +292,7 @@ export function useCategoriesState(): UseCategoriesResult {
       if (error) throw error;
 
       setSelectedCategory(null);
-      fetchCategories();
+      await fetchCategories();
     } catch (error) {
       setError('Chyba při mazání kategorie');
       console.error('Error deleting category:', error);

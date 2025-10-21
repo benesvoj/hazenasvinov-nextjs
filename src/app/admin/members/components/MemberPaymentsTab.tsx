@@ -5,7 +5,6 @@ import React, {useState} from 'react';
 import {
   Card,
   CardBody,
-  CardHeader,
   Button,
   Table,
   TableHeader,
@@ -20,8 +19,6 @@ import {
 } from '@heroui/react';
 
 import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
-
-import {getPaymentStatusColor, getPaymentStatusLabel} from '@/enums/membershipFeeStatus';
 
 import {DeleteConfirmationModal} from '@/components';
 import {useMemberPayments} from '@/hooks';

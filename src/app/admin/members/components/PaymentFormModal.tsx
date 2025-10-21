@@ -1,24 +1,14 @@
 'use client';
 
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-  Select,
-  SelectItem,
-  Textarea,
-} from '@heroui/react';
+import {Input, Select, SelectItem, Textarea} from '@heroui/react';
 
-import {PaymentMethod, FeeType} from '@/enums/membershipFeeStatus';
+import {FeeType, PaymentMethod} from '@/enums/membershipFeeStatus';
 
+import {UnifiedModal} from '@/components';
 import {useMemberPayments} from '@/hooks';
-import {BaseMember, Member, MembershipFeePayment} from '@/types';
+import {BaseMember, MembershipFeePayment} from '@/types';
 
 interface PaymentFormModalProps {
   isOpen: boolean;
@@ -26,6 +16,7 @@ interface PaymentFormModalProps {
   payment?: MembershipFeePayment | null;
   member: BaseMember;
   defaultYear: number;
+  onSuccess?: () => void;
 }
 
 export default function PaymentFormModal({
@@ -34,6 +25,7 @@ export default function PaymentFormModal({
   payment,
   member,
   defaultYear,
+  onSuccess,
 }: PaymentFormModalProps) {
   const {createPayment, updatePayment} = useMemberPayments(member.id);
 
@@ -97,112 +89,105 @@ export default function PaymentFormModal({
       }
 
       onClose();
+      onSuccess?.(); // Call onSuccess callback to refresh the list
     } catch (error) {
       console.error('Failed to save payment:', error);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="2xl">
-      <ModalContent>
-        <ModalHeader>{payment ? 'Upravit platbu' : 'Přidat platbu'}</ModalHeader>
-        <ModalBody>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                type="number"
-                label="Kalendářní rok"
-                value={formData.calendar_year.toString()}
-                onChange={(e) =>
-                  setFormData({...formData, calendar_year: parseInt(e.target.value)})
-                }
-                isRequired
-              />
+    <UnifiedModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={payment ? 'Upravit platbu' : 'Přidat platbu'}
+      size="2xl"
+      onPress={handleSubmit}
+      isFooterWithActions
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            type="number"
+            label="Kalendářní rok"
+            value={formData.calendar_year.toString()}
+            onChange={(e) => setFormData({...formData, calendar_year: parseInt(e.target.value)})}
+            isRequired
+          />
 
-              <Input
-                type="date"
-                label="Datum platby"
-                value={formData.payment_date}
-                onChange={(e) => setFormData({...formData, payment_date: e.target.value})}
-                isRequired
-              />
-            </div>
+          <Input
+            type="date"
+            label="Datum platby"
+            value={formData.payment_date}
+            onChange={(e) => setFormData({...formData, payment_date: e.target.value})}
+            isRequired
+          />
+        </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                type="number"
-                label="Částka"
-                value={formData.amount}
-                onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                isRequired
-              />
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            type="number"
+            label="Částka"
+            value={formData.amount}
+            onChange={(e) => setFormData({...formData, amount: e.target.value})}
+            isRequired
+          />
 
-              <Input
-                label="Měna"
-                value={formData.currency}
-                onChange={(e) => setFormData({...formData, currency: e.target.value})}
-                isRequired
-              />
-            </div>
+          <Input
+            label="Měna"
+            value={formData.currency}
+            onChange={(e) => setFormData({...formData, currency: e.target.value})}
+            isRequired
+          />
+        </div>
 
-            <Select
-              label="Typ platby"
-              selectedKeys={[formData.fee_type]}
-              onSelectionChange={(keys) =>
-                setFormData({...formData, fee_type: Array.from(keys)[0] as FeeType})
-              }
-              isRequired
-            >
-              <SelectItem key={FeeType.MEMBERSHIP}>Členský poplatek</SelectItem>
-              <SelectItem key={FeeType.REGISTRATION}>Registrační poplatek</SelectItem>
-              <SelectItem key={FeeType.ADDITIONAL}>Dodatečný poplatek</SelectItem>
-              <SelectItem key={FeeType.REFUND}>Vrácení</SelectItem>
-            </Select>
+        <Select
+          label="Typ platby"
+          selectedKeys={[formData.fee_type]}
+          onSelectionChange={(keys) =>
+            setFormData({...formData, fee_type: Array.from(keys)[0] as FeeType})
+          }
+          isRequired
+        >
+          <SelectItem key={FeeType.MEMBERSHIP}>Členský poplatek</SelectItem>
+          <SelectItem key={FeeType.REGISTRATION}>Registrační poplatek</SelectItem>
+          <SelectItem key={FeeType.ADDITIONAL}>Dodatečný poplatek</SelectItem>
+          <SelectItem key={FeeType.REFUND}>Vrácení</SelectItem>
+        </Select>
 
-            <Select
-              label="Způsob platby"
-              selectedKeys={[formData.payment_method]}
-              onSelectionChange={(keys) =>
-                setFormData({...formData, payment_method: Array.from(keys)[0] as PaymentMethod})
-              }
-            >
-              <SelectItem key={PaymentMethod.CASH}>Hotovost</SelectItem>
-              <SelectItem key={PaymentMethod.BANK_TRANSFER}>Bankovní převod</SelectItem>
-              <SelectItem key={PaymentMethod.CARD}>Karta</SelectItem>
-              <SelectItem key={PaymentMethod.OTHER}>Jiné</SelectItem>
-            </Select>
+        <Select
+          label="Způsob platby"
+          selectedKeys={[formData.payment_method]}
+          onSelectionChange={(keys) =>
+            setFormData({...formData, payment_method: Array.from(keys)[0] as PaymentMethod})
+          }
+        >
+          <SelectItem key={PaymentMethod.CASH}>Hotovost</SelectItem>
+          <SelectItem key={PaymentMethod.BANK_TRANSFER}>Bankovní převod</SelectItem>
+          <SelectItem key={PaymentMethod.CARD}>Karta</SelectItem>
+          <SelectItem key={PaymentMethod.OTHER}>Jiné</SelectItem>
+        </Select>
 
-            <Input
-              label="Reference platby"
-              value={formData.payment_reference}
-              onChange={(e) => setFormData({...formData, payment_reference: e.target.value})}
-              placeholder="Číslo transakce, šeku, atd."
-            />
+        <Input
+          label="Reference platby"
+          value={formData.payment_reference}
+          onChange={(e) => setFormData({...formData, payment_reference: e.target.value})}
+          placeholder="Číslo transakce, šeku, atd."
+        />
 
-            <Input
-              label="Číslo dokladu"
-              value={formData.receipt_number}
-              onChange={(e) => setFormData({...formData, receipt_number: e.target.value})}
-              placeholder="Volitelné"
-            />
+        <Input
+          label="Číslo dokladu"
+          value={formData.receipt_number}
+          onChange={(e) => setFormData({...formData, receipt_number: e.target.value})}
+          placeholder="Volitelné"
+        />
 
-            <Textarea
-              label="Poznámka"
-              value={formData.notes}
-              onChange={(e) => setFormData({...formData, notes: e.target.value})}
-              placeholder="Volitelná poznámka k platbě"
-            />
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button variant="light" onPress={onClose}>
-            Zrušit
-          </Button>
-          <Button color="primary" onPress={handleSubmit}>
-            {payment ? 'Uložit' : 'Přidat'}
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        <Textarea
+          label="Poznámka"
+          value={formData.notes}
+          onChange={(e) => setFormData({...formData, notes: e.target.value})}
+          placeholder="Volitelná poznámka k platbě"
+        />
+      </div>
+    </UnifiedModal>
   );
 }

@@ -1,3 +1,5 @@
+'use client';
+
 import {useState, useCallback, useEffect} from 'react';
 
 import {createClient} from '@/utils/supabase/client';
@@ -66,6 +68,7 @@ export function useCommittees() {
       console.error('Error adding committee:', error);
       showToast.danger('Chyba při přidávání komise');
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [formData, fetchCommittees]);
 
   // Update committee
@@ -95,6 +98,7 @@ export function useCommittees() {
       console.error('Error updating committee:', error);
       showToast.danger('Chyba při aktualizaci komise');
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [selectedCommittee, formData, fetchCommittees]);
 
   // Delete committee

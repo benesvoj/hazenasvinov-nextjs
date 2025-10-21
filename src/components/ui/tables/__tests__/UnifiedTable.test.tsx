@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {act} from 'react';
 
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 
@@ -418,30 +418,31 @@ describe('UnifiedTable', () => {
       expect(screen.queryByText('User 11')).not.toBeInTheDocument();
     });
 
-    it('should update displayed items when page changes', () => {
-      const {rerender} = render(
+    it('should update displayed items when page changes', async () => {
+      // For client-side pagination, don't pass external page prop
+      // Use internal pagination state instead
+      const {container} = render(
         <UnifiedTable
           columns={mockColumns}
           data={largeDataset}
           ariaLabel="Test table"
           rowsPerPage={10}
-          page={1}
         />
       );
 
+      // Page 1 should show User 1
       expect(screen.getByText('User 1')).toBeInTheDocument();
+      expect(screen.queryByText('User 11')).not.toBeInTheDocument();
 
-      // Change to page 2
-      rerender(
-        <UnifiedTable
-          columns={mockColumns}
-          data={largeDataset}
-          ariaLabel="Test table"
-          rowsPerPage={10}
-          page={2}
-        />
-      );
+      // Click next page button
+      const pagination = screen.getByTestId('pagination');
+      const nextButton = within(pagination).getByText('Next');
 
+      await act(async () => {
+        nextButton.click();
+      });
+
+      // Page 2 should show User 11, not User 1
       expect(screen.queryByText('User 1')).not.toBeInTheDocument();
       expect(screen.getByText('User 11')).toBeInTheDocument();
     });
@@ -449,18 +450,21 @@ describe('UnifiedTable', () => {
     it('should use controlled pagination', () => {
       const onPageChange = vi.fn();
 
+      // For server-side pagination, must pass totalPages
       render(
         <UnifiedTable
           columns={mockColumns}
-          data={largeDataset}
+          data={largeDataset.slice(0, 10)} // Server returns only page 1 data
           ariaLabel="Test table"
           rowsPerPage={10}
           page={1}
+          totalPages={3} // 30 items / 10 per page = 3 pages
           onPageChange={onPageChange}
         />
       );
 
-      const nextButton = screen.getByText('Next');
+      const pagination = screen.getByTestId('pagination');
+      const nextButton = within(pagination).getByText('Next');
       nextButton.click();
 
       expect(onPageChange).toHaveBeenCalledWith(2);

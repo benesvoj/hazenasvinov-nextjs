@@ -1,3 +1,4 @@
+'use client';
 import {useState, useMemo} from 'react';
 
 import {Genders, MemberFunction} from '@/enums';

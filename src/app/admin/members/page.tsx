@@ -14,9 +14,10 @@ import MemberFormModal from '@/app/admin/members/components/MemberFormModal';
 import MembersCsvImport from '@/app/admin/members/components/MembersCsvImport';
 import {MembersListFilters} from '@/app/admin/members/components/MembersListFilters';
 import MembersStatisticTab from '@/app/admin/members/components/MembersStatisticTab';
+import PaymentFormModal from '@/app/admin/members/components/PaymentFormModal';
 
 import {AdminContainer, DeleteConfirmationModal} from '@/components';
-import {ActionTypes, Genders, getGenderOptions} from '@/enums';
+import {ActionTypes, Genders, getGenderOptions, ModalMode} from '@/enums';
 import {
   useBulkEditMembers,
   useFetchMembersExternal,
@@ -78,12 +79,14 @@ export default function MembersAdminPage() {
   // Modal state
   const {
     addModal,
+    paymentModal,
     editModal,
     deleteModal,
     detailModal,
     bulkEditModal,
     modalContext, // Get the context
     openAdd,
+    openPayment,
     openEdit: openEditBase,
     openDelete: openDeleteBase,
     openDetail: openDetailBase,
@@ -104,7 +107,13 @@ export default function MembersAdminPage() {
     },
   });
 
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+
   // Context-aware wrappers for each tab
+  const openPaymentInternal = (member: MemberInternal) => {
+    openPayment(member as BaseMember, 'internal');
+  };
   const openEditInternal = (member: MemberInternal) =>
     openEditBase(member as BaseMember, 'internal');
   const openDeleteInternal = (member: MemberInternal) => {
@@ -219,6 +228,7 @@ export default function MembersAdminPage() {
               <MembersInternalTab
                 categoriesData={categories}
                 sexOptions={genderOptions}
+                openPayment={openPaymentInternal}
                 openEdit={openEditInternal}
                 openDelete={openDeleteInternal}
                 openDetail={openDetailInternal}
@@ -303,12 +313,22 @@ export default function MembersAdminPage() {
         onTabChange={setActiveTab}
       />
 
+      {selectedMember && (
+        <PaymentFormModal
+          isOpen={paymentModal.isOpen}
+          onClose={paymentModal.onClose}
+          member={selectedMember}
+          payment={null}
+          defaultYear={selectedYear}
+          onSuccess={refreshInternal}
+        />
+      )}
+
       {/* Modals */}
       <MemberFormModal
         isOpen={addModal.isOpen}
         onClose={addModal.onClose}
         onSubmit={handleAddMember}
-        title={t.modals.addMember}
         formData={formData}
         setFormData={setFormData}
         categories={categories || []}
@@ -320,7 +340,6 @@ export default function MembersAdminPage() {
         isOpen={editModal.isOpen}
         onClose={editModal.onClose}
         onSubmit={handleUpdateMember}
-        title={t.modals.editMember}
         formData={formData}
         setFormData={setFormData}
         categories={categories || []}
@@ -332,6 +351,8 @@ export default function MembersAdminPage() {
         isOpen={detailModal.isOpen}
         onClose={detailModal.onClose}
         member={selectedMember}
+        mode={ModalMode.EDIT}
+        onSubmit={handleUpdateMember}
       />
 
       <DeleteConfirmationModal

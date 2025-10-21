@@ -1,3 +1,7 @@
+/**
+ *  @deprecated DO not use it anymore
+ */
+
 import {Genders} from '@/enums';
 
 import {PlayerSearchResult} from './unifiedPlayer';

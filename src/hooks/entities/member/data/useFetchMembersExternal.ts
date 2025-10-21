@@ -1,8 +1,9 @@
+'use client';
 import {useCallback, useEffect, useState} from 'react';
 
 import {showToast} from '@/components';
 import {API_ROUTES} from '@/lib';
-import {MemberExternal} from '@/types';
+import {convertExternalMemberSchema, MemberExternal, MembersExternalSchema} from '@/types';
 
 export const useFetchMembersExternal = () => {
   const [data, setData] = useState<MemberExternal[]>([]);
@@ -21,7 +22,10 @@ export const useFetchMembersExternal = () => {
         throw new Error(result.error);
       }
 
-      setData(result.data || []);
+      setData(
+        result.data.map((schema: MembersExternalSchema) => convertExternalMemberSchema(schema)) ||
+          []
+      );
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load records';
       setError(errorMessage);

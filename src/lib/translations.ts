@@ -247,6 +247,7 @@ export const translations = {
     statusTransition: 'Změna stavu',
     moveStatusTo: 'Přesunout ze stavu',
     moveStatusFrom: 'do stavu',
+    payment: 'Platba',
   },
   sponsorship: {
     title: 'Sponzorství',
@@ -525,10 +526,29 @@ export const translations = {
       addMember: 'Přidat člena',
     },
     modals: {
+      tabsAriaLabel: 'Members Detail Tabs',
+      tabs: {
+        info: 'Informace',
+        membershipFees: 'Členské příspěvky',
+      },
       addMember: 'Přidat člena',
       editMember: 'Upravit člena',
       deleteMember: 'Smazat člena',
       deleteMemberMessage: 'Opravdu chcete smazat člena? Tato akce je nevratná.',
+      memberForm: {
+        registrationNumber: 'Registrační číslo',
+        registrationNumberHelper: 'Registrační číslo (volitelné - vygeneruje se automaticky)',
+        registrationNumberPlaceholder: 'např. REG-2024-0001',
+        name: 'Jméno',
+        surname: 'Příjmení',
+        dateOfBirth: 'Datum',
+        dateOfBirthPlaceholder: 'Vyberte datum narození',
+        sex: 'Pohlaví',
+        category: 'Kategorie',
+        categoryHelper: 'Vyberte nejprve pohlaví pro zobrazení dostupných kategorií',
+        functions: 'Funkce',
+        functionsHelper: 'Členové bez přiřazených funkcí budou označeni jako neaktivní v tabulce.',
+      },
     },
   },
   memberFunctions: {

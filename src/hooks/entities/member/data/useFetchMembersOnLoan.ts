@@ -1,8 +1,9 @@
+'use client';
 import {useCallback, useEffect, useState} from 'react';
 
 import {showToast} from '@/components';
 import {API_ROUTES} from '@/lib';
-import {MemberOnLoan} from '@/types';
+import {convertOnLoanMemberSchema, MemberOnLoan, MembersOnLoanSchema} from '@/types';
 
 export const useFetchMembersOnLoan = () => {
   const [data, setData] = useState<MemberOnLoan[]>([]);
@@ -21,7 +22,9 @@ export const useFetchMembersOnLoan = () => {
         throw new Error(result.error);
       }
 
-      setData(result.data || []);
+      setData(
+        result.data.map((schema: MembersOnLoanSchema) => convertOnLoanMemberSchema(schema)) || []
+      );
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load records';
       setError(errorMessage);

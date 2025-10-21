@@ -1,3 +1,4 @@
+'use client';
 import {useState} from 'react';
 
 import {useDisclosure} from '@heroui/react';
@@ -16,6 +17,7 @@ export const useMemberModals = <T extends BaseMember = Member>({
 }: UseMemberModalsProps) => {
   // Modal states
   const addModal = useDisclosure();
+  const paymentModal = useDisclosure();
   const editModal = useDisclosure();
   const deleteModal = useDisclosure();
   const detailModal = useDisclosure();
@@ -55,6 +57,12 @@ export const useMemberModals = <T extends BaseMember = Member>({
     setFormData({...formInitData});
     setModalContext('internal'); // Add is always for internal
     addModal.onOpen();
+  };
+
+  const openPayment = (member: T, context: MemberContext) => {
+    setSelectedMember(member);
+    setModalContext(context);
+    paymentModal.onOpen();
   };
 
   const openEdit = (member: T, context: MemberContext) => {
@@ -100,6 +108,12 @@ export const useMemberModals = <T extends BaseMember = Member>({
     addModal.onClose();
   };
 
+  const closePayment = () => {
+    setSelectedMember(null);
+    setModalContext(null);
+    paymentModal.onClose();
+  };
+
   const closeEdit = () => {
     setSelectedMember(null);
     setModalContext(null);
@@ -132,6 +146,7 @@ export const useMemberModals = <T extends BaseMember = Member>({
   return {
     // Modal states
     addModal: {...addModal, onClose: closeAdd},
+    paymentModal: {...paymentModal, onClose: closePayment},
     editModal: {...editModal, onClose: closeEdit},
     deleteModal: {...deleteModal, onClose: closeDelete},
     detailModal: {...detailModal, onClose: closeDetail},
@@ -139,6 +154,7 @@ export const useMemberModals = <T extends BaseMember = Member>({
 
     // Open handlers
     openAdd,
+    openPayment,
     openEdit,
     openDelete,
     openDetail,

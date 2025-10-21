@@ -1,15 +1,9 @@
-import {Genders, MemberFunction as MemberFunctionEnum} from '@/enums';
+import {Genders, MemberFunction} from '@/enums';
 import {Category, MemberInternal, MemberSchema} from '@/types';
 
 export interface Member extends MemberSchema {
   sex: Genders;
-  functions: MemberFunctionEnum[];
-}
-export interface MembersListTabProps {
-  members: Member[];
-  categoriesData: Category[] | null;
-  functionOptions: Record<string, string>;
-  sexOptions: Record<string, string>;
+  functions: MemberFunction[];
 }
 
 export interface MembersStatisticTabProps {
@@ -36,7 +30,7 @@ export interface MemberFormData {
   registration_number: string;
   date_of_birth?: string;
   sex: Genders;
-  functions: MemberFunctionEnum[];
+  functions: MemberFunction[];
 }
 
 export interface CreateMemberResult {
@@ -53,15 +47,7 @@ export interface UpdateMemberData {
   registration_number?: string;
   date_of_birth?: string | null;
   sex?: Genders;
-  functions?: MemberFunctionEnum[];
+  functions?: MemberFunction[];
   category_id?: string;
   is_active?: boolean;
-}
-
-/**
- * New types for Member to refactor system
- */
-export interface MemberNew extends MemberSchema {
-  sex: Genders;
-  functions: MemberFunctionEnum[];
 }

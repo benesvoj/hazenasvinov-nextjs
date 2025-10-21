@@ -1,4 +1,5 @@
-import {useState, useCallback, useEffect} from 'react';
+'use client';
+import {useCallback, useEffect, useState} from 'react';
 
 import {showToast} from '@/components';
 import {translations} from '@/lib';
@@ -55,6 +56,7 @@ export const useCategoryFees = (year?: number) => {
         throw err;
       }
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [loadFees]
   );
 
@@ -80,6 +82,7 @@ export const useCategoryFees = (year?: number) => {
         throw err;
       }
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [loadFees]
   );
 

@@ -46,6 +46,7 @@ export default function VideosPage() {
   // Fetch videos when filters change
   useEffect(() => {
     fetchVideos(filters);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [filters]); // Remove fetchVideos from dependencies to prevent infinite loop
 
   // Categories, clubs, and seasons are now provided by AppDataContext

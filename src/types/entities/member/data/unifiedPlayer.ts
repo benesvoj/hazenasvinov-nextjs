@@ -1,4 +1,4 @@
-import {Member, MemberNew, PlayerLoan} from '@/types';
+import {Member, PlayerLoan} from '@/types';
 
 export interface UnifiedPlayer extends Member {
   is_external?: boolean;
@@ -17,15 +17,6 @@ export interface UnifiedPlayer extends Member {
   loan_end_date?: string;
   loan_type?: 'temporary' | 'permanent' | 'youth';
   loan_status?: 'active' | 'expired' | 'terminated';
-}
-
-export interface UnifiedPlayerNew extends MemberNew {
-  is_external: boolean;
-  core_club_id?: string;
-  current_club_id?: string;
-  external_club_name?: string;
-  position?: string;
-  jersey_number?: number;
 }
 
 export interface PlayerSearchFilters {
@@ -49,10 +40,6 @@ export interface PlayerSearchResult {
   jersey_number?: number;
   display_name: string;
   is_captain?: boolean;
-}
-
-export interface PlayerWithLoans extends UnifiedPlayer {
-  loans: PlayerLoan[];
 }
 
 export interface PlayerStats {

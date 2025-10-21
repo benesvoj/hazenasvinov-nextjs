@@ -66,6 +66,7 @@ export default function CoachesVideosPage() {
     if (user?.id && !authLoading) {
       fetchAssignedCategories();
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [user?.id, authLoading]); // Remove fetchAssignedCategories from dependencies
 
   // Categories, clubs, and seasons are now provided by AppDataContext
@@ -76,6 +77,7 @@ export default function CoachesVideosPage() {
     if (assignedCategories.length > 0) {
       fetchVideos(filters);
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [filters, assignedCategories]); // Remove fetchVideos from dependencies
 
   // Handle video operations

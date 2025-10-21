@@ -1,3 +1,5 @@
+import {Genders, MemberFunction} from '@/enums';
+
 /**
  * Base member interface
  * All member types (Member, MemberInternal, MemberExternal, MemberOnLoan)
@@ -10,22 +12,9 @@ export interface BaseMember {
   registration_number: string | null;
   date_of_birth: string | null;
   category_id: string | null;
-  sex: string | null;
-  functions: string[] | null;
+  sex: Genders | null;
+  functions: MemberFunction[] | null;
   is_active: boolean | null;
   created_at: string | null;
   updated_at: string | null;
-}
-
-/**
- * Type guard to check if an object is a BaseMember
- */
-export function isBaseMember(obj: any): obj is BaseMember {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    typeof obj.id === 'string' &&
-    typeof obj.name === 'string' &&
-    typeof obj.surname === 'string'
-  );
 }

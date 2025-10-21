@@ -1,4 +1,6 @@
-import {useState, useEffect, useCallback, useMemo} from 'react';
+'use client';
+
+import {useState, useCallback, useMemo} from 'react';
 
 import {
   CategoryLineup,
@@ -6,7 +8,6 @@ import {
   RawCategoryLineupMember,
   CategoryLineupFormData,
   AddMemberToLineupData,
-  CategoryLineupFilters,
 } from '@/types/entities/category/data/categoryLineup';
 
 import {createClient} from '@/utils/supabase/client';

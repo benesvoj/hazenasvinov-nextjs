@@ -1,3 +1,4 @@
+'use client';
 /**
  * Performance-optimized React hooks for match queries with memoization
  */

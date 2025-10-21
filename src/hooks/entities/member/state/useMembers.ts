@@ -1,10 +1,11 @@
+'use client';
 import {useState, useCallback} from 'react';
 
 import {createClient} from '@/utils/supabase/client';
 
 import {showToast} from '@/components';
 import {useMemberClubRelationships} from '@/hooks';
-import {MemberFormData, CreateMemberResult, Member, UpdateMemberData} from '@/types';
+import {MemberFormData, Member, UpdateMemberData, convertSchemaToMember} from '@/types';
 
 export interface ValidationErrors {
   [key: string]: string;
@@ -17,7 +18,6 @@ export interface ValidationErrors {
 export function useMembers() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
-  const [members, setMembers] = useState<Member[]>([]);
 
   const supabase = createClient();
   const {createRelationship} = useMemberClubRelationships();
@@ -43,45 +43,15 @@ export function useMembers() {
   }, []);
 
   /**
-   * Fetch all members
-   */
-  const fetchMembers = useCallback(async () => {
-    setIsLoading(true);
-    setErrors({});
-
-    try {
-      const {data, error} = await supabase
-        .from('members')
-        .select('*')
-        .order('surname', {ascending: true})
-        .order('name', {ascending: true});
-
-      if (error) {
-        console.error('Error fetching members:', error);
-        throw new Error(`Chyba při načítání členů: ${error.message}`);
-      }
-
-      setMembers(data || []);
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching members:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Chyba při načítání členů';
-      showToast.danger(errorMessage);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [supabase]);
-
-  /**
    * Create a new member
+   * @returns Full Member object with enum conversions
    */
   const createMember = useCallback(
     async (
       formData: MemberFormData,
-      categoryId?: string,
-      clubId?: string
-    ): Promise<CreateMemberResult> => {
+      categoryId?: string | null,
+      clubId?: string | null
+    ): Promise<Member> => {
       if (!validateForm(formData)) {
         throw new Error('Formulář obsahuje chyby');
       }
@@ -90,17 +60,16 @@ export function useMembers() {
       setErrors({});
 
       try {
-        // Step 1: Create member record
         const {data, error} = await supabase
           .from('members')
           .insert({
             name: formData.name.trim(),
             surname: formData.surname.trim(),
             registration_number: formData.registration_number.trim(),
-            date_of_birth: formData.date_of_birth || null,
+            date_of_birth: formData.date_of_birth ?? null,
             sex: formData.sex,
             functions: formData.functions,
-            category_id: categoryId,
+            category_id: categoryId ?? null,
           })
           .select()
           .single();
@@ -118,17 +87,10 @@ export function useMembers() {
           });
         }
 
-        // Update local state
-        setMembers((prev) => [...prev, data]);
-
+        const convertedMember = convertSchemaToMember(data);
         showToast.success('Člen byl úspěšně vytvořen');
 
-        return {
-          id: data.id,
-          name: data.name,
-          surname: data.surname,
-          registration_number: data.registration_number,
-        };
+        return convertedMember;
       } catch (error) {
         console.error('Error creating member:', error);
         const errorMessage = error instanceof Error ? error.message : 'Chyba při vytváření člena';
@@ -165,11 +127,10 @@ export function useMembers() {
           throw new Error(`Chyba při aktualizaci člena: ${error.message}`);
         }
 
-        // Update local state
-        setMembers((prev) => prev.map((member) => (member.id === memberData.id ? data : member)));
-
+        const convertedMember = convertSchemaToMember(data);
         showToast.success('Člen byl úspěšně aktualizován');
-        return data;
+
+        return convertedMember;
       } catch (error) {
         console.error('Error updating member:', error);
         const errorMessage = error instanceof Error ? error.message : 'Chyba při aktualizaci člena';
@@ -197,47 +158,10 @@ export function useMembers() {
           console.error('Error deleting member:', error);
           throw new Error(`Chyba při mazání člena: ${error.message}`);
         }
-
-        // Update local state
-        setMembers((prev) => prev.filter((member) => member.id !== memberId));
-
         showToast.success('Člen byl úspěšně smazán');
       } catch (error) {
         console.error('Error deleting member:', error);
         const errorMessage = error instanceof Error ? error.message : 'Chyba při mazání člena';
-        showToast.danger(errorMessage);
-        throw error;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [supabase]
-  );
-
-  /**
-   * Get a specific member by ID
-   */
-  const getMember = useCallback(
-    async (memberId: string): Promise<Member | null> => {
-      setIsLoading(true);
-      setErrors({});
-
-      try {
-        const {data, error} = await supabase
-          .from('members')
-          .select('*')
-          .eq('id', memberId)
-          .single();
-
-        if (error) {
-          console.error('Error fetching member:', error);
-          throw new Error(`Chyba při načítání člena: ${error.message}`);
-        }
-
-        return data;
-      } catch (error) {
-        console.error('Error fetching member:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Chyba při načítání člena';
         showToast.danger(errorMessage);
         throw error;
       } finally {
@@ -276,19 +200,15 @@ export function useMembers() {
 
   return {
     // State
-    members,
     isLoading,
     errors,
 
     // CRUD Operations
-    fetchMembers,
     createMember,
     updateMember,
     deleteMember,
-    getMember,
 
     // Validation
-    validateForm,
     clearFieldError,
     clearAllErrors,
     reset,

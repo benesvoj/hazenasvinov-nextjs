@@ -1,3 +1,4 @@
+'use client';
 import {useState, useCallback} from 'react';
 
 import {createClient} from '@/utils/supabase/client';

@@ -19,6 +19,7 @@ export enum ActionTypes {
   IMPORT = 'import',
   BULK = 'bulk',
   STATUS_TRANSITION = 'status-transition',
+  PAYMENT = 'payment',
 }
 
 export const ACTION_TYPE_LABELS = {
@@ -38,6 +39,7 @@ export const ACTION_TYPE_LABELS = {
   [ActionTypes.IMPORT]: t.import,
   [ActionTypes.BULK]: t.bulk,
   [ActionTypes.STATUS_TRANSITION]: t.statusTransition,
+  [ActionTypes.PAYMENT]: t.payment,
 } as const;
 
 export const getActionTypeOptions = () => {

@@ -31,6 +31,7 @@ interface MemberTableTabProps<T> {
   onPageChange?: (page: number) => void;
 
   // Actions (optional)
+  onPayment?: (item: T) => void;
   openEdit?: (item: T) => void;
   openDelete?: (item: T) => void;
   openDetail?: (item: T) => void;

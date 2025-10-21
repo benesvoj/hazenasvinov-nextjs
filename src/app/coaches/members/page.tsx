@@ -24,6 +24,7 @@ export default function CoachesMembersPage() {
   } = useFetchMembersInternal();
 
   const {
+    openPayment,
     openEdit: openEditBase,
     openDelete: openDeleteBase,
     openDetail: openDetailBase,
@@ -40,8 +41,12 @@ export default function CoachesMembersPage() {
   const openDetailInternal = (member: MemberInternal) => {
     openDetailBase(member as BaseMember, 'internal');
   };
+  const openPaymentInternal = (member: MemberInternal) => {
+    openPayment(member as BaseMember, 'internal');
+  };
 
   const columns = getInternalMemberColumns(t, {
+    onPayment: openPaymentInternal,
     onEdit: openEditInternal,
     onDelete: openDeleteInternal,
     onDetail: openDetailInternal,
