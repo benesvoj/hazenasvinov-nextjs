@@ -28,8 +28,13 @@ export const MembersInternalTab = ({
   openDetail,
   selectedMembers,
   setSelectedMembers,
+  searchTerm,
+  filters,
 }: MembersListTabProps) => {
-  const {data, loading} = useFetchMembersInternal();
+  const {data, loading, pagination, goToPage} = useFetchMembersInternal({
+    search: searchTerm,
+    filters: filters,
+  });
 
   const t = translations.members;
 
@@ -66,6 +71,8 @@ export const MembersInternalTab = ({
       enableSelection={true}
       selectedItems={selectedMembers}
       onSelectionChange={setSelectedMembers as any}
+      pagination={pagination}
+      onPageChange={goToPage}
       ariaLabel={t.table.membersInternalAriaLabel}
     />
   );

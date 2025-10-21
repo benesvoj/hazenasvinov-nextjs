@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 
 import {showToast} from '@/components';
+import {API_ROUTES} from '@/lib';
 import {MemberExternal} from '@/types';
 
 export const useFetchMembersExternal = () => {
@@ -13,7 +14,7 @@ export const useFetchMembersExternal = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/members-external');
+      const response = await fetch(API_ROUTES.members.external);
       const result = await response.json();
 
       if (result.error) {

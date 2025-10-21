@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 
-import {Api} from '@/app/api/api';
-
+import {API_ROUTES} from '@/lib';
 import {MemberFunction} from '@/types';
 
 export function useFetchMemberFunctions() {
@@ -14,7 +13,7 @@ export function useFetchMemberFunctions() {
       setLoading(true);
       setError(null); // Clear previous errors
 
-      const res = await fetch(Api.getMemberFunctions, {
+      const res = await fetch(API_ROUTES.members.functions, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

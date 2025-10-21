@@ -10,6 +10,8 @@ import {
 
 import {StatusCell} from '@/app/admin/members/components';
 
+import {getMemberFunctionOptions} from '@/enums';
+import {translations} from '@/lib';
 import {MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
 
 // Internal member cell renderer (includes payment status)
@@ -79,6 +81,8 @@ const renderCommonMemberCell = (
   columnKey: string,
   categories: Record<string, string>
 ): React.ReactNode => {
+  const t = translations.members;
+
   switch (columnKey) {
     case 'status':
       return <StatusCell isActive={member.is_active ?? false} />;
@@ -102,19 +106,22 @@ const renderCommonMemberCell = (
     }
     case 'category':
       return categories[member.category_id || ''] || '-';
-    case 'sex':
-      return member.sex === 'male' ? 'Muž' : member.sex === 'female' ? 'Žena' : '-';
     case 'functions':
       if (!member.is_active || !member.functions || member.functions.length === 0) {
-        return <span className="text-gray-500">Žádné funkce</span>;
+        return <span className="text-gray-500">{t.table.noFunctionsFound}</span>;
       }
       return (
         <div className="flex flex-wrap gap-1">
-          {member.functions.map((func) => (
-            <Chip key={func} color="primary" variant="solid" size="sm">
-              {func}
-            </Chip>
-          ))}
+          {member.functions.map((func) =>
+            getMemberFunctionOptions().map(
+              ({value, label}) =>
+                func === value && (
+                  <Chip key={func} color="primary" variant="solid" size="sm">
+                    {label}
+                  </Chip>
+                )
+            )
+          )}
         </div>
       );
     default:

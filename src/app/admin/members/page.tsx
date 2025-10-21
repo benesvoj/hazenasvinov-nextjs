@@ -1,5 +1,5 @@
 'use client';
-import React, {useMemo} from 'react';
+import React, {useMemo, useState} from 'react';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
@@ -26,12 +26,16 @@ import {
   useMembers,
 } from '@/hooks';
 import {translations} from '@/lib';
-import {BaseMember, Member, MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
+import {BaseMember, MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
 
 export default function MembersAdminPage() {
   const t = translations.members;
 
-  const [activeTab, setActiveTab] = React.useState<string>('members');
+  const [activeTab, setActiveTab] = useState('members-internal');
+
+  const shouldFetchInternal = activeTab === 'members-internal';
+  const shouldFetchExternal = activeTab === 'members-external';
+  const shouldFetchOnLoan = activeTab === 'members-on-loan';
 
   const genderOptions = getGenderOptions().reduce(
     (acc, {value, label}) => {
@@ -209,9 +213,9 @@ export default function MembersAdminPage() {
         loading={anyLoading}
         tabs={[
           {
-            key: 'members',
+            key: 'members-internal',
             title: t.tabs.members,
-            content: (
+            content: shouldFetchInternal ? (
               <MembersInternalTab
                 categoriesData={categories}
                 sexOptions={genderOptions}
@@ -223,7 +227,7 @@ export default function MembersAdminPage() {
                 searchTerm={searchTerm}
                 filters={filters}
               />
-            ),
+            ) : null,
             filters: (
               <MembersListFilters
                 searchTerm={searchTerm}
@@ -266,26 +270,26 @@ export default function MembersAdminPage() {
           {
             key: 'members-on-loan',
             title: t.tabs.membersOnLoan,
-            content: (
+            content: shouldFetchOnLoan ? (
               <MembersOnLoanTab
                 categoriesData={categoriesMap}
                 openEdit={openEditOnLoan}
                 openDelete={openDeleteOnLoan}
                 openDetail={openDetailOnLoan}
               />
-            ),
+            ) : null,
           },
           {
             key: 'members-external',
             title: t.tabs.membersExternal,
-            content: (
+            content: shouldFetchExternal ? (
               <MembersExternalTab
                 categoriesData={categoriesMap}
                 openEdit={openEditExternal}
                 openDelete={openDeleteExternal}
                 openDetail={openDetailExternal}
               />
-            ),
+            ) : null,
           },
           {
             key: 'statistics',

@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 
 import {showToast} from '@/components';
+import {API_ROUTES} from '@/lib';
 import {MemberOnLoan} from '@/types';
 
 export const useFetchMembersOnLoan = () => {
@@ -13,7 +14,7 @@ export const useFetchMembersOnLoan = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/members-on-loan');
+      const response = await fetch(API_ROUTES.members.onLoan);
       const result = await response.json();
 
       if (result.error) {

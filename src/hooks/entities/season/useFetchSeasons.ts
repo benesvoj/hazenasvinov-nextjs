@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 
-import {Api} from '@/app/api/api';
-
+import {API_ROUTES} from '@/lib';
 import {Season} from '@/types';
 
 export function useFetchSeasons() {
@@ -12,7 +11,7 @@ export function useFetchSeasons() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(Api.getSeasons);
+        const res = await fetch(API_ROUTES.seasons);
         const data = await res.json();
         setData(data);
       } catch (err) {

@@ -35,6 +35,7 @@
     "generate:hooks": "node scripts/generate-hook-exports.mjs",
     "generate:types": "node scripts/generate-type-exports.mjs",
     "generate:components": "node scripts/generate-component-exports.mjs",
+    "generate:api-routes": "node scripts/generate-api-routes.mjs",
     "fix:imports": "eslint src --ext .ts,.tsx --fix",
     "test": "vitest",
     "test:ui": "vitest --ui",

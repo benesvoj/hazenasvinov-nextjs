@@ -5,12 +5,11 @@ import {ColumnType, MemberExternal, MemberInternal, MemberOnLoan} from '@/types'
 export const getCommonMemberColumns = (t: any) => {
   return [
     {key: 'status', label: t.table.columns.status},
-    {key: 'registration_number', label: t.table.columns.registrationNumber},
-    {key: 'name', label: t.table.columns.name},
-    {key: 'surname', label: t.table.columns.surname},
+    {key: 'registration_number', label: t.table.columns.registrationNumber, sortable: true},
+    {key: 'name', label: t.table.columns.name, sortable: true},
+    {key: 'surname', label: t.table.columns.surname, sortable: true},
     {key: 'date_of_birth', label: t.table.columns.dateOfBirth},
     {key: 'category', label: t.table.columns.category},
-    {key: 'sex', label: t.table.columns.gender},
     {key: 'functions', label: t.table.columns.functions},
   ];
 };

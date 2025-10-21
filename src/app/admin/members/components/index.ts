@@ -1,5 +1,5 @@
 export * from './cells/index';
-export * from './BulkEditModal';
+export * as default from './BulkEditModal';
 export * from './MemberDetailModal';
 export * from './MemberFormModal';
 export * from './PaymentFormModal';

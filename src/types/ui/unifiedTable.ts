@@ -63,7 +63,8 @@ export interface UnifiedTableProps<T = any> {
   topContent?: React.ReactNode;
   // Pagination props
   enablePagination?: boolean;
-  rowsPerPage?: number;
-  page?: number;
-  onPageChange?: (page: number) => void;
+  rowsPerPage?: number; // For client-side pagination
+  page?: number; // For server-side pagination (controlled)
+  totalPages?: number; // For server-side pagination
+  onPageChange?: (page: number) => void; // For server-side pagination
 }

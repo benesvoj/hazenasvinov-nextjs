@@ -28,7 +28,7 @@ export function MembersListFilters({
   categories,
 }: MembersListFiltersProps) {
   const t = translations.members;
-  const hasActiveFilters = filters.sex || filters.category_id || filters.function;
+  const hasActiveFilters = searchTerm || filters.sex || filters.category_id || filters.function;
 
   return (
     <div className="flex flex-col gap-4">

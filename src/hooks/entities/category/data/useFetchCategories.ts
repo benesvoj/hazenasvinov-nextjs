@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 
-import {Api} from '@/app/api/api';
-
+import {API_ROUTES} from '@/lib';
 import {Category} from '@/types';
 
 export function useFetchCategories() {
@@ -12,7 +11,7 @@ export function useFetchCategories() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(Api.getCategories);
+        const res = await fetch(API_ROUTES.categories);
         const data = await res.json();
         setData(data);
       } catch (err) {

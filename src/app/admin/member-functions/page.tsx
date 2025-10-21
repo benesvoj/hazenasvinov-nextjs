@@ -4,11 +4,10 @@ import React, {useState, useEffect} from 'react';
 
 import {useDisclosure} from '@heroui/react';
 
-import {translations} from '@/lib/translations';
-
 import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
 import {ActionTypes, ColumnAlignType} from '@/enums';
 import {useFetchMemberFunctions} from '@/hooks';
+import {API_ROUTES, translations} from '@/lib';
 import {MemberFunction} from '@/types';
 
 import FunctionFormModal from './components/FunctionFormModal';
@@ -116,7 +115,7 @@ export default function MemberFunctionsAdminPage() {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/manage-member-functions', {
+      const response = await fetch(API_ROUTES.members.functions, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +150,7 @@ export default function MemberFunctionsAdminPage() {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/manage-member-functions', {
+      const response = await fetch(API_ROUTES.members.functions, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -185,7 +184,7 @@ export default function MemberFunctionsAdminPage() {
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/manage-member-functions?id=${selectedFunction.id}`, {
+      const response = await fetch(`/api/members/functions?id=${selectedFunction.id}`, {
         method: 'DELETE',
       });
 

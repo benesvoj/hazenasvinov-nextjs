@@ -23,6 +23,13 @@ interface MemberTableTabProps<T> {
   selectedItems?: Set<string>;
   onSelectionChange?: (keys: Selection) => void;
 
+  // Pagination (server-side)
+  pagination?: {
+    page: number;
+    total: number | null;
+  };
+  onPageChange?: (page: number) => void;
+
   // Actions (optional)
   openEdit?: (item: T) => void;
   openDelete?: (item: T) => void;
@@ -38,8 +45,16 @@ export const MemberTableTab = <T,>({
   enableSelection = false,
   selectedItems,
   onSelectionChange,
+  pagination,
+  onPageChange,
 }: MemberTableTabProps<T>) => {
   const t = translations.members;
+
+  // Calculate total pages from server pagination info
+  const totalPages =
+    pagination?.total && pagination.total > 0
+      ? Math.ceil(pagination.total / 25) // Using default page size of 25
+      : 1;
 
   return (
     <>
@@ -50,7 +65,10 @@ export const MemberTableTab = <T,>({
         ariaLabel={ariaLabel}
         isLoading={loading}
         emptyContent={t.table.noMembersFound}
-        enablePagination
+        enablePagination={!!pagination}
+        page={pagination?.page}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
         selectionMode={enableSelection ? 'multiple' : 'none'}
         selectedKeys={selectedItems}
         onSelectionChange={
