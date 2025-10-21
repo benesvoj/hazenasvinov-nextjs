@@ -19,7 +19,6 @@ export const getInternalMemberColumns = (
   t: any,
   actions: {
     onPayment: (member: MemberInternal) => void;
-    onEdit: (member: MemberInternal) => void;
     onDelete: (member: MemberInternal) => void;
     onDetail: (member: MemberInternal) => void;
   }
@@ -34,8 +33,7 @@ export const getInternalMemberColumns = (
       isActionColumn: true,
       actions: [
         {type: ActionTypes.PAYMENT, onPress: actions.onPayment},
-        {type: ActionTypes.READ, onPress: actions.onDetail},
-        {type: ActionTypes.UPDATE, onPress: actions.onEdit},
+        {type: ActionTypes.UPDATE, onPress: actions.onDetail},
         {type: ActionTypes.DELETE, onPress: actions.onDelete},
       ],
     },

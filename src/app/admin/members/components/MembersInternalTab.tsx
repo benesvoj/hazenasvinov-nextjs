@@ -13,7 +13,6 @@ interface MembersListTabProps {
   categoriesData: Category[] | null;
   sexOptions: Record<string, string>;
   openPayment: (member: MemberInternal) => void;
-  openEdit: (member: MemberInternal) => void;
   openDelete: (member: MemberInternal) => void;
   openDetail: (member: MemberInternal) => void;
   selectedMembers: Set<string>;
@@ -25,7 +24,6 @@ interface MembersListTabProps {
 export const MembersInternalTab = ({
   categoriesData,
   openPayment,
-  openEdit,
   openDelete,
   openDetail,
   selectedMembers,
@@ -57,7 +55,6 @@ export const MembersInternalTab = ({
 
   const columns = getInternalMemberColumns(t, {
     onPayment: openPayment,
-    onEdit: openEdit,
     onDelete: openDelete,
     onDetail: openDetail,
   });

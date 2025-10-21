@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 
 import {Tab, Tabs} from '@heroui/react';
 
@@ -18,7 +18,8 @@ interface MemberDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
-  member: BaseMember | null;
+  formData: BaseMember;
+  setFormData: (data: BaseMember) => void;
   mode: ModalMode;
 }
 
@@ -26,37 +27,13 @@ export default function MemberDetailModal({
   isOpen,
   onClose,
   onSubmit,
-  member,
+  formData,
+  setFormData,
   mode,
 }: MemberDetailModalProps) {
   const t = translations.members.modals;
   const {categories} = useAppData();
-  const {createMember, updateMember} = useMembers();
-
-  // Default member for add mode
-  const getDefaultMember = (): BaseMember => ({
-    id: '',
-    name: '',
-    surname: '',
-    registration_number: '',
-    date_of_birth: null,
-    sex: Genders.MALE,
-    category_id: '',
-    functions: [],
-    created_at: '',
-    updated_at: '',
-    is_active: true,
-  });
-
-  const [formData, setFormData] = useState<BaseMember>(member || getDefaultMember());
-
-  useEffect(() => {
-    if (member) {
-      setFormData(member);
-    } else {
-      setFormData(getDefaultMember());
-    }
-  }, [member]);
+  const {createMember} = useMembers();
 
   const handleSave = async () => {
     try {
@@ -72,28 +49,15 @@ export default function MemberDetailModal({
           },
           formData.category_id ?? undefined
         );
-      } else {
-        await updateMember({
-          id: formData.id,
-          name: formData.name,
-          surname: formData.surname,
-          registration_number: formData.registration_number ?? '',
-          date_of_birth: formData.date_of_birth,
-          sex: formData.sex ?? undefined,
-          functions: formData.functions ?? [],
-          category_id: formData.category_id ?? undefined,
-        });
       }
-      onSubmit(); // Callback to parent
+      // For EDIT mode, parent handles the update via onSubmit
+
+      onSubmit(); // Callback to parent to save/refresh
       onClose();
     } catch (error) {
       console.log('Failed to save member:', error);
     }
   };
-
-  if (!member) {
-    return null;
-  }
 
   return (
     <UnifiedModal
@@ -104,7 +68,9 @@ export default function MemberDetailModal({
       title={
         mode === ModalMode.ADD
           ? t.addMember
-          : `${member.registration_number} - ${member.name} ${member.surname}`
+          : formData.id
+            ? `${formData.registration_number} - ${formData.name} ${formData.surname}`
+            : t.addMember
       }
       isFooterWithActions
     >

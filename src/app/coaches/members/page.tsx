@@ -47,7 +47,6 @@ export default function CoachesMembersPage() {
 
   const columns = getInternalMemberColumns(t, {
     onPayment: openPaymentInternal,
-    onEdit: openEditInternal,
     onDelete: openDeleteInternal,
     onDetail: openDetailInternal,
   });

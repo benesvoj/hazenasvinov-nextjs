@@ -167,7 +167,7 @@ export default function AdminDashboard() {
     <AdminContainer>
       <TodoStatsCards todos={todos} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 pt-4">
         <ToDoList
           todos={todos.filteredTodos}
           todosLoading={todos.todosLoading}

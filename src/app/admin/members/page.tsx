@@ -147,17 +147,17 @@ export default function MembersAdminPage() {
 
   // Handlers
   const handleAddMember = async () => {
-    // Extract only MemberFormData fields
+    // Extract only MemberFormData fields, convert null to undefined
     const memberFormData = {
       name: formData.name,
       surname: formData.surname,
-      registration_number: formData.registration_number,
-      date_of_birth: formData.date_of_birth || undefined,
-      sex: formData.sex,
-      functions: formData.functions,
+      registration_number: formData.registration_number ?? '',
+      date_of_birth: formData.date_of_birth ?? undefined,
+      sex: formData.sex ?? Genders.MALE,
+      functions: formData.functions ?? [],
     };
 
-    await createMember(memberFormData, formData.category_id || undefined);
+    await createMember(memberFormData, formData.category_id ?? undefined);
 
     addModal.onClose();
 
@@ -171,13 +171,16 @@ export default function MembersAdminPage() {
       id: selectedMember.id,
       name: formData.name,
       surname: formData.surname,
-      registration_number: formData.registration_number,
-      date_of_birth: formData.date_of_birth,
-      sex: formData.sex,
-      functions: formData.functions,
-      category_id: formData.category_id || undefined,
+      registration_number: formData.registration_number ?? undefined,
+      date_of_birth: formData.date_of_birth ?? undefined,
+      sex: formData.sex ?? undefined,
+      functions: formData.functions ?? undefined,
+      category_id: formData.category_id ?? undefined,
+      is_active: formData.is_active ?? undefined,
     });
+
     editModal.onClose();
+    detailModal.onClose();
 
     // Context determines which tab to refresh
     if (modalContext === 'internal') refreshInternal();
@@ -229,7 +232,6 @@ export default function MembersAdminPage() {
                 categoriesData={categories}
                 sexOptions={genderOptions}
                 openPayment={openPaymentInternal}
-                openEdit={openEditInternal}
                 openDelete={openDeleteInternal}
                 openDetail={openDetailInternal}
                 selectedMembers={selectedMembers}
@@ -336,21 +338,11 @@ export default function MembersAdminPage() {
         isEditMode={false}
       />
 
-      <MemberFormModal
-        isOpen={editModal.isOpen}
-        onClose={editModal.onClose}
-        onSubmit={handleUpdateMember}
-        formData={formData}
-        setFormData={setFormData}
-        categories={categories || []}
-        sexOptions={genderOptions}
-        isEditMode={true}
-      />
-
       <MemberDetailModal
         isOpen={detailModal.isOpen}
         onClose={detailModal.onClose}
-        member={selectedMember}
+        formData={formData as BaseMember}
+        setFormData={(data: BaseMember) => setFormData(data as any)}
         mode={ModalMode.EDIT}
         onSubmit={handleUpdateMember}
       />

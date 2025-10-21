@@ -112,12 +112,22 @@ export function useMembers() {
       setErrors({});
 
       try {
+        // Filter out undefined values to avoid Supabase errors
+        const updateData: Record<string, any> = {
+          updated_at: new Date().toISOString(),
+        };
+
+        // Only include fields that are not undefined
+        Object.keys(memberData).forEach((key) => {
+          const value = memberData[key as keyof UpdateMemberData];
+          if (value !== undefined && key !== 'id') {
+            updateData[key] = value;
+          }
+        });
+
         const {data, error} = await supabase
           .from('members')
-          .update({
-            ...memberData,
-            updated_at: new Date().toISOString(),
-          })
+          .update(updateData)
           .eq('id', memberData.id)
           .select()
           .single();
