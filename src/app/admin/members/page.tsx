@@ -266,6 +266,7 @@ export default function MembersAdminPage() {
                 variant: 'flat',
                 onClick: () => {
                   // This will be handled by the MembersCsvImport modal component
+                  // TODO: find better solution than use DOM elements
                   document.getElementById('csv-import-trigger')?.click();
                 },
                 priority: 'secondary',

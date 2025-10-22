@@ -155,6 +155,10 @@ export const translations = {
         actions: 'Akce',
         noClubs: 'Žádné kluby nebyly nalezeny',
       },
+      responseMessages: {
+        clubsFetchError: 'Nepodařilo se načíst oddíly.',
+        clubsFetchSuccess: 'Seznam oddílů načten.',
+      },
     },
     clubCategories: {
       title: 'Správa kategorií klubů',
@@ -519,6 +523,14 @@ export const translations = {
     },
     toasts: {
       selectMember: 'Vyberte alespoň jednoho člena pro hromadnou úpravu',
+      memberCreatedSuccessfully: 'Člen byl úspěšně vytvořen',
+      failedToCreateMember: 'Chyba při vytváření člena',
+      failedToCreateClubRelationship: 'Člen vytvořen, ale nepodařilo se přiřadit ke klubu',
+      formContainsError: 'Formulář obsahuje chyby',
+      memberUpdateFailed: 'Chyba při aktualizaci člena',
+      memberUpdatedSuccessfully: 'Člen byl úspěšně aktualizován',
+      memberDeleteFailed: 'Chyba při mazání člena',
+      memberDeletedSuccessfully: 'Člen byl úspěšně smazán',
     },
     buttons: {
       bulkChange: 'Hromadná změna',
@@ -549,6 +561,23 @@ export const translations = {
         functions: 'Funkce',
         functionsHelper: 'Členové bez přiřazených funkcí budou označeni jako neaktivní v tabulce.',
       },
+    },
+    validations: {
+      mandatoryName: 'Jméno je povinné',
+      mandatorySurname: 'Příjmení je povinné',
+      mandatoryRegNumber: 'Registrační číslo je povinné',
+    },
+  },
+  memberClubRelationship: {
+    responseMessages: {
+      relationshipCreationError: 'Chyba při vytváření vztahu člen-klub',
+      relationshipCreationSuccess: 'Vztah člen-klub byl úspěšně vytvořen',
+      relationshipUpdateError: 'Chyba při aktualizaci vztahu člen-klub',
+      relationshipUpdateSuccess: 'Vztah člen-klub byl úspěšně aktualizován',
+      relationshipDeleteError: 'Chyba při mazání vztahu člen-klub',
+      relationshipDeleteSuccess: 'Vztah člen-klub byl úspěšně smazán',
+      relationshipFetchError: 'Chyba při načítání vztahů člena',
+      relationshipFetchSuccess: ',',
     },
   },
   memberFunctions: {
@@ -1191,6 +1220,13 @@ export const translations = {
       paymentsCreated: 'Platby byly úspěšně vytvořeny',
       paymentsUpdated: 'Platby byly úspěšně aktualizovány',
       paymentsDeleted: 'Platby byly úspěšně smazány',
+    },
+    paymentStatus: {
+      paid: 'Zaplaceno',
+      partial: 'Částečně zaplaceno',
+      unpaid: 'Nezaplaceno',
+      notRequired: 'Nevyžadováno',
+      unknown: 'Neznámý stav',
     },
   },
   buttons: {

@@ -19,12 +19,7 @@ export default function MemberFunctionsAdminPage() {
   const [loading, setLoading] = useState(false);
 
   // Fetch functions from database
-  const {
-    data: functionsData,
-    loading: functionsLoading,
-    error: functionsError,
-    refetch,
-  } = useFetchMemberFunctions();
+  const {data: functionsData, loading: functionsLoading, refetch} = useFetchMemberFunctions();
 
   // Modal states
   const {
@@ -184,7 +179,7 @@ export default function MemberFunctionsAdminPage() {
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/members/functions?id=${selectedFunction.id}`, {
+      const response = await fetch(`${API_ROUTES.members.functions}?id=${selectedFunction.id}`, {
         method: 'DELETE',
       });
 
@@ -203,11 +198,6 @@ export default function MemberFunctionsAdminPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Get status badge color
-  const getStatusBadgeColor = (isActive: boolean) => {
-    return isActive ? 'success' : 'danger';
   };
 
   const functionColumns = [

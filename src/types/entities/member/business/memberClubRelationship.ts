@@ -36,3 +36,22 @@ export interface MemberClubRelationshipWithDetails extends MemberClubRelationshi
     name: string;
   };
 }
+
+export interface CreateMemberClubRelationshipData {
+  memberId: string;
+  clubId: string;
+  relationshipType?: RelationshipType;
+  status?: RelationshipStatus;
+  validFrom?: string;
+  validTo?: string;
+  notes?: string;
+}
+
+export interface UpdateMemberClubRelationshipData {
+  relationshipId: string;
+  relationshipType?: RelationshipType;
+  status?: RelationshipStatus;
+  validFrom?: string;
+  validTo?: string;
+  notes?: string;
+}

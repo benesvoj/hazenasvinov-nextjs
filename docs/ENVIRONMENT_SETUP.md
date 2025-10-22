@@ -75,9 +75,9 @@ Your access token should look like: `sbp_1234567890abcdef...` (starts with `sbp_
 
 ## Related Documentation
 
-- [Type Generation Setup](./docs/TYPE_GENERATION_SETUP_COMPLETE.md)
-- [Database Type Generation Guide](./docs/DATABASE_TYPE_GENERATION.md)
+- [Type Generation Setup](TYPE_GENERATION_SETUP_COMPLETE.md)
+- [Database Type Generation Guide](DATABASE_TYPE_GENERATION.md)
 
 ---
 
-**Need Help?** Check the [example file](./.env.local.example) for the complete template.
+**Need Help?** Check the [example file](../.env.local.example) for the complete template.

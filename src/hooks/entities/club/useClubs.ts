@@ -1,45 +1,47 @@
 'use client';
-import {useState, useEffect, useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useCallback, useState} from 'react';
 
+import {ValidationErrors} from '@/hooks';
+import {API_ROUTES, translations} from '@/lib';
 import {Club} from '@/types';
 
 export function useClubs() {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const t = translations.admin.clubs;
 
   const fetchClubs = useCallback(async () => {
+    setLoading(true);
+    setErrors({});
+
     try {
-      setLoading(true);
-      setError(null);
+      const response = await fetch(API_ROUTES.clubs.root, {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'},
+      });
 
-      const supabase = createClient();
-      const {data, error} = await supabase
-        .from('clubs')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
+      const result = await response.json();
 
-      if (error) throw error;
-      setClubs(data || []);
+      if (!response.ok) {
+        throw new Error(result.error || t.responseMessages.clubsFetchError);
+      }
+
+      setClubs(result.data || []);
     } catch (error) {
       console.error('Error fetching clubs:', error);
-      setError('Chyba při načítání klubů');
+      const errorMessage = error instanceof Error ? error.message : 'Chyba při načítání klubů';
+      setErrors({fetch: errorMessage});
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchClubs();
-  }, [fetchClubs]);
-
   return {
     clubs,
     loading,
-    error,
+    errors,
     fetchClubs,
   };
 }

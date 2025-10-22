@@ -1,11 +1,9 @@
 'use client';
-import {useState, useCallback} from 'react';
-
-import {createClient} from '@/utils/supabase/client';
+import {useCallback, useState} from 'react';
 
 import {showToast} from '@/components';
-import {useMemberClubRelationships} from '@/hooks';
-import {MemberFormData, Member, UpdateMemberData, convertSchemaToMember} from '@/types';
+import {API_ROUTES, translations} from '@/lib';
+import {convertSchemaToMember, Member, MemberFormData, UpdateMemberData} from '@/types';
 
 export interface ValidationErrors {
   [key: string]: string;
@@ -18,9 +16,7 @@ export interface ValidationErrors {
 export function useMembers() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
-
-  const supabase = createClient();
-  const {createRelationship} = useMemberClubRelationships();
+  const tMembers = translations.members;
 
   /**
    * Validate member form data
@@ -29,13 +25,13 @@ export function useMembers() {
     const newErrors: ValidationErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Jméno je povinné';
+      newErrors.name = tMembers.validations.mandatoryName;
     }
     if (!formData.surname.trim()) {
-      newErrors.surname = 'Příjmení je povinné';
+      newErrors.surname = tMembers.validations.mandatorySurname;
     }
     if (!formData.registration_number.trim()) {
-      newErrors.registration_number = 'Registrační číslo je povinné';
+      newErrors.registration_number = tMembers.validations.mandatoryRegNumber;
     }
 
     setErrors(newErrors);
@@ -53,133 +49,130 @@ export function useMembers() {
       clubId?: string | null
     ): Promise<Member> => {
       if (!validateForm(formData)) {
-        throw new Error('Formulář obsahuje chyby');
+        throw new Error(tMembers.toasts.formContainsError);
       }
 
       setIsLoading(true);
       setErrors({});
 
       try {
-        const {data, error} = await supabase
-          .from('members')
-          .insert({
+        const response = await fetch(API_ROUTES.members.root, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
             name: formData.name.trim(),
             surname: formData.surname.trim(),
             registration_number: formData.registration_number.trim(),
             date_of_birth: formData.date_of_birth ?? null,
             sex: formData.sex,
             functions: formData.functions,
-            category_id: categoryId ?? null,
-          })
-          .select()
-          .single();
+            category_id: categoryId || null,
+          }),
+        });
 
-        if (error) {
-          showToast.danger(`Chyba při vytváření člena: ${error.message}`);
-          throw new Error(`Chyba při vytváření člena: ${error.message}`);
+        const result = await response.json();
+
+        if (!response.ok) {
+          showToast.danger(tMembers.toasts.failedToCreateMember);
         }
 
         // Step 2: Create member-club relationship if clubId is provided
-        if (clubId) {
-          await createRelationship({
-            memberId: data.id,
-            clubId: clubId,
-          });
+        if (clubId && result.data) {
+          const relationshipResponse = await fetch(
+            API_ROUTES.members.relationships(result.data.id),
+            {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({clubId}),
+            }
+          );
+          if (!relationshipResponse.ok) {
+            const relationshipError = await relationshipResponse.json();
+            console.error('Error updating relationship error:', relationshipError);
+            showToast.danger(tMembers.toasts.failedToCreateClubRelationship);
+          }
         }
 
-        const convertedMember = convertSchemaToMember(data);
-        showToast.success('Člen byl úspěšně vytvořen');
+        const convertedMember = convertSchemaToMember(result.data);
+        showToast.success(tMembers.toasts.memberCreatedSuccessfully);
 
         return convertedMember;
       } catch (error) {
         console.error('Error creating member:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Chyba při vytváření člena';
+        const errorMessage =
+          error instanceof Error ? error.message : tMembers.toasts.failedToCreateMember;
         showToast.danger(errorMessage);
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [supabase, validateForm, createRelationship]
+    [validateForm]
   );
 
   /**
-   * Update an existing member
+   * Update an existing member via API
    */
-  const updateMember = useCallback(
-    async (memberData: UpdateMemberData): Promise<Member> => {
-      setIsLoading(true);
-      setErrors({});
+  const updateMember = useCallback(async (memberData: UpdateMemberData): Promise<Member> => {
+    setIsLoading(true);
+    setErrors({});
 
-      try {
-        // Filter out undefined values to avoid Supabase errors
-        const updateData: Record<string, any> = {
-          updated_at: new Date().toISOString(),
-        };
+    try {
+      const response = await fetch(API_ROUTES.members.byId(memberData.id), {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({memberData}),
+      });
 
-        // Only include fields that are not undefined
-        Object.keys(memberData).forEach((key) => {
-          const value = memberData[key as keyof UpdateMemberData];
-          if (value !== undefined && key !== 'id') {
-            updateData[key] = value;
-          }
-        });
+      const result = await response.json();
 
-        const {data, error} = await supabase
-          .from('members')
-          .update(updateData)
-          .eq('id', memberData.id)
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Error updating member:', error);
-          throw new Error(`Chyba při aktualizaci člena: ${error.message}`);
-        }
-
-        const convertedMember = convertSchemaToMember(data);
-        showToast.success('Člen byl úspěšně aktualizován');
-
-        return convertedMember;
-      } catch (error) {
-        console.error('Error updating member:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Chyba při aktualizaci člena';
-        showToast.danger(errorMessage);
-        throw error;
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(result.error || tMembers.toasts.memberUpdateFailed);
       }
-    },
-    [supabase]
-  );
+
+      const convertedMember = convertSchemaToMember(result.data);
+      showToast.success(tMembers.toasts.memberUpdatedSuccessfully);
+
+      return convertedMember;
+    } catch (error) {
+      console.error('Error updating member:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : tMembers.toasts.memberUpdateFailed;
+      showToast.danger(errorMessage);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   /**
    * Delete a member
    */
-  const deleteMember = useCallback(
-    async (memberId: string): Promise<void> => {
-      setIsLoading(true);
-      setErrors({});
+  const deleteMember = useCallback(async (memberId: string): Promise<void> => {
+    setIsLoading(true);
+    setErrors({});
 
-      try {
-        const {error} = await supabase.from('members').delete().eq('id', memberId);
+    try {
+      const response = await fetch(API_ROUTES.members.byId(memberId), {
+        method: 'DELETE',
+      });
+      const result = await response.json();
 
-        if (error) {
-          console.error('Error deleting member:', error);
-          throw new Error(`Chyba při mazání člena: ${error.message}`);
-        }
-        showToast.success('Člen byl úspěšně smazán');
-      } catch (error) {
-        console.error('Error deleting member:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Chyba při mazání člena';
-        showToast.danger(errorMessage);
-        throw error;
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(result.error || tMembers.toasts.memberDeleteFailed);
       }
-    },
-    [supabase]
-  );
+
+      showToast.success(tMembers.toasts.memberDeletedSuccessfully);
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : tMembers.toasts.memberDeleteFailed;
+      showToast.danger(errorMessage);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   /**
    * Clear validation errors for a specific field

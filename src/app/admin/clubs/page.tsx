@@ -281,7 +281,7 @@ export default function ClubsAdminPage() {
   const renderClubCell = (club: Club, columnKey: string) => {
     switch (columnKey) {
       case 'logo':
-        return <Image src={club.logo_url} alt={club.name} width={48} height={48} />;
+        return <Image src={club.logo_url ?? undefined} alt={club.name} width={48} height={48} />;
       case 'name':
         return <span className="font-medium">{club.name}</span>;
       case 'short_name':
@@ -340,13 +340,13 @@ export default function ClubsAdminPage() {
               <Input
                 label="Krátký název"
                 placeholder="např. Švínov"
-                value={createForm.short_name}
+                value={createForm.short_name ? createForm.short_name : ''}
                 onChange={(e) => setCreateForm({...createForm, short_name: e.target.value})}
               />
               <Input
                 label="Město"
-                placeholder="např. Švínov"
-                value={createForm.city}
+                placeholder="např. Svinov"
+                value={createForm.city ? createForm.city : ''}
                 onChange={(e) => setCreateForm({...createForm, city: e.target.value})}
               />
               <Input
@@ -359,7 +359,7 @@ export default function ClubsAdminPage() {
                 }
               />
               <LogoUpload
-                value={createForm.logo_url}
+                value={createForm.logo_url ? createForm.logo_url : ''}
                 onChange={(logoUrl) => setCreateForm({...createForm, logo_url: logoUrl})}
                 label="Logo klubu"
                 description="Nahrajte logo klubu (max 5MB, JPG/PNG)"
@@ -367,44 +367,44 @@ export default function ClubsAdminPage() {
               <Input
                 label="Hřiště/venue"
                 placeholder="např. Sportovní hala Švínov"
-                value={createForm.venue}
+                value={createForm.venue ? createForm.venue : ''}
                 onChange={(e) => setCreateForm({...createForm, venue: e.target.value})}
               />
               <Input
                 label="Webové stránky"
                 placeholder="https://example.com"
-                value={createForm.web}
+                value={createForm.web ? createForm.web : ''}
                 onChange={(e) => setCreateForm({...createForm, web: e.target.value})}
               />
               <Input
                 label="Email"
                 type="email"
                 placeholder="info@example.com"
-                value={createForm.email}
+                value={createForm.email ? createForm.email : ''}
                 onChange={(e) => setCreateForm({...createForm, email: e.target.value})}
               />
               <Input
                 label="Telefon"
                 placeholder="+420 123 456 789"
-                value={createForm.phone}
+                value={createForm.phone ? createForm.phone : ''}
                 onChange={(e) => setCreateForm({...createForm, phone: e.target.value})}
               />
               <Input
                 label="Adresa"
                 placeholder="ulice, město, PSČ"
-                value={createForm.address}
+                value={createForm.address ? createForm.address : ''}
                 onChange={(e) => setCreateForm({...createForm, address: e.target.value})}
               />
               <Input
                 label="Popis"
                 placeholder="Krátký popis klubu..."
-                value={createForm.description}
+                value={createForm.description ? createForm.description : ''}
                 onChange={(e) => setCreateForm({...createForm, description: e.target.value})}
               />
               <Input
                 label="Kontaktní osoba"
                 placeholder="Jméno a příjmení"
-                value={createForm.contact_person}
+                value={createForm.contact_person ? createForm.contact_person : ''}
                 onChange={(e) =>
                   setCreateForm({
                     ...createForm,
@@ -416,7 +416,7 @@ export default function ClubsAdminPage() {
                 <input
                   type="checkbox"
                   id="create-is-own-club"
-                  checked={createForm.is_own_club}
+                  checked={!!createForm.is_own_club}
                   onChange={(e) =>
                     setCreateForm({
                       ...createForm,
@@ -457,13 +457,13 @@ export default function ClubsAdminPage() {
               <Input
                 label="Krátký název"
                 placeholder="např. Švínov"
-                value={editForm.short_name}
+                value={editForm.short_name ? editForm.short_name : ''}
                 onChange={(e) => setEditForm({...editForm, short_name: e.target.value})}
               />
               <Input
                 label="Město"
                 placeholder="např. Švínov"
-                value={editForm.city}
+                value={editForm.city ? editForm.city : ''}
                 onChange={(e) => setEditForm({...editForm, city: e.target.value})}
               />
               <Input
@@ -474,7 +474,7 @@ export default function ClubsAdminPage() {
                 onChange={(e) => setEditForm({...editForm, founded_year: parseInt(e.target.value)})}
               />
               <LogoUpload
-                value={editForm.logo_url}
+                value={editForm.logo_url ? editForm.logo_url : ''}
                 onChange={(logoUrl) => {
                   setEditForm({...editForm, logo_url: logoUrl});
                 }}
@@ -484,51 +484,51 @@ export default function ClubsAdminPage() {
               <Input
                 label="Hřiště/venue"
                 placeholder="např. Sportovní hala Švínov"
-                value={editForm.venue}
+                value={editForm.venue ? editForm.venue : ''}
                 onChange={(e) => setEditForm({...editForm, venue: e.target.value})}
               />
               <Input
                 label="Webové stránky"
                 placeholder="https://example.com"
-                value={editForm.web}
+                value={editForm.web ? editForm.web : ''}
                 onChange={(e) => setEditForm({...editForm, web: e.target.value})}
               />
               <Input
                 label="Email"
                 type="email"
                 placeholder="info@example.com"
-                value={editForm.email}
+                value={editForm.email ? editForm.email : ''}
                 onChange={(e) => setEditForm({...editForm, email: e.target.value})}
               />
               <Input
                 label="Telefon"
                 placeholder="+420 123 456 789"
-                value={editForm.phone}
+                value={editForm.phone ? editForm.phone : ''}
                 onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
               />
               <Input
                 label="Adresa"
                 placeholder="ulice, město, PSČ"
-                value={editForm.address}
+                value={editForm.address ? editForm.address : ''}
                 onChange={(e) => setEditForm({...editForm, address: e.target.value})}
               />
               <Input
                 label="Popis"
                 placeholder="Krátký popis klubu..."
-                value={editForm.description}
+                value={editForm.description ? editForm.description : ''}
                 onChange={(e) => setEditForm({...editForm, description: e.target.value})}
               />
               <Input
                 label="Kontaktní osoba"
                 placeholder="Jméno a příjmení"
-                value={editForm.contact_person}
+                value={editForm.contact_person ? editForm.contact_person : ''}
                 onChange={(e) => setEditForm({...editForm, contact_person: e.target.value})}
               />
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="edit-is-own-club"
-                  checked={editForm.is_own_club}
+                  checked={!!editForm.is_own_club}
                   onChange={(e) => setEditForm({...editForm, is_own_club: e.target.checked})}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />

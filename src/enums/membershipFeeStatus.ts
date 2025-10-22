@@ -1,3 +1,5 @@
+import {translations} from '@/lib';
+
 export enum PaymentStatus {
   PAID = 'paid',
   PARTIAL = 'partial',
@@ -27,43 +29,33 @@ export enum FeePeriod {
 }
 
 export const getPaymentStatusColor = (
-  status: PaymentStatus | 'paid' | 'partial' | 'unpaid' | 'not_required'
+  status: PaymentStatus
 ): 'success' | 'warning' | 'danger' | 'default' => {
   switch (status) {
     case PaymentStatus.PAID:
-    case 'paid':
-      return 'success'; // Green
+      return 'success';
     case PaymentStatus.PARTIAL:
-    case 'partial':
-      return 'warning'; // Orange/Yellow
+      return 'warning';
     case PaymentStatus.UNPAID:
-    case 'unpaid':
-      return 'danger'; // Red
+      return 'danger';
     case PaymentStatus.NOT_REQUIRED:
-    case 'not_required':
-      return 'default'; // Gray
+      return 'default';
     default:
       return 'default';
   }
 };
 
-export const getPaymentStatusLabel = (
-  status: PaymentStatus | 'paid' | 'partial' | 'unpaid' | 'not_required'
-): string => {
+export const getPaymentStatusLabel = (status: PaymentStatus): string => {
   switch (status) {
     case PaymentStatus.PAID:
-    case 'paid':
-      return 'Zaplaceno';
+      return translations.membershipFees.paymentStatus.paid;
     case PaymentStatus.PARTIAL:
-    case 'partial':
-      return 'Částečně zaplaceno';
+      return translations.membershipFees.paymentStatus.partial;
     case PaymentStatus.UNPAID:
-    case 'unpaid':
-      return 'Nezaplaceno';
+      return translations.membershipFees.paymentStatus.unpaid;
     case PaymentStatus.NOT_REQUIRED:
-    case 'not_required':
-      return 'Nevyžadováno';
+      return translations.membershipFees.paymentStatus.notRequired;
     default:
-      return 'Neznámý stav';
+      return translations.membershipFees.paymentStatus.unknown;
   }
 };

@@ -24,7 +24,7 @@ export default function PlayerLoanModal({
   playerId,
   onLoanCreated,
 }: PlayerLoanModalProps) {
-  const {clubs, loading: clubsLoading, error: clubsError} = useClubs();
+  const {clubs, loading: clubsLoading} = useClubs();
   const {createLoan, loading: loanLoading, error: loanError} = usePlayerLoans();
 
   const [formData, setFormData] = useState<CreatePlayerLoanData>({
@@ -208,12 +208,6 @@ export default function PlayerLoanModal({
         {loanError && (
           <div className="rounded-md bg-red-50 p-4">
             <div className="text-sm text-red-800">Chyba při vytváření půjčky: {loanError}</div>
-          </div>
-        )}
-
-        {clubsError && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="text-sm text-red-800">Chyba při načítání klubů: {clubsError}</div>
           </div>
         )}
       </div>
