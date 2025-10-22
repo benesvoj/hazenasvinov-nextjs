@@ -1,19 +1,29 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {errorResponse, prepareUpdateData, successResponse, withAdminAuth, withAuth} from '@/utils';
+import {
+  errorResponse,
+  prepareUpdateData,
+  successResponse,
+  withAdminAuth,
+  withAuth,
+} from '@/utils/supabase/apiHelpers';
 
 /**
  * GET /api/categories/[id]/fees/[feeId] - Get single fee
  *
  * @example Nested dynamic route with proper validation
  */
-export async function GET(request: NextRequest, {params}: {params: {id: string; feeId: string}}) {
+export async function GET(
+  request: NextRequest,
+  {params}: {params: Promise<{id: string; feeId: string}>}
+) {
   return withAuth(async (user, supabase) => {
+    const {id, feeId} = await params;
     const {data, error} = await supabase
       .from('category_membership_fees')
       .select('*, categories(name)')
-      .eq('id', params.feeId)
-      .eq('category_id', params.id)
+      .eq('id', feeId)
+      .eq('category_id', id)
       .single();
 
     if (error) throw error;
@@ -31,8 +41,12 @@ export async function GET(request: NextRequest, {params}: {params: {id: string; 
  *
  * @example Admin route with validation that fee belongs to category
  */
-export async function PATCH(request: NextRequest, {params}: {params: {id: string; feeId: string}}) {
+export async function PATCH(
+  request: NextRequest,
+  {params}: {params: Promise<{id: string; feeId: string}>}
+) {
   return withAdminAuth(async (user, supabase) => {
+    const {id, feeId} = await params;
     const body = await request.json();
     const updateData = prepareUpdateData(body);
 
@@ -40,8 +54,8 @@ export async function PATCH(request: NextRequest, {params}: {params: {id: string
     const {data: existingFee} = await supabase
       .from('category_membership_fees')
       .select('id')
-      .eq('id', params.feeId)
-      .eq('category_id', params.id)
+      .eq('id', feeId)
+      .eq('category_id', id)
       .single();
 
     if (!existingFee) {
@@ -51,8 +65,8 @@ export async function PATCH(request: NextRequest, {params}: {params: {id: string
     const {data, error} = await supabase
       .from('category_membership_fees')
       .update(updateData)
-      .eq('id', params.feeId)
-      .eq('category_id', params.id)
+      .eq('id', feeId)
+      .eq('category_id', id)
       .select()
       .single();
 
@@ -69,15 +83,16 @@ export async function PATCH(request: NextRequest, {params}: {params: {id: string
  */
 export async function DELETE(
   request: NextRequest,
-  {params}: {params: {id: string; feeId: string}}
+  {params}: {params: Promise<{id: string; feeId: string}>}
 ) {
   return withAdminAuth(async (user, supabase) => {
+    const {id, feeId} = await params;
     // Verify the fee belongs to this category before deleting
     const {data: existingFee} = await supabase
       .from('category_membership_fees')
       .select('id')
-      .eq('id', params.feeId)
-      .eq('category_id', params.id)
+      .eq('id', feeId)
+      .eq('category_id', id)
       .single();
 
     if (!existingFee) {
@@ -87,8 +102,8 @@ export async function DELETE(
     const {error} = await supabase
       .from('category_membership_fees')
       .delete()
-      .eq('id', params.feeId)
-      .eq('category_id', params.id);
+      .eq('id', feeId)
+      .eq('category_id', id);
 
     if (error) throw error;
 

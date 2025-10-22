@@ -6,8 +6,9 @@ import {createClient} from '@/utils/supabase/server';
 /**
  * GET /api/members/[id] - Get single member
  */
-export async function GET(request: Request, {params}: {params: {id: string}}) {
+export async function GET(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
+    const {id} = await params;
     const supabase = await createClient();
 
     // Check authentication
@@ -18,7 +19,7 @@ export async function GET(request: Request, {params}: {params: {id: string}}) {
       return NextResponse.json({error: 'Unauthorized'}, {status: 401});
     }
 
-    const {data, error} = await supabase.from('members').select('*').eq('id', params.id).single();
+    const {data, error} = await supabase.from('members').select('*').eq('id', id).single();
 
     if (error) {
       console.error('Error fetching member:', error);
@@ -38,8 +39,9 @@ export async function GET(request: Request, {params}: {params: {id: string}}) {
  * @param params
  * @constructor
  */
-export async function PATCH(request: Request, {params}: {params: {id: string}}) {
+export async function PATCH(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
+    const {id} = await params;
     const supabase = await createClient();
 
     // Check authentication
@@ -68,7 +70,7 @@ export async function PATCH(request: Request, {params}: {params: {id: string}}) 
     const {data, error} = await supabaseAdmin
       .from('members')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -93,8 +95,9 @@ export async function PATCH(request: Request, {params}: {params: {id: string}}) 
  * @param params
  * @constructor
  */
-export async function DELETE(request: Request, {params}: {params: {id: string}}) {
+export async function DELETE(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
+    const {id} = await params;
     const supabase = await createClient();
 
     // Check authentication
@@ -105,7 +108,7 @@ export async function DELETE(request: Request, {params}: {params: {id: string}})
       return NextResponse.json({error: 'Unauthorized'}, {status: 401});
     }
 
-    const {error} = await supabaseAdmin.from('members').delete().eq('id', params.id);
+    const {error} = await supabaseAdmin.from('members').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting member:', error);

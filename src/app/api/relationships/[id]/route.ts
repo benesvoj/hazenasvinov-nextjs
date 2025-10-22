@@ -4,8 +4,9 @@ import supabaseAdmin from '@/utils/supabase/admin';
 import {createClient} from '@/utils/supabase/server';
 
 // PATCH /api/relationships/[id] - Update relationship
-export async function PATCH(request: Request, {params}: {params: {id: string}}) {
+export async function PATCH(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
+    const {id} = await params;
     const supabase = await createClient();
 
     // Check authentication
@@ -31,7 +32,7 @@ export async function PATCH(request: Request, {params}: {params: {id: string}}) 
     const {data, error} = await supabaseAdmin
       .from('member_club_relationships')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -51,8 +52,9 @@ export async function PATCH(request: Request, {params}: {params: {id: string}}) 
 }
 
 // DELETE /api/relationships/[id] - Delete relationship
-export async function DELETE(request: Request, {params}: {params: {id: string}}) {
+export async function DELETE(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
+    const {id} = await params;
     const supabase = await createClient();
 
     // Check authentication
@@ -63,10 +65,7 @@ export async function DELETE(request: Request, {params}: {params: {id: string}})
       return NextResponse.json({error: 'Unauthorized'}, {status: 401});
     }
 
-    const {error} = await supabaseAdmin
-      .from('member_club_relationships')
-      .delete()
-      .eq('id', params.id);
+    const {error} = await supabaseAdmin.from('member_club_relationships').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting relationship:', error);

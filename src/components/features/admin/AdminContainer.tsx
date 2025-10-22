@@ -103,7 +103,7 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
             ) : (
               <>
                 {(displayActions || displayFilters) && (
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-4 mb-4">
                     {displayActions && displayActions.length > 0 && (
                       <AdminActions actions={displayActions} />
                     )}

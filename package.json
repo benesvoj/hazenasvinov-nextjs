@@ -44,7 +44,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@auth/supabase-adapter": "^1.9.1",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@heroui/badge": "^2.2.15",
@@ -77,13 +76,13 @@
     "framer-motion": "^12.23.12",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.417.0",
-    "next": "^15.3.1",
-    "next-auth": "^5.0.0-beta.27",
+    "next": "^16.0.0",
     "next-themes": "^0.4.6",
     "papaparse": "^5.5.2",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "tailwindcss-animate": "^1.0.7",
+    "vite": "^7.1.11",
     "xlsx": "^0.18.5",
     "zod": "^3.24.4"
   },

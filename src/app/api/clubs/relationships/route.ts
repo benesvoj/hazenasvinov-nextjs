@@ -2,7 +2,7 @@ import {NextResponse} from 'next/server';
 
 import {createClient} from '@/utils/supabase/server';
 
-export async function GET(request: Request, {params}: {params: {clubId: string}}) {
+export async function GET(request: Request) {
   try {
     const supabase = await createClient();
 
@@ -14,10 +14,18 @@ export async function GET(request: Request, {params}: {params: {clubId: string}}
       return NextResponse.json({error: 'Unauthorized'}, {status: 401});
     }
 
-    const {data, error} = await supabase
-      .from('member_club_relationships')
-      .select('*')
-      .eq('club_id', params.clubId);
+    // Get clubId from query params
+    const {searchParams} = new URL(request.url);
+    const clubId = searchParams.get('clubId');
+
+    let query = supabase.from('member_club_relationships').select('*');
+
+    // Filter by clubId if provided
+    if (clubId) {
+      query = query.eq('club_id', clubId);
+    }
+
+    const {data, error} = await query;
 
     if (error) {
       console.error('Error fetching clubs relationships:', error);

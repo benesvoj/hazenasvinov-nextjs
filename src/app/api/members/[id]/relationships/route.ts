@@ -6,8 +6,9 @@ import {createClient} from '@/utils/supabase/server';
 import {RelationshipType, RelationshipStatus} from '@/enums';
 
 // POST /api/members/[id]/relationships - Create relationship
-export async function POST(request: Request, {params}: {params: {id: string}}) {
+export async function POST(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
+    const {id} = await params;
     const supabase = await createClient();
 
     // Check authentication
@@ -28,7 +29,7 @@ export async function POST(request: Request, {params}: {params: {id: string}}) {
     const {data, error} = await supabaseAdmin
       .from('member_club_relationships')
       .insert({
-        member_id: params.id,
+        member_id: id,
         club_id: clubId,
         relationship_type: relationshipType || RelationshipType.PERMANENT,
         status: status || RelationshipStatus.ACTIVE,
@@ -55,8 +56,9 @@ export async function POST(request: Request, {params}: {params: {id: string}}) {
 }
 
 // GET /api/members/[id]/relationships - Get member's relationships
-export async function GET(request: Request, {params}: {params: {id: string}}) {
+export async function GET(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
+    const {id} = await params;
     const supabase = await createClient();
 
     // Check authentication
@@ -79,7 +81,7 @@ export async function GET(request: Request, {params}: {params: {id: string}}) {
         )
       `
       )
-      .eq('member_id', params.id)
+      .eq('member_id', id)
       .order('created_at', {ascending: false});
 
     if (error) {

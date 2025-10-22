@@ -1,3 +1,13 @@
+/**
+ * @fileoverview API Helper Utilities - SERVER ONLY
+ *
+ * ⚠️ IMPORTANT: This file should ONLY be imported in API routes (src/app/api/**)
+ * Do NOT import in client components or pages as it uses server-only modules.
+ *
+ * Correct import: import { withAuth } from '@/utils/supabase/apiHelpers';
+ * Wrong import: import { withAuth } from '@/utils'; // ❌ Will cause client/server errors
+ */
+
 import {NextResponse} from 'next/server';
 
 import type {SupabaseClient, User} from '@supabase/supabase-js';

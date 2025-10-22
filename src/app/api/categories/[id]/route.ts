@@ -1,19 +1,22 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {errorResponse, prepareUpdateData, successResponse, withAdminAuth, withAuth} from '@/utils';
+import {
+  errorResponse,
+  prepareUpdateData,
+  successResponse,
+  withAdminAuth,
+  withAuth,
+} from '@/utils/supabase/apiHelpers';
 
 /**
  * GET /api/categories/[id] - Get single category
  *
  * @example Using new apiHelpers pattern - cleaner, less boilerplate
  */
-export async function GET(request: NextRequest, {params}: {params: {id: string}}) {
+export async function GET(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
   return withAuth(async (user, supabase) => {
-    const {data, error} = await supabase
-      .from('categories')
-      .select('*')
-      .eq('id', params.id)
-      .single();
+    const {id} = await params;
+    const {data, error} = await supabase.from('categories').select('*').eq('id', id).single();
 
     if (error) throw error;
 
@@ -30,8 +33,9 @@ export async function GET(request: NextRequest, {params}: {params: {id: string}}
  *
  * @example Using withAdminAuth with admin client and prepareUpdateData helper
  */
-export async function PATCH(request: NextRequest, {params}: {params: {id: string}}) {
+export async function PATCH(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
   return withAdminAuth(async (user, supabase, admin) => {
+    const {id} = await params;
     const body = await request.json();
     const updateData = prepareUpdateData(body);
 
@@ -39,7 +43,7 @@ export async function PATCH(request: NextRequest, {params}: {params: {id: string
     const {data, error} = await admin
       .from('categories')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -54,10 +58,11 @@ export async function PATCH(request: NextRequest, {params}: {params: {id: string
  *
  * @example Using admin client for system-level deletion
  */
-export async function DELETE(request: NextRequest, {params}: {params: {id: string}}) {
+export async function DELETE(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
   return withAdminAuth(async (user, supabase, admin) => {
+    const {id} = await params;
     // Use admin client to bypass RLS
-    const {error} = await admin.from('categories').delete().eq('id', params.id);
+    const {error} = await admin.from('categories').delete().eq('id', id);
 
     if (error) throw error;
 

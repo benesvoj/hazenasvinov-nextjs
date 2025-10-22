@@ -47,10 +47,6 @@ This guide will help you set up the required environment variables for the proje
 - **`NEXT_PUBLIC_SUPABASE_ANON_KEY`** - Public API key (client-side)
 - **`SUPABASE_SERVICE_ROLE_KEY`** - Service role key (server-side only, has admin privileges)
 
-### Authentication
-- **`NEXTAUTH_SECRET`** - Secret for NextAuth.js session encryption
-- **`NEXTAUTH_URL`** - Base URL of your application
-
 ## Security Notes
 
 - ⚠️ **NEVER commit `.env.local` to git** (it's in `.gitignore`)

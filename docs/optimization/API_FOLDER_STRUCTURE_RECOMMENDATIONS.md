@@ -352,7 +352,7 @@ Move all `test-*` and debugging endpoints to `/api/dev/`
 
 **Implementation:**
 ```typescript
-// middleware.ts
+// proxy.ts
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -638,7 +638,7 @@ export async function GET(request: Request) {
 ### 4. **Rate Limiting & Caching**
 
 ```typescript
-// src/middleware.ts
+// src/proxy.ts
 import { rateLimit } from '@/lib/api/rate-limit';
 
 export const config = {

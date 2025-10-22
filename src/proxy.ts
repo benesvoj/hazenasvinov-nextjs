@@ -4,7 +4,7 @@ import {createClient} from '@/utils/supabase/server';
 
 import {privateRoutes, publicRoutes} from '@/routes/routes';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     // Check auth for admin routes and coaches routes
     if (

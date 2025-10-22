@@ -10,7 +10,7 @@ import CategoryFeesTab from '@/app/admin/categories/components/CategoryFeesTab';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
-import {useCategories} from '@/hooks';
+import {useCategories, useFetchCategories} from '@/hooks';
 import {translations} from '@/lib';
 import {Category} from '@/types';
 
@@ -43,6 +43,8 @@ export default function CategoriesAdminPage() {
   } = useCategories({
     searchTerm,
   });
+
+  const {data, loading: categoriesLoading, error: categoriesError} = useFetchCategories();
 
   // Modal states
   const {
@@ -220,7 +222,7 @@ export default function CategoriesAdminPage() {
         <Tab key="categories" title={t.title}>
           <UnifiedTable
             columns={categoryColumns}
-            data={categories}
+            data={data}
             ariaLabel={t.title}
             renderCell={renderCategoryCell}
             getKey={(category: Category) => category.id}
