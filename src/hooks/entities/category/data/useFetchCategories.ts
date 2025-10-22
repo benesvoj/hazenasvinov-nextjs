@@ -13,7 +13,7 @@ export function useFetchCategories() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(API_ROUTES.categories);
+        const res = await fetch(API_ROUTES.categories.root);
         const data = await res.json();
         setData(data);
       } catch (err) {

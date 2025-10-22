@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Hook for managing members - provides full CRUD operations
  * Follows entity-based naming convention (useMembers, not useMemberCreation)

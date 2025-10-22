@@ -1,6 +1,5 @@
 import {NextResponse} from 'next/server';
 
-import supabaseAdmin from '@/utils/supabase/admin';
 import {createClient} from '@/utils/supabase/server';
 
 export async function GET(request: Request) {
@@ -15,7 +14,7 @@ export async function GET(request: Request) {
       return NextResponse.json({error: 'Unauthorized'}, {status: 401});
     }
 
-    const {data, error} = await supabaseAdmin
+    const {data, error} = await supabase
       .from('clubs')
       .select('*')
       .eq('is_active', true)
