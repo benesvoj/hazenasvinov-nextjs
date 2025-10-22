@@ -223,6 +223,10 @@ export const translations = {
         inactiveLabel: 'Neaktivní',
         noCommittees: 'Žádné komise nebyly nalezeny',
       },
+      responseMessages: {
+        committeesFetchFailed: 'Chyba při načítání komisí',
+        committeesUpdateSuccess: 'Komise byla úspěšně aktualizována',
+      },
     },
   },
   action: {

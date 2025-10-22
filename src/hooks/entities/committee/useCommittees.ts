@@ -1,10 +1,11 @@
 'use client';
 
-import {useState, useCallback, useEffect} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
 import {createClient} from '@/utils/supabase/client';
 
 import {showToast} from '@/components';
+import {API_ROUTES, translations} from '@/lib';
 import {Committee} from '@/types';
 
 export function useCommittees() {
@@ -22,6 +23,7 @@ export function useCommittees() {
     created_at: '',
     updated_at: '',
   });
+  const t = translations.admin.committees;
 
   // Fetch all committees
   const fetchCommittees = useCallback(async () => {
@@ -29,22 +31,18 @@ export function useCommittees() {
       setLoading(true);
       setError(null);
 
-      const supabase = createClient();
-      const {data, error} = await supabase
-        .from('committees')
-        .select('*')
-        .order('sort_order', {ascending: true});
+      const res = await fetch(API_ROUTES.committees.root);
+      const response = await res.json();
 
-      if (error) throw error;
-      setCommittees(data || []);
+      setCommittees(response.data || []);
     } catch (error) {
       console.error('Error fetching committees:', error);
-      setError('Chyba při načítání komisí');
-      showToast.danger('Chyba při načítání komisí');
+      setError(t.responseMessages.committeesFetchFailed);
+      showToast.danger(t.responseMessages.committeesFetchFailed);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Add new committee
   const addCommittee = useCallback(async () => {
@@ -76,19 +74,14 @@ export function useCommittees() {
     if (!selectedCommittee) return;
 
     try {
-      const supabase = createClient();
+      const res = await fetch(API_ROUTES.committees.byId(selectedCommittee.id), {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(formData),
+      });
+      const response = await res.json();
 
-      const {error} = await supabase
-        .from('committees')
-        .update({
-          name: formData.name,
-          description: formData.description,
-          is_active: formData.is_active,
-          sort_order: formData.sort_order,
-        })
-        .eq('id', selectedCommittee.id);
-
-      if (error) throw error;
+      if (!res.ok) throw new Error(response.error || 'Update failed');
 
       showToast.success('Komise byla úspěšně aktualizována');
       setSelectedCommittee(null);
@@ -148,10 +141,9 @@ export function useCommittees() {
 
   // Automatically fetch committees when hook is first used
   useEffect(() => {
-    if (committees.length === 0 && !loading) {
-      fetchCommittees();
-    }
-  }, [committees.length, loading, fetchCommittees]);
+    fetchCommittees();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     // Data
