@@ -1,3 +1,4 @@
+// TODO: refactor to remove supabase from component
 'use client';
 
 import React, {useState, useEffect} from 'react';
@@ -6,7 +7,7 @@ import {Button, Image} from '@heroui/react';
 
 import {BuildingOfficeIcon} from '@heroicons/react/24/outline';
 
-import {useSeasons, useCategories} from '@/hooks';
+import {useSeasons, useFetchCategories} from '@/hooks';
 import {ClubWithTeams} from '@/types';
 
 interface ClubSelectorProps {
@@ -30,7 +31,7 @@ export default function ClubSelector({
 
   // Use existing hooks instead of custom fetch functions
   const {activeSeason, fetchActiveSeason} = useSeasons();
-  const {categories, fetchCategories} = useCategories();
+  const {data: categories, refetch: fetchCategories} = useFetchCategories();
 
   // Fetch required data when component mounts
   useEffect(() => {

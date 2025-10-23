@@ -1,7 +1,4 @@
-import {Nullish} from '../../../shared/Nullish';
-import {Category} from '../../category/data/category';
-import {Season} from '../../season/data/season';
-import {Team} from '../../team/data/team';
+import {Nullish, Category, Season, Team} from '@/types';
 
 export type MatchStatus = 'upcoming' | 'completed';
 

@@ -12,6 +12,7 @@ interface CommitteeModalProps {
   formData: CommitteeFormData;
   setFormData: (data: CommitteeFormData) => void;
   onSubmit: () => void;
+  isLoading: boolean;
   mode: ModalMode;
 }
 
@@ -22,6 +23,7 @@ export const CommitteeModal = ({
   setFormData,
   onSubmit,
   mode,
+  isLoading,
 }: CommitteeModalProps) => {
   const t = translations.admin.committees;
   const tAction = translations.action;
@@ -36,10 +38,10 @@ export const CommitteeModal = ({
       size="2xl"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="flat" onPress={onClose}>
+          <Button variant="flat" onPress={onClose} isDisabled={isLoading}>
             {tAction.cancel}
           </Button>
-          <Button color="primary" onPress={onSubmit}>
+          <Button color="primary" onPress={onSubmit} isLoading={isLoading} isDisabled={isLoading}>
             {isEditMode ? tAction.save : tAction.add}
           </Button>
         </div>

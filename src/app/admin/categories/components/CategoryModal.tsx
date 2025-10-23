@@ -1,22 +1,24 @@
 import React from 'react';
 
-import {Checkbox, Input, Select, SelectItem, Tabs, Tab} from '@heroui/react';
+import {Checkbox, Input, Select, SelectItem, Tab, Tabs} from '@heroui/react';
 
 import CategoryFeeQuickView from '@/app/admin/categories/components/CategoryFeeQuickView';
 
-import {Heading, UnifiedModal} from '@/components';
+import {UnifiedModal} from '@/components';
 import {AgeGroups, Genders, getAgeGroupsOptions, getGenderOptions, ModalMode} from '@/enums';
 import {translations} from '@/lib';
-import {Category} from '@/types';
+import {Category, CategoryFormData} from '@/types';
 
 export interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
-  formData: Category;
-  setFormData: (data: Category) => void;
+  formData: CategoryFormData;
+  setFormData: (data: CategoryFormData) => void;
   mode: ModalMode;
+  selectedCategory?: Category | null;
   title?: string;
+  isLoading?: boolean;
 }
 
 export default function CategoryModal({
@@ -26,7 +28,9 @@ export default function CategoryModal({
   formData,
   setFormData,
   mode,
+  selectedCategory,
   title,
+  isLoading,
 }: CategoryModalProps) {
   const t = translations.categories;
   const modalTitle = title || (mode === ModalMode.ADD ? t.addCategory : t.editCategory);
@@ -39,6 +43,7 @@ export default function CategoryModal({
       size="3xl"
       onPress={onSubmit}
       isFooterWithActions
+      isLoading={isLoading}
     >
       <Tabs aria-label="Category modal tabs" className="w-full">
         <Tab key="basic" title={t.modal.basicInfoTab}>
@@ -96,7 +101,7 @@ export default function CategoryModal({
               />
               <div className="flex items-center">
                 <Checkbox
-                  isSelected={formData.is_active}
+                  isSelected={formData.is_active ?? true}
                   onValueChange={(checked) => setFormData({...formData, is_active: checked})}
                 >
                   {t.modal.input.isActive}
@@ -124,9 +129,9 @@ export default function CategoryModal({
             </div>
           </Tab>
         )}
-        {mode === ModalMode.EDIT && (
+        {mode === ModalMode.EDIT && selectedCategory && (
           <Tab key="membershipFees" title={t.modal.membershipFeesTab}>
-            <CategoryFeeQuickView categoryId={formData.id} />
+            <CategoryFeeQuickView categoryId={selectedCategory.id} />
           </Tab>
         )}
       </Tabs>

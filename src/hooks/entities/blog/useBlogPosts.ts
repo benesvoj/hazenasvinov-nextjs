@@ -1,3 +1,5 @@
+// TODO: REFACTOR NEEDED, Hook calls hook
+
 'use client';
 
 import {useState, useEffect, useCallback, useMemo} from 'react';
@@ -6,8 +8,8 @@ import {createSearchablePost, searchPosts} from '@/utils/contentSearch';
 import {createClient} from '@/utils/supabase/client';
 
 import {showToast} from '@/components';
-import {adminStatusFilterOptions, statusFilterToDbValue} from '@/constants';
-import {useCategories, useDebounce} from '@/hooks';
+import {statusFilterToDbValue} from '@/constants';
+import {useDebounce, useFetchCategories} from '@/hooks';
 import {BlogPost} from '@/types';
 
 interface User {
@@ -26,7 +28,7 @@ export interface UseBlogPostsResult {
   categoriesLoading: boolean;
   userError: string | null;
   dbError: string | null;
-  categoriesError: string | null;
+  categoriesError: Error | null;
 
   // Search and filters
   searchTerm: string;
@@ -66,11 +68,11 @@ export function useBlogPosts(): UseBlogPostsResult {
 
   // Use the category hook
   const {
-    categories,
+    data: categories,
     loading: categoriesLoading,
     error: categoriesError,
-    fetchCategories,
-  } = useCategories();
+    refetch: fetchCategories,
+  } = useFetchCategories();
 
   const supabase = createClient();
 

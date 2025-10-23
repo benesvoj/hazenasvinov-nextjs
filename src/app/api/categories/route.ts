@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
     const {data, error} = await supabase
       .from('categories')
       .select('*')
-      .order('sort_order', {ascending: true});
+      .order('sort_order', {ascending: true})
+      .order('name', {ascending: true});
 
     if (error) throw error;
 

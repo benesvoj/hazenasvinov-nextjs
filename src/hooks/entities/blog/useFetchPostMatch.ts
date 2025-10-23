@@ -146,7 +146,7 @@ export function useFetchPostMatch(postId: string | null): UseFetchPostMatchResul
               id: matchData.category?.id,
               name: matchData.category?.name,
               description: matchData.category?.description,
-            },
+            } as any,
             season: {
               id: matchData.season?.id,
               name: matchData.season?.name,

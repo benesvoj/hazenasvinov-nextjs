@@ -8,16 +8,15 @@ import {ChartBarIcon} from '@heroicons/react/24/outline';
 
 import UnifiedStandingTable from '@/components/shared/standing-table/UnifiedStandingTable';
 
-import {translations} from '@/lib/translations';
-
 import {LoadingSpinner, PageContainer} from '@/components';
 import {
   useSeasons,
-  useCategories,
   useStandings,
   useUserRoles,
   useOptimizedOwnClubMatches,
+  useFetchCategories,
 } from '@/hooks';
+import {translations} from '@/lib';
 import {Match} from '@/types';
 
 import {
@@ -38,7 +37,7 @@ export default function CoachesMatchesPage() {
   const [activeTab, setActiveTab] = useState('upcoming');
 
   const {activeSeason, fetchActiveSeason} = useSeasons();
-  const {categories, fetchCategories} = useCategories();
+  const {data: categories, refetch: fetchCategories} = useFetchCategories();
   const {standings, loading: standingsLoading, fetchStandings} = useStandings();
 
   const t = translations.coaches.matches.tabs;

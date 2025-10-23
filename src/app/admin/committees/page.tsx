@@ -8,15 +8,24 @@ import {translations} from '@/lib/translations';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
-import {useCommitteeForm, useCommittees} from '@/hooks';
+import {useCommitteeForm, useCommittees, useFetchCommittees} from '@/hooks';
 import {Committee} from '@/types';
 
 import {CommitteeModal} from './components/CommitteeModal';
 
 export default function CommitteesAdminPage() {
-  // Data & CRUD operations
-  const {committees, loading, error, addCommittee, updateCommittee, deleteCommittee} =
-    useCommittees();
+  // Data
+  const {data, loading: committeesLoading, refetch} = useFetchCommittees();
+
+  // CRUD operations
+  const {
+    loading: crudLoading,
+    setLoading: setCrudLoading,
+    error,
+    createCommittee,
+    updateCommittee,
+    deleteCommittee,
+  } = useCommittees();
 
   // Form state management
   const {
@@ -68,11 +77,15 @@ export default function CommitteesAdminPage() {
     try {
       if (modalMode === ModalMode.EDIT && selectedCommittee) {
         await updateCommittee(selectedCommittee.id, formData);
+        setCrudLoading(false);
       } else {
-        await addCommittee(formData);
+        await createCommittee(formData);
+        setCrudLoading(false);
       }
+      await refetch();
       onCommitteeModalClose();
       resetForm();
+      setCrudLoading(false);
     } catch (error) {
       // Error already handled in hook
     }
@@ -87,8 +100,10 @@ export default function CommitteesAdminPage() {
   const handleConfirmDelete = async () => {
     if (selectedCommittee) {
       await deleteCommittee(selectedCommittee.id);
+      await refetch();
       onDeleteCommitteeClose();
       resetForm();
+      setCrudLoading(false);
     }
   };
 
@@ -146,9 +161,9 @@ export default function CommitteesAdminPage() {
       )}
 
       <UnifiedTable
-        isLoading={loading}
+        isLoading={committeesLoading}
         columns={committeeColumns}
-        data={committees}
+        data={data}
         ariaLabel={t.title}
         renderCell={renderCommitteeCell}
         getKey={(committee: Committee) => committee.id}
@@ -164,6 +179,7 @@ export default function CommitteesAdminPage() {
         setFormData={setFormData}
         onSubmit={handleSubmit}
         mode={modalMode}
+        isLoading={crudLoading}
       />
 
       {/* Delete Committee Modal */}
@@ -173,6 +189,7 @@ export default function CommitteesAdminPage() {
         onConfirm={handleConfirmDelete}
         title={t.deleteCommittee}
         message={t.deleteCommitteeMessage}
+        isLoading={crudLoading}
       />
     </AdminContainer>
   );

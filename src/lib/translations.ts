@@ -74,6 +74,16 @@ export const translations = {
     },
     deleteCategory: 'Smazat kategorii',
     deleteCategoryMessage: 'Opravdu chcete smazat kategorii? Tato akce je nevratná.',
+    responseMessages: {
+      categoriesFetchFailed: 'Chyba při načitání kategorií',
+      categoryFetchFailed: 'Chyba při načitání kategorie',
+      categoryCreationSuccess: 'Kategorie úspěšně založena',
+      categoryCreationFailed: 'Chyba při přidání kategorie',
+      categoryUpdateFailed: 'Chyba při aktualizaci kategorie',
+      categoryUpdatedSuccess: 'Kategorie byla aktualizovaná',
+      categoryDeleteFailed: 'Chyba při mazání kategorie',
+      categoryDeleteSuccess: 'Kategorie byla smazána',
+    },
   },
   men: {
     title: 'Muži',

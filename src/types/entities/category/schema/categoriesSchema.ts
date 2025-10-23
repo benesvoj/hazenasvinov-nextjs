@@ -12,7 +12,7 @@
  * Last generated: 2025-10-23
  */
 
-export interface CategorySchema {
+export interface CategoriesSchema {
   age_group: string | null;
   created_at: string | null;
   description: string | null;
@@ -28,13 +28,13 @@ export interface CategorySchema {
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type CategoryInsert = Omit<CategorySchema, 'id' | 'created_at' | 'updated_at'> & {
+export type CategoriesInsert = Omit<CategoriesSchema, 'id' | 'created_at' | 'updated_at'> & {
   id?: string; // Optional for inserts
 };
 
 /**
  * Type for UPDATE operations (all fields optional except ID)
  */
-export type CategoryUpdate = {
+export type CategoriesUpdate = {
   id: string;
-} & Partial<Omit<CategorySchema, 'id' | 'created_at' | 'updated_at'>>;
+} & Partial<Omit<CategoriesSchema, 'id' | 'created_at' | 'updated_at'>>;

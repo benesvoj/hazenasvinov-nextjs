@@ -27,9 +27,8 @@ Hooks implementing complex business rules and domain logic.
 ## Quick Start
 
 ```typescript
-import { 
-  useFetchCategories,        // Data fetching
-  useCategories,             // State management
+import {
+  useCategories,            // Data fetching
   useCategoryLineups         // Business logic
 } from '@/hooks';
 
@@ -37,7 +36,7 @@ import {
 const { data: categories, loading } = useFetchCategories();
 
 // Manage categories (CRUD)
-const { handleAddCategory, handleUpdateCategory } = useCategories();
+const { createCategory, updateCategory, deleteCategory } = useCategories();
 
 // Handle lineups
 const { createLineup, updateLineup } = useCategoryLineups(categoryId);

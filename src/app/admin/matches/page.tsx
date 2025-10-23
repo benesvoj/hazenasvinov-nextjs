@@ -29,11 +29,11 @@ import {
   useSeasons,
   useFilteredTeams,
   useStandings,
-  useCategories,
   useFetchMembers,
   useTeams,
   useExcelImport,
   useTeamDisplayLogic,
+  useFetchCategories,
 } from '@/hooks';
 import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
@@ -56,7 +56,11 @@ export default function MatchesAdminPage() {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
   // Use existing hooks instead of custom state and fetch functions
-  const {categories, loading: categoriesLoading, fetchCategories} = useCategories();
+  const {
+    data: categories,
+    loading: categoriesLoading,
+    refetch: fetchCategories,
+  } = useFetchCategories();
   const {members, loading: membersLoading, fetchMembers} = useFetchMembers();
   const {teams, loading: allTeamsLoading, fetchTeams} = useTeams();
 

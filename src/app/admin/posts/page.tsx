@@ -1,3 +1,4 @@
+// TODO: REFACTOR
 'use client';
 
 import React, {useState} from 'react';
@@ -267,13 +268,6 @@ export default function BlogPostsPage() {
                         ? 'Pro vybrané filtry nebyly nalezeny žádné články.'
                         : 'Zatím nebyly vytvořeny žádné články.'}
                   </p>
-                  {(dbError || categoriesError) && (
-                    <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
-                      <p className="text-sm text-orange-700 dark:text-orange-300">
-                        <strong>Detaily chyby:</strong> {dbError || categoriesError}
-                      </p>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
