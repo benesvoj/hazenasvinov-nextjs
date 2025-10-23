@@ -226,6 +226,8 @@ export const translations = {
       responseMessages: {
         committeesFetchFailed: 'Chyba při načítání komisí',
         committeesUpdateSuccess: 'Komise byla úspěšně aktualizována',
+        mandatoryCode: 'Kod je povinný',
+        mandatoryName: 'Název je povinny',
       },
     },
   },

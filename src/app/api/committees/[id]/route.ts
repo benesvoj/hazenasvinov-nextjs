@@ -1,4 +1,4 @@
-import {NextRequest} from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 
 import {
   errorResponse,
@@ -7,6 +7,8 @@ import {
   withAdminAuth,
   withAuth,
 } from '@/utils/supabase/apiHelpers';
+
+import {CommitteeUpdate} from '@/types';
 
 export async function GET(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
   return withAuth(async (user, supabase) => {
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{id: 
 export async function PATCH(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
   return withAdminAuth(async (user, supabase, admin) => {
     const {id} = await params;
-    const body = await request.json();
+    const body: CommitteeUpdate = await request.json();
     const updateData = prepareUpdateData(body);
 
     const {data, error} = await admin
@@ -39,5 +41,23 @@ export async function PATCH(request: NextRequest, {params}: {params: Promise<{id
     if (error) throw error;
 
     return successResponse(data);
+  });
+}
+
+export async function DELETE(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
+  return withAdminAuth(async (user, supabase, admin) => {
+    const {id} = await params;
+
+    const {data: existing} = await admin.from('committees').select('id').eq('id', id).single();
+
+    if (!existing) {
+      return errorResponse('Committee not found', 404);
+    }
+
+    const {error} = await admin.from('committees').delete().eq('id', id);
+
+    if (error) throw error;
+
+    return NextResponse.json({success: true, error: null});
   });
 }

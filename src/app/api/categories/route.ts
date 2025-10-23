@@ -1,51 +1,41 @@
-import {NextResponse} from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 
-import supabaseAdmin from '@/utils/supabase/admin';
+import {successResponse, withAdminAuth, withAuth} from '@/utils/supabase/apiHelpers';
 
 import {Category} from '@/types';
-import {createClient} from '@/utils';
 
-const supabase = createClient();
+export async function GET(request: NextRequest) {
+  return withAuth(async (user, supabase) => {
+    const {data, error} = await supabase
+      .from('categories')
+      .select('*')
+      .order('sort_order', {ascending: true});
 
-export async function GET() {
-  const {data, error} = await supabaseAdmin.from('categories').select('*');
+    if (error) throw error;
 
-  if (error) {
-    console.error('Error fetching data:', error);
-    return NextResponse.json({error: 'Failed to fetch data'}, {status: 500});
-  }
-
-  return NextResponse.json(data);
+    return successResponse(data);
+  });
 }
 
-export async function POST(request: Request) {
-  const {
-    name,
-    description,
-    age_group,
-    gender,
-    is_active,
-    sort_order,
-    slug,
-    updated_at,
-    id,
-  }: Category = await request.json();
-  const {error} = await supabase
-    .from('categories')
-    .update({
-      name: name,
-      description: description || '',
-      slug: slug || '',
-      update_at: updated_at,
-      age_group: age_group || '',
-      gender: gender || '',
-      is_active: is_active || false,
-      sort_order: sort_order || 0,
-    })
-    .eq('id', id);
+/**
+ *  POST request to create a new category in system
+ * @param request
+ * @constructor
+ */
 
-  if (error) {
-    console.log(error);
-    throw new Error('Update failed: ' + error.message);
-  }
+export async function POST(request: NextRequest) {
+  return withAdminAuth(async (user, supabase, admin) => {
+    const body: Category = await request.json();
+    const {data, error} = await admin
+      .from('categories')
+      .insert({
+        ...body,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({data}, {status: 201});
+  });
 }

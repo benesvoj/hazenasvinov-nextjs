@@ -5104,14 +5104,8 @@ export type Database = {
       };
     };
     Functions: {
-      ensure_user_profile: {
-        Args: {input_user_id: string};
-        Returns: string;
-      };
-      exec_sql: {
-        Args: {sql: string};
-        Returns: string;
-      };
+      ensure_user_profile: {Args: {input_user_id: string}; Returns: string};
+      exec_sql: {Args: {sql: string}; Returns: string};
       generate_teams_for_club_category: {
         Args: {p_club_category_id: string; p_max_teams?: number};
         Returns: undefined;
@@ -5140,21 +5134,38 @@ export type Database = {
           recorded_at: string;
         }[];
       };
-      get_attendance_summary: {
-        Args:
-          | {p_category: string; p_season_id: string}
-          | {p_category_id: string; p_season_id: string; p_user_id: string};
-        Returns: {
-          absent_count: number;
-          excused_count: number;
-          late_count: number;
-          present_count: number;
-          session_date: string;
-          session_id: string;
-          session_title: string;
-          total_members: number;
-        }[];
-      };
+      get_attendance_summary:
+        | {
+            Args: {
+              p_category_id: string;
+              p_season_id: string;
+              p_user_id: string;
+            };
+            Returns: {
+              absent_count: number;
+              excused_count: number;
+              late_count: number;
+              present_count: number;
+              session_date: string;
+              session_id: string;
+              session_title: string;
+              total_members: number;
+            }[];
+          }
+        | {
+            Args: {p_category: string; p_season_id: string};
+            Returns: {
+              absent_count: number;
+              attendance_percentage: number;
+              excused_count: number;
+              late_count: number;
+              member_id: string;
+              member_name: string;
+              member_surname: string;
+              present_count: number;
+              total_sessions: number;
+            }[];
+          };
       get_current_club_for_member: {
         Args: {member_uuid: string};
         Returns: {
@@ -5166,7 +5177,7 @@ export type Database = {
         }[];
       };
       get_current_user_summary: {
-        Args: Record<PropertyKey, never>;
+        Args: never;
         Returns: {
           assigned_categories: string[];
           assigned_category_codes: string[];
@@ -5222,7 +5233,7 @@ export type Database = {
         Returns: string;
       };
       get_sponsorship_stats: {
-        Args: Record<PropertyKey, never>;
+        Args: never;
         Returns: {
           active_business_partners: number;
           active_main_partners: number;
@@ -5295,57 +5306,36 @@ export type Database = {
           user_id: string;
         }[];
       };
-      has_admin_access: {
-        Args: {user_uuid?: string};
-        Returns: boolean;
-      };
+      has_admin_access: {Args: {user_uuid?: string}; Returns: boolean};
       has_role: {
         Args: {role_name: string; user_uuid: string};
         Returns: boolean;
       };
-      is_admin: {
-        Args: {user_uuid?: string};
-        Returns: boolean;
-      };
+      is_admin: {Args: {user_uuid?: string}; Returns: boolean};
       populate_profiles_additional_fields: {
-        Args: Record<PropertyKey, never>;
+        Args: never;
         Returns: {
           message: string;
           updated_count: number;
         }[];
       };
-      populate_profiles_from_auth_users: {
-        Args: Record<PropertyKey, never>;
-        Returns: undefined;
-      };
-      refresh_betting_leaderboard: {
-        Args: Record<PropertyKey, never>;
-        Returns: undefined;
-      };
-      refresh_match_stats: {
-        Args: Record<PropertyKey, never>;
-        Returns: undefined;
-      };
+      populate_profiles_from_auth_users: {Args: never; Returns: undefined};
+      refresh_betting_leaderboard: {Args: never; Returns: undefined};
+      refresh_match_stats: {Args: never; Returns: undefined};
       refresh_materialized_view: {
         Args: {view_name: string};
         Returns: undefined;
       };
-      refresh_profiles_mv: {
-        Args: Record<PropertyKey, never>;
-        Returns: undefined;
-      };
+      refresh_profiles_mv: {Args: never; Returns: undefined};
       refresh_profiles_mv_with_stats: {
-        Args: Record<PropertyKey, never>;
+        Args: never;
         Returns: {
           message: string;
           refreshed_at: string;
           total_profiles: number;
         }[];
       };
-      refresh_teams_materialized_view: {
-        Args: Record<PropertyKey, never>;
-        Returns: undefined;
-      };
+      refresh_teams_materialized_view: {Args: never; Returns: undefined};
       search_external_players: {
         Args: {search_term: string};
         Returns: {
@@ -5364,7 +5354,7 @@ export type Database = {
         Returns: undefined;
       };
       sync_all_profiles_data: {
-        Args: Record<PropertyKey, never>;
+        Args: never;
         Returns: {
           message: string;
           refreshed_at: string;
@@ -5373,24 +5363,21 @@ export type Database = {
         }[];
       };
       sync_profiles_data: {
-        Args: Record<PropertyKey, never>;
+        Args: never;
         Returns: {
           message: string;
           synced_count: number;
         }[];
       };
       sync_profiles_from_user_profiles: {
-        Args: Record<PropertyKey, never>;
+        Args: never;
         Returns: {
           message: string;
           synced_count: number;
           total_profiles: number;
         }[];
       };
-      user_has_profile: {
-        Args: {user_uuid: string};
-        Returns: boolean;
-      };
+      user_has_profile: {Args: {user_uuid: string}; Returns: boolean};
     };
     Enums: {
       [_ in never]: never;

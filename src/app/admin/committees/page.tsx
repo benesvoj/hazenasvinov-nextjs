@@ -1,45 +1,39 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 
-import {useDisclosure, Button} from '@heroui/react';
-
-import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {useDisclosure} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
-import {useCommittees} from '@/hooks';
+import {useCommitteeForm, useCommittees} from '@/hooks';
 import {Committee} from '@/types';
 
 import {CommitteeModal} from './components/CommitteeModal';
 
 export default function CommitteesAdminPage() {
+  // Data & CRUD operations
+  const {committees, loading, error, addCommittee, updateCommittee, deleteCommittee} =
+    useCommittees();
+
+  // Form state management
   const {
-    committees,
-    loading,
-    error,
     formData,
-    fetchCommittees,
-    addCommittee,
-    updateCommittee,
-    deleteCommittee,
-    openEditModal,
-    openDeleteModal,
-    resetForm,
+    selectedCommittee,
+    modalMode,
     setFormData,
-  } = useCommittees();
+    openAddMode,
+    openEditMode,
+    resetForm,
+    validateForm,
+  } = useCommitteeForm();
 
   const t = translations.admin.committees;
   const tAction = translations.action;
 
-  useEffect(() => {
-    fetchCommittees();
-  }, [fetchCommittees]);
-
-  // Modal states
-  const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.ADD);
+  // Modal states/controls
   const {
     isOpen: isCommitteeModalOpen,
     onOpen: onCommitteeModalOpen,
@@ -53,46 +47,52 @@ export default function CommitteesAdminPage() {
 
   // Handle modal open for add
   const handleAddClick = () => {
-    setModalMode(ModalMode.ADD);
-    resetForm();
+    openAddMode();
     onCommitteeModalOpen();
   };
 
   // Handle modal open for edit
   const handleEditClick = (committee: Committee) => {
-    setModalMode(ModalMode.EDIT);
-    openEditModal(committee);
+    openEditMode(committee);
     onCommitteeModalOpen();
   };
 
-  // Handle modal close
-  const handleCommitteeModalClose = () => {
-    onCommitteeModalClose();
-    resetForm();
-  };
-
-  // Handle committee submission
-  const handleCommitteeSubmit = async () => {
-    if (modalMode === ModalMode.ADD) {
-      await addCommittee();
-    } else {
-      await updateCommittee();
+  // Handle submit
+  const handleSubmit = async () => {
+    const {valid, errors} = validateForm();
+    if (!valid) {
+      console.error('Validation errors:', errors);
+      return;
     }
-    handleCommitteeModalClose();
+
+    try {
+      if (modalMode === ModalMode.EDIT && selectedCommittee) {
+        await updateCommittee(selectedCommittee.id, formData);
+      } else {
+        await addCommittee(formData);
+      }
+      onCommitteeModalClose();
+      resetForm();
+    } catch (error) {
+      // Error already handled in hook
+    }
   };
 
   // Handle delete
   const handleDeleteClick = (committee: Committee) => {
-    openDeleteModal(committee);
+    openEditMode(committee); // Set selected committee
     onDeleteCommitteeOpen();
   };
 
-  const handleDeleteCommittee = async () => {
-    await deleteCommittee();
-    onDeleteCommitteeClose();
+  const handleConfirmDelete = async () => {
+    if (selectedCommittee) {
+      await deleteCommittee(selectedCommittee.id);
+      onDeleteCommitteeClose();
+      resetForm();
+    }
   };
 
-  const commiteeColumns = [
+  const committeeColumns = [
     {key: 'code', label: t.table.code},
     {key: 'name', label: t.table.name},
     {key: 'description', label: t.table.description},
@@ -147,7 +147,7 @@ export default function CommitteesAdminPage() {
 
       <UnifiedTable
         isLoading={loading}
-        columns={commiteeColumns}
+        columns={committeeColumns}
         data={committees}
         ariaLabel={t.title}
         renderCell={renderCommitteeCell}
@@ -159,10 +159,10 @@ export default function CommitteesAdminPage() {
       {/* Committee Modal (Add/Edit) */}
       <CommitteeModal
         isOpen={isCommitteeModalOpen}
-        onClose={handleCommitteeModalClose}
+        onClose={onCommitteeModalClose}
         formData={formData}
         setFormData={setFormData}
-        onSubmit={handleCommitteeSubmit}
+        onSubmit={handleSubmit}
         mode={modalMode}
       />
 
@@ -170,7 +170,7 @@ export default function CommitteesAdminPage() {
       <DeleteConfirmationModal
         isOpen={isDeleteCommitteeOpen}
         onClose={onDeleteCommitteeClose}
-        onConfirm={handleDeleteCommittee}
+        onConfirm={handleConfirmDelete}
         title={t.deleteCommittee}
         message={t.deleteCommitteeMessage}
       />
