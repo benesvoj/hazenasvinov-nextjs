@@ -144,32 +144,34 @@ export default function CommitteesAdminPage() {
   };
 
   return (
-    <AdminContainer
-      actions={[
-        {
-          label: t.addCommittee,
-          onClick: handleAddClick,
-          variant: 'solid',
-          buttonType: ActionTypes.CREATE,
-        },
-      ]}
-    >
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
-        </div>
-      )}
+    <>
+      <AdminContainer
+        actions={[
+          {
+            label: t.addCommittee,
+            onClick: handleAddClick,
+            variant: 'solid',
+            buttonType: ActionTypes.CREATE,
+          },
+        ]}
+      >
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
 
-      <UnifiedTable
-        isLoading={committeesLoading}
-        columns={committeeColumns}
-        data={data}
-        ariaLabel={t.title}
-        renderCell={renderCommitteeCell}
-        getKey={(committee: Committee) => committee.id}
-        emptyContent={t.table.noCommittees}
-        isStriped
-      />
+        <UnifiedTable
+          isLoading={committeesLoading}
+          columns={committeeColumns}
+          data={data}
+          ariaLabel={t.title}
+          renderCell={renderCommitteeCell}
+          getKey={(committee: Committee) => committee.id}
+          emptyContent={t.table.noCommittees}
+          isStriped
+        />
+      </AdminContainer>
 
       {/* Committee Modal (Add/Edit) */}
       <CommitteeModal
@@ -191,6 +193,6 @@ export default function CommitteesAdminPage() {
         message={t.deleteCommitteeMessage}
         isLoading={crudLoading}
       />
-    </AdminContainer>
+    </>
   );
 }

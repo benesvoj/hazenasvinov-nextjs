@@ -98,7 +98,7 @@ useCategoriesState()               // Complex state orchestration
 
 // ✅ Specific feature hooks
 useMemberPayments()                // Payment-specific operations
-useCategoryFees()                  // Fee management
+useCategoryMembershipFees()                  // Fee management
 usePlayerLoans()                   // Loan management
 
 // ❌ Bad examples

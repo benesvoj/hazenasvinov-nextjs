@@ -601,7 +601,7 @@ hooks/entities/membershipFee/     # ❌ WRONG in plan: hooks/admin/
 │   ├── useFetchCategoryFees.ts
 │   └── useFetchMemberPayments.ts
 └── state/
-    ├── useCategoryFees.ts
+    ├── useCategoryMembershipFees.ts
     └── useMemberPayments.ts
 
 # API Routes
@@ -633,11 +633,11 @@ enums/
 1. **Hooks Location (HIGH PRIORITY)**
    ```
    # ❌ WRONG (from plan)
-   src/hooks/admin/useCategoryFees.ts
+   src/hooks/admin/useCategoryMembershipFees.ts
    src/hooks/admin/useMemberPayments.ts
 
    # ✅ CORRECT (following entity pattern)
-   src/hooks/entities/membershipFee/state/useCategoryFees.ts
+   src/hooks/entities/membershipFee/state/useCategoryMembershipFees.ts
    src/hooks/entities/membershipFee/state/useMemberPayments.ts
    src/hooks/entities/membershipFee/business/usePaymentStatus.ts
    ```

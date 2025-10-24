@@ -3,35 +3,40 @@
 import {useState} from 'react';
 
 import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
   Button,
+  Chip,
   Select,
   SelectItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
   useDisclosure,
-  Chip,
 } from '@heroui/react';
 
-import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {PencilIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {DeleteConfirmationModal} from '@/components';
-import {useCategoryFees} from '@/hooks';
+import {useCategoryMembershipFees, useFetchCategoryMembershipFees} from '@/hooks';
 import {CategoryMembershipFee} from '@/types';
 
 import CategoryFeeFormModal from './CategoryFeeFormModal';
+
+const YEAR_RANGE_BEFORE = 5;
+const YEAR_RANGE_AFTER = 5;
+const YEAR_OPTIONS_LENGTH = YEAR_RANGE_BEFORE + YEAR_RANGE_AFTER;
 
 export default function CategoryFeesTab() {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
+  const {data, loading: fetchLoading, refetch} = useFetchCategoryMembershipFees({selectedYear});
   const {categories} = useAppData();
-  const {fees, loading, deleteFee} = useCategoryFees(selectedYear);
+  const {fees, loading, deleteFee} = useCategoryMembershipFees(selectedYear);
 
   const {isOpen: isFormOpen, onOpen: onFormOpen, onClose: onFormClose} = useDisclosure();
 
@@ -40,7 +45,7 @@ export default function CategoryFeesTab() {
   const [selectedFee, setSelectedFee] = useState<CategoryMembershipFee | null>(null);
 
   // Generate year options (current year ± 5 years)
-  const yearOptions = Array.from({length: 11}, (_, i) => currentYear - 5 + i);
+  const yearOptions = Array.from({length: YEAR_OPTIONS_LENGTH}, (_, i) => currentYear - 5 + i);
 
   const handleEdit = (fee: CategoryMembershipFee) => {
     setSelectedFee(fee);
@@ -65,7 +70,9 @@ export default function CategoryFeesTab() {
           className="max-w-xs"
         >
           {yearOptions.map((year) => (
-            <SelectItem key={year.toString()}>{year}</SelectItem>
+            <SelectItem key={year.toString()} textValue={year.toString()}>
+              {year}
+            </SelectItem>
           ))}
         </Select>
 
@@ -92,8 +99,8 @@ export default function CategoryFeesTab() {
           <TableColumn>AKCE</TableColumn>
         </TableHeader>
         <TableBody
-          items={fees}
-          isLoading={loading}
+          items={data}
+          isLoading={fetchLoading}
           emptyContent={`Žádné poplatky pro rok ${selectedYear}`}
         >
           {(fee) => {

@@ -22,7 +22,7 @@ import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 import {DeleteConfirmationModal} from '@/components';
 import {useMemberPayments} from '@/hooks';
-import {BaseMember, Member, MembershipFeePayment} from '@/types';
+import {BaseMember, MembershipFeePayment} from '@/types';
 
 import PaymentFormModal from './PaymentFormModal';
 

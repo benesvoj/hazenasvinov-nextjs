@@ -2,12 +2,12 @@ import {useRouter} from 'next/navigation';
 
 import {Button, Card, CardBody, CardHeader} from '@heroui/react';
 
-import {useCategoryFees} from '@/hooks';
+import {useCategoryMembershipFees} from '@/hooks';
 
 export default function CategoryFeeQuickView({categoryId}: {categoryId: string}) {
   const router = useRouter();
   const currentYear = new Date().getFullYear();
-  const {fees} = useCategoryFees(currentYear);
+  const {fees} = useCategoryMembershipFees(currentYear);
   const currentFee = fees.find((f) => f.category_id === categoryId);
 
   return (

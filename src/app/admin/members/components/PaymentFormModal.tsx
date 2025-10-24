@@ -85,7 +85,8 @@ export default function PaymentFormModal({
       if (payment) {
         await updatePayment({...data, id: payment.id});
       } else {
-        await createPayment(data);
+        // TODO: temporary fix before refactor
+        await createPayment(data as any);
       }
 
       onClose();

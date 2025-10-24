@@ -18,7 +18,7 @@ import {
 
 import {FeePeriod} from '@/enums/membershipFeeStatus';
 
-import {useCategoryFees} from '@/hooks';
+import {useCategoryMembershipFees} from '@/hooks';
 import {Category, CategoryMembershipFee} from '@/types';
 
 interface CategoryFeeFormModalProps {
@@ -36,7 +36,7 @@ export default function CategoryFeeFormModal({
   categories,
   defaultYear,
 }: CategoryFeeFormModalProps) {
-  const {createFee, updateFee} = useCategoryFees();
+  const {createFee, updateFee} = useCategoryMembershipFees();
 
   const [formData, setFormData] = useState({
     category_id: '',
@@ -57,7 +57,7 @@ export default function CategoryFeeFormModal({
         currency: fee.currency,
         fee_period: fee.fee_period as FeePeriod,
         description: fee.description || '',
-        is_active: fee.is_active,
+        is_active: fee.is_active || false,
       });
     } else {
       setFormData({

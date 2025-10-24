@@ -1056,7 +1056,7 @@ export async function GET(request: NextRequest) {
 
 #### 6.1 Category Fees Hook
 
-File: `src/hooks/admin/useCategoryFees.ts`
+File: `src/hooks/admin/useCategoryMembershipFees.ts`
 
 ```typescript
 import { useState, useCallback, useEffect } from 'react';
@@ -1064,7 +1064,7 @@ import { CategoryMembershipFee, CreateCategoryFeeData, UpdateCategoryFeeData } f
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 
-export const useCategoryFees = (year?: number) => {
+export const useCategoryMembershipFees = (year?: number) => {
   const [fees, setFees] = useState<CategoryMembershipFee[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1372,7 +1372,7 @@ import {
 } from '@heroui/react';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-import { useCategoryFees } from '@/hooks/admin/useCategoryFees';
+import { useCategoryMembershipFees } from '@/hooks/admin/useCategoryMembershipFees';
 import { useAppData } from '@/contexts/AppDataContext';
 import { DeleteConfirmationModal } from '@/components';
 
@@ -1383,7 +1383,7 @@ export default function CategoryFeesTab() {
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
   const { categories } = useAppData();
-  const { fees, loading, deleteFee } = useCategoryFees(selectedYear);
+  const { fees, loading, deleteFee } = useCategoryMembershipFees(selectedYear);
 
   const {
     isOpen: isFormOpen,
@@ -1538,7 +1538,7 @@ import {
   Switch,
 } from '@heroui/react';
 
-import { useCategoryFees } from '@/hooks/admin/useCategoryFees';
+import { useCategoryMembershipFees } from '@/hooks/admin/useCategoryMembershipFees';
 import { Category } from '@/types';
 import { FeePeriod } from '@/enums';
 
@@ -1557,7 +1557,7 @@ export default function CategoryFeeFormModal({
   categories,
   defaultYear,
 }: CategoryFeeFormModalProps) {
-  const { createFee, updateFee } = useCategoryFees();
+  const { createFee, updateFee } = useCategoryMembershipFees();
 
   const [formData, setFormData] = useState({
     category_id: '',

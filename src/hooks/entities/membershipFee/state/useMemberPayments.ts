@@ -3,7 +3,11 @@ import {useState, useCallback, useEffect} from 'react';
 
 import {showToast} from '@/components';
 import {translations} from '@/lib';
-import {MembershipFeePayment, CreatePaymentData, UpdatePaymentData} from '@/types';
+import {
+  MembershipFeePayment,
+  CreateMembershipFeePayment,
+  UpdateMembershipFeePayment,
+} from '@/types';
 
 export const useMemberPayments = (memberId: string, year?: number) => {
   const [payments, setPayments] = useState<MembershipFeePayment[]>([]);
@@ -39,7 +43,7 @@ export const useMemberPayments = (memberId: string, year?: number) => {
   }, [memberId, year]);
 
   const createPayment = useCallback(
-    async (paymentData: CreatePaymentData) => {
+    async (paymentData: CreateMembershipFeePayment) => {
       try {
         const response = await fetch('/api/member-payments', {
           method: 'POST',
@@ -64,7 +68,7 @@ export const useMemberPayments = (memberId: string, year?: number) => {
   );
 
   const updatePayment = useCallback(
-    async (paymentData: UpdatePaymentData) => {
+    async (paymentData: UpdateMembershipFeePayment) => {
       try {
         const response = await fetch('/api/member-payments', {
           method: 'PATCH',

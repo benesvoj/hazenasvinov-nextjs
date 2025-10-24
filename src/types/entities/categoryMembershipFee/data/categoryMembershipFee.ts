@@ -1,17 +1,6 @@
-export interface CategoryMembershipFee {
-  id: string;
-  category_id: string;
-  calendar_year: number;
-  fee_amount: number;
-  currency: string;
-  fee_period: 'yearly' | 'semester' | 'quarterly' | 'monthly';
-  description?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  created_by?: string;
-  updated_by?: string;
-}
+import {CategoryMembershipFeeSchema} from '@/types';
+
+export interface CategoryMembershipFee extends CategoryMembershipFeeSchema {}
 
 export interface CategoryWithFee {
   id: string;
