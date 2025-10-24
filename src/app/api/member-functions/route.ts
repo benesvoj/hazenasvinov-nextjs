@@ -2,18 +2,18 @@ import {NextRequest, NextResponse} from 'next/server';
 
 import {successResponse, withAdminAuth, withAuth} from '@/utils/supabase/apiHelpers';
 
-import {NewClub} from '@/types';
+import {CreateMemberFunction} from '@/types';
 
 export async function GET(request: NextRequest) {
   return withAuth(async (user, supabase) => {
     const {data, error} = await supabase
-      .from('clubs')
+      .from('member_functions')
       .select('*')
-      .eq('is_active', true)
-      .order('name');
+      .order('sort_order', {ascending: true})
+      .order('display_name', {ascending: true});
 
     if (error) {
-      console.error('Error fetching clubs:', error);
+      console.error('Error fetching member functions', error);
       return NextResponse.json({error: error.message}, {status: 500});
     }
 
@@ -23,12 +23,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   return withAdminAuth(async (user, supabase, admin) => {
-    const body: NewClub = await request.json();
+    const body: CreateMemberFunction = await request.json();
     const {data, error} = await admin
-      .from('clubs')
-      .insert({
-        ...body,
-      })
+      .from('member_functions')
+      .insert({...body})
       .select()
       .single();
 

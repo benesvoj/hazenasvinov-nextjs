@@ -1,36 +1,44 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 
 import {useDisclosure} from '@heroui/react';
 
-import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
-import {ActionTypes, ColumnAlignType} from '@/enums';
-import {useFetchMemberFunctions} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
+import {ActionTypes, ColumnAlignType, ModalMode} from '@/enums';
+import {useFetchMemberFunctions, useMemberFunctionForm, useMemberFunctions} from '@/hooks';
+import {translations} from '@/lib';
 import {MemberFunction} from '@/types';
 
 import FunctionFormModal from './components/FunctionFormModal';
 
+const tAction = translations.action;
+
 export default function MemberFunctionsAdminPage() {
-  const tAction = translations.action;
-
-  const [functions, setFunctions] = useState<MemberFunction[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Fetch functions from database
   const {data: functionsData, loading: functionsLoading, refetch} = useFetchMemberFunctions();
+  const {
+    loading: crudLoading,
+    setLoading: setCrudLoading,
+    createMemberFunction,
+    updateMemberFunction,
+    deleteMemberFunction,
+  } = useMemberFunctions();
+  const {
+    openAddMode,
+    openEditMode,
+    modalMode,
+    formData,
+    selectedRecord: selectedFunction,
+    setFormData,
+    validateForm,
+    resetForm,
+  } = useMemberFunctionForm();
 
   // Modal states
   const {
-    isOpen: isAddFunctionOpen,
-    onOpen: onAddFunctionOpen,
-    onClose: onAddFunctionClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditFunctionOpen,
-    onOpen: onEditFunctionOpen,
-    onClose: onEditFunctionClose,
+    isOpen: isFunctionModalOpen,
+    onOpen: onFunctionModalOpen,
+    onClose: onFunctionModalClose,
   } = useDisclosure();
   const {
     isOpen: isDeleteFunctionOpen,
@@ -38,165 +46,51 @@ export default function MemberFunctionsAdminPage() {
     onClose: onDeleteFunctionClose,
   } = useDisclosure();
 
-  const [selectedFunction, setSelectedFunction] = useState<MemberFunction | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    display_name: '',
-    description: '',
-    sort_order: 0,
-    is_active: true,
-  });
-
-  // Update local state when data is fetched
-  useEffect(() => {
-    if (functionsData) {
-      setFunctions(functionsData);
-    }
-  }, [functionsData]);
-
-  // Show success message
-  const showSuccess = (message: string) => {
-    showToast.success(message);
+  const handleAdd = () => {
+    openAddMode();
+    onFunctionModalOpen();
   };
 
-  // Open add modal
-  const openAddModal = () => {
-    setFormData({
-      name: '',
-      display_name: '',
-      description: '',
-      sort_order: 0,
-      is_active: true,
-    });
-    onAddFunctionOpen();
+  const handleEdit = async (item: MemberFunction) => {
+    openEditMode(item);
+    onFunctionModalOpen();
   };
 
-  // Open edit modal
-  const openEditModal = (functionItem: MemberFunction) => {
-    setSelectedFunction(functionItem);
-    setFormData({
-      name: functionItem.name,
-      display_name: functionItem.display_name,
-      description: functionItem.description || '',
-      sort_order: functionItem.sort_order,
-      is_active: functionItem.is_active,
-    });
-    onEditFunctionOpen();
-  };
-
-  // Open delete modal
-  const openDeleteModal = (functionItem: MemberFunction) => {
-    setSelectedFunction(functionItem);
+  const handleDelete = async (item: MemberFunction) => {
+    openEditMode(item);
     onDeleteFunctionOpen();
   };
 
-  // Handle modal close
-  const handleAddModalClose = () => {
-    onAddFunctionClose();
-  };
-
-  const handleEditModalClose = () => {
-    setSelectedFunction(null);
-    onEditFunctionClose();
-  };
-
-  // Add new function
-  const handleAddFunction = async (data?: Partial<MemberFunction>) => {
-    const functionData = data || formData;
-    if (!functionData.name || !functionData.display_name) {
-      showToast.danger('Název a zobrazovaný název jsou povinné');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await fetch(API_ROUTES.members.functions, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(functionData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Chyba při přidávání funkce');
-      }
-
-      const newFunction = await response.json();
-      setFunctions((prev) => [...prev, newFunction]);
-      handleAddModalClose();
-      showSuccess('Funkce byla úspěšně přidána.');
-      refetch(); // Refresh data
-    } catch (error: any) {
-      showToast.danger(error.message || 'Chyba při přidávání funkce');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Update function
-  const handleUpdateFunction = async (data?: Partial<MemberFunction>) => {
-    const functionData = data || formData;
-    if (!selectedFunction || !functionData.name || !functionData.display_name) {
-      showToast.danger('Název a zobrazovaný název jsou povinné');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await fetch(API_ROUTES.members.functions, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: selectedFunction.id,
-          ...functionData,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Chyba při aktualizaci funkce');
-      }
-
-      const updatedFunction = await response.json();
-      setFunctions((prev) => prev.map((f) => (f.id === selectedFunction.id ? updatedFunction : f)));
-      handleEditModalClose();
-      showSuccess('Funkce byla úspěšně aktualizována.');
-      refetch(); // Refresh data
-    } catch (error: any) {
-      showToast.danger(error.message || 'Chyba při aktualizaci funkce');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Delete function
-  const handleDeleteFunction = async () => {
-    if (!selectedFunction) return;
-
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_ROUTES.members.functions}?id=${selectedFunction.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Chyba při mazání funkce');
-      }
-
-      setFunctions((prev) => prev.filter((f) => f.id !== selectedFunction.id));
+  const handleConfirmDelete = async () => {
+    if (selectedFunction) {
+      await deleteMemberFunction(selectedFunction.id);
+      await refetch();
       onDeleteFunctionClose();
-      setSelectedFunction(null);
-      showSuccess('Funkce byla úspěšně smazána.');
-      refetch(); // Refresh data
-    } catch (error: any) {
-      showToast.danger(error.message || 'Chyba při mazání funkce');
-    } finally {
-      setLoading(false);
+      resetForm();
+      setCrudLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    const {valid, errors} = validateForm();
+
+    if (!valid) {
+      console.error('Validation error ', errors);
+      return;
+    }
+
+    try {
+      if (modalMode === ModalMode.EDIT && selectedFunction) {
+        await updateMemberFunction(selectedFunction.id, formData);
+      } else {
+        await createMemberFunction(formData);
+      }
+      await refetch();
+      setCrudLoading(false);
+      onFunctionModalClose();
+      resetForm();
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -212,8 +106,8 @@ export default function MemberFunctionsAdminPage() {
       align: ColumnAlignType.CENTER,
       isActionColumn: true,
       actions: [
-        {type: ActionTypes.UPDATE, onPress: openEditModal, title: tAction.edit},
-        {type: ActionTypes.DELETE, onPress: openDeleteModal, title: tAction.delete},
+        {type: ActionTypes.UPDATE, onPress: handleEdit, title: tAction.edit},
+        {type: ActionTypes.DELETE, onPress: handleDelete, title: tAction.delete},
       ],
     },
   ];
@@ -243,7 +137,7 @@ export default function MemberFunctionsAdminPage() {
         actions={[
           {
             label: tAction.add,
-            onClick: openAddModal,
+            onClick: handleAdd,
             variant: 'solid',
             buttonType: ActionTypes.CREATE,
           },
@@ -252,7 +146,7 @@ export default function MemberFunctionsAdminPage() {
         <UnifiedTable
           isLoading={functionsLoading}
           columns={functionColumns}
-          data={functions}
+          data={functionsData}
           ariaLabel={translations.memberFunctions.table.ariaLabel}
           renderCell={renderFunctionCell}
           getKey={(functionItem: MemberFunction) => functionItem.id}
@@ -261,35 +155,24 @@ export default function MemberFunctionsAdminPage() {
         />
       </AdminContainer>
 
-      {/* Add Function Modal */}
       <FunctionFormModal
-        key="add-function-modal"
-        isOpen={isAddFunctionOpen}
-        isEdit={false}
-        onClose={onAddFunctionClose}
-        onSubmit={handleAddFunction}
-        loading={loading}
-        initialData={undefined}
-      />
-
-      {/* Edit Function Modal */}
-      <FunctionFormModal
-        key="edit-function-modal"
-        isOpen={isEditFunctionOpen}
-        isEdit={true}
-        onClose={onEditFunctionClose}
-        onSubmit={handleUpdateFunction}
-        loading={loading}
-        initialData={selectedFunction || undefined}
+        isOpen={isFunctionModalOpen}
+        onClose={onFunctionModalClose}
+        onSubmit={handleSubmit}
+        loading={crudLoading}
+        formData={formData}
+        setFormData={setFormData}
+        mode={modalMode}
       />
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={isDeleteFunctionOpen}
         onClose={onDeleteFunctionClose}
-        onConfirm={handleDeleteFunction}
+        onConfirm={handleConfirmDelete}
         title="Smazat funkci"
         message={`Opravdu chcete smazat funkci "${selectedFunction?.display_name}"?`}
+        isLoading={crudLoading}
       />
     </>
   );

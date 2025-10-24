@@ -9,7 +9,7 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-10-23
+ * Last generated: 2025-10-24
  */
 
 export interface SeasonSchema {
