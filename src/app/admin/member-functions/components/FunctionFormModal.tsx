@@ -4,6 +4,7 @@ import {Checkbox, Input, Textarea} from '@heroui/react';
 
 import {UnifiedModal} from '@/components';
 import {ModalMode} from '@/enums';
+import {translations} from "@/lib";
 import {MemberFunctionFormData} from '@/types';
 
 interface FunctionFormModalProps {
@@ -16,6 +17,8 @@ interface FunctionFormModalProps {
   setFormData: (data: MemberFunctionFormData) => void;
 }
 
+const tMemberFunctions = translations.memberFunctions;
+
 export default function FunctionFormModal({
   isOpen,
   onClose,
@@ -25,7 +28,7 @@ export default function FunctionFormModal({
   formData,
   setFormData,
 }: FunctionFormModalProps) {
-  const modalTitle = mode === ModalMode.EDIT ? 'Upravit funkci' : 'Přidat novou funkci';
+  const modalTitle = mode === ModalMode.EDIT ? tMemberFunctions.modal.editTitle : tMemberFunctions.modal.addTitle;
 
   return (
     <UnifiedModal
@@ -39,32 +42,32 @@ export default function FunctionFormModal({
     >
       <div className="space-y-4">
         <Input
-          label="Název (kód)"
-          placeholder="např. player, coach"
+          label={tMemberFunctions.modal.formFields.name}
+          placeholder={tMemberFunctions.modal.formFields.namePlaceholder}
           value={formData.name}
           onChange={(e) => setFormData({...formData, name: e.target.value})}
           isRequired
         />
 
         <Input
-          label="Zobrazovaný název"
-          placeholder="např. Hráč, Trenér"
+          label={tMemberFunctions.modal.formFields.displayName}
+          placeholder={tMemberFunctions.modal.formFields.displayNamePlaceholder}
           value={formData.display_name}
           onChange={(e) => setFormData({...formData, display_name: e.target.value})}
           isRequired
         />
 
         <Textarea
-          label="Popis"
-          placeholder="Popis funkce (volitelné)"
+          label={tMemberFunctions.modal.formFields.description}
+          placeholder={tMemberFunctions.modal.formFields.descriptionPlaceholder}
           value={formData.description ?? ''}
           onChange={(e) => setFormData({...formData, description: e.target.value})}
         />
 
         <Input
-          label="Řazení"
+          label={tMemberFunctions.modal.formFields.order}
           type="number"
-          placeholder="0"
+          placeholder={tMemberFunctions.modal.formFields.orderPlaceholder}
           value={formData.sort_order?.toString() || '0'}
           onChange={(e) => setFormData({...formData, sort_order: parseInt(e.target.value) || 0})}
         />
@@ -73,7 +76,7 @@ export default function FunctionFormModal({
           isSelected={formData.is_active ?? true}
           onValueChange={(checked) => setFormData({...formData, is_active: checked})}
         >
-          Aktivní
+          {tMemberFunctions.modal.formFields.active}
         </Checkbox>
       </div>
     </UnifiedModal>

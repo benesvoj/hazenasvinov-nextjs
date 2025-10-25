@@ -619,6 +619,23 @@ export const translations = {
       successDelete: 'Záznam úspěšně smazán',
       failedDelete: 'Nepodařilo se smazat záznam',
     },
+    modal: {
+      deleteTitle: 'Smazat funkci',
+      deleteDescription: 'Opravdu chcete smazat funkci?',
+      addTitle: 'Přidat novou funkci',
+      editTitle: 'Upravit funkci',
+      formFields: {
+        name: 'Název',
+        namePlaceholder: 'např. player, coach',
+        displayName: 'Zobrazovaný název',
+        displayNamePlaceholder: 'např. Hráč, Trenér',
+        description: 'Popis',
+        descriptionPlaceholder: 'Popis funkce (volitelné)',
+        order: 'Řazení',
+        orderPlaceholder: '0',
+        active: 'Aktivní',
+      },
+    },
   },
   table: {
     title: 'Tabulka',

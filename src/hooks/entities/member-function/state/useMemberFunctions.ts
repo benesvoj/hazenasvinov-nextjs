@@ -7,7 +7,7 @@ import {API_ROUTES, translations} from '@/lib';
 import {CreateMemberFunction} from '@/types';
 
 const t = translations.memberFunctions.responseMessages;
-const tCommon = translations.common.responseMessage
+const tCommon = translations.common.responseMessage;
 
 export function useMemberFunctions() {
 	const [loading, setLoading] = useState(false);
