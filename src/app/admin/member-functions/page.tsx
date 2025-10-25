@@ -13,7 +13,7 @@ import {MemberFunction} from '@/types';
 import FunctionFormModal from './components/FunctionFormModal';
 
 const tAction = translations.action;
-const tCommon = translations.common
+const tCommon = translations.common;
 const tMemberFunctions = translations.memberFunctions;
 
 export default function MemberFunctionsAdminPage() {
@@ -100,14 +100,14 @@ export default function MemberFunctionsAdminPage() {
 	};
 
 	const functionColumns = [
-		{key: 'name', label: translations.memberFunctions.table.header.name},
-		{key: 'display_name', label: translations.memberFunctions.table.header.displayName},
-		{key: 'description', label: translations.memberFunctions.table.header.description},
-		{key: 'sort_order', label: translations.memberFunctions.table.header.sorting},
-		{key: 'is_active', label: translations.memberFunctions.table.header.status},
+		{key: 'name', label: tMemberFunctions.table.header.name},
+		{key: 'display_name', label: tMemberFunctions.table.header.displayName},
+		{key: 'description', label: tMemberFunctions.table.header.description},
+		{key: 'sort_order', label: tMemberFunctions.table.header.sorting},
+		{key: 'is_active', label: tMemberFunctions.table.header.status},
 		{
 			key: 'actions',
-			label: translations.memberFunctions.table.header.actions,
+			label: tMemberFunctions.table.header.actions,
 			align: ColumnAlignType.CENTER,
 			isActionColumn: true,
 			actions: [
@@ -129,7 +129,7 @@ export default function MemberFunctionsAdminPage() {
 				return <span className="font-medium">{functionItem.sort_order}</span>;
 			case 'is_active':
 				return (
-					<span className="font-medium">{functionItem.is_active ? 'Aktivní' : 'Neaktivní'}</span>
+					<span className="font-medium">{functionItem.is_active ? tMemberFunctions.status.active : tMemberFunctions.status.inactive}</span>
 				);
 		}
 		return null;
@@ -177,7 +177,7 @@ export default function MemberFunctionsAdminPage() {
 				onConfirm={handleConfirmDelete}
 				isLoading={crudLoading}
 				title={tMemberFunctions.modal.deleteTitle}
-				message={tMemberFunctions.modal.deleteDescription}
+				message={`${tMemberFunctions.modal.deleteDescription} ${selectedFunction?.display_name}?`}
 			/>
 		</>
 	);

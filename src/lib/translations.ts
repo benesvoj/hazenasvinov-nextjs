@@ -600,6 +600,10 @@ export const translations = {
     title: 'Správa funkcí členů',
     description: 'Správa funkcí členů, které jsou dostupné v systému.',
     list: 'Seznam funkcí',
+    status: {
+      active: 'Aktivní',
+      inactive: 'Neaktivní',
+    },
     table: {
       header: {
         name: 'Název',
@@ -614,14 +618,14 @@ export const translations = {
     responseMessages: {
       successInsert: 'Funkce byla úspěšně založena',
       failedInsert: 'Chyba při zakládání záznamu',
-      successUpdate: 'Záznam úspěšně aktualizován,',
+      successUpdate: 'Záznam úspěšně aktualizován',
       failedUpdate: 'Nepodařilo se aktualizovat záznam',
       successDelete: 'Záznam úspěšně smazán',
       failedDelete: 'Nepodařilo se smazat záznam',
     },
     modal: {
       deleteTitle: 'Smazat funkci',
-      deleteDescription: 'Opravdu chcete smazat funkci?',
+      deleteDescription: 'Opravdu chcete smazat funkci',
       addTitle: 'Přidat novou funkci',
       editTitle: 'Upravit funkci',
       formFields: {
