@@ -3,115 +3,119 @@
 import {useCallback, useState} from 'react';
 
 import {showToast} from '@/components';
-import {API_ROUTES} from '@/lib';
-import {CreateMemberFunction, MemberFunction} from '@/types';
+import {API_ROUTES, translations} from '@/lib';
+import {CreateMemberFunction} from '@/types';
+
+const t = translations.memberFunctions.responseMessages;
+const tCommon = translations.common.responseMessage
 
 export function useMemberFunctions() {
-  const [memberFunctions, setMemberFunctions] = useState<MemberFunction[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-  const createMemberFunction = useCallback(async (data: CreateMemberFunction) => {
-    try {
-      setLoading(true);
-      setError(null);
+	const createMemberFunction = useCallback(async (data: CreateMemberFunction) => {
+		try {
+			setLoading(true);
+			setError(null);
 
-      const res = await fetch(API_ROUTES.memberFunctions.root, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      const response = await res.json();
+			const res = await fetch(API_ROUTES.memberFunctions.root, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			const response = await res.json();
 
-      if (!res.ok || response.error) {
-        throw new Error(response.error || 'Failed to add member function');
-      }
+			if (!res.ok || response.error) {
+				throw new Error(response.error || t.failedInsert);
+			}
 
-      showToast.success('Funkce byla úspěšně přidána');
-      setMemberFunctions((prev) => [...prev, response.data]);
-      return response;
-    } catch (error) {
-      console.error('Error: ', error);
-      showToast.danger('Chyba pri zakladani zaznamu');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+			showToast.success(t.successInsert);
+			return response.data;
 
-  const updateMemberFunction = useCallback(
-    async (id: string, data: Partial<CreateMemberFunction>) => {
-      try {
-        setLoading(true);
-        setError(null);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : tCommon.unknownError;
+			setError(message);
+			showToast.danger(t.failedInsert);
+			throw error;
 
-        const res = await fetch(API_ROUTES.memberFunctions.byId(id), {
-          method: 'PATCH',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(data),
-        });
-        const response = await res.json();
+		} finally {
+			setLoading(false);
+		}
+	}, []);
 
-        if (!res.ok || response.error) {
-          throw new Error(response.error || 'Nepodarilo se aktualizovat zaznam');
-        }
+	const updateMemberFunction = useCallback(
+		async (id: string, data: Partial<CreateMemberFunction>) => {
+			try {
+				setLoading(true);
+				setError(null);
 
-        showToast.success('Zaznam uspesne aktualizovan');
-        setMemberFunctions((prev) => prev.map((cat) => (cat.id === id ? response.data : cat)));
-        return response;
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Nepodarilo se aktualizovat zaznam';
-        setError(errorMessage);
-        console.error('Error updating record:', error);
-        return {success: false, error: errorMessage};
-      }
-    },
-    []
-  );
+				const res = await fetch(API_ROUTES.memberFunctions.byId(id), {
+					method: 'PATCH',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(data),
+				});
+				const response = await res.json();
 
-  const deleteMemberFunction = useCallback(async (id: string) => {
-    try {
-      setLoading(true);
-      setError(null);
+				if (!res.ok || response.error) {
+					throw new Error(response.error || t.failedUpdate);
+				}
 
-      const res = await fetch(API_ROUTES.memberFunctions.byId(id), {
-        method: 'DELETE',
-      });
-      const response = await res.json();
+				showToast.success(t.successUpdate);
+				return response.data;
 
-      if (!res.ok || response.error) {
-        throw new Error(response.error || 'Neporadilo se smazat zaznam.');
-      }
+			} catch (error) {
+				const message = error instanceof Error ? error.message : tCommon.unknownError;
+				setError(message);
+				showToast.danger(t.failedUpdate);
+				throw error;
 
-      showToast.success('Zaznam uspesne smazan');
-      setMemberFunctions((prev) => prev.filter((cat) => cat.id !== id));
-      return {success: true};
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Neporadilo se smazat zaznam.';
-      setError(errorMessage);
-      console.error('Error deleting record:', error);
-      return {success: false, error: errorMessage};
-    }
-  }, []);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[]
+	);
 
-  return {
-    // Data
-    memberFunctions,
+	const deleteMemberFunction = useCallback(async (id: string) => {
+		try {
+			setLoading(true);
+			setError(null);
 
-    // State
-    loading,
-    error,
+			const res = await fetch(API_ROUTES.memberFunctions.byId(id), {
+				method: 'DELETE',
+			});
+			const response = await res.json();
 
-    // CRUD Operations
-    createMemberFunction,
-    updateMemberFunction,
-    deleteMemberFunction,
+			if (!res.ok || response.error) {
+				throw new Error(response.error || t.failedDelete);
+			}
 
-    // Setters
-    setLoading,
+			showToast.success(t.successDelete);
+			return response.data;
 
-    // Validation
-  };
+		} catch (error) {
+			const message = error instanceof Error ? error.message : tCommon.unknownError;
+			setError(message);
+			showToast.danger(t.failedDelete);
+			throw error;
+
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	return {
+		// State
+		loading,
+		error,
+
+		// CRUD Operations
+		createMemberFunction,
+		updateMemberFunction,
+		deleteMemberFunction,
+
+		// Validation
+	};
 }

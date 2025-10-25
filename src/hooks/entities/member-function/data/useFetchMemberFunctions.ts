@@ -1,45 +1,57 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
-import {API_ROUTES} from '@/lib';
+import {showToast} from "@/components";
+import {API_ROUTES, translations} from '@/lib';
 import {MemberFunction} from '@/types';
 
+const t = translations.common.responseMessage;
+
 export function useFetchMemberFunctions() {
-  const [data, setData] = useState<MemberFunction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+	const [data, setData] = useState<MemberFunction[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+	const fetchData = useCallback(async () => {
+		try {
+			setLoading(true);
+			setError(null);
 
-      const res = await fetch(API_ROUTES.memberFunctions.root, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const response = await res.json();
+			const res = await fetch(API_ROUTES.memberFunctions.root, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+			const response = await res.json();
 
-      setData(response.data || []);
-    } catch (error) {
-      console.error('Failed to fetch member functions', error);
-      setError(error instanceof Error ? error : new Error('Unknown error'));
-    } finally {
-      setLoading(false);
-    }
-  };
+			if (!res.ok || response.error) {
+				throw new Error(response.error || t.failedToFetchData);
+			}
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+			setData(response.data || []);
 
-  return {
-    data,
-    loading,
-    error,
-    refetch: fetchData,
-  };
+		} catch (error) {
+			const message = error instanceof Error ? error.message : t.unknownError;
+			setError(message);
+			showToast.danger(t.failedToFetchData);
+			throw error;
+
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+
+	useEffect(() => {
+		fetchData();
+	}, [fetchData]);
+
+	return {
+		data,
+		loading,
+		error,
+		refetch: fetchData,
+	};
 }

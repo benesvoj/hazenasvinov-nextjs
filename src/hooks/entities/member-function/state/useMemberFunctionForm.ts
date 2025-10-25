@@ -43,6 +43,9 @@ export function useMemberFunctionForm() {
     if (!formData.name?.trim()) {
       errors.push('name is required');
     }
+    if (!formData.display_name?.trim()) {
+      errors.push('display_name is required');
+    }
 
     return {
       valid: errors.length === 0,

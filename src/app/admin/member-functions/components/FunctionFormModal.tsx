@@ -10,7 +10,7 @@ interface FunctionFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
-  loading: boolean;
+  loading?: boolean;
   mode: ModalMode;
   formData: MemberFunctionFormData;
   setFormData: (data: MemberFunctionFormData) => void;

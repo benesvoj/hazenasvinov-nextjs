@@ -611,6 +611,14 @@ export const translations = {
       },
       ariaLabel: 'Tabulka funkcí členů',
     },
+    responseMessages: {
+      successInsert: 'Funkce byla úspěšně založena',
+      failedInsert: 'Chyba při zakládání záznamu',
+      successUpdate: 'Záznam úspěšně aktualizován,',
+      failedUpdate: 'Nepodařilo se aktualizovat záznam',
+      successDelete: 'Záznam úspěšně smazán',
+      failedDelete: 'Nepodařilo se smazat záznam',
+    },
   },
   table: {
     title: 'Tabulka',
@@ -1029,6 +1037,10 @@ export const translations = {
     commentsZoneItem: {
       createdBy: 'Vytvořil',
       createdAt: 'Vytvořeno',
+    },
+    responseMessage: {
+      unknownError: 'Unknown error occur',
+      failedToFetchData: 'Failed to fetch data source ',
     },
   },
   betting: {

@@ -4,7 +4,7 @@ import React from 'react';
 
 import {useDisclosure} from '@heroui/react';
 
-import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
+import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
 import {ActionTypes, ColumnAlignType, ModalMode} from '@/enums';
 import {useFetchMemberFunctions, useMemberFunctionForm, useMemberFunctions} from '@/hooks';
 import {translations} from '@/lib';
@@ -18,7 +18,6 @@ export default function MemberFunctionsAdminPage() {
   const {data: functionsData, loading: functionsLoading, refetch} = useFetchMemberFunctions();
   const {
     loading: crudLoading,
-    setLoading: setCrudLoading,
     createMemberFunction,
     updateMemberFunction,
     deleteMemberFunction,
@@ -51,12 +50,12 @@ export default function MemberFunctionsAdminPage() {
     onFunctionModalOpen();
   };
 
-  const handleEdit = async (item: MemberFunction) => {
+  const handleEdit = (item: MemberFunction) => {
     openEditMode(item);
     onFunctionModalOpen();
   };
 
-  const handleDelete = async (item: MemberFunction) => {
+  const handleDelete = (item: MemberFunction) => {
     openEditMode(item);
     onDeleteFunctionOpen();
   };
@@ -67,7 +66,6 @@ export default function MemberFunctionsAdminPage() {
       await refetch();
       onDeleteFunctionClose();
       resetForm();
-      setCrudLoading(false);
     }
   };
 
@@ -86,11 +84,11 @@ export default function MemberFunctionsAdminPage() {
         await createMemberFunction(formData);
       }
       await refetch();
-      setCrudLoading(false);
       onFunctionModalClose();
       resetForm();
     } catch (error) {
       console.error(error);
+      showToast.danger('Neočekávaná chyba.')
     }
   };
 
@@ -159,10 +157,10 @@ export default function MemberFunctionsAdminPage() {
         isOpen={isFunctionModalOpen}
         onClose={onFunctionModalClose}
         onSubmit={handleSubmit}
-        loading={crudLoading}
         formData={formData}
         setFormData={setFormData}
         mode={modalMode}
+        loading={crudLoading}
       />
 
       {/* Delete Confirmation Modal */}
@@ -170,9 +168,9 @@ export default function MemberFunctionsAdminPage() {
         isOpen={isDeleteFunctionOpen}
         onClose={onDeleteFunctionClose}
         onConfirm={handleConfirmDelete}
+        isLoading={crudLoading}
         title="Smazat funkci"
         message={`Opravdu chcete smazat funkci "${selectedFunction?.display_name}"?`}
-        isLoading={crudLoading}
       />
     </>
   );
