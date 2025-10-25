@@ -1,5 +1,6 @@
-import {useState, useEffect} from 'react';
+'use client';
 
+import {useState, useEffect} from 'react';
 /**
  * Custom hook for debouncing values
  * @param value - The value to debounce

@@ -1,19 +1,24 @@
 import React from 'react';
 
-import {Checkbox, Input, Select, SelectItem, Tabs, Tab} from '@heroui/react';
+import {Checkbox, Input, Select, SelectItem, Tab, Tabs} from '@heroui/react';
 
-import {Heading, UnifiedModal} from '@/components';
+import CategoryFeeQuickView from '@/app/admin/categories/components/CategoryFeeQuickView';
+
+import {UnifiedModal} from '@/components';
 import {AgeGroups, Genders, getAgeGroupsOptions, getGenderOptions, ModalMode} from '@/enums';
-import {Category} from '@/types';
+import {translations} from '@/lib';
+import {Category, CategoryFormData} from '@/types';
 
 export interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
-  formData: Category;
-  setFormData: (data: Category) => void;
+  formData: CategoryFormData;
+  setFormData: (data: CategoryFormData) => void;
   mode: ModalMode;
+  selectedCategory?: Category | null;
   title?: string;
+  isLoading?: boolean;
 }
 
 export default function CategoryModal({
@@ -23,9 +28,12 @@ export default function CategoryModal({
   formData,
   setFormData,
   mode,
+  selectedCategory,
   title,
+  isLoading,
 }: CategoryModalProps) {
-  const modalTitle = title || (mode === ModalMode.ADD ? 'Přidat kategorii' : 'Upravit kategorii');
+  const t = translations.categories;
+  const modalTitle = title || (mode === ModalMode.ADD ? t.addCategory : t.editCategory);
 
   return (
     <UnifiedModal
@@ -35,27 +43,28 @@ export default function CategoryModal({
       size="3xl"
       onPress={onSubmit}
       isFooterWithActions
+      isLoading={isLoading}
     >
       <Tabs aria-label="Category modal tabs" className="w-full">
-        <Tab key="basic" title="Základní údaje">
+        <Tab key="basic" title={t.modal.basicInfoTab}>
           <div className="space-y-4 pt-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Input
-                label="Název"
+                label={t.modal.input.name}
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 isRequired
-                placeholder="např. Muži, Ženy, Dorostenci"
+                placeholder={t.modal.input.namePlaceholder}
               />
               <Input
-                label="Popis"
+                label={t.modal.input.description}
                 value={formData.description || ''}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Volitelný popis kategorie"
+                placeholder={t.modal.input.descriptionPlaceholder}
               />
               <Select
-                label="Věková skupina"
-                placeholder="Vyberte věkovou skupinu"
+                label={t.modal.input.ageGroup}
+                placeholder={t.modal.input.ageGroupPlaceholder}
                 selectedKeys={formData.age_group ? [formData.age_group] : []}
                 onSelectionChange={(keys) => {
                   const selectedKey = Array.from(keys)[0] as AgeGroups;
@@ -67,35 +76,35 @@ export default function CategoryModal({
                 ))}
               </Select>
               <Select
-                label="Pohlaví"
-                placeholder="Vyberte pohlaví"
+                label={t.modal.input.gender}
+                placeholder={t.modal.input.genderPlaceholder}
                 selectedKeys={formData.gender ? [formData.gender] : []}
                 onSelectionChange={(keys) => {
                   const selectedKey = Array.from(keys)[0] as Genders;
                   setFormData({...formData, gender: selectedKey});
                 }}
-                description="Smíšené týmy mohou být pouze pro mládežnické kategorie"
+                description={t.modal.input.genderDescription}
               >
                 {getGenderOptions().map((option) => (
                   <SelectItem key={option.value}>{option.label}</SelectItem>
                 ))}
               </Select>
               <Input
-                label="Pořadí"
+                label={t.modal.input.sortOrder}
                 type="number"
                 value={formData.sort_order?.toString() || '0'}
                 onChange={(e) =>
                   setFormData({...formData, sort_order: parseInt(e.target.value) || 0})
                 }
                 placeholder="0"
-                description="Nižší číslo = vyšší priorita v seznamu"
+                description={t.modal.input.sortOrderDescription}
               />
               <div className="flex items-center">
                 <Checkbox
-                  isSelected={formData.is_active}
+                  isSelected={formData.is_active ?? true}
                   onValueChange={(checked) => setFormData({...formData, is_active: checked})}
                 >
-                  Aktivní
+                  {t.modal.input.isActive}
                 </Checkbox>
               </div>
             </div>
@@ -103,7 +112,7 @@ export default function CategoryModal({
         </Tab>
 
         {mode === ModalMode.EDIT && (
-          <Tab key="seasons" title="Sezóny">
+          <Tab key="seasons" title={t.modal.seasonTab}>
             <div className="space-y-4 pt-4">
               <div className="p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
@@ -118,6 +127,11 @@ export default function CategoryModal({
                 </p>
               </div>
             </div>
+          </Tab>
+        )}
+        {mode === ModalMode.EDIT && selectedCategory && (
+          <Tab key="membershipFees" title={t.modal.membershipFeesTab}>
+            <CategoryFeeQuickView categoryId={selectedCategory.id} />
           </Tab>
         )}
       </Tabs>

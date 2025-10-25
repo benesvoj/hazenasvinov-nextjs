@@ -37,7 +37,7 @@ Previously, users who signed up through the system would be created in `auth.use
 ### Application Code
 - `src/utils/supabase/actions.ts` - Updated signup function
 - `src/app/auth/callback/page.tsx` - Added profile creation fallback
-- `src/middleware.ts` - Added profile creation fallback
+- `src/proxy.ts` - Added profile creation fallback
 - `src/app/login/page.tsx` - Added profile creation fallback
 
 ## How It Works

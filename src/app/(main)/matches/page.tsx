@@ -13,7 +13,7 @@ import MatchCard from '@/app/(main)/matches/components/MatchCard';
 
 import {months as monthsConstants} from '@/constants';
 import {formatMonth} from '@/helpers';
-import {usePublicMatches, useSeasons, useCategories} from '@/hooks';
+import {usePublicMatches, useFetchCategories} from '@/hooks';
 import {Match, Category} from '@/types';
 
 export default function MatchesPage() {
@@ -25,7 +25,7 @@ export default function MatchesPage() {
   // Use the new public matches hook
   const {matches, loading, error} = usePublicMatches(selectedCategory);
 
-  const {categories, fetchCategories, error: categoryError} = useCategories();
+  const {data: categories, refetch: fetchCategories, error: categoryError} = useFetchCategories();
 
   // Check for category parameter in URL
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function MatchesPage() {
       if (!grouped[monthKey]) {
         grouped[monthKey] = [];
       }
-      grouped[monthKey].push(match);
+      grouped[monthKey].push(match as any);
     });
 
     return grouped;
@@ -216,24 +216,20 @@ export default function MatchesPage() {
         {/* Category Filter */}
         <div className="flex items-center gap-2">
           <FunnelIcon className="w-5 h-5 text-gray-500" />
-          {categoryError ? (
-            <div className="text-red-600 dark:text-red-400 text-sm">Chyba: {categoryError}</div>
-          ) : (
-            <Select
-              selectedKeys={[selectedCategory]}
-              onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
-              className="w-48"
-              placeholder="Vyberte kategorii"
-              aria-label="Vyberte kategorii zápasů"
-            >
-              <SelectItem key="all">{translations.matches.allCategories}</SelectItem>
-              <>
-                {categories.map((category) => (
-                  <SelectItem key={category.id}>{category.name}</SelectItem>
-                ))}
-              </>
-            </Select>
-          )}
+          <Select
+            selectedKeys={[selectedCategory]}
+            onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
+            className="w-48"
+            placeholder="Vyberte kategorii"
+            aria-label="Vyberte kategorii zápasů"
+          >
+            <SelectItem key="all">{translations.matches.allCategories}</SelectItem>
+            <>
+              {categories.map((category) => (
+                <SelectItem key={category.id}>{category.name}</SelectItem>
+              ))}
+            </>
+          </Select>
         </div>
 
         {/* Status Filter */}

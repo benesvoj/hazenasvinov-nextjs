@@ -9,17 +9,17 @@ import {ageGroupsOptions, genderOptions} from '@/utils';
 /**
  * Get display label for age group
  */
-export const getAgeGroupLabel = (ageGroup?: AgeGroups): string => {
+export const getAgeGroupLabel = (ageGroup?: AgeGroups | string | null): string => {
   if (!ageGroup) return '-';
-  return ageGroupsOptions[ageGroup] || ageGroup;
+  return ageGroupsOptions[ageGroup as AgeGroups] || ageGroup;
 };
 
 /**
  * Get display label for gender
  */
-export const getGenderLabel = (gender?: Genders): string => {
+export const getGenderLabel = (gender?: Genders | string | null): string => {
   if (!gender) return '-';
-  return genderOptions[gender] || gender;
+  return genderOptions[gender as Genders] || gender;
 };
 
 /**

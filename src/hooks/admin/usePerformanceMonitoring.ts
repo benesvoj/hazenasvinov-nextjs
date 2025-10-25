@@ -1,3 +1,4 @@
+'use client';
 /**
  * Performance monitoring and metrics collection for match queries
  */

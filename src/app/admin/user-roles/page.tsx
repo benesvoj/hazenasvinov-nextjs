@@ -27,14 +27,14 @@ import {
 import {PencilIcon, UserIcon} from '@heroicons/react/24/outline';
 
 import {AdminContainer, showToast} from '@/components';
-import {useUserRoles, useCategories} from '@/hooks';
+import {useUserRoles, useCategories, useFetchCategories} from '@/hooks';
 import {UserRoleSummary, RoleAssignment} from '@/types';
 
 export default function UserRolesPage() {
   const {userRoleSummaries, loading, error, fetchUserRoleSummaries, assignUserRoles} =
     useUserRoles();
 
-  const {categories, fetchCategories} = useCategories();
+  const {data: categories, refetch: fetchCategories} = useFetchCategories();
 
   const [selectedUser, setSelectedUser] = useState<UserRoleSummary | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

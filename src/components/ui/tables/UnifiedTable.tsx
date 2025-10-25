@@ -1,3 +1,7 @@
+'use client';
+
+import React, {useMemo, useState} from 'react';
+
 import {
   Table,
   TableBody,
@@ -6,6 +10,7 @@ import {
   TableHeader,
   TableRow,
   Button,
+  Pagination,
 } from '@heroui/react';
 
 import {translations} from '@/lib/translations';
@@ -36,8 +41,45 @@ export default function UnifiedTable<T = any>({
   onSortChange,
   classNames,
   topContent,
+  enablePagination = true,
+  rowsPerPage = 25,
+  page: externalPage,
+  totalPages: externalTotalPages,
+  onPageChange: externalOnPageChange,
 }: UnifiedTableProps<T>) {
   const t = translations.unifiedTable;
+
+  // Determine if using server-side or client-side pagination
+  const isServerPagination = externalPage !== undefined && externalOnPageChange !== undefined;
+
+  // Pagination state - use internal state if not controlled externally (client-side)
+  const [internalPage, setInternalPage] = useState(1);
+  const page = isServerPagination ? externalPage : internalPage;
+  const setPage = isServerPagination ? externalOnPageChange : setInternalPage;
+
+  // Calculate pagination based on mode
+  const totalPages = isServerPagination
+    ? externalTotalPages || 1
+    : Math.ceil(data.length / rowsPerPage);
+
+  const shouldShowPagination =
+    enablePagination && (isServerPagination ? totalPages > 1 : data.length > rowsPerPage);
+
+  // Paginated data (only for client-side pagination)
+  const paginatedData = useMemo(() => {
+    if (isServerPagination) {
+      // Server-side: data is already paginated
+      return data;
+    }
+
+    // Client-side: paginate locally
+    if (!enablePagination || data.length <= rowsPerPage) {
+      return data;
+    }
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return data.slice(start, end);
+  }, [data, page, rowsPerPage, enablePagination, isServerPagination]);
 
   // Default cell renderer that uses getKeyValue for simple data access
   const defaultRenderCell = (item: T, columnKey: string): React.ReactNode => {
@@ -56,11 +98,11 @@ export default function UnifiedTable<T = any>({
   const getDefaultColor = (type: ActionTypes): ActionConfig['color'] => {
     switch (type) {
       case ActionTypes.UPDATE:
-        return 'primary';
+        return 'default';
       case ActionTypes.DELETE:
         return 'danger';
       case ActionTypes.READ:
-        return 'primary';
+        return 'default';
       default:
         return 'default';
     }
@@ -107,6 +149,22 @@ export default function UnifiedTable<T = any>({
     return cellRenderer(item, columnKey);
   };
 
+  // Pagination for table - only show if there are more than rowsPerPage items
+  const bottomContent = shouldShowPagination ? (
+    <div className="flex w-full justify-center">
+      <Pagination
+        aria-label="Pagination controls"
+        isCompact
+        showControls
+        showShadow
+        color="default"
+        page={page}
+        total={totalPages}
+        onChange={setPage}
+      />
+    </div>
+  ) : undefined;
+
   return (
     <Table
       aria-label={ariaLabel}
@@ -122,6 +180,7 @@ export default function UnifiedTable<T = any>({
       onSortChange={onSortChange}
       classNames={classNames}
       topContent={topContent}
+      bottomContent={bottomContent}
     >
       <TableHeader columns={columns}>
         {(column) => (
@@ -142,7 +201,7 @@ export default function UnifiedTable<T = any>({
         )}
       </TableHeader>
       <TableBody
-        items={data}
+        items={paginatedData}
         emptyContent={emptyContent || t.emptyMessage}
         isLoading={isLoading}
         loadingContent={loadingContent}

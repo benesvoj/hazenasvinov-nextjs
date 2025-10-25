@@ -116,7 +116,7 @@ Many buttons, especially those with icons (`startContent`), are missing `aria-la
 
 #### **Medium Priority**
 1. `src/app/admin/users/components/UsersTab.tsx`
-2. `src/app/admin/members/components/MembersListTab.tsx`
+2. `src/app/admin/members/components/MembersInternalTab.tsx`
 3. `src/app/admin/photo-gallery/components/*.tsx`
 4. `src/app/admin/sponsorship/components/*.tsx`
 

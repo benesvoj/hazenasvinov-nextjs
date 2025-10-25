@@ -1,4 +1,4 @@
-import {useState, useCallback, useRef} from 'react';
+import {useCallback, useRef, useState} from 'react';
 
 import {showToast} from '@/components';
 import {LineupErrorType} from '@/enums';
@@ -157,6 +157,7 @@ export function useLineupErrorHandler({
         return null;
       }
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [addError, autoRetry, retryOperation]
   );
 

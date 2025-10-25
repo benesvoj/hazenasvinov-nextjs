@@ -1,12 +1,12 @@
+'use client';
 import {useState, useCallback} from 'react';
 
 import {createClient} from '@/utils/supabase/client';
 
 import {showToast} from '@/components';
 import {Genders, MemberFunction} from '@/enums';
+import {useMemberClubRelationships} from '@/hooks';
 import {ExternalPlayerFormData, PlayerSearchResult} from '@/types';
-
-import {useMemberClubRelationships} from '../member/business/useMemberClubRelationships';
 
 /**
  * Hook for managing external player creation business logic
