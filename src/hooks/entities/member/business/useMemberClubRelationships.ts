@@ -1,28 +1,10 @@
-import {useState, useCallback} from 'react';
+'use client';
 
-import {createClient} from '@/utils/supabase/client';
+import {useCallback, useState} from 'react';
 
 import {showToast} from '@/components';
-import {RelationshipType, RelationshipStatus} from '@/enums';
-
-export interface CreateMemberClubRelationshipData {
-  memberId: string;
-  clubId: string;
-  relationshipType?: RelationshipType;
-  status?: RelationshipStatus;
-  validFrom?: string;
-  validTo?: string;
-  notes?: string;
-}
-
-export interface UpdateMemberClubRelationshipData {
-  relationshipId: string;
-  relationshipType?: RelationshipType;
-  status?: RelationshipStatus;
-  validFrom?: string;
-  validTo?: string;
-  notes?: string;
-}
+import {API_ROUTES, translations} from '@/lib';
+import {CreateMemberClubRelationshipData, UpdateMemberClubRelationshipData} from '@/types';
 
 /**
  * Hook for managing member-club relationships
@@ -31,11 +13,10 @@ export interface UpdateMemberClubRelationshipData {
 export function useMemberClubRelationships() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const supabase = createClient();
+  const t = translations.memberClubRelationship;
 
   /**
-   * Create a member-club relationship
+   * Create a member-club relationship via API
    */
   const createRelationship = useCallback(
     async (data: CreateMemberClubRelationshipData): Promise<void> => {
@@ -43,26 +24,30 @@ export function useMemberClubRelationships() {
       setError(null);
 
       try {
-        const {error: relationshipError} = await supabase.from('member_club_relationships').insert({
-          member_id: data.memberId,
-          club_id: data.clubId,
-          relationship_type: data.relationshipType || RelationshipType.PERMANENT,
-          status: data.status || RelationshipStatus.ACTIVE,
-          valid_from: data.validFrom || new Date().toISOString().split('T')[0],
-          valid_to: data.validTo || null,
-          notes: data.notes || null,
+        const response = await fetch(API_ROUTES.members.relationships(data.memberId), {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            clubId: data.clubId,
+            relationshipType: data.relationshipType,
+            status: data.status,
+            validFrom: data.validFrom,
+            validTo: data.validTo,
+            notes: data.notes,
+          }),
         });
 
-        if (relationshipError) {
-          console.error('Error creating member-club relationship:', relationshipError);
-          throw new Error(`Chyba při vytváření vztahu člen-klub: ${relationshipError.message}`);
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || t.responseMessages.relationshipCreationError);
         }
 
-        showToast.success('Vztah člen-klub byl úspěšně vytvořen');
+        showToast.success(t.responseMessages.relationshipCreationSuccess);
       } catch (error) {
         console.error('Error creating member-club relationship:', error);
         const errorMessage =
-          error instanceof Error ? error.message : 'Chyba při vytváření vztahu člen-klub';
+          error instanceof Error ? error.message : t.responseMessages.relationshipCreationError;
         showToast.danger(errorMessage);
         setError(errorMessage);
         throw error;
@@ -70,11 +55,10 @@ export function useMemberClubRelationships() {
         setIsLoading(false);
       }
     },
-    [supabase]
+    []
   );
-
   /**
-   * Update a member-club relationship
+   * Update a member-club relationship via API
    */
   const updateRelationship = useCallback(
     async (data: UpdateMemberClubRelationshipData): Promise<void> => {
@@ -82,32 +66,23 @@ export function useMemberClubRelationships() {
       setError(null);
 
       try {
-        const updateData: any = {
-          updated_at: new Date().toISOString(),
-        };
+        const response = await fetch(API_ROUTES.relationships.byId(data.relationshipId), {
+          method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data),
+        });
 
-        if (data.relationshipType !== undefined)
-          updateData.relationship_type = data.relationshipType;
-        if (data.status !== undefined) updateData.status = data.status;
-        if (data.validFrom !== undefined) updateData.valid_from = data.validFrom;
-        if (data.validTo !== undefined) updateData.valid_to = data.validTo;
-        if (data.notes !== undefined) updateData.notes = data.notes;
+        const result = await response.json();
 
-        const {error: relationshipError} = await supabase
-          .from('member_club_relationships')
-          .update(updateData)
-          .eq('id', data.relationshipId);
-
-        if (relationshipError) {
-          console.error('Error updating member-club relationship:', relationshipError);
-          throw new Error(`Chyba při aktualizaci vztahu člen-klub: ${relationshipError.message}`);
+        if (!response.ok) {
+          throw new Error(result.error || t.responseMessages.relationshipUpdateError);
         }
 
-        showToast.success('Vztah člen-klub byl úspěšně aktualizován');
+        showToast.success(t.responseMessages.relationshipUpdateSuccess);
       } catch (error) {
         console.error('Error updating member-club relationship:', error);
         const errorMessage =
-          error instanceof Error ? error.message : 'Chyba při aktualizaci vztahu člen-klub';
+          error instanceof Error ? error.message : t.responseMessages.relationshipUpdateError;
         showToast.danger(errorMessage);
         setError(errorMessage);
         throw error;
@@ -115,129 +90,94 @@ export function useMemberClubRelationships() {
         setIsLoading(false);
       }
     },
-    [supabase]
+    []
   );
 
   /**
-   * Delete a member-club relationship
+   * Delete a member-club relationship via API
    */
-  const deleteRelationship = useCallback(
-    async (relationshipId: string): Promise<void> => {
-      setIsLoading(true);
-      setError(null);
+  const deleteRelationship = useCallback(async (relationshipId: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const {error: relationshipError} = await supabase
-          .from('member_club_relationships')
-          .delete()
-          .eq('id', relationshipId);
+    try {
+      const response = await fetch(API_ROUTES.relationships.byId(relationshipId), {
+        method: 'DELETE',
+      });
 
-        if (relationshipError) {
-          console.error('Error deleting member-club relationship:', relationshipError);
-          throw new Error(`Chyba při mazání vztahu člen-klub: ${relationshipError.message}`);
-        }
+      const result = await response.json();
 
-        showToast.success('Vztah člen-klub byl úspěšně smazán');
-      } catch (error) {
-        console.error('Error deleting member-club relationship:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Chyba při mazání vztahu člen-klub';
-        showToast.danger(errorMessage);
-        setError(errorMessage);
-        throw error;
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(result.error || t.responseMessages.relationshipDeleteError);
       }
-    },
-    [supabase]
-  );
+
+      showToast.success(t.responseMessages.relationshipDeleteSuccess);
+    } catch (error) {
+      console.error('Error deleting member-club relationship:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : t.responseMessages.relationshipDeleteError;
+      showToast.danger(errorMessage);
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   /**
-   * Get member-club relationships for a specific member
+   * Get member-club relationships for a specific member via API
    */
-  const getMemberRelationships = useCallback(
-    async (memberId: string) => {
-      setIsLoading(true);
-      setError(null);
+  const getMemberRelationships = useCallback(async (memberId: string) => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const {data, error: relationshipError} = await supabase
-          .from('member_club_relationships')
-          .select(
-            `
-            *,
-            club:clubs(
-              id,
-              name,
-              short_name
-            )
-          `
-          )
-          .eq('member_id', memberId)
-          .order('created_at', {ascending: false});
+    try {
+      const response = await fetch(API_ROUTES.members.relationships(memberId));
+      const result = await response.json();
 
-        if (relationshipError) {
-          console.error('Error fetching member relationships:', relationshipError);
-          throw new Error(`Chyba při načítání vztahů člena: ${relationshipError.message}`);
-        }
-
-        return data || [];
-      } catch (error) {
-        console.error('Error fetching member relationships:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Chyba při načítání vztahů člena';
-        setError(errorMessage);
-        throw error;
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(result.error || t.responseMessages.relationshipFetchError);
       }
-    },
-    [supabase]
-  );
+
+      return result.data || [];
+    } catch (error) {
+      console.error('Error fetching member relationships:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : t.responseMessages.relationshipFetchError;
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   /**
-   * Get member-club relationships for a specific club
+   * Get member-club relationships for a specific club via API
+   * Note: This requires a /api/clubs/[id]/relationships route to be created
    */
-  const getClubRelationships = useCallback(
-    async (clubId: string) => {
-      setIsLoading(true);
-      setError(null);
+  const getClubRelationships = useCallback(async (clubId: string) => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const {data, error: relationshipError} = await supabase
-          .from('member_club_relationships')
-          .select(
-            `
-            *,
-            member:members(
-              id,
-              name,
-              surname,
-              registration_number
-            )
-          `
-          )
-          .eq('club_id', clubId)
-          .order('created_at', {ascending: false});
+    try {
+      const response = await fetch(`/api/clubs/${clubId}/relationships`);
+      const result = await response.json();
 
-        if (relationshipError) {
-          console.error('Error fetching club relationships:', relationshipError);
-          throw new Error(`Chyba při načítání vztahů klubu: ${relationshipError.message}`);
-        }
-
-        return data || [];
-      } catch (error) {
-        console.error('Error fetching club relationships:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Chyba při načítání vztahů klubu';
-        setError(errorMessage);
-        throw error;
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(result.error || t.responseMessages.relationshipFetchError);
       }
-    },
-    [supabase]
-  );
+
+      return result.data || [];
+    } catch (error) {
+      console.error('Error fetching club relationships:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : t.responseMessages.relationshipFetchError;
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return {
     isLoading,

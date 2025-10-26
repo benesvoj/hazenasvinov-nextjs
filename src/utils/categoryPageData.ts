@@ -400,7 +400,7 @@ export async function getCategoryPageData(
     springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     return {
-      category,
+      category: category as any,
       matches: {
         autumn: autumnMatches,
         spring: springMatches,

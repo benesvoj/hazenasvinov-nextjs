@@ -1,10 +1,10 @@
-import {useState, useEffect, useCallback} from 'react';
+'use client';
+import {useState, useCallback} from 'react';
 
 import {createClient} from '@/utils/supabase/client';
 
+import {useAuth} from '@/hooks';
 import {Video, VideoFormData, VideoFilters} from '@/types';
-
-import {useAuth} from '../../auth/useAuth';
 
 interface UseVideosOptions {
   assignedCategories?: string[];

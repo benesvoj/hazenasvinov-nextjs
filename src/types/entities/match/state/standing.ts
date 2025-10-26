@@ -1,4 +1,4 @@
-import {Club} from '../../team/business/clubs';
+import {Club} from '@/types';
 
 export interface Standing {
   id: string;

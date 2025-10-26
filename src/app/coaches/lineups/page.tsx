@@ -1,3 +1,4 @@
+// TODO: refactor needed
 'use client';
 
 import React, {useState, useEffect} from 'react';
@@ -27,13 +28,7 @@ import {
   TableCell,
 } from '@heroui/react';
 
-import {
-  UserGroupIcon,
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  UserPlusIcon,
-} from '@heroicons/react/24/outline';
+import {PlusIcon, PencilIcon, TrashIcon, UserPlusIcon} from '@heroicons/react/24/outline';
 
 import {
   CategoryLineupFormData,
@@ -44,7 +39,7 @@ import {useSeasons} from '@/hooks/entities/season/useSeasons';
 import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
 
 import {PageContainer} from '@/components';
-import {useCategoryLineups, useCategories} from '@/hooks';
+import {useCategoryLineups, useFetchCategories} from '@/hooks';
 
 import AddMemberModal from './components/AddMemberModal';
 
@@ -78,7 +73,11 @@ export default function CoachesLineupsPage() {
   } = useCategoryLineups();
 
   const {seasons, loading: seasonsLoading, fetchAllSeasons} = useSeasons();
-  const {categories, loading: categoriesLoading, fetchCategories} = useCategories();
+  const {
+    data: categories,
+    loading: categoriesLoading,
+    refetch: fetchCategories,
+  } = useFetchCategories();
   const {getCurrentUserCategories} = useUserRoles();
 
   // Get user's assigned category

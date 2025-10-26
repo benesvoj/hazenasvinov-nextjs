@@ -1,6 +1,7 @@
+'use client';
 import {useState, useEffect} from 'react';
 
-import {usePageVisibility} from '../../shared/usePageVisibility';
+import {usePageVisibility} from '@/hooks';
 
 export const useSectionVisibility = () => {
   const {pages, loading, error} = usePageVisibility();

@@ -2,37 +2,11 @@
 
 import React from 'react';
 
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Input,
-  Select,
-  SelectItem,
-  Chip,
-  Badge,
-  Skeleton,
-} from '@heroui/react';
-
-import {
-  DocumentTextIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  CalendarIcon,
-  UserIcon,
-  DocumentArrowDownIcon,
-  EyeIcon,
-  ArrowDownTrayIcon,
-} from '@heroicons/react/24/outline';
-
-import {useMeetingMinutes} from '@/hooks/entities/meetingMinute/useMeetingMinutes';
-import {useSeasons} from '@/hooks/entities/season/useSeasons';
+import {DocumentTextIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
 import {MeetingMinutesContainer, PageContainer} from '@/components';
-import {MeetingMinutes, MeetingMinutesFilters} from '@/types';
 
 export default function CoachMeetingMinutesPage() {
   const t = translations.components.meetingMinutes;

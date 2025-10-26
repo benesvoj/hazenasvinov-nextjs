@@ -11,7 +11,7 @@ import MatchSchedule from '@/components/shared/match/MatchSchedule';
 import {useUser} from '@/contexts/UserContext';
 
 import {PageContainer, LoadingSpinner} from '@/components';
-import {useCategories, useUserRoles} from '@/hooks';
+import {useFetchCategories, useUserRoles} from '@/hooks';
 
 import CoachMatchResultFlow from '../matches/components/CoachMatchResultFlow';
 
@@ -24,7 +24,7 @@ export default function CoachesDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
 
-  const {categories, fetchCategories} = useCategories();
+  const {data: categories, refetch: fetchCategories} = useFetchCategories();
   const {getCurrentUserCategories} = useUserRoles();
 
   // Filter category based on assigned category

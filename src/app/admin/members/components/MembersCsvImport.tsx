@@ -192,6 +192,7 @@ export default function MembersCsvImport({
   return (
     <>
       <Button
+        id="csv-import-trigger"
         color="secondary"
         variant="flat"
         startContent={<DocumentArrowUpIcon className="w-4 h-4" />}

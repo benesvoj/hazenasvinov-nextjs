@@ -25,6 +25,7 @@ export default function PlayerLoansList({
 
   useEffect(() => {
     loadLoans();
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [filters]);
 
   const loadLoans = async () => {

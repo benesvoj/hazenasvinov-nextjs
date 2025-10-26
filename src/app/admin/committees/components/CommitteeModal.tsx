@@ -4,14 +4,15 @@ import {translations} from '@/lib/translations';
 
 import {UnifiedModal} from '@/components';
 import {ModalMode} from '@/enums';
-import {Committee} from '@/types';
+import {CommitteeFormData} from '@/types';
 
 interface CommitteeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  formData: Committee;
-  setFormData: (data: Committee) => void;
+  formData: CommitteeFormData;
+  setFormData: (data: CommitteeFormData) => void;
   onSubmit: () => void;
+  isLoading: boolean;
   mode: ModalMode;
 }
 
@@ -22,6 +23,7 @@ export const CommitteeModal = ({
   setFormData,
   onSubmit,
   mode,
+  isLoading,
 }: CommitteeModalProps) => {
   const t = translations.admin.committees;
   const tAction = translations.action;
@@ -36,10 +38,10 @@ export const CommitteeModal = ({
       size="2xl"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="flat" onPress={onClose}>
+          <Button variant="flat" onPress={onClose} isDisabled={isLoading}>
             {tAction.cancel}
           </Button>
-          <Button color="primary" onPress={onSubmit}>
+          <Button color="primary" onPress={onSubmit} isLoading={isLoading} isDisabled={isLoading}>
             {isEditMode ? tAction.save : tAction.add}
           </Button>
         </div>
@@ -64,14 +66,14 @@ export const CommitteeModal = ({
         />
         <Input
           label={t.modal.description}
-          value={formData.description}
+          value={formData?.description ?? ''}
           onChange={(e) => setFormData({...formData, description: e.target.value})}
           placeholder={t.modal.descriptionPlaceholder}
         />
         <Input
           label={t.modal.sortOrder}
           type="number"
-          value={formData.sort_order.toString()}
+          value={formData.sort_order?.toString()}
           onChange={(e) =>
             setFormData({
               ...formData,
@@ -81,9 +83,8 @@ export const CommitteeModal = ({
           placeholder="0"
         />
         <Checkbox
-          type="checkbox"
-          checked={formData.is_active}
-          onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+          isSelected={formData.is_active ?? true}
+          onValueChange={(checked) => setFormData({...formData, is_active: checked})}
         >
           {t.modal.active}
         </Checkbox>

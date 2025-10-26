@@ -1,21 +1,20 @@
 'use client';
 
-import React, {useState, useEffect, useRef, useMemo} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 
-import {Alert, Skeleton, Tabs, Tab} from '@heroui/react';
-
-import {translations} from '@/lib/translations';
+import {Alert, Skeleton, Tab, Tabs} from '@heroui/react';
 
 import CategoryMatchesAndResults from '@/app/(main)/components/CategoryMatchesAndResults';
 
 import {Heading, LoadingSpinner, UnifiedStandingTable} from '@/components';
 import {
+  useFetchCategories,
+  useOptimizedOwnClubMatches,
   useSeasons,
-  useCategories,
   useStandings,
   useUserRoles,
-  useOptimizedOwnClubMatches,
 } from '@/hooks';
+import {translations} from '@/lib';
 
 interface MatchScheduleProps {
   title?: string;
@@ -41,7 +40,7 @@ export default function MatchSchedule({
   const lastFetchedRef = useRef<{categoryId: string; seasonId: string} | null>(null);
 
   const {activeSeason, fetchActiveSeason} = useSeasons();
-  const {categories, fetchCategories} = useCategories();
+  const {data: categories, refetch: fetchCategories} = useFetchCategories();
 
   // Try to get user roles, but handle case where UserProvider is not available
   let getCurrentUserCategories: (() => Promise<string[]>) | null = null;
