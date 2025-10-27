@@ -15,7 +15,7 @@ import ThemeSwitch from '@/components/ui/theme-switch/ThemeSwitch';
 
 import {texts} from '@/utils/texts';
 
-import {buildMenuFromPages, fallbackRoutes, MenuItem} from '../../../routes/dynamicRoutes';
+import {buildMenuFromPages, fallbackRoutes, MenuItem} from '@/routes/dynamicRoutes';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
