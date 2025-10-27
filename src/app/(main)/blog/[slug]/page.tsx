@@ -20,6 +20,8 @@ import {BlogContent, BlogPostCard} from '@/components/features';
 import {MatchInfo} from '@/components/shared';
 import {Link, Heading} from '@/components/ui';
 
+import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
+
 import {useCategories, useFetchBlogPost, useFetchPostMatch} from '@/hooks';
 import {translations} from '@/lib';
 
@@ -143,6 +145,8 @@ export default function BlogPostPage() {
             <MatchInfo match={relatedMatch} />
           </>
         )}
+
+        <SponsorsTemp />
 
         {/* Share and Bookmark */}
         <div className="flex items-center justify-between mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">

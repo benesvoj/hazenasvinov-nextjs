@@ -6,12 +6,14 @@ import MatchSchedule from '@/components/shared/match/MatchSchedule';
 
 import {translations} from '@/lib/translations';
 
+import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
+
 import {
   CallTheActionSection,
-  SponsorsSection,
   ClubHighlightSection,
-  PostSection,
   LatestResultsSection,
+  PostSection,
+  SponsorsSection,
 } from './components';
 import AuthHandler from './components/AuthHandler';
 
@@ -31,6 +33,8 @@ export default function Page() {
       {!loading && sectionVisibility.clubHighlight && <ClubHighlightSection />}
       {!loading && sectionVisibility.sponsors && <SponsorsSection />}
       {!loading && sectionVisibility.callToAction && <CallTheActionSection />}
+
+      <SponsorsTemp />
     </div>
   );
 }
