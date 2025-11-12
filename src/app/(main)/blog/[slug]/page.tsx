@@ -22,7 +22,7 @@ import {Link, Heading} from '@/components/ui';
 
 import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
 
-import {useCategories, useFetchBlogPost, useFetchPostMatch} from '@/hooks';
+import {useFetchCategories, useFetchBlogPost, useFetchPostMatch} from '@/hooks';
 import {translations} from '@/lib';
 
 export default function BlogPostPage() {
@@ -30,7 +30,7 @@ export default function BlogPostPage() {
   const slug = params.slug as string;
 
   const {post, relatedPosts, loading, error} = useFetchBlogPost(slug);
-  const {categories, fetchCategories} = useCategories();
+  const {data: categories, refetch: fetchCategories} = useFetchCategories();
   const {match: relatedMatch, loading: matchLoading} = useFetchPostMatch(post?.id || null);
 
   useEffect(() => {
@@ -176,28 +176,6 @@ export default function BlogPostPage() {
           </div>
         </section>
       )}
-
-      {/* Newsletter Signup */}
-      {/* <Card className="bg-linear-to-r from-blue-600 to-blue-700 text-white">
-        <CardBody className="text-center">
-          <h3 className="text-2xl font-bold mb-2">
-            Nechte si posílat novinky
-          </h3>
-          <p className="text-blue-100 mb-4">
-            Přihlaste se k odběru novinek a buďte první, kdo se dozví o důležitých událostech v našem oddílu.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Váš email"
-              className="flex-1 px-4 py-2 rounded-md text-gray-900"
-            />
-            <Button color="primary" className="bg-white text-blue-600 hover:bg-blue-50">
-              Přihlásit
-            </Button>
-          </div>
-        </CardBody>
-      </Card> */}
     </div>
   );
 }

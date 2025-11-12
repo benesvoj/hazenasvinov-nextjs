@@ -1,8 +1,9 @@
+'use client';
 import {useEffect, useState, useCallback} from 'react';
 
-import {Api} from '@/app/api/api';
-
+import {API_ROUTES} from '@/lib';
 import {SupabaseUser} from '@/types';
+
 export interface LoginLog {
   id: string;
   user_id: string;
@@ -55,7 +56,7 @@ export function useFetchUsers(includeLogs: boolean = false) {
           }
         }
 
-        const url = includeLogs ? `${Api.getUsers}?${params.toString()}` : Api.getUsers;
+        const url = includeLogs ? `${API_ROUTES.users}?${params.toString()}` : API_ROUTES.users;
         const res = await fetch(url);
         const data = await res.json();
 

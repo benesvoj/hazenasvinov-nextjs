@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {translations} from '@/lib/translations';
+import {Header} from '@/components/ui/client';
 
-import {Header} from '@/components';
+import {translations} from '@/lib';
 
 export default function MainLayout({children}: {children: React.ReactNode}) {
   return (

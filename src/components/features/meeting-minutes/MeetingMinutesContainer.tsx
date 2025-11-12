@@ -11,23 +11,22 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 
-import {useMeetingMinutes} from '@/hooks/entities/meetingMinute/useMeetingMinutes';
-import {useSeasons} from '@/hooks/entities/season/useSeasons';
-
-import {MeetingMinutesFormModal} from '@/components/features';
-import {DeleteConfirmationModal, showToast, LoadingSpinner} from '@/components/ui';
-
-import {translations} from '@/lib/translations';
-
+import {
+  MeetingMinutesFormModal,
+  DeleteConfirmationModal,
+  showToast,
+  LoadingSpinner,
+  AttendeesModal,
+  MeetingMinutesCard,
+} from '@/components';
+import {useMeetingMinutes, useSeasons} from '@/hooks';
+import {API_ROUTES, translations} from '@/lib';
 import {
   MeetingMinutes,
   MeetingMinutesFilters,
   MeetingMinutesContainerProps,
   MeetingMinutesContainerRef,
 } from '@/types';
-
-import {AttendeesModal} from './AttendeesModal';
-import {MeetingMinutesCard} from './MeetingMinutesCard';
 
 export const MeetingMinutesContainer = forwardRef<
   MeetingMinutesContainerRef,
@@ -73,7 +72,7 @@ export const MeetingMinutesContainer = forwardRef<
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('/api/get-users');
+        const response = await fetch(API_ROUTES.users);
         const data = await response.json();
         // The API returns users directly, not wrapped in a users property
         setUsers(Array.isArray(data) ? data : data.users || []);

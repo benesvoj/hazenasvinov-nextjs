@@ -1,5 +1,3 @@
-'use client';
-
 import {Button, Card, CardBody, CardFooter, CardHeader} from '@heroui/react';
 
 import {LoadingSpinner, Heading, showToast} from '@/components';

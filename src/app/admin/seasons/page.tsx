@@ -10,7 +10,7 @@ import {formatDateString} from '@/helpers/formatDate';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedCard, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
-import {useSeasons} from '@/hooks';
+import {useFetchSeasons, useSeasons} from '@/hooks';
 import {Season} from '@/types';
 
 import {SeasonModal} from './components/SeasonModal';
@@ -18,10 +18,8 @@ import {SeasonModal} from './components/SeasonModal';
 export default function SeasonsAdminPage() {
   const tAction = translations.action;
   const {
-    seasons,
     loading,
     formData,
-    fetchAllSeasons,
     addSeason,
     updateSeason,
     deleteSeason,
@@ -30,6 +28,8 @@ export default function SeasonsAdminPage() {
     resetForm,
     setFormData,
   } = useSeasons();
+
+  const {data: seasons, refetch: fetchAllSeasons} = useFetchSeasons();
 
   useEffect(() => {
     fetchAllSeasons();

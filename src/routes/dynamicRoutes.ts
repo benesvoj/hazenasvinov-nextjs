@@ -115,7 +115,7 @@ export const privateRoutes = {
   committees: '/admin/committees',
   competitions: '/admin/competitions',
   sponsorship: '/admin/sponsorship',
-  clubConfig: '/admin/club-config',
+  clubConfig: '/admin/clubConfig',
   photoGallery: '/admin/photo-gallery',
   grantCalendar: '/admin/grant-calendar',
 };

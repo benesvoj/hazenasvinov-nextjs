@@ -1,7 +1,4 @@
-import {Nullish} from '../../../shared/Nullish';
-import {Category} from '../../category/data/category';
-import {Season} from '../../season/data/season';
-import {Team} from '../../team/data/team';
+import {Nullish, Category, Season, Team} from '@/types';
 
 export type MatchStatus = 'upcoming' | 'completed';
 
@@ -26,7 +23,10 @@ export interface Match {
   matchweek?: number | Nullish;
   match_number?: number | Nullish;
   category: Category;
-  season: Season;
+  season: {
+    id: string;
+    name: string;
+  };
   /** Optional reference to related blog post */
   post_id?: string;
   /** Array of related video IDs */

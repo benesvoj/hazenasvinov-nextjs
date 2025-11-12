@@ -25,7 +25,7 @@ import {useUser} from '@/contexts/UserContext';
 
 import {DeleteConfirmationModal, LoadingSpinner, PageContainer, showToast} from '@/components';
 import {formatDateString, formatTime} from '@/helpers';
-import {useAttendance, useCategoryLineups} from '@/hooks';
+import {useAttendance, useCategoryLineups, useFetchCategoryLineupMembers, useFetchCategoryLineups} from '@/hooks';
 import {TrainingSessionFormData, TrainingSessionStatus} from '@/types';
 
 import {TrainingSessionModal, TrainingSessionGenerator} from './components';
@@ -68,23 +68,17 @@ export default function CoachesAttendancePage() {
   } = useAttendance();
 
   const {
-    seasons,
-    categories,
-    members,
-    activeSeason,
+    seasons: {data: seasons, activeSeason},
+    categories: {data: categories},
+    members: {data: members},
     loading: appDataLoading,
-    seasonsLoading,
-    categoriesLoading,
-    membersLoading,
   } = useAppData();
   const {userCategories, getCurrentUserCategories, isAdmin} = useUser();
   const {
-    lineups,
+    data: lineupMembers,
     loading: lineupsLoading,
-    fetchLineups,
-    lineupMembers,
-    fetchLineupMembers,
-  } = useCategoryLineups();
+  } = useFetchCategoryLineupMembers(selectedCategory, selectedSession);
+  const {data: lineups, refetch: fetchLineups} = useFetchCategoryLineups(selectedCategory, selectedSeason);
 
   // Get admin category simulation from localStorage (for admin users testing coach portal)
   const [adminSimulationCategories, setAdminSimulationCategories] = useState<string[]>([]);
@@ -145,7 +139,7 @@ export default function CoachesAttendancePage() {
   // Fetch lineups when category and season change
   useEffect(() => {
     if (selectedCategory && selectedSeason) {
-      fetchLineups(selectedCategory, selectedSeason);
+      fetchLineups();
     }
   }, [selectedCategory, selectedSeason, fetchLineups]);
 
@@ -189,7 +183,7 @@ export default function CoachesAttendancePage() {
   const filteredMembers = useMemo(() => {
     // Get lineup members for the selected category, fallback to filtered members if no lineups
     const lineupMembersList = lineupMembers
-      .map((lineupMember) => lineupMember.member)
+      .map((lineupMember) => lineupMember.members)
       .filter(Boolean);
 
     // Fallback: if no lineup members, filter all members by category
@@ -371,8 +365,8 @@ export default function CoachesAttendancePage() {
 
     try {
       // Get lineup members for the selected category and season
-      await fetchLineups(selectedCategory, selectedSeason);
-      const memberIds = lineupMembers.map((lm) => lm.member?.id).filter(Boolean) as string[];
+      await fetchLineups();
+      const memberIds = lineupMembers.map((lm) => lm.members?.id).filter(Boolean) as string[];
 
       if (memberIds.length === 0) {
         // Fallback to filtered members if no lineup members
@@ -455,7 +449,7 @@ export default function CoachesAttendancePage() {
                 placeholder="Vyberte kategorii"
                 selectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
                 onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
-                isDisabled={categoriesLoading || availableCategories.length === 1}
+                isDisabled={appDataLoading || availableCategories.length === 1}
                 defaultSelectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
                 className="min-w-0"
               >
@@ -469,7 +463,7 @@ export default function CoachesAttendancePage() {
                 placeholder="Vyberte sezónu"
                 selectedKeys={selectedSeason ? [selectedSeason] : []}
                 onSelectionChange={(keys) => setSelectedSeason(Array.from(keys)[0] as string)}
-                isDisabled={seasonsLoading}
+                isDisabled={appDataLoading}
                 className="min-w-0"
               >
                 {seasons.map((season) => (

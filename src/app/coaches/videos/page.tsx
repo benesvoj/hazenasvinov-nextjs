@@ -2,8 +2,6 @@
 
 import React, {useState, useEffect, useCallback} from 'react';
 
-import {Button} from '@heroui/react';
-
 import {VideoCameraIcon} from '@heroicons/react/24/outline';
 
 import {useVideos} from '@/hooks/entities/video/useVideos';
@@ -23,8 +21,11 @@ export default function CoachesVideosPage() {
   const [assignedCategories, setAssignedCategories] = useState<string[]>([]);
 
   // Use AppDataContext for common data
-  const {categories, clubs, seasons, categoriesLoading, clubsLoading, seasonsLoading} =
-    useAppData();
+  const {
+    categories: {data: categories, loading: categoriesLoading},
+    clubs: {data: clubs, loading: clubsLoading},
+    seasons: {data: seasons, loading: seasonsLoading}
+  } = useAppData();
 
   const {user, loading: authLoading} = useAuth();
   const {getCurrentUserCategories} = useUserRoles();
@@ -66,6 +67,7 @@ export default function CoachesVideosPage() {
     if (user?.id && !authLoading) {
       fetchAssignedCategories();
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [user?.id, authLoading]); // Remove fetchAssignedCategories from dependencies
 
   // Categories, clubs, and seasons are now provided by AppDataContext
@@ -76,6 +78,7 @@ export default function CoachesVideosPage() {
     if (assignedCategories.length > 0) {
       fetchVideos(filters);
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [filters, assignedCategories]); // Remove fetchVideos from dependencies
 
   // Handle video operations

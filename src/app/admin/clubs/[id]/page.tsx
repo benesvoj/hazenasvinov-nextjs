@@ -21,7 +21,7 @@ import {
 
 import {PencilIcon, UserGroupIcon, TrophyIcon} from '@heroicons/react/24/outline';
 
-import LogoUpload from '@/components/ui/forms/LogoUpload';
+import LogoUpload from '@/components/ui/client/LogoUpload';
 
 import {createClient} from '@/utils/supabase/client';
 

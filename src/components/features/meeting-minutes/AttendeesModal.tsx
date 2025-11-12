@@ -52,7 +52,7 @@ export function AttendeesModal({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  const {members, loading: membersLoading} = useFetchMembers();
+  const {data: members} = useFetchMembers();
   const t = translations.components.meetingMinutes;
   const tAction = translations.action;
 

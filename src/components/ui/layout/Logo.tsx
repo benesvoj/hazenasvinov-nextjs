@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import {useClubConfig} from '@/hooks/entities/club/useClubConfig';
+import {useFetchClubConfig} from "@/hooks";
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -15,7 +15,7 @@ export default function Logo({
   fallbackSrc = '/logo.png',
   alt = 'Club Logo',
 }: LogoProps) {
-  const {clubConfig} = useClubConfig();
+  const {data: clubConfig} = useFetchClubConfig();
 
   const sizeClasses = {
     sm: 'w-8 h-8',

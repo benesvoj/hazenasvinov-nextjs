@@ -1,8 +1,12 @@
-import {PlayerLoan} from '../business/playerLoan';
-
-import {Member} from './member';
+import {Member, PlayerLoan} from '@/types';
 
 export interface UnifiedPlayer extends Member {
+  is_external?: boolean;
+  core_club_id?: string;
+  current_club_id?: string;
+  external_club_name?: string;
+  position: string;
+  jersey_number?: number;
   // Club information
   core_club_name?: string;
   current_club_name?: string;
@@ -36,10 +40,6 @@ export interface PlayerSearchResult {
   jersey_number?: number;
   display_name: string;
   is_captain?: boolean;
-}
-
-export interface PlayerWithLoans extends UnifiedPlayer {
-  loans: PlayerLoan[];
 }
 
 export interface PlayerStats {

@@ -19,11 +19,11 @@ function AdminMainContent({children}: {children: React.ReactNode}) {
   return (
     <div
       className={`flex-1 transition-all duration-300 ease-in-out w-full ${
-        isMobile ? 'ml-0' : isCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+        isMobile ? 'ml-0' : isCollapsed ? 'lg:ml-16' : 'lg:ml-52'
       }`}
     >
       <AdminTopBar />
-      <main className="pt-4 p-3 sm:p-4 lg:p-6 mt-20">
+      <main className="pt-4 p-3 sm:p-4 lg:p-4 mt-20">
         <div className={`max-w-7xl ${isMobile ? 'ml-0' : 'ml-4'}`}>{children}</div>
       </main>
     </div>

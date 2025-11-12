@@ -1,12 +1,13 @@
+// TODO: refactor to remove supabase from component
 'use client';
 
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect} from 'react';
 
 import {Button, Image} from '@heroui/react';
 
 import {BuildingOfficeIcon} from '@heroicons/react/24/outline';
 
-import {useSeasons, useCategories} from '@/hooks';
+import {useSeasons, useFetchCategories} from '@/hooks';
 import {ClubWithTeams} from '@/types';
 
 interface ClubSelectorProps {
@@ -30,7 +31,7 @@ export default function ClubSelector({
 
   // Use existing hooks instead of custom fetch functions
   const {activeSeason, fetchActiveSeason} = useSeasons();
-  const {categories, fetchCategories} = useCategories();
+  const {data: categories, refetch: fetchCategories} = useFetchCategories();
 
   // Fetch required data when component mounts
   useEffect(() => {
@@ -188,14 +189,14 @@ export default function ClubSelector({
       clubs.forEach((club) => {
         if (selectedCategory && selectedCategory !== 'all') {
           // Filter teams by selected category
-          const categoryTeams = club.teams.filter((team) => {
+          const categoryTeams = club.teams.filter((team: any) => {
             const category = categories.find((cat) => cat.id === team.club_category_id);
             return category?.id === selectedCategory;
           });
-          clubTeamMap[club.id] = categoryTeams.map((team) => team.id);
+          clubTeamMap[club.id] = categoryTeams.map((team: any) => team.id);
         } else {
           // All teams if no category selected
-          clubTeamMap[club.id] = club.teams.map((team) => team.id);
+          clubTeamMap[club.id] = club.teams.map((team: any) => team.id);
         }
       });
 

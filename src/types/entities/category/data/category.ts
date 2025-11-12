@@ -1,6 +1,5 @@
 import {AgeGroups, CompetitionTypes, Genders} from '@/enums';
-
-import {CategorySeason} from './categorySeason';
+import {CategoriesInsert, CategoriesSchema, CategoriesUpdate, CategorySeason} from '@/types';
 /**
  * Enhanced Category interface for the new category system with URL-friendly routing.
  *
@@ -19,18 +18,7 @@ import {CategorySeason} from './categorySeason';
  * @property updated_at - Last update timestamp
  * @property slug - URL-friendly identifier for routing (e.g., 'men', 'women', 'junior-boys')
  */
-export interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  age_group?: AgeGroups;
-  gender?: Genders;
-  is_active?: boolean;
-  sort_order?: number;
-  created_at?: string;
-  updated_at?: string;
-  slug?: string;
-}
+export interface Category extends CategoriesSchema {}
 
 export interface AddCategoryModalProps {
   isOpen: boolean;
@@ -69,3 +57,9 @@ export interface CreateCategoryData {
 export interface UpdateCategoryData extends CreateCategoryData {
   id: string;
 }
+
+export interface CreateCategory extends CategoriesInsert {}
+
+export interface UpdateCategory extends CategoriesUpdate {}
+
+export type CategoryFormData = Omit<Category, 'id' | 'created_at' | 'updated_at'>;

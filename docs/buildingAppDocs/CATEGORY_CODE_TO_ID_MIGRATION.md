@@ -116,7 +116,7 @@ SELECT code, id FROM categories;
 
 #### 3.4 Member Management Components
 **Files**: 
-- `src/app/admin/members/components/MembersListTab.tsx`
+- `src/app/admin/members/components/MembersInternalTab.tsx`
 - `src/app/admin/members/components/MemberFormModal.tsx`
 - `src/app/admin/members/components/BulkEditModal.tsx`
 - `src/app/admin/members/helpers/memberHelpers.ts`

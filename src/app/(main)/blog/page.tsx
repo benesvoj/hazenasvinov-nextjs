@@ -12,7 +12,7 @@ import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
 
 import {createSearchablePost, searchPosts} from '@/utils/contentSearch';
 
-import {useFetchBlogPosts} from '@/hooks';
+import {useFetchBlog} from '@/hooks';
 
 export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,7 +22,7 @@ export default function BlogPage() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Fetch all published blog posts
-  const {posts: allPosts, loading, error} = useFetchBlogPosts(100); // Get more posts for filtering
+  const {data: allPosts, loading} = useFetchBlog(); // Get more posts for filtering
 
   // Get unique category from posts
   const categories = useMemo(() => {
@@ -45,8 +45,7 @@ export default function BlogPage() {
 
     // Filter by category
     return searchFiltered.filter((post) => {
-      const matchesCategory = selectedCategory === 'Všechny';
-      return matchesCategory;
+      return selectedCategory === 'Všechny';
     });
   }, [allPosts, debouncedSearchTerm, selectedCategory]);
 
@@ -111,22 +110,6 @@ export default function BlogPage() {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <BlogPostCardSkeleton key={i} variant="blog" />
           ))}
-        </div>
-      ) : error ? (
-        // Error state
-        <div className="text-center py-12">
-          <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
-            <CardBody className="text-center">
-              <TagIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
-                Chyba při načítání článků
-              </h3>
-              <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-              <Button color="primary" variant="bordered" onPress={() => window.location.reload()}>
-                Zkusit znovu
-              </Button>
-            </CardBody>
-          </Card>
         </div>
       ) : filteredPosts.length > 0 ? (
         // Success state - display posts

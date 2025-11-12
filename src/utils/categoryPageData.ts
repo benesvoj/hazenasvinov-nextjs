@@ -1,6 +1,11 @@
+/**
+ * @Deprecated This file is deprecated and will be removed in future versions.
+ * Please use the new data fetching utilities in src/lib/data instead.
+ * @todo REFACTOR: This file is getting quite large and complex. Consider breaking it down into smaller modules. Consider if it is still needed.
+ */
 import {createClient} from '@/utils/supabase/server';
 
-import {Category, Match, BlogPost, ProcessedStanding, Season} from '@/types';
+import {Category, Match, BlogPost, ProcessedStanding, SeasonCategoryPageData} from '@/types';
 
 export interface CategoryPageServerData {
   category: Category | null;
@@ -10,7 +15,7 @@ export interface CategoryPageServerData {
   };
   posts: BlogPost[];
   standings: ProcessedStanding[];
-  season: Season;
+  season: SeasonCategoryPageData;
 }
 
 /**
@@ -400,7 +405,7 @@ export async function getCategoryPageData(
     springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     return {
-      category,
+      category: category as any,
       matches: {
         autumn: autumnMatches,
         spring: springMatches,

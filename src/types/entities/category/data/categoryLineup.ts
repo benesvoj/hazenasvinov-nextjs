@@ -1,17 +1,15 @@
 // Category-based lineup types for team management
 // This is different from match lineups - these represent the actual team composition for each category
 
-export interface CategoryLineup {
-  id: string;
-  name: string;
-  category_id: string;
-  season_id: string;
-  description?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-}
+import {CategoryLineupInsert, CategoryLineupSchema, CategoryLineupUpdate, Committee} from "@/types";
+
+export interface CategoryLineup extends CategoryLineupSchema{}
+
+export interface CreateCategoryLineup extends CategoryLineupInsert{}
+
+export interface UpdateCategoryLineup extends CategoryLineupUpdate{}
+
+export type CategoryLineupFormData = Omit<CategoryLineup, 'id' | 'created_at' | 'updated_at'>;
 
 // Raw database record structure from Supabase query
 export interface RawCategoryLineupMember {
@@ -34,7 +32,7 @@ export interface RawCategoryLineupMember {
   };
 }
 
-export interface CategoryLineupMember {
+export interface CategoryLineupMemberOld {
   id: string;
   lineup_id: string;
   member_id: string;
@@ -52,13 +50,6 @@ export interface CategoryLineupMember {
     registration_number: string;
     category_id: string;
   };
-}
-
-export interface CategoryLineupFormData {
-  name: string;
-  description?: string;
-  category_id: string;
-  season_id: string;
 }
 
 export interface AddMemberToLineupData {

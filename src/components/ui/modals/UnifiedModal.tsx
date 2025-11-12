@@ -82,14 +82,19 @@ export default function UnifiedModal({
         {footer && <ModalFooter className="px-4 sm:px-6 py-4">{footer}</ModalFooter>}
         {isFooterWithActions && (
           <ModalFooter className="px-4 sm:px-6 py-4">
-            <Button variant="flat" onPress={onClose} aria-label={tAction.cancel}>
+            <Button
+              variant="flat"
+              onPress={onClose}
+              aria-label={tAction.cancel}
+              isDisabled={isLoading}
+            >
               {tAction.cancel}
             </Button>
             {!isOnlyCloseButton && (
               <Button
                 color="primary"
                 onPress={onPress}
-                isDisabled={isDisabled}
+                isDisabled={isDisabled || isLoading}
                 aria-label={tAction.save}
                 isLoading={isLoading}
               >

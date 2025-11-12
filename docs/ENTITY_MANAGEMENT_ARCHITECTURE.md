@@ -210,7 +210,7 @@ API routes should ONLY be used for:
 |--------|--------|--------------|-------|
 | Club Categories | ✅ Complete | `useClubCategories` | Clean implementation |
 | Categories | ✅ Complete | `useCategories` | New clean implementation |
-| Clubs | ❌ Needs work | `useClubs` | Only has basic fetch |
+| Clubs | ❌ Needs work | `useFetchClubs` | Only has basic fetch |
 | Members | ❌ Needs work | `useMembers` | Complex state management |
 | Seasons | ❌ Needs work | `useSeasons` | Mixed patterns |
 | Users | ❌ Needs work | `useUsers` | API routes + hooks |

@@ -1,3 +1,4 @@
+'use client';
 import {useState, useEffect, useCallback} from 'react';
 
 import {translations} from '@/lib/translations';

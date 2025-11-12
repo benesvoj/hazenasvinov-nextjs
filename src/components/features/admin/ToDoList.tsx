@@ -19,7 +19,6 @@ export default function ToDoList({
   updateTodoStatus,
   deleteTodo,
   handleEditTodo,
-  currentFilter = TodoFilter.ALL,
 }: ToDoListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;

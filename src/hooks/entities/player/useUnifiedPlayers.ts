@@ -1,3 +1,4 @@
+'use client';
 import {useState, useCallback} from 'react';
 
 import {
@@ -158,6 +159,7 @@ export function useUnifiedPlayers() {
         category_id: data.category_id,
         functions: data.functions,
         date_of_birth: data.date_of_birth,
+        position: '', // Position is set when adding to lineup, not a member attribute,
         sex: data.sex,
         is_external: false, // This will be determined by club relationship
         is_active: true, // This will be determined by club relationship status

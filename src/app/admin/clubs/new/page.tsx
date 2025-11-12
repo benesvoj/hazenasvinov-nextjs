@@ -11,7 +11,7 @@ import {Input} from '@heroui/input';
 
 import {BuildingOfficeIcon, ArrowLeftIcon} from '@heroicons/react/24/outline';
 
-import LogoUpload from '@/components/ui/forms/LogoUpload';
+import LogoUpload from '@/components/ui/client/LogoUpload';
 
 import {createClient} from '@/utils/supabase/client';
 

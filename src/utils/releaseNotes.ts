@@ -370,7 +370,7 @@ export const releaseNotes: ReleaseNote[] = [
       '📊 Corrected database schema issues for blog post images',
     ],
     technical: [
-      '🏗️ Created useFetchBlogPosts hook for centralized blog data management',
+      '🏗️ Created useFetchBlog hook for centralized blog data management',
       '🗄️ Added image_url column support to blog_posts table schema',
       '🔌 Integrated Supabase storage for blog image uploads',
       '🎭 Enhanced error boundaries and loading states for better user experience',

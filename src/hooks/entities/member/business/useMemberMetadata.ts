@@ -1,3 +1,4 @@
+'use client';
 import {useState, useCallback} from 'react';
 
 import {MemberMetadata, MemberWithMetadata} from '@/types/entities/member/data/memberMetadata';

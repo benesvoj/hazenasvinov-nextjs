@@ -1,44 +1,43 @@
-import {useState, useEffect, useCallback} from 'react';
+'use client';
 
-import {Member} from '@/types/entities/member/data/member';
+import {useCallback, useEffect, useState} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {showToast} from "@/components";
+import {API_ROUTES} from "@/lib";
+import {Member} from '@/types';
 
 export function useFetchMembers() {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+	const [data, setData] = useState<Member[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-  const fetchMembers = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+	const fetchData = useCallback(
+		async () => {
+			try {
+				setLoading(true);
+				setError(null);
 
-      const supabase = createClient();
+				const res = await fetch(API_ROUTES.members.root);
+				const response = await res.json();
 
-      const {data, error} = await supabase
-        .from('members')
-        .select('*')
-        .order('surname', {ascending: true})
-        .order('name', {ascending: true});
+				setData(response.data || []);
+			} catch (error) {
+				console.error('Error fetching members', error);
+				setError('Error fetching members');
+				showToast.danger('Error fetching members');
+			} finally {
+				setLoading(false);
+			}
+		}, [])
 
-      if (error) throw error;
+	useEffect(() => {
+		fetchData();
+	}, []);
 
-      setMembers(data || []);
-    } catch (err: any) {
-      console.error('❌ Error fetching members:', err);
-      setError(err?.message || 'Chyba při načítání členů');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Removed automatic fetch - components should call fetchMembers explicitly
-
-  return {
-    members,
-    loading,
-    error,
-    fetchMembers,
-  };
+	return {
+		data,
+		loading,
+		error,
+		refetch: fetchData,
+	};
 }

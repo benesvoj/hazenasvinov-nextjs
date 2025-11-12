@@ -29,11 +29,11 @@ import {
   useSeasons,
   useFilteredTeams,
   useStandings,
-  useCategories,
   useFetchMembers,
   useTeams,
   useExcelImport,
   useTeamDisplayLogic,
+  useFetchCategories, useFetchSeasons,
 } from '@/hooks';
 import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
@@ -56,8 +56,12 @@ export default function MatchesAdminPage() {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
   // Use existing hooks instead of custom state and fetch functions
-  const {categories, loading: categoriesLoading, fetchCategories} = useCategories();
-  const {members, loading: membersLoading, fetchMembers} = useFetchMembers();
+  const {
+    data: categories,
+    loading: categoriesLoading,
+    refetch: fetchCategories,
+  } = useFetchCategories();
+  const {data: members, loading: membersLoading, refetch: fetchMembers} = useFetchMembers();
   const {teams, loading: allTeamsLoading, fetchTeams} = useTeams();
 
   // Modal states
@@ -117,11 +121,7 @@ export default function MatchesAdminPage() {
   const t = translations.matches;
 
   // Use the team display logic hook
-  const {
-    teamCounts,
-    loading: teamCountsLoading,
-    fetchTeamCounts,
-  } = useTeamDisplayLogic(selectedCategory);
+  const {fetchTeamCounts} = useTeamDisplayLogic(selectedCategory);
 
   // Reset matchToDelete when confirmation modal closes
   const handleDeleteConfirmClose = () => {
@@ -198,24 +198,14 @@ export default function MatchesAdminPage() {
   const supabase = createClient();
 
   // Use the enhanced seasons hook
-  const {
-    activeSeason,
-    sortedSeasons,
-    loading: seasonsLoading,
-    error: seasonsError,
-    fetchAllSeasons,
-  } = useSeasons();
+  const {activeSeason, sortedSeasons, loading: seasonsLoading} = useSeasons();
 
   const [selectedSeason, setSelectedSeason] = useState<string>('');
   const queryClient = useQueryClient();
 
   // Use the matches hook - pass category code instead of ID, and show ALL matches (admin mode)
   const selectedCategoryId = categories.find((cat) => cat.id === selectedCategory)?.id || '';
-  const {
-    data: seasonalMatchesData,
-    isLoading: matchesLoading,
-    error: matchesError,
-  } = useMatchesSeasonal({
+  const {data: seasonalMatchesData, error: matchesError} = useMatchesSeasonal({
     categoryId: selectedCategoryId,
     seasonId: selectedSeason,
     ownClubOnly: false,
@@ -233,13 +223,7 @@ export default function MatchesAdminPage() {
     : [];
 
   // Use the filtered teams hook
-  const {
-    filteredTeams,
-    loading: teamsLoading,
-    error: teamsError,
-    fetchFilteredTeams,
-    clearTeams,
-  } = useFilteredTeams(selectedCategory, selectedSeason);
+  const {filteredTeams, fetchFilteredTeams} = useFilteredTeams(selectedCategory, selectedSeason);
 
   // Use the standings hook
   const {standings, fetchStandings, loading: standingsLoading} = useStandings();
@@ -266,10 +250,9 @@ export default function MatchesAdminPage() {
   // Initial data fetch
   useEffect(() => {
     fetchCategories();
-    fetchAllSeasons();
     fetchTeams();
     fetchMembers();
-  }, [fetchCategories, fetchAllSeasons, fetchTeams, fetchMembers]);
+  }, [fetchCategories, fetchTeams, fetchMembers]);
 
   // Set first category as default when categories are loaded
   useEffect(() => {
@@ -308,7 +291,7 @@ export default function MatchesAdminPage() {
 
     if (result.success) {
       // Refresh standings
-      fetchStandings(selectedCategory, selectedSeason);
+      await fetchStandings(selectedCategory, selectedSeason);
       setError('');
     } else {
       setError(result.error || 'Chyba při výpočtu tabulky');
@@ -860,12 +843,11 @@ export default function MatchesAdminPage() {
 
   /**
    * @description Generates matchweek options based on the selected category.
-   * @param categoryId
    * @deprecated Matchweek count is now fixed to 22 for all categories, needs to be refactored, this should be combo of season+category in future
    * @returns Array of matchweek options
    */
   // Helper function to generate matchweek options based on category
-  const getMatchweekOptions = (categoryId?: string) => {
+  const getMatchweekOptions = () => {
     const options = [];
     // Add "No matchweek" option
     options.push({value: '', label: 'Bez kola'});
@@ -917,6 +899,7 @@ export default function MatchesAdminPage() {
         setError(`Import selhal: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
       }
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [
       selectedSeason,
       importMatches,

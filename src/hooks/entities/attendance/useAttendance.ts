@@ -1,4 +1,6 @@
-import {useState, useCallback} from 'react';
+'use client';
+
+import {useState, useCallback, useMemo} from 'react';
 
 import {showToast} from '@/components/ui/feedback';
 
@@ -29,7 +31,7 @@ export function useAttendance() {
   const [error, setError] = useState<string | null>(null);
 
   const {user, hasRole} = useUser();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   // Fetch training sessions for a specific category and season
   const fetchTrainingSessions = useCallback(

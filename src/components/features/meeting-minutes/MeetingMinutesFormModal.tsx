@@ -24,7 +24,7 @@ import {
 import {PlusIcon, TrashIcon, UserIcon} from '@heroicons/react/24/outline';
 
 import {useAuth} from '@/hooks/auth/useAuthNew';
-import {useSeasons} from '@/hooks/entities/season/useSeasons';
+import {useSeasons} from '@/hooks/entities/season/state/useSeasons';
 
 import {showToast} from '@/components/ui/feedback/Toast';
 
@@ -34,6 +34,7 @@ import {useFetchMembers} from '@/hooks';
 import {MeetingMinutes, MeetingMinutesFormData, MeetingAttendeeFormData} from '@/types';
 
 import {AttendeesModal} from './AttendeesModal';
+import {API_ROUTES} from "@/lib";
 
 interface MeetingMinutesFormModalProps {
   isOpen: boolean;
@@ -68,7 +69,7 @@ export function MeetingMinutesFormModal({
 
   const {seasons, loading: seasonsLoading, fetchAllSeasons, activeSeason} = useSeasons();
   const {user} = useAuth();
-  const {members, loading: membersLoading} = useFetchMembers();
+  const {data: members} = useFetchMembers();
 
   const t = translations.components.meetingMinutes;
 
@@ -76,7 +77,7 @@ export function MeetingMinutesFormModal({
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('/api/get-users');
+        const response = await fetch(API_ROUTES.users);
         const data = await response.json();
         // The API returns users directly, not wrapped in a users property
         setUsers(Array.isArray(data) ? data : data.users || []);

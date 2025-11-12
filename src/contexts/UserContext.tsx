@@ -455,7 +455,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
     };
 
     initializeUser();
-  }, [refreshUser]); // Only run once on mount
+  }, []); // Only run once on mount
 
   // No auth state change listener - let Supabase handle session management
   // This prevents unnecessary re-fetches when switching tabs

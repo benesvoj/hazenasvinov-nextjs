@@ -3,14 +3,13 @@
 import {Button} from '@heroui/button';
 import {Image} from '@heroui/image';
 
-import {useClubConfig} from '@/hooks/entities/club/useClubConfig';
-
 import Link from '@/components/ui/link/Link';
 
-import {translations} from '@/lib/translations';
+import {useFetchClubConfig} from "@/hooks";
+import {translations} from '@/lib';
 
 export default function HeroSection() {
-  const {clubConfig, loading: configLoading} = useClubConfig();
+  const {data: clubConfig} = useFetchClubConfig();
 
   return (
     <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white rounded-2xl overflow-hidden">
