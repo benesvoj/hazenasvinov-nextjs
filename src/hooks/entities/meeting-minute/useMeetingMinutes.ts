@@ -4,6 +4,7 @@ import {useState, useCallback} from 'react';
 import {createClient} from '@/utils/supabase/client';
 
 import {MeetingMinutes, MeetingMinutesFilters, MeetingAttendee} from '@/types';
+import {API_ROUTES} from "@/lib";
 
 export function useMeetingMinutes() {
   const [meetingMinutes, setMeetingMinutes] = useState<MeetingMinutes[]>([]);
@@ -73,7 +74,7 @@ export function useMeetingMinutes() {
       let wroteByUsersData: any[] = [];
       if (wroteByUserIds.size > 0) {
         try {
-          const response = await fetch('/api/get-users');
+          const response = await fetch(API_ROUTES.users);
           const usersResponse = await response.json();
           const allUsers = Array.isArray(usersResponse) ? usersResponse : usersResponse.users || [];
           wroteByUsersData = allUsers.filter((user: any) =>

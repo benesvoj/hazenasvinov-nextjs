@@ -53,7 +53,7 @@ export const privateRoutes = {
   memberFunctions: '/admin/member-functions',
   committees: '/admin/committees',
   sponsorship: '/admin/sponsorship',
-  clubConfig: '/admin/clubConfig',
+  clubConfig: '/admin/club-config',
   photoGallery: '/admin/photo-gallery',
   clubs: '/admin/clubs',
   clubCategories: '/admin/club-categories',

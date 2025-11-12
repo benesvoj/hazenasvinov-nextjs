@@ -34,6 +34,7 @@ import {useFetchMembers} from '@/hooks';
 import {MeetingMinutes, MeetingMinutesFormData, MeetingAttendeeFormData} from '@/types';
 
 import {AttendeesModal} from './AttendeesModal';
+import {API_ROUTES} from "@/lib";
 
 interface MeetingMinutesFormModalProps {
   isOpen: boolean;
@@ -76,7 +77,7 @@ export function MeetingMinutesFormModal({
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('/api/get-users');
+        const response = await fetch(API_ROUTES.users);
         const data = await response.json();
         // The API returns users directly, not wrapped in a users property
         setUsers(Array.isArray(data) ? data : data.users || []);

@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback} from "react";
 
 import {showToast} from "@/components";
 import {API_ROUTES} from "@/lib";
@@ -11,7 +11,7 @@ export function useFetchCategoryLineups(categoryId: string, seasonId: string) {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	const fetchData = async () => {
+	const fetchData = useCallback(async () => {
 		try {
 			setLoading(true);
 			setError(null);
@@ -31,14 +31,13 @@ export function useFetchCategoryLineups(categoryId: string, seasonId: string) {
 		} finally {
 			setLoading(false);
 		}
-	}
+	}, [categoryId, seasonId]);
 
 	useEffect(() => {
 		if (categoryId && seasonId) {
 			fetchData();
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [categoryId, seasonId]);
+	}, [categoryId, seasonId, fetchData]);
 
 
 	return {

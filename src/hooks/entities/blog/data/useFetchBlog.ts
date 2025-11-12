@@ -20,7 +20,6 @@ export function useFetchBlog(options?: { enabled?: boolean }) {
 	const fetchData = useCallback(
 		async () => {
 			setLoading(true);
-			console.log('🔍 useFetchBlog - Starting fetch...');
 
 			try {
 				const res = await fetch(API_ROUTES.blog.root);

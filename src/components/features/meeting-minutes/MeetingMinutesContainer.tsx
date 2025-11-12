@@ -20,7 +20,7 @@ import {
   MeetingMinutesCard,
 } from '@/components';
 import {useMeetingMinutes, useSeasons} from '@/hooks';
-import {translations} from '@/lib';
+import {API_ROUTES, translations} from '@/lib';
 import {
   MeetingMinutes,
   MeetingMinutesFilters,
@@ -72,7 +72,7 @@ export const MeetingMinutesContainer = forwardRef<
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('/api/get-users');
+        const response = await fetch(API_ROUTES.users);
         const data = await response.json();
         // The API returns users directly, not wrapped in a users property
         setUsers(Array.isArray(data) ? data : data.users || []);
