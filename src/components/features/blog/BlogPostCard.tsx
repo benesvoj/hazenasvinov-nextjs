@@ -10,10 +10,9 @@ import {CalendarIcon} from '@heroicons/react/24/outline';
 
 import Link from '@/components/ui/link/Link';
 
-import {useAppData} from '@/contexts/AppDataContext';
+import {useAppDataSafe} from '@/contexts/AppDataContext';
 
 import {formatDateString} from '@/helpers';
-import {useCategories} from '@/hooks';
 import {BlogPostCard as BlogPostCardProps, Category} from '@/types';
 
 export default function BlogPostCard({
@@ -21,32 +20,26 @@ export default function BlogPostCard({
   index = 0,
   variant = 'landing',
   className = '',
+  category: categoryProp,
 }: BlogPostCardProps) {
   const isLandingVariant = variant === 'landing';
 
-  // Always call both hooks to avoid conditional hook calls
-  let appDataCategories: Category[] = [];
-  let hookCategories: Category[] = [];
-
-  try {
-    const appData = useAppData();
-    appDataCategories = appData.categories;
-  } catch (error) {
-    // AppDataProvider not available, will use hook category
-    appDataCategories = [];
-  }
-
-  // Always call useCategories hook
-  const {categories: hookCategoriesData} = useCategories();
-  hookCategories = hookCategoriesData;
-
-  // Use AppDataContext category if available, otherwise fallback to hook category
-  const categories = appDataCategories.length > 0 ? appDataCategories : hookCategories;
+  // Use category prop if provided, otherwise try to fetch from context
+  const appData = useAppDataSafe();
+  const contextCategories = categoryProp ? undefined : appData?.categories?.data;
 
   // Memoized category lookup for performance
   const category = useMemo(() => {
-    return categories.find((category) => category.id === post.category_id);
-  }, [categories, post.category_id]);
+    // If category is provided as prop, use it directly
+    if (categoryProp) return categoryProp;
+
+    // Otherwise, lookup from context categories
+    if (contextCategories) {
+      return contextCategories.find((category) => category.id === post.category_id);
+    }
+
+    return undefined;
+  }, [categoryProp, contextCategories, post.category_id]);
 
   const CategoryChip = ({category}: {category: Category}) => {
     return (

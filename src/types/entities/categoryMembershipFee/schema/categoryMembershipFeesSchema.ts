@@ -9,22 +9,22 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-10-24
+ * Last generated: 2025-11-11
  */
 
 export interface CategoryMembershipFeeSchema {
-  calendar_year: number;
-  category_id: string;
-  created_at: string | null;
-  created_by: string | null;
-  currency: string;
-  description: string | null;
-  fee_amount: number;
-  fee_period: string | null;
-  id: string;
-  is_active: boolean | null;
-  updated_at: string | null;
-  updated_by: string | null;
+  calendar_year: number
+  category_id: string
+  created_at: string | null
+  created_by: string | null
+  currency: string
+  description: string | null
+  fee_amount: number
+  fee_period: string | null
+  id: string
+  is_active: boolean | null
+  updated_at: string | null
+  updated_by: string | null
 }
 
 /**

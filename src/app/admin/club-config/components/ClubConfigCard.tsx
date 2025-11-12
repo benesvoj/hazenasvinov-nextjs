@@ -2,9 +2,7 @@ import {useState, useEffect} from 'react';
 
 import Image from 'next/image';
 
-import {Button} from '@heroui/button';
-import {Input, Textarea} from '@heroui/input';
-import {Card, CardHeader, CardBody} from '@heroui/react';
+import {Card, CardHeader, CardBody, Input, Textarea, Button} from '@heroui/react';
 
 import {
   Cog6ToothIcon,
@@ -16,14 +14,15 @@ import {
   PhotoIcon,
 } from '@heroicons/react/24/outline';
 
-import {useClubConfig} from '@/hooks/entities/club/useClubConfig';
-
 import Logo from '@/components/ui/layout/Logo';
 
 import {uploadClubAsset, deleteClubAsset} from '@/utils/supabase/storage';
 
+import {useFetchClubConfig, useClubConfig} from "@/hooks";
+
 export default function ClubConfigCard() {
-  const {clubConfig, loading, error, updateClubConfig} = useClubConfig();
+  const {data: clubConfig, loading, error} = useFetchClubConfig();
+  const {updateClubConfig} = useClubConfig();
   const [isEditing, setIsEditing] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingHero, setUploadingHero] = useState(false);
@@ -72,9 +71,9 @@ export default function ClubConfigCard() {
     }
   }, [clubConfig]);
 
-  const handleSave = async () => {
+  const handleSave = async (id: string) => {
     try {
-      await updateClubConfig(formData);
+      await updateClubConfig(id, formData);
       setIsEditing(false);
     } catch (error) {
       console.error('Error saving club config:', error);
@@ -222,7 +221,7 @@ export default function ClubConfigCard() {
               <Button color="secondary" variant="bordered" onPress={handleCancel}>
                 Zrušit
               </Button>
-              <Button color="primary" onPress={handleSave}>
+              <Button color="primary" onPress={() => handleSave(clubConfig!.id)}>
                 Uložit změny
               </Button>
             </div>

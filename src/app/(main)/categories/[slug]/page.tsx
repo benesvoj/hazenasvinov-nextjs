@@ -7,6 +7,7 @@ import {
   CategoryMatches,
   CategoryPosts,
 } from '@/app/(main)/categories/components';
+
 interface CategoryPageProps {
   params: Promise<{
     slug: string;
@@ -20,6 +21,7 @@ export default async function CategoryPage({params}: CategoryPageProps) {
   }
   const categorySlug = awaitedParams.slug;
 
+  // TODO: REFACTOR
   try {
     // Fetch all data server-side in optimized batches
     const {category, matches, posts, standings, season} = await getCategoryPageData(categorySlug);

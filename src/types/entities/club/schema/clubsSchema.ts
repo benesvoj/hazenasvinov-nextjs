@@ -9,33 +9,36 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-10-24
+ * Last generated: 2025-11-11
  */
 
 export interface ClubSchema {
-  address: string | null;
-  city: string | null;
-  contact_person: string | null;
-  created_at: string | null;
-  description: string | null;
-  email: string | null;
-  founded_year: number | null;
-  id: string;
-  is_active: boolean | null;
-  is_own_club: boolean | null;
-  logo_url: string | null;
-  name: string;
-  phone: string | null;
-  short_name: string | null;
-  updated_at: string | null;
-  venue: string | null;
-  web: string | null;
+  address: string | null
+  city: string | null
+  contact_person: string | null
+  created_at: string | null
+  description: string | null
+  email: string | null
+  founded_year: number | null
+  id: string
+  is_active: boolean | null
+  is_own_club: boolean | null
+  logo_url: string | null
+  name: string
+  phone: string | null
+  short_name: string | null
+  updated_at: string | null
+  venue: string | null
+  web: string | null
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type ClubInsert = Omit<ClubSchema, 'id' | 'created_at' | 'updated_at'> & {
+export type ClubInsert = Omit<
+  ClubSchema,
+  'id' | 'created_at' | 'updated_at'
+> & {
   id?: string; // Optional for inserts
 };
 

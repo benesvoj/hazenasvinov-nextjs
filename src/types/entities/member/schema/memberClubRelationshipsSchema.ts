@@ -9,21 +9,21 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-10-24
+ * Last generated: 2025-11-11
  */
 
 export interface MemberClubRelationshipSchema {
-  club_id: string;
-  created_at: string | null;
-  created_by: string | null;
-  id: string;
-  member_id: string;
-  notes: string | null;
-  relationship_type: string;
-  status: string;
-  updated_at: string | null;
-  valid_from: string;
-  valid_to: string | null;
+  club_id: string
+  created_at: string | null
+  created_by: string | null
+  id: string
+  member_id: string
+  notes: string | null
+  relationship_type: string
+  status: string
+  updated_at: string | null
+  valid_from: string
+  valid_to: string | null
 }
 
 /**

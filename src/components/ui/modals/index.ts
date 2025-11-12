@@ -5,4 +5,4 @@
 
 export {default as DeleteConfirmationModal} from './DeleteConfirmationModal';
 export {default as UnifiedModal} from './UnifiedModal';
-export {UserProfileModal} from './UserProfileModal';
+export {UserProfileModal} from '../client/UserProfileModal';

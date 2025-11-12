@@ -47,7 +47,7 @@ export default function MembersAdminPage() {
   );
 
   // Use AppDataContext for members and category data
-  const {categories} = useAppData();
+  const {categories: {data: categories}} = useAppData();
 
   // Add hooks for all three tab types (for refresh functionality)
   const {

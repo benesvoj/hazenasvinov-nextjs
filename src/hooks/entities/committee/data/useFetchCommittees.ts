@@ -9,36 +9,36 @@ import {Committee} from '@/types';
 const t = translations.admin.committees.responseMessages;
 
 export function useFetchCommittees() {
-  const [data, setData] = useState<Committee[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+	const [data, setData] = useState<Committee[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+	const fetchData = async () => {
+		try {
+			setLoading(true);
+			setError(null);
 
-      const res = await fetch(API_ROUTES.committees.root);
-      const response = await res.json();
+			const res = await fetch(API_ROUTES.committees.root);
+			const response = await res.json();
 
-      setData(response.data || []);
-    } catch (error) {
-      console.error(t.committeesFetchFailed, error);
-      setError(t.committeesFetchFailed);
-      showToast.danger(t.committeesFetchFailed);
-    } finally {
-      setLoading(false);
-    }
-  };
+			setData(response.data || []);
+		} catch (error) {
+			console.error(t.committeesFetchFailed, error);
+			setError(t.committeesFetchFailed);
+			showToast.danger(t.committeesFetchFailed);
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+	useEffect(() => {
+		fetchData();
+	}, []);
 
-  return {
-    data,
-    loading,
-    error,
-    refetch: fetchData,
-  };
+	return {
+		data,
+		loading,
+		error,
+		refetch: fetchData,
+	};
 }

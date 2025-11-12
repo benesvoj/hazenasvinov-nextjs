@@ -9,24 +9,27 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-10-24
+ * Last generated: 2025-11-11
  */
 
 export interface SeasonSchema {
-  created_at: string | null;
-  end_date: string;
-  id: string;
-  is_active: boolean | null;
-  is_closed: boolean | null;
-  name: string;
-  start_date: string;
-  updated_at: string | null;
+  created_at: string | null
+  end_date: string
+  id: string
+  is_active: boolean | null
+  is_closed: boolean | null
+  name: string
+  start_date: string
+  updated_at: string | null
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type SeasonInsert = Omit<SeasonSchema, 'id' | 'created_at' | 'updated_at'> & {
+export type SeasonInsert = Omit<
+  SeasonSchema,
+  'id' | 'created_at' | 'updated_at'
+> & {
   id?: string; // Optional for inserts
 };
 

@@ -61,7 +61,7 @@ export default function CreateMemberModal({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const {fetchMembers} = useFetchMembers();
+  const {refetch: fetchMembers} = useFetchMembers();
   const {createMemberMetadata} = useMemberMetadata();
 
   const handleInputChange = (field: keyof MemberMetadaFormData, value: string) => {

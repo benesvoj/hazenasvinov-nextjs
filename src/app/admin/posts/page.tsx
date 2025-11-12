@@ -1,308 +1,301 @@
-// TODO: REFACTOR
 'use client';
 
 import React, {useState} from 'react';
 
-import {
-  Card,
-  CardBody,
-  Button,
-  Input,
-  useDisclosure,
-  Select,
-  SelectItem,
-  Image,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Chip,
-} from '@heroui/react';
+import {Chip, Image, Input, Select, SelectItem, useDisclosure,} from '@heroui/react';
 
-import {PencilIcon, TrashIcon, TagIcon, PhotoIcon} from '@heroicons/react/24/outline';
+import {PhotoIcon, TagIcon} from '@heroicons/react/24/outline';
 
-import {useBlogPosts} from '@/hooks/entities/blog/useBlogPosts';
+import {uploadClubAsset} from "@/utils/supabase/storage";
 
-import {translations} from '@/lib/translations';
+import {BlogPostModal} from "@/app/admin/posts/components/BlogPostModal";
 
-import {LoadingSpinner, AdminContainer, DeleteConfirmationModal} from '@/components';
+import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
 import {adminStatusFilterOptions} from '@/constants';
-import {ActionTypes} from '@/enums';
+import {ActionTypes, BlogPostStatuses, ModalMode} from '@/enums';
 import {formatDateString} from '@/helpers';
-import {BlogPost} from '@/types';
+import {
+	useBlogPost,
+	useBlogPostFiltering,
+	useBlogPostForm,
+	useFetchBlog,
+	useFetchCategories,
+	useFetchUsers
+} from "@/hooks";
+import {translations} from '@/lib';
+import {Blog, BlogPostInsert} from '@/types';
 
-import {AddPostModal, EditPostModal} from './components';
 
 export default function BlogPostsPage() {
-  const t = translations.admin.posts;
+	const t = translations.admin.posts;
 
-  // Use the custom hook for all business logic
-  const {
-    posts,
-    users,
-    categories,
-    loading,
-    categoriesLoading,
-    userError,
-    dbError,
-    categoriesError,
-    searchTerm,
-    setSearchTerm,
-    statusFilter,
-    setStatusFilter,
-    filteredPosts,
-    categoryLookupMap,
-    addPost: handleAddPost,
-    updatePost: handleUpdatePost,
-    deletePost: handleDeletePost,
-  } = useBlogPosts();
+	const {users} = useFetchUsers();
+	const {data: blogPosts, loading: blogPostsLoading, refetch: refetchBlog} = useFetchBlog()
+	const {data: categories, loading: categoriesLoading} = useFetchCategories();
 
-  const {isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose} = useDisclosure();
-  const {isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose} = useDisclosure();
-  const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
+	const {createBlog, updateBlog, deleteBlog, loading: crudLoading} = useBlogPost();
 
-  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+	const blogPostForm = useBlogPostForm();
 
-  // Event handlers
-  const handleAddPostClick = () => {
-    onAddOpen();
-  };
+	const [searchTerm, setSearchTerm] = useState('');
+	const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const handleEditPostClick = (post: BlogPost) => {
-    setSelectedPost(post);
-    onEditOpen();
-  };
+	const {filteredPosts, categoryLookupMap} = useBlogPostFiltering({
+		blogPosts: blogPosts || [],
+		searchTerm,
+		statusFilter,
+		categories: categories || []
+	});
 
-  const handleDeletePostClick = (post: BlogPost) => {
-    setSelectedPost(post);
-    onDeleteOpen();
-  };
+	const {isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose} = useDisclosure();
+	const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
 
-  const handleDeleteConfirm = async () => {
-    if (selectedPost) {
-      await handleDeletePost(selectedPost.id);
-      setSelectedPost(null);
-      onDeleteClose();
-    }
-  };
+	// Event handlers
+	const handleAddPostClick = () => {
+		blogPostForm.openAddMode();
+		onModalOpen();
+	};
 
-  const handleUpdatePostWrapper = async (
-    formData: Omit<BlogPost, 'id' | 'updated_at' | 'created_at'>,
-    imageFile: File | null
-  ) => {
-    if (!selectedPost) return;
-    await handleUpdatePost({...formData, id: selectedPost.id} as BlogPost, imageFile);
-  };
+	const handleEditPostClick = (post: Blog) => {
+		blogPostForm.openEditMode(post)
+		onModalOpen();
+	};
 
-  // Get status badge color
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'published':
-        return (
-          <Chip color="success" variant="flat">
-            {adminStatusFilterOptions.published}
-          </Chip>
-        );
-      case 'draft':
-        return (
-          <Chip color="warning" variant="flat">
-            {adminStatusFilterOptions.draft}
-          </Chip>
-        );
-      case 'archived':
-        return (
-          <Chip color="secondary" variant="flat">
-            {adminStatusFilterOptions.archived}
-          </Chip>
-        );
-      default:
-        return null;
-    }
-  };
+	const handleSubmitPost = async () => {
+		const {valid, errors} = blogPostForm.validateForm();
 
-  return (
-    <AdminContainer
-      actions={[
-        {
-          label: t.addPost,
-          onClick: handleAddPostClick,
-          variant: 'solid',
-          buttonType: ActionTypes.CREATE,
-        },
-      ]}
-    >
-      {/* Filters */}
-      <Card>
-        <CardBody className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <Input
-              placeholder="Hledat v článcích..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1"
-              startContent={<TagIcon className="w-4 h-4 text-gray-400" />}
-            />
-            <Select
-              placeholder="Filtr podle stavu"
-              selectedKeys={[statusFilter]}
-              onSelectionChange={(keys) => setStatusFilter(Array.from(keys)[0] as string)}
-              className="w-full md:w-48"
-            >
-              {Object.entries(adminStatusFilterOptions).map(([key, value]) => (
-                <SelectItem key={key}>{value}</SelectItem>
-              ))}
-            </Select>
-          </div>
-        </CardBody>
-      </Card>
+		if (!valid) {
+			errors.forEach(error => showToast.danger(error));
+			return;
+		}
 
-      {/* Posts Table */}
-      <Card>
-        <CardBody className="p-0">
-          {loading || categoriesLoading ? (
-            <div className="text-center py-12">
-              <LoadingSpinner />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableColumn>Obrázek</TableColumn>
-                  <TableColumn>Název</TableColumn>
-                  <TableColumn>Kategorie</TableColumn>
-                  <TableColumn>Autor</TableColumn>
-                  <TableColumn>Stav</TableColumn>
-                  <TableColumn>Vytvořeno</TableColumn>
-                  <TableColumn>Akce</TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {filteredPosts.map((post) => (
-                    <TableRow key={post.id}>
-                      <TableCell>
-                        {post.image_url ? (
-                          <div className="relative w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                            <Image
-                              src={post.image_url}
-                              alt={post.title}
-                              width={64}
-                              height={64}
-                              className="object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                            <PhotoIcon className="w-6 h-6 text-gray-400" />
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {post.title}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {post.slug}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {post.category_id !== null
-                            ? categoryLookupMap.get(post.category_id) || '-'
-                            : '-'}
-                        </div>
-                      </TableCell>
-                      {/* TODO: add author name instead of ID */}
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">
-                            {post.author_id === 'default-user' ? 'Admin' : `ID: ${post.author_id}`}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(post.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{formatDateString(post.created_at)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="light"
-                            color="primary"
-                            isIconOnly
-                            onPress={() => handleEditPostClick(post)}
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="light"
-                            color="danger"
-                            isIconOnly
-                            onPress={() => handleDeletePostClick(post)}
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+		let imageUrl = blogPostForm.formData.image_url
 
-              {filteredPosts.length === 0 && (
-                <div className="text-center py-12">
-                  <TagIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                    {dbError || categoriesError ? 'Chyba databáze' : 'Žádné články'}
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-500">
-                    {dbError || categoriesError
-                      ? 'Nelze načíst články kvůli chybě databáze. Zkontrolujte konfiguraci Supabase.'
-                      : searchTerm || statusFilter !== 'all'
-                        ? 'Pro vybrané filtry nebyly nalezeny žádné články.'
-                        : 'Zatím nebyly vytvořeny žádné články.'}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </CardBody>
-      </Card>
+		if (blogPostForm.imageFile) {
+			blogPostForm.setUploadingImage(true);
 
-      {/* Add Post Modal */}
-      <AddPostModal
-        isOpen={isAddOpen}
-        onClose={onAddClose}
-        onSubmit={handleAddPost}
-        users={users}
-        categories={categories}
-        categoriesLoading={categoriesLoading}
-      />
+			const timestamp = Date.now();
+			const fileExtension = blogPostForm.imageFile.name.split('.').pop();
+			const fileName = `${timestamp}.${fileExtension}`;
+			const blogPostId = blogPostForm.selectedPost?.id || 'new';
+			const filePath = `blog-images/${blogPostId}/${fileName}`;
 
-      {/* Edit Post Modal */}
-      <EditPostModal
-        isOpen={isEditOpen}
-        onClose={onEditClose}
-        onSubmit={handleUpdatePostWrapper}
-        post={selectedPost}
-        users={users}
-        categories={categories}
-        categoriesLoading={categoriesLoading}
-      />
+			const uploadResult = await uploadClubAsset(blogPostForm.imageFile, filePath);
 
-      <DeleteConfirmationModal
-        isOpen={isDeleteOpen}
-        onClose={onDeleteClose}
-        onConfirm={handleDeleteConfirm}
-        message={t.deletePostMessage}
-        title={t.deletePost}
-      />
-    </AdminContainer>
-  );
+			if (uploadResult.error) {
+				showToast.danger('Chyba při nahrávání obrázku.');
+				blogPostForm.setUploadingImage(false);
+				return;
+			}
+
+			imageUrl = uploadResult.url;
+			blogPostForm.setUploadingImage(false);
+		}
+
+		let success = false;
+
+		if (blogPostForm.modalMode === ModalMode.ADD) {
+			const insertData: BlogPostInsert = {
+				...blogPostForm.formData,
+				image_url: imageUrl || null,
+			}
+			success = await createBlog(insertData);
+		} else {
+			if (!blogPostForm.selectedPost) return;
+			success = await updateBlog(blogPostForm.selectedPost.id, {
+				id: blogPostForm.selectedPost.id,
+				...blogPostForm.formData,
+				image_url: imageUrl || null,
+			})
+		}
+
+		if (success) {
+			await refetchBlog();
+			blogPostForm.resetForm();
+			onModalClose()
+		}
+	}
+
+	const handleDeletePostClick = (item: Blog) => {
+		blogPostForm.openEditMode(item);
+		onDeleteOpen();
+	};
+
+	const handleDeleteConfirm = async () => {
+		if (blogPostForm.selectedPost) {
+			const success = await deleteBlog(blogPostForm.selectedPost.id);
+			if (success) {
+				await refetchBlog();
+				blogPostForm.resetForm();
+				onDeleteClose();
+			}
+		}
+	};
+
+	const getStatusBadge = (status: string) => {
+		switch (status) {
+			case BlogPostStatuses.PUBLISHED:
+				return (
+					<Chip color="success" variant="flat">
+						{adminStatusFilterOptions.published}
+					</Chip>
+				);
+			case BlogPostStatuses.DRAFT:
+				return (
+					<Chip color="warning" variant="flat">
+						{adminStatusFilterOptions.draft}
+					</Chip>
+				);
+			case BlogPostStatuses.ARCHIVED:
+				return (
+					<Chip color="secondary" variant="flat">
+						{adminStatusFilterOptions.archived}
+					</Chip>
+				);
+			default:
+				return null;
+		}
+	};
+
+	const columns = [
+		{key: 'image', label: t.table.image},
+		{key: 'title', label: t.table.title},
+		{key: 'category', label: t.table.category},
+		{key: 'author', label: t.table.author},
+		{key: 'status', label: t.table.status},
+		{key: 'created_at', label: t.table.createdAt},
+		{
+			key: 'actions', label: t.table.actions, isActionColumn: true,
+			actions: [
+				{type: ActionTypes.UPDATE, onPress: handleEditPostClick, title: t.actions.editPost},
+				{type: ActionTypes.DELETE, onPress: handleDeletePostClick, title: t.actions.deletePost},
+			]
+		},
+	]
+
+	const renderCells = (post: Blog, columnKey: string) => {
+		switch (columnKey) {
+			case 'image':
+				return post.image_url ? (
+					<div
+						className="relative w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+						<Image
+							src={post.image_url}
+							alt={post.title}
+							width={64}
+							height={64}
+							className="object-cover"
+						/>
+					</div>
+				) : (
+					<div
+						className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+						<PhotoIcon className="w-6 h-6 text-gray-400"/>
+					</div>
+				);
+			case 'title':
+				return (
+					<div>
+						<div className="font-medium text-gray-900 dark:text-white">
+							{post.title}
+						</div>
+						<div className="text-sm text-gray-500 dark:text-gray-400">
+							{post.slug}
+						</div>
+					</div>
+				)
+			case 'category':
+				return (
+					<div className="flex flex-wrap gap-1">
+						{post.category_id !== null
+							? categoryLookupMap.get(post.category_id) || '-'
+							: '-'}
+					</div>
+				);
+			case 'author':
+				return (
+					<div className="flex items-center gap-2">
+						<span className="text-sm">
+							{users.find(user => user.id === post.author_id)?.email || '-'}
+						</span>
+					</div>
+				);
+			case 'status':
+				return getStatusBadge(post.status);
+			case 'created_at':
+				return (
+					<div className="flex items-center gap-2">
+						<span
+							className="text-sm">{post.created_at ? formatDateString(post.created_at) : '-'}</span>
+					</div>
+				);
+		}
+	}
+
+	const filters = (
+		<div className="flex flex-col md:flex-row gap-4 w-full">
+			<Input
+				placeholder={t.filters.searchInputPlaceholder}
+				value={searchTerm}
+				onChange={(e) => setSearchTerm(e.target.value)}
+				className="flex-1"
+				startContent={<TagIcon className="w-4 h-4 text-gray-400"/>}
+				aria-label={t.filters.searchInputPlaceholder}
+			/>
+			<Select
+				placeholder={t.filters.byStatus}
+				selectedKeys={[statusFilter]}
+				onSelectionChange={(keys) => setStatusFilter(Array.from(keys)[0] as string)}
+				className="w-full md:w-48"
+				aria-label={t.filters.byStatus}
+			>
+				{Object.entries(adminStatusFilterOptions).map(([key, value]) => (
+					<SelectItem key={key}>{value}</SelectItem>
+				))}
+			</Select>
+		</div>
+	)
+
+	return (
+		<>
+			<AdminContainer
+				actions={[
+					{
+						label: t.addPost,
+						onClick: handleAddPostClick,
+						variant: 'solid',
+						buttonType: ActionTypes.CREATE,
+					},
+				]}
+				filters={filters}
+			>
+				<UnifiedTable
+					columns={columns}
+					data={filteredPosts}
+					renderCell={renderCells}
+					isLoading={blogPostsLoading}
+					ariaLabel={t.table.ariaLabel}
+				/>
+			</AdminContainer>
+
+			<BlogPostModal
+				isOpen={isModalOpen}
+				onClose={onModalClose}
+				onSubmit={handleSubmitPost}
+				mode={blogPostForm.modalMode}
+				categories={categories || []}
+				categoriesLoading={categoriesLoading}
+				blogPostForm={blogPostForm}
+			/>
+
+			<DeleteConfirmationModal
+				isOpen={isDeleteOpen}
+				onClose={onDeleteClose}
+				onConfirm={handleDeleteConfirm}
+				message={t.deletePostMessage}
+				title={t.deletePost}
+				isLoading={crudLoading}
+			/>
+		</>
+	);
 }

@@ -21,11 +21,11 @@ export default function CategoriesAdminPage() {
   const {data: categories, loading, refetch} = useFetchCategories({searchTerm});
   const {
     loading: crudLoading,
-    setLoading: setCrudLoading,
     createCategory,
     updateCategory,
     deleteCategory,
   } = useCategories();
+
   const {
     formData,
     setFormData,
@@ -77,7 +77,6 @@ export default function CategoriesAdminPage() {
         await createCategory(formData);
       }
       await refetch();
-      setCrudLoading(false);
       onCategoryModalClose();
       resetForm();
     } catch (error) {
@@ -96,7 +95,6 @@ export default function CategoriesAdminPage() {
       await refetch();
       onDeleteCategoryClose();
       resetForm();
-      setCrudLoading(false);
     }
   };
 

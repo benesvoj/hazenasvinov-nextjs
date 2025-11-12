@@ -3,20 +3,17 @@
 // Last updated: 2025-10-24T13:56:27.050Z
 // Folder: ui
 
-export {ButtonWithTooltip} from './buttons/ButtonWithTooltip';
+export {ButtonWithTooltip} from '@/components/ui/server/buttons/ButtonWithTooltip';
 export {Card} from './cards/Card';
 export {default as UnifiedCard} from './cards/UnifiedCard';
 export {default as PageContainer} from './containers/PageContainer';
 export {default as DropdownMenu} from './dropdown-menu/DropdownMenu';
 export * from './feedback';
 export {default as FormField} from './forms/FormField';
-export {default as LogoUpload} from './forms/LogoUpload';
 export {Heading} from './heading/Heading';
-export {PasswordInput} from './inputs/PasswordInput';
 export * from './layout';
 export {default as Link} from './link/Link';
 export * from './modals';
 export {default as MobileActionsMenu} from './navigation/MobileActionsMenu';
-export * from './navigation/Navigation';
-export {default as UnifiedTable} from './tables/UnifiedTable';
-export {default as ThemeSwitch} from './theme-switch/ThemeSwitch';
+export * from './client/Navigation';
+export {default as UnifiedTable} from '@/components/ui/client/tables/UnifiedTable';

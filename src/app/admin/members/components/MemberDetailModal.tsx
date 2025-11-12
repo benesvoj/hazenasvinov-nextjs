@@ -32,7 +32,7 @@ export default function MemberDetailModal({
   mode,
 }: MemberDetailModalProps) {
   const t = translations.members.modals;
-  const {categories} = useAppData();
+  const {categories: {data: categories}} = useAppData();
   const {createMember} = useMembers();
 
   const handleSave = async () => {

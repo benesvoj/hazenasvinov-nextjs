@@ -9,24 +9,27 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-10-24
+ * Last generated: 2025-11-11
  */
 
 export interface CommitteesSchema {
-  code: string;
-  created_at: string | null;
-  description: string | null;
-  id: string;
-  is_active: boolean | null;
-  name: string;
-  sort_order: number | null;
-  updated_at: string | null;
+  code: string
+  created_at: string | null
+  description: string | null
+  id: string
+  is_active: boolean | null
+  name: string
+  sort_order: number | null
+  updated_at: string | null
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type CommitteesInsert = Omit<CommitteesSchema, 'id' | 'created_at' | 'updated_at'> & {
+export type CommitteesInsert = Omit<
+  CommitteesSchema,
+  'id' | 'created_at' | 'updated_at'
+> & {
   id?: string; // Optional for inserts
 };
 

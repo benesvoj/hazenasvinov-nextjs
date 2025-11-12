@@ -33,7 +33,7 @@ import {
   useTeams,
   useExcelImport,
   useTeamDisplayLogic,
-  useFetchCategories,
+  useFetchCategories, useFetchSeasons,
 } from '@/hooks';
 import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
@@ -61,7 +61,7 @@ export default function MatchesAdminPage() {
     loading: categoriesLoading,
     refetch: fetchCategories,
   } = useFetchCategories();
-  const {members, loading: membersLoading, fetchMembers} = useFetchMembers();
+  const {data: members, loading: membersLoading, refetch: fetchMembers} = useFetchMembers();
   const {teams, loading: allTeamsLoading, fetchTeams} = useTeams();
 
   // Modal states
@@ -198,7 +198,7 @@ export default function MatchesAdminPage() {
   const supabase = createClient();
 
   // Use the enhanced seasons hook
-  const {activeSeason, sortedSeasons, loading: seasonsLoading, fetchAllSeasons} = useSeasons();
+  const {activeSeason, sortedSeasons, loading: seasonsLoading} = useSeasons();
 
   const [selectedSeason, setSelectedSeason] = useState<string>('');
   const queryClient = useQueryClient();
@@ -250,10 +250,9 @@ export default function MatchesAdminPage() {
   // Initial data fetch
   useEffect(() => {
     fetchCategories();
-    fetchAllSeasons();
     fetchTeams();
     fetchMembers();
-  }, [fetchCategories, fetchAllSeasons, fetchTeams, fetchMembers]);
+  }, [fetchCategories, fetchTeams, fetchMembers]);
 
   // Set first category as default when categories are loaded
   useEffect(() => {

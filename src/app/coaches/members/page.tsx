@@ -15,7 +15,7 @@ import {BaseMember, MemberInternal} from '@/types';
 
 export default function CoachesMembersPage() {
   const t = translations.members;
-  const {categories: categoriesData} = useAppData();
+  const {categories: {data: categoriesData}} = useAppData();
 
   const {
     data: membersInternalData,

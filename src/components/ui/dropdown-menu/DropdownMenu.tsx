@@ -1,5 +1,3 @@
-'use client';
-
 import {ChevronDownIcon} from '@heroicons/react/16/solid';
 
 //. TODO: find solution to do not use headlessui to ba able to remove it from package.json

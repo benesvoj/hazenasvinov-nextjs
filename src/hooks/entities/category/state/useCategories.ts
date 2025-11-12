@@ -4,114 +4,99 @@ import {useCallback, useState} from 'react';
 
 import {showToast} from '@/components';
 import {API_ROUTES, translations} from '@/lib';
-import {Category, CategoryInsert} from '@/types';
+import {CreateCategory, UpdateCategory} from '@/types';
 
 const t = translations.categories.responseMessages;
 
 export function useCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+	const [loading, setLoading] = useState(false);
 
-  // Create category
-  const createCategory = useCallback(async (data: CategoryInsert) => {
-    try {
-      setLoading(true);
-      setError(null);
+	// Create category
+	const createCategory = useCallback(
+		async (data: CreateCategory) => {
+			try {
+				setLoading(true);
 
-      const res = await fetch(API_ROUTES.categories.root, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data),
-      });
-      const response = await res.json();
+				const res = await fetch(API_ROUTES.categories.root, {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(data),
+				});
+				const response = await res.json();
 
-      if (!res.ok || response.error) {
-        throw new Error(response.error || t.categoryCreationFailed);
-      }
+				if (!res.ok || response.error) {
+					throw new Error(response.error || t.categoryCreationFailed);
+				}
 
-      showToast.success(t.categoryCreationSuccess);
-      setCategories((prev) => [...prev, response.data]);
-      return response;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t.categoryCreationFailed;
-      setError(errorMessage);
-      console.error(t.categoryCreationFailed, error);
-      return {success: false, error: errorMessage};
-    }
-  }, []);
+				showToast.success(t.categoryCreationSuccess);
+				return response;
+			} catch (error) {
+				console.error(t.categoryCreationFailed, error);
+				showToast.danger(t.categoryCreationFailed);
+			} finally {
+				setLoading(false);
+			}
+		}, []);
 
-  // Update category
-  const updateCategory = useCallback(async (id: string, data: Partial<CategoryInsert>) => {
-    try {
-      setLoading(true);
-      setError(null);
+	// Update category
+	const updateCategory = useCallback(
+		async (id: string, data: Partial<UpdateCategory>) => {
+			try {
+				setLoading(true);
 
-      const res = await fetch(API_ROUTES.categories.byId(id), {
-        method: 'PATCH',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data),
-      });
-      const response = await res.json();
+				const res = await fetch(API_ROUTES.categories.byId(id), {
+					method: 'PATCH',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(data),
+				});
+				const response = await res.json();
 
-      if (!res.ok || response.error) {
-        throw new Error(response.error || t.categoryUpdateFailed);
-      }
+				if (!res.ok || response.error) {
+					throw new Error(response.error || t.categoryUpdateFailed);
+				}
 
-      showToast.success(t.categoryUpdatedSuccess);
-      setCategories((prev) => prev.map((cat) => (cat.id === id ? response.data : cat)));
-      return response;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t.categoryUpdateFailed;
-      setError(errorMessage);
-      console.error('Error updating category:', error);
-      return {success: false, error: errorMessage};
-    }
-  }, []);
+				showToast.success(t.categoryUpdatedSuccess);
+				return response;
+			} catch (error) {
+				console.error('Error updating category:', error);
+				showToast.danger(t.categoryUpdateFailed);
+			} finally {
+				setLoading(false);
+			}
+		}, []);
 
-  // Delete category
-  const deleteCategory = useCallback(async (id: string) => {
-    try {
-      setLoading(true);
-      setError(null);
+	// Delete category
+	const deleteCategory = useCallback(
+		async (id: string) => {
+			try {
+				setLoading(true);
 
-      const res = await fetch(API_ROUTES.categories.byId(id), {
-        method: 'DELETE',
-      });
-      const response = await res.json();
+				const res = await fetch(API_ROUTES.categories.byId(id), {
+					method: 'DELETE',
+				});
+				const response = await res.json();
 
-      if (!res.ok || response.error) {
-        throw new Error(response.error || t.categoryDeleteFailed);
-      }
+				if (!res.ok || response.error) {
+					throw new Error(response.error || t.categoryDeleteFailed);
+				}
 
-      showToast.success(t.categoryDeleteSuccess);
-      setCategories((prev) => prev.filter((cat) => cat.id !== id));
-      return {success: true};
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t.categoryDeleteFailed;
-      setError(errorMessage);
-      console.error('Error deleting category:', error);
-      return {success: false, error: errorMessage};
-    }
-  }, []);
+				showToast.success(t.categoryDeleteSuccess);
+				return {success: true};
+			} catch (error) {
+				console.error('Error deleting category:', error);
+				showToast.danger(t.categoryDeleteFailed);
+			} finally {
+				setLoading(false);
+			}
+		}, []);
 
-  return {
-    // Data
-    categories,
+	return {
+		// State
+		loading,
 
-    // State
-    loading,
-    error,
-
-    // Actions
-    createCategory,
-    updateCategory,
-    deleteCategory,
-
-    // Setters
-    setLoading,
-
-    // Utilities
-    clearError: () => setError(null),
-  };
+		// Actions
+		createCategory,
+		updateCategory,
+		deleteCategory,
+	};
 }

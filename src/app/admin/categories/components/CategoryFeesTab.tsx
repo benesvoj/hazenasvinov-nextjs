@@ -35,7 +35,7 @@ export default function CategoryFeesTab() {
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
   const {data, loading: fetchLoading, refetch} = useFetchCategoryMembershipFees({selectedYear});
-  const {categories} = useAppData();
+  const {categories: {data: categories}} = useAppData();
   const {fees, loading, deleteFee} = useCategoryMembershipFees(selectedYear);
 
   const {isOpen: isFormOpen, onOpen: onFormOpen, onClose: onFormClose} = useDisclosure();

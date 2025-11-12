@@ -16,7 +16,7 @@ import {
   Button,
 } from '@heroui/react';
 
-import {useSeasons} from '@/hooks/entities/season/useSeasons';
+import {useSeasons} from '@/hooks/entities/season/state/useSeasons';
 
 import {useFetchCategories} from '@/hooks';
 import {Video, VideoFormData, Category, Club} from '@/types';

@@ -11,7 +11,7 @@ import {translations} from '@/lib/translations';
 import {showToast} from '@/components';
 import {Category, Season, Video} from '@/types';
 
-import {ButtonWithTooltip, ButtonWithTooltipProps} from '../../ui/buttons/ButtonWithTooltip';
+import {ButtonWithTooltip, ButtonWithTooltipProps} from '@/components/ui/server/buttons/ButtonWithTooltip';
 
 interface VideoCardProps {
   video: Video;

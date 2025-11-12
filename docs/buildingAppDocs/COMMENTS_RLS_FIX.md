@@ -21,7 +21,7 @@ The `comments` table was created without Row Level Security (RLS) enabled, which
 ### 1. Enable Row Level Security
 
 ```sql
--- Enable RLS on the comments table
+-- Enable RLS on the comment table
 ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 ```
 
@@ -31,7 +31,7 @@ Since `comments` contains project management data with user emails, we need bala
 
 #### Public Read Access (Project Collaboration)
 ```sql
--- Policy 1: Allow all authenticated users to read comments
+-- Policy 1: Allow all authenticated users to read comment
 CREATE POLICY "Allow authenticated users to read comments" ON comments
     FOR SELECT
     TO authenticated
@@ -40,7 +40,7 @@ CREATE POLICY "Allow authenticated users to read comments" ON comments
 
 #### User Self-Management
 ```sql
--- Policy 2: Allow users to insert comments (with their own email)
+-- Policy 2: Allow users to insert comment (with their own email)
 CREATE POLICY "Allow authenticated users to insert comments" ON comments
     FOR INSERT
     TO authenticated
@@ -50,7 +50,7 @@ CREATE POLICY "Allow authenticated users to insert comments" ON comments
         )
     );
 
--- Policy 3: Allow users to update their own comments
+-- Policy 3: Allow users to update their own comment
 CREATE POLICY "Allow users to update their own comments" ON comments
     FOR UPDATE
     TO authenticated
@@ -65,7 +65,7 @@ CREATE POLICY "Allow users to update their own comments" ON comments
         )
     );
 
--- Policy 4: Allow users to delete their own comments
+-- Policy 4: Allow users to delete their own comment
 CREATE POLICY "Allow users to delete their own comments" ON comments
     FOR DELETE
     TO authenticated
@@ -119,7 +119,7 @@ GRANT INSERT, UPDATE, DELETE ON comments TO authenticated;
 2. **Run the automated script**:
    ```bash
    cd scripts
-   node fix-comments-rls.js
+   node fix-comment-rls.js
    ```
 
 ### Option 2: Manual SQL Execution

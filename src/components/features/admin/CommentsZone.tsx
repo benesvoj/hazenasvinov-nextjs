@@ -1,5 +1,3 @@
-'use client';
-
 import {ChatBubbleLeftRightIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
@@ -11,7 +9,6 @@ import {CommentsZoneProps} from '@/types';
 export default function CommentsZone({
   comments,
   commentsLoading,
-  handleAddComment,
   handleEditComment,
   onAddCommentOpen,
   deleteComment,

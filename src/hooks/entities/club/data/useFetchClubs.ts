@@ -38,7 +38,7 @@ export function useFetchClubs(filters?: UseClubsFilters) {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []);
 
   // Filter categories based on search term
   const getFilterClubs = useCallback(() => {

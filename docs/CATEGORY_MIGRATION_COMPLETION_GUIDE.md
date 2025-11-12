@@ -176,7 +176,7 @@ ALTER TABLE category_lineup_members DROP CONSTRAINT IF EXISTS check_valid_catego
 -- Step 3: Remove category.code column (if no longer needed)
 -- ALTER TABLE category DROP COLUMN IF EXISTS code;
 
--- Step 4: Update comments
+-- Step 4: Update comment
 COMMENT ON COLUMN training_sessions.category_id IS 'Category UUID reference - migration completed';
 COMMENT ON COLUMN category_lineup_members.category_id IS 'Category UUID reference - migration completed';
 ```

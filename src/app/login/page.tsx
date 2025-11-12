@@ -14,7 +14,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
-import {PasswordInput} from '@/components/ui/inputs/PasswordInput';
+import {PasswordInput} from '@/components/ui/client/inputs/PasswordInput';
 
 import {logSuccessfulLogin, logFailedLogin} from '@/utils/loginLogger';
 import {createClient} from '@/utils/supabase/client';

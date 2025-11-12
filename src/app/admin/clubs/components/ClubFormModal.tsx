@@ -1,11 +1,14 @@
 import React from 'react';
 
-import {Button, Checkbox, Input} from '@heroui/react';
+import {Button, Input} from '@heroui/react';
 
-import {UnifiedModal, LogoUpload} from '@/components';
+import {LogoUpload} from "@/components/ui/client";
+
+import {UnifiedModal} from '@/components';
 import {ModalMode} from '@/enums';
 import {translations} from '@/lib';
 import {ClubFormData} from '@/types';
+
 
 interface ClubFormModalProps {
   isOpen: boolean;

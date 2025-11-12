@@ -1,3 +1,5 @@
+// TODO: refactor
+
 'use client';
 
 import React, {useState, useEffect} from 'react';
@@ -22,8 +24,11 @@ export default function VideosPage() {
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
 
   // Use AppDataContext for common data
-  const {categories, clubs, seasons, categoriesLoading, clubsLoading, seasonsLoading} =
-    useAppData();
+  const {
+    categories: {data: categories, loading: categoriesLoading},
+    clubs: {data: clubs, loading: clubLoading},
+    seasons: {data: seasons, loading: seasonLoading},
+  } = useAppData();
 
   const {
     videos,

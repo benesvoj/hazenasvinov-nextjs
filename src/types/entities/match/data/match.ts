@@ -23,7 +23,10 @@ export interface Match {
   matchweek?: number | Nullish;
   match_number?: number | Nullish;
   category: Category;
-  season: Season;
+  season: {
+    id: string;
+    name: string;
+  };
   /** Optional reference to related blog post */
   post_id?: string;
   /** Array of related video IDs */

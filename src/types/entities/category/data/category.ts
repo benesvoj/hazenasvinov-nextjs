@@ -58,8 +58,8 @@ export interface UpdateCategoryData extends CreateCategoryData {
   id: string;
 }
 
-export interface CategoryInsert extends CategoriesInsert {}
+export interface CreateCategory extends CategoriesInsert {}
 
-export interface CategoryUpdate extends CategoriesUpdate {}
+export interface UpdateCategory extends CategoriesUpdate {}
 
 export type CategoryFormData = Omit<Category, 'id' | 'created_at' | 'updated_at'>;

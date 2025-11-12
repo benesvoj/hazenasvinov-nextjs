@@ -9,34 +9,34 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-10-24
+ * Last generated: 2025-11-11
  */
 
 export interface MembersInternalSchema {
-  calendar_year: number | null;
-  category_id: string | null;
-  category_name: string | null;
-  club_name: string | null;
-  created_at: string | null;
-  currency: string | null;
-  date_of_birth: string | null;
-  expected_fee_amount: number | null;
-  functions: string[] | null;
-  id: string | null;
-  is_active: boolean | null;
-  last_payment_date: string | null;
-  name: string | null;
-  net_paid: number | null;
-  payment_count: number | null;
-  payment_status: string | null;
-  registration_number: string | null;
-  relationship_status: string | null;
-  relationship_type: string | null;
-  sex: string | null;
-  surname: string | null;
-  total_paid: number | null;
-  total_refunded: number | null;
-  updated_at: string | null;
-  valid_from: string | null;
-  valid_to: string | null;
+  calendar_year: number | null
+  category_id: string | null
+  category_name: string | null
+  club_name: string | null
+  created_at: string | null
+  currency: string | null
+  date_of_birth: string | null
+  expected_fee_amount: number | null
+  functions: string[] | null
+  id: string | null
+  is_active: boolean | null
+  last_payment_date: string | null
+  name: string | null
+  net_paid: number | null
+  payment_count: number | null
+  payment_status: string | null
+  registration_number: string | null
+  relationship_status: string | null
+  relationship_type: string | null
+  sex: string | null
+  surname: string | null
+  total_paid: number | null
+  total_refunded: number | null
+  updated_at: string | null
+  valid_from: string | null
+  valid_to: string | null
 }

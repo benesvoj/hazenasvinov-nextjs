@@ -1,6 +1,7 @@
 import {LineupErrorType, TeamTypes} from '@/enums';
 
 import {LineupCoach, LineupPlayer, LineupCoachFormData, Match} from '../../../index';
+
 export interface Lineup {
   id: string;
   match_id: string;

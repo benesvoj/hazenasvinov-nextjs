@@ -24,7 +24,7 @@ import {
 import {PlusIcon, TrashIcon, UserIcon} from '@heroicons/react/24/outline';
 
 import {useAuth} from '@/hooks/auth/useAuthNew';
-import {useSeasons} from '@/hooks/entities/season/useSeasons';
+import {useSeasons} from '@/hooks/entities/season/state/useSeasons';
 
 import {showToast} from '@/components/ui/feedback/Toast';
 
@@ -68,7 +68,7 @@ export function MeetingMinutesFormModal({
 
   const {seasons, loading: seasonsLoading, fetchAllSeasons, activeSeason} = useSeasons();
   const {user} = useAuth();
-  const {members, loading: membersLoading} = useFetchMembers();
+  const {data: members} = useFetchMembers();
 
   const t = translations.components.meetingMinutes;
 

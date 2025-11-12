@@ -20,7 +20,7 @@ const AdminCategorySimulationContext = createContext<
 
 export function AdminCategorySimulationProvider({children}: {children: React.ReactNode}) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const {categories, categoriesLoading} = useAppData();
+  const {categories: {data: categories, loading: categoriesLoading}} = useAppData();
 
   const availableCategories = categories || [];
   const loading = categoriesLoading;

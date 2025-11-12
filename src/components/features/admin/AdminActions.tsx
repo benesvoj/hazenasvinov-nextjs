@@ -1,3 +1,5 @@
+'use client';
+
 import {Button} from '@heroui/react';
 
 import {EllipsisVerticalIcon} from '@heroicons/react/24/outline';

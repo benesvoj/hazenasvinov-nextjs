@@ -6,7 +6,7 @@
 
 import React, {memo, useMemo, useCallback} from 'react';
 
-import {useSeasons} from '@/hooks/entities/season/useSeasons';
+import {useSeasons} from '@/hooks/entities/season/state/useSeasons';
 
 import {PerformanceMonitorPanel} from '@/components/features/admin/PerformanceMonitorPanel';
 

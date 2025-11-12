@@ -12,7 +12,7 @@ import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
 
 import {createSearchablePost, searchPosts} from '@/utils/contentSearch';
 
-import {useFetchBlogPosts} from '@/hooks';
+import {useFetchBlog} from '@/hooks';
 
 export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,7 +22,7 @@ export default function BlogPage() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Fetch all published blog posts
-  const {posts: allPosts, loading, error} = useFetchBlogPosts(100); // Get more posts for filtering
+  const {posts: allPosts, loading, error} = useFetchBlog(100); // Get more posts for filtering
 
   // Get unique category from posts
   const categories = useMemo(() => {

@@ -261,7 +261,7 @@ CREATE POLICY "Admins can manage membership fees"
         )
     );
 
--- Add comments
+-- Add comment
 COMMENT ON TABLE category_membership_fees IS 'Membership fee configuration per category per calendar year';
 COMMENT ON COLUMN category_membership_fees.fee_period IS 'Payment period: yearly (default), semester, quarterly, monthly';
 ```
@@ -357,7 +357,7 @@ CREATE POLICY "Admins can manage payments"
         )
     );
 
--- Add comments
+-- Add comment
 COMMENT ON TABLE membership_fee_payments IS 'Individual membership fee payment records';
 COMMENT ON COLUMN membership_fee_payments.fee_type IS 'Type of fee: membership (regular), registration (initial), additional, refund';
 ```

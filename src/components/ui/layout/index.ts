@@ -3,8 +3,8 @@
 // Last updated: 2025-10-24T13:56:27.049Z
 // Folder: layout
 
-export {default as Header} from './Header';
+export {default as Header} from '../client/Header';
 export {default as Logo} from './Logo';
-export {UnifiedSidebar} from './UnifiedSidebar';
-export * from './UnifiedSidebarContext';
-export {UnifiedTopBar} from './UnifiedTopBar';
+export {UnifiedSidebar} from '../client/UnifiedSidebar';
+export * from '../client/UnifiedSidebarContext';
+export {UnifiedTopBar} from '../client/UnifiedTopBar';
