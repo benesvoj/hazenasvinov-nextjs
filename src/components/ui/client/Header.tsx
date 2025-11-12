@@ -16,7 +16,7 @@ import Link from '@/components/ui/link/Link';
 
 import {texts} from '@/utils/texts';
 
-import {buildMenuFromPages, fallbackRoutes, MenuItem} from '../../../routes/dynamicRoutes';
+import {buildMenuFromPages, fallbackRoutes, MenuItem} from '@/routes/dynamicRoutes';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
