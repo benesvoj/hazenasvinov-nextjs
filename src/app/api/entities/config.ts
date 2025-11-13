@@ -1,6 +1,7 @@
 import {SupabaseClient} from '@supabase/supabase-js';
 
 import * as committeeQueries from '@/queries/committees';
+import * as seasonQueries from '@/queries/seasons';
 import {QueryContext, QueryResult} from '@/queries/shared/types';
 
 export interface EntityQueryLayer<T = any, Options = any> {
@@ -45,14 +46,20 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
       maxLimit: 100,
     },
   },
+  seasons: {
+    tableName: 'seasons',
+    sortBy: [{column: 'start_date', ascending: false}],
+    requiresAdmin: false,
+    queryLayer: {
+      getAll: seasonQueries.getAllSeasons,
+      getById: seasonQueries.getSeasonById,
+      create: seasonQueries.createSeason,
+      update: seasonQueries.updateSeason,
+      delete: seasonQueries.deleteSeason,
+    },
+    pagination: {
+      defaultLimit: 25,
+      maxLimit: 100,
+    },
+  },
 };
-
-// Helper function to get entity config
-export function getEntityConfig(entity: string): EntityConfig | null {
-  return ENTITY_CONFIGS[entity] || null;
-}
-
-// Helper to validate entity exists
-export function isValidEntity(entity: string): boolean {
-  return entity in ENTITY_CONFIGS;
-}

@@ -5,3 +5,5 @@ export {
   buildUpdateQuery,
   buildDeleteQuery,
 } from './queryBuilder';
+
+export {handleSupabasePaginationBug} from './utils';

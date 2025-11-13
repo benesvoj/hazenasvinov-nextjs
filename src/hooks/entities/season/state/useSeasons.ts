@@ -2,19 +2,19 @@
 
 import {translations} from '@/lib/translations';
 
-import {createCRUDHook} from "@/hooks";
-import {API_ROUTES} from "@/lib";
+import {createCRUDHook} from '@/hooks';
+import {API_ROUTES} from '@/lib';
 import {Season, SeasonInsert} from '@/types';
 
-const t = translations.admin.seasons.responseMessages
+const t = translations.admin.seasons.responseMessages;
 
 /**
  * Hook for managing seasons (CRUD operations)
  * Generated using createCRUDHook factory
  */
-const _useCommittees = createCRUDHook<Season, SeasonInsert>({
-  baseEndpoint: API_ROUTES.seasons.root,
-  byIdEndpoint: API_ROUTES.seasons.byId,
+const _useSeasons = createCRUDHook<Season, SeasonInsert>({
+  baseEndpoint: API_ROUTES.entities.root('seasons'),
+  byIdEndpoint: (id) => API_ROUTES.entities.byId('seasons', id),
   entityName: 'season',
   messages: {
     createSuccess: t.createSuccess,
@@ -23,15 +23,15 @@ const _useCommittees = createCRUDHook<Season, SeasonInsert>({
     createError: t.createError,
     updateError: t.updateError,
     deleteError: t.deleteError,
-  }
-})
+  },
+});
 
 /**
  * Wrapper to maintain backward compatibility with existing API
  * Maps factory hook methods to expected names
  */
 export function useSeasons() {
-  const {loading, error, create, update, deleteItem, setLoading} = _useCommittees();
+  const {loading, error, create, update, deleteItem, setLoading} = _useSeasons();
 
   return {
     loading,
@@ -40,5 +40,5 @@ export function useSeasons() {
     updateSeason: update,
     deleteSeason: deleteItem,
     setLoading,
-  }
+  };
 }
