@@ -9,20 +9,20 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-13
  */
 
 export interface CategoryLineupMemberSchema {
-  added_at: string | null
-  added_by: string
-  id: string
-  is_active: boolean | null
-  is_captain: boolean | null
-  is_vice_captain: boolean | null
-  jersey_number: number | null
-  lineup_id: string
-  member_id: string
-  position: string
+  added_at: string | null;
+  added_by: string;
+  id: string;
+  is_active: boolean | null;
+  is_captain: boolean | null;
+  is_vice_captain: boolean | null;
+  jersey_number: number | null;
+  lineup_id: string;
+  member_id: string;
+  position: string;
 }
 
 /**

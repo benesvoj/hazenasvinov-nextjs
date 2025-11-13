@@ -14,185 +14,176 @@ import {Committee} from '@/types';
 import {CommitteeModal} from './components/CommitteeModal';
 
 export default function CommitteesAdminPage() {
-	// Data
-	const {data, loading: committeesLoading, refetch} = useFetchCommittees();
+  // Data
+  const {data, loading: committeesLoading, refetch} = useFetchCommittees();
 
-	// CRUD operations
-	const {
-		loading: crudLoading,
-		setLoading: setCrudLoading,
-		error,
-		createCommittee,
-		updateCommittee,
-		deleteCommittee,
-	} = useCommittees();
+  // CRUD operations
+  const {
+    loading: crudLoading,
+    setLoading: setCrudLoading,
+    createCommittee,
+    updateCommittee,
+    deleteCommittee,
+  } = useCommittees();
 
-	// Form state management
-	const {
-		formData,
-		selectedCommittee,
-		modalMode,
-		setFormData,
-		openAddMode,
-		openEditMode,
-		resetForm,
-		validateForm,
-	} = useCommitteeForm();
+  // Form state management
+  const {
+    formData,
+    selectedCommittee,
+    modalMode,
+    setFormData,
+    openAddMode,
+    openEditMode,
+    resetForm,
+    validateForm,
+  } = useCommitteeForm();
 
-	const t = translations.admin.committees;
-	const tAction = translations.action;
+  const t = translations.admin.committees;
+  const tAction = translations.action;
 
-	// Modal states/controls
-	const {
-		isOpen: isCommitteeModalOpen,
-		onOpen: onCommitteeModalOpen,
-		onClose: onCommitteeModalClose,
-	} = useDisclosure();
-	const {
-		isOpen: isDeleteCommitteeOpen,
-		onOpen: onDeleteCommitteeOpen,
-		onClose: onDeleteCommitteeClose,
-	} = useDisclosure();
+  // Modal states/controls
+  const {
+    isOpen: isCommitteeModalOpen,
+    onOpen: onCommitteeModalOpen,
+    onClose: onCommitteeModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isDeleteCommitteeOpen,
+    onOpen: onDeleteCommitteeOpen,
+    onClose: onDeleteCommitteeClose,
+  } = useDisclosure();
 
-	// Handle modal open for add
-	const handleAddClick = () => {
-		openAddMode();
-		onCommitteeModalOpen();
-	};
+  // Handle modal open for add
+  const handleAddClick = () => {
+    openAddMode();
+    onCommitteeModalOpen();
+  };
 
-	// Handle modal open for edit
-	const handleEditClick = (committee: Committee) => {
-		openEditMode(committee);
-		onCommitteeModalOpen();
-	};
+  // Handle modal open for edit
+  const handleEditClick = (committee: Committee) => {
+    openEditMode(committee);
+    onCommitteeModalOpen();
+  };
 
-	// Handle submit
-	const handleSubmit = async () => {
-		const {valid, errors} = validateForm();
-		if (!valid) {
-			console.error('Validation errors:', errors);
-			return;
-		}
+  // Handle submit
+  const handleSubmit = async () => {
+    const {valid, errors} = validateForm();
+    if (!valid) {
+      console.error('Validation errors:', errors);
+      return;
+    }
 
-		try {
-			if (modalMode === ModalMode.EDIT && selectedCommittee) {
-				await updateCommittee(selectedCommittee.id, formData);
-				setCrudLoading(false);
-			} else {
-				await createCommittee(formData);
-				setCrudLoading(false);
-			}
-			await refetch();
-			onCommitteeModalClose();
-			resetForm();
-			setCrudLoading(false);
-		} catch (error) {
-			// Error already handled in hook
-		}
-	};
+    try {
+      if (modalMode === ModalMode.EDIT && selectedCommittee) {
+        await updateCommittee(selectedCommittee.id, formData);
+        setCrudLoading(false);
+      } else {
+        await createCommittee(formData);
+        setCrudLoading(false);
+      }
+      await refetch();
+      onCommitteeModalClose();
+      resetForm();
+      setCrudLoading(false);
+    } catch (error) {
+      // Error already handled in hook
+    }
+  };
 
-	// Handle delete
-	const handleDeleteClick = (committee: Committee) => {
-		openEditMode(committee); // Set selected committee
-		onDeleteCommitteeOpen();
-	};
+  // Handle delete
+  const handleDeleteClick = (committee: Committee) => {
+    openEditMode(committee); // Set selected committee
+    onDeleteCommitteeOpen();
+  };
 
-	const handleConfirmDelete = async () => {
-		if (selectedCommittee) {
-			await deleteCommittee(selectedCommittee.id);
-			await refetch();
-			onDeleteCommitteeClose();
-			resetForm();
-			setCrudLoading(false);
-		}
-	};
+  const handleConfirmDelete = async () => {
+    if (selectedCommittee) {
+      await deleteCommittee(selectedCommittee.id);
+      await refetch();
+      onDeleteCommitteeClose();
+      resetForm();
+      setCrudLoading(false);
+    }
+  };
 
-	const committeeColumns = [
-		{key: 'code', label: t.table.code},
-		{key: 'name', label: t.table.name},
-		{key: 'description', label: t.table.description},
-		{key: 'status', label: t.table.status},
-		{key: 'sort_order', label: t.table.sortOrder},
-		{
-			key: 'actions',
-			label: t.table.actions,
-			isActionColumn: true,
-			actions: [
-				{type: ActionTypes.UPDATE, onPress: handleEditClick, title: tAction.edit},
-				{type: ActionTypes.DELETE, onPress: handleDeleteClick, title: tAction.delete},
-			],
-		},
-	];
+  const committeeColumns = [
+    {key: 'code', label: t.table.code},
+    {key: 'name', label: t.table.name},
+    {key: 'description', label: t.table.description},
+    {key: 'status', label: t.table.status},
+    {key: 'sort_order', label: t.table.sortOrder},
+    {
+      key: 'actions',
+      label: t.table.actions,
+      isActionColumn: true,
+      actions: [
+        {type: ActionTypes.UPDATE, onPress: handleEditClick, title: tAction.edit},
+        {type: ActionTypes.DELETE, onPress: handleDeleteClick, title: tAction.delete},
+      ],
+    },
+  ];
 
-	const renderCommitteeCell = (committee: Committee, columnKey: string) => {
-		switch (columnKey) {
-			case 'code':
-				return <span className="font-medium">{committee.code}</span>;
-			case 'name':
-				return <span className="font-medium">{committee.name}</span>;
-			case 'description':
-				return <span className="font-medium">{committee.description || '-'}</span>;
-			case 'status':
-				return (
-					<span className="font-medium">
+  const renderCommitteeCell = (committee: Committee, columnKey: string) => {
+    switch (columnKey) {
+      case 'code':
+        return <span className="font-medium">{committee.code}</span>;
+      case 'name':
+        return <span className="font-medium">{committee.name}</span>;
+      case 'description':
+        return <span className="font-medium">{committee.description || '-'}</span>;
+      case 'status':
+        return (
+          <span className="font-medium">
             {committee.is_active ? t.table.activeLabel : t.table.inactiveLabel}
           </span>
-				);
-			case 'sort_order':
-				return <span className="font-medium">{committee.sort_order}</span>;
-		}
-	};
+        );
+      case 'sort_order':
+        return <span className="font-medium">{committee.sort_order}</span>;
+    }
+  };
 
-	return (
-		<>
-			<AdminContainer
-				actions={[
-					{
-						label: t.addCommittee,
-						onClick: handleAddClick,
-						variant: 'solid',
-						buttonType: ActionTypes.CREATE,
-					},
-				]}
-			>
-				{error && (
-					<div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-						{error}
-					</div>
-				)}
+  return (
+    <>
+      <AdminContainer
+        actions={[
+          {
+            label: t.addCommittee,
+            onClick: handleAddClick,
+            variant: 'solid',
+            buttonType: ActionTypes.CREATE,
+          },
+        ]}
+      >
+        <UnifiedTable
+          isLoading={committeesLoading}
+          columns={committeeColumns}
+          data={data}
+          ariaLabel={t.title}
+          renderCell={renderCommitteeCell}
+          getKey={(committee: Committee) => committee.id}
+          emptyContent={t.table.noCommittees}
+          isStriped
+        />
+      </AdminContainer>
 
-				<UnifiedTable
-					isLoading={committeesLoading}
-					columns={committeeColumns}
-					data={data}
-					ariaLabel={t.title}
-					renderCell={renderCommitteeCell}
-					getKey={(committee: Committee) => committee.id}
-					emptyContent={t.table.noCommittees}
-					isStriped
-				/>
-			</AdminContainer>
+      <CommitteeModal
+        isOpen={isCommitteeModalOpen}
+        onClose={onCommitteeModalClose}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmit}
+        mode={modalMode}
+        isLoading={crudLoading}
+      />
 
-			{/* Committee Modal (Add/Edit) */}
-			<CommitteeModal
-				isOpen={isCommitteeModalOpen}
-				onClose={onCommitteeModalClose}
-				formData={formData}
-				setFormData={setFormData}
-				onSubmit={handleSubmit}
-				mode={modalMode}
-				isLoading={crudLoading}
-			/>
-
-			{/* Delete Committee Modal */}
-			<DeleteConfirmationModal
-				isOpen={isDeleteCommitteeOpen}
-				onClose={onDeleteCommitteeClose}
-				onConfirm={handleConfirmDelete}
-				title={t.deleteCommittee}
-				message={t.deleteCommitteeMessage}
-				isLoading={crudLoading}
-			/>
-		</>
-	);
+      <DeleteConfirmationModal
+        isOpen={isDeleteCommitteeOpen}
+        onClose={onDeleteCommitteeClose}
+        onConfirm={handleConfirmDelete}
+        title={t.deleteCommittee}
+        message={t.deleteCommitteeMessage}
+        isLoading={crudLoading}
+      />
+    </>
+  );
 }

@@ -9,26 +9,23 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-13
  */
 
 export interface CommentSchema {
-  author: string
-  content: string
-  created_at: string | null
-  id: string
-  type: string | null
-  updated_at: string | null
-  user_email: string
+  author: string;
+  content: string;
+  created_at: string | null;
+  id: string;
+  type: string | null;
+  updated_at: string | null;
+  user_email: string;
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type CommentInsert = Omit<
-  CommentSchema,
-  'id' | 'created_at' | 'updated_at'
-> & {
+export type CommentInsert = Omit<CommentSchema, 'id' | 'created_at' | 'updated_at'> & {
   id?: string; // Optional for inserts
 };
 

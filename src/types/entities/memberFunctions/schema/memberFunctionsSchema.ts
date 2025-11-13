@@ -9,18 +9,18 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-13
  */
 
 export interface MemberFunctionSchema {
-  created_at: string | null
-  description: string | null
-  display_name: string
-  id: string
-  is_active: boolean | null
-  name: string
-  sort_order: number | null
-  updated_at: string | null
+  created_at: string | null;
+  description: string | null;
+  display_name: string;
+  id: string;
+  is_active: boolean | null;
+  name: string;
+  sort_order: number | null;
+  updated_at: string | null;
 }
 
 /**

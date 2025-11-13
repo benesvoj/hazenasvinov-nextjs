@@ -140,29 +140,95 @@ Key files mentioned in analysis with absolute paths:
 - `/src/types/` (organized by entity)
 - `/src/types/README.md` (type organization)
 
+## Additional Guides
+
+### 2. QUERY_LAYER_EXTRACTION_GUIDE.md (Implementation Guide)
+**File Size:** ~60 KB | **Lines:** ~1,800
+
+Deep dive into extracting and centralizing database queries:
+- What is a Query Layer and why it's needed
+- Current problem analysis with code examples
+- Proposed solution with directory structure
+- Complete implementation examples (queries.ts, mutations.ts, types.ts)
+- Migration strategy (step-by-step, entity-by-entity)
+- Testing strategy (unit tests, integration tests)
+- Best practices and naming conventions
+- Before/After comparisons showing 50% code reduction
+
+### 3. DYNAMIC_ROUTE_CONSOLIDATION_GUIDE.md (API Route Pattern)
+**File Size:** ~45 KB | **Lines:** ~900
+
+Complete guide to consolidating API routes using dynamic parameters:
+- Explanation of Next.js dynamic routes with `[entity]` pattern
+- How to reduce 54 route files to 2 files
+- Configuration-based routing system
+- Implementation examples with validation
+- Migration strategy and testing approach
+
+### 4. API_ROUTES_SCRIPT_FIX_SUMMARY.md (Script Fix)
+**File Size:** ~8 KB | **Lines:** ~180
+
+Documentation of the fix to `generate-api-routes.mjs` script:
+- Problem: Only generating `byId` function for entities
+- Solution: Generate both `root` and `byId` functions
+- Usage examples for dynamic entity routes
+
+### 5. DYNAMIC_ROUTES_QUERY_LAYER_INTEGRATION.md (Migration Plan)
+**File Size:** ~20 KB | **Lines:** ~500
+
+Comprehensive plan to integrate query layer into dynamic entity routes:
+- **Problem Analysis:** Two API systems (old routes vs dynamic routes)
+- **Gap Analysis:** What dynamic routes are missing
+- **Migration Strategy:** Three approaches with pros/cons
+- **Implementation Plan:** 4 phases with detailed code examples
+- **Testing Strategy:** Test cases and regression testing
+- **Timeline Estimate:** 18-28 hours total
+- **Risk Assessment:** Risks and mitigations
+
+### 6. DYNAMIC_ROUTES_MIGRATION_SUMMARY.md (Quick Reference)
+**File Size:** ~5 KB | **Lines:** ~150
+
+Executive summary of dynamic routes migration:
+- The problem in visual format
+- The solution with code snippets
+- Quick start guide (3 steps)
+- Timeline overview
+- Next actions
+
 ## Recommendations for Next Steps
 
-1. **Start with Query Consolidation** (High Priority)
-   - Read Section 8.1 for consolidation strategy
+1. **Integrate Query Layer with Dynamic Routes** (Highest Priority - In Progress)
+   - **READ:** [DYNAMIC_ROUTES_MIGRATION_SUMMARY.md](./DYNAMIC_ROUTES_MIGRATION_SUMMARY.md) (Quick Start)
+   - **DEEP DIVE:** [DYNAMIC_ROUTES_QUERY_LAYER_INTEGRATION.md](./DYNAMIC_ROUTES_QUERY_LAYER_INTEGRATION.md) (Full Plan)
+   - **STATUS:** Committees query layer ✅ Complete
+   - **NEXT:** Integrate query layer into dynamic entity routes
+   - Adds pagination, better type safety, and consolidation
+   - Estimated: 18-28 hours total
+
+2. **Continue Query Layer Extraction** (High Priority)
+   - **READ:** [QUERY_LAYER_EXTRACTION_GUIDE.md](./QUERY_LAYER_EXTRACTION_GUIDE.md)
    - Reference existing service layer pattern in matchQueries.ts
    - Create new `/src/queries/` directory structure
+   - **DONE:** committees ✅
+   - **IN PROGRESS:** members (partial)
+   - **TODO:** seasons, categories, todos, blog
 
-2. **Standardize API Responses** (High Priority)
+3. **Standardize API Responses** (High Priority)
    - Review current patterns in Section 5
    - Implement ApiResponse<T> interface
    - Update all 54 API routes gradually
 
-3. **Create Hook Factories** (Medium Priority)
+4. **Create Hook Factories** (Medium Priority)
    - Study existing patterns in Section 3.2
    - Implement factory function for data fetching hooks
    - Gradually refactor existing hooks
 
-4. **Centralize Validation** (Medium Priority)
+5. **Centralize Validation** (Medium Priority)
    - Create `/src/validation/` directory
    - Move Zod schemas from hooks and components
    - Export centralized schemas for reuse
 
-5. **Improve Test Coverage** (Ongoing)
+6. **Improve Test Coverage** (Ongoing)
    - See Section 11 for recommended test structure
    - Start with unit tests for hooks
    - Add integration tests for API routes

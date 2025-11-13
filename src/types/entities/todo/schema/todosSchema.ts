@@ -9,31 +9,28 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-13
  */
 
 export interface TodoSchema {
-  assigned_to: string | null
-  category: string | null
-  created_at: string | null
-  created_by: string | null
-  description: string | null
-  due_date: string | null
-  id: string
-  priority: string | null
-  status: string | null
-  title: string
-  updated_at: string | null
-  user_email: string
+  assigned_to: string | null;
+  category: string | null;
+  created_at: string | null;
+  created_by: string | null;
+  description: string | null;
+  due_date: string | null;
+  id: string;
+  priority: string | null;
+  status: string | null;
+  title: string;
+  updated_at: string | null;
+  user_email: string;
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type TodoInsert = Omit<
-  TodoSchema,
-  'id' | 'created_at' | 'updated_at'
-> & {
+export type TodoInsert = Omit<TodoSchema, 'id' | 'created_at' | 'updated_at'> & {
   id?: string; // Optional for inserts
 };
 
