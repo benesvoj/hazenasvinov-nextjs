@@ -9,7 +9,7 @@ import {formatTime} from '@/helpers/formatTime';
 import {UnifiedModal, UnifiedTable} from "@/components";
 import {matchStatuses} from '@/constants';
 import {formatDateString} from '@/helpers';
-import {useFetchMatches, useSeasons} from '@/hooks';
+import {useFetchMatches, useFetchSeasons, useSeasonFiltering, useSeasons} from '@/hooks';
 import {Match} from '@/types';
 
 interface MatchSelectionModalProps {
@@ -30,7 +30,8 @@ export default function MatchSelectionModal({
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState<string>('all');
 	// Get active season
-	const {activeSeason} = useSeasons();
+	const {data: seasons} = useFetchSeasons();
+	const {activeSeason} = useSeasonFiltering({seasons: seasons});
 
 	// Use the existing hook to fetch matches (only when modal is open, categoryId is provided, and active season exists)
 	const {

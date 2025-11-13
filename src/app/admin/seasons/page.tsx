@@ -1,177 +1,190 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 
 import {Chip, useDisclosure} from '@heroui/react';
 
-import {translations} from '@/lib/translations';
 
 import {formatDateString} from '@/helpers/formatDate';
 
-import {AdminContainer, DeleteConfirmationModal, UnifiedCard, UnifiedTable} from '@/components';
+import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedCard, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
-import {useFetchSeasons, useSeasons} from '@/hooks';
-import {Season} from '@/types';
+import {useFetchSeasons, useSeasonForm, useSeasons} from '@/hooks';
+import {translations} from '@/lib';
+import {Season, SeasonInsert} from '@/types';
 
 import {SeasonModal} from './components/SeasonModal';
 
+const tAction = translations.action;
+
 export default function SeasonsAdminPage() {
-  const tAction = translations.action;
-  const {
-    loading,
-    formData,
-    addSeason,
-    updateSeason,
-    deleteSeason,
-    openEditModal,
-    openDeleteModal,
-    resetForm,
-    setFormData,
-  } = useSeasons();
+	const {data: seasons, loading: fetchLoading, refetch} = useFetchSeasons();
+	const seasonForm = useSeasonForm();
+	const {
+		loading: crudLoading,
+		createSeason,
+		updateSeason,
+		deleteSeason,
+	} = useSeasons();
 
-  const {data: seasons, refetch: fetchAllSeasons} = useFetchSeasons();
+	// Modal states
+	const {
+		isOpen: isModalOpen,
+		onOpen: onModalOpen,
+		onClose: onModalClose,
+	} = useDisclosure();
+	const {
+		isOpen: isDeleteOpen,
+		onOpen: onDeleteOpen,
+		onClose: onDeleteClose,
+	} = useDisclosure();
 
-  useEffect(() => {
-    fetchAllSeasons();
-  }, [fetchAllSeasons]);
+	// Handle modal open for add
+	const handleAddClick = () => {
+		seasonForm.openAddMode();
+		onModalOpen();
+	};
 
-  // Modal states
-  const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.ADD);
-  const {
-    isOpen: isSeasonModalOpen,
-    onOpen: onSeasonModalOpen,
-    onClose: onSeasonModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteSeasonOpen,
-    onOpen: onDeleteSeasonOpen,
-    onClose: onDeleteSeasonClose,
-  } = useDisclosure();
+	// Handle modal open for edit
+	const handleEditClick = (season: Season) => {
+		seasonForm.openEditMode(season)
+		onModalOpen();
+	};
 
-  // Handle modal open for add
-  const handleAddClick = () => {
-    setModalMode(ModalMode.ADD);
-    resetForm();
-    onSeasonModalOpen();
-  };
+	// Handle season submission
+	const handleSubmit = async () => {
+		const {valid, errors} = seasonForm.validateForm();
 
-  // Handle modal open for edit
-  const handleEditClick = (season: Season) => {
-    setModalMode(ModalMode.EDIT);
-    openEditModal(season);
-    onSeasonModalOpen();
-  };
+		if (!valid) {
+			errors.forEach(error => showToast.danger(error));
+			return;
+		}
 
-  // Handle modal close
-  const handleSeasonModalClose = () => {
-    onSeasonModalClose();
-    resetForm();
-  };
+		try {
+			if (seasonForm.modalMode === ModalMode.ADD) {
+				const insertData: SeasonInsert = {
+					...seasonForm.formData,
+				}
+				await createSeason(insertData)
+			} else {
+				if (!seasonForm.selectedSeason) return;
+				await updateSeason(seasonForm.selectedSeason.id, {
+					id: seasonForm.selectedSeason.id,
+					...seasonForm.formData,
+				})
+			}
+		} catch (error) {
+			console.error('Error submitting season:', error);
+		} finally {
+			await refetch();
+			seasonForm.resetForm();
+			onModalClose();
+		}
+	};
 
-  // Handle season submission
-  const handleSeasonSubmit = async () => {
-    if (modalMode === ModalMode.ADD) {
-      await addSeason();
-    } else {
-      await updateSeason();
-    }
-    handleSeasonModalClose();
-  };
+	// Handle delete
+	const handleDeleteClick = (season: Season) => {
+		seasonForm.openEditMode(season);
+		onDeleteOpen();
+	};
 
-  // Handle delete
-  const handleDeleteClick = (season: Season) => {
-    openDeleteModal(season);
-    onDeleteSeasonOpen();
-  };
+	const handleDeleteConfirm = async () => {
+		if (seasonForm.selectedSeason) {
+			const success = await deleteSeason(seasonForm.selectedSeason.id);
 
-  const handleDeleteSeason = async () => {
-    await deleteSeason();
-    onDeleteSeasonClose();
-  };
+			if (success) {
+				await refetch();
+				seasonForm.resetForm();
+				onDeleteClose();
+			}
+		}
+	}
 
-  const columns = [
-    {key: 'name', label: translations.season.table.name},
-    {key: 'start_date', label: translations.season.table.startDate},
-    {key: 'end_date', label: translations.season.table.endDate},
-    {key: 'status', label: translations.season.table.status},
-    {
-      key: 'actions',
-      label: translations.season.table.actions,
-      isActionColumn: true,
-      actions: [
-        {type: ActionTypes.UPDATE, onPress: handleEditClick, title: tAction.edit},
-        {type: ActionTypes.DELETE, onPress: handleDeleteClick, title: tAction.delete},
-      ],
-    },
-  ];
+	const columns = [
+		{key: 'name', label: translations.season.table.name},
+		{key: 'start_date', label: translations.season.table.startDate},
+		{key: 'end_date', label: translations.season.table.endDate},
+		{key: 'status', label: translations.season.table.status},
+		{
+			key: 'actions',
+			label: translations.season.table.actions,
+			isActionColumn: true,
+			actions: [
+				{type: ActionTypes.UPDATE, onPress: handleEditClick, title: tAction.edit},
+				{type: ActionTypes.DELETE, onPress: handleDeleteClick, title: tAction.delete},
+			],
+		},
+	];
 
-  const renderSeasonCell = (season: Season, columnKey: string) => {
-    switch (columnKey) {
-      case 'name':
-        return <span className="font-medium">{season.name}</span>;
-      case 'start_date':
-        return <span className="font-medium">{formatDateString(season.start_date || '')}</span>;
-      case 'end_date':
-        return <span className="font-medium">{formatDateString(season.end_date || '')}</span>;
-      case 'status':
-        return (
-          <div className="flex gap-1">
-            <Chip size="sm" color={season.is_active ? 'success' : 'default'} variant="flat">
-              {season.is_active
-                ? translations.season.activeLabel
-                : translations.season.inactiveLabel}
-            </Chip>
-            <Chip size="sm" color={season.is_closed ? 'default' : 'secondary'} variant="flat">
-              {season.is_closed ? translations.season.closedLabel : translations.season.openLabel}
-            </Chip>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-  return (
-    <AdminContainer
-      loading={loading}
-      actions={[
-        {
-          label: translations.season.addSeason,
-          onClick: handleAddClick,
-          variant: 'solid',
-          buttonType: ActionTypes.CREATE,
-        },
-      ]}
-    >
-      <UnifiedCard>
-        <UnifiedTable
-          columns={columns}
-          data={seasons}
-          ariaLabel={translations.season.title}
-          renderCell={renderSeasonCell}
-          getKey={(season) => season.id}
-          isLoading={loading}
-          emptyContent={translations.season.noSeasons}
-          isStriped
-        />
-      </UnifiedCard>
+	const renderSeasonCell = (season: Season, columnKey: string) => {
+		switch (columnKey) {
+			case 'name':
+				return <span className="font-medium">{season.name}</span>;
+			case 'start_date':
+				return <span className="font-medium">{formatDateString(season.start_date || '')}</span>;
+			case 'end_date':
+				return <span className="font-medium">{formatDateString(season.end_date || '')}</span>;
+			case 'status':
+				return (
+					<div className="flex gap-1">
+						<Chip size="sm" color={season.is_active ? 'success' : 'default'} variant="flat">
+							{season.is_active
+								? translations.season.activeLabel
+								: translations.season.inactiveLabel}
+						</Chip>
+						<Chip size="sm" color={season.is_closed ? 'default' : 'secondary'} variant="flat">
+							{season.is_closed ? translations.season.closedLabel : translations.season.openLabel}
+						</Chip>
+					</div>
+				);
+			default:
+				return null;
+		}
+	};
+	return (
+		<>
+			<AdminContainer
+				loading={fetchLoading}
+				actions={[
+					{
+						label: translations.season.addSeason,
+						onClick: handleAddClick,
+						variant: 'solid',
+						buttonType: ActionTypes.CREATE,
+					},
+				]}
+			>
+				<UnifiedCard>
+					<UnifiedTable
+						columns={columns}
+						data={seasons}
+						ariaLabel={translations.season.title}
+						renderCell={renderSeasonCell}
+						getKey={(season) => season.id}
+						isLoading={fetchLoading}
+						emptyContent={translations.season.noSeasons}
+						isStriped
+					/>
+				</UnifiedCard>
+			</AdminContainer>
 
-      {/* Season Modal (Add/Edit) */}
-      <SeasonModal
-        isOpen={isSeasonModalOpen}
-        onClose={handleSeasonModalClose}
-        formData={formData}
-        setFormData={setFormData}
-        onSubmit={handleSeasonSubmit}
-        mode={modalMode}
-      />
+			<SeasonModal
+				isOpen={isModalOpen}
+				onClose={onModalClose}
+				formData={seasonForm.formData}
+				setFormData={seasonForm.setFormData}
+				onSubmit={handleSubmit}
+				mode={seasonForm.modalMode}
+				loading={crudLoading}
+			/>
 
-      <DeleteConfirmationModal
-        isOpen={isDeleteSeasonOpen}
-        onClose={onDeleteSeasonClose}
-        onConfirm={handleDeleteSeason}
-        title={translations.season.deleteSeason}
-        message={translations.season.deleteSeasonMessage}
-      />
-    </AdminContainer>
-  );
+			<DeleteConfirmationModal
+				isOpen={isDeleteOpen}
+				onClose={onDeleteClose}
+				onConfirm={handleDeleteConfirm}
+				title={translations.season.deleteSeason}
+				message={translations.season.deleteSeasonMessage}
+			/>
+		</>
+	);
 }

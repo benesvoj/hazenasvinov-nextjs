@@ -19,7 +19,7 @@ import {
   AttendeesModal,
   MeetingMinutesCard,
 } from '@/components';
-import {useMeetingMinutes, useSeasons} from '@/hooks';
+import {useFetchSeasons, useMeetingMinutes} from '@/hooks';
 import {API_ROUTES, translations} from '@/lib';
 import {
   MeetingMinutes,
@@ -52,7 +52,7 @@ export const MeetingMinutesContainer = forwardRef<
     deleteMeetingMinutes,
     getNextMeetingNumber,
   } = useMeetingMinutes();
-  const {seasons, loading: seasonsLoading, fetchAllSeasons} = useSeasons();
+  const {data: seasons, loading: seasonsLoading, refetch: fetchAllSeasons} = useFetchSeasons();
 
   const [users, setUsers] = useState<any[]>([]);
   const t = translations.components.meetingMinutes;

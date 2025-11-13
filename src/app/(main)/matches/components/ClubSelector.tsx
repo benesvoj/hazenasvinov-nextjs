@@ -7,7 +7,7 @@ import {Button, Image} from '@heroui/react';
 
 import {BuildingOfficeIcon} from '@heroicons/react/24/outline';
 
-import {useSeasons, useFetchCategories} from '@/hooks';
+import {useSeasons, useFetchCategories, useFetchSeasons, useSeasonFiltering} from '@/hooks';
 import {ClubWithTeams} from '@/types';
 
 interface ClubSelectorProps {
@@ -30,7 +30,8 @@ export default function ClubSelector({
   const [error, setError] = useState<string | null>(null);
 
   // Use existing hooks instead of custom fetch functions
-  const {activeSeason, fetchActiveSeason} = useSeasons();
+  const {data: seasons, refetch: fetchActiveSeason} = useFetchSeasons();
+  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
   const {data: categories, refetch: fetchCategories} = useFetchCategories();
 
   // Fetch required data when component mounts

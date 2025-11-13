@@ -16,9 +16,7 @@ import {
   Button,
 } from '@heroui/react';
 
-import {useSeasons} from '@/hooks/entities/season/state/useSeasons';
-
-import {useFetchCategories} from '@/hooks';
+import {useFetchCategories, useFetchSeasons} from '@/hooks';
 import {Video, VideoFormData, Category, Club} from '@/types';
 
 interface VideoFormModalProps {
@@ -57,7 +55,7 @@ export function VideoFormModal({
     loading: categoriesLoading,
     refetch: fetchCategories,
   } = useFetchCategories();
-  const {seasons, loading: seasonsLoading, fetchAllSeasons} = useSeasons();
+  const {data: seasons, loading: seasonsLoading, refetch: fetchAllSeasons} = useFetchSeasons();
 
   // Use availableCategories if provided (for coaches), otherwise use all category
   const displayCategories = availableCategories || categories;
