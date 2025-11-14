@@ -4,7 +4,6 @@ import React from 'react';
 
 import {Chip, useDisclosure} from '@heroui/react';
 
-
 import {formatDateString} from '@/helpers/formatDate';
 
 import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedCard, UnifiedTable} from '@/components';
@@ -19,7 +18,16 @@ const tAction = translations.action;
 
 export default function SeasonsAdminPage() {
 	const {data: seasons, loading: fetchLoading, refetch} = useFetchSeasons();
-	const seasonForm = useSeasonForm();
+	const {
+		selectedItem: selectedSeason,
+		formData,
+		setFormData,
+		resetForm,
+		validateForm,
+		modalMode,
+		openAddMode,
+		openEditMode
+	} = useSeasonForm();
 	const {
 		loading: crudLoading,
 		createSeason,
@@ -41,19 +49,19 @@ export default function SeasonsAdminPage() {
 
 	// Handle modal open for add
 	const handleAddClick = () => {
-		seasonForm.openAddMode();
+		openAddMode();
 		onModalOpen();
 	};
 
 	// Handle modal open for edit
 	const handleEditClick = (season: Season) => {
-		seasonForm.openEditMode(season)
+		openEditMode(season)
 		onModalOpen();
 	};
 
 	// Handle season submission
 	const handleSubmit = async () => {
-		const {valid, errors} = seasonForm.validateForm();
+		const {valid, errors} = validateForm();
 
 		if (!valid) {
 			errors.forEach(error => showToast.danger(error));
@@ -61,40 +69,40 @@ export default function SeasonsAdminPage() {
 		}
 
 		try {
-			if (seasonForm.modalMode === ModalMode.ADD) {
+			if (modalMode === ModalMode.ADD) {
 				const insertData: SeasonInsert = {
-					...seasonForm.formData,
+					...formData,
 				}
 				await createSeason(insertData)
 			} else {
-				if (!seasonForm.selectedSeason) return;
-				await updateSeason(seasonForm.selectedSeason.id, {
-					id: seasonForm.selectedSeason.id,
-					...seasonForm.formData,
+				if (!selectedSeason) return;
+				await updateSeason(selectedSeason.id, {
+					id: selectedSeason.id,
+					...formData,
 				})
 			}
 		} catch (error) {
 			console.error('Error submitting season:', error);
 		} finally {
 			await refetch();
-			seasonForm.resetForm();
+			resetForm();
 			onModalClose();
 		}
 	};
 
 	// Handle delete
 	const handleDeleteClick = (season: Season) => {
-		seasonForm.openEditMode(season);
+		openEditMode(season);
 		onDeleteOpen();
 	};
 
 	const handleDeleteConfirm = async () => {
-		if (seasonForm.selectedSeason) {
-			const success = await deleteSeason(seasonForm.selectedSeason.id);
+		if (selectedSeason) {
+			const success = await deleteSeason(selectedSeason.id);
 
 			if (success) {
 				await refetch();
-				seasonForm.resetForm();
+				resetForm();
 				onDeleteClose();
 			}
 		}
@@ -171,10 +179,10 @@ export default function SeasonsAdminPage() {
 			<SeasonModal
 				isOpen={isModalOpen}
 				onClose={onModalClose}
-				formData={seasonForm.formData}
-				setFormData={seasonForm.setFormData}
+				formData={formData}
+				setFormData={setFormData}
 				onSubmit={handleSubmit}
-				mode={seasonForm.modalMode}
+				mode={modalMode}
 				loading={crudLoading}
 			/>
 

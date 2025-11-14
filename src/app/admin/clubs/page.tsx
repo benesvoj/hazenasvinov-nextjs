@@ -29,7 +29,7 @@ export default function ClubsAdminPage() {
     loading: crudLoading,
     setLoading: setCrudLoading,
   } = useClubs();
-  const clubForm = useClubForm();
+  const {selectedItem: selectedClub, formData, setFormData, openAddMode, openEditMode, resetForm, validateForm, modalMode} = useClubForm();
 
   // Memoize search handler to prevent unnecessary re-renders
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,31 +49,31 @@ export default function ClubsAdminPage() {
   } = useDisclosure();
 
   const handleAddClick = () => {
-    clubForm.openAddMode();
+    openAddMode();
     onClubModalOpen();
   };
 
   const handleEditClick = (club: Club) => {
-    clubForm.openEditMode(club);
+    openEditMode(club);
     onClubModalOpen();
   };
 
   const handleDeleteClick = (club: Club) => {
-    clubForm.openEditMode(club);
+    openEditMode(club);
     onDeleteClubOpen();
   };
 
   const handleConfirmDelete = async () => {
-    if (clubForm.selectedClub) {
-      await deleteClub(clubForm.selectedClub.id);
+    if (selectedClub) {
+      await deleteClub(selectedClub.id);
       await refetch();
       onDeleteClubClose();
-      clubForm.resetForm();
+      resetForm();
     }
   };
 
   const handleSubmit = async () => {
-    const {valid, errors} = clubForm.validateForm();
+    const {valid, errors} = validateForm();
 
     if (!valid) {
       console.error('Validation errors', errors);
@@ -81,16 +81,16 @@ export default function ClubsAdminPage() {
     }
 
     try {
-      if (clubForm.modalMode === ModalMode.EDIT && clubForm.selectedClub) {
-        await updateClub(clubForm.selectedClub.id, clubForm.formData);
+      if (modalMode === ModalMode.EDIT && selectedClub) {
+        await updateClub(selectedClub.id, formData);
         setCrudLoading(false);
       } else {
-        await createClub(clubForm.formData);
+        await createClub(formData);
         setCrudLoading(false);
       }
       await refetch();
       onClubModalClose();
-      clubForm.resetForm();
+      resetForm();
       setCrudLoading(false);
     } catch (error) {
       console.error(error);
@@ -181,11 +181,11 @@ export default function ClubsAdminPage() {
       <ClubFormModal
         isOpen={isClubModalOpen}
         onClose={onClubModalClose}
-        formData={clubForm.formData}
-        setFormData={clubForm.setFormData}
+        formData={formData}
+        setFormData={setFormData}
         onSubmit={handleSubmit}
         isLoading={crudLoading}
-        mode={clubForm.modalMode}
+        mode={modalMode}
       />
 
       <DeleteConfirmationModal

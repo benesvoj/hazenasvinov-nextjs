@@ -75,14 +75,7 @@ export const translations = {
     deleteCategory: 'Smazat kategorii',
     deleteCategoryMessage: 'Opravdu chcete smazat kategorii? Tato akce je nevratná.',
     responseMessages: {
-      categoriesFetchFailed: 'Chyba při načitání kategorií',
       categoryFetchFailed: 'Chyba při načitání kategorie',
-      createSuccess: 'Kategorie úspěšně založena',
-      createError: 'Chyba při přidání kategorie',
-      updateSuccess: 'Chyba při aktualizaci kategorie',
-      updateError: 'Kategorie byla aktualizovaná',
-      deleteSuccess: 'Kategorie byla smazána',
-      deleteError: 'Chyba při mazání kategorie',
     },
   },
   men: {
@@ -193,6 +186,7 @@ export const translations = {
         updateError: 'Chyba při aktualizaci oddílu.',
         deleteSuccess: 'Oddíl byl úspěšně smazán.',
         deleteError: 'Chyba při mazání oddílu.',
+        mandatoryName: 'Název je povinný',
       },
     },
     clubCategories: {
@@ -289,6 +283,8 @@ export const translations = {
         createError: 'Chyba při přidávání sezóny',
         updateError: 'Chyba při aktualizaci sezóny',
         deleteError: 'Chyba při mazání sezóny',
+        mandatoryName: 'Název je povinný',
+        mandatoryStartDate: 'Dátum začátku je povinný',
       },
     },
     members: {
@@ -308,6 +304,19 @@ export const translations = {
         createError: 'Error creating grant.',
         updateError: 'Error updating grant.',
         deleteError: 'Error deleting grant.',
+      },
+    },
+    categories: {
+      responseMessages: {
+        mandatoryName: 'Název je povinný',
+        categoriesFetchFailed: 'Chyba při načitání kategorií',
+        categoryFetchFailed: 'Chyba při načitání kategorie',
+        createSuccess: 'Kategorie úspěšně založena',
+        createError: 'Chyba při přidání kategorie',
+        updateSuccess: 'Chyba při aktualizaci kategorie',
+        updateError: 'Kategorie byla aktualizovaná',
+        deleteSuccess: 'Kategorie byla smazána',
+        deleteError: 'Chyba při mazání kategorie',
       },
     },
   },

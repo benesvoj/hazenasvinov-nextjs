@@ -29,7 +29,7 @@ export default function CommitteesAdminPage() {
   // Form state management
   const {
     formData,
-    selectedCommittee,
+    selectedItem: selectedCommittee,
     modalMode,
     setFormData,
     openAddMode,

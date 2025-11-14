@@ -3,6 +3,7 @@
 import {useCallback, useState} from 'react';
 
 import {ModalMode} from '@/enums';
+import {createFormHook} from "@/hooks";
 import {ClubCategoryInsert, ClubCategorySchema} from '@/types';
 
 const initialFormData: ClubCategoryInsert = {
@@ -18,6 +19,9 @@ const initialFormData: ClubCategoryInsert = {
  * Hook for managing club category form state
  * Handles: form data, validation, reset
  */
+// export const useClubCategoryForm = createFormHook<ClubCategorySchema, ClubCategoryInsert>({
+//   initialFormData,
+// })
 export const useClubCategoryForm = () => {
   const [formData, setFormData] = useState<ClubCategoryInsert>(initialFormData);
   const [selectedClubCategory, setSelectedClubCategory] = useState<ClubCategorySchema | null>(null);

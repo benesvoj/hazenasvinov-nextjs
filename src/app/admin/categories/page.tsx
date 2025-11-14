@@ -25,7 +25,7 @@ export default function CategoriesAdminPage() {
   const {
     formData,
     setFormData,
-    selectedCategory,
+    selectedItem: selectedCategory,
     modalMode,
     openAddMode,
     openEditMode,

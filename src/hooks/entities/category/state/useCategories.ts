@@ -4,7 +4,7 @@ import {createCRUDHook} from '@/hooks';
 import {API_ROUTES, translations} from '@/lib';
 import {Category, CategoryInsert} from '@/types';
 
-const t = translations.categories.responseMessages;
+const t = translations.admin.categories.responseMessages;
 
 /**
  * Hook for managing categories (CRUD operations)
