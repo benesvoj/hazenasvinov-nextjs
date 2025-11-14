@@ -4,6 +4,7 @@ import * as categoriesQueries from '@/queries/categories';
 import * as clubCategoriesQueries from '@/queries/clubCategories';
 import * as clubsQueries from '@/queries/clubs';
 import * as committeeQueries from '@/queries/committees';
+import * as grantQueries from '@/queries/grants';
 import * as seasonQueries from '@/queries/seasons';
 import {QueryContext, QueryResult} from '@/queries/shared/types';
 
@@ -110,6 +111,25 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
       create: clubCategoriesQueries.createClubCategory,
       update: clubCategoriesQueries.updateClubCategory,
       delete: clubCategoriesQueries.deleteClubCategory,
+    },
+    pagination: {
+      defaultLimit: 25,
+      maxLimit: 100,
+    },
+  },
+  grants: {
+    tableName: 'grants',
+    sortBy: [
+      {column: 'month', ascending: false},
+      {column: 'name', ascending: true},
+    ],
+    requiresAdmin: true,
+    queryLayer: {
+      getAll: grantQueries.getAllGrants,
+      getById: grantQueries.getGrantById,
+      create: grantQueries.createGrant,
+      update: grantQueries.updateGrant,
+      delete: grantQueries.deleteGrant,
     },
     pagination: {
       defaultLimit: 25,
