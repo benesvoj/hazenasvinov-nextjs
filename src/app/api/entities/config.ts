@@ -1,5 +1,8 @@
 import {SupabaseClient} from '@supabase/supabase-js';
 
+import * as categoriesQueries from '@/queries/categories';
+import * as clubCategoriesQueries from '@/queries/clubCategories';
+import * as clubsQueries from '@/queries/clubs';
 import * as committeeQueries from '@/queries/committees';
 import * as seasonQueries from '@/queries/seasons';
 import {QueryContext, QueryResult} from '@/queries/shared/types';
@@ -56,6 +59,57 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
       create: seasonQueries.createSeason,
       update: seasonQueries.updateSeason,
       delete: seasonQueries.deleteSeason,
+    },
+    pagination: {
+      defaultLimit: 25,
+      maxLimit: 100,
+    },
+  },
+  categories: {
+    tableName: 'categories',
+    sortBy: [
+      {column: 'sort_order', ascending: true},
+      {column: 'name', ascending: true},
+    ],
+    requiresAdmin: false,
+    queryLayer: {
+      getAll: categoriesQueries.getAllCategories,
+      getById: categoriesQueries.getCategoryById,
+      create: categoriesQueries.createCategory,
+      update: categoriesQueries.updateCategory,
+      delete: categoriesQueries.deleteCategory,
+    },
+    pagination: {
+      defaultLimit: 25,
+      maxLimit: 100,
+    },
+  },
+  clubs: {
+    tableName: 'clubs',
+    sortBy: [{column: 'name', ascending: true}],
+    requiresAdmin: false,
+    queryLayer: {
+      getAll: clubsQueries.getAllClubs,
+      getById: clubsQueries.getClubById,
+      create: clubsQueries.createClub,
+      update: clubsQueries.updateClub,
+      delete: clubsQueries.deleteClub,
+    },
+    pagination: {
+      defaultLimit: 25,
+      maxLimit: 100,
+    },
+  },
+  club_categories: {
+    tableName: 'club_categories',
+    sortBy: [{column: 'club_id', ascending: true}],
+    requiresAdmin: false,
+    queryLayer: {
+      getAll: clubCategoriesQueries.getAllClubCategories,
+      getById: clubCategoriesQueries.getClubCategoryById,
+      create: clubCategoriesQueries.createClubCategory,
+      update: clubCategoriesQueries.updateClubCategory,
+      delete: clubCategoriesQueries.deleteClubCategory,
     },
     pagination: {
       defaultLimit: 25,

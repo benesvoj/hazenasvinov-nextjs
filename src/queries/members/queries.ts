@@ -2,8 +2,7 @@ import {SupabaseClient} from '@supabase/supabase-js';
 
 import {Member} from '@/types';
 
-import {buildSelectQuery, applySorting} from '../shared/queryBuilder';
-import {QueryResult, SortOptions} from '../shared/types';
+import {QueryResult} from '../shared/types';
 
 import {MemberWithRelations, GetMembersOptions, MemberFilters} from './types';
 

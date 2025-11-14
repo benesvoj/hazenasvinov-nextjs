@@ -8,10 +8,8 @@ export async function getAllCommittees(
   options?: GetCommitteesOptions
 ): Promise<QueryResult<Committee[]>> {
   try {
-    const defaultSorting = [{column: 'sort_order', ascending: true}];
-
     const query = buildSelectQuery(ctx.supabase, 'committees', {
-      sorting: options?.sorting ?? defaultSorting,
+      sorting: options?.sorting,
       pagination: options?.pagination,
       filters: options?.filters,
     });

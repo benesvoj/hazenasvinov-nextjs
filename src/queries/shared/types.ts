@@ -40,3 +40,9 @@ export interface QueryContext {
   supabase: SupabaseClient;
   userId?: string;
 }
+
+export interface GetEntitiesOptions {
+  pagination?: PaginationOptions;
+  sorting?: SortOptions[];
+  filters?: FilterOptions;
+}

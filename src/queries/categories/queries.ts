@@ -1,14 +1,13 @@
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
-import {GetSeasonsOptions} from '@/queries/seasons/types';
-import {QueryContext, QueryResult} from '@/queries/shared/types';
-import {Season} from '@/types';
+import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
+import {Category} from '@/types';
 
-export async function getAllSeasons(
+export async function getAllCategories(
   ctx: QueryContext,
-  options?: GetSeasonsOptions
-): Promise<QueryResult<Season[]>> {
+  options?: GetEntitiesOptions
+): Promise<QueryResult<Category[]>> {
   try {
-    const query = buildSelectQuery(ctx.supabase, 'seasons', {
+    const query = buildSelectQuery(ctx.supabase, 'categories', {
       sorting: options?.sorting,
       pagination: options?.pagination,
       filters: options?.filters,
@@ -17,18 +16,18 @@ export async function getAllSeasons(
     const {data, error, count} = await query;
 
     // Handle malformed Supabase error (bug when pagination is beyond available records)
-    const paginationBugResult = handleSupabasePaginationBug<Season>(error, count);
+    const paginationBugResult = handleSupabasePaginationBug<Category>(error, count);
     if (paginationBugResult) {
       return paginationBugResult;
     }
 
     return {
-      data: data as unknown as Season[],
+      data: data as unknown as Category[],
       error: null,
       count: count ?? 0,
     };
   } catch (err: any) {
-    console.error('Exception in getAllSeasons:', err);
+    console.error('Exception in getAllCategories:', err);
     return {
       data: null,
       error: err.message || 'Unknown error',
@@ -37,14 +36,17 @@ export async function getAllSeasons(
   }
 }
 
-export async function getSeasonById(ctx: QueryContext, id: string): Promise<QueryResult<Season>> {
+export async function getCategoryById(
+  ctx: QueryContext,
+  id: string
+): Promise<QueryResult<Category>> {
   try {
-    const query = buildSelectOneQuery(ctx.supabase, 'seasons', id);
+    const query = buildSelectOneQuery(ctx.supabase, 'categories', id);
 
     const {data, error} = await query;
 
     if (error) {
-      console.error('Error fetching season:', error);
+      console.error('Error fetching category:', error);
       return {
         data: null,
         error: error.message,
@@ -52,11 +54,11 @@ export async function getSeasonById(ctx: QueryContext, id: string): Promise<Quer
     }
 
     return {
-      data: data as unknown as Season,
+      data: data as unknown as Category,
       error: null,
     };
   } catch (err: any) {
-    console.error('Exception in getSeasonById:', err);
+    console.error('Exception in getCategoryById:', err);
     return {
       data: null,
       error: err.message || 'Unknown error',

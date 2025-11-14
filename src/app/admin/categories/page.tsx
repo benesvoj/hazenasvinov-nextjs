@@ -10,7 +10,7 @@ import CategoryFeesTab from '@/app/admin/categories/components/CategoryFeesTab';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
-import {useCategories, useCategoryForm, useFetchCategories} from '@/hooks';
+import {useCategories, useCategoryFiltering, useCategoryForm, useFetchCategories} from '@/hooks';
 import {translations} from '@/lib';
 import {Category} from '@/types';
 
@@ -18,13 +18,9 @@ import CategoryModal from './components/CategoryModal';
 
 export default function CategoriesAdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const {data: categories, loading, refetch} = useFetchCategories({searchTerm});
-  const {
-    loading: crudLoading,
-    createCategory,
-    updateCategory,
-    deleteCategory,
-  } = useCategories();
+  const {data: fetchCategories, loading, refetch} = useFetchCategories();
+  const {filteredData: categories} = useCategoryFiltering(fetchCategories, {searchTerm});
+  const {loading: crudLoading, createCategory, updateCategory, deleteCategory} = useCategories();
 
   const {
     formData,
@@ -183,7 +179,6 @@ export default function CategoriesAdminPage() {
         </Tabs>
       </AdminContainer>
 
-      {/* Category Modal (Create/Edit) */}
       <CategoryModal
         isOpen={isCategoryModalOpen}
         onClose={onCategoryModalClose}
@@ -195,7 +190,6 @@ export default function CategoriesAdminPage() {
         isLoading={crudLoading}
       />
 
-      {/* Delete Category Modal */}
       <DeleteConfirmationModal
         isOpen={isDeleteCategoryOpen}
         onClose={onDeleteCategoryClose}

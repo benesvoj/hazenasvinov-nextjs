@@ -27,6 +27,7 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{enti
       const limit = searchParams.get('limit');
 
       const options = {
+        sorting: config.sortBy,
         pagination:
           page || limit
             ? {

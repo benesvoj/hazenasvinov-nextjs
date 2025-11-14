@@ -10,7 +10,7 @@ import {ClubFormModal} from '@/app/admin/clubs/components/ClubFormModal';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
-import {useClubForm, useClubs, useFetchClubs} from '@/hooks';
+import {useClubFiltering, useClubForm, useClubs, useFetchClubs} from '@/hooks';
 import {translations} from '@/lib';
 import {Club} from '@/types';
 
@@ -20,7 +20,8 @@ const t = translations.admin.clubs;
 export default function ClubsAdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
-  const {data, loading: fetchLoading, refetch} = useFetchClubs({searchTerm});
+  const {data: clubs, loading: fetchLoading, refetch} = useFetchClubs();
+  const {data} = useClubFiltering(clubs, {searchTerm});
   const {
     createClub,
     updateClub,
@@ -28,16 +29,7 @@ export default function ClubsAdminPage() {
     loading: crudLoading,
     setLoading: setCrudLoading,
   } = useClubs();
-  const {
-    formData,
-    selectedClub,
-    modalMode,
-    setFormData,
-    openAddMode,
-    openEditMode,
-    resetForm,
-    validateForm,
-  } = useClubForm();
+  const clubForm = useClubForm();
 
   // Memoize search handler to prevent unnecessary re-renders
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,31 +49,31 @@ export default function ClubsAdminPage() {
   } = useDisclosure();
 
   const handleAddClick = () => {
-    openAddMode();
+    clubForm.openAddMode();
     onClubModalOpen();
   };
 
   const handleEditClick = (club: Club) => {
-    openEditMode(club);
+    clubForm.openEditMode(club);
     onClubModalOpen();
   };
 
   const handleDeleteClick = (club: Club) => {
-    openEditMode(club);
+    clubForm.openEditMode(club);
     onDeleteClubOpen();
   };
 
   const handleConfirmDelete = async () => {
-    if (selectedClub) {
-      await deleteClub(selectedClub.id);
+    if (clubForm.selectedClub) {
+      await deleteClub(clubForm.selectedClub.id);
       await refetch();
       onDeleteClubClose();
-      resetForm();
+      clubForm.resetForm();
     }
   };
 
   const handleSubmit = async () => {
-    const {valid, errors} = validateForm();
+    const {valid, errors} = clubForm.validateForm();
 
     if (!valid) {
       console.error('Validation errors', errors);
@@ -89,16 +81,16 @@ export default function ClubsAdminPage() {
     }
 
     try {
-      if (modalMode === ModalMode.EDIT && selectedClub) {
-        await updateClub(selectedClub.id, formData);
+      if (clubForm.modalMode === ModalMode.EDIT && clubForm.selectedClub) {
+        await updateClub(clubForm.selectedClub.id, clubForm.formData);
         setCrudLoading(false);
       } else {
-        await createClub(formData);
+        await createClub(clubForm.formData);
         setCrudLoading(false);
       }
       await refetch();
       onClubModalClose();
-      resetForm();
+      clubForm.resetForm();
       setCrudLoading(false);
     } catch (error) {
       console.error(error);
@@ -189,14 +181,13 @@ export default function ClubsAdminPage() {
       <ClubFormModal
         isOpen={isClubModalOpen}
         onClose={onClubModalClose}
-        formData={formData}
-        setFormData={setFormData}
+        formData={clubForm.formData}
+        setFormData={clubForm.setFormData}
         onSubmit={handleSubmit}
         isLoading={crudLoading}
-        mode={modalMode}
+        mode={clubForm.modalMode}
       />
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={isDeleteClubOpen}
         onClose={onDeleteClubClose}
