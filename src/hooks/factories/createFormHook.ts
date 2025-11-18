@@ -29,6 +29,7 @@ export interface FormHookResult<TEntity, TFormData> {
 
   // Actions
   setFormData: (data: TFormData) => void;
+  updateFormData: (updates: Partial<TFormData>) => void;
   openAddMode: () => void;
   openEditMode: (item: TEntity) => void;
   resetForm: () => void;
@@ -111,6 +112,10 @@ export function createFormHook<TEntity, TFormData>(
       };
     }, [formData]);
 
+    const updateFormData = useCallback((updates: Partial<TFormData>) => {
+      setFormData((prev) => ({...prev, ...updates}));
+    }, []);
+
     return {
       formData,
       selectedItem,
@@ -120,6 +125,7 @@ export function createFormHook<TEntity, TFormData>(
       openEditMode,
       resetForm,
       validateForm,
+      updateFormData,
     };
   };
 }

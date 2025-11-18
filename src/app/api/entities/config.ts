@@ -1,5 +1,6 @@
 import {SupabaseClient} from '@supabase/supabase-js';
 
+import * as blogPostQueries from '@/queries/blogPosts';
 import * as categoriesQueries from '@/queries/categories';
 import * as clubCategoriesQueries from '@/queries/clubCategories';
 import * as clubsQueries from '@/queries/clubs';
@@ -134,6 +135,18 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     pagination: {
       defaultLimit: 25,
       maxLimit: 100,
+    },
+  },
+  blog_posts: {
+    tableName: 'blog_posts',
+    sortBy: [{column: 'published_at', ascending: false}],
+    requiresAdmin: true,
+    queryLayer: {
+      getAll: blogPostQueries.getAllBlogPosts,
+      getById: blogPostQueries.getBlogPostById,
+      create: blogPostQueries.createBlogPost,
+      update: blogPostQueries.updateBlogPost,
+      delete: blogPostQueries.deleteBlogPost,
     },
   },
 };

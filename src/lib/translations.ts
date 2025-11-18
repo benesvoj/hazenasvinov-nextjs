@@ -319,6 +319,19 @@ export const translations = {
         deleteError: 'Chyba při mazání kategorie',
       },
     },
+    blog: {
+      responseMessages: {
+        createSuccess: 'Blog post created successfully',
+        updateSuccess: 'Blog post updated successfully',
+        deleteSuccess: 'Blog post deleted successfully',
+        createError: 'Failed to create blog post',
+        updateError: 'Failed to update blog post',
+        deleteError: 'Failed to delete blog post',
+        blogPostsFetchFailed: 'Failed to fetch blog posts',
+        mandatoryTitle: 'Title is mandatory',
+        mandatoryContent: 'Content is mandatory',
+      },
+    },
   },
   action: {
     add: 'Přidat',

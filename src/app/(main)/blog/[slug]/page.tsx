@@ -22,14 +22,15 @@ import {Link, Heading} from '@/components/ui';
 
 import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
 
-import {useFetchCategories, useFetchBlogPost, useFetchPostMatch} from '@/hooks';
+import {formatDateString} from '@/helpers';
+import {useFetchCategories, useFetchBlogPostBySlug, useFetchPostMatch} from '@/hooks';
 import {translations} from '@/lib';
 
 export default function BlogPostPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const {post, relatedPosts, loading, error} = useFetchBlogPost(slug);
+  const {post, relatedPosts, loading, error} = useFetchBlogPostBySlug(slug);
   const {data: categories, refetch: fetchCategories} = useFetchCategories();
   const {match: relatedMatch, loading: matchLoading} = useFetchPostMatch(post?.id || null);
 
@@ -108,9 +109,7 @@ export default function BlogPostPage() {
             </div>
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-4 h-4" />
-              <span>
-                {new Date(post.published_at || post.created_at).toLocaleDateString('cs-CZ')}
-              </span>
+              <span>{post?.published_at !== null ? formatDateString(post.published_at) : '-'}</span>
             </div>
             {category && (
               <div className="flex flex-wrap gap-2">

@@ -1,12 +1,10 @@
 'use client';
 import React from 'react';
 
-import {useCustomModal} from '@/components/ui/modals/UnifiedModal';
-
 import {AdminContainer, DeleteConfirmationModal, GrantModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {getMonthName} from '@/helpers';
-import {useFetchGrants, useGrantForm, useGrants} from '@/hooks';
+import {useFetchGrants, useGrantForm, useGrants, useCustomModal} from '@/hooks';
 import {translations} from '@/lib';
 import {Grant} from '@/types';
 

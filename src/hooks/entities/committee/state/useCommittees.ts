@@ -1,7 +1,6 @@
 'use client';
 
-import {createCRUDHook} from '@/hooks/factories';
-
+import {createCRUDHook} from '@/hooks';
 import {API_ROUTES, translations} from '@/lib';
 import {Committee, CommitteeInsert} from '@/types';
 

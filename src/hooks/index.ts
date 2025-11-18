@@ -7,10 +7,10 @@ export * from './coach/useUpcomingBirthdays';
 export * from './entities/attendance/useAttendance';
 export * from './entities/blog/business/useBlogPostFiltering';
 export * from './entities/blog/data/useFetchBlog';
+export * from './entities/blog/data/useFetchBlogPostBySlug';
+export * from './entities/blog/data/useFetchBlogPostsPublished';
 export * from './entities/blog/state/useBlogPost';
 export * from './entities/blog/state/useBlogPostForm';
-export * from './entities/blog/useFetchBlogPost';
-export * from './entities/blog/useFetchBlogPosts';
 export * from './entities/blog/useFetchPostMatch';
 export * from './entities/category/business/useCategoryFiltering';
 export * from './entities/category/business/useCategoryPageData';
@@ -127,6 +127,7 @@ export {
   useDeleteMatch,
   useOptimisticMatchUpdate,
 } from './shared/queries/useMatchQueries';
+export * from './shared/useCustomModal';
 export * from './shared/useDebounce';
 export * from './shared/usePageVisibility';
 export * from './shared/usePortalAccess';

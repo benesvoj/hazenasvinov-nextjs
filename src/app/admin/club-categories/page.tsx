@@ -18,6 +18,7 @@ import {
   useFetchClubCategories,
   useFetchClubs,
   useFetchSeasons,
+  useCustomModal,
 } from '@/hooks';
 import {ClubCategorySchema, ClubCategoryWithRelations, Season} from '@/types';
 
@@ -30,7 +31,15 @@ export default function ClubCategoriesAdminPage() {
   const [selectedSeason, setSelectedSeason] = useState<string>('');
 
   const {data: clubCategories, loading: fetchLoading, refetch} = useFetchClubCategories();
-  const clubCategoryForm = useClubCategoryForm();
+  const {
+    selectedItem: selectedClubCategory,
+    formData,
+    setFormData,
+    resetForm,
+    modalMode,
+    openAddMode,
+    openEditMode,
+  } = useClubCategoryForm();
   const {data: clubs} = useFetchClubs();
   const {data: categories} = useFetchCategories();
   const {data: seasons} = useFetchSeasons();
@@ -40,56 +49,49 @@ export default function ClubCategoriesAdminPage() {
     selectedSeason,
   });
 
-  const {isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose} = useDisclosure();
-  const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
+  const clubCategoryModal = useCustomModal();
+  const deleteModal = useCustomModal();
 
   const handleAddClick = () => {
-    clubCategoryForm.openAddMode();
-    onModalOpen();
+    openAddMode();
+    clubCategoryModal.onOpen();
   };
 
   const handleEditClick = (data: ClubCategorySchema) => {
-    clubCategoryForm.openEditMode(data);
-    onModalOpen();
+    openEditMode(data);
+    clubCategoryModal.onOpen();
   };
 
   const handleDeleteClick = (data: ClubCategorySchema) => {
-    clubCategoryForm.openEditMode(data);
-    onDeleteOpen();
+    openEditMode(data);
+    deleteModal.onOpen();
   };
 
   const handleSubmit = async () => {
-    if (
-      !clubCategoryForm.formData.club_id ||
-      !clubCategoryForm.formData.category_id ||
-      !clubCategoryForm.formData.season_id
-    ) {
+    if (!formData.club_id || !formData.category_id || !formData.season_id) {
       return;
     }
 
     try {
-      if (clubCategoryForm.modalMode === ModalMode.EDIT && clubCategoryForm.selectedClubCategory) {
-        await updateClubCategory(
-          clubCategoryForm.selectedClubCategory.id,
-          clubCategoryForm.formData
-        );
+      if (modalMode === ModalMode.EDIT && selectedClubCategory) {
+        await updateClubCategory(selectedClubCategory.id, formData);
       } else {
-        await createClubCategory(clubCategoryForm.formData);
+        await createClubCategory(formData);
       }
       await refetch();
-      onModalClose();
-      clubCategoryForm.resetForm();
+      clubCategoryModal.onClose();
+      resetForm();
     } catch (error) {
       showToast.danger('Chyba při ukládání přiřazení kategorie klubu.');
     }
   };
 
   const handleConfirmDelete = async () => {
-    if (clubCategoryForm.selectedClubCategory) {
-      await deleteClubCategory(clubCategoryForm.selectedClubCategory.id);
+    if (selectedClubCategory) {
+      await deleteClubCategory(selectedClubCategory.id);
       await refetch();
-      onDeleteClose();
-      clubCategoryForm.resetForm();
+      deleteModal.onClose();
+      resetForm();
     }
   };
 
@@ -187,20 +189,20 @@ export default function ClubCategoriesAdminPage() {
       </AdminContainer>
 
       <ClubCategoriesModal
-        isOpen={isModalOpen}
-        onClose={onModalClose}
+        isOpen={clubCategoryModal.isOpen}
+        onClose={clubCategoryModal.onClose}
         onPress={handleSubmit}
-        mode={clubCategoryForm.modalMode}
-        formData={clubCategoryForm.formData}
-        setFormData={clubCategoryForm.setFormData}
+        mode={modalMode}
+        formData={formData}
+        setFormData={setFormData}
         clubs={clubs}
         categories={categories}
         seasons={seasons}
       />
 
       <DeleteConfirmationModal
-        isOpen={isDeleteOpen}
-        onClose={onDeleteClose}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
         onConfirm={handleConfirmDelete}
         title={t.deleteClubCategory}
         message={t.deleteClubCategoryMessage}
