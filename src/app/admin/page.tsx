@@ -38,11 +38,7 @@ interface DeleteItem {
 export default function AdminDashboard() {
   const {user, loading, isAuthenticated, isAdmin} = useUser();
 
-  const {
-    data: todosData,
-    loading: fetchLoading,
-    refetch: refetchTodos,
-  } = useFetchTodos({enabled: false});
+  const {data: todosData, loading: fetchLoading, refetch: refetchTodos} = useFetchTodos();
   const {
     createTodo,
     updateTodo,
@@ -56,7 +52,7 @@ export default function AdminDashboard() {
     todos: todosData || [],
     todoFilter,
   });
-  const [isTodoModalOpen, setIsTodoModalOpen] = useState(false);
+  const todoModal = useCustomModal();
 
   const {
     data: commentsData,
@@ -81,13 +77,7 @@ export default function AdminDashboard() {
       redirect('/login?error=no_admin_access');
       return;
     }
-
-    if (!loading && isAuthenticated && isAdmin) {
-      // Load data after user is confirmed
-      refetchTodos();
-      commentsRefetch();
-    }
-  }, [loading, isAuthenticated, isAdmin, refetchTodos, commentsRefetch]);
+  }, [loading, isAuthenticated, isAdmin]);
 
   // ============ Comment Handlers ============
   const handleAddCommentOpen = () => {
@@ -149,17 +139,12 @@ export default function AdminDashboard() {
   // ============ Todo Handlers ============
   const handleAddTodoOpen = () => {
     todoForm.openAddMode();
-    setIsTodoModalOpen(true);
+    todoModal.onOpen();
   };
 
   const handleEditTodoOpen = (todo: TodoItem) => {
     todoForm.openEditMode(todo);
-    setIsTodoModalOpen(true);
-  };
-
-  const handleTodoModalClose = () => {
-    setIsTodoModalOpen(false);
-    todoForm.resetForm();
+    todoModal.onOpen();
   };
 
   const handleTodoSubmit = async () => {
@@ -170,24 +155,20 @@ export default function AdminDashboard() {
       return;
     }
 
-    let success = false;
-
     if (todoForm.modalMode === ModalMode.ADD) {
       const insertData: TodoInsert = {
         ...todoForm.formData,
         user_email: user?.email || '',
         created_by: user?.id || '',
       };
-      success = await createTodo(insertData);
+      await createTodo(insertData);
     } else {
-      if (!todoForm.selectedTodo) return;
-      success = await updateTodo(todoForm.selectedTodo.id, todoForm.formData);
+      if (!todoForm.selectedItem) return;
+      await updateTodo(todoForm.selectedItem.id, todoForm.formData);
     }
 
-    if (success) {
-      await refetchTodos();
-      handleTodoModalClose();
-    }
+    await refetchTodos();
+    todoModal.onClose();
   };
 
   const handleTodoUpdateStatus = async (id: string, status: TodoStatuses) => {
@@ -243,8 +224,8 @@ export default function AdminDashboard() {
       </AdminContainer>
 
       <TodoModal
-        isOpen={isTodoModalOpen}
-        onClose={handleTodoModalClose}
+        isOpen={todoModal.isOpen}
+        onClose={todoModal.onClose}
         todoFormData={todoForm.formData}
         setTodoFormData={todoForm.setFormData}
         onSubmit={handleTodoSubmit}

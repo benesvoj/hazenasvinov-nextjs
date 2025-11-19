@@ -7,7 +7,7 @@ import {BaseComment, CommentInsert} from '@/types';
 
 const t = translations.admin.comments.responseMessages;
 
-const _useGrants = createCRUDHook<BaseComment, CommentInsert>({
+const _useComments = createCRUDHook<BaseComment, CommentInsert>({
   baseEndpoint: API_ROUTES.entities.root(DB_TABLE),
   byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
   entityName: DB_TABLE,
@@ -22,7 +22,7 @@ const _useGrants = createCRUDHook<BaseComment, CommentInsert>({
 });
 
 export function useComments() {
-  const {loading, setLoading, error, create, update, deleteItem} = _useGrants();
+  const {loading, setLoading, error, create, update, deleteItem} = _useComments();
 
   return {
     loading,

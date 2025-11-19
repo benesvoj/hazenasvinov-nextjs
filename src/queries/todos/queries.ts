@@ -1,12 +1,12 @@
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
-import {DB_TABLE, ENTITY} from '@/queries/comments';
 import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
-import {BaseComment} from '@/types';
+import {DB_TABLE, ENTITY} from '@/queries/todos';
+import {TodoItem} from '@/types';
 
-export async function getAllComments(
+export async function getAllTodos(
   ctx: QueryContext,
   options?: GetEntitiesOptions
-): Promise<QueryResult<BaseComment[]>> {
+): Promise<QueryResult<TodoItem[]>> {
   try {
     const query = buildSelectQuery(ctx.supabase, DB_TABLE, {
       filters: options?.filters,
@@ -16,12 +16,12 @@ export async function getAllComments(
 
     const {data, error, count} = await query;
 
-    const paginationBugResult = handleSupabasePaginationBug<BaseComment>(error, count);
+    const paginationBugResult = handleSupabasePaginationBug<TodoItem>(error, count);
     if (paginationBugResult) {
       return paginationBugResult;
     }
     return {
-      data: data as unknown as BaseComment[],
+      data: data as unknown as TodoItem[],
       error: null,
       count: count ?? 0,
     };
@@ -35,10 +35,7 @@ export async function getAllComments(
   }
 }
 
-export async function getCommentById(
-  ctx: QueryContext,
-  id: string
-): Promise<QueryResult<BaseComment>> {
+export async function getTodoById(ctx: QueryContext, id: string): Promise<QueryResult<TodoItem>> {
   try {
     const query = buildSelectOneQuery(ctx.supabase, DB_TABLE, id);
     const {data, error} = await query;
@@ -52,7 +49,7 @@ export async function getCommentById(
     }
 
     return {
-      data: data as unknown as BaseComment,
+      data: data as unknown as TodoItem,
       error: null,
     };
   } catch (err: any) {

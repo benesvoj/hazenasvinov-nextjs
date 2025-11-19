@@ -9,6 +9,7 @@ import * as committeeQueries from '@/queries/committees';
 import * as grantQueries from '@/queries/grants';
 import * as seasonQueries from '@/queries/seasons';
 import {QueryContext, QueryResult} from '@/queries/shared/types';
+import * as todoQueries from '@/queries/todos';
 
 export interface EntityQueryLayer<T = any, Options = any> {
   getAll: (ctx: QueryContext, options?: Options) => Promise<QueryResult<T[]>>;
@@ -160,6 +161,18 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
       create: commentsQueries.createComment,
       update: commentsQueries.updateComment,
       delete: commentsQueries.deleteComment,
+    },
+  },
+  todos: {
+    tableName: 'todos',
+    sortBy: [{column: 'created_at', ascending: false}],
+    requiresAdmin: true,
+    queryLayer: {
+      getAll: todoQueries.getAllTodos,
+      getById: todoQueries.getTodoById,
+      create: todoQueries.createTodo,
+      update: todoQueries.updateTodo,
+      delete: todoQueries.deleteTodo,
     },
   },
 };
