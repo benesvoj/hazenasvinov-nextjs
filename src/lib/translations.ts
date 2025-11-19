@@ -332,6 +332,19 @@ export const translations = {
         mandatoryContent: 'Content is mandatory',
       },
     },
+    comments: {
+      responseMessages: {
+        commentsFetchFailed: 'Chyba při načítání komentářů',
+        createSuccess: 'Comment created successfully!',
+        updateSuccess: 'Comment updated successfully!',
+        deleteSuccess: 'Comment deleted successfully!',
+        createError: 'Failed to create comment.',
+        updateError: 'Failed to update comment.',
+        deleteError: 'Failed to delete comment.',
+        mandatoryType: 'Type is mandatory',
+        mandatoryContent: 'Content is mandatory',
+      },
+    },
   },
   action: {
     add: 'Přidat',

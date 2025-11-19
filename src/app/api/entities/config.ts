@@ -4,6 +4,7 @@ import * as blogPostQueries from '@/queries/blogPosts';
 import * as categoriesQueries from '@/queries/categories';
 import * as clubCategoriesQueries from '@/queries/clubCategories';
 import * as clubsQueries from '@/queries/clubs';
+import * as commentsQueries from '@/queries/comments';
 import * as committeeQueries from '@/queries/committees';
 import * as grantQueries from '@/queries/grants';
 import * as seasonQueries from '@/queries/seasons';
@@ -147,6 +148,18 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
       create: blogPostQueries.createBlogPost,
       update: blogPostQueries.updateBlogPost,
       delete: blogPostQueries.deleteBlogPost,
+    },
+  },
+  comments: {
+    tableName: 'comments',
+    sortBy: [{column: 'created_at', ascending: false}],
+    requiresAdmin: false,
+    queryLayer: {
+      getAll: commentsQueries.getAllComments,
+      getById: commentsQueries.getCommentById,
+      create: commentsQueries.createComment,
+      update: commentsQueries.updateComment,
+      delete: commentsQueries.deleteComment,
     },
   },
 };
