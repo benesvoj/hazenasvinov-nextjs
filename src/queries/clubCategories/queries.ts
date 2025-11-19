@@ -1,4 +1,5 @@
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
+import {DB_TABLE, ENTITY} from "@/queries/clubCategories";
 import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
 import {ClubCategorySchema, ClubCategoryWithRelations} from '@/types';
 
@@ -7,7 +8,7 @@ export async function getAllClubCategories(
   options?: GetEntitiesOptions
 ): Promise<QueryResult<ClubCategoryWithRelations[]>> {
   try {
-    const query = buildSelectQuery(ctx.supabase, 'club_categories', {
+    const query = buildSelectQuery(ctx.supabase, DB_TABLE, {
       select: `
           *,
           club:clubs(id, name, logo_url),
@@ -36,7 +37,7 @@ export async function getAllClubCategories(
       count: count ?? 0,
     };
   } catch (err: any) {
-    console.error('Exception in getAllClubCategories', err);
+    console.error(`Exception in getAll${ENTITY.plural}`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',
@@ -50,12 +51,12 @@ export async function getClubCategoryById(
   id: string
 ): Promise<QueryResult<ClubCategorySchema>> {
   try {
-    const query = buildSelectOneQuery(ctx.supabase, 'club_categories', id);
+    const query = buildSelectOneQuery(ctx.supabase, DB_TABLE, id);
 
     const {data, error} = await query;
 
     if (error) {
-      console.error('Error fetching club category:', error);
+      console.error(`Error fetching club ${ENTITY.singular}:`, error);
       return {
         data: null,
         error: error.message,
@@ -67,7 +68,7 @@ export async function getClubCategoryById(
       error: null,
     };
   } catch (err: any) {
-    console.error('Exception in getClubCategoryById:', err);
+    console.error(`Exception in get${ENTITY.singular}ById:`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',

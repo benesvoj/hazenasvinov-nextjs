@@ -1,14 +1,14 @@
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
-import {GetSeasonsOptions} from '@/queries/seasons/types';
-import {QueryContext, QueryResult} from '@/queries/shared/types';
+import {DB_TABLE, ENTITY} from "@/queries/seasons";
+import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
 import {Season} from '@/types';
 
 export async function getAllSeasons(
   ctx: QueryContext,
-  options?: GetSeasonsOptions
+  options?: GetEntitiesOptions
 ): Promise<QueryResult<Season[]>> {
   try {
-    const query = buildSelectQuery(ctx.supabase, 'seasons', {
+    const query = buildSelectQuery(ctx.supabase, DB_TABLE, {
       sorting: options?.sorting,
       pagination: options?.pagination,
       filters: options?.filters,
@@ -28,7 +28,7 @@ export async function getAllSeasons(
       count: count ?? 0,
     };
   } catch (err: any) {
-    console.error('Exception in getAllSeasons:', err);
+    console.error(`Exception in getAll${ENTITY.plural}:`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',
@@ -39,12 +39,12 @@ export async function getAllSeasons(
 
 export async function getSeasonById(ctx: QueryContext, id: string): Promise<QueryResult<Season>> {
   try {
-    const query = buildSelectOneQuery(ctx.supabase, 'seasons', id);
+    const query = buildSelectOneQuery(ctx.supabase, DB_TABLE, id);
 
     const {data, error} = await query;
 
     if (error) {
-      console.error('Error fetching season:', error);
+      console.error(`Error fetching ${ENTITY.singular}:`, error);
       return {
         data: null,
         error: error.message,
@@ -56,7 +56,7 @@ export async function getSeasonById(ctx: QueryContext, id: string): Promise<Quer
       error: null,
     };
   } catch (err: any) {
-    console.error('Exception in getSeasonById:', err);
+    console.error(`Exception in get${ENTITY.singular}ById:`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',

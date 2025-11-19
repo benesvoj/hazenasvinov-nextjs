@@ -1,6 +1,6 @@
-const DB_TABLE = 'grants';
-const ENTITY_NAME = 'Grants';
-const SINGLE_ENTITY_NAME = 'Grant';
+const DB_TABLE = 'seasons';
+const ENTITY_NAME = 'Seasons';
+const SINGLE_ENTITY_NAME = 'Season';
 
 const ENTITY = {
 	plural: ENTITY_NAME,

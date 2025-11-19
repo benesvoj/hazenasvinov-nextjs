@@ -23,7 +23,7 @@ export async function createGrant(
       error: null,
     };
   } catch (err: any) {
-    console.error(`Exception in create${ENTITY}:`, err);
+    console.error(`Exception in create${ENTITY.singular}:`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',
@@ -51,7 +51,7 @@ export async function updateGrant(
       error: null,
     };
   } catch (err: any) {
-    console.error(`Exception in update${ENTITY}:`, err);
+    console.error(`Exception in update${ENTITY.singular}:`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',
@@ -79,7 +79,7 @@ export async function deleteGrant(
       error: null,
     };
   } catch (err: any) {
-    console.error(`Exception in delete${ENTITY}:`, err);
+    console.error(`Exception in delete${ENTITY.singular}:`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',

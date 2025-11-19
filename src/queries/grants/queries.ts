@@ -28,7 +28,7 @@ export async function getAllGrants(
       count: count ?? 0,
     };
   } catch (err: any) {
-    console.error(`Exception in getAll${ENTITY}`, err);
+    console.error(`Exception in getAll${ENTITY.plural}`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',
@@ -44,7 +44,7 @@ export async function getGrantById(ctx: QueryContext, id: string): Promise<Query
     const {data, error} = await query;
 
     if (error) {
-      console.error(`Error fetching ${ENTITY}`, error);
+      console.error(`Error fetching ${ENTITY.singular}`, error);
       return {
         data: null,
         error: error.message,
@@ -56,7 +56,7 @@ export async function getGrantById(ctx: QueryContext, id: string): Promise<Query
       error: null,
     };
   } catch (err: any) {
-    console.error(`Exception in get${ENTITY}ById:`, err);
+    console.error(`Exception in get${ENTITY.singular}ById:`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',

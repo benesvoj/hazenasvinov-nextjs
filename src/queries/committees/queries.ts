@@ -1,14 +1,14 @@
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
-import {GetCommitteesOptions} from '@/queries/committees/types';
-import {QueryContext, QueryResult} from '@/queries/shared/types';
+import {DB_TABLE, ENTITY} from "@/queries/committees";
+import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
 import {Committee} from '@/types';
 
 export async function getAllCommittees(
   ctx: QueryContext,
-  options?: GetCommitteesOptions
+  options?: GetEntitiesOptions
 ): Promise<QueryResult<Committee[]>> {
   try {
-    const query = buildSelectQuery(ctx.supabase, 'committees', {
+    const query = buildSelectQuery(ctx.supabase, DB_TABLE, {
       sorting: options?.sorting,
       pagination: options?.pagination,
       filters: options?.filters,
@@ -28,7 +28,7 @@ export async function getAllCommittees(
       count: count ?? 0,
     };
   } catch (err: any) {
-    console.error('Exception in getAllCommittees:', err);
+    console.error(`Exception in getAll${ENTITY.plural}`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',
@@ -42,11 +42,11 @@ export async function getCommitteeById(
   id: string
 ): Promise<QueryResult<Committee>> {
   try {
-    const query = buildSelectOneQuery(ctx.supabase, 'committees', id);
+    const query = buildSelectOneQuery(ctx.supabase, DB_TABLE, id);
     const {data, error} = await query;
 
     if (error) {
-      console.error('Error fetching committee:', error);
+      console.error(`Error fetching ${ENTITY.singular}:`, error);
       return {
         data: null,
         error: error.message,
@@ -58,7 +58,7 @@ export async function getCommitteeById(
       error: null,
     };
   } catch (err: any) {
-    console.error('Exception in getCommitteeById:', err);
+    console.error(`Exception in get${ENTITY.singular}ById:`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',

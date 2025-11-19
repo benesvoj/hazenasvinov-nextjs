@@ -1,9 +1,7 @@
 import {buildDeleteQuery, buildInsertQuery, buildUpdateQuery} from '@/queries';
+import {DB_TABLE, ENTITY} from "@/queries/clubCategories";
 import {QueryContext, QueryResult} from '@/queries/shared/types';
 import {ClubCategoryInsert, ClubCategorySchema} from '@/types';
-
-const DB_TABLE = 'club_categories';
-const ENTITY = 'ClubCategory';
 
 export async function createClubCategory(
   ctx: QueryContext,
