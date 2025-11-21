@@ -133,25 +133,23 @@ export default function CategoriesAdminPage() {
     }
   };
 
-  const filters = () => {
-    return (
-      <div className="w-full max-w-md">
-        <Input
-          label={t.searchCategory}
-          placeholder={t.searchCategoryPlaceholder}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          size="sm"
-        />
-      </div>
-    );
-  };
+  const filters = (
+    <div className="w-full max-w-md">
+      <Input
+        label={t.searchCategory}
+        placeholder={t.searchCategoryPlaceholder}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        size="sm"
+      />
+    </div>
+  );
 
   return (
     <>
       <AdminContainer
         loading={loading}
-        filters={filters()}
+        filters={filters}
         actions={[
           {
             label: t.addCategory,

@@ -55,7 +55,7 @@ export default function EditMatchModal({
   // Determine opponent club ID - whichever team is not our own club
   const opponentClubId = isHomeTeamOwnClub ? awayTeamClubId : homeTeamClubId;
 
-  // Get match videos using the new hook (only when modal is open and we have a selected match)
+  // Get match video using the new hook (only when modal is open and we have a selected match)
   const matchId = isOpen && selectedMatch?.id ? selectedMatch.id : null;
 
   const {
@@ -75,18 +75,18 @@ export default function EditMatchModal({
       const currentVideoIds = matchVideos.map((v) => v.id);
       const newVideoIds = videos.map((v) => v.id);
 
-      // Find videos to add
+      // Find video to add
       const videosToAdd = videos.filter((video) => !currentVideoIds.includes(video.id));
 
-      // Find videos to remove
+      // Find video to remove
       const videosToRemove = matchVideos.filter((video) => !newVideoIds.includes(video.id));
 
-      // Add new videos
+      // Add new video
       for (const video of videosToAdd) {
         await addVideo(video.id);
       }
 
-      // Remove videos
+      // Remove video
       for (const video of videosToRemove) {
         await removeVideo(video.id);
       }
@@ -97,7 +97,7 @@ export default function EditMatchModal({
         showToast.success(`Videa byla úspěšně aktualizována (${totalChanges} změn)`);
       }
     } catch (error) {
-      console.error('Error updating videos:', error);
+      console.error('Error updating video:', error);
       showToast.danger('Chyba při aktualizaci videí');
     }
   };
@@ -301,14 +301,14 @@ export default function EditMatchModal({
                     Videa (volitelné)
                   </label>
 
-                  {/* Display error if videos can't be loaded */}
+                  {/* Display error if video can't be loaded */}
                   {videosError && (
                     <div className="p-3 border border-red-300 dark:border-red-600 rounded-lg bg-red-50 dark:bg-red-900/20 mb-4">
                       <div className="text-sm text-red-600 dark:text-red-400">{videosError}</div>
                     </div>
                   )}
 
-                  {/* Display selected videos */}
+                  {/* Display selected video */}
                   {matchVideos.length > 0 ? (
                     <div className="space-y-2 mb-4">
                       {matchVideos.map((video) => (

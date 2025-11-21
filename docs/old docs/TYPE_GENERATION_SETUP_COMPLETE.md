@@ -328,7 +328,7 @@ npm run db:generate-types
 
 ## Related Documentation
 
-- **[Complete Guide](./DATABASE_TYPE_GENERATION.md)** - Full documentation
+- **[Complete Guide](DATABASE_TYPE_GENERATION.md)** - Full documentation
 - **[Type Architecture](./refactoring/MEMBERS_EXISTING_ANALYSIS.md)** - Pattern analysis
 - **[Refactoring Plan](./refactoring/MEMBERS_LIST_TAB_REFACTORING_PLAN.md)** - Implementation guide
 
@@ -349,4 +349,4 @@ npm run db:generate-types
 
 **Setup Complete!** 🎉
 
-**Questions?** See [DATABASE_TYPE_GENERATION.md](./DATABASE_TYPE_GENERATION.md) for detailed documentation.
+**Questions?** See [DATABASE_TYPE_GENERATION.md](DATABASE_TYPE_GENERATION.md) for detailed documentation.

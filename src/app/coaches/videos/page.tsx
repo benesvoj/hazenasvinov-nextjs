@@ -4,50 +4,38 @@ import React, {useState, useEffect, useCallback} from 'react';
 
 import {VideoCameraIcon} from '@heroicons/react/24/outline';
 
-import {useVideos} from '@/hooks/entities/video/useVideos';
-
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {DeleteConfirmationModal, PageContainer, VideoPageLayout} from '@/components';
-import {useAuth, useUserRoles} from '@/hooks';
-import {Video, VideoFormData, VideoFilters} from '@/types';
+import {useAuth, useFetchVideos, useUserRoles, useVideoFiltering, useVideos} from '@/hooks';
+import {Video, VideoFormData} from '@/types';
+import {transformToVideoInsert} from '@/utils';
 
 export default function CoachesVideosPage() {
-  const [filters, setFilters] = useState<VideoFilters>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
   const [assignedCategories, setAssignedCategories] = useState<string[]>([]);
 
-  // Use AppDataContext for common data
   const {
-    categories: {data: categories, loading: categoriesLoading},
-    clubs: {data: clubs, loading: clubsLoading},
-    seasons: {data: seasons, loading: seasonsLoading}
+    categories: {data: categories},
+    clubs: {data: clubs},
+    seasons: {data: seasons},
   } = useAppData();
 
   const {user, loading: authLoading} = useAuth();
   const {getCurrentUserCategories} = useUserRoles();
 
-  const {
+  const {data: videos, loading, error, refetch: fetchVideos} = useFetchVideos();
+  const {createVideo, updateVideo, deleteVideo} = useVideos();
+  const {filters, setFilters, paginatedVideos, totalPages, totalCount} = useVideoFiltering({
     videos,
-    loading,
-    error,
-    setError,
-    fetchVideos,
-    createVideo,
-    updateVideo,
-    deleteVideo,
-    currentPage,
-    totalPages,
-    totalCount,
     itemsPerPage,
-    goToPage,
-  } = useVideos({
-    assignedCategories,
-    enableAccessControl: true,
-    itemsPerPage: 20,
+    currentPage,
   });
 
   // Fetch coach's assigned category using new role system
@@ -70,25 +58,15 @@ export default function CoachesVideosPage() {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [user?.id, authLoading]); // Remove fetchAssignedCategories from dependencies
 
-  // Categories, clubs, and seasons are now provided by AppDataContext
-  // No need for individual fetching
-
-  // Fetch videos when filters or assigned category change
-  useEffect(() => {
-    if (assignedCategories.length > 0) {
-      fetchVideos(filters);
-    }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [filters, assignedCategories]); // Remove fetchVideos from dependencies
-
   // Handle video operations
   const handleCreateVideo = async (formData: VideoFormData) => {
+    const videoData = transformToVideoInsert(formData);
+
     try {
-      await createVideo(formData);
+      await createVideo(videoData);
       setIsFormModalOpen(false);
     } catch (err) {
       console.error('Error creating video:', err);
-      setError('Chyba při vytváření videa');
     }
   };
 
@@ -101,7 +79,6 @@ export default function CoachesVideosPage() {
       setIsFormModalOpen(false);
     } catch (err) {
       console.error('Error updating video:', err);
-      setError('Chyba při aktualizaci videa');
     }
   };
 
@@ -112,7 +89,6 @@ export default function CoachesVideosPage() {
       setVideoToDelete(null);
     } catch (err) {
       console.error('Error deleting video:', err);
-      setError('Chyba při mazání videa');
     }
   };
 
@@ -140,12 +116,6 @@ export default function CoachesVideosPage() {
   };
 
   const handleFormSubmit = editingVideo ? handleUpdateVideo : handleCreateVideo;
-
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    goToPage(page);
-    fetchVideos(filters, page);
-  };
 
   // Filter category to only show assigned ones
   const availableCategories = categories.filter((cat) => assignedCategories.includes(cat.id));
@@ -203,7 +173,6 @@ export default function CoachesVideosPage() {
           videos={videos}
           loading={loading}
           error={error}
-          filters={filters}
           categories={categories}
           clubs={clubs}
           seasons={seasons}
@@ -233,7 +202,6 @@ export default function CoachesVideosPage() {
           totalPages={totalPages}
           totalCount={totalCount}
           itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
         />
       </PageContainer>
 

@@ -141,7 +141,7 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
   const [videosLoading, setVideosLoading] = useState(false);
   const [videosError, setVideosError] = useState<string | null>(null);
 
-  // Fetch videos for opponent club
+  // Fetch video for opponent club
   const fetchOpponentVideos = useCallback(async (filters: any) => {
     try {
       setVideosLoading(true);
@@ -223,15 +223,15 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
 
       setOpponentVideos(videos || []);
     } catch (error) {
-      console.error('Error fetching opponent videos:', error);
-      setVideosError(error instanceof Error ? error.message : 'Failed to fetch videos');
+      console.error('Error fetching opponent video:', error);
+      setVideosError(error instanceof Error ? error.message : 'Failed to fetch video');
       setOpponentVideos([]);
     } finally {
       setVideosLoading(false);
     }
   }, []);
 
-  // Process videos to include match information
+  // Process video to include match information
   const processedVideos = useMemo(() => {
     return opponentVideos.map((video) => {
       const matchVideo = video.match_videos?.[0];
@@ -270,7 +270,7 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     });
   }, [opponentVideos]);
 
-  // Filter videos by opponent team name if no club ID is available
+  // Filter video by opponent team name if no club ID is available
   const filteredOpponentVideos = useMemo(() => {
     if (!opponentTeam?.name || opponentClubId) {
       return processedVideos;
@@ -290,7 +290,7 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     return filtered;
   }, [processedVideos, opponentTeam?.name, opponentClubId]);
 
-  // Fetch videos when match is selected and club ID is available
+  // Fetch video when match is selected and club ID is available
   useEffect(() => {
     if (selectedMatch?.category_id && selectedMatch?.id && !clubIdLoading) {
       if (opponentClubId) {

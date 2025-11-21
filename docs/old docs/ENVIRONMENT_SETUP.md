@@ -76,4 +76,4 @@ Your access token should look like: `sbp_1234567890abcdef...` (starts with `sbp_
 
 ---
 
-**Need Help?** Check the [example file](../.env.local.example) for the complete template.
+**Need Help?** Check the [example file](../../.env.local.example) for the complete template.

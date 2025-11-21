@@ -5,30 +5,30 @@ This folder contains comprehensive documentation for the project, organized by c
 ## 📚 **Documentation Categories**
 
 ### **🏗️ Development Standards**
-- **[NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md)** - File and folder naming conventions
-- **[IMPORT_ORDERING_RULES.md](./IMPORT_ORDERING_RULES.md)** - Automated import organization
-- **[PERFORMANCE_OPTIMIZATION.md](./PERFORMANCE_OPTIMIZATION.md)** - Performance best practices
-- **[QUERY_SYSTEMS_DOCUMENTATION.md](./QUERY_SYSTEMS_DOCUMENTATION.md)** - Database query patterns
+- **[NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md)** - File and folder naming conventions
+- **[IMPORT_ORDERING_RULES.md](IMPORT_ORDERING_RULES.md)** - Automated import organization
+- **[PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md)** - Performance best practices
+- **[QUERY_SYSTEMS_DOCUMENTATION.md](QUERY_SYSTEMS_DOCUMENTATION.md)** - Database query patterns
 
 ### **🔧 Setup & Configuration**
-- **[AUTH_SERVICE_ISSUE_RESOLUTION.md](./AUTH_SERVICE_ISSUE_RESOLUTION.md)** - Authentication setup
-- **[CURRENT_DATABASE_SCHEMA.md](./CURRENT_DATABASE_SCHEMA.md)** - Database structure
-- **[IMPLEMENTATION_CHECKLIST.md](./IMPLEMENTATION_CHECKLIST.md)** - Development checklist
+- **[AUTH_SERVICE_ISSUE_RESOLUTION.md](AUTH_SERVICE_ISSUE_RESOLUTION.md)** - Authentication setup
+- **[CURRENT_DATABASE_SCHEMA.md](CURRENT_DATABASE_SCHEMA.md)** - Database structure
+- **[IMPLEMENTATION_CHECKLIST.md](IMPLEMENTATION_CHECKLIST.md)** - Development checklist
 
 ### **📊 Migration Guides**
-- **[CATEGORY_MIGRATION_COMPLETION_GUIDE.md](./CATEGORY_MIGRATION_COMPLETION_GUIDE.md)** - Category system migration
-- **[TRAINING_SESSIONS_MIGRATION_GUIDE.md](./TRAINING_SESSIONS_MIGRATION_GUIDE.md)** - Training sessions migration
-- **[UNIFIED_PLAYER_SYSTEM_IMPLEMENTATION.md](./UNIFIED_PLAYER_SYSTEM_IMPLEMENTATION.md)** - Player system migration
+- **[CATEGORY_MIGRATION_COMPLETION_GUIDE.md](CATEGORY_MIGRATION_COMPLETION_GUIDE.md)** - Category system migration
+- **[TRAINING_SESSIONS_MIGRATION_GUIDE.md](TRAINING_SESSIONS_MIGRATION_GUIDE.md)** - Training sessions migration
+- **[UNIFIED_PLAYER_SYSTEM_IMPLEMENTATION.md](UNIFIED_PLAYER_SYSTEM_IMPLEMENTATION.md)** - Player system migration
 
 ### **🐛 Issue Resolution**
-- **[CRITICAL_SUPABASE_ISSUE_UPDATE.md](./CRITICAL_SUPABASE_ISSUE_UPDATE.md)** - Critical issues
-- **[SUPABASE_SUPPORT_ISSUE.md](./SUPABASE_SUPPORT_ISSUE.md)** - Support issues
-- **[USER_CREATION_ISSUE_RESOLUTION.md](./USER_CREATION_ISSUE_RESOLUTION.md)** - User creation fixes
+- **[CRITICAL_SUPABASE_ISSUE_UPDATE.md](CRITICAL_SUPABASE_ISSUE_UPDATE.md)** - Critical issues
+- **[SUPABASE_SUPPORT_ISSUE.md](SUPABASE_SUPPORT_ISSUE.md)** - Support issues
+- **[USER_CREATION_ISSUE_RESOLUTION.md](USER_CREATION_ISSUE_RESOLUTION.md)** - User creation fixes
 
 ### **📋 Feature Documentation**
-- **[COACH_MATCH_RESULT_FLOW.md](./COACH_MATCH_RESULT_FLOW.md)** - Coach portal features
-- **[PROFILES_COMPATIBILITY_LAYER.md](./PROFILES_COMPATIBILITY_LAYER.md)** - Profile system
-- **[TEAM_SUFFIX_LOGIC_DOCUMENTATION.md](./TEAM_SUFFIX_LOGIC_DOCUMENTATION.md)** - Team management
+- **[COACH_MATCH_RESULT_FLOW.md](COACH_MATCH_RESULT_FLOW.md)** - Coach portal features
+- **[PROFILES_COMPATIBILITY_LAYER.md](PROFILES_COMPATIBILITY_LAYER.md)** - Profile system
+- **[TEAM_SUFFIX_LOGIC_DOCUMENTATION.md](TEAM_SUFFIX_LOGIC_DOCUMENTATION.md)** - Team management
 
 ### **🔨 Building App Documentation**
 The `buildingAppDocs/` folder contains detailed setup instructions for various features:
@@ -57,15 +57,15 @@ The `buildingAppDocs/` folder contains detailed setup instructions for various f
 ## 🎯 **Quick Reference**
 
 ### **For New Developers**
-1. Start with [NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md)
-2. Review [IMPORT_ORDERING_RULES.md](./IMPORT_ORDERING_RULES.md)
-3. Check [IMPLEMENTATION_CHECKLIST.md](./IMPLEMENTATION_CHECKLIST.md)
-4. Review [CURRENT_DATABASE_SCHEMA.md](./CURRENT_DATABASE_SCHEMA.md)
+1. Start with [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md)
+2. Review [IMPORT_ORDERING_RULES.md](IMPORT_ORDERING_RULES.md)
+3. Check [IMPLEMENTATION_CHECKLIST.md](IMPLEMENTATION_CHECKLIST.md)
+4. Review [CURRENT_DATABASE_SCHEMA.md](CURRENT_DATABASE_SCHEMA.md)
 
 ### **For Feature Development**
 1. Check existing feature docs in `buildingAppDocs/`
-2. Follow naming conventions from [NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md)
-3. Review performance guidelines in [PERFORMANCE_OPTIMIZATION.md](./PERFORMANCE_OPTIMIZATION.md)
+2. Follow naming conventions from [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md)
+3. Review performance guidelines in [PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md)
 
 ### **For Troubleshooting**
 1. Check issue resolution docs
@@ -97,7 +97,7 @@ The `buildingAppDocs/` folder contains detailed setup instructions for various f
 When adding new documentation:
 
 1. **Choose the right location** based on the category
-2. **Follow naming conventions** (see [NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md))
+2. **Follow naming conventions** (see [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md))
 3. **Use consistent formatting** and structure
 4. **Include practical examples** and code snippets
 5. **Update this README** if adding new categories

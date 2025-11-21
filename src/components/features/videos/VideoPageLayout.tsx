@@ -4,20 +4,25 @@ import React from 'react';
 
 import {Card, CardBody} from '@heroui/react';
 
-import {Video, VideoFilters as VideoFiltersType, Category, Club, Season} from '@/types';
+import {
+  Category,
+  Club,
+  Season,
+  Video,
+  VideoFilters as VideoFiltersType,
+  VideoSchema,
+} from '@/types';
 
-import {VideoFilters} from './VideoFilters';
-import {VideoFormModal} from './VideoFormModal';
 import {VideoGrid} from './VideoGrid';
+
 interface VideoPageLayoutProps {
   // Header props
   onAddVideo: () => void;
 
   // Data props
-  videos: Video[];
+  videos: VideoSchema[];
   loading: boolean;
   error: string | null;
-  filters: VideoFiltersType;
   categories: Category[];
   clubs: Club[];
   seasons: Season[];
@@ -25,8 +30,8 @@ interface VideoPageLayoutProps {
 
   // Event handlers
   onFiltersChange: (filters: VideoFiltersType) => void;
-  onEdit: (video: Video) => void;
-  onDelete: (video: Video) => void;
+  onEdit: (video: VideoSchema) => void;
+  onDelete: (video: VideoSchema) => void;
   onFormSubmit: (formData: any) => void;
 
   // Modal props
@@ -53,29 +58,16 @@ interface VideoPageLayoutProps {
 }
 
 export function VideoPageLayout({
-  // Header props
-  onAddVideo,
-
-  // Data props
   videos,
   loading,
-  error,
-  filters,
   categories,
-  clubs,
   seasons,
+  clubs,
   availableCategories,
 
   // Event handlers
-  onFiltersChange,
   onEdit,
   onDelete,
-  onFormSubmit,
-
-  // Modal props
-  isFormModalOpen,
-  editingVideo,
-  onCloseModals,
 
   // Access control
   showAccessControlMessage = false,
@@ -102,44 +94,19 @@ export function VideoPageLayout({
         </Card>
       )}
 
-      {/* Filters */}
-      <VideoFilters
-        filters={filters}
-        onFiltersChange={onFiltersChange}
-        categories={categories}
-        clubs={clubs}
-        seasons={seasons}
-        availableCategories={availableCategories}
-      />
-
-      {/* Videos Grid */}
       <VideoGrid
         videos={videos}
         loading={loading}
-        filters={filters}
         categories={availableCategories || categories}
         seasons={seasons}
+        clubs={clubs}
         onEdit={onEdit}
         onDelete={onDelete}
-        onAddVideo={onAddVideo}
-        emptyStateTitle={emptyStateTitle}
-        emptyStateDescription={emptyStateDescription}
-        showAddButton={showAddButton}
         currentPage={currentPage}
         totalPages={totalPages}
         totalCount={totalCount}
         itemsPerPage={itemsPerPage}
         onPageChange={onPageChange}
-      />
-
-      {/* Form Modal */}
-      <VideoFormModal
-        isOpen={isFormModalOpen}
-        onClose={onCloseModals}
-        onSubmit={onFormSubmit}
-        video={editingVideo}
-        clubs={clubs}
-        availableCategories={availableCategories}
       />
     </div>
   );

@@ -167,7 +167,7 @@ WHERE up.role IN ('coach', 'head_coach');
 ### Recommended RLS Policies
 
 ```sql
--- Example RLS policy for videos table
+-- Example RLS policy for video table
 CREATE POLICY "Coaches can view assigned category videos" ON videos
   FOR SELECT USING (
     auth.role() = 'authenticated' AND (

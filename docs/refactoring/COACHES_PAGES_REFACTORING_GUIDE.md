@@ -661,7 +661,7 @@ Use this checklist when creating new components/hooks:
 
 - [Hook Layers Architecture](../buildingAppDocs/HOOKS_ARCHITECTURE.md)
 - [Type System Guide](../refactoring/MEMBER_TYPE_SYSTEM_CLEANUP_PLAN.md)
-- [API Routes Generator](../API_ROUTES_GENERATOR.md)
+- [API Routes Generator](../old%20docs/API_ROUTES_GENERATOR.md)
 - [Error Handling Patterns](../buildingAppDocs/ERROR_HANDLING.md)
 
 ---

@@ -1,6 +1,6 @@
 import {NextRequest} from 'next/server';
 
-import {successResponse, withAuth, withAdminAuth, errorResponse} from '@/utils/supabase/apiHelpers';
+import {errorResponse, successResponse, withAdminAuth, withAuth} from '@/utils/supabase/apiHelpers';
 
 import {ENTITY_CONFIGS} from '../../config';
 
@@ -66,7 +66,7 @@ export async function PUT(
   return withAdminAuth(async (user, supabase, admin) => {
     const body = await request.json();
 
-    if (config.queryLayer) {
+    if (config.queryLayer?.update) {
       const result = await config.queryLayer.update({supabase: admin}, id, body);
 
       if (result.error) {
@@ -115,9 +115,8 @@ export async function PATCH(
   return withAdminAuth(async (user, supabase, admin) => {
     const body = await request.json();
 
-    if (config.queryLayer) {
+    if (config.queryLayer?.update) {
       const result = await config.queryLayer.update({supabase: admin}, id, body);
-
       if (result.error) {
         throw new Error(result.error);
       }
@@ -160,7 +159,7 @@ export async function DELETE(
   }
 
   return withAdminAuth(async (user, supabase, admin) => {
-    if (config.queryLayer) {
+    if (config.queryLayer?.delete) {
       const result = await config.queryLayer.delete({supabase: admin}, id);
 
       if (result.error) {

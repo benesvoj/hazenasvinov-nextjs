@@ -9,7 +9,7 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-14
+ * Last generated: 2025-11-20
  */
 
 export interface ClubSchema {

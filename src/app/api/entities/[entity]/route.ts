@@ -86,11 +86,9 @@ export async function POST(request: NextRequest, {params}: {params: Promise<{ent
     const body = await request.json();
 
     // Use query layer if available
-    if (config.queryLayer) {
+    if (config.queryLayer?.create) {
       const result = await config.queryLayer.create({supabase: admin}, body);
-
       if (result.error) throw new Error(result.error);
-
       return successResponse(result.data, 201);
     }
 

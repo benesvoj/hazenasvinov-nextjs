@@ -24,7 +24,7 @@ If you're getting an error "Tabulka videí neexistuje" (Videos table does not ex
 If you have your environment variables set up:
 
 ```bash
-npm run setup:videos-table
+npm run setup:video-table
 ```
 
 ### Option 3: Manual SQL Execution
@@ -33,7 +33,7 @@ npm run setup:videos-table
 Copy and paste this SQL into your Supabase SQL Editor:
 
 ```sql
--- Create videos table
+-- Create video table
 CREATE TABLE IF NOT EXISTS videos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,

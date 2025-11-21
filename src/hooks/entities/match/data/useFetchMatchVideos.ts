@@ -12,9 +12,9 @@ interface UseFetchMatchVideosResult {
 }
 
 /**
- * Hook to fetch videos related to a match
+ * Hook to fetch video related to a match
  * @param matchId - The ID of the match
- * @returns Array of videos, loading state, and error state
+ * @returns Array of video, loading state, and error state
  */
 export function useFetchMatchVideos(matchId: string | null): UseFetchMatchVideosResult {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -36,7 +36,7 @@ export function useFetchMatchVideos(matchId: string | null): UseFetchMatchVideos
 
         const supabase = createClient();
 
-        // Fetch videos related to this match
+        // Fetch video related to this match
         const {data: videosData, error: videosError} = await supabase
           .from('videos')
           .select(
@@ -58,7 +58,7 @@ export function useFetchMatchVideos(matchId: string | null): UseFetchMatchVideos
 
         setVideos(videosData || []);
       } catch (err) {
-        console.error('Error fetching match videos:', err);
+        console.error('Error fetching match video:', err);
         setError(err instanceof Error ? err.message : 'Chyba při načítání videí');
       } finally {
         setLoading(false);

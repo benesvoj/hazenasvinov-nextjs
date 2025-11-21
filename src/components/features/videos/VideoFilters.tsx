@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, {memo} from 'react';
 
-import {Card, CardBody, Input, Select, SelectItem, Switch, Button} from '@heroui/react';
+import {Button, Input, Select, SelectItem, Switch} from '@heroui/react';
 
-import {MagnifyingGlassIcon, FunnelIcon} from '@heroicons/react/24/outline';
+import {FunnelIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
 
-import {VideoFilters as VideoFiltersType, Category, Club, Season} from '@/types';
+import {Category, Club, Season, VideoFilters as VideoFiltersType} from '@/types';
 
 interface VideoFiltersProps {
   filters: VideoFiltersType;
@@ -17,7 +17,7 @@ interface VideoFiltersProps {
   availableCategories?: Category[]; // For coaches - only show assigned category
 }
 
-export function VideoFilters({
+export const VideoFilters = memo(function VideoFilters({
   filters,
   onFiltersChange,
   categories,
@@ -68,84 +68,80 @@ export function VideoFilters({
   };
 
   return (
-    <Card>
-      <CardBody>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Search */}
-          <Input
-            placeholder="Hledat videa..."
-            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
-            value={filters.search || ''}
-            onValueChange={handleSearchFilter}
-          />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* Search */}
+      <Input
+        placeholder="Hledat videa..."
+        startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
+        value={filters.search || ''}
+        onValueChange={handleSearchFilter}
+      />
 
-          {/* Category Filter */}
-          <Select
-            placeholder="Všechny kategorie"
-            selectedKeys={filters.category_id ? [filters.category_id] : ['all']}
-            onSelectionChange={(keys) => {
-              const selected = Array.from(keys)[0] as string;
-              handleCategoryFilter(selected);
-            }}
-          >
-            <>
-              <SelectItem key="all">Všechny kategorie</SelectItem>
-              {displayCategories.map((category) => (
-                <SelectItem key={category.id}>{category.name}</SelectItem>
-              ))}
-            </>
-          </Select>
+      {/* Category Filter */}
+      <Select
+        placeholder="Všechny kategorie"
+        selectedKeys={filters.category_id ? [filters.category_id] : ['all']}
+        onSelectionChange={(keys) => {
+          const selected = Array.from(keys)[0] as string;
+          handleCategoryFilter(selected);
+        }}
+      >
+        <>
+          <SelectItem key="all">Všechny kategorie</SelectItem>
+          {displayCategories.map((category) => (
+            <SelectItem key={category.id}>{category.name}</SelectItem>
+          ))}
+        </>
+      </Select>
 
-          {/* Club Filter */}
-          <Select
-            placeholder="Všechny kluby"
-            selectedKeys={filters.club_id ? [filters.club_id] : ['all']}
-            onSelectionChange={(keys) => {
-              const selected = Array.from(keys)[0] as string;
-              handleClubFilter(selected);
-            }}
-          >
-            <>
-              <SelectItem key="all">Všechny kluby</SelectItem>
-              {clubs.map((club) => (
-                <SelectItem key={club.id}>{club.name}</SelectItem>
-              ))}
-            </>
-          </Select>
+      {/* Club Filter */}
+      <Select
+        placeholder="Všechny kluby"
+        selectedKeys={filters.club_id ? [filters.club_id] : ['all']}
+        onSelectionChange={(keys) => {
+          const selected = Array.from(keys)[0] as string;
+          handleClubFilter(selected);
+        }}
+      >
+        <>
+          <SelectItem key="all">Všechny kluby</SelectItem>
+          {clubs.map((club) => (
+            <SelectItem key={club.id}>{club.name}</SelectItem>
+          ))}
+        </>
+      </Select>
 
-          {/* Season Filter */}
-          <Select
-            placeholder="Všechny sezóny"
-            selectedKeys={filters.season_id ? [filters.season_id] : ['all']}
-            onSelectionChange={(keys) => {
-              const selected = Array.from(keys)[0] as string;
-              handleSeasonFilter(selected);
-            }}
-          >
-            <>
-              <SelectItem key="all">Všechny sezóny</SelectItem>
-              {seasons.map((season) => (
-                <SelectItem key={season.id}>{season.name}</SelectItem>
-              ))}
-            </>
-          </Select>
+      {/* Season Filter */}
+      <Select
+        placeholder="Všechny sezóny"
+        selectedKeys={filters.season_id ? [filters.season_id] : ['all']}
+        onSelectionChange={(keys) => {
+          const selected = Array.from(keys)[0] as string;
+          handleSeasonFilter(selected);
+        }}
+      >
+        <>
+          <SelectItem key="all">Všechny sezóny</SelectItem>
+          {seasons.map((season) => (
+            <SelectItem key={season.id}>{season.name}</SelectItem>
+          ))}
+        </>
+      </Select>
 
-          {/* Active Filter */}
-          <div className="flex items-center gap-2">
-            <Switch isSelected={filters.is_active === true} onValueChange={handleActiveFilter} />
-            <span className="text-sm text-gray-600">Pouze aktivní</span>
-          </div>
+      {/* Active Filter */}
+      <div className="flex items-center gap-2">
+        <Switch isSelected={filters.is_active === true} onValueChange={handleActiveFilter} />
+        <span className="text-sm text-gray-600">Pouze aktivní</span>
+      </div>
 
-          {/* Clear Filters */}
-          <Button
-            variant="bordered"
-            startContent={<FunnelIcon className="w-4 h-4" />}
-            onPress={clearFilters}
-          >
-            Vymazat filtry
-          </Button>
-        </div>
-      </CardBody>
-    </Card>
+      {/* Clear Filters */}
+      <Button
+        variant="bordered"
+        startContent={<FunnelIcon className="w-4 h-4" />}
+        onPress={clearFilters}
+      >
+        Vymazat filtry
+      </Button>
+    </div>
   );
-}
+});

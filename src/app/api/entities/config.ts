@@ -10,13 +10,14 @@ import * as grantQueries from '@/queries/grants';
 import * as seasonQueries from '@/queries/seasons';
 import {QueryContext, QueryResult} from '@/queries/shared/types';
 import * as todoQueries from '@/queries/todos';
+import * as videoQueries from '@/queries/videos';
 
 export interface EntityQueryLayer<T = any, Options = any> {
   getAll: (ctx: QueryContext, options?: Options) => Promise<QueryResult<T[]>>;
   getById: (ctx: QueryContext, id: string) => Promise<QueryResult<T>>;
-  create: (ctx: QueryContext, data: any) => Promise<QueryResult<T>>;
-  update: (ctx: QueryContext, id: string, data: any) => Promise<QueryResult<T>>;
-  delete: (ctx: QueryContext, id: string) => Promise<QueryResult<{success: boolean}>>;
+  create?: (ctx: QueryContext, data: any) => Promise<QueryResult<T>>;
+  update?: (ctx: QueryContext, id: string, data: any) => Promise<QueryResult<T>>;
+  delete?: (ctx: QueryContext, id: string) => Promise<QueryResult<{success: boolean}>>;
 }
 
 export interface EntityConfig {
@@ -173,6 +174,18 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
       create: todoQueries.createTodo,
       update: todoQueries.updateTodo,
       delete: todoQueries.deleteTodo,
+    },
+  },
+  videos: {
+    tableName: 'videos',
+    sortBy: [{column: 'recording_date', ascending: false}],
+    requiresAdmin: false,
+    queryLayer: {
+      getAll: videoQueries.getAllVideos,
+      getById: videoQueries.getVideoById,
+      create: videoQueries.createVideo,
+      update: videoQueries.updateVideo,
+      delete: videoQueries.deleteVideo,
     },
   },
 };
