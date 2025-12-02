@@ -109,7 +109,7 @@
     "msw": "^2.11.3",
     "postcss": "^8",
     "prettier": "^3.6.2",
-    "supabase": "^2.51.0",
+    "supabase": "^2.64.2",
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.6",
     "typescript": "^5",
