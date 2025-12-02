@@ -2,143 +2,97 @@
 
 import React, {useState} from 'react';
 
-import {Button} from '@heroui/button';
 import {Input} from '@heroui/input';
 import {useDisclosure} from '@heroui/modal';
 import {Select, SelectItem} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
-import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
-import {ActionTypes, ColumnAlignType, ModalMode as ModalModeEnum} from '@/enums';
-import {useClubCategories} from '@/hooks';
-import {ClubCategory} from '@/types';
+import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
+import {ActionTypes, ColumnAlignType, ModalMode} from '@/enums';
+import {
+  useClubCategories,
+  useClubCategoryFiltering,
+  useClubCategoryForm,
+  useFetchCategories,
+  useFetchClubCategories,
+  useFetchClubs,
+  useFetchSeasons,
+  useCustomModal,
+} from '@/hooks';
+import {ClubCategorySchema, ClubCategoryWithRelations, Season} from '@/types';
 
 import {ClubCategoriesModal} from './components/ClubCategoriesModal';
+
+const t = translations.admin.clubCategories;
 
 export default function ClubCategoriesAdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSeason, setSelectedSeason] = useState<string>('');
 
-  const t = translations.admin.clubCategories;
-
-  // Modal states
-  const {isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose} = useDisclosure();
-  const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
-
-  const clubCategoryInitialFormData: ClubCategory = {
-    club_id: '',
-    category_id: '',
-    season_id: '',
-    max_teams: 1,
-    id: '',
-    is_active: true,
-    club: null,
-    category: null,
-    season: null,
-  };
-
-  // Form states
-  const [modalMode, setModalMode] = useState<ModalModeEnum>(ModalModeEnum.ADD);
-  const [formData, setFormData] = useState(clubCategoryInitialFormData);
-  const [clubCategoryToDelete, setClubCategoryToDelete] = useState<ClubCategory | null>(null);
-
-  // Use the custom hook
+  const {data: clubCategories, loading: fetchLoading, refetch} = useFetchClubCategories();
   const {
-    clubCategories,
-    clubs,
-    categories,
-    seasons,
-    loading,
-    error,
-    createClubCategory,
-    updateClubCategory,
-    deleteClubCategory,
-    clearError,
-  } = useClubCategories({
+    selectedItem: selectedClubCategory,
+    formData,
+    setFormData,
+    resetForm,
+    modalMode,
+    openAddMode,
+    openEditMode,
+  } = useClubCategoryForm();
+  const {data: clubs} = useFetchClubs();
+  const {data: categories} = useFetchCategories();
+  const {data: seasons} = useFetchSeasons();
+  const {loading, createClubCategory, updateClubCategory, deleteClubCategory} = useClubCategories();
+  const {data: filteredClubCategories} = useClubCategoryFiltering(clubCategories, {
     searchTerm,
     selectedSeason,
   });
 
-  // Set first season as default when seasons are loaded
-  React.useEffect(() => {
-    if (seasons.length > 0 && !selectedSeason) {
-      setSelectedSeason(seasons[0].id);
-    }
-  }, [seasons, selectedSeason]);
+  const clubCategoryModal = useCustomModal();
+  const deleteModal = useCustomModal();
 
-  // Handle modal submit (both create and edit)
-  const handleModalSubmit = async () => {
+  const handleAddClick = () => {
+    openAddMode();
+    clubCategoryModal.onOpen();
+  };
+
+  const handleEditClick = (data: ClubCategorySchema) => {
+    openEditMode(data);
+    clubCategoryModal.onOpen();
+  };
+
+  const handleDeleteClick = (data: ClubCategorySchema) => {
+    openEditMode(data);
+    deleteModal.onOpen();
+  };
+
+  const handleSubmit = async () => {
     if (!formData.club_id || !formData.category_id || !formData.season_id) {
       return;
     }
 
-    let result;
-    if (modalMode === ModalModeEnum.ADD) {
-      result = await createClubCategory({
-        club_id: formData.club_id,
-        category_id: formData.category_id,
-        season_id: formData.season_id,
-        max_teams: formData.max_teams,
-      });
-    } else {
-      result = await updateClubCategory({
-        id: formData.id,
-        club_id: formData.club_id,
-        category_id: formData.category_id,
-        season_id: formData.season_id,
-        max_teams: formData.max_teams,
-      });
-    }
-
-    if (result.success) {
-      onModalClose();
-      setFormData(clubCategoryInitialFormData);
-      clearError();
+    try {
+      if (modalMode === ModalMode.EDIT && selectedClubCategory) {
+        await updateClubCategory(selectedClubCategory.id, formData);
+      } else {
+        await createClubCategory(formData);
+      }
+      await refetch();
+      clubCategoryModal.onClose();
+      resetForm();
+    } catch (error) {
+      showToast.danger('Chyba při ukládání přiřazení kategorie klubu.');
     }
   };
 
-  // Delete club category assignment
-  const handleDeleteClubCategory = async () => {
-    if (!clubCategoryToDelete) return;
-
-    const result = await deleteClubCategory(clubCategoryToDelete.id);
-
-    if (result.success) {
-      onDeleteClose();
-      setClubCategoryToDelete(null);
-      clearError();
+  const handleConfirmDelete = async () => {
+    if (selectedClubCategory) {
+      await deleteClubCategory(selectedClubCategory.id);
+      await refetch();
+      deleteModal.onClose();
+      resetForm();
     }
-  };
-
-  // Open create modal
-  const openCreateModal = () => {
-    setModalMode(ModalModeEnum.ADD);
-    setFormData(clubCategoryInitialFormData);
-    onModalOpen();
-  };
-
-  // Open edit modal
-  const openEditModal = (clubCategory: ClubCategory) => {
-    setModalMode(ModalModeEnum.EDIT);
-    setFormData({
-      id: clubCategory.id,
-      club_id: clubCategory.club_id,
-      category_id: clubCategory.category_id,
-      season_id: clubCategory.season_id,
-      max_teams: clubCategory.max_teams,
-      is_active: clubCategory.is_active,
-      club: clubCategory.club,
-      category: clubCategory.category,
-      season: clubCategory.season,
-    });
-    onModalOpen();
-  };
-
-  // Open delete modal
-  const openDeleteModal = (clubCategory: ClubCategory) => {
-    setClubCategoryToDelete(clubCategory);
-    onDeleteOpen();
   };
 
   const filters = () => {
@@ -162,7 +116,7 @@ export default function ClubCategoriesAdminPage() {
           }}
           className="w-full"
         >
-          {seasons.map((season: any) => (
+          {seasons.map((season: Season) => (
             <SelectItem key={season.id}>{season.name}</SelectItem>
           ))}
         </Select>
@@ -183,19 +137,19 @@ export default function ClubCategoriesAdminPage() {
       actions: [
         {
           type: ActionTypes.UPDATE,
-          onPress: openEditModal,
+          onPress: handleEditClick,
           title: 'Upravit přiřazení',
         },
         {
           type: ActionTypes.DELETE,
-          onPress: openDeleteModal,
+          onPress: handleDeleteClick,
           title: 'Smazat přiřazení',
         },
       ],
     },
   ];
 
-  const renderClubCategoryCell = (clubCategory: ClubCategory, columnKey: string) => {
+  const renderClubCategoryCell = (clubCategory: ClubCategoryWithRelations, columnKey: string) => {
     switch (columnKey) {
       case 'club':
         return <span className="font-medium">{clubCategory.club?.name}</span>;
@@ -216,7 +170,7 @@ export default function ClubCategoriesAdminPage() {
         actions={[
           {
             label: t.addClubCategory,
-            onClick: openCreateModal,
+            onClick: handleAddClick,
             variant: 'solid',
             buttonType: ActionTypes.CREATE,
           },
@@ -224,20 +178,20 @@ export default function ClubCategoriesAdminPage() {
       >
         <UnifiedTable
           columns={clubCategoryColumns}
-          data={clubCategories}
+          data={filteredClubCategories}
           ariaLabel={t.title}
           renderCell={renderClubCategoryCell}
-          getKey={(clubCategory: ClubCategory) => clubCategory.id}
+          getKey={(clubCategory: ClubCategorySchema) => clubCategory.id}
           emptyContent={t.table.noClubCategories}
           isStriped
+          isLoading={fetchLoading}
         />
       </AdminContainer>
 
       <ClubCategoriesModal
-        isOpen={isModalOpen}
-        onClose={onModalClose}
-        title={modalMode === ModalModeEnum.ADD ? t.modal.title : t.editClubCategory}
-        onPress={handleModalSubmit}
+        isOpen={clubCategoryModal.isOpen}
+        onClose={clubCategoryModal.onClose}
+        onPress={handleSubmit}
         mode={modalMode}
         formData={formData}
         setFormData={setFormData}
@@ -246,11 +200,10 @@ export default function ClubCategoriesAdminPage() {
         seasons={seasons}
       />
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
-        isOpen={isDeleteOpen}
-        onClose={onDeleteClose}
-        onConfirm={handleDeleteClubCategory}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+        onConfirm={handleConfirmDelete}
         title={t.deleteClubCategory}
         message={t.deleteClubCategoryMessage}
       />

@@ -6,7 +6,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  useDisclosure,
   ModalProps,
   Button,
 } from '@heroui/react';
@@ -107,15 +106,3 @@ export default function UnifiedModal({
     </Modal>
   );
 }
-
-// Hook for managing modal state
-export const useCustomModal = () => {
-  const {isOpen, onOpen, onClose} = useDisclosure();
-
-  return {
-    isOpen,
-    onOpen,
-    onClose,
-    onToggle: () => (isOpen ? onClose() : onOpen()),
-  };
-};

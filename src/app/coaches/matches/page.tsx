@@ -14,7 +14,7 @@ import {
   useStandings,
   useUserRoles,
   useOptimizedOwnClubMatches,
-  useFetchCategories,
+  useFetchCategories, useFetchSeasons, useSeasonFiltering,
 } from '@/hooks';
 import {translations} from '@/lib';
 import {Match} from '@/types';
@@ -36,7 +36,9 @@ export default function CoachesMatchesPage() {
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('upcoming');
 
-  const {activeSeason, fetchActiveSeason} = useSeasons();
+  const {data: seasons, refetch: fetchActiveSeason} = useFetchSeasons();
+  const {activeSeason} = useSeasonFiltering({seasons: seasons})
+
   const {data: categories, refetch: fetchCategories} = useFetchCategories();
   const {standings, loading: standingsLoading, fetchStandings} = useStandings();
 

@@ -5,7 +5,7 @@
  */
 import {createClient} from '@/utils/supabase/server';
 
-import {Category, Match, BlogPost, ProcessedStanding, SeasonCategoryPageData} from '@/types';
+import {Category, Match, BlogPost, ProcessedStanding, SeasonCategoryPageData, Blog} from '@/types';
 
 export interface CategoryPageServerData {
   category: Category | null;
@@ -13,7 +13,7 @@ export interface CategoryPageServerData {
     autumn: Match[];
     spring: Match[];
   };
-  posts: BlogPost[];
+  posts: Blog[];
   standings: ProcessedStanding[];
   season: SeasonCategoryPageData;
 }
@@ -192,7 +192,7 @@ export async function getCategoryPageData(
     ]);
 
     // Process results
-    let posts: BlogPost[] = [];
+    let posts: Blog[] = [];
     let matches: Match[] = [];
     let standings: ProcessedStanding[] = [];
 
@@ -211,10 +211,10 @@ export async function getCategoryPageData(
       const allPosts = postsResult.data;
 
       // Posts are already filtered by category_id at the database level
-      posts = allPosts.map((post: BlogPost) => ({
+      posts = allPosts.map((post: Blog) => ({
         ...post,
         content: post.content?.substring(0, 150) + '...' || 'Bez popisu',
-        image_url: post.image_url || undefined,
+        image_url: post.image_url || null,
       }));
     }
 

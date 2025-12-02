@@ -1,111 +1,43 @@
 'use client';
 
-import {useCallback, useState} from "react";
+import {createCRUDHook} from '@/hooks';
+import {API_ROUTES, translations} from '@/lib';
+import {Blog, BlogPostInsert} from '@/types';
 
-import {showToast} from "@/components";
-import {API_ROUTES} from "@/lib";
-import {CreateBlogPost, UpdateBlogPost} from "@/types";
-
- interface UseBlogReturn {
-	loading: boolean;
-	createBlog: (data: CreateBlogPost) => Promise<boolean>;
-	updateBlog: (id: string, data: UpdateBlogPost) => Promise<boolean>;
-	deleteBlog: (id: string) => Promise<boolean>;
-}
+const t = translations.admin.blog.responseMessages;
 
 /**
- * UseBlog hook
- * @returns {UseBlogReturn} - Object containing loading state and blog management functions
- * @description Hook for managing blog posts: create, update, delete
+ * Hook for managing blog posts (CRUD operations)
+ * Generated using createCRUDHook factory
+ * @todo Rename to useFetchBlogPosts for clarity after deprecating old hook.
  */
+const _useBlogPost = createCRUDHook<Blog, BlogPostInsert>({
+  baseEndpoint: API_ROUTES.entities.root('blog_posts'),
+  byIdEndpoint: (id) => API_ROUTES.entities.byId('blog_posts', id),
+  entityName: 'blogPosts',
+  messages: {
+    createSuccess: t.createSuccess,
+    updateSuccess: t.updateSuccess,
+    deleteSuccess: t.deleteSuccess,
+    createError: t.createError,
+    updateError: t.updateError,
+    deleteError: t.deleteError,
+  },
+});
 
-export const useBlogPost = (): UseBlogReturn => {
-	const [loading, setLoading] = useState<boolean>(false);
+/**
+ * Wrapper to maintain backward compatibility with existing API
+ * Maps factory hook methods to expected names
+ */
+export function useBlogPost() {
+  const {loading, error, create, update, deleteItem, setLoading} = _useBlogPost();
 
-	const createBlog = useCallback(
-		async (data: CreateBlogPost): Promise<boolean> => {
-			try {
-				setLoading(true);
-
-				const res = await fetch(API_ROUTES.blog.root, {
-					method: 'POST',
-					headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify(data),
-				});
-				const response = await res.json();
-
-				if (!res.ok || response.error) {
-					throw new Error(response.error || 'Create blog post failed');
-				}
-				showToast.success('Blog post created successfully!');
-				return true;
-			} catch (error) {
-				console.error('Error creating blog post:', error);
-				showToast.danger('Error creating blog post');
-				return false;
-			} finally {
-				setLoading(false
-				)
-			}
-		}, [])
-
-	const updateBlog = useCallback(
-		async (id: string, data: UpdateBlogPost): Promise<boolean> => {
-			try {
-				setLoading(true);
-
-				const res = await fetch(API_ROUTES.blog.byId(id), {
-					method: 'PATCH',
-					headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify(data),
-				});
-				const response = await res.json();
-
-				if (!res.ok || response.error) {
-					throw new Error(response.error || 'Update blog post failed');
-				}
-
-				showToast.success('Blog post updated successfully!');
-				return true;
-			} catch (error) {
-				console.error('Error updating blog post:', error);
-				showToast.danger('Error updating blog post');
-				return false;
-			} finally {
-				setLoading(false);
-			}
-		}, [])
-
-	const deleteBlog = useCallback(
-		async (id: string): Promise<boolean> => {
-			try {
-				setLoading(true);
-
-				const res = await fetch(API_ROUTES.blog.byId(id), {
-					method: 'DELETE',
-				});
-				const response = await res.json();
-
-				if (!res.ok || response.error) {
-					throw new Error(response.error || 'Delete blog post failed');
-				}
-
-				showToast.success('Blog post deleted successfully!');
-				return true;
-			} catch (error) {
-				console.error('Error deleting blog post:', error);
-				showToast.danger('Error deleting blog post');
-				return false;
-			} finally {
-				setLoading(false);
-			}
-		}, [])
-
-
-	return {
-		loading,
-		createBlog,
-		updateBlog,
-		deleteBlog,
-	}
+  return {
+    loading,
+    error,
+    createBlogPost: create,
+    updateBlogPost: update,
+    deleteBlogPost: deleteItem,
+    setLoading,
+  };
 }

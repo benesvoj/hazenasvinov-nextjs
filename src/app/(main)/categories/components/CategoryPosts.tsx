@@ -1,18 +1,17 @@
 'use client';
 
-import {Button} from '@heroui/button';
-import {Card, CardBody, CardFooter} from '@heroui/card';
+import {Button, Card, CardBody, CardFooter} from '@heroui/react';
 
 import {TagIcon, ArrowRightIcon} from '@heroicons/react/24/outline';
 
 import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
 import Link from '@/components/ui/link/Link';
 
-import {BlogPost} from '@/types';
+import {Blog} from '@/types';
 
 interface CategoryPostsProps {
   categoryId: string;
-  posts?: BlogPost[];
+  posts?: Blog[];
 }
 
 export function CategoryPosts({categoryId, posts = []}: CategoryPostsProps) {
@@ -20,6 +19,7 @@ export function CategoryPosts({categoryId, posts = []}: CategoryPostsProps) {
 
   const postsLoading = false;
   const postsError = null;
+
   return (
     <section className="relative">
       {/* Posts Grid */}

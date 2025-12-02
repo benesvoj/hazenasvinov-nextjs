@@ -832,7 +832,7 @@ export * from './entities/blog/business/useBlogPostFiltering';  // ✅ Add this
 export * from './entities/blog/data/useFetchBlog';
 export * from './entities/blog/state/useBlogPost';
 export * from './entities/blog/state/useBlogPostForm';
-export * from './entities/blog/useFetchBlogPost';
+export * from './entities/blog/useFetchBlogPostBySlug';
 export * from './entities/blog/useFetchBlog';
 export * from './entities/blog/useFetchPostMatch';
 // export * from './entities/blog/useBlogPosts';  // ❌ Remove this line

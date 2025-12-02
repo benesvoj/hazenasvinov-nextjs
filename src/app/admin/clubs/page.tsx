@@ -10,7 +10,7 @@ import {ClubFormModal} from '@/app/admin/clubs/components/ClubFormModal';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
-import {useClubForm, useClubs, useFetchClubs} from '@/hooks';
+import {useClubFiltering, useClubForm, useClubs, useFetchClubs} from '@/hooks';
 import {translations} from '@/lib';
 import {Club} from '@/types';
 
@@ -20,7 +20,8 @@ const t = translations.admin.clubs;
 export default function ClubsAdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
-  const {data, loading: fetchLoading, refetch} = useFetchClubs({searchTerm});
+  const {data: clubs, loading: fetchLoading, refetch} = useFetchClubs();
+  const {data} = useClubFiltering(clubs, {searchTerm});
   const {
     createClub,
     updateClub,
@@ -28,16 +29,7 @@ export default function ClubsAdminPage() {
     loading: crudLoading,
     setLoading: setCrudLoading,
   } = useClubs();
-  const {
-    formData,
-    selectedClub,
-    modalMode,
-    setFormData,
-    openAddMode,
-    openEditMode,
-    resetForm,
-    validateForm,
-  } = useClubForm();
+  const {selectedItem: selectedClub, formData, setFormData, openAddMode, openEditMode, resetForm, validateForm, modalMode} = useClubForm();
 
   // Memoize search handler to prevent unnecessary re-renders
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -196,7 +188,6 @@ export default function ClubsAdminPage() {
         mode={modalMode}
       />
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={isDeleteClubOpen}
         onClose={onDeleteClubClose}

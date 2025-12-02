@@ -13,7 +13,22 @@ import Link from '@/components/ui/link/Link';
 import {useAppDataSafe} from '@/contexts/AppDataContext';
 
 import {formatDateString} from '@/helpers';
-import {BlogPostCard as BlogPostCardProps, Category} from '@/types';
+import {Blog, Category} from '@/types';
+
+interface BlogPostCardProps {
+  post: Blog;
+  index?: number;
+  /**
+   * @default 'landing'
+   * @description 'landing' for landing page, 'blog' for blog page
+   */
+  variant?: 'landing' | 'blog';
+  className?: string;
+  /**
+   * @description Optional category data - if not provided, will be fetched from context (requires AppDataProvider)
+   */
+  category?: Category;
+}
 
 export default function BlogPostCard({
   post,
@@ -94,7 +109,7 @@ export default function BlogPostCard({
               {/* Date */}
               <div className="flex items-center gap-1 text-xs text-gray-300">
                 <CalendarIcon className="w-3 h-3" />
-                <DateChip date={post.created_at} />
+                <DateChip date={post.created_at ?? '-'} />
               </div>
             </div>
 
@@ -158,7 +173,7 @@ export default function BlogPostCard({
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
           <div className="flex items-center gap-1">
             <CalendarIcon className="w-4 h-4" />
-            <DateChip date={post.created_at} />
+            <DateChip date={post.created_at ?? '-'} />
           </div>
         </div>
 

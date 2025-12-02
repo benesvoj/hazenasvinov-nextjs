@@ -5,7 +5,7 @@ import {Card, CardBody} from '@heroui/card';
 
 import {TagIcon, ArrowRightIcon} from '@heroicons/react/24/outline';
 
-import {useFetchBlogPosts} from '@/hooks/entities/blog/useFetchBlogPosts';
+import {useFetchBlogPostsPublished} from '@/hooks/entities/blog/data/useFetchBlogPostsPublished';
 
 import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
 import {Link} from '@/components/ui';
@@ -13,7 +13,11 @@ import {Link} from '@/components/ui';
 import {translations} from '@/lib/translations';
 
 export default function PostSection() {
-  const {posts: latestPosts, loading: postsLoading, error: postsError} = useFetchBlogPosts(3);
+  const {
+    posts: latestPosts,
+    loading: postsLoading,
+    error: postsError,
+  } = useFetchBlogPostsPublished(3);
 
   return (
     <section className="relative">

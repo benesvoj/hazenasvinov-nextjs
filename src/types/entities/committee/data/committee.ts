@@ -1,9 +1,9 @@
-import {CommitteesInsert, CommitteesSchema, CommitteesUpdate} from '@/types';
+import {CommitteeInsert, CommitteeSchema, CommitteeUpdate} from '@/types';
 
-export interface Committee extends CommitteesSchema {}
+export interface Committee extends CommitteeSchema {}
 
-export interface CommitteeInsert extends CommitteesInsert {}
+export interface CreateCommittee extends CommitteeInsert {}
 
-export interface CommitteeUpdate extends CommitteesUpdate {}
+export interface UpdateCommittee extends CommitteeUpdate {}
 
 export type CommitteeFormData = Omit<Committee, 'id' | 'created_at' | 'updated_at'>;

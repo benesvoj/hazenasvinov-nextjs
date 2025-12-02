@@ -4,16 +4,15 @@ import {translations} from '@/lib/translations';
 
 import {UnifiedModal} from '@/components';
 import {ModalMode} from '@/enums';
-import {Category, Club, ClubCategory, Season} from '@/types';
+import {Category, Club, ClubCategoryInsert, Season} from '@/types';
 
 interface ClubCategoriesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
   onPress: () => void;
   mode: ModalMode;
-  formData: ClubCategory;
-  setFormData: (form: ClubCategory) => void;
+  formData: ClubCategoryInsert;
+  setFormData: (form: ClubCategoryInsert) => void;
   clubs: Club[];
   categories: Category[];
   seasons: Season[];
@@ -22,7 +21,6 @@ interface ClubCategoriesModalProps {
 export const ClubCategoriesModal = ({
   isOpen,
   onClose,
-  title,
   onPress,
   mode,
   formData,
@@ -33,11 +31,13 @@ export const ClubCategoriesModal = ({
 }: ClubCategoriesModalProps) => {
   const t = translations.admin.clubCategories;
 
+  const isEditMode = mode === ModalMode.EDIT;
+
   return (
     <UnifiedModal
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
+      title={isEditMode ? t.editClubCategory : t.modal.title}
       size="2xl"
       onPress={onPress}
       isFooterWithActions
@@ -92,7 +92,7 @@ export const ClubCategoriesModal = ({
         placeholder={t.modal.maxTeamsPlaceholder}
         type="number"
         min="1"
-        value={formData.max_teams.toString()}
+        value={formData.max_teams ? formData.max_teams.toString() : '1'}
         onChange={(e) => setFormData({...formData, max_teams: parseInt(e.target.value) || 1})}
       />
     </UnifiedModal>
