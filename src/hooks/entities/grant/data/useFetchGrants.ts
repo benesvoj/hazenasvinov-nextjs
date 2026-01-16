@@ -1,4 +1,5 @@
-import {createDataFetchHook} from '@/hooks';
+import {createDataFetchHook} from '@/hooks/factories';
+
 import {API_ROUTES, translations} from '@/lib';
 import {Grant} from '@/types';
 

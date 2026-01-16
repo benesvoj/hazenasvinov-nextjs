@@ -28,7 +28,7 @@ export async function getAllBlogPosts(
       count: count ?? 0,
     };
   } catch (err: any) {
-    console.error(`Exception in getAll${ENTITY}`, err);
+    console.error(`Exception in getAll${ENTITY.plural}`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',
@@ -44,7 +44,7 @@ export async function getBlogPostById(ctx: QueryContext, id: string): Promise<Qu
     const {data, error} = await query;
 
     if (error) {
-      console.error(`Error fetching ${ENTITY}`, error);
+      console.error(`Error fetching ${ENTITY.singular}`, error);
       return {
         data: null,
         error: error.message,
@@ -56,7 +56,7 @@ export async function getBlogPostById(ctx: QueryContext, id: string): Promise<Qu
       error: null,
     };
   } catch (err: any) {
-    console.error(`Exception in get${ENTITY}ById:`, err);
+    console.error(`Exception in get${ENTITY.singular}ById:`, err);
     return {
       data: null,
       error: err.message || 'Unknown error',

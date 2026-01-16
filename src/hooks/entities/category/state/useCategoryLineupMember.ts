@@ -4,11 +4,7 @@ import {useCallback, useState} from 'react';
 
 import {showToast} from '@/components';
 import {API_ROUTES} from '@/lib';
-import {
-  CategoryLineupMember,
-  CreateCategoryLineupMemberModal,
-  UpdateCategoryLineupMember,
-} from '@/types';
+import {CreateCategoryLineupMemberModal, UpdateCategoryLineupMember} from '@/types';
 
 /**
  * Hook for managing category lineup member data and CRUD operations

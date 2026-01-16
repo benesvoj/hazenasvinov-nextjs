@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useCallback, useMemo} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
 import {showToast} from '@/components/ui/feedback';
 
@@ -8,19 +8,18 @@ import {createClient} from '@/utils/supabase/client';
 
 import {useUser} from '@/contexts/UserContext';
 
+import {TrainingSessionStatusEnum} from '@/enums';
 import {
-  TrainingSession,
-  TrainingSessionStatus,
   AttendanceRecord,
-  RawAttendanceRecord,
-  AttendanceSummary,
-  TrainingSessionFormData,
   AttendanceStats,
-  MemberAttendanceStats,
-  TrainingSessionStats,
+  AttendanceSummary,
   AttendanceTrendData,
   CoachAnalytics,
+  MemberAttendanceStats,
+  RawAttendanceRecord,
   ToastOptions,
+  TrainingSession,
+  TrainingSessionStats,
 } from '@/types';
 
 export function useAttendance() {
@@ -32,113 +31,6 @@ export function useAttendance() {
 
   const {user, hasRole} = useUser();
   const supabase = useMemo(() => createClient(), []);
-
-  // Fetch training sessions for a specific category and season
-  const fetchTrainingSessions = useCallback(
-    async (categoryId: string, seasonId: string) => {
-      if (!user?.id) return;
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Use direct query until RPC functions are updated
-        const {data, error} = await supabase
-          .from('training_sessions')
-          .select('*')
-          .eq('category_id', categoryId)
-          .eq('season_id', seasonId)
-          .order('session_date', {ascending: false})
-          .order('session_time', {ascending: false});
-
-        if (error) {
-          throw error;
-        }
-
-        setTrainingSessions(data || []);
-      } catch (err) {
-        console.error('Error fetching training sessions:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch training sessions');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [user?.id, supabase]
-  );
-
-  // Fetch attendance records for a training session
-  const fetchAttendanceRecords = useCallback(
-    async (trainingSessionId: string) => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const {data, error} = await supabase
-          .from('member_attendance')
-          .select(
-            `
-          id,
-          member_id,
-          training_session_id,
-          attendance_status,
-          notes,
-          recorded_by,
-          recorded_at,
-          created_at,
-          updated_at,
-          members!inner (
-            id,
-            name,
-            surname,
-            category_id
-          ),
-          training_sessions!inner (
-            id,
-            title,
-            session_date,
-            session_time,
-            category_id
-          )
-        `
-          )
-          .eq('training_session_id', trainingSessionId)
-          .order('recorded_at', {ascending: false});
-
-        if (error) {
-          throw error;
-        }
-
-        const records: AttendanceRecord[] = (data || []).map((record: RawAttendanceRecord) => ({
-          id: record.id,
-          member: {
-            id: record.members.id,
-            name: record.members.name,
-            surname: record.members.surname,
-            category_id: record.members.category_id,
-          },
-          training_session: {
-            id: record.training_sessions.id,
-            title: record.training_sessions.title,
-            session_date: record.training_sessions.session_date,
-            session_time: record.training_sessions.session_time,
-            category_id: record.training_sessions.category_id,
-          },
-          attendance_status: record.attendance_status,
-          notes: record.notes,
-          recorded_by: record.recorded_by,
-          recorded_at: record.recorded_at,
-        }));
-
-        setAttendanceRecords(records);
-      } catch (err) {
-        console.error('Error fetching attendance records:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch attendance records');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [supabase]
-  );
 
   // Fetch attendance summary for a category and season
   const fetchAttendanceSummary = useCallback(
@@ -183,141 +75,9 @@ export function useAttendance() {
     [supabase]
   );
 
-  // Create a new training session
-  const createTrainingSession = useCallback(
-    async (sessionData: TrainingSessionFormData) => {
-      if (!user?.id) throw new Error('User not authenticated');
-
-      try {
-        setError(null);
-
-        // Check user profile and role
-        const {data: userProfile, error: profileError} = await supabase
-          .from('user_profiles')
-          .select('role, assigned_categories')
-          .eq('user_id', user.id)
-          .single();
-
-        if (profileError) {
-          console.error('🔍 Debug: Profile error:', profileError);
-        }
-
-        // Prepare data with only non-empty optional fields
-        const insertData = {
-          title: sessionData.title,
-          session_date: sessionData.session_date,
-          category_id: sessionData.category_id,
-          season_id: sessionData.season_id,
-          coach_id: user.id,
-          ...(sessionData.description && {description: sessionData.description}),
-          ...(sessionData.session_time && {session_time: sessionData.session_time}),
-          ...(sessionData.location && {location: sessionData.location}),
-        };
-
-        const {data, error} = await supabase
-          .from('training_sessions')
-          .insert(insertData)
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Database error:', error);
-          console.error('Error details:', {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code,
-          });
-          throw error;
-        }
-
-        // Refresh training sessions
-        await fetchTrainingSessions(sessionData.category_id, sessionData.season_id);
-
-        return data;
-      } catch (err) {
-        console.error('Error creating training session:', err);
-        setError(err instanceof Error ? err.message : 'Failed to create training session');
-        throw err;
-      }
-    },
-    [user?.id, supabase, fetchTrainingSessions]
-  );
-
-  // Update a training session
-  const updateTrainingSession = useCallback(
-    async (id: string, sessionData: Partial<TrainingSessionFormData>) => {
-      try {
-        setError(null);
-
-        // Prepare data with only non-empty optional fields
-        const updateData: any = {};
-        if (sessionData.title) updateData.title = sessionData.title;
-        if (sessionData.session_date) updateData.session_date = sessionData.session_date;
-        if (sessionData.category_id) updateData.category_id = sessionData.category_id;
-        if (sessionData.season_id) updateData.season_id = sessionData.season_id;
-        if (sessionData.description !== undefined) updateData.description = sessionData.description;
-        if (sessionData.session_time !== undefined)
-          updateData.session_time = sessionData.session_time;
-        if (sessionData.location !== undefined) updateData.location = sessionData.location;
-
-        const {data, error} = await supabase
-          .from('training_sessions')
-          .update(updateData)
-          .eq('id', id)
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Database error:', error);
-          throw error;
-        }
-
-        // Refresh training sessions if category or season changed
-        if (sessionData.category_id && sessionData.season_id) {
-          await fetchTrainingSessions(sessionData.category_id, sessionData.season_id);
-        }
-
-        return data;
-      } catch (err) {
-        console.error('Error updating training session:', err);
-        setError(err instanceof Error ? err.message : 'Failed to update training session');
-        throw err;
-      }
-    },
-    [supabase, fetchTrainingSessions]
-  );
-
-  // Delete a training session
-  const deleteTrainingSession = useCallback(
-    async (id: string) => {
-      try {
-        setError(null);
-
-        // Check if session can be deleted (not done or cancelled)
-        const session = trainingSessions.find((s) => s.id === id);
-        if (session && (session.status === 'done' || session.status === 'cancelled')) {
-          throw new Error('Nelze smazat trénink se stavem "Proveden" nebo "Zrušen"');
-        }
-
-        const {error} = await supabase.from('training_sessions').delete().eq('id', id);
-
-        if (error) throw error;
-
-        // Remove from local state
-        setTrainingSessions((prev) => prev.filter((session) => session.id !== id));
-      } catch (err) {
-        console.error('Error deleting training session:', err);
-        setError(err instanceof Error ? err.message : 'Failed to delete training session');
-        throw err;
-      }
-    },
-    [supabase, trainingSessions]
-  );
-
   // Update training session status
   const updateTrainingSessionStatus = useCallback(
-    async (sessionId: string, status: TrainingSessionStatus, statusReason?: string) => {
+    async (sessionId: string, status: TrainingSessionStatusEnum, statusReason?: string) => {
       try {
         setError(null);
 
@@ -362,9 +122,6 @@ export function useAttendance() {
           } else {
             // Refresh attendance records if this session is currently selected
             const currentSession = trainingSessions.find((s) => s.id === sessionId);
-            if (currentSession) {
-              await fetchAttendanceRecords(sessionId);
-            }
           }
         }
 
@@ -375,7 +132,7 @@ export function useAttendance() {
         throw err;
       }
     },
-    [supabase, trainingSessions, fetchAttendanceRecords]
+    [supabase, trainingSessions]
   );
 
   // Create attendance records for all lineup members
@@ -521,7 +278,7 @@ export function useAttendance() {
         }
 
         // Refresh attendance records
-        await fetchAttendanceRecords(trainingSessionId);
+        // await fetchAttendanceRecords(trainingSessionId);
 
         return data;
       } catch (err) {
@@ -530,7 +287,7 @@ export function useAttendance() {
         throw err;
       }
     },
-    [user?.id, supabase, fetchAttendanceRecords]
+    [user?.id, supabase]
   );
 
   // Update attendance record
@@ -557,9 +314,6 @@ export function useAttendance() {
 
         // Refresh attendance records
         const record = attendanceRecords.find((r) => r.id === attendanceId);
-        if (record) {
-          await fetchAttendanceRecords(record.training_session.id);
-        }
 
         return data;
       } catch (err) {
@@ -568,7 +322,7 @@ export function useAttendance() {
         throw err;
       }
     },
-    [supabase, attendanceRecords, fetchAttendanceRecords]
+    [supabase, attendanceRecords]
   );
 
   // Delete attendance record
@@ -962,18 +716,11 @@ export function useAttendance() {
   );
 
   return {
-    attendanceRecords,
-    trainingSessions,
     attendanceSummary,
     loading,
     error,
     setError,
-    fetchTrainingSessions,
-    fetchAttendanceRecords,
     fetchAttendanceSummary,
-    createTrainingSession,
-    updateTrainingSession,
-    deleteTrainingSession,
     updateTrainingSessionStatus,
     recordAttendance,
     updateAttendance,

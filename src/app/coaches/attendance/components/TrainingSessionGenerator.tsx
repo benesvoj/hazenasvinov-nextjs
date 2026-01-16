@@ -57,7 +57,8 @@ export default function TrainingSessionGenerator({
   const [error, setError] = useState<string | null>(null);
   const [createAttendanceRecords, setCreateAttendanceRecords] = useState(true);
 
-  const {createTrainingSession, createAttendanceForLineupMembers} = useAttendance();
+  // const {createTrainingSession, createAttendanceForLineupMembers} = useAttendance();
+  const {createAttendanceForLineupMembers} = useAttendance();
 
   // Use userCategories from UserContext instead of local state
 
@@ -214,36 +215,37 @@ export default function TrainingSessionGenerator({
         }
       }
 
-      for (const session of generatedSessions) {
-        try {
-          const createdSession = await createTrainingSession({
-            title: session.title,
-            session_date: session.date,
-            session_time: session.time,
-            category_id: session.category_id,
-            season_id: selectedSeason || '', // Use the selected season ID
-            description: `Automaticky vygenerovaný trénink - ${session.title}`,
-          });
-
-          createdSessionIds.push(createdSession.id);
-          successCount++;
-
-          // Create attendance records for lineup members if enabled
-          if (createAttendanceRecords && memberIds.length > 0) {
-            try {
-              await createAttendanceForLineupMembers(
-                createdSession.id,
-                memberIds,
-                'present' // Default status for generated sessions
-              );
-            } catch (attendanceErr) {
-              // Don't fail the entire process if attendance creation fails
-            }
-          }
-        } catch (err) {
-          errorCount++;
-        }
-      }
+      // TODO: Crate training sessions logic here, currently commented out during refactor
+      // for (const session of generatedSessions) {
+      //   try {
+      //     const createdSession = await createTrainingSession({
+      //       title: session.title,
+      //       session_date: session.date,
+      //       session_time: session.time,
+      //       category_id: session.category_id,
+      //       season_id: selectedSeason || '', // Use the selected season ID
+      //       description: `Automaticky vygenerovaný trénink - ${session.title}`,
+      //     });
+      //
+      //     createdSessionIds.push(createdSession.id);
+      //     successCount++;
+      //
+      //     // Create attendance records for lineup members if enabled
+      //     if (createAttendanceRecords && memberIds.length > 0) {
+      //       try {
+      //         await createAttendanceForLineupMembers(
+      //           createdSession.id,
+      //           memberIds,
+      //           'present' // Default status for generated sessions
+      //         );
+      //       } catch (attendanceErr) {
+      //         // Don't fail the entire process if attendance creation fails
+      //       }
+      //     }
+      //   } catch (err) {
+      //     errorCount++;
+      //   }
+      // }
 
       if (successCount > 0) {
         setGeneratedSessions([]);

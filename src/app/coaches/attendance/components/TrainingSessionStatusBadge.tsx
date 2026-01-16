@@ -1,29 +1,25 @@
-'use client';
-
 import React from 'react';
 
 import {Chip} from '@heroui/react';
 
-import {TrainingSessionStatus} from '@/types/entities/attendance/data/attendance';
+import {getTrainingSessionStatusOptions, TrainingSessionStatusEnum} from '@/enums';
+import {trainingSessionStatusOptions} from '@/utils';
 
 interface TrainingSessionStatusBadgeProps {
-  status: TrainingSessionStatus;
+  status: TrainingSessionStatusEnum;
   size?: 'sm' | 'md' | 'lg';
 }
 
 const statusConfig = {
   planned: {
-    label: 'Naplánován',
     color: 'default' as const,
     variant: 'flat' as const,
   },
   done: {
-    label: 'Proveden',
     color: 'success' as const,
     variant: 'flat' as const,
   },
   cancelled: {
-    label: 'Zrušen',
     color: 'danger' as const,
     variant: 'flat' as const,
   },
@@ -34,10 +30,11 @@ export default function TrainingSessionStatusBadge({
   size = 'sm',
 }: TrainingSessionStatusBadgeProps) {
   const config = statusConfig[status];
+  const statusOptions = trainingSessionStatusOptions();
 
   return (
     <Chip color={config.color} variant={config.variant} size={size} className="font-medium">
-      {config.label}
+      {statusOptions[status]}
     </Chip>
   );
 }

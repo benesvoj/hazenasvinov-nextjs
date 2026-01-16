@@ -23,8 +23,20 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{enti
   return withAuth(async (user, supabase) => {
     if (config.queryLayer) {
       const searchParams = request.nextUrl.searchParams;
+
       const page = searchParams.get('page');
       const limit = searchParams.get('limit');
+
+      const filters: Record<string, any> = {};
+      if (config.filters) {
+        config.filters.forEach((filter) => {
+          const value = searchParams.get(filter.paramName);
+          if (value !== null) {
+            const dbColumn = filter.dbColumn || filter.paramName;
+            filters[dbColumn] = filter.transform ? filter.transform(value) : value;
+          }
+        });
+      }
 
       const options = {
         sorting: config.sortBy,
@@ -37,6 +49,7 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{enti
                   : config.pagination?.defaultLimit || 25,
               }
             : undefined,
+        filters,
       };
 
       const result = await config.queryLayer.getAll({supabase}, options);

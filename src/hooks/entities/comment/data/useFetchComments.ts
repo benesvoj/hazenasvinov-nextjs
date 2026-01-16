@@ -1,6 +1,7 @@
 'use client';
 
-import {createDataFetchHook} from '@/hooks';
+import {createDataFetchHook} from '@/hooks/factories';
+
 import {API_ROUTES, translations} from '@/lib';
 import {DB_TABLE} from '@/queries/comments';
 import {BaseComment} from '@/types';

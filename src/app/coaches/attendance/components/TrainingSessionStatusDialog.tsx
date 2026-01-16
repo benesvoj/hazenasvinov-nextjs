@@ -5,13 +5,13 @@ import React, {useState} from 'react';
 import {Select, SelectItem, Textarea, Card, CardBody} from '@heroui/react';
 
 import {UnifiedModal} from '@/components';
-import {TrainingSessionStatus} from '@/types';
+import {TrainingSessionStatusEnum} from '@/enums';
 
 interface TrainingSessionStatusDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (status: TrainingSessionStatus, reason?: string) => void;
-  currentStatus: TrainingSessionStatus;
+  onConfirm: (status: TrainingSessionStatusEnum, reason?: string) => void;
+  currentStatus: TrainingSessionStatusEnum;
   sessionTitle: string;
 }
 
@@ -43,7 +43,7 @@ export default function TrainingSessionStatusDialog({
   currentStatus,
   sessionTitle,
 }: TrainingSessionStatusDialogProps) {
-  const [selectedStatus, setSelectedStatus] = useState<TrainingSessionStatus>(currentStatus);
+  const [selectedStatus, setSelectedStatus] = useState<TrainingSessionStatusEnum>(currentStatus);
   const [cancellationReason, setCancellationReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -90,7 +90,7 @@ export default function TrainingSessionStatusDialog({
           placeholder="Vyberte stav"
           selectedKeys={[selectedStatus]}
           onSelectionChange={(keys) => {
-            const status = Array.from(keys)[0] as TrainingSessionStatus;
+            const status = Array.from(keys)[0] as TrainingSessionStatusEnum;
             setSelectedStatus(status);
             if (status !== 'cancelled') {
               setCancellationReason('');

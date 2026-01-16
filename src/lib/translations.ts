@@ -373,6 +373,77 @@ export const translations = {
       },
     },
   },
+  coachPortal: {
+    trainingSessions: {
+      trainingSessionList: {
+        title: 'Tréninkové jednotky',
+        noTrainingSession: 'Žádné tréninky',
+        cancelTrainingSessionReason: 'Důvod zrušení:',
+        changeTrainingSessionStatus: 'Změnit stav tréninku',
+        updateTrainingSession: 'Upravit trénink',
+        deleteTrainingSession: 'Smazat trénink',
+        trainingSessionDescription: 'Popis:',
+      },
+      statuses: {
+        planned: 'Naplánován',
+        done: 'Proveden',
+        cancelled: 'Zrušen',
+      },
+      responseMessages: {
+        trainingSessionsFetchFailed: 'Chyba při načítání tréninkových jednotek',
+        createSuccess: 'Tréninková jednotka byla úspěšně vytvořena.',
+        updateSuccess: 'Tréninková jednotka byla úspěšně aktualizována.',
+        deleteSuccess: 'Tréninková jednotka byla úspěšně smazána.',
+        createError: 'Chyba při vytváření tréninkové jednotky.',
+        updateError: 'Chyba při aktualizaci tréninkové jednotky.',
+        deleteError: 'Chyba při mazání tréninkové jednotky.',
+      },
+    },
+    memberAttendance: {
+      responseMessages: {
+        memberAttendanceFetchFailed: 'Chyba při načítání docházky členů',
+      },
+    },
+    lineupList: {
+      responseMessages: {
+        lineupsFetchFailed: 'Chyba při načítání soupisek',
+        mandatoryName: 'Název je povinný',
+        createSuccess: 'Soupiska byla úspěšně vytvořena.',
+        updateSuccess: 'Soupiska byla úspěšně aktualizována.',
+        deleteSuccess: 'Soupiska byla úspěšně smazána.',
+        createError: 'Chyba při vytváření soupisky.',
+        updateError: 'Chyba při aktualizaci soupisky.',
+        deleteError: 'Chyba při mazání soupisky.',
+      },
+      title: 'Soupisky',
+      updateLineup: 'Upravit soupisku',
+      deleteLineup: 'Smazat soupisku',
+      deleteLineupMessage: 'Opravdu chcete smazat tuto soupisku? Tato akce je nevratná.',
+      noLineups: 'Žádné soupisky',
+      deleteLineupMember: 'Smazat člena soupisky',
+      deleteLineupMemberMessage:
+        'Opravdu chcete smazat tohoto člena ze soupisky? Tato akce je nevratná.',
+    },
+    lineupMembers: {
+      responseMessages: {
+        lineupMembersFetchFailed: 'Chyba při načítání členů soupisky',
+      },
+      title: 'Členové soupisky',
+      noLineupMembers: 'Žádní členové soupisky',
+      selectLineupPrompt: 'Vyberte soupisku pro zobrazení členů',
+      addMember: 'Přidat člena',
+      table: {
+        ariaLabel: 'Seznam členů soupisky',
+        columns: {
+          member: 'Člen',
+          position: 'Pozice',
+          jersey_number: 'Dres',
+          functions: 'Funkce',
+          actions: 'Akce',
+        },
+      },
+    },
+  },
   action: {
     add: 'Přidat',
     edit: 'Upravit',

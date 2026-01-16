@@ -3,7 +3,6 @@
 import {useCallback, useEffect, useState} from 'react';
 
 import {showToast} from '@/components';
-import {createDataFetchHook} from '@/hooks';
 import {API_ROUTES, translations} from '@/lib';
 import {Member} from '@/types';
 
@@ -40,7 +39,7 @@ export function useFetchMembers() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   return {
     data,

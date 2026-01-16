@@ -1,12 +1,12 @@
 'use client';
 
-import {useCallback, useEffect, useState, useRef} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {showToast} from '@/components';
 
-export interface DataFetchHookConfig {
+export interface DataFetchHookConfig<TParams = void> {
   /** API endpoint to fetch from */
-  endpoint: string;
+  endpoint: string | ((params: TParams) => string);
   /** Entity name for error messages (e.g., "committees", "members") */
   entityName: string;
   /** Error message for failed fetch */
@@ -95,10 +95,26 @@ export interface DataFetchHookResult<T> {
  * - Uses useCallback for stable refetch reference
  * - Memoizes fetch function with proper dependencies
  */
-export function createDataFetchHook<T>(config: DataFetchHookConfig): () => DataFetchHookResult<T> {
-  const {endpoint, entityName, errorMessage, fetchOnMount = true, showErrorToast = true} = config;
+export function createDataFetchHook<T, TParams = void>(
+  config: DataFetchHookConfig<TParams>
+): TParams extends void
+  ? () => DataFetchHookResult<T>
+  : (params: TParams) => DataFetchHookResult<T> {
+  const {entityName, errorMessage, fetchOnMount = true, showErrorToast = true} = config;
+  const isParameterized = typeof config.endpoint === 'function';
 
-  return function useDataFetch(): DataFetchHookResult<T> {
+  return function useDataFetch(params?: TParams): DataFetchHookResult<T> {
+    // Serialize params for stable comparison
+    const paramsKey = params ? JSON.stringify(params) : '';
+
+    const endpoint = useMemo(() => {
+      if (isParameterized) {
+        return (config.endpoint as (p: TParams) => string)(params as TParams);
+      }
+      return config.endpoint as string;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [paramsKey]);
+
     const [data, setData] = useState<T[]>([]);
     const [loading, setLoading] = useState(fetchOnMount);
     const [error, setError] = useState<string | null>(null);
@@ -106,14 +122,9 @@ export function createDataFetchHook<T>(config: DataFetchHookConfig): () => DataF
 
     const fetchData = useCallback(async () => {
       try {
-        // Cancel previous request if still pending
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort();
-        }
+        if (abortControllerRef.current) abortControllerRef.current.abort();
 
-        // Create new abort controller
         abortControllerRef.current = new AbortController();
-
         setLoading(true);
         setError(null);
 
@@ -122,16 +133,11 @@ export function createDataFetchHook<T>(config: DataFetchHookConfig): () => DataF
         });
         const response = await res.json();
 
-        if (!res.ok) {
-          throw new Error(response.error || errorMessage);
-        }
+        if (!res.ok) throw new Error(response.error || errorMessage);
 
         setData(response.data || []);
       } catch (err: any) {
-        // Ignore abort errors
-        if (err.name === 'AbortError') {
-          return;
-        }
+        if (err.name === 'AbortError') return;
 
         console.error(`Error fetching ${entityName}:`, err);
         const errorMsg = err.message || errorMessage;
@@ -143,6 +149,7 @@ export function createDataFetchHook<T>(config: DataFetchHookConfig): () => DataF
       } finally {
         setLoading(false);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -150,7 +157,6 @@ export function createDataFetchHook<T>(config: DataFetchHookConfig): () => DataF
         fetchData();
       }
 
-      // Cleanup: abort pending requests on unmount
       return () => {
         if (abortControllerRef.current) {
           abortControllerRef.current.abort();
@@ -164,5 +170,5 @@ export function createDataFetchHook<T>(config: DataFetchHookConfig): () => DataF
       error,
       refetch: fetchData,
     };
-  };
+  } as any;
 }

@@ -1,4 +1,4 @@
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib';
 
 const t = translations.common.todoStatus;
 

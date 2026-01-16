@@ -1,4 +1,4 @@
-import {NextRequest} from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 
 import {errorResponse, successResponse, withAdminAuth, withAuth} from '@/utils/supabase/apiHelpers';
 
@@ -23,6 +23,10 @@ export async function GET(
   }
 
   return withAuth(async (user, supabase) => {
+    if (!config.queryLayer?.getById) {
+      return NextResponse.json({error: 'getById not supported for this entity'}, {status: 400});
+    }
+
     if (config.queryLayer) {
       const result = await config.queryLayer.getById({supabase}, id);
 
