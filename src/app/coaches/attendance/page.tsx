@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, {useEffect, useMemo, useState} from 'react';
 
 import {Button, Card, CardBody, Select, SelectItem, Tab, Tabs} from '@heroui/react';

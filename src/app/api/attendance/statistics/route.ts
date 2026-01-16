@@ -2,7 +2,7 @@ import {NextRequest} from 'next/server';
 
 import {errorResponse, successResponse, withAuth} from '@/utils/supabase/apiHelpers';
 
-import {generateInsights, generateRecommendations} from '@/helpers';
+import {generateInsights, generateRecommendations} from '@/helpers/attendance/helpers';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
