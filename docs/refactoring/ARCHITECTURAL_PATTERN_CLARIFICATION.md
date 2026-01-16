@@ -28,7 +28,7 @@ export function useTodos() {
 
 ### Your Codebase Pattern
 
-Looking at `src/app/admin/page.tsx`:
+Looking at `src/app/admin/page.tsx.backup`:
 
 ```typescript
 export default function AdminDashboard() {
@@ -317,7 +317,7 @@ function MyComponent() {
 
 ### Categories (Follows Pattern ✅)
 ```typescript
-// admin/categories/page.tsx
+// admin/categories/page.tsx.backup
 const {data: categories} = useFetchCategories();  // Independent
 const categoryState = useCategories();             // Independent
 
@@ -326,7 +326,7 @@ const categoryState = useCategories();             // Independent
 
 ### Members (Follows Pattern ✅)
 ```typescript
-// admin/members/page.tsx
+// admin/members/page.tsx.backup
 const {data: members} = useFetchMembers();  // Independent
 const memberForm = useMemberForm();         // Independent (inferred)
 
@@ -335,7 +335,7 @@ const memberForm = useMemberForm();         // Independent (inferred)
 
 ### Todos (NOW Follows Pattern ✅)
 ```typescript
-// admin/page.tsx
+// admin/page.tsx.backup
 const {data} = useFetchTodos();   // Independent
 const todos = useTodos();          // Independent
 const todoForm = useTodoForm();    // Independent

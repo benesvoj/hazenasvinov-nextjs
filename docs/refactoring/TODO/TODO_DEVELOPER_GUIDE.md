@@ -712,7 +712,7 @@ DELETE /api/todos/:id       - Delete todo (admin only)
 ## Examples from Codebase
 
 ### Example 1: AdminDashboard Page
-**File**: `src/app/admin/page.tsx`
+**File**: `src/app/admin/page.tsx.backup`
 
 Full example of CRUD todo management with filtering, modals, and delete confirmation.
 
@@ -754,7 +754,7 @@ const {createTodo} = useTodos();
 
 1. Check `TODO_REFACTORING_COMPLETION.md` for architecture overview
 2. Check `TODO_ARCHITECTURE_FINAL.md` for detailed architecture
-3. Review `src/app/admin/page.tsx` for complete example
+3. Review `src/app/admin/page.tsx.backup` for complete example
 4. Check hook source code in `src/hooks/entities/todo/`
 
 ---

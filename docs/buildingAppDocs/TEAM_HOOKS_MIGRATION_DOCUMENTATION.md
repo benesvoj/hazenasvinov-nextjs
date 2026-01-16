@@ -23,8 +23,8 @@ As part of the database restructuring, the `teams` table was removed in favor of
 - Returns `teams`, `loading`, `error`, `refetch`, and `fetchTeams` (legacy compatibility)
 
 **Files Using This Hook**:
-- `src/app/admin/matches/page.tsx` - Uses `fetchTeams` for team data fetching
-- `src/app/coaches/matches/page.tsx` - Uses `teams` array for match management
+- `src/app/admin/matches/page.tsx.backup` - Uses `fetchTeams` for team data fetching
+- `src/app/coaches/matches/page.tsx.backup` - Uses `teams` array for match management
 - `src/components/match/MatchRow.tsx` - Uses team data for display
 - `src/hooks/useFilteredTeams.ts` - Depends on this hook for team filtering
 
@@ -50,8 +50,8 @@ As part of the database restructuring, the `teams` table was removed in favor of
 - Includes `clearTeams` function for resetting team data
 
 **Files Using This Hook**:
-- `src/app/admin/matches/page.tsx` - Uses `filteredTeams`, `fetchFilteredTeams`, and `clearTeams`
-- `src/app/coaches/matches/page.tsx` - Uses filtered team data for match management
+- `src/app/admin/matches/page.tsx.backup` - Uses `filteredTeams`, `fetchFilteredTeams`, and `clearTeams`
+- `src/app/coaches/matches/page.tsx.backup` - Uses filtered team data for match management
 
 **Why It Was Removed Initially**:
 - Direct dependency on the old `teams` table structure
@@ -75,7 +75,7 @@ As part of the database restructuring, the `teams` table was removed in favor of
 - Updated Team interface to include `category_id` and `season_id` properties
 
 **Files Using This Hook**:
-- `src/app/admin/matches/page.tsx` - Uses `teamCounts`, `loading`, and `fetchTeamCounts`
+- `src/app/admin/matches/page.tsx.backup` - Uses `teamCounts`, `loading`, and `fetchTeamCounts`
 - `src/components/match/MatchRow.tsx` - Uses team display functions
 - `src/hooks/useFilteredTeams.ts` - Depends on team display utilities
 
@@ -100,7 +100,7 @@ As part of the database restructuring, the `teams` table was removed in favor of
 - Returns `clubId`, `isOwnClub`, `teamClub`, `loading`, `error`, and `refetch`
 
 **Files Using This Hook**:
-- `src/app/admin/matches/page.tsx` - Uses `clubId` and `isOwnClub` for match management
+- `src/app/admin/matches/page.tsx.backup` - Uses `clubId` and `isOwnClub` for match management
 - `src/components/match/EditMatchModal.tsx` - Uses team-club relationship data
 
 **Why It Was Removed Initially**:

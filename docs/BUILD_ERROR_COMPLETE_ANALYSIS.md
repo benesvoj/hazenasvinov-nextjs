@@ -260,13 +260,13 @@ npm run dev
 - ✅ `src/app/api/attendance/statistics/route.ts` - Direct import
 - ✅ `src/hooks/index.ts` - Added 'use client'
 - ✅ `src/hooks/entities/attendance/data/useFetchAttendanceStatistics.ts` - Added 'use client'
-- ✅ `src/app/coaches/attendance/page.tsx` - Fixed TypeScript errors (4 → 0)
+- ✅ `src/app/coaches/attendance/page.tsx.backup` - Fixed TypeScript errors (4 → 0)
 - ✅ `src/app/coaches/attendance/components/AttendanceRecordingTable.tsx` - Fixed prop types
 - ✅ All circular dependency imports (11 files)
 
 ### Attempted But Reverted
-- `src/app/auth/callback/page.tsx` - Added dynamic export (reverted by linter)
-- `src/app/blocked/page.tsx` - Added dynamic export (reverted by linter)
+- `src/app/auth/callback/page.tsx.backup` - Added dynamic export (reverted by linter)
+- `src/app/blocked/page.tsx.backup` - Added dynamic export (reverted by linter)
 - `next.config.mjs` - Added experimental config (reverted by linter)
 
 ---

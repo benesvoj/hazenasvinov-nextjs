@@ -34,7 +34,7 @@ This migration updates the `training_sessions` table and all related code to use
 ### 4. ✅ Application Code Update
 - **Files Updated:**
   - `src/hooks/useAttendance.ts` - Updated all functions to use `category_id`
-  - `src/app/coaches/attendance/page.tsx` - Removed category code conversion
+  - `src/app/coaches/attendance/page.tsx.backup` - Removed category code conversion
   - `src/app/coaches/attendance/components/TrainingSessionGenerator.tsx` - Updated to use `category_id`
 
 ## Migration Execution Order
@@ -126,7 +126,7 @@ If issues occur, rollback steps:
 ### TypeScript Files
 - `src/types/attendance.ts`
 - `src/hooks/useAttendance.ts`
-- `src/app/coaches/attendance/page.tsx`
+- `src/app/coaches/attendance/page.tsx.backup`
 - `src/app/coaches/attendance/components/TrainingSessionGenerator.tsx`
 
 ## Next Steps

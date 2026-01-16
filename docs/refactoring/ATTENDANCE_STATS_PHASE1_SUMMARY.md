@@ -171,7 +171,7 @@ const { data, isLoading } = useFetchAttendanceStatistics(categoryId, seasonId);
 
 ### UI Page (Already Complete)
 ```typescript
-// src/app/coaches/attendance/page.tsx
+// src/app/coaches/attendance/page.tsx.backup
 <Tabs>
   <Tab key="attendance">...</Tab>
   <Tab key="statistics">
@@ -388,7 +388,7 @@ Existing Files (Already Complete):
 ├── src/hooks/entities/attendance/data/
 │   └── useFetchAttendanceStatistics.ts                  (React Query hook)
 ├── src/app/coaches/attendance/
-│   ├── page.tsx                                         (Tab navigation)
+│   ├── page.tsx.backup                                         (Tab navigation)
 │   └── components/AttendanceStatisticsLazy.tsx         (Lazy loader)
 └── src/helpers/attendance/helpers.ts                   (Insights/recommendations)
 ```

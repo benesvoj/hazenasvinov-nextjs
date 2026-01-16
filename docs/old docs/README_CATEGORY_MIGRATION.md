@@ -27,23 +27,23 @@ The following category codes are currently used throughout the system:
 ### Files Requiring Updates (15 files)
 
 #### 1. **URL Routing & Navigation**
-- `src/app/(main)/categories/[slug]/page.tsx` - Category page routing
+- `src/app/(main)/categories/[slug]/page.tsx.backup` - Category page routing
 - `src/routes/routes.ts` - Hardcoded category routes
 - `src/utils/categoryPageData.ts` - Server-side category data fetching
 
 #### 2. **Component Logic**
 - `src/components/match/MatchSchedule.tsx` - Match filtering
-- `src/app/(main)/matches/page.tsx` - Category selection
+- `src/app/(main)/matches/page.tsx.backup` - Category selection
 - `src/app/(main)/matches/components/ClubSelector.tsx` - Club filtering
-- `src/app/(main)/matches/[id]/page.tsx` - Match detail URLs
+- `src/app/(main)/matches/[id]/page.tsx.backup` - Match detail URLs
 
 #### 3. **Admin Interface**
 - `src/app/admin/members/components/MembersInternalTab.tsx` - Member filtering
 - `src/app/admin/members/components/MemberFormModal.tsx` - Member forms
 - `src/app/admin/members/components/BulkEditModal.tsx` - Bulk operations
 - `src/app/admin/members/components/MembersStatisticTab.tsx` - Statistics
-- `src/app/admin/user-roles/page.tsx` - Role assignments
-- `src/app/admin/categories/page.tsx` - Category management
+- `src/app/admin/user-roles/page.tsx.backup` - Role assignments
+- `src/app/admin/categories/page.tsx.backup` - Category management
 
 #### 4. **Hooks & Utilities**
 - `src/hooks/useFetchMatches.ts` - Match fetching logic
@@ -141,7 +141,7 @@ export function useFetchMatches(categoryId: string, ...)
 ### Step 3: Update Component Logic
 
 #### 3.1 Category Page Routing
-**File**: `src/app/(main)/categories/[slug]/page.tsx`
+**File**: `src/app/(main)/categories/[slug]/page.tsx.backup`
 ```typescript
 // BEFORE
 const currentCategory = categories?.find(cat => 
@@ -155,7 +155,7 @@ const currentCategory = categories?.find(cat =>
 ```
 
 #### 3.2 Matches Page Filtering
-**File**: `src/app/(main)/matches/page.tsx`
+**File**: `src/app/(main)/matches/page.tsx.backup`
 ```typescript
 // BEFORE
 <SelectItem key={category.code}>
@@ -318,10 +318,10 @@ prepKids: '/category/prep-kids',
 ## 🗂️ File-by-File Migration Checklist
 
 ### High Priority Files
-- [ ] `src/app/(main)/categories/[slug]/page.tsx`
+- [ ] `src/app/(main)/categories/[slug]/page.tsx.backup`
 - [ ] `src/hooks/useFetchMatches.ts`
 - [ ] `src/utils/categoryPageData.ts`
-- [ ] `src/app/(main)/matches/page.tsx`
+- [ ] `src/app/(main)/matches/page.tsx.backup`
 
 ### Medium Priority Files
 - [ ] `src/app/(main)/matches/components/ClubSelector.tsx`
@@ -333,9 +333,9 @@ prepKids: '/category/prep-kids',
 - [ ] `src/app/admin/members/components/MemberFormModal.tsx`
 - [ ] `src/app/admin/members/components/BulkEditModal.tsx`
 - [ ] `src/app/admin/members/components/MembersStatisticTab.tsx`
-- [ ] `src/app/admin/user-roles/page.tsx`
-- [ ] `src/app/admin/categories/page.tsx`
-- [ ] `src/app/(main)/matches/[id]/page.tsx`
+- [ ] `src/app/admin/user-roles/page.tsx.backup`
+- [ ] `src/app/admin/categories/page.tsx.backup`
+- [ ] `src/app/(main)/matches/[id]/page.tsx.backup`
 - [ ] `src/hooks/useFetchMatch.ts`
 
 ## 🎯 Quick Start Commands

@@ -123,7 +123,7 @@ The codebase has a betting system with payment patterns:
 ### UI Current State
 
 #### Admin Members Page
-Location: `src/app/admin/members/page.tsx`
+Location: `src/app/admin/members/page.tsx.backup`
 
 **Current Features:**
 - Two tabs: "Seznam členů" (Members List) and "Statistiky" (Statistics)
@@ -1342,7 +1342,7 @@ export const usePaymentStatus = () => {
 
 #### 7.1 Update Categories Admin Page
 
-File: `src/app/admin/categories/page.tsx`
+File: `src/app/admin/categories/page.tsx.backup`
 
 Add new tab for "Členské poplatky" (Membership Fees) where admins can:
 - View fees for all categories for current year

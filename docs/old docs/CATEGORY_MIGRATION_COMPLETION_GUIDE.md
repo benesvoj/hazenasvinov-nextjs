@@ -153,11 +153,11 @@ WHERE c.id IS NULL;
 
 #### 3.2 Test Application Functionality
 **Files to Test:**
-- `src/app/coaches/attendance/page.tsx` - Training session creation/editing
+- `src/app/coaches/attendance/page.tsx.backup` - Training session creation/editing
 - `src/app/coaches/attendance/components/TrainingSessionGenerator.tsx` - Bulk session creation
 - `src/hooks/useAttendance.ts` - All attendance functions
 - `src/hooks/useCategoryLineups.ts` - Lineup management
-- `src/app/coaches/lineups/page.tsx` - Lineup interface
+- `src/app/coaches/lineups/page.tsx.backup` - Lineup interface
 
 ### Phase 4: Remove Legacy Columns
 

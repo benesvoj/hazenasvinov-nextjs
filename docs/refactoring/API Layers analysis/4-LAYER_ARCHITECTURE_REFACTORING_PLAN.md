@@ -55,7 +55,7 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                    LAYER 1: PRESENTATION                        │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │  Pages (src/app/**/page.tsx)                              │  │
+│  │  Pages (src/app/**/page.tsx.backup)                              │  │
 │  │  - Route handlers                                         │  │
 │  │  - Layout components                                      │  │
 │  │  - Server/Client component coordination                   │  │
@@ -184,7 +184,7 @@
 ### Layer 1: Presentation Layer
 
 **Location:**
-- `/src/app/**/page.tsx` - Page components
+- `/src/app/**/page.tsx.backup` - Page components
 - `/src/components/**` - UI and feature components
 
 **Current Files:** ~200 component files
@@ -217,7 +217,7 @@ export default function MembersPage() {
 }
 ```
 
-**Files to Modify:** All page.tsx and component files (clean up any direct fetch calls)
+**Files to Modify:** All page.tsx.backup and component files (clean up any direct fetch calls)
 
 ---
 
@@ -753,8 +753,8 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Admin Members Page | `/src/app/admin/members/page.tsx` | **H** | **P1** | 8h | Core admin feature, multiple hooks |
-| Coaches Members Page | `/src/app/coaches/members/page.tsx` | **M** | **P2** | 4h | Similar to admin but limited access |
+| Admin Members Page | `/src/app/admin/members/page.tsx.backup` | **H** | **P1** | 8h | Core admin feature, multiple hooks |
+| Coaches Members Page | `/src/app/coaches/members/page.tsx.backup` | **M** | **P2** | 4h | Similar to admin but limited access |
 | MembersTable Component | `/src/components/shared/member/*` | **H** | **P1** | 6h | Complex table with filters, sorting |
 | Member Import | `/src/components/features/member-import/*` | **H** | **P2** | 8h | Bulk operations, validation |
 | Member Relationships | `/src/components/features/member-relationships/*` | **M** | **P3** | 4h | Relationship management |
@@ -780,10 +780,10 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Public Matches Page | `/src/app/(main)/matches/page.tsx` | **H** | **P1** | 6h | High traffic, complex filters |
-| Match Detail Page | `/src/app/(main)/matches/[id]/page.tsx` | **H** | **P1** | 8h | Complex data (lineups, stats, videos) |
-| Admin Matches Page | `/src/app/admin/matches/page.tsx` | **C** | **P1** | 10h | Most complex page, many features |
-| Coaches Matches Page | `/src/app/coaches/matches/page.tsx` | **H** | **P2** | 6h | Similar to admin but limited |
+| Public Matches Page | `/src/app/(main)/matches/page.tsx.backup` | **H** | **P1** | 6h | High traffic, complex filters |
+| Match Detail Page | `/src/app/(main)/matches/[id]/page.tsx.backup` | **H** | **P1** | 8h | Complex data (lineups, stats, videos) |
+| Admin Matches Page | `/src/app/admin/matches/page.tsx.backup` | **C** | **P1** | 10h | Most complex page, many features |
+| Coaches Matches Page | `/src/app/coaches/matches/page.tsx.backup` | **H** | **P2** | 6h | Similar to admin but limited |
 | MatchSchedule Component | `/src/components/shared/match/*` | **H** | **P1** | 8h | Complex display logic |
 | MatchCard Component | `/src/components/shared/match/*` | **M** | **P1** | 4h | Reusable match display |
 | useFetchMatches | `/src/hooks/entities/match/data/*` | **C** | **P1** | 8h | Most complex hook, many filters |
@@ -805,8 +805,8 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Public Category Page | `/src/app/(main)/categories/[slug]/page.tsx` | **H** | **P1** | 8h | High traffic, standings, matches |
-| Admin Categories Page | `/src/app/admin/categories/page.tsx` | **M** | **P2** | 4h | Simple CRUD |
+| Public Category Page | `/src/app/(main)/categories/[slug]/page.tsx.backup` | **H** | **P1** | 8h | High traffic, standings, matches |
+| Admin Categories Page | `/src/app/admin/categories/page.tsx.backup` | **M** | **P2** | 4h | Simple CRUD |
 | useFetchCategories | `/src/hooks/entities/category/data/*` | **L** | **P1** | 2h | Simple fetch |
 | useCategories (CRUD) | `/src/hooks/entities/category/state/*` | **M** | **P2** | 3h | CRUD operations |
 | useCategoryPageData | `/src/hooks/entities/category/business/*` | **H** | **P1** | 6h | Complex business logic |
@@ -821,7 +821,7 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Coaches Lineups Page | `/src/app/coaches/lineups/page.tsx` | **C** | **P1** | 12h | Most complex coaches feature |
+| Coaches Lineups Page | `/src/app/coaches/lineups/page.tsx.backup` | **C** | **P1** | 12h | Most complex coaches feature |
 | LineupManager Component | `/src/components/features/lineup/*` | **C** | **P1** | 10h | Drag-drop, complex state |
 | useLineupData | `/src/hooks/entities/lineup/data/*` | **H** | **P1** | 6h | Complex data fetching |
 | useLineupManager | `/src/hooks/entities/lineup/state/*` | **C** | **P1** | 8h | Complex state management |
@@ -836,7 +836,7 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Coaches Attendance Page | `/src/app/coaches/attendance/page.tsx` | **H** | **P2** | 8h | Calendar view, bulk operations |
+| Coaches Attendance Page | `/src/app/coaches/attendance/page.tsx.backup` | **H** | **P2** | 8h | Calendar view, bulk operations |
 | Attendance Components | `/src/components/features/attendance/*` | **M** | **P2** | 6h | Calendar, lists |
 | useAttendance | `/src/hooks/entities/attendance/*` | **M** | **P2** | 4h | Fetch and CRUD |
 | API: /api/attendance | `/src/app/api/attendance/route.ts` | **M** | **P2** | 3h | CRUD operations |
@@ -849,8 +849,8 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Public Betting Page | `/src/app/(betting)/betting/page.tsx` | **H** | **P2** | 8h | Complex UI, many features |
-| Admin Generate Odds | `/src/app/admin/betting/generate-odds/page.tsx` | **H** | **P2** | 6h | Complex calculations |
+| Public Betting Page | `/src/app/(betting)/betting/page.tsx.backup` | **H** | **P2** | 8h | Complex UI, many features |
+| Admin Generate Odds | `/src/app/admin/betting/generate-odds/page.tsx.backup` | **H** | **P2** | 6h | Complex calculations |
 | Betting Components | `/src/components/features/betting/*` | **H** | **P2** | 10h | 8 files, complex interactions |
 | useBetting | `/src/hooks/entities/betting/*` | **H** | **P2** | 8h | Complex logic |
 | bettingService.ts | `/src/services/bettingService.ts` | **H** | **P2** | 8h | Odds calculation, wallet |
@@ -864,9 +864,9 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Public Blog List | `/src/app/(main)/blog/page.tsx` | **M** | **P2** | 4h | List with pagination |
-| Public Blog Post | `/src/app/(main)/blog/[slug]/page.tsx` | **M** | **P2** | 4h | Single post display |
-| Admin Posts Page | `/src/app/admin/posts/page.tsx` | **M** | **P2** | 4h | CRUD interface |
+| Public Blog List | `/src/app/(main)/blog/page.tsx.backup` | **M** | **P2** | 4h | List with pagination |
+| Public Blog Post | `/src/app/(main)/blog/[slug]/page.tsx.backup` | **M** | **P2** | 4h | Single post display |
+| Admin Posts Page | `/src/app/admin/posts/page.tsx.backup` | **M** | **P2** | 4h | CRUD interface |
 | useFetchBlog | `/src/hooks/entities/blog/data/*` | **L** | **P2** | 2h | Simple fetch |
 | useBlog (CRUD) | `/src/hooks/entities/blog/state/*` | **M** | **P2** | 3h | CRUD operations |
 | API: /api/blog | `/src/app/api/blog/route.ts` | **L** | **P2** | 2h | Simple CRUD |
@@ -879,10 +879,10 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Admin Clubs Page | `/src/app/admin/clubs/page.tsx` | **M** | **P2** | 4h | List + CRUD |
-| Admin Club Detail | `/src/app/admin/clubs/[id]/page.tsx` | **H** | **P2** | 6h | Complex relationships |
-| Admin New Club | `/src/app/admin/clubs/new/page.tsx` | **M** | **P2** | 4h | Form with validation |
-| Admin Club Categories | `/src/app/admin/club-categories/page.tsx` | **M** | **P3** | 4h | Relationship management |
+| Admin Clubs Page | `/src/app/admin/clubs/page.tsx.backup` | **M** | **P2** | 4h | List + CRUD |
+| Admin Club Detail | `/src/app/admin/clubs/[id]/page.tsx.backup` | **H** | **P2** | 6h | Complex relationships |
+| Admin New Club | `/src/app/admin/clubs/new/page.tsx.backup` | **M** | **P2** | 4h | Form with validation |
+| Admin Club Categories | `/src/app/admin/club-categories/page.tsx.backup` | **M** | **P3** | 4h | Relationship management |
 | useTeams | `/src/hooks/entities/team/*` | **M** | **P2** | 3h | CRUD operations |
 | useClubs | `/src/hooks/entities/club/*` | **M** | **P2** | 3h | CRUD operations |
 | API: /api/teams | `/src/app/api/teams/route.ts` | **L** | **P2** | 2h | Simple CRUD |
@@ -896,13 +896,13 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Login Page | `/src/app/login/page.tsx` | **M** | **P1** | 4h | Auth flow |
-| Coaches Login | `/src/app/coaches/login/page.tsx` | **M** | **P1** | 4h | Separate auth |
-| Admin Users Page | `/src/app/admin/users/page.tsx` | **M** | **P1** | 4h | User management |
-| Admin User Roles | `/src/app/admin/user-roles/page.tsx` | **M** | **P2** | 4h | Role management |
-| Reset Password | `/src/app/reset-password/page.tsx` | **M** | **P2** | 3h | Password reset flow |
-| Set Password | `/src/app/set-password/page.tsx` | **M** | **P2** | 3h | Password set flow |
-| Auth Callback | `/src/app/auth/callback/page.tsx` | **M** | **P1** | 3h | OAuth callback |
+| Login Page | `/src/app/login/page.tsx.backup` | **M** | **P1** | 4h | Auth flow |
+| Coaches Login | `/src/app/coaches/login/page.tsx.backup` | **M** | **P1** | 4h | Separate auth |
+| Admin Users Page | `/src/app/admin/users/page.tsx.backup` | **M** | **P1** | 4h | User management |
+| Admin User Roles | `/src/app/admin/user-roles/page.tsx.backup` | **M** | **P2** | 4h | Role management |
+| Reset Password | `/src/app/reset-password/page.tsx.backup` | **M** | **P2** | 3h | Password reset flow |
+| Set Password | `/src/app/set-password/page.tsx.backup` | **M** | **P2** | 3h | Password set flow |
+| Auth Callback | `/src/app/auth/callback/page.tsx.backup` | **M** | **P1** | 3h | OAuth callback |
 | useAuth / useAuthNew | `/src/hooks/entities/auth/*` | **H** | **P1** | 6h | Complex auth state |
 | Middleware (proxy.ts) | `/src/proxy.ts` | **H** | **P1** | 6h | Authentication middleware |
 | API: /api/users | `/src/app/api/users/route.ts` | **M** | **P1** | 3h | User CRUD |
@@ -915,30 +915,30 @@ We'll refactor from the bottom (infrastructure) up to the top (presentation), en
 
 | Component/Page | File | Complexity | Priority | Est. Hours | Notes |
 |----------------|------|------------|----------|------------|-------|
-| Home Page | `/src/app/(main)/page.tsx` | **M** | **P1** | 4h | High traffic |
-| About Page | `/src/app/(main)/about/page.tsx` | **L** | **P3** | 1h | Static content |
-| Contact Page | `/src/app/(main)/contact/page.tsx` | **L** | **P3** | 2h | Contact form |
-| Photo Gallery | `/src/app/(main)/photo-gallery/page.tsx` | **M** | **P3** | 4h | Image display |
-| Admin Photo Gallery | `/src/app/admin/photo-gallery/page.tsx` | **M** | **P3** | 4h | Upload & management |
-| Downloads | `/src/app/(main)/downloads/page.tsx` | **L** | **P3** | 2h | File listing |
-| Chronicle | `/src/app/(main)/chronicle/page.tsx` | **L** | **P3** | 2h | Historical content |
-| Celebration/100 | `/src/app/(main)/celebration/page.tsx` | **L** | **P4** | 1h | Special pages |
-| Admin Dashboard | `/src/app/admin/page.tsx` | **M** | **P2** | 4h | Stats dashboard |
-| Coaches Dashboard | `/src/app/coaches/dashboard/page.tsx` | **M** | **P2** | 4h | Stats dashboard |
-| Coaches Statistics | `/src/app/coaches/statistics/page.tsx` | **H** | **P2** | 6h | Complex calculations |
-| Meeting Minutes (Admin) | `/src/app/admin/meeting-minutes/page.tsx` | **H** | **P2** | 6h | Complex form |
-| Meeting Minutes (Coaches) | `/src/app/coaches/meeting-minutes/page.tsx` | **M** | **P2** | 4h | View only |
+| Home Page | `/src/app/(main)/page.tsx.backup` | **M** | **P1** | 4h | High traffic |
+| About Page | `/src/app/(main)/about/page.tsx.backup` | **L** | **P3** | 1h | Static content |
+| Contact Page | `/src/app/(main)/contact/page.tsx.backup` | **L** | **P3** | 2h | Contact form |
+| Photo Gallery | `/src/app/(main)/photo-gallery/page.tsx.backup` | **M** | **P3** | 4h | Image display |
+| Admin Photo Gallery | `/src/app/admin/photo-gallery/page.tsx.backup` | **M** | **P3** | 4h | Upload & management |
+| Downloads | `/src/app/(main)/downloads/page.tsx.backup` | **L** | **P3** | 2h | File listing |
+| Chronicle | `/src/app/(main)/chronicle/page.tsx.backup` | **L** | **P3** | 2h | Historical content |
+| Celebration/100 | `/src/app/(main)/celebration/page.tsx.backup` | **L** | **P4** | 1h | Special pages |
+| Admin Dashboard | `/src/app/admin/page.tsx.backup` | **M** | **P2** | 4h | Stats dashboard |
+| Coaches Dashboard | `/src/app/coaches/dashboard/page.tsx.backup` | **M** | **P2** | 4h | Stats dashboard |
+| Coaches Statistics | `/src/app/coaches/statistics/page.tsx.backup` | **H** | **P2** | 6h | Complex calculations |
+| Meeting Minutes (Admin) | `/src/app/admin/meeting-minutes/page.tsx.backup` | **H** | **P2** | 6h | Complex form |
+| Meeting Minutes (Coaches) | `/src/app/coaches/meeting-minutes/page.tsx.backup` | **M** | **P2** | 4h | View only |
 | MeetingMinutesContainer | `/src/components/features/meeting-minutes/*` | **H** | **P2** | 6h | Complex component |
-| Admin Seasons | `/src/app/admin/seasons/page.tsx` | **M** | **P2** | 4h | Season management |
-| Admin Videos | `/src/app/admin/videos/page.tsx` | **M** | **P2** | 4h | Video management |
-| Coaches Videos | `/src/app/coaches/videos/page.tsx` | **L** | **P2** | 2h | Video listing |
-| Admin Member Functions | `/src/app/admin/member-functions/page.tsx` | **M** | **P3** | 4h | Function assignment |
-| Admin Committees | `/src/app/admin/committees/page.tsx` | **M** | **P3** | 4h | Committee management |
-| Admin Club Config | `/src/app/admin/club-config/page.tsx` | **M** | **P3** | 4h | Configuration |
-| Admin Sponsorship | `/src/app/admin/sponsorship/page.tsx` | **M** | **P3** | 4h | Sponsor management |
-| Admin Grant Calendar | `/src/app/admin/grant-calendar/page.tsx` | **M** | **P3** | 4h | Calendar management |
-| Blocked Page | `/src/app/blocked/page.tsx` | **L** | **P2** | 1h | Simple message |
-| Error Page | `/src/app/error/page.tsx` | **L** | **P2** | 1h | Error handling |
+| Admin Seasons | `/src/app/admin/seasons/page.tsx.backup` | **M** | **P2** | 4h | Season management |
+| Admin Videos | `/src/app/admin/videos/page.tsx.backup` | **M** | **P2** | 4h | Video management |
+| Coaches Videos | `/src/app/coaches/videos/page.tsx.backup` | **L** | **P2** | 2h | Video listing |
+| Admin Member Functions | `/src/app/admin/member-functions/page.tsx.backup` | **M** | **P3** | 4h | Function assignment |
+| Admin Committees | `/src/app/admin/committees/page.tsx.backup` | **M** | **P3** | 4h | Committee management |
+| Admin Club Config | `/src/app/admin/club-config/page.tsx.backup` | **M** | **P3** | 4h | Configuration |
+| Admin Sponsorship | `/src/app/admin/sponsorship/page.tsx.backup` | **M** | **P3** | 4h | Sponsor management |
+| Admin Grant Calendar | `/src/app/admin/grant-calendar/page.tsx.backup` | **M** | **P3** | 4h | Calendar management |
+| Blocked Page | `/src/app/blocked/page.tsx.backup` | **L** | **P2** | 1h | Simple message |
+| Error Page | `/src/app/error/page.tsx.backup` | **L** | **P2** | 1h | Error handling |
 
 **Other Features Subtotal:** ~82 hours
 
@@ -1918,19 +1918,19 @@ describe('/api/members', () => {
 /src
 ├── app/
 │   ├── (main)/
-│   │   ├── page.tsx
+│   │   ├── page.tsx.backup
 │   │   ├── blog/
 │   │   ├── matches/
 │   │   ├── categories/
 │   │   └── ...
 │   ├── admin/
-│   │   ├── members/page.tsx
-│   │   ├── matches/page.tsx
-│   │   ├── categories/page.tsx
+│   │   ├── members/page.tsx.backup
+│   │   ├── matches/page.tsx.backup
+│   │   ├── categories/page.tsx.backup
 │   │   └── ...
 │   ├── coaches/
-│   │   ├── lineups/page.tsx
-│   │   ├── attendance/page.tsx
+│   │   ├── lineups/page.tsx.backup
+│   │   ├── attendance/page.tsx.backup
 │   │   └── ...
 │   └── api/
 │       ├── members/route.ts

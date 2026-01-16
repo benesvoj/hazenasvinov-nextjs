@@ -209,12 +209,12 @@ Despite the build issue, we accomplished a lot:
 - ✅ `src/hooks/index.ts` - Added 'use client'
 - ✅ `src/enums/*.ts` - Fixed imports (3 files)
 - ✅ `src/app/api/attendance/statistics/route.ts` - Direct import
-- ✅ `src/app/coaches/attendance/page.tsx` - TypeScript fixes
+- ✅ `src/app/coaches/attendance/page.tsx.backup` - TypeScript fixes
 - ✅ `src/app/coaches/attendance/components/AttendanceRecordingTable.tsx` - Prop types
 - ✅ `src/hooks/entities/attendance/data/useFetchAttendanceStatistics.ts` - Added 'use client'
 - ✅ `src/hooks/entities/*/data/*.ts` - Fixed circular imports (11 files)
-- ✅ `src/app/auth/callback/page.tsx` - Added dynamic export
-- ✅ `src/app/blocked/page.tsx` - Added dynamic export
+- ✅ `src/app/auth/callback/page.tsx.backup` - Added dynamic export
+- ✅ `src/app/blocked/page.tsx.backup` - Added dynamic export
 
 ### Documentation
 - ✅ `docs/PROJECT_ROADMAP_2026Q1.md`

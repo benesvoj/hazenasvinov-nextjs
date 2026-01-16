@@ -114,7 +114,7 @@ Deep dive into:
 ### Level 1: Getting Started (15 min)
 1. Read: [TODO_DEVELOPER_GUIDE.md](./TODO_DEVELOPER_GUIDE.md) - "Quick Start" section
 2. Try: Copy a basic usage example
-3. Explore: Look at `src/app/admin/page.tsx`
+3. Explore: Look at `src/app/admin/page.tsx.backup`
 
 ### Level 2: Understanding (30 min)
 1. Read: [TODO_REFACTORING_COMPLETION.md](./TODO_REFACTORING_COMPLETION.md) - "Architecture Diagram"
@@ -181,7 +181,7 @@ src/hooks/entities/todo/
 ```
 src/
 ├── app/admin/
-│   ├── page.tsx                  - Main page (orchestrator)
+│   ├── page.tsx.backup                  - Main page (orchestrator)
 │   └── components/
 │       ├── dashboard/
 │       │   └── TodoStatsCards.tsx
@@ -303,7 +303,7 @@ Components coordinate hooks and manage UI state.
 1. Check this README for the right document
 2. Read the relevant section
 3. Check code examples in [Developer Guide](./TODO_DEVELOPER_GUIDE.md)
-4. Look at `src/app/admin/page.tsx` for complete example
+4. Look at `src/app/admin/page.tsx.backup` for complete example
 5. Check [Troubleshooting](./TODO_DEVELOPER_GUIDE.md#troubleshooting)
 
 ### When You Need Help

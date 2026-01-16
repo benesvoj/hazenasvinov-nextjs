@@ -435,9 +435,9 @@ The MatchSelectionModal is already integrated (lines 263-269). No changes needed
 />
 ```
 
-### Phase 3: Update Submit Handler in page.tsx
+### Phase 3: Update Submit Handler in page.tsx.backup
 
-**File:** `src/app/admin/posts/page.tsx`
+**File:** `src/app/admin/posts/page.tsx.backup`
 
 #### 3.1 Update `handleSubmitPost` Function
 
@@ -610,7 +610,7 @@ import {uploadClubAsset} from '@/utils/supabase/storage';
 
 - `src/hooks/entities/blog/state/useBlogPostForm.ts` - Form state management
 - `src/app/admin/posts/components/BlogPostModal.tsx` - Main modal component
-- `src/app/admin/posts/page.tsx` - Parent page with submit handler
+- `src/app/admin/posts/page.tsx.backup` - Parent page with submit handler
 - `src/app/admin/posts/components/MatchSelectionModal.tsx` - Match selection modal
 - `src/utils/supabase/storage.ts` - Storage utilities
 - `src/types/entities/blog/schema/blogPostsSchema.ts` - Type definitions
@@ -628,7 +628,7 @@ import {uploadClubAsset} from '@/utils/supabase/storage';
 2. Fix button handler bug (line 168)
 3. Add match selection state & handlers to `useBlogPostForm`
 4. Add image upload state & handlers to `useBlogPostForm`
-5. Update page.tsx submit handler to upload images
+5. Update page.tsx.backup submit handler to upload images
 
 ### 📝 Implementation Summary
 
@@ -641,7 +641,7 @@ import {uploadClubAsset} from '@/utils/supabase/storage';
 - Fix title input to use `updateFormData`
 - Fix match button handler
 
-**Phase 3:** Update page.tsx submit handler (~30 min)
+**Phase 3:** Update page.tsx.backup submit handler (~30 min)
 - Add image upload logic before create/update
 - Handle upload errors gracefully
 
@@ -649,7 +649,7 @@ import {uploadClubAsset} from '@/utils/supabase/storage';
 
 ## Anti-Pattern Warning
 
-⚠️ **Important:** This implementation corrects the previous anti-pattern where `useBlogPostForm` was instantiated in both the parent component and the modal component, causing state to not be shared. The hook is now instantiated ONLY in the parent (`page.tsx`) and passed to the modal as a prop.
+⚠️ **Important:** This implementation corrects the previous anti-pattern where `useBlogPostForm` was instantiated in both the parent component and the modal component, causing state to not be shared. The hook is now instantiated ONLY in the parent (`page.tsx.backup`) and passed to the modal as a prop.
 
 This ensures:
 - Single source of truth for form state

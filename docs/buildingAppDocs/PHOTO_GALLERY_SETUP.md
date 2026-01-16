@@ -82,7 +82,7 @@ Navigate to **Admin → Fotogalerie** in the admin portal.
 
 ```
 src/app/admin/photo-gallery/
-├── page.tsx                 # Main photo gallery page
+├── page.tsx.backup                 # Main photo gallery page
 ├── components/
 │   ├── AlbumsTab.tsx        # Albums management tab
 │   ├── PhotosTab.tsx        # Photos management tab

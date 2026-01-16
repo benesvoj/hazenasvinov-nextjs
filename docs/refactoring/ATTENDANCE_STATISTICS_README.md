@@ -126,7 +126,7 @@ src/
 ├── app/
 │   ├── api/attendance/statistics/route.ts          ← API endpoint (DONE)
 │   └── coaches/attendance/
-│       ├── page.tsx                                 ← Main page (DONE)
+│       ├── page.tsx.backup                                 ← Main page (DONE)
 │       └── components/
 │           ├── AttendanceStatisticsLazy.tsx        ← Lazy loader (DONE)
 │           ├── SummaryCards.tsx                     ← TODO

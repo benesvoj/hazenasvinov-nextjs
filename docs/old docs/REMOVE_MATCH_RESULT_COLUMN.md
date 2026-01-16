@@ -24,7 +24,7 @@ This document outlines the steps to remove the redundant `result` column from th
 - Type-safe with `MatchResult` type
 
 ### 4. Code Updates
-**File**: `src/app/admin/matches/page.tsx`
+**File**: `src/app/admin/matches/page.tsx.backup`
 - Removed result calculation logic from `handleUpdateResult()`
 - Removed result field from database update operations
 - Result is now computed on-demand when needed
@@ -80,7 +80,7 @@ If issues arise, the result column can be re-added:
 - `scripts/building-app/remove_match_result_column.sql` (NEW)
 - `src/utils/matchResult.ts` (NEW)
 - `src/types/match.ts`
-- `src/app/admin/matches/page.tsx`
+- `src/app/admin/matches/page.tsx.backup`
 - `src/app/admin/posts/components/MatchSelectionModal.tsx`
 
 ## Files That May Need Updates

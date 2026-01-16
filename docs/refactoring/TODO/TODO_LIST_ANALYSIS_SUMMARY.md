@@ -138,7 +138,7 @@ hooks/entities/todo/
 - [ ] `src/hooks/entities/todo/state/useTodos.ts` - **Complete refactor**
 - [ ] `src/hooks/entities/todo/data/useFetchTodos.ts` - Minor fixes
 - [ ] `src/hooks/entities/todo/state/useTodoForm.ts` - Add setFormData
-- [ ] `src/app/admin/page.tsx` - Use separated hooks
+- [ ] `src/app/admin/page.tsx.backup` - Use separated hooks
 - [ ] `src/types/entities/todo/data/todo.ts` - Update type definitions
 
 ### Should Change

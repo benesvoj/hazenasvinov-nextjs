@@ -499,7 +499,7 @@ setUsers(Array.isArray(data) ? data : data.users || []);
 ### 6.1 Entity-Based Dependency Graph
 
 ```
-Page Component (e.g., admin/members/page.tsx)
+Page Component (e.g., admin/members/page.tsx.backup)
     ↓
 Feature Components (e.g., MembersTable, MemberForm)
     ↓

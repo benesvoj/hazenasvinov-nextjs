@@ -7,7 +7,7 @@ Total: **28 TypeScript errors** across 7 files
 
 ### 🔴 CRITICAL (Blocking Features)
 1. **AttendanceRecordingTable.tsx** - 8 errors (table cannot display data)
-2. **attendance/page.tsx** - 4 errors (page cannot function)
+2. **attendance/page.tsx.backup** - 4 errors (page cannot function)
 3. **useAttendance.ts** - 1 error (missing function)
 
 ### 🟡 HIGH (Feature Incomplete)
@@ -101,7 +101,7 @@ import { TrainingSessionStatusEnum } from '@/enums';
 
 ---
 
-### 4. attendance/page.tsx (4 errors)
+### 4. attendance/page.tsx.backup (4 errors)
 **Problem**: Multiple issues:
 1. Passing 2 arguments to a function expecting 0
 2. Accessing `.id` on potentially `void` type
@@ -115,7 +115,7 @@ import { TrainingSessionStatusEnum } from '@/enums';
 3. Remove `members` prop from `AttendanceRecordingTable` or add it to the component's prop types (line 496)
 
 **Files to modify**:
-- `src/app/coaches/attendance/page.tsx`
+- `src/app/coaches/attendance/page.tsx.backup`
 - `src/app/coaches/attendance/components/AttendanceRecordingTable.tsx` (prop types)
 
 **Lines affected**: 80, 278, 284, 496

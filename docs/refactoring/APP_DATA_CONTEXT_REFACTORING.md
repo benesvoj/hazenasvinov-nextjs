@@ -71,10 +71,10 @@ The `AppDataContext` currently manages:
 ### Usage
 
 Used in **10+ pages** including:
-- `/app/coaches/attendance/page.tsx`
-- `/app/coaches/videos/page.tsx`
-- `/app/coaches/members/page.tsx`
-- `/app/admin/members/page.tsx`
+- `/app/coaches/attendance/page.tsx.backup`
+- `/app/coaches/videos/page.tsx.backup`
+- `/app/coaches/members/page.tsx.backup`
+- `/app/admin/members/page.tsx.backup`
 - `/app/admin/categories/components/CategoryFeesTab.tsx`
 - And more...
 
@@ -609,7 +609,7 @@ const { seasons: { activeSeason, sortedSeasons } } = useAppData();
 
 #### 4.3 Component Example Update
 
-**File**: `src/app/coaches/attendance/page.tsx:22`
+**File**: `src/app/coaches/attendance/page.tsx.backup:22`
 
 ```typescript
 // BEFORE

@@ -58,7 +58,7 @@ The member attendance statistics system suffers from significant performance iss
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    UI Layer (React)                        │
-│  - CoachesAttendancePage (page.tsx)                        │
+│  - CoachesAttendancePage (page.tsx.backup)                        │
 │  - AttendanceStatistics.tsx (auto-loads on mount)         │
 └────────────────────┬────────────────────────────────────────┘
                      │
@@ -88,7 +88,7 @@ The member attendance statistics system suffers from significant performance iss
 
 | File | Location | Purpose | Lines |
 |------|----------|---------|-------|
-| `page.tsx` | `src/app/coaches/attendance/page.tsx` | Main attendance page | 792 |
+| `page.tsx.backup` | `src/app/coaches/attendance/page.tsx.backup` | Main attendance page | 792 |
 | `useAttendance.ts` | `src/hooks/entities/attendance/useAttendance.ts` | Core attendance logic | 989 |
 | `AttendanceStatistics.tsx` | `src/app/coaches/attendance/components/AttendanceStatistics.tsx` | Statistics display | 480 |
 
@@ -492,7 +492,7 @@ CoachesAttendancePage
 **Implementation:**
 
 ```typescript
-// page.tsx - Tab structure
+// page.tsx.backup - Tab structure
 const [activeTab, setActiveTab] = useState<'attendance' | 'statistics'>('attendance');
 
 return (
@@ -1313,7 +1313,7 @@ export function useAttendanceStatistics(
 **3.4 Refactor Main Attendance Page with Tabs**
 
 ```typescript
-// File: src/app/coaches/attendance/page.tsx (partial refactor)
+// File: src/app/coaches/attendance/page.tsx.backup (partial refactor)
 'use client';
 
 import {useState} from 'react';

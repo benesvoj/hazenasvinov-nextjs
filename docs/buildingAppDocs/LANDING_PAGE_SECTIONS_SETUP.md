@@ -67,7 +67,7 @@ The system uses the existing `page_visibility` table with these fields:
 ### Files Modified
 
 - `src/hooks/useSectionVisibility.ts` - New hook for section visibility
-- `src/app/(main)/page.tsx` - Conditional section rendering
+- `src/app/(main)/page.tsx.backup` - Conditional section rendering
 - `src/app/admin/club-config/components/ClubPagesCard.tsx` - Admin controls
 - `scripts/setup-landing-sections.js` - Setup script
 - `scripts/add_landing_page_sections.sql` - SQL script

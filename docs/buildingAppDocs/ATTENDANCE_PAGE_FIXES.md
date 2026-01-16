@@ -75,7 +75,7 @@ const insertData = {
 ### Modified Files
 - `src/hooks/useUserRoles.ts` - Fixed infinite loop
 - `src/hooks/useAttendance.ts` - Added fallbacks and improved creation
-- `src/app/coaches/attendance/page.tsx` - Fixed category/season dropdowns
+- `src/app/coaches/attendance/page.tsx.backup` - Fixed category/season dropdowns
 
 ## Current Status
 

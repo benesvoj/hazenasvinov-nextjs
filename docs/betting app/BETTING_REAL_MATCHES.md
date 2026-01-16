@@ -59,7 +59,7 @@ Created React Query hooks for data fetching:
 - Fetches matches grouped by date
 - Same caching strategy
 
-### 3. Updated Betting Page (`src/app/(betting)/betting/page.tsx`)
+### 3. Updated Betting Page (`src/app/(betting)/betting/page.tsx.backup`)
 
 Integrated real matches with excellent UX:
 
@@ -205,7 +205,7 @@ User can still test system
 
 ### Adjust Fetch Parameters:
 
-In `src/app/(betting)/betting/page.tsx`:
+In `src/app/(betting)/betting/page.tsx.backup`:
 
 ```typescript
 const {data: realMatches} = useUpcomingBettingMatches({
@@ -281,7 +281,7 @@ refetchInterval: 1000 * 60 * 5,  // Change from 5 minutes
 
 Once you have real matches in your database:
 
-1. Remove mock data array from `page.tsx`
+1. Remove mock data array from `page.tsx.backup`
 2. Change this line:
    ```typescript
    // OLD:

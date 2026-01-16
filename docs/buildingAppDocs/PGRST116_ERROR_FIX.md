@@ -26,7 +26,7 @@ The error was caused by users having **multiple profiles** in the `user_profiles
 ### 1. Code Updates
 **Files Modified:**
 - `src/hooks/useUserRoles.ts` - Updated `getCurrentUserCategories` and `fetchUserRoles`
-- `src/app/coaches/dashboard/page.tsx` - Updated profile fetching logic
+- `src/app/coaches/dashboard/page.tsx.backup` - Updated profile fetching logic
 - `src/app/coaches/components/CoachesTopBar.tsx` - Updated profile fetching logic
 
 **Changes Made:**
@@ -124,7 +124,7 @@ ADD CONSTRAINT unique_user_profile UNIQUE (user_id);
 
 ### Modified Files
 - `src/hooks/useUserRoles.ts` - Fixed multiple profile handling
-- `src/app/coaches/dashboard/page.tsx` - Updated profile fetching
+- `src/app/coaches/dashboard/page.tsx.backup` - Updated profile fetching
 - `src/app/coaches/components/CoachesTopBar.tsx` - Updated profile fetching
 
 ## Results

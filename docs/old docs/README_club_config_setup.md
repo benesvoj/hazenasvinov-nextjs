@@ -118,8 +118,8 @@ You should see:
 - `src/types/types.ts` - TypeScript interfaces
 - `src/hooks/useClubConfig.ts` - Data management hook
 - `src/app/api/club-config/route.ts` - API endpoints
-- `src/app/admin/club-config/page.tsx` - Admin interface
-- `src/app/(main)/page.tsx` - Updated landing page
+- `src/app/admin/club-config/page.tsx.backup` - Admin interface
+- `src/app/(main)/page.tsx.backup` - Updated landing page
 - `src/routes/routes.ts` - Added admin route
 - `src/app/admin/components/Sidebar.tsx` - Added navigation
 

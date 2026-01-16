@@ -341,7 +341,7 @@ export default function AdminDashboard() {
 
 ## Current Page Implementation Gap
 
-Looking at `src/app/admin/page.tsx:32-34`:
+Looking at `src/app/admin/page.tsx.backup:32-34`:
 
 ```typescript
 // ❌ Current (OLD API - doesn't match new hooks)
@@ -441,7 +441,7 @@ interface UseTodosReturn {
 
 ## Updated AdminDashboard Implementation
 
-**File:** `src/app/admin/page.tsx`
+**File:** `src/app/admin/page.tsx.backup`
 
 Here's how the page should use the refactored hooks:
 

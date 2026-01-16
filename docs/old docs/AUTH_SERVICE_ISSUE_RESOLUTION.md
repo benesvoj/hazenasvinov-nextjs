@@ -88,7 +88,7 @@ Custom triggers on `auth.users` can interfere with Supabase's Auth service, even
 - `scripts/remove_club_id_from_user_profiles.js` - Database cleanup script
 - `src/contexts/UserContext.tsx` - Updated interface and queries
 - `src/app/admin/users/components/UserFormModal.tsx` - Removed club_id references
-- `src/app/login/page.tsx` - Updated profile queries
+- `src/app/login/page.tsx.backup` - Updated profile queries
 
 ## Status
 ✅ **FULLY RESOLVED** - Auth service and login functionality fully operational as of January 15, 2025
