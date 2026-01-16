@@ -106,7 +106,7 @@ export * from './entities/training-session/data/useFetchTrainingSessions';
 export * from './entities/training-session/state/useTrainingSession';
 export * from './entities/user/useFetchUsers';
 export * from './entities/user/useUserRoles';
-export * from './entities/video/business/useVIdeoFiltering';
+export * from './entities/video/business/useVideoFiltering';
 export * from './entities/video/data/useFetchVideos';
 export * from './entities/video/state/useVideoForm';
 export * from './entities/video/state/useVideos';
