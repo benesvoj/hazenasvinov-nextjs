@@ -1,11 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    outputFileTracingIncludes: {
-      '/**': ['./node_modules/**'],
-    },
-  },
-  output: 'standalone',
   images: {
     remotePatterns: [
       // Supabase storage
