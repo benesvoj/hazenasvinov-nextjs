@@ -11,8 +11,10 @@ const t = translations.admin.seasons.responseMessages;
  * Hook for fetching seasons
  * Generated using createDataFetchHook factory
  */
-export const useFetchSeasons = createDataFetchHook<Season>({
-  endpoint: API_ROUTES.entities.root('seasons'),
-  entityName: 'seasons',
-  errorMessage: t.seasonsFetchFailed,
-});
+export function useFetchSeasons() {
+	return createDataFetchHook<Season>({
+		endpoint: API_ROUTES.entities.root('seasons'),
+		entityName: 'seasons',
+		errorMessage: t.seasonsFetchFailed,
+	});
+}

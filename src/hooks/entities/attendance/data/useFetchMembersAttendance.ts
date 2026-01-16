@@ -8,17 +8,19 @@ import {MemberAttendanceWithMember} from '@/types';
 
 const t = translations.coachPortal.memberAttendance.responseMessages;
 
-export const useFetchMembersAttendance = createDataFetchHook<
-  MemberAttendanceWithMember,
-  {trainingSessionId: string}
->({
-  endpoint: (params) => {
-    const searchParams = new URLSearchParams({
-      trainingSessionId: params.trainingSessionId,
-    });
-    return `${API_ROUTES.entities.root(DB_TABLE)}?${searchParams.toString()}`;
-  },
-  entityName: ENTITY.plural,
-  errorMessage: t.memberAttendanceFetchFailed,
-  fetchOnMount: false,
-});
+export function useFetchMembersAttendance(params: {trainingSessionId: string}) {
+  return createDataFetchHook<
+    MemberAttendanceWithMember,
+    {trainingSessionId: string}
+  >({
+    endpoint: (params) => {
+      const searchParams = new URLSearchParams({
+        trainingSessionId: params.trainingSessionId,
+      });
+      return `${API_ROUTES.entities.root(DB_TABLE)}?${searchParams.toString()}`;
+    },
+    entityName: ENTITY.plural,
+    errorMessage: t.memberAttendanceFetchFailed,
+    fetchOnMount: false,
+  })(params);
+}

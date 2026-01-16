@@ -8,8 +8,10 @@ import {VideoSchema} from '@/types';
 
 const t = translations.admin.videos.responseMessages;
 
-export const useFetchVideos = createDataFetchHook<VideoSchema>({
-  endpoint: API_ROUTES.entities.root(DB_TABLE),
-  entityName: ENTITY.plural,
-  errorMessage: t.videosFetchFailed,
-});
+export function useFetchVideos() {
+  return createDataFetchHook<VideoSchema>({
+    endpoint: API_ROUTES.entities.root(DB_TABLE),
+    entityName: ENTITY.plural,
+    errorMessage: t.videosFetchFailed,
+  });
+}

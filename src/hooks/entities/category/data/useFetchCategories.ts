@@ -11,8 +11,10 @@ const t = translations.admin.categories.responseMessages;
  * Hook for fetching categories
  * Generated using createDataFetchHook factory
  */
-export const useFetchCategories = createDataFetchHook<Category>({
-  endpoint: API_ROUTES.entities.root('categories'),
-  entityName: 'categories',
-  errorMessage: t.categoriesFetchFailed,
-});
+export function useFetchCategories() {
+	return createDataFetchHook<Category>({
+		endpoint: API_ROUTES.entities.root('categories'),
+		entityName: 'categories',
+		errorMessage: t.categoriesFetchFailed,
+	});
+}

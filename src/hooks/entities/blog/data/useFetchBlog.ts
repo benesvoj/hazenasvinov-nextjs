@@ -11,8 +11,10 @@ const t = translations.admin.blog.responseMessages;
  * Hook for fetching blog posts
  * Generated using createDataFetchHook factory
  */
-export const useFetchBlog = createDataFetchHook<Blog>({
-  endpoint: API_ROUTES.entities.root('blog_posts'),
-  entityName: 'blogPosts',
-  errorMessage: t.blogPostsFetchFailed,
-});
+export function useFetchBlog() {
+	return createDataFetchHook<Blog>({
+		endpoint: API_ROUTES.entities.root('blog_posts'),
+		entityName: 'blogPosts',
+		errorMessage: t.blogPostsFetchFailed,
+	});
+}

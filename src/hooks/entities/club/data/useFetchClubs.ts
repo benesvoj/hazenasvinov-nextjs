@@ -11,8 +11,10 @@ const t = translations.admin.clubs.responseMessages;
  * Hook for fetching clubs
  * Generated using createDataFetchHook factory
  */
-export const useFetchClubs = createDataFetchHook<Club>({
-  endpoint: API_ROUTES.entities.root('clubs'),
-  entityName: 'clubs',
-  errorMessage: t.clubsFetchError,
-});
+export function useFetchClubs() {
+	return createDataFetchHook<Club>({
+		endpoint: API_ROUTES.entities.root('clubs'),
+		entityName: 'clubs',
+		errorMessage: t.clubsFetchError,
+	});
+}

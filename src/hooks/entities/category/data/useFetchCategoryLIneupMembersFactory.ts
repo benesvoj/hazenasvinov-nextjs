@@ -8,8 +8,10 @@ import {BaseCategoryLineupMember} from '@/types';
 
 const t = translations.coachPortal.lineupMembers.responseMessages;
 
-export const useFetchCategoryLineupMembersFactory = createDataFetchHook<BaseCategoryLineupMember>({
-  endpoint: API_ROUTES.entities.root(DB_TABLE),
-  entityName: ENTITY.plural,
-  errorMessage: t.lineupMembersFetchFailed,
-});
+export function useFetchCategoryLineupMembersFactory() {
+	return createDataFetchHook<BaseCategoryLineupMember>({
+		endpoint: API_ROUTES.entities.root(DB_TABLE),
+		entityName: ENTITY.plural,
+		errorMessage: t.lineupMembersFetchFailed,
+	});
+}

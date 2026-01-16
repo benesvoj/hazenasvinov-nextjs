@@ -8,8 +8,11 @@ import {BaseComment} from '@/types';
 
 const t = translations.admin.comments.responseMessages;
 
-export const useFetchComments = createDataFetchHook<BaseComment>({
-  endpoint: API_ROUTES.entities.root(DB_TABLE),
-  entityName: 'comments',
-  errorMessage: t.commentsFetchFailed,
-});
+export function useFetchComments() {
+	return createDataFetchHook<BaseComment>({
+		endpoint: API_ROUTES.entities.root(DB_TABLE),
+		entityName: 'comments',
+		errorMessage: t.commentsFetchFailed,
+	});
+
+}

@@ -11,8 +11,10 @@ const t = translations.admin.committees.responseMessages;
  * Hook for fetching committees
  * Generated using createDataFetchHook factory
  */
-export const useFetchCommittees = createDataFetchHook<Committee>({
-  endpoint: API_ROUTES.entities.root('committees'),
-  entityName: 'committees',
-  errorMessage: t.committeesFetchFailed,
-});
+export function useFetchCommittees() {
+  return createDataFetchHook<Committee>({
+    endpoint: API_ROUTES.entities.root('committees'),
+    entityName: 'committees',
+    errorMessage: t.committeesFetchFailed,
+  })();
+}

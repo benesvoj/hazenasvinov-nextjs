@@ -8,12 +8,6 @@ import {Member} from '@/types';
 
 const t = translations.admin.members.responseMessages;
 
-// export const useFetchMembers = createDataFetchHook({
-// 	endpoint: API_ROUTES.entities.root('members'),
-// 	entityName: 'members',
-// 	errorMessage: t.membersFetchFailed,
-// })
-
 export function useFetchMembers() {
   const [data, setData] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);

@@ -8,18 +8,20 @@ import {CategoryLineup} from '@/types';
 
 const t = translations.coachPortal.lineupList.responseMessages;
 
-export const useFetchCategoryLineups = createDataFetchHook<
-  CategoryLineup,
-  {categoryId: string; seasonId: string}
->({
-  endpoint: (params) => {
-    const searchParams = new URLSearchParams({
-      categoryId: params.categoryId,
-      seasonId: params.seasonId,
-    });
-    return `${API_ROUTES.entities.root(DB_TABLE)}?${searchParams.toString()}`;
-  },
-  entityName: ENTITY.plural,
-  errorMessage: t.lineupsFetchFailed,
-  fetchOnMount: true,
-});
+export function useFetchCategoryLineups(params: { categoryId: string; seasonId: string }) {
+	return createDataFetchHook<
+		CategoryLineup,
+		{ categoryId: string; seasonId: string }
+	>({
+		endpoint: (params) => {
+			const searchParams = new URLSearchParams({
+				categoryId: params.categoryId,
+				seasonId: params.seasonId,
+			});
+			return `${API_ROUTES.entities.root(DB_TABLE)}?${searchParams.toString()}`;
+		},
+		entityName: ENTITY.plural,
+		errorMessage: t.lineupsFetchFailed,
+		fetchOnMount: true,
+	})(params);
+}

@@ -8,8 +8,11 @@ import {TodoItem} from '@/types';
 
 const t = translations.admin.todos.responseMessages;
 
-export const useFetchTodos = createDataFetchHook<TodoItem>({
-  endpoint: API_ROUTES.entities.root(DB_TABLE),
-  entityName: 'todos',
-  errorMessage: t.todosFetchFailed,
-});
+export function useFetchTodos() {
+	return createDataFetchHook<TodoItem>({
+		endpoint: API_ROUTES.entities.root(DB_TABLE),
+		entityName: 'todos',
+		errorMessage: t.todosFetchFailed,
+	});
+
+}
