@@ -4,9 +4,7 @@
  * Performance-optimized MatchSchedule component with memoization
  */
 
-import React, {memo, useMemo, useCallback} from 'react';
-
-import {useSeasons} from '@/hooks/entities/season/state/useSeasons';
+import React, {memo, useMemo} from 'react';
 
 import {PerformanceMonitorPanel} from '@/components/features/admin/PerformanceMonitorPanel';
 
@@ -84,11 +82,6 @@ const OptimizedMatchSchedule = memo<OptimizedMatchScheduleProps>(({className}) =
     [allMatches, upcomingMatches, recentResults]
   );
 
-  // Memoized error handler
-  const handleError = useCallback((error: string) => {
-    console.error('MatchSchedule error:', error);
-  }, []);
-
   // Don't render if essential data is not available
   if (!selectedCategoryData || !activeSeason) {
     return (
@@ -110,7 +103,7 @@ const OptimizedMatchSchedule = memo<OptimizedMatchScheduleProps>(({className}) =
       <div className={className}>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
