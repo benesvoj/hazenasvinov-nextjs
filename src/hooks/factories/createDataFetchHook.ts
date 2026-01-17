@@ -149,8 +149,7 @@ export function createDataFetchHook<T, TParams = void>(
       } finally {
         setLoading(false);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [endpoint, entityName, errorMessage, showErrorToast]);
 
     useEffect(() => {
       if (fetchOnMount) {
@@ -162,7 +161,7 @@ export function createDataFetchHook<T, TParams = void>(
           abortControllerRef.current.abort();
         }
       };
-    }, [fetchData]);
+    }, [fetchData, fetchOnMount]);
 
     return {
       data,
