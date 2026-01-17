@@ -8,9 +8,10 @@ import CategoryMatchesAndResults from '@/app/(main)/components/CategoryMatchesAn
 
 import {Heading, LoadingSpinner, UnifiedStandingTable} from '@/components';
 import {
-  useFetchCategories, useFetchSeasons,
-  useOptimizedOwnClubMatches, useSeasonFiltering,
-  useSeasons,
+  useFetchCategories,
+  useFetchSeasons,
+  useOptimizedOwnClubMatches,
+  useSeasonFiltering,
   useStandings,
   useUserRoles,
 } from '@/hooks';
@@ -40,7 +41,7 @@ export default function MatchSchedule({
   const lastFetchedRef = useRef<{categoryId: string; seasonId: string} | null>(null);
 
   const {data: seasons, refetch: fetchSeasons} = useFetchSeasons();
-  const {activeSeason} = useSeasonFiltering({seasons: seasons})
+  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
   const {data: categories, refetch: fetchCategories} = useFetchCategories();
 
   // Try to get user roles, but handle case where UserProvider is not available
