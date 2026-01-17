@@ -194,7 +194,7 @@ export function createFormHook<TEntity, TFormData>(
       validationRules.forEach((rule) => {
         const value = formData[rule.field];
 
-        // Defautl validation: check if field is truthy and trimmed
+        // Default validation: check if field is truthy and trimmed
         const isValid = rule.validator
           ? rule.validator(value)
           : typeof value === 'string'
