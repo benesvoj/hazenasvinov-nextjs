@@ -1,33 +1,28 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Input,
-  Select,
-  SelectItem,
   Button,
-  Chip,
-  Divider,
   Card,
   CardBody,
+  Chip,
+  Divider,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Select,
+  SelectItem,
 } from '@heroui/react';
 
 import {TrashIcon, UserIcon} from '@heroicons/react/24/outline';
 
-import {useAuth} from '@/hooks/auth/useAuthNew';
-
-import {showToast} from '@/components/ui/feedback/Toast';
-
-import {translations} from '@/lib/translations';
-
-import {useFetchMembers, useFetchSeasons, useSeasonFiltering} from '@/hooks';
-import {API_ROUTES} from "@/lib";
+import {showToast} from '@/components';
+import {useAuth, useFetchMembers, useFetchSeasons, useSeasonFiltering} from '@/hooks';
+import {API_ROUTES, translations} from '@/lib';
 import {MeetingMinutes, MeetingMinutesFormData} from '@/types';
 
 import {AttendeesModal} from './AttendeesModal';

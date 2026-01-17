@@ -28,6 +28,7 @@ export interface EntityConfig {
   tableName: string;
   sortBy?: {column: string; ascending: boolean}[];
   requiresAdmin?: boolean;
+  isPublic?: boolean; // If true, endpoint is accessible without authentication
 
   queryLayer?: EntityQueryLayer;
 
@@ -67,6 +68,7 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     tableName: seasonQueries.DB_TABLE,
     sortBy: [{column: 'start_date', ascending: false}],
     requiresAdmin: false,
+    isPublic: true, // Accessible on landing page without auth
     queryLayer: {
       getAll: seasonQueries.getAllSeasons,
       getById: seasonQueries.getSeasonById,
@@ -86,6 +88,7 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
       {column: 'name', ascending: true},
     ],
     requiresAdmin: false,
+    isPublic: true, // Accessible on landing page without auth
     queryLayer: {
       getAll: categoriesQueries.getAllCategories,
       getById: categoriesQueries.getCategoryById,

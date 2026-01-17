@@ -101,6 +101,45 @@ export async function withAuth(handler: AuthHandler): Promise<NextResponse> {
 }
 
 /**
+ * Wraps an API route for PUBLIC access (no authentication required)
+ *
+ * Use this for landing page data, public blog posts, etc.
+ * The handler receives a supabase client (with RLS applied).
+ * For compatibility with withAuth, also provides null as user parameter.
+ *
+ * @param handler - Function that handles the public request
+ * @returns NextResponse with appropriate status codes
+ *
+ * @example
+ * export async function GET(request: NextRequest) {
+ *   return withPublicAccess(async (supabase) => {
+ *     const {data} = await supabase
+ *       .from('blog_posts')
+ *       .select('*')
+ *       .eq('status', 'published');
+ *     return successResponse(data);
+ *   });
+ * }
+ */
+export async function withPublicAccess(
+  handler: ((supabase: SupabaseClient) => Promise<NextResponse>) | AuthHandler
+): Promise<NextResponse> {
+  try {
+    const supabase = await createClient();
+
+    // Execute handler with supabase client (no auth check)
+    // If handler expects (user, supabase), pass null as user for compatibility
+    if (handler.length === 2) {
+      return await (handler as AuthHandler)(null as any, supabase);
+    }
+    return await (handler as (supabase: SupabaseClient) => Promise<NextResponse>)(supabase);
+  } catch (error: any) {
+    console.error('API Error:', error);
+    return NextResponse.json({error: error.message || 'Internal server error'}, {status: 500});
+  }
+}
+
+/**
  * Wraps an API route with admin authentication checks
  *
  * First checks if user is authenticated, then verifies admin role from user_profiles table.

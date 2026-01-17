@@ -1,6 +1,12 @@
 import {NextRequest} from 'next/server';
 
-import {errorResponse, successResponse, withAdminAuth, withAuth} from '@/utils/supabase/apiHelpers';
+import {
+  errorResponse,
+  successResponse,
+  withAdminAuth,
+  withAuth,
+  withPublicAccess,
+} from '@/utils/supabase/apiHelpers';
 
 import {ENTITY_CONFIGS} from '../config';
 
@@ -20,7 +26,8 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{enti
     return errorResponse(`Entity '${entity}' not found`, 404);
   }
 
-  return withAuth(async (user, supabase) => {
+  // Handler function that both auth wrappers will use
+  const handler = async (supabase: any) => {
     if (config.queryLayer) {
       const searchParams = request.nextUrl.searchParams;
 
@@ -77,7 +84,14 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{enti
     }
 
     return successResponse(data);
-  });
+  };
+
+  // Use public access for entities marked as public, otherwise require auth
+  if (config.isPublic) {
+    return withPublicAccess(handler);
+  }
+
+  return withAuth(async (user, supabase) => handler(supabase));
 }
 
 /**

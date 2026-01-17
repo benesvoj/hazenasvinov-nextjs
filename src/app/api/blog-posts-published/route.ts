@@ -1,17 +1,20 @@
 import {NextRequest} from 'next/server';
 
-import {successResponse, withAuth} from '@/utils/supabase/apiHelpers';
+import {SupabaseClient} from '@supabase/supabase-js';
+
+import {successResponse, withPublicAccess} from '@/utils/supabase/apiHelpers';
 
 /**
  * GET /api/blog-posts-published
  *
  * Fetch published blog posts with optional limit
+ * PUBLIC ENDPOINT - No authentication required
  *
  * @query limit - Number of posts to return (default: 10, max: 100)
  * @example GET /api/blog-posts-published?limit=3
  */
 export async function GET(request: NextRequest) {
-  return withAuth(async (user, supabase) => {
+  return withPublicAccess(async (supabase: SupabaseClient) => {
     // Get query parameters from URL
     const searchParams = request.nextUrl.searchParams;
     const limitParam = searchParams.get('limit');
