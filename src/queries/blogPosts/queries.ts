@@ -1,3 +1,6 @@
+import {createClient} from '@/utils/supabase/client';
+import {withClientQueryList} from '@/utils/supabase/queryHelpers';
+
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
 import {DB_TABLE, ENTITY} from '@/queries/blogPosts/constants';
 import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
@@ -62,4 +65,97 @@ export async function getBlogPostById(ctx: QueryContext, id: string): Promise<Qu
       error: err.message || 'Unknown error',
     };
   }
+}
+
+/**
+ * Client-side fetch: Get all published blog posts
+ * Use with useQuery or prefetchQuery
+ */
+export const fetchBlogPosts = withClientQueryList<Blog>((supabase) =>
+  supabase
+    .from(DB_TABLE)
+    .select('*')
+    .eq('status', 'published')
+    .order('published_at', {ascending: false})
+    .order('created_at', {ascending: false})
+);
+
+/**
+ * Client-side fetch: Get blog post by slug with related data
+ * Use with useQuery or prefetchQuery in Server Components
+ */
+export async function fetchBlogPostBySlug(slug: string) {
+  const supabase = createClient();
+
+  // Fetch blog post
+  const {data: post, error: postError} = await supabase
+    .from(DB_TABLE)
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .single();
+
+  if (postError) throw postError;
+  if (!post) throw new Error('Blog post not found');
+
+  // Fetch related data in parallel
+  const [{data: categories}, {data: relatedPosts}] = await Promise.all([
+    supabase.from('categories').select('*'),
+
+    post.category_id
+      ? supabase
+          .from(DB_TABLE)
+          .select('*')
+          .eq('status', 'published')
+          .eq('category_id', post.category_id)
+          .neq('slug', slug)
+          .order('published_at', {ascending: false})
+          .limit(2)
+      : Promise.resolve({data: []}),
+  ]);
+
+  const category = categories?.find((c: any) => c.id === post.category_id);
+
+  return {
+    post,
+    relatedPosts: relatedPosts || [],
+    category,
+  };
+}
+
+/**
+ * Client-side fetch: Get match data for blog post
+ * Use when blog post has match_id
+ */
+export async function fetchBlogPostMatch(matchId: string) {
+  const supabase = createClient();
+
+  const {data: matchData, error} = await supabase
+    .from('matches')
+    .select(
+      `
+      *,
+      home_team:home_team_id(
+        id,
+        team_suffix,
+        club_category:club_categories(
+          club:clubs(id, name, short_name, logo_url, is_own_club)
+        )
+      ),
+      away_team:away_team_id(
+        id,
+        team_suffix,
+        club_category:club_categories(
+          club:clubs(id, name, short_name, logo_url, is_own_club)
+        )
+      ),
+      category:categories(id, name),
+      season:seasons(id, name)
+    `
+    )
+    .eq('id', matchId)
+    .single();
+
+  if (error) throw error;
+  return matchData;
 }
