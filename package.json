@@ -123,15 +123,6 @@
     ],
     "src/**/*.{ts,tsx}": [
       "bash -c 'npx tsc --noEmit --skipLibCheck'"
-    ],
-    "src/hooks/**/*.ts": [
-      "npm run generate:hooks"
-    ],
-    "src/types/**/*.ts": [
-      "npm run generate:types"
-    ],
-    "src/components/**/*.{ts,tsx}": [
-      "npm run generate:components"
     ]
   }
 }

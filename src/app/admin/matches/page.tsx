@@ -32,7 +32,9 @@ import {
   useTeams,
   useExcelImport,
   useTeamDisplayLogic,
-  useFetchCategories, useFetchSeasons, useSeasonFiltering,
+  useFetchCategories,
+  useFetchSeasons,
+  useSeasonFiltering,
 } from '@/hooks';
 import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
 import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
@@ -197,8 +199,8 @@ export default function MatchesAdminPage() {
   const supabase = createClient();
 
   // Use the enhanced seasons hook
-  const {data: seasons, loading: seasonsLoading,} = useFetchSeasons();
-  const {activeSeason, sortedSeasons} = useSeasonFiltering({seasons: seasons});
+  const {data: seasons, loading: seasonsLoading} = useFetchSeasons();
+  const {activeSeason, sortedSeasons} = useSeasonFiltering({seasons: seasons || []});
 
   const [selectedSeason, setSelectedSeason] = useState<string>('');
   const queryClient = useQueryClient();

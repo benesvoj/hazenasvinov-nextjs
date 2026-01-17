@@ -26,9 +26,8 @@ export function usePublicMatches(categoryId?: string): PublicMatchesResult {
   const [error, setError] = useState<string | null>(null);
 
   // Get active season for suffix logic
-  // TODO: antipattern: using a hook inside another hook
-  const {data: seasons, loading: seasonLoading,} = useFetchSeasons()
-  const {activeSeason} = useSeasonFiltering({seasons: seasons});
+  const {data: seasons, loading: seasonLoading} = useFetchSeasons();
+  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
 
   const fetchMatches = useCallback(async () => {
     // Don't fetch if we don't have an active season yet

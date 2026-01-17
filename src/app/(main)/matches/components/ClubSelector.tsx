@@ -7,7 +7,7 @@ import {Button, Image} from '@heroui/react';
 
 import {BuildingOfficeIcon} from '@heroicons/react/24/outline';
 
-import {useSeasons, useFetchCategories, useFetchSeasons, useSeasonFiltering} from '@/hooks';
+import {useFetchCategories, useFetchSeasons, useSeasonFiltering} from '@/hooks';
 import {ClubWithTeams} from '@/types';
 
 interface ClubSelectorProps {

@@ -52,10 +52,16 @@ export const MeetingMinutesContainer = forwardRef<
     deleteMeetingMinutes,
     getNextMeetingNumber,
   } = useMeetingMinutes();
-  const {data: seasons, loading: seasonsLoading, refetch: fetchAllSeasons} = useFetchSeasons();
+  const {data: seasons, refetch: fetchAllSeasons} = useFetchSeasons();
 
   const [users, setUsers] = useState<any[]>([]);
   const t = translations.components.meetingMinutes;
+
+  // Modal functions - declared before useImperativeHandle
+  const openCreateModal = () => {
+    setEditingMeetingMinutes(null);
+    setIsFormModalOpen(true);
+  };
 
   // Expose functions to parent component
   useImperativeHandle(ref, () => ({
@@ -97,11 +103,6 @@ export const MeetingMinutesContainer = forwardRef<
   const handleClearFilters = () => {
     setFilters({});
     fetchMeetingMinutes({});
-  };
-
-  const openCreateModal = () => {
-    setEditingMeetingMinutes(null);
-    setIsFormModalOpen(true);
   };
 
   const openEditModal = (meetingMinutes: MeetingMinutes) => {
