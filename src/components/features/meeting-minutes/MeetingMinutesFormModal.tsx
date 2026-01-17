@@ -58,7 +58,7 @@ export function MeetingMinutesFormModal({
   const [isAttendeesModalOpen, setIsAttendeesModalOpen] = useState(false);
 
   const {data: seasons, loading: seasonsLoading, refetch: fetchAllSeasons} = useFetchSeasons();
-  const {activeSeason} = useSeasonFiltering({seasons: seasons});
+  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
   const {user} = useAuth();
   const {data: members} = useFetchMembers();
 
