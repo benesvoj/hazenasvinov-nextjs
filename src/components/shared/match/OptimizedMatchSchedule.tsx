@@ -12,7 +12,12 @@ import {PerformanceMonitorPanel} from '@/components/features/admin/PerformanceMo
 
 import CategoryMatchesAndResults from '@/app/(main)/components/CategoryMatchesAndResults';
 
-import {useOptimizedOwnClubMatches, useFetchCategories, useFetchSeasons, useSeasonFiltering} from '@/hooks';
+import {
+  useOptimizedOwnClubMatches,
+  useFetchCategories,
+  useFetchSeasons,
+  useSeasonFiltering,
+} from '@/hooks';
 
 interface OptimizedMatchScheduleProps {
   className?: string;
@@ -24,8 +29,8 @@ const OptimizedMatchSchedule = memo<OptimizedMatchScheduleProps>(({className}) =
     loading: categoriesLoading,
     refetch: fetchCategories,
   } = useFetchCategories();
-  const {data: seasons, loading: seasonLoading} = useFetchSeasons()
-  const {activeSeason} = useSeasonFiltering({seasons: seasons});
+  const {data: seasons, loading: seasonLoading} = useFetchSeasons();
+  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
 
   // For now, we'll use the first category as selected (you can add category selection logic later)
   const selectedCategoryData = availableCategories[0];
