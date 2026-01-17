@@ -5,26 +5,29 @@ import {useEffect} from 'react';
 import Image from 'next/image';
 import {useParams} from 'next/navigation';
 
-import {Card, CardBody, Button, Chip, Divider} from '@heroui/react';
+import {Button, Card, CardBody, Chip, Divider} from '@heroui/react';
 
 import {
-  CalendarIcon,
-  UserIcon,
-  TagIcon,
   ArrowLeftIcon,
-  ShareIcon,
   BookmarkIcon,
+  CalendarIcon,
+  ShareIcon,
+  TagIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 
 import {BlogContent, BlogPostCard} from '@/components/features';
 import {MatchInfo} from '@/components/shared';
-import {Link, Heading} from '@/components/ui';
+import {Heading, Link} from '@/components/ui';
 
 import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
 
+import {LoadingSpinner} from '@/components';
 import {formatDateString} from '@/helpers';
-import {useFetchCategories, useFetchBlogPostBySlug, useFetchPostMatch} from '@/hooks';
+import {useFetchBlogPostBySlug, useFetchCategories, useFetchPostMatch} from '@/hooks';
 import {translations} from '@/lib';
+
+const t = translations.landingPage.posts;
 
 export default function BlogPostPage() {
   const params = useParams();
@@ -38,24 +41,10 @@ export default function BlogPostPage() {
     fetchCategories();
   }, [fetchCategories]);
 
-  const t = translations.landingPage.posts;
-
   const category = post ? categories.find((category) => category.id === post.category_id) : null;
 
   if (loading) {
-    return (
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="animate-pulse">
-          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-8"></div>
-          <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded mb-8"></div>
-          <div className="space-y-4">
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error || !post) {

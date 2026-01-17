@@ -1,17 +1,20 @@
 import {NextRequest} from 'next/server';
 
-import {errorResponse, successResponse, withAuth} from '@/utils/supabase/apiHelpers';
+import {SupabaseClient} from '@supabase/supabase-js';
+
+import {errorResponse, successResponse, withPublicAccess} from '@/utils/supabase/apiHelpers';
 
 /**
  * GET /api/blog-posts/by-slug/[slug]
  *
  * Fetch published blog post via slug
+ * PUBLIC ENDPOINT - No authentication required (public blog posts)
  *
  * @query slug - Slug of the blog post to retrieve
  * @example GET /api/blog/by-slug/my-first-blog-post
  */
 export async function GET(request: NextRequest, {params}: {params: Promise<{slug: string}>}) {
-  return withAuth(async (user, supabase) => {
+  return withPublicAccess(async (supabase: SupabaseClient) => {
     const {slug} = await params;
 
     if (!slug) {
