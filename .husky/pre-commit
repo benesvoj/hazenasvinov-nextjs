@@ -1,28 +1,12 @@
 #!/bin/sh
 
-# Check if API routes have changed
-API_CHANGED=$(git diff --cached --name-only | grep "^src/app/api/")
+echo "🔍 Running pre-commit checks..."
 
-if [ -n "$API_CHANGED" ]; then
-  echo "🔄 API routes changed, regenerating API constants..."
-  npm run generate:api-routes
-
-  if [ $? -eq 0 ]; then
-    # Add the generated file if it changed
-    git add src/lib/api-routes.ts
-    echo "✅ API routes regenerated and staged"
-  else
-    echo "❌ Failed to regenerate API routes"
-    exit 1
-  fi
-fi
-
-# Run lint-staged (runs ESLint, Prettier, and TypeScript on staged files)
-echo "🔍 Running pre-commit checks on staged files..."
-npx lint-staged
-if [ $? -ne 0 ]; then
+# Run lint-staged (ESLint, Prettier, TypeScript on staged files)
+if ! npx lint-staged; then
   echo "❌ Pre-commit checks failed. Please fix the errors before committing."
   exit 1
 fi
 
-echo "✅ All checks passed! Proceeding with commit..."
+echo "✅ Pre-commit checks passed!"
+exit 0
