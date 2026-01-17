@@ -1,3 +1,5 @@
+'use client';
+
 import {Card, CardBody, Image} from '@heroui/react';
 
 export const SponsorsTemp = () => {

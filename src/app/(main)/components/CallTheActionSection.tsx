@@ -1,3 +1,5 @@
+'use client';
+
 import {Button} from '@heroui/button';
 
 import Link from '@/components/ui/link/Link';

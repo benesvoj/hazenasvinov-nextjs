@@ -1,3 +1,5 @@
+'use client';
+
 import {Button} from '@heroui/button';
 import {Card, CardHeader, CardBody} from '@heroui/card';
 import {Spacer} from '@heroui/spacer';

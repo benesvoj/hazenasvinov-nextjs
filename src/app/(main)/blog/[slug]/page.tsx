@@ -1,22 +1,20 @@
 import Image from 'next/image';
 import {notFound} from 'next/navigation';
 
-import {Button, Chip, Divider} from '@heroui/react';
-
-import {
-  ArrowLeftIcon,
-  BookmarkIcon,
-  CalendarIcon,
-  ShareIcon,
-  UserIcon,
-} from '@heroicons/react/24/outline';
+import {CalendarIcon, UserIcon} from '@heroicons/react/24/outline';
 
 import {BlogContent, BlogPostCard} from '@/components/features';
 import {MatchInfo} from '@/components/shared';
-import {Heading, Link} from '@/components/ui';
+import {Heading} from '@/components/ui';
 
 import {createClient} from '@/utils/supabase/server';
 
+import {
+  BackButton,
+  CategoryBadge,
+  ContentDivider,
+  ShareButtons,
+} from '@/app/(main)/blog/[slug]/components';
 import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
 
 import {formatDateString} from '@/helpers';
@@ -96,14 +94,7 @@ export default async function BlogPostPage({params}: {params: Promise<{slug: str
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Back Button */}
       <div>
-        <Button
-          as={Link}
-          href="/blog"
-          variant="bordered"
-          startContent={<ArrowLeftIcon className="w-4 h-4" />}
-        >
-          {t.backToPosts}
-        </Button>
+        <BackButton label={t.backToPosts} />
       </div>
 
       {/* Article */}
@@ -121,11 +112,7 @@ export default async function BlogPostPage({params}: {params: Promise<{slug: str
               <CalendarIcon className="w-4 h-4" />
               <span>{post.published_at ? formatDateString(post.published_at) : '-'}</span>
             </div>
-            {category && (
-              <Chip size="sm" variant="solid" color="primary">
-                {category.name}
-              </Chip>
-            )}
+            {category && <CategoryBadge name={category.name} />}
           </div>
         </header>
 
@@ -148,7 +135,7 @@ export default async function BlogPostPage({params}: {params: Promise<{slug: str
         {/* Related Match */}
         {matchData && (
           <>
-            <Divider className="my-6" />
+            <ContentDivider />
             <MatchInfo match={matchData} />
           </>
         )}
@@ -158,16 +145,7 @@ export default async function BlogPostPage({params}: {params: Promise<{slug: str
         {/* Share Buttons */}
         <div className="flex items-center justify-between mt-8 pt-8 border-t">
           <div className="flex items-center gap-4">
-            <Button variant="bordered" size="sm" startContent={<ShareIcon className="w-4 h-4" />}>
-              Sdílet
-            </Button>
-            <Button
-              variant="bordered"
-              size="sm"
-              startContent={<BookmarkIcon className="w-4 h-4" />}
-            >
-              Uložit
-            </Button>
+            <ShareButtons />
           </div>
         </div>
       </article>
@@ -189,9 +167,10 @@ export default async function BlogPostPage({params}: {params: Promise<{slug: str
 
 // ✅ BONUS: Pre-render popular posts at build time for even faster loads!
 export async function generateStaticParams() {
-  const supabase = await createClient();
+  // Use admin client for build-time generation (no cookies available)
+  const {default: supabaseAdmin} = await import('@/utils/supabase/admin');
 
-  const {data: posts} = await supabase
+  const {data: posts} = await supabaseAdmin
     .from('blog_posts')
     .select('slug')
     .eq('status', 'published')

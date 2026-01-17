@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * @description Heading component
  * @param param0 { size: HeadingLevel, children: React.ReactNode }
