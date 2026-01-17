@@ -12,9 +12,9 @@ const t = translations.admin.clubCategories.responseMessages;
  * Generated using createDataFetchHook factory
  */
 export function useFetchClubCategories() {
-	return createDataFetchHook<ClubCategoryWithRelations>({
-		endpoint: API_ROUTES.entities.root('club_categories'),
-		entityName: 'clubCategories',
-		errorMessage: t.clubCategoriesFetchFailed,
-	});
+  return createDataFetchHook<ClubCategoryWithRelations>({
+    endpoint: API_ROUTES.entities.root('club_categories'),
+    entityName: 'clubCategories',
+    errorMessage: t.clubCategoriesFetchFailed,
+  })();
 }

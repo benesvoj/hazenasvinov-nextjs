@@ -14,10 +14,12 @@ const initialFormData: GrantFormData = {
   created_by: null,
 };
 
-export const useGrantForm = createFormHook<Grant, GrantFormData>({
-  initialFormData,
-  validationRules: [
-    {field: 'name', message: t.mandatoryName},
-    {field: 'month', message: t.mandatoryMonth},
-  ],
-});
+export function useGrantForm() {
+  return createFormHook<Grant, GrantFormData>({
+    initialFormData,
+    validationRules: [
+      {field: 'name', message: t.mandatoryName},
+      {field: 'month', message: t.mandatoryMonth},
+    ],
+  })();
+}

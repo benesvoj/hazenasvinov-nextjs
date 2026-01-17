@@ -11,22 +11,23 @@ import {TodoInsert, TodoItem, UpdateTodo} from '@/types';
 
 const t = translations.admin.todos.responseMessages;
 
-const _useTodos = createCRUDHook<TodoItem, TodoInsert>({
-  baseEndpoint: API_ROUTES.entities.root(DB_TABLE),
-  byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
-  entityName: DB_TABLE,
-  messages: {
-    createSuccess: t.createSuccess,
-    updateSuccess: t.updateSuccess,
-    deleteSuccess: t.deleteSuccess,
-    createError: t.createError,
-    updateError: t.updateError,
-    deleteError: t.deleteError,
-  },
-});
-
 export function useTodos() {
-  const {loading, setLoading, error, create, update, deleteItem} = _useTodos();
+  const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<
+    TodoItem,
+    TodoInsert
+  >({
+    baseEndpoint: API_ROUTES.entities.root(DB_TABLE),
+    byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
+    entityName: DB_TABLE,
+    messages: {
+      createSuccess: t.createSuccess,
+      updateSuccess: t.updateSuccess,
+      deleteSuccess: t.deleteSuccess,
+      createError: t.createError,
+      updateError: t.updateError,
+      deleteError: t.deleteError,
+    },
+  })();
 
   const updateTodoStatus = useCallback(
     async (id: string, status: TodoStatuses): Promise<boolean> => {

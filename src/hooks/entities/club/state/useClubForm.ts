@@ -22,7 +22,9 @@ const initialFormData: ClubFormData = {
   is_active: true,
 };
 
-export const useClubForm = createFormHook<Club, ClubFormData>({
-  initialFormData,
-  validationRules: [{field: 'name', message: t.mandatoryName}],
-});
+export function useClubForm() {
+  return createFormHook<Club, ClubFormData>({
+    initialFormData,
+    validationRules: [{field: 'name', message: t.mandatoryName}],
+  })();
+}

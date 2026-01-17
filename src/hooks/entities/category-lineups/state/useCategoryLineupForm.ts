@@ -15,7 +15,9 @@ const initialFormData: CategoryLineupFormData = {
   created_by: '',
 };
 
-export const useCategoryLineupForm = createFormHook<CategoryLineup, CategoryLineupFormData>({
-  initialFormData,
-  validationRules: [{field: 'name', message: t.mandatoryName}],
-});
+export function useCategoryLineupForm() {
+  return createFormHook<CategoryLineup, CategoryLineupFormData>({
+    initialFormData,
+    validationRules: [{field: 'name', message: t.mandatoryName}],
+  })();
+}

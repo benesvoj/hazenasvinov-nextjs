@@ -13,10 +13,12 @@ const initialFormData: CommentFormData = {
 
 const t = translations.admin.comments.responseMessages;
 
-export const useCommentForm = createFormHook<BaseComment, CommentFormData>({
-  initialFormData,
-  validationRules: [
-    {field: 'content', message: t.mandatoryContent},
-    {field: 'type', message: t.mandatoryType},
-  ],
-});
+export function useCommentForm() {
+  return createFormHook<BaseComment, CommentFormData>({
+    initialFormData,
+    validationRules: [
+      {field: 'content', message: t.mandatoryContent},
+      {field: 'type', message: t.mandatoryType},
+    ],
+  })();
+}

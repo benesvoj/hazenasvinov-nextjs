@@ -19,10 +19,12 @@ const initialFormData: TodoFormData = {
   created_by: '',
 };
 
-export const useTodoForm = createFormHook<TodoItem, TodoFormData>({
-  initialFormData,
-  validationRules: [
-    {field: 'title', message: t.mandatoryTitle},
-    {field: 'description', message: t.mandatoryDescription},
-  ],
-});
+export function useTodoForm() {
+  return createFormHook<TodoItem, TodoFormData>({
+    initialFormData,
+    validationRules: [
+      {field: 'title', message: t.mandatoryTitle},
+      {field: 'description', message: t.mandatoryDescription},
+    ],
+  })();
+}

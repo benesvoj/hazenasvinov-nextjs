@@ -11,22 +11,23 @@ import {CategoryLineup, CreateCategoryLineup} from '@/types';
 
 const t = translations.coachPortal.lineupList.responseMessages;
 
-const _useCategoryLineups = createCRUDHook<CategoryLineup, CreateCategoryLineup>({
-  baseEndpoint: API_ROUTES.entities.root(DB_TABLE),
-  byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
-  entityName: ENTITY.plural,
-  messages: {
-    createSuccess: t.createSuccess,
-    updateSuccess: t.updateSuccess,
-    deleteSuccess: t.deleteSuccess,
-    createError: t.createError,
-    updateError: t.updateError,
-    deleteError: t.deleteError,
-  },
-});
-
 export function useCategoryLineups() {
-  const {loading, setLoading, error, create, update, deleteItem} = _useCategoryLineups();
+  const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<
+    CategoryLineup,
+    CreateCategoryLineup
+  >({
+    baseEndpoint: API_ROUTES.entities.root(DB_TABLE),
+    byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
+    entityName: ENTITY.plural,
+    messages: {
+      createSuccess: t.createSuccess,
+      updateSuccess: t.updateSuccess,
+      deleteSuccess: t.deleteSuccess,
+      createError: t.createError,
+      updateError: t.updateError,
+      deleteError: t.deleteError,
+    },
+  })();
 
   return {
     loading,

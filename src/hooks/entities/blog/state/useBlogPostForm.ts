@@ -25,21 +25,23 @@ const t = translations.admin.blog.responseMessages;
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-const useBlogPostBaseForm = createFormHook<Blog, BlogPostFormData>({
-  initialFormData,
-  validationRules: [
-    {field: 'title', message: t.mandatoryTitle},
-    {field: 'content', message: t.mandatoryContent},
-  ],
-  excludeFields: [
-    'id',
-    'created_at',
-    'updated_at',
-    'created_by',
-    'searchableContent',
-    'searchableTitle',
-  ],
-});
+function useBlogPostBaseForm() {
+  return createFormHook<Blog, BlogPostFormData>({
+    initialFormData,
+    validationRules: [
+      {field: 'title', message: t.mandatoryTitle},
+      {field: 'content', message: t.mandatoryContent},
+    ],
+    excludeFields: [
+      'id',
+      'created_at',
+      'updated_at',
+      'created_by',
+      'searchableContent',
+      'searchableTitle',
+    ],
+  })();
+}
 
 export const useBlogPostForm = () => {
   const baseForm = useBlogPostBaseForm();

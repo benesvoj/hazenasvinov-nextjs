@@ -13,5 +13,5 @@ export function useFetchVideos() {
     endpoint: API_ROUTES.entities.root(DB_TABLE),
     entityName: ENTITY.plural,
     errorMessage: t.videosFetchFailed,
-  });
+  })();
 }

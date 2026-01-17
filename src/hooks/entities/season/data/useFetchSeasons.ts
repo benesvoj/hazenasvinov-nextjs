@@ -12,9 +12,9 @@ const t = translations.admin.seasons.responseMessages;
  * Generated using createDataFetchHook factory
  */
 export function useFetchSeasons() {
-	return createDataFetchHook<Season>({
-		endpoint: API_ROUTES.entities.root('seasons'),
-		entityName: 'seasons',
-		errorMessage: t.seasonsFetchFailed,
-	});
+  return createDataFetchHook<Season>({
+    endpoint: API_ROUTES.entities.root('seasons'),
+    entityName: 'seasons',
+    errorMessage: t.seasonsFetchFailed,
+  })();
 }

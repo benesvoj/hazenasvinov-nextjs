@@ -9,9 +9,9 @@ import {BaseCategoryLineupMember} from '@/types';
 const t = translations.coachPortal.lineupMembers.responseMessages;
 
 export function useFetchCategoryLineupMembersFactory() {
-	return createDataFetchHook<BaseCategoryLineupMember>({
-		endpoint: API_ROUTES.entities.root(DB_TABLE),
-		entityName: ENTITY.plural,
-		errorMessage: t.lineupMembersFetchFailed,
-	});
+  return createDataFetchHook<BaseCategoryLineupMember>({
+    endpoint: API_ROUTES.entities.root(DB_TABLE),
+    entityName: ENTITY.plural,
+    errorMessage: t.lineupMembersFetchFailed,
+  })();
 }

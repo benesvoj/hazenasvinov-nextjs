@@ -7,22 +7,23 @@ import {VideoInsert, VideoSchema} from '@/types';
 
 const t = translations.admin.videos.responseMessages;
 
-const _useVideos = createCRUDHook<VideoSchema, VideoInsert>({
-  baseEndpoint: API_ROUTES.entities.root(DB_TABLE),
-  byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
-  entityName: DB_TABLE,
-  messages: {
-    createSuccess: t.createSuccess,
-    updateSuccess: t.updateSuccess,
-    deleteSuccess: t.deleteSuccess,
-    createError: t.createError,
-    updateError: t.updateError,
-    deleteError: t.deleteError,
-  },
-});
-
 export function useVideos() {
-  const {loading, setLoading, error, create, update, deleteItem} = _useVideos();
+  const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<
+    VideoSchema,
+    VideoInsert
+  >({
+    baseEndpoint: API_ROUTES.entities.root(DB_TABLE),
+    byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
+    entityName: DB_TABLE,
+    messages: {
+      createSuccess: t.createSuccess,
+      updateSuccess: t.updateSuccess,
+      deleteSuccess: t.deleteSuccess,
+      createError: t.createError,
+      updateError: t.updateError,
+      deleteError: t.deleteError,
+    },
+  })();
 
   return {
     loading,

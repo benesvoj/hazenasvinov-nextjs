@@ -12,9 +12,9 @@ const t = translations.admin.blog.responseMessages;
  * Generated using createDataFetchHook factory
  */
 export function useFetchBlog() {
-	return createDataFetchHook<Blog>({
-		endpoint: API_ROUTES.entities.root('blog_posts'),
-		entityName: 'blogPosts',
-		errorMessage: t.blogPostsFetchFailed,
-	});
+  return createDataFetchHook<Blog>({
+    endpoint: API_ROUTES.entities.root('blog_posts'),
+    entityName: 'blogPosts',
+    errorMessage: t.blogPostsFetchFailed,
+  })();
 }

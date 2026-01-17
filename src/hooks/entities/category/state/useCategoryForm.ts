@@ -1,10 +1,10 @@
 'use client';
 
-import {createFormHook} from "@/hooks";
-import {translations} from "@/lib";
+import {createFormHook} from '@/hooks';
+import {translations} from '@/lib';
 import {Category, CategoryFormData} from '@/types';
 
-const t = translations.admin.categories.responseMessages
+const t = translations.admin.categories.responseMessages;
 const initialFormData: CategoryFormData = {
   name: '',
   description: '',
@@ -19,9 +19,9 @@ const initialFormData: CategoryFormData = {
  * Hook for managing category form state
  * Handles: form data, validation, reset
  */
-export const useCategoryForm = createFormHook<Category, CategoryFormData>({
-  initialFormData,
-    validationRules: [
-        {field: 'name', message: t.mandatoryName},
-    ],
-});
+export function useCategoryForm() {
+  return createFormHook<Category, CategoryFormData>({
+    initialFormData,
+    validationRules: [{field: 'name', message: t.mandatoryName}],
+  })();
+}

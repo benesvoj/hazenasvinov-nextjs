@@ -17,11 +17,13 @@ const initialFormData: VideoFormData = {
   is_active: true,
 };
 
-export const useVideoForm = createFormHook<VideoSchema, VideoFormData>({
-  initialFormData,
-  validationRules: [
-    {field: 'youtube_url', message: t.mandatoryYoutubeURL},
-    {field: 'title', message: t.mandatoryTitle},
-    {field: 'category_id', message: t.mandatoryCategory},
-  ],
-});
+export function useVideoForm() {
+  return createFormHook<VideoSchema, VideoFormData>({
+    initialFormData,
+    validationRules: [
+      {field: 'youtube_url', message: t.mandatoryYoutubeURL},
+      {field: 'title', message: t.mandatoryTitle},
+      {field: 'category_id', message: t.mandatoryCategory},
+    ],
+  })();
+}
