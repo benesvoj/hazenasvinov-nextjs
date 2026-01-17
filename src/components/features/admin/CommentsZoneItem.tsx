@@ -1,3 +1,5 @@
+'use client';
+
 import {translations} from '@/lib/translations';
 
 import {UnifiedCard} from '@/components';
@@ -56,7 +58,9 @@ export const CommentsZoneItem = ({
               <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {tCommon.commentsZoneItem.createdAt}
               </div>
-              <div className="truncate">{comment.created_at ? formatDateString(comment.created_at) : '-'}</div>
+              <div className="truncate">
+                {comment.created_at ? formatDateString(comment.created_at) : '-'}
+              </div>
             </div>
           </div>
         </div>

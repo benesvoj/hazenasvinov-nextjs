@@ -1,3 +1,5 @@
+'use client';
+
 interface AdminContentProps {
   children: React.ReactNode;
 }

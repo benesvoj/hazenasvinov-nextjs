@@ -1,3 +1,5 @@
+'use client';
+
 import {Button} from '@heroui/react';
 
 import {formatOdds} from '@/services';

@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 import {Tooltip, Button} from '@heroui/react';
