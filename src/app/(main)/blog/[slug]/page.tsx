@@ -1,18 +1,13 @@
-'use client';
-
-import {useEffect} from 'react';
-
 import Image from 'next/image';
-import {useParams} from 'next/navigation';
+import {notFound} from 'next/navigation';
 
-import {Button, Card, CardBody, Chip, Divider} from '@heroui/react';
+import {Button, Chip, Divider} from '@heroui/react';
 
 import {
   ArrowLeftIcon,
   BookmarkIcon,
   CalendarIcon,
   ShareIcon,
-  TagIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
 
@@ -20,56 +15,83 @@ import {BlogContent, BlogPostCard} from '@/components/features';
 import {MatchInfo} from '@/components/shared';
 import {Heading, Link} from '@/components/ui';
 
+import {createClient} from '@/utils/supabase/server';
+
 import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
 
-import {LoadingSpinner} from '@/components';
 import {formatDateString} from '@/helpers';
-import {useFetchBlogPostBySlug, useFetchCategories, useFetchPostMatch} from '@/hooks';
 import {translations} from '@/lib';
 
 const t = translations.landingPage.posts;
 
-export default function BlogPostPage() {
-  const params = useParams();
-  const slug = params.slug as string;
+// ✅ Server Component (no 'use client'!)
+export default async function BlogPostPage({params}: {params: Promise<{slug: string}>}) {
+  const {slug} = await params;
+  const supabase = await createClient();
 
-  const {post, relatedPosts, loading, error} = useFetchBlogPostBySlug(slug);
-  const {data: categories, refetch: fetchCategories} = useFetchCategories();
-  const {match: relatedMatch, loading: matchLoading} = useFetchPostMatch(post?.id || null);
+  // ✅ Fetch blog post on server
+  const {data: post, error: postError} = await supabase
+    .from('blog_posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .single();
 
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
-
-  const category = post ? categories.find((category) => category.id === post.category_id) : null;
-
-  if (loading) {
-    return <LoadingSpinner />;
+  // ✅ Handle not found
+  if (postError || !post) {
+    notFound(); // Next.js 404 page
   }
 
-  if (error || !post) {
-    return (
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center py-12">
-          <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
-            <CardBody className="text-center">
-              <TagIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
-                {error || 'Článek nebyl nalezen'}
-              </h3>
-              <p className="text-red-600 dark:text-red-400 mb-4">
-                Požadovaný článek nebyl nalezen nebo není dostupný.
-              </p>
-              <Button as={Link} href="/blog" color="primary" variant="bordered">
-                {t.backToPosts}
-              </Button>
-            </CardBody>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  // ✅ Fetch related data in parallel
+  const [{data: categories}, {data: relatedPosts}, {data: matchData}] = await Promise.all([
+    // Categories (for badge)
+    supabase.from('categories').select('*'),
 
+    // Related posts (same category)
+    post.category_id
+      ? supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('status', 'published')
+          .eq('category_id', post.category_id)
+          .neq('slug', slug)
+          .order('published_at', {ascending: false})
+          .limit(2)
+      : Promise.resolve({data: null}),
+
+    // Related match (if post has match_id)
+    post.match_id
+      ? supabase
+          .from('matches')
+          .select(
+            `
+            *,
+            home_team:home_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url, is_own_club)
+              )
+            ),
+            away_team:away_team_id(
+              id,
+              team_suffix,
+              club_category:club_categories(
+                club:clubs(id, name, short_name, logo_url, is_own_club)
+              )
+            ),
+            category:categories(id, name),
+            season:seasons(id, name)
+          `
+          )
+          .eq('id', post.match_id)
+          .single()
+      : Promise.resolve({data: null}),
+  ]);
+
+  const category = categories?.find((c) => c.id === post.category_id);
+
+  // ✅ Render immediately - NO loading state needed!
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Back Button */}
@@ -84,13 +106,12 @@ export default function BlogPostPage() {
         </Button>
       </div>
 
-      {/* Article Header */}
+      {/* Article */}
       <article>
         <header className="space-y-4">
-          {/* Post Title */}
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{post.title}</h1>
 
-          {/* Post Meta */}
+          {/* Meta */}
           <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-2">
               <UserIcon className="w-4 h-4" />
@@ -98,21 +119,19 @@ export default function BlogPostPage() {
             </div>
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-4 h-4" />
-              <span>{post?.published_at !== null ? formatDateString(post.published_at) : '-'}</span>
+              <span>{post.published_at ? formatDateString(post.published_at) : '-'}</span>
             </div>
             {category && (
-              <div className="flex flex-wrap gap-2">
-                <Chip size="sm" variant="solid" color="primary" className="px-2 py-1">
-                  {category.name}
-                </Chip>
-              </div>
+              <Chip size="sm" variant="solid" color="primary">
+                {category.name}
+              </Chip>
             )}
           </div>
         </header>
 
-        {/* Featured Image */}
-        <div className="my-8">
-          {post.image_url && (
+        {/* Image */}
+        {post.image_url && (
+          <div className="my-8">
             <Image
               src={post.image_url}
               alt={post.title}
@@ -120,24 +139,24 @@ export default function BlogPostPage() {
               height={400}
               className="w-full h-64 lg:h-80 object-cover rounded-lg"
             />
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Article Content */}
+        {/* Content */}
         <BlogContent content={post.content} />
 
-        {/* Related Match Information */}
-        {relatedMatch && !matchLoading && (
+        {/* Related Match */}
+        {matchData && (
           <>
             <Divider className="my-6" />
-            <MatchInfo match={relatedMatch} />
+            <MatchInfo match={matchData} />
           </>
         )}
 
         <SponsorsTemp />
 
-        {/* Share and Bookmark */}
-        <div className="flex items-center justify-between mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+        {/* Share Buttons */}
+        <div className="flex items-center justify-between mt-8 pt-8 border-t">
           <div className="flex items-center gap-4">
             <Button variant="bordered" size="sm" startContent={<ShareIcon className="w-4 h-4" />}>
               Sdílet
@@ -154,7 +173,7 @@ export default function BlogPostPage() {
       </article>
 
       {/* Related Posts */}
-      {relatedPosts.length > 0 && (
+      {relatedPosts && relatedPosts.length > 0 && (
         <section>
           <Heading size={2}>Související články</Heading>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -167,3 +186,20 @@ export default function BlogPostPage() {
     </div>
   );
 }
+
+// ✅ BONUS: Pre-render popular posts at build time for even faster loads!
+export async function generateStaticParams() {
+  const supabase = await createClient();
+
+  const {data: posts} = await supabase
+    .from('blog_posts')
+    .select('slug')
+    .eq('status', 'published')
+    .order('published_at', {ascending: false})
+    .limit(20); // Pre-render 20 most recent posts
+
+  return posts?.map((post) => ({slug: post.slug})) || [];
+}
+
+// ✅ Enable ISR (Incremental Static Regeneration)
+export const revalidate = 3600; // Revalidate every hour
