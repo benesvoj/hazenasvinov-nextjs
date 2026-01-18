@@ -9,6 +9,7 @@ import {useQuery} from '@tanstack/react-query';
 import {BlogContent, BlogPostCard} from '@/components/features';
 import {MatchInfo} from '@/components/shared';
 import {Heading} from '@/components/ui';
+import {CategoryChip} from '@/components/ui/chips';
 
 import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
 
@@ -16,7 +17,7 @@ import {formatDateString} from '@/helpers';
 import {translations} from '@/lib';
 import {fetchBlogPostBySlug, fetchBlogPostMatch} from '@/queries/blogPosts/queries';
 
-import {BackButton, CategoryBadge, ContentDivider, ShareButtons} from './components';
+import {BackButton, ContentDivider, ShareButtons} from './components';
 
 interface BlogPostClientProps {
   slug: string;
@@ -87,7 +88,7 @@ export function BlogPostClient({slug}: BlogPostClientProps) {
             </div>
             {category && (
               <div className="flex flex-wrap gap-2">
-                <CategoryBadge name={category.name} />
+                <CategoryChip category={category} />
               </div>
             )}
           </div>

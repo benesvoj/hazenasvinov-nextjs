@@ -1,10 +1,10 @@
 'use client';
 
-import {useState, useMemo} from 'react';
+import {useMemo, useState} from 'react';
 
 import {Card, CardBody, Input, Select, SelectItem} from '@heroui/react';
 
-import {TagIcon, MagnifyingGlassIcon} from '@heroicons/react/24/outline';
+import {MagnifyingGlassIcon, TagIcon} from '@heroicons/react/24/outline';
 
 import {useQuery} from '@tanstack/react-query';
 
@@ -15,6 +15,7 @@ import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
 import {createSearchablePost, searchPosts} from '@/utils/contentSearch';
 
 import {fetchBlogPosts} from '@/queries/blogPosts/queries';
+import {fetchCategories} from '@/queries/categories/queries';
 import {Blog} from '@/types';
 
 export function BlogListingClient() {
@@ -25,22 +26,30 @@ export function BlogListingClient() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // ✅ Data is hydrated from server - instant!
-  const {data: allPosts = [], isLoading} = useQuery({
+  const {data: allPosts = [], isLoading: postsLoading} = useQuery({
     queryKey: ['blog-posts'],
     queryFn: fetchBlogPosts,
   });
 
-  // Debug logging
-  console.log('BlogListingClient - allPosts:', {
-    count: allPosts?.length || 0,
-    isLoading,
-    posts: allPosts,
+  // ✅ Fetch categories (also hydrated from server)
+  const {data: allCategories = [], isLoading: categoriesLoading} = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
   });
 
-  // Get unique categories
+  // Create category lookup map for BlogPostCard
+  const categoryMap = useMemo(() => {
+    const map = new Map();
+    allCategories.forEach((cat) => map.set(cat.id, cat));
+    return map;
+  }, [allCategories]);
+
+  // Get unique categories for filter dropdown
   const categories = useMemo(() => {
     return ['Všechny']; // Can enhance later with actual categories
   }, []);
+
+  const isLoading = postsLoading || categoriesLoading;
 
   // Client-side filtering (instant!)
   const filteredPosts = useMemo(() => {
@@ -53,11 +62,10 @@ export function BlogListingClient() {
       ? searchPosts(searchablePosts, debouncedSearchTerm)
       : searchablePosts;
 
-    // Filter by category and remove any undefined posts
-    return searchResults
-      .map((sp) => sp.post)
-      .filter((post): post is Blog => post !== null && post !== undefined);
-  }, [allPosts, debouncedSearchTerm, selectedCategory]);
+    // searchResults already ARE the posts (with search properties added)
+    // Just filter out any nulls/undefined
+    return searchResults.filter((post): post is Blog => post !== null && post !== undefined);
+  }, [allPosts, debouncedSearchTerm]);
 
   // Loading skeleton (rarely shows due to server prefetch)
   if (isLoading) {
@@ -90,6 +98,7 @@ export function BlogListingClient() {
           <div className="flex gap-4">
             <Input
               placeholder="Hledat články..."
+              aria-label="Hledat články"
               value={searchTerm}
               onValueChange={setSearchTerm}
               startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
@@ -97,6 +106,7 @@ export function BlogListingClient() {
             />
             <Select
               placeholder="Kategorie"
+              aria-label="Filtrovat podle kategorie"
               selectedKeys={[selectedCategory]}
               onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
               className="w-48"
@@ -120,7 +130,12 @@ export function BlogListingClient() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPosts.map((post) => (
-            <BlogPostCard key={post.id} post={post} />
+            <BlogPostCard
+              key={post.id}
+              post={post}
+              category={categoryMap.get(post.category_id)}
+              variant="blog"
+            />
           ))}
         </div>
       )}

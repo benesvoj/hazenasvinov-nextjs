@@ -1,8 +1,9 @@
 import {HydrationBoundary} from '@tanstack/react-query';
 
-import {prefetchQuery} from '@/utils/prefetch';
+import {prefetchQueries} from '@/utils/prefetch';
 
 import {fetchBlogPosts} from '@/queries/blogPosts/queries';
+import {fetchCategories} from '@/queries/categories/queries';
 
 import {BlogListingClient} from './BlogListingClient';
 
@@ -11,8 +12,11 @@ import {BlogListingClient} from './BlogListingClient';
  * Follows the same pattern as admin pages (seasons, committees, etc.)
  */
 export default async function BlogPage() {
-  // Prefetch blog posts on server using React Query pattern
-  const dehydratedState = await prefetchQuery(['blog-posts'], fetchBlogPosts);
+  // Prefetch blog posts AND categories on server
+  const dehydratedState = await prefetchQueries([
+    {queryKey: ['blog-posts'], queryFn: fetchBlogPosts},
+    {queryKey: ['categories'], queryFn: fetchCategories},
+  ]);
 
   return (
     <HydrationBoundary state={dehydratedState}>
