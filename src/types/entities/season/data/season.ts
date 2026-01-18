@@ -12,4 +12,6 @@ export interface CreateSeason extends SeasonInsert{}
 
 export interface UpdateSeason extends SeasonUpdate{}
 
+export type SeasonFormData = Omit<Season, 'id' | 'created_at' | 'updated_at'>;
+
 export type SeasonCategoryPageData = Partial<Omit<SeasonSchema, 'id' | 'created_at' | 'updated_at'>>;

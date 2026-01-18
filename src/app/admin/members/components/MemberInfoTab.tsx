@@ -2,9 +2,10 @@ import React from 'react';
 
 import {Chip, Input, Select, SelectItem} from '@heroui/react';
 
-import {Genders, getGenderOptions, getMemberFunctionOptions, ModalMode} from '@/enums';
+import {Genders, getMemberFunctionOptions, ModalMode} from '@/enums';
 import {translations} from '@/lib';
 import {BaseMember, Category} from '@/types';
+import {genderOptions} from '@/utils';
 
 interface MemberInfoTabProps {
   formData: BaseMember | null;
@@ -23,13 +24,7 @@ export default function MemberInfoTab({
 
   const tMember = translations.members;
 
-  const genderOptions = getGenderOptions().reduce(
-    (acc, {value, label}) => {
-      acc[value] = label;
-      return acc;
-    },
-    {} as Record<string, string>
-  );
+  const genderOpts = genderOptions();
 
   if (!formData) return null;
 
@@ -84,7 +79,7 @@ export default function MemberInfoTab({
           }
           isRequired
         >
-          {Object.entries(genderOptions).map(([key, value]) => (
+          {Object.entries(genderOpts).map(([key, value]) => (
             <SelectItem key={key}>{value}</SelectItem>
           ))}
         </Select>

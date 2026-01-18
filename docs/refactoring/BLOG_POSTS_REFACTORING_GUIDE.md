@@ -50,7 +50,7 @@ Target (Aligned with TODO pattern):
 
 ### 1. Hook Architecture Violations
 
-**File:** `src/app/admin/posts/page.tsx:18-39`
+**File:** `src/app/admin/posts/page.tsx.backup:18-39`
 
 ```typescript
 // ❌ CURRENT: Incorrect architecture
@@ -165,7 +165,7 @@ interface BlogPostModalProps {
 
 **Page passes different props:**
 ```typescript
-// src/app/admin/posts/page.tsx:246-253
+// src/app/admin/posts/page.tsx.backup:246-253
 <BlogPostModal
   isOpen={isModalOpen}
   onClose={onModalClose}      // ✅ Has this
@@ -486,7 +486,7 @@ import {useBlogPostForm} from "@/hooks";
 5. **Fixed TypeScript error in updateBlog call** - Added id to the data object to match UpdateBlogPost type requirements
 6. **Made button text dynamic in modal** - Button now shows "Uložit změny" in edit mode and "Vytvořit článek" in add mode
 
-**File:** `src/app/admin/posts/page.tsx`
+**File:** `src/app/admin/posts/page.tsx.backup`
 
 #### Step 3.1: Update Hook Usage
 
@@ -832,7 +832,7 @@ export * from './entities/blog/business/useBlogPostFiltering';  // ✅ Add this
 export * from './entities/blog/data/useFetchBlog';
 export * from './entities/blog/state/useBlogPost';
 export * from './entities/blog/state/useBlogPostForm';
-export * from './entities/blog/useFetchBlogPost';
+export * from './entities/blog/useFetchBlogPostBySlug';
 export * from './entities/blog/useFetchBlog';
 export * from './entities/blog/useFetchPostMatch';
 // export * from './entities/blog/useBlogPosts';  // ❌ Remove this line
@@ -1040,7 +1040,7 @@ grep -r "useBlogPosts" src/
 # Expected result: Only found in:
 # - src/hooks/entities/blog/useBlogPosts.ts (the file itself)
 # - src/hooks/index.ts (export statement)
-# - src/app/admin/posts/page.tsx (usage being refactored)
+# - src/app/admin/posts/page.tsx.backup (usage being refactored)
 ```
 
 ---
@@ -1184,7 +1184,7 @@ After completing the refactoring, consider:
 ### Files Modified:
 
 1. `src/app/api/blog/[id]/route.ts` - Added PATCH and DELETE endpoints
-2. `src/app/admin/posts/page.tsx` - Refactored to 4-layer architecture
+2. `src/app/admin/posts/page.tsx.backup` - Refactored to 4-layer architecture
 3. `src/app/admin/posts/components/BlogPostModal.tsx` - Fixed props and dynamic text
 4. `src/hooks/entities/blog/business/useBlogPostFiltering.ts` - Already complete
 5. `src/hooks/index.ts` - Already exporting correctly

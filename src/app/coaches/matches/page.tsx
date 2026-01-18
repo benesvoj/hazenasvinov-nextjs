@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 
 import {Tab, Tabs} from '@heroui/react';
 
@@ -10,21 +10,22 @@ import UnifiedStandingTable from '@/components/shared/standing-table/UnifiedStan
 
 import {LoadingSpinner, PageContainer} from '@/components';
 import {
-  useSeasons,
+  useFetchCategories,
+  useFetchSeasons,
+  useOptimizedOwnClubMatches,
+  useSeasonFiltering,
   useStandings,
   useUserRoles,
-  useOptimizedOwnClubMatches,
-  useFetchCategories,
 } from '@/hooks';
 import {translations} from '@/lib';
 import {Match} from '@/types';
 
 import {
-  UpcomingMatchesCard,
+  MatchStatisticsZone,
+  RecentMatchDetails,
   RecentResultsCard,
   StrategyPreparationZone,
-  RecentMatchDetails,
-  MatchStatisticsZone,
+  UpcomingMatchesCard,
 } from './components';
 import CoachMatchResultFlow from './components/CoachMatchResultFlow';
 
@@ -36,7 +37,9 @@ export default function CoachesMatchesPage() {
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('upcoming');
 
-  const {activeSeason, fetchActiveSeason} = useSeasons();
+  const {data: seasons, refetch: fetchActiveSeason} = useFetchSeasons();
+  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
+
   const {data: categories, refetch: fetchCategories} = useFetchCategories();
   const {standings, loading: standingsLoading, fetchStandings} = useStandings();
 
@@ -67,7 +70,6 @@ export default function CoachesMatchesPage() {
   const {
     allMatches,
     loading: matchesLoading,
-    error: matchesError,
     refetch: refetchMatches,
   } = useOptimizedOwnClubMatches(
     selectedCategoryData?.id || undefined,
@@ -97,18 +99,14 @@ export default function CoachesMatchesPage() {
   // Process matches
   const upcomingMatches = useMemo(() => {
     const now = new Date();
-    const upcoming = allMatches.filter(
-      (match) => match.status === 'upcoming' && new Date(match.date) >= now
-    );
-    return upcoming;
+    return allMatches.filter((match) => match.status === 'upcoming' && new Date(match.date) >= now);
   }, [allMatches]);
 
   const recentResults = useMemo(() => {
     const now = new Date();
-    const recent = allMatches
+    return allMatches
       .filter((match) => match.status === 'completed' && new Date(match.date) <= now)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return recent;
   }, [allMatches]);
 
   // Filter standings by selected category

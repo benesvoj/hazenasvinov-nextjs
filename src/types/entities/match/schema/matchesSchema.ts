@@ -9,40 +9,37 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-25
  */
 
 export interface MatchSchema {
-  away_score: number | null
-  away_score_halftime: number | null
-  away_team_id: string | null
-  category_id: string | null
-  coach_notes: string | null
-  competition: string
-  created_at: string | null
-  date: string
-  home_score: number | null
-  home_score_halftime: number | null
-  home_team_id: string | null
-  id: string
-  is_home: boolean | null
-  match_number: string | null
-  matchweek: number | null
-  post_id: string | null
-  season_id: string | null
-  status: string | null
-  time: string
-  updated_at: string | null
-  venue: string
+  away_score: number | null;
+  away_score_halftime: number | null;
+  away_team_id: string | null;
+  category_id: string | null;
+  coach_notes: string | null;
+  competition: string;
+  created_at: string | null;
+  date: string;
+  home_score: number | null;
+  home_score_halftime: number | null;
+  home_team_id: string | null;
+  id: string;
+  is_home: boolean | null;
+  match_number: string | null;
+  matchweek: number | null;
+  post_id: string | null;
+  season_id: string | null;
+  status: string | null;
+  time: string;
+  updated_at: string | null;
+  venue: string;
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type MatchInsert = Omit<
-  MatchSchema,
-  'id' | 'created_at' | 'updated_at'
-> & {
+export type MatchInsert = Omit<MatchSchema, 'id' | 'created_at' | 'updated_at'> & {
   id?: string; // Optional for inserts
 };
 

@@ -1,164 +1,127 @@
 'use client';
 
-import React, {useCallback, useState} from "react";
+import React, {useCallback, useState} from 'react';
 
-import {generateSlug} from "@/utils/slugGenerator";
+import {generateSlug} from '@/utils/slugGenerator';
 
-import {showToast} from "@/components";
-import {BLOG_POST_STATUSES, ModalMode} from "@/enums";
-import {Blog, BlogFormData, Match} from "@/types";
+import {showToast} from '@/components';
+import {BLOG_POST_STATUSES} from '@/enums';
+import {createFormHook} from '@/hooks';
+import {translations} from '@/lib';
+import {Blog, BlogPostFormData, Match} from '@/types';
 
-const initialFormData: BlogFormData = {
-	title: '',
-	slug: '',
-	content: '',
-	status: BLOG_POST_STATUSES.draft,
-	category_id:'',
-	match_id: '',
-	image_url: '',
-	author_id: '',
-	published_at: '',
+const initialFormData: BlogPostFormData = {
+  title: '',
+  slug: '',
+  content: '',
+  status: BLOG_POST_STATUSES.draft,
+  category_id: '',
+  match_id: '',
+  image_url: '',
+  author_id: '',
+  published_at: '',
+};
+const t = translations.admin.blog.responseMessages;
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+function useBlogPostBaseForm() {
+  return createFormHook<Blog, BlogPostFormData>({
+    initialFormData,
+    validationRules: [
+      {field: 'title', message: t.mandatoryTitle},
+      {field: 'content', message: t.mandatoryContent},
+    ],
+    excludeFields: [
+      'id',
+      'created_at',
+      'updated_at',
+      'created_by',
+      'searchableContent',
+      'searchableTitle',
+    ],
+  })();
 }
 
 export const useBlogPostForm = () => {
-	const [formData, setFormData] = useState<BlogFormData>(initialFormData);
-	const [selectedPost, setSelectedPost] = useState<Blog | null>(null);
-	const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.ADD);
+  const baseForm = useBlogPostBaseForm();
 
-	const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-	const [imageFile, setImageFile] = useState<File | null>(null);
-	const [imagePreview, setImagePreview] = useState<string>('');
-	const [isMatchModalOpen, setIsMatchModalOpen] = useState<boolean>(false);
-	const [uploadingImage, setUploadingImage] = useState<boolean>(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
 
-	const openAddMode = useCallback(() => {
-		setModalMode(ModalMode.ADD);
-		setSelectedPost(null);
-		setFormData(initialFormData);
-	}, [])
+  const updateFormData = useCallback(
+    (updates: Partial<BlogPostFormData>) => {
+      const newData = {...updates};
+      if (updates.title !== undefined) {
+        newData.slug = generateSlug(updates.title);
+      }
+      baseForm.updateFormData(newData);
+    },
+    [baseForm]
+  );
 
-	const openEditMode = useCallback((item: Blog) => {
-		setModalMode(ModalMode.EDIT);
-		setSelectedPost(item);
-		const {id, created_at, updated_at, ...editableFields} = item;
-		setFormData(editableFields);
+  const resetForm = useCallback(() => {
+    baseForm.resetForm();
+    setSelectedMatch(null);
+    setImageFile(null);
+    setImagePreview('');
+    setUploadingImage(false);
+  }, [baseForm]);
 
-		if(item.image_url) {
-			setImagePreview(item.image_url);
-		}
-	}, [])
+  const handleMatchSelect = useCallback(
+    (match: Match | null) => {
+      setSelectedMatch(match);
+      updateFormData({match_id: match?.id || ''});
+    },
+    [updateFormData]
+  );
 
-	const resetForm = useCallback(() => {
-		setFormData(initialFormData);
-		setSelectedPost(null);
-		setModalMode(ModalMode.ADD);
+  const handleImageFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-		setSelectedMatch(null);
-		setImageFile(null);
-		setImagePreview('');
-		setIsMatchModalOpen(false);
-		setUploadingImage(false);
-	}, [])
+    if (!file.type.startsWith('image/')) {
+      showToast.warning('Selected file is not an image.');
+      console.error('Selected file is not an image.');
+      return;
+    }
 
-	const handleMatchSelect = useCallback((match: Match | null) => {
-		setSelectedMatch(match);
-		setFormData(prev => ({
-			...prev,
-			match_id: match?.id || '',
-		}));
-	}, []);
+    if (file.size > MAX_FILE_SIZE) {
+      showToast.warning('Selected image exceeds the maximum size of 5MB.');
+      console.error('Selected image exceeds the maximum size of 5MB.');
+      return;
+    }
+    setImageFile(file);
 
-	const openMatchModal = useCallback(() => {
-		setIsMatchModalOpen(true);
-	}, []);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
 
-	const closeMatchModal = useCallback(() => {
-		setIsMatchModalOpen(false);
-	}, []);
+  const handleRemoveImage = useCallback(() => {
+    setImageFile(null);
+    setImagePreview('');
+    updateFormData({image_url: ''});
+  }, [updateFormData]);
 
-	const handleImageFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
-		if (!file) return;
+  return {
+    ...baseForm,
 
-		if (!file.type.startsWith('image/')) {
-			showToast.warning('Selected file is not an image.')
-			console.error('Selected file is not an image.');
-			return;
-		}
+    updateFormData,
+    resetForm,
 
-		const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-		if (file.size > MAX_SIZE) {
-			showToast.warning('Selected image exceeds the maximum size of 5MB.')
-			console.error('Selected image exceeds the maximum size of 5MB.');
-			return;
-		}
-		setImageFile(file);
+    selectedMatch,
+    handleMatchSelect,
 
-		const reader = new FileReader();
-		reader.onloadend = () => {
-			setImagePreview(reader.result as string);
-		};
-		reader.readAsDataURL(file);
-	}, []);
-
-	const handleRemoveImage = useCallback(() => {
-		setImageFile(null);
-		setImagePreview('');
-		setFormData(prev => ({
-			...prev,
-			image_url: '',
-		}));
-	},[]);
-
-	const validateForm = useCallback((): {valid: boolean; errors: string[]} => {
-		const errors: string[] = [];
-
-		if (!formData.content?.trim()) {
-			errors.push('Content is mandatory');
-		}
-		if (!formData.title?.trim()) {
-			errors.push('Title is mandatory');
-		}
-
-		return {
-			valid: errors.length === 0,
-			errors,
-		};
-	}, [formData]);
-
-	const updateFormData = useCallback((updates: Partial<BlogFormData>) => {
-		setFormData(prev => {
-			const newData = {...prev, ...updates}
-
-			if (updates.title !== undefined) {
-				newData.slug = generateSlug(updates.title)
-			}
-			return newData;
-		})
-	},[])
-
-	return {
-		formData,
-		setFormData,
-		updateFormData,
-		selectedPost,
-		modalMode,
-		openAddMode,
-		openEditMode,
-		resetForm,
-		validateForm,
-
-		selectedMatch,
-		handleMatchSelect,
-		isMatchModalOpen,
-		openMatchModal,
-		closeMatchModal,
-
-		imageFile,
-		imagePreview,
-		handleImageFileChange,
-		handleRemoveImage,
-		uploadingImage,
-		setUploadingImage,
-	}
-}
+    imageFile,
+    imagePreview,
+    handleImageFileChange,
+    handleRemoveImage,
+    uploadingImage,
+    setUploadingImage,
+  };
+};

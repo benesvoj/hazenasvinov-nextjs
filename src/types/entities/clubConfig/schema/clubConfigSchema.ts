@@ -9,40 +9,37 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-25
  */
 
 export interface ClubConfigSchema {
-  address: string | null
-  club_logo_path: string | null
-  club_logo_url: string | null
-  club_name: string
-  contact_email: string | null
-  contact_phone: string | null
-  created_at: string | null
-  description: string | null
-  facebook_url: string | null
-  founded_year: number | null
-  hero_button_link: string | null
-  hero_button_text: string | null
-  hero_image_path: string | null
-  hero_image_url: string | null
-  hero_subtitle: string | null
-  hero_title: string | null
-  id: string
-  instagram_url: string | null
-  is_active: boolean | null
-  updated_at: string | null
-  website_url: string | null
+  address: string | null;
+  club_logo_path: string | null;
+  club_logo_url: string | null;
+  club_name: string;
+  contact_email: string | null;
+  contact_phone: string | null;
+  created_at: string | null;
+  description: string | null;
+  facebook_url: string | null;
+  founded_year: number | null;
+  hero_button_link: string | null;
+  hero_button_text: string | null;
+  hero_image_path: string | null;
+  hero_image_url: string | null;
+  hero_subtitle: string | null;
+  hero_title: string | null;
+  id: string;
+  instagram_url: string | null;
+  is_active: boolean | null;
+  updated_at: string | null;
+  website_url: string | null;
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type ClubConfigInsert = Omit<
-  ClubConfigSchema,
-  'id' | 'created_at' | 'updated_at'
-> & {
+export type ClubConfigInsert = Omit<ClubConfigSchema, 'id' | 'created_at' | 'updated_at'> & {
   id?: string; // Optional for inserts
 };
 

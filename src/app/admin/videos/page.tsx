@@ -1,182 +1,194 @@
-// TODO: refactor
-
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-import {useVideos} from '@/hooks/entities/video/useVideos';
-
-import {AdminContainer} from '@/components/features/admin/AdminContainer';
-
-import {translations} from '@/lib/translations';
+import {useVideos} from '@/hooks/entities/video/state/useVideos';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
-import {DeleteConfirmationModal, VideoPageLayout} from '@/components';
-import {ActionTypes} from '@/enums';
-import {Video, VideoFormData, VideoFilters} from '@/types';
+import {
+  AdminContainer,
+  DeleteConfirmationModal,
+  VideoFilters as VideoFiltersComponent,
+  VideoFormModal,
+  VideoGrid,
+} from '@/components';
+import {ActionTypes, ModalMode} from '@/enums';
+import {useCustomModal, useFetchVideos, useVideoFiltering, useVideoForm} from '@/hooks';
+import {translations} from '@/lib';
+import {VideoSchema} from '@/types';
+import {transformToVideoInsert} from '@/utils';
+
+const t = translations.admin.videos;
 
 export default function VideosPage() {
-  const [filters, setFilters] = useState<VideoFilters>({});
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingVideo, setEditingVideo] = useState<Video | null>(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
-  // Use AppDataContext for common data
   const {
-    categories: {data: categories, loading: categoriesLoading},
-    clubs: {data: clubs, loading: clubLoading},
-    seasons: {data: seasons, loading: seasonLoading},
+    categories: {data: categories},
+    clubs: {data: clubs},
+    seasons: {data: seasons},
   } = useAppData();
-
+  const {data: allVideos, loading: fetchLoading, refetch} = useFetchVideos();
+  const {createVideo, updateVideo, deleteVideo, loading: crudLoading} = useVideos();
   const {
-    videos,
-    loading,
-    error,
-    setError,
-    fetchVideos,
-    createVideo,
-    updateVideo,
-    deleteVideo,
-    currentPage,
-    totalPages,
-    totalCount,
+    formData,
+    setFormData,
+    modalMode,
+    validateForm,
+    selectedItem,
+    resetForm,
+    openAddMode,
+    openEditMode,
+  } = useVideoForm();
+
+  const {filters, setFilters, paginatedVideos, totalPages, totalCount} = useVideoFiltering({
+    videos: allVideos,
     itemsPerPage,
-    goToPage,
-  } = useVideos({enableAccessControl: false, itemsPerPage: 20});
+    currentPage,
+  });
 
-  const t = translations.admin.videos;
+  const videoFormModal = useCustomModal();
+  const deleteModal = useCustomModal();
 
-  // Fetch videos when filters change
+  // Reset to page 1 when filters change
   useEffect(() => {
-    fetchVideos(filters);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [filters]); // Remove fetchVideos from dependencies to prevent infinite loop
+    setCurrentPage(1);
+  }, [filters]);
 
-  // Categories, clubs, and seasons are now provided by AppDataContext
-  // No need for individual fetching
+  const openAddModal = useCallback(() => {
+    openAddMode();
+    videoFormModal.onOpen();
+  }, [openAddMode, videoFormModal]);
 
-  // Handle video operations
-  const handleCreateVideo = async (formData: VideoFormData) => {
-    try {
-      await createVideo(formData);
-      setIsFormModalOpen(false);
-    } catch (err: any) {
-      setError(`Chyba při vytváření videa: ${err?.message || 'Neznámá chyba'}`);
+  const openEditModal = useCallback(
+    (item: VideoSchema) => {
+      openEditMode(item);
+      videoFormModal.onOpen();
+    },
+    [openEditMode, videoFormModal]
+  );
+
+  const openDeleteModal = useCallback(
+    (item: VideoSchema) => {
+      openEditMode(item);
+      deleteModal.onOpen();
+    },
+    [openEditMode, deleteModal]
+  );
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (selectedItem) {
+      await deleteVideo(selectedItem.id);
+      await refetch();
+      deleteModal.onClose();
+      resetForm();
     }
-  };
+  }, [selectedItem, deleteVideo, refetch, deleteModal, resetForm]);
 
-  const handleUpdateVideo = async (formData: VideoFormData) => {
-    if (!editingVideo) return;
+  const handleFormSubmit = useCallback(async () => {
+    const {valid, errors} = validateForm();
+
+    if (!valid) {
+      console.error('Validation errors', errors);
+      return;
+    }
 
     try {
-      await updateVideo(editingVideo.id, formData);
-      setEditingVideo(null);
-      setIsFormModalOpen(false);
-    } catch (err: any) {
-      setError(`Chyba při aktualizaci videa: ${err?.message || 'Neznámá chyba'}`);
+      const videoData = transformToVideoInsert(formData);
+
+      if (modalMode === ModalMode.EDIT && selectedItem) {
+        await updateVideo(selectedItem.id, videoData);
+      } else {
+        await createVideo(videoData);
+      }
+      await refetch();
+      videoFormModal.onClose();
+      resetForm();
+    } catch (error) {
+      console.error(error);
     }
-  };
+  }, [
+    validateForm,
+    formData,
+    modalMode,
+    selectedItem,
+    updateVideo,
+    createVideo,
+    refetch,
+    videoFormModal,
+    resetForm,
+  ]);
 
-  const handleDeleteVideo = async (id: string) => {
-    try {
-      await deleteVideo(id);
-      setDeleteModalOpen(false);
-      setVideoToDelete(null);
-    } catch (err: any) {
-      console.error('Error deleting video:', err);
-      setError(`Chyba při mazání videa: ${err?.message || 'Neznámá chyba'}`);
-    }
-  };
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }, []);
 
-  // Modal handlers
-  const openCreateModal = () => {
-    setEditingVideo(null);
-    setIsFormModalOpen(true);
-  };
-
-  const openEditModal = (video: Video) => {
-    setEditingVideo(video);
-    setIsFormModalOpen(true);
-  };
-
-  const openDeleteModal = (video: Video) => {
-    setVideoToDelete(video);
-    setDeleteModalOpen(true);
-  };
-
-  const closeModals = () => {
-    setIsFormModalOpen(false);
-    setEditingVideo(null);
-    setDeleteModalOpen(false);
-    setVideoToDelete(null);
-  };
-
-  const handleFormSubmit = editingVideo ? handleUpdateVideo : handleCreateVideo;
-
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    goToPage(page);
-    fetchVideos(filters, page);
-  };
-
-  return (
-    <AdminContainer
-      actions={[
-        {
-          label: t.addVideo,
-          onClick: openCreateModal,
-          variant: 'solid',
-          buttonType: ActionTypes.CREATE,
-        },
-      ]}
-    >
-      {/* TODO: Remove header props after migration */}
-      <VideoPageLayout
-        isHeaderVisible={false}
-        onAddVideo={openCreateModal}
-        // Data props
-        videos={videos}
-        loading={loading}
-        error={error}
+  const videoFilters = useMemo(
+    () => (
+      <VideoFiltersComponent
         filters={filters}
         categories={categories}
         clubs={clubs}
         seasons={seasons}
-        // Event handlers
         onFiltersChange={setFilters}
-        onEdit={openEditModal}
-        onDelete={openDeleteModal}
-        onFormSubmit={handleFormSubmit}
-        // Modal props
-        isFormModalOpen={isFormModalOpen}
-        editingVideo={editingVideo}
-        onCloseModals={closeModals}
-        // Empty state customization
-        emptyStateTitle="Žádná videa"
-        emptyStateDescription={
-          filters.search || filters.category_id || filters.is_active !== undefined
-            ? 'Nebyla nalezena žádná videa odpovídající filtru.'
-            : 'Zatím nejsou přidána žádná videa.'
-        }
-        showAddButton={!filters.search && !filters.category_id && filters.is_active === undefined}
-        // Pagination props
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalCount={totalCount}
-        itemsPerPage={itemsPerPage}
-        onPageChange={handlePageChange}
+      />
+    ),
+    [filters, categories, clubs, seasons, setFilters]
+  );
+
+  return (
+    <>
+      <AdminContainer
+        actions={[
+          {
+            label: t.addVideo,
+            onClick: openAddModal,
+            variant: 'solid',
+            buttonType: ActionTypes.CREATE,
+          },
+        ]}
+        filters={videoFilters}
+      >
+        <VideoGrid
+          videos={paginatedVideos}
+          loading={fetchLoading}
+          categories={categories}
+          seasons={seasons}
+          clubs={clubs}
+          onEdit={openEditModal}
+          onDelete={openDeleteModal}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+        />
+      </AdminContainer>
+
+      <VideoFormModal
+        isOpen={videoFormModal.isOpen}
+        onClose={videoFormModal.onClose}
+        onSubmit={handleFormSubmit}
+        formData={formData}
+        setFormData={setFormData}
+        mode={modalMode}
+        clubs={clubs}
+        categories={categories}
+        seasons={seasons}
+        isLoading={crudLoading}
       />
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={closeModals}
-        onConfirm={() => videoToDelete && handleDeleteVideo(videoToDelete.id)}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+        onConfirm={handleConfirmDelete}
         title={t.deleteModal.title}
         message={t.deleteModal.description}
+        isLoading={crudLoading}
       />
-    </AdminContainer>
+    </>
   );
 }

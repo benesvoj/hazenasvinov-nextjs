@@ -9,35 +9,32 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-25
  */
 
-export interface CategoriesSchema {
-  age_group: string | null
-  created_at: string | null
-  description: string | null
-  gender: string | null
-  id: string
-  is_active: boolean | null
-  name: string
-  slug: string | null
-  sort_order: number | null
-  updated_at: string | null
+export interface CategorySchema {
+  age_group: string | null;
+  created_at: string | null;
+  description: string | null;
+  gender: string | null;
+  id: string;
+  is_active: boolean | null;
+  name: string;
+  slug: string | null;
+  sort_order: number | null;
+  updated_at: string | null;
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type CategoriesInsert = Omit<
-  CategoriesSchema,
-  'id' | 'created_at' | 'updated_at'
-> & {
+export type CategoryInsert = Omit<CategorySchema, 'id' | 'created_at' | 'updated_at'> & {
   id?: string; // Optional for inserts
 };
 
 /**
  * Type for UPDATE operations (all fields optional except ID)
  */
-export type CategoriesUpdate = {
+export type CategoryUpdate = {
   id: string;
-} & Partial<Omit<CategoriesSchema, 'id' | 'created_at' | 'updated_at'>>;
+} & Partial<Omit<CategorySchema, 'id' | 'created_at' | 'updated_at'>>;

@@ -1,5 +1,6 @@
 /**
  * GET, POST /api/categories/:id/lineups
+ * @deprecated do not use, use dynamic API
  */
 import {NextRequest} from 'next/server';
 

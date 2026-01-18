@@ -9,8 +9,9 @@ import CategoryMatchesAndResults from '@/app/(main)/components/CategoryMatchesAn
 import {Heading, LoadingSpinner, UnifiedStandingTable} from '@/components';
 import {
   useFetchCategories,
+  useFetchSeasons,
   useOptimizedOwnClubMatches,
-  useSeasons,
+  useSeasonFiltering,
   useStandings,
   useUserRoles,
 } from '@/hooks';
@@ -39,7 +40,8 @@ export default function MatchSchedule({
   const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
   const lastFetchedRef = useRef<{categoryId: string; seasonId: string} | null>(null);
 
-  const {activeSeason, fetchActiveSeason} = useSeasons();
+  const {data: seasons, refetch: fetchSeasons} = useFetchSeasons();
+  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
   const {data: categories, refetch: fetchCategories} = useFetchCategories();
 
   // Try to get user roles, but handle case where UserProvider is not available
@@ -80,9 +82,9 @@ export default function MatchSchedule({
 
   // Fetch active season and category on mount
   useEffect(() => {
-    fetchActiveSeason();
+    fetchSeasons();
     fetchCategories();
-  }, [fetchActiveSeason, fetchCategories]);
+  }, [fetchSeasons, fetchCategories]);
 
   // Fetch assigned category if needed for coach portal
   useEffect(() => {

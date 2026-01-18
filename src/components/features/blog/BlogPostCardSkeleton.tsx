@@ -1,3 +1,4 @@
+'use client';
 import {Card} from '@heroui/react';
 
 /**

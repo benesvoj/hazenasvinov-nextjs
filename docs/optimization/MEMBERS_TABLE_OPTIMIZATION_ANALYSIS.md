@@ -14,7 +14,7 @@ The MembersTableTab component and its associated data fetching hooks are experie
 ### Component Structure
 
 ```
-MembersAdminPage (page.tsx:31)
+MembersAdminPage (page.tsx.backup:31)
 ├── useFetchMembersInternal (hook)
 ├── useFetchMembersExternal (hook)
 ├── useFetchMembersOnLoan (hook)
@@ -47,7 +47,7 @@ MembersAdminPage (page.tsx:31)
 ## Performance Issues Identified
 
 ### 1. **Multiple Parallel Data Fetches on Page Load**
-**Issue:** All three member types are fetched simultaneously on page mount (page.tsx:48-54)
+**Issue:** All three member types are fetched simultaneously on page mount (page.tsx.backup:48-54)
 ```typescript
 const {data: membersInternalData, refresh: refreshInternal, loading: membersInternalLoading} = useFetchMembersInternal();
 const {refresh: refreshExternal, loading: membersExternalLoading} = useFetchMembersExternal();
@@ -529,7 +529,7 @@ const useFetchMembers = ({ search, filters, page }) => {
 1. **Tight coupling:** Data fetching hooks tightly coupled to components
 2. **No error boundaries:** Errors can crash entire page
 3. **Limited testing:** No performance tests in CI/CD
-4. **Manual refresh logic:** Context-based refresh is error-prone (page.tsx:96-101)
+4. **Manual refresh logic:** Context-based refresh is error-prone (page.tsx.backup:96-101)
 
 ### Recommendations for Future Refactoring
 1. Move to data provider pattern (React Context or Zustand)

@@ -1,4 +1,5 @@
-export type TrainingSessionStatus = 'planned' | 'done' | 'cancelled';
+import {TrainingSessionStatusEnum} from '@/enums';
+import {TrainingSessionInsert} from '@/types';
 
 export interface TrainingSession {
   id: string;
@@ -10,7 +11,7 @@ export interface TrainingSession {
   season_id: string;
   location?: string;
   coach_id: string;
-  status: TrainingSessionStatus;
+  status: TrainingSessionStatusEnum;
   status_reason?: string;
   created_at: string;
   updated_at: string;
@@ -85,15 +86,7 @@ export interface AttendanceSummary {
   attendance_percentage: number;
 }
 
-export interface TrainingSessionFormData {
-  title: string;
-  description?: string;
-  session_date: string;
-  session_time?: string;
-  category_id: string;
-  season_id: string;
-  location?: string;
-}
+export interface TrainingSessionFormData extends TrainingSessionInsert {}
 
 export interface AttendanceFilters {
   category_id?: string;

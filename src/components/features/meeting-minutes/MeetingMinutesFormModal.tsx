@@ -1,40 +1,31 @@
 'use client';
 
-import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Input,
-  Select,
-  SelectItem,
   Button,
-  Chip,
-  Textarea,
-  Divider,
   Card,
   CardBody,
-  Autocomplete,
-  AutocompleteItem,
+  Chip,
+  Divider,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Select,
+  SelectItem,
 } from '@heroui/react';
 
-import {PlusIcon, TrashIcon, UserIcon} from '@heroicons/react/24/outline';
+import {TrashIcon, UserIcon} from '@heroicons/react/24/outline';
 
-import {useAuth} from '@/hooks/auth/useAuthNew';
-import {useSeasons} from '@/hooks/entities/season/state/useSeasons';
-
-import {showToast} from '@/components/ui/feedback/Toast';
-
-import {translations} from '@/lib/translations';
-
-import {useFetchMembers} from '@/hooks';
-import {MeetingMinutes, MeetingMinutesFormData, MeetingAttendeeFormData} from '@/types';
+import {showToast} from '@/components';
+import {useAuth, useFetchMembers, useFetchSeasons, useSeasonFiltering} from '@/hooks';
+import {API_ROUTES, translations} from '@/lib';
+import {MeetingMinutes, MeetingMinutesFormData} from '@/types';
 
 import {AttendeesModal} from './AttendeesModal';
-import {API_ROUTES} from "@/lib";
 
 interface MeetingMinutesFormModalProps {
   isOpen: boolean;
@@ -64,10 +55,10 @@ export function MeetingMinutesFormModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
-  const [searchValues, setSearchValues] = useState<Record<number, string>>({});
   const [isAttendeesModalOpen, setIsAttendeesModalOpen] = useState(false);
 
-  const {seasons, loading: seasonsLoading, fetchAllSeasons, activeSeason} = useSeasons();
+  const {data: seasons, loading: seasonsLoading, refetch: fetchAllSeasons} = useFetchSeasons();
+  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
   const {user} = useAuth();
   const {data: members} = useFetchMembers();
 

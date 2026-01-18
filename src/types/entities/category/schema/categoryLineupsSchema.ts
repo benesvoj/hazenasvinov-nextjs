@@ -9,19 +9,19 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-25
  */
 
 export interface CategoryLineupSchema {
-  category_id: string
-  created_at: string | null
-  created_by: string
-  description: string | null
-  id: string
-  is_active: boolean | null
-  name: string
-  season_id: string
-  updated_at: string | null
+  category_id: string;
+  created_at: string | null;
+  created_by: string;
+  description: string | null;
+  id: string;
+  is_active: boolean | null;
+  name: string;
+  season_id: string;
+  updated_at: string | null;
 }
 
 /**

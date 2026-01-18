@@ -1,42 +1,17 @@
 'use client';
 
-import {useCallback, useEffect, useState} from "react";
+import {createDataFetchHook} from '@/hooks/factories';
 
-import {showToast} from "@/components";
-import {API_ROUTES} from "@/lib";
-import {BaseComment} from "@/types";
+import {API_ROUTES, translations} from '@/lib';
+import {DB_TABLE} from '@/queries/comments';
+import {BaseComment} from '@/types';
 
-export function useFetchComments(options?: { enabled?: boolean }) {
-	const enabled = options?.enabled ?? true;
-	const [data, setData] = useState<BaseComment[]>([]);
-	const [loading, setLoading] = useState<boolean>(false);
+const t = translations.admin.comments.responseMessages;
 
-	const fetchData = useCallback(
-		async () => {
-			setLoading(true);
-
-			try {
-				const res = await fetch(API_ROUTES.comments.root)
-				const response = await res.json();
-				setData(response.data || []);
-			} catch (error) {
-				console.error(error);
-				showToast.danger('Failed to fetch comments');
-				setData([]);
-			} finally {
-				setLoading(false);
-			}
-		}, []);
-
-	useEffect(() => {
-		if( enabled) {
-			fetchData()
-		}
-	}, []);
-
-	return {
-		data,
-		loading,
-		refetch: fetchData,
-	}
+export function useFetchComments() {
+  return createDataFetchHook<BaseComment>({
+    endpoint: API_ROUTES.entities.root(DB_TABLE),
+    entityName: 'comments',
+    errorMessage: t.commentsFetchFailed,
+  })();
 }

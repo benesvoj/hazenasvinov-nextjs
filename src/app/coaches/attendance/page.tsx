@@ -1,43 +1,41 @@
 'use client';
 
-import React, {useState, useEffect, useMemo} from 'react';
+export const dynamic = 'force-dynamic';
 
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Select,
-  SelectItem,
-  Skeleton,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-} from '@heroui/react';
+import React, {useEffect, useMemo, useState} from 'react';
 
-import {PlusIcon, CalendarIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {Button, Card, CardBody, Select, SelectItem, Tab, Tabs} from '@heroui/react';
+
+import {CalendarIcon, PlusIcon} from '@heroicons/react/24/outline';
 
 import {useAppData} from '@/contexts/AppDataContext';
 import {useUser} from '@/contexts/UserContext';
 
 import {DeleteConfirmationModal, LoadingSpinner, PageContainer, showToast} from '@/components';
-import {formatDateString, formatTime} from '@/helpers';
-import {useAttendance, useCategoryLineups, useFetchCategoryLineupMembers, useFetchCategoryLineups} from '@/hooks';
-import {TrainingSessionFormData, TrainingSessionStatus} from '@/types';
+import {TrainingSessionStatusEnum} from '@/enums';
+import {
+  useAttendance,
+  useFetchCategoryLineupMembers,
+  useFetchCategoryLineups,
+  useFetchMembersAttendance,
+  useFetchTrainingSessions,
+  useTrainingSession,
+} from '@/hooks';
+import {TrainingSessionFormData} from '@/types';
 
-import {TrainingSessionModal, TrainingSessionGenerator} from './components';
-import AttendanceChart from './components/AttendanceChart';
-import AttendanceStatistics from './components/AttendanceStatistics';
-import TrainingSessionStatusBadge from './components/TrainingSessionStatusBadge';
-import TrainingSessionStatusDialog from './components/TrainingSessionStatusDialog';
+import {
+  AttendanceRecordingTable,
+  AttendanceStatisticsLazy,
+  TrainingSessionGenerator,
+  TrainingSessionList,
+  TrainingSessionModal,
+  TrainingSessionStatusDialog,
+} from './components';
 
 export default function CoachesAttendancePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSeason, setSelectedSeason] = useState<string>('');
-  const [selectedSession, setSelectedSession] = useState<string>('');
+  const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -45,27 +43,18 @@ export default function CoachesAttendancePage() {
   const [editingSession, setEditingSession] = useState<any>(null);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [sessionForStatusUpdate, setSessionForStatusUpdate] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'attendance' | 'statistics'>('attendance');
 
   const {
-    trainingSessions,
-    attendanceRecords,
-    attendanceSummary,
     loading,
-    error,
-    fetchTrainingSessions,
-    fetchAttendanceRecords,
     fetchAttendanceSummary,
-    createTrainingSession,
-    updateTrainingSession,
-    deleteTrainingSession,
     updateTrainingSessionStatus,
     recordAttendance,
     createAttendanceForLineupMembers,
-    getMemberAttendanceStats,
-    getTrainingSessionStats,
-    getAttendanceTrends,
-    getCoachAnalytics,
   } = useAttendance();
+
+  const {createTrainingSession, updateTrainingSession, deleteTrainingSession} =
+    useTrainingSession();
 
   const {
     seasons: {data: seasons, activeSeason},
@@ -73,12 +62,25 @@ export default function CoachesAttendancePage() {
     members: {data: members},
     loading: appDataLoading,
   } = useAppData();
-  const {userCategories, getCurrentUserCategories, isAdmin} = useUser();
-  const {
-    data: lineupMembers,
-    loading: lineupsLoading,
-  } = useFetchCategoryLineupMembers(selectedCategory, selectedSession);
-  const {data: lineups, refetch: fetchLineups} = useFetchCategoryLineups(selectedCategory, selectedSeason);
+
+  const {data: sessions, loading: trainingSessionsLoading} = useFetchTrainingSessions({
+    categoryId: selectedCategory,
+    seasonId: selectedSeason,
+  });
+
+  const {data: attendanceRecords, refetch: fetchAttendanceRecords} = useFetchMembersAttendance({
+    trainingSessionId: selectedSession || '',
+  });
+
+  const {userCategories, isAdmin} = useUser();
+  const {data: lineupMembers} = useFetchCategoryLineupMembers(
+    selectedCategory,
+    selectedSession || ''
+  );
+  const {refetch: fetchLineups} = useFetchCategoryLineups({
+    categoryId: selectedCategory,
+    seasonId: selectedSeason,
+  });
 
   // Get admin category simulation from localStorage (for admin users testing coach portal)
   const [adminSimulationCategories, setAdminSimulationCategories] = useState<string[]>([]);
@@ -161,53 +163,16 @@ export default function CoachesAttendancePage() {
   useEffect(() => {
     if (effectiveSelectedCategory && selectedSeason && categories.length > 0) {
       // Use category ID directly (no need to convert to code)
-      fetchTrainingSessions(effectiveSelectedCategory, selectedSeason);
       fetchAttendanceSummary(effectiveSelectedCategory, selectedSeason);
     }
-  }, [
-    effectiveSelectedCategory,
-    selectedSeason,
-    categories,
-    fetchTrainingSessions,
-    fetchAttendanceSummary,
-  ]);
+  }, [effectiveSelectedCategory, selectedSeason, categories, fetchAttendanceSummary]);
 
   // Fetch attendance records when session changes
   useEffect(() => {
     if (selectedSession) {
-      fetchAttendanceRecords(selectedSession);
+      fetchAttendanceRecords();
     }
   }, [selectedSession, fetchAttendanceRecords]);
-
-  // Memoize filtered members calculation
-  const filteredMembers = useMemo(() => {
-    // Get lineup members for the selected category, fallback to filtered members if no lineups
-    const lineupMembersList = lineupMembers
-      .map((lineupMember) => lineupMember.members)
-      .filter(Boolean);
-
-    // Fallback: if no lineup members, filter all members by category
-    const fallbackMembers = members.filter((member) => {
-      return member.category_id === effectiveSelectedCategory;
-    });
-
-    // Use lineup members if available, otherwise use filtered members
-    const unsortedMembers = lineupMembersList.length > 0 ? lineupMembersList : fallbackMembers;
-
-    // Sort members by surname, then by name
-    return unsortedMembers.sort((a, b) => {
-      // Type guard to ensure both members exist
-      if (!a || !b) return 0;
-
-      // First sort by surname
-      const surnameComparison = (a.surname || '').localeCompare(b.surname || '');
-      if (surnameComparison !== 0) {
-        return surnameComparison;
-      }
-      // If surnames are the same, sort by name
-      return (a.name || '').localeCompare(b.name || '');
-    });
-  }, [lineupMembers, members, effectiveSelectedCategory]);
 
   const handleSessionSubmit = async (sessionData: TrainingSessionFormData) => {
     try {
@@ -224,6 +189,12 @@ export default function CoachesAttendancePage() {
       } else {
         // Create new training session
         const createdSession = await createTrainingSession(dataWithCategory);
+
+        // Check if session was created successfully
+        if (!createdSession) {
+          showToast.danger('Nepodařilo se vytvořit trénink');
+          return;
+        }
 
         // Create attendance records for the new session
         try {
@@ -327,7 +298,7 @@ export default function CoachesAttendancePage() {
     }
   };
 
-  const handleStatusUpdate = async (status: TrainingSessionStatus, reason?: string) => {
+  const handleStatusUpdate = async (status: TrainingSessionStatusEnum, reason?: string) => {
     if (!sessionForStatusUpdate) return;
 
     try {
@@ -379,7 +350,7 @@ export default function CoachesAttendancePage() {
         }
 
         await createAttendanceForLineupMembers(selectedSession, fallbackMemberIds, 'present');
-        await fetchAttendanceRecords(selectedSession);
+        await fetchAttendanceRecords();
         alert(
           `Vytvořeno ${fallbackMemberIds.length} záznamů docházky pro tento trénink (použiti všichni členové kategorie)`
         );
@@ -389,7 +360,7 @@ export default function CoachesAttendancePage() {
       await createAttendanceForLineupMembers(selectedSession, memberIds, 'present');
 
       // Refresh attendance records
-      await fetchAttendanceRecords(selectedSession);
+      await fetchAttendanceRecords();
 
       alert(`Vytvořeno ${memberIds.length} záznamů docházky pro tento trénink`);
     } catch (err) {
@@ -397,37 +368,7 @@ export default function CoachesAttendancePage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'present':
-        return 'success';
-      case 'absent':
-        return 'danger';
-      case 'late':
-        return 'warning';
-      case 'excused':
-        return 'default';
-      default:
-        return 'default';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'present':
-        return 'Přítomen';
-      case 'absent':
-        return 'Nepřítomen';
-      case 'late':
-        return 'Pozdní příchod';
-      case 'excused':
-        return 'Omluven';
-      default:
-        return status;
-    }
-  };
-
-  if (loading && !trainingSessions.length) {
+  if (loading || appDataLoading || trainingSessionsLoading) {
     return (
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
@@ -438,292 +379,115 @@ export default function CoachesAttendancePage() {
   }
 
   return (
-    <PageContainer>
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardBody>
-          <div className="flex flex-col lg:flex-row gap-4 justify-between">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 flex-1 lg:w-auto">
-              <Select
-                label="Kategorie"
-                placeholder="Vyberte kategorii"
-                selectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
-                onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
-                isDisabled={appDataLoading || availableCategories.length === 1}
-                defaultSelectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
-                className="min-w-0"
-              >
-                {availableCategories.map((category: any) => (
-                  <SelectItem key={category.id}>{category.name}</SelectItem>
-                ))}
-              </Select>
-
-              <Select
-                label="Sezóna"
-                placeholder="Vyberte sezónu"
-                selectedKeys={selectedSeason ? [selectedSeason] : []}
-                onSelectionChange={(keys) => setSelectedSeason(Array.from(keys)[0] as string)}
-                isDisabled={appDataLoading}
-                className="min-w-0"
-              >
-                {seasons.map((season) => (
-                  <SelectItem key={season.id}>{season.name}</SelectItem>
-                ))}
-              </Select>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
-              <Button
-                color="primary"
-                startContent={<PlusIcon className="w-4 h-4" />}
-                onPress={() => {
-                  setEditingSession(null);
-                  // Small delay to ensure state is reset before opening modal
-                  setTimeout(() => {
-                    setIsSessionModalOpen(true);
-                  }, 0);
-                }}
-                isDisabled={!selectedCategory || !selectedSeason}
-                className="w-full sm:w-auto"
-              >
-                <span className="hidden sm:inline">Nový trénink</span>
-                <span className="sm:hidden">Nový</span>
-              </Button>
-              <Button
-                color="primary"
-                variant="bordered"
-                startContent={<CalendarIcon className="w-4 h-4" />}
-                onPress={() => setIsGeneratorOpen(true)}
-                isDisabled={!selectedCategory || !selectedSeason}
-                isIconOnly
-                aria-label="Generovat tréninky"
-                className="w-full sm:w-auto"
-              />
-            </div>
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Statistics Section */}
-      {selectedCategory && selectedSeason && (
+    <>
+      <PageContainer>
         <Card className="mb-6">
-          <CardHeader>
-            <h2 className="text-xl font-semibold">Statistiky a analýza</h2>
-          </CardHeader>
           <CardBody>
-            <AttendanceStatistics
-              categoryId={selectedCategory}
-              seasonId={selectedSeason}
-              onLoadAnalytics={getCoachAnalytics}
-            />
+            <div className="flex flex-col lg:flex-row gap-4 justify-between">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 flex-1 lg:w-auto">
+                <Select
+                  label="Kategorie"
+                  placeholder="Vyberte kategorii"
+                  selectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
+                  onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
+                  isDisabled={appDataLoading || availableCategories.length === 1}
+                  defaultSelectedKeys={effectiveSelectedCategory ? [effectiveSelectedCategory] : []}
+                  className="min-w-0"
+                >
+                  {availableCategories.map((category: any) => (
+                    <SelectItem key={category.id}>{category.name}</SelectItem>
+                  ))}
+                </Select>
+
+                <Select
+                  label="Sezóna"
+                  placeholder="Vyberte sezónu"
+                  selectedKeys={selectedSeason ? [selectedSeason] : []}
+                  onSelectionChange={(keys) => setSelectedSeason(Array.from(keys)[0] as string)}
+                  isDisabled={appDataLoading}
+                  className="min-w-0"
+                >
+                  {seasons.map((season) => (
+                    <SelectItem key={season.id}>{season.name}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
+                <Button
+                  color="primary"
+                  startContent={<PlusIcon className="w-4 h-4" />}
+                  onPress={() => {
+                    setEditingSession(null);
+                    // Small delay to ensure state is reset before opening modal
+                    setTimeout(() => {
+                      setIsSessionModalOpen(true);
+                    }, 0);
+                  }}
+                  isDisabled={!selectedCategory || !selectedSeason}
+                  className="w-full sm:w-auto"
+                >
+                  <span className="hidden sm:inline">Nový trénink</span>
+                  <span className="sm:hidden">Nový</span>
+                </Button>
+                <Button
+                  color="primary"
+                  variant="bordered"
+                  startContent={<CalendarIcon className="w-4 h-4" />}
+                  onPress={() => setIsGeneratorOpen(true)}
+                  isDisabled={!selectedCategory || !selectedSeason}
+                  isIconOnly
+                  aria-label="Generovat tréninky"
+                  className="w-full sm:w-auto"
+                />
+              </div>
+            </div>
           </CardBody>
         </Card>
-      )}
 
-      {/* Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Training Sessions */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <h3 className="text-lg font-semibold">Tréninkové jednotky</h3>
-            </CardHeader>
-            <CardBody>
-              {loading ? (
-                <div className="space-y-2">
-                  {[...Array(3)].map((_, i) => (
-                    <Skeleton key={i} className="h-16 rounded-lg" />
-                  ))}
-                </div>
-              ) : trainingSessions.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Žádné tréninky</p>
-              ) : (
-                <div className="space-y-2">
-                  {trainingSessions.map((session) => (
-                    <div
-                      key={session.id}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedSession === session.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                      onClick={() => setSelectedSession(session.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium text-sm">{session.title}</h4>
-                            <TrainingSessionStatusBadge
-                              status={session.status || 'planned'}
-                              size="sm"
-                            />
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                            <div>{formatDateString(session.session_date)}</div>
-                            {session.session_time && <div>{formatTime(session.session_time)}</div>}
-                          </div>
-                          {session.location && (
-                            <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                              {session.location}
-                            </div>
-                          )}
-                          {session.description && (
-                            <div className="flex items-start gap-1 text-xs text-gray-500 mt-1">
-                              <span className="font-semibold">Popis:</span> {session.description}
-                            </div>
-                          )}
-                          {session.status === 'cancelled' && session.status_reason && (
-                            <div className="flex items-start gap-1 text-xs text-red-600 mt-1">
-                              <span className="font-semibold">Důvod zrušení:</span>{' '}
-                              {session.status_reason}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="light"
-                            color="primary"
-                            onPress={() => handleOpenStatusDialog(session)}
-                            isIconOnly
-                            aria-label={`Změnit stav tréninku ${session.title}`}
-                            startContent={<CalendarIcon className="w-4 h-4" />}
-                          />
-                          <Button
-                            size="sm"
-                            variant="light"
-                            startContent={<PencilIcon className="w-4 h-4" />}
-                            isIconOnly
-                            aria-label={`Upravit trénink ${session.title}`}
-                            onPress={() => handleEditSession(session)}
-                          />
-                          <Button
-                            size="sm"
-                            color="danger"
-                            variant="light"
-                            onPress={() => handleDeleteSession(session.id)}
-                            isIconOnly
-                            aria-label={`Smazat trénink ${session.title}`}
-                            startContent={<TrashIcon className="w-4 h-4" />}
-                            isDisabled={session.status === 'done' || session.status === 'cancelled'}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardBody>
-          </Card>
-        </div>
+        <Tabs
+          selectedKey={activeTab}
+          onSelectionChange={(key) => setActiveTab(key as any)}
+          className="mb-6"
+          size="lg"
+        >
+          <Tab key="attendance" title="Docházka">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <TrainingSessionList
+                sessions={sessions}
+                selectedSession={selectedSession}
+                onSelectedSession={setSelectedSession}
+                onStatusChnage={handleOpenStatusDialog}
+                onEditSession={handleEditSession}
+                onDeleteSession={handleDeleteSession}
+                loading={trainingSessionsLoading}
+              />
 
-        {/* Attendance Records */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between w-full">
-                <h3 className="text-lg font-semibold">
-                  Docházka {attendanceRecords ? `(${attendanceRecords.length})` : ''}
-                </h3>
-                {selectedSession && attendanceRecords.length === 0 && (
-                  <Button
-                    size="sm"
-                    color="primary"
-                    variant="bordered"
-                    onPress={handleCreateAttendanceForSession}
-                  >
-                    Vytvořit záznamy docházky
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardBody>
-              {!selectedSession ? (
-                <p className="text-gray-500 text-center py-8">
-                  Vyberte trénink pro zobrazení docházky
-                </p>
-              ) : loading ? (
-                <div className="space-y-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-12 rounded-lg" />
-                  ))}
-                </div>
-              ) : attendanceRecords.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  Žádné záznamy docházky pro tento trénink
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table aria-label="Attendance records">
-                    <TableHeader>
-                      <TableColumn>ČLEN</TableColumn>
-                      <TableColumn>STATUS</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                      {attendanceRecords
-                        .sort((a, b) => {
-                          // Sort by surname, then by name
-                          if (!a.member || !b.member) return 0;
-                          const surnameComparison = (a.member.surname || '').localeCompare(
-                            b.member.surname || ''
-                          );
-                          if (surnameComparison !== 0) {
-                            return surnameComparison;
-                          }
-                          return (a.member.name || '').localeCompare(b.member.name || '');
-                        })
-                        .map((record) => (
-                          <TableRow key={record.id}>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium text-sm sm:text-base">
-                                  {record.member.surname} {record.member.name}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-wrap gap-1">
-                                {(['present', 'absent', 'late', 'excused'] as const).map(
-                                  (status) => (
-                                    <Button
-                                      key={status}
-                                      size="sm"
-                                      variant={
-                                        record.attendance_status === status ? 'solid' : 'light'
-                                      }
-                                      color={getStatusColor(status)}
-                                      onPress={() =>
-                                        handleRecordAttendance(record.member.id, status)
-                                      }
-                                      className="text-xs sm:text-sm"
-                                    >
-                                      <span className="hidden sm:inline">
-                                        {getStatusText(status)}
-                                      </span>
-                                      <span className="sm:hidden">
-                                        {status === 'present'
-                                          ? 'P'
-                                          : status === 'absent'
-                                            ? 'N'
-                                            : status === 'late'
-                                              ? 'L'
-                                              : 'O'}
-                                      </span>
-                                    </Button>
-                                  )
-                                )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardBody>
-          </Card>
-        </div>
-      </div>
+              <AttendanceRecordingTable
+                attendanceRecords={attendanceRecords}
+                selectedSession={selectedSession}
+                handleRecordAttendance={handleRecordAttendance}
+                handleCreateAttendanceForSession={handleCreateAttendanceForSession}
+                loading={loading}
+              />
+            </div>
+          </Tab>
+          <Tab key="statistics" title="Statistiky a analýza">
+            {activeTab === 'statistics' && selectedCategory && selectedSeason && (
+              <AttendanceStatisticsLazy categoryId={selectedCategory} seasonId={selectedSeason} />
+            )}
+            {activeTab === 'statistics' && (!selectedCategory || !selectedSeason) && (
+              <Card>
+                <CardBody>
+                  <p className="text-center text-gray-500">
+                    Please select a category and season to view statistics
+                  </p>
+                </CardBody>
+              </Card>
+            )}
+          </Tab>
+        </Tabs>
+      </PageContainer>
 
       {/* Training Session Modal */}
       <TrainingSessionModal
@@ -748,7 +512,7 @@ export default function CoachesAttendancePage() {
           // Refresh training sessions after successful generation
           if (selectedCategory && selectedSeason) {
             if (selectedCategory) {
-              fetchTrainingSessions(selectedCategory, selectedSeason);
+              // previously executed fetchTrainingSessions with both category and season
             }
           }
         }}
@@ -777,6 +541,6 @@ export default function CoachesAttendancePage() {
         currentStatus={sessionForStatusUpdate?.status || 'planned'}
         sessionTitle={sessionForStatusUpdate?.title || ''}
       />
-    </PageContainer>
+    </>
   );
 }

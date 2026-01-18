@@ -37,7 +37,7 @@ export const coachesRoutes = [
   },
   {
     name: translations.coaches.routes.videos,
-    href: '/coaches/videos',
+    href: '/coaches/video',
     icon: VideoCameraIcon,
   },
   {

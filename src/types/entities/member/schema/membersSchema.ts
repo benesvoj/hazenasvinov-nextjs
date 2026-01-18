@@ -9,30 +9,27 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-25
  */
 
 export interface MemberSchema {
-  category_id: string | null
-  created_at: string | null
-  date_of_birth: string | null
-  functions: string[] | null
-  id: string
-  is_active: boolean
-  name: string
-  registration_number: string
-  sex: string
-  surname: string
-  updated_at: string | null
+  category_id: string | null;
+  created_at: string | null;
+  date_of_birth: string | null;
+  functions: string[] | null;
+  id: string;
+  is_active: boolean;
+  name: string;
+  registration_number: string;
+  sex: string;
+  surname: string;
+  updated_at: string | null;
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type MemberInsert = Omit<
-  MemberSchema,
-  'id' | 'created_at' | 'updated_at'
-> & {
+export type MemberInsert = Omit<MemberSchema, 'id' | 'created_at' | 'updated_at'> & {
   id?: string; // Optional for inserts
 };
 

@@ -26,11 +26,11 @@ The unified login system provides a single entry point for both admin and coach 
 
 ```
 src/app/login/
-├── page.tsx          # Unified login page with tabs
+├── page.tsx.backup          # Unified login page with tabs
 ├── layout.tsx        # Login page layout with gradient background
 
 src/app/coaches/login/
-└── page.tsx          # Redirect page to unified login
+└── page.tsx.backup          # Redirect page to unified login
 ```
 
 ## 🎨 **UI Components**

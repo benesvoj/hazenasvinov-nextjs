@@ -13,7 +13,7 @@ src/app/
 ├── (betting)/           # Betting app with custom layout
 │   ├── layout.tsx       # Custom layout (no header)
 │   └── betting/
-│       └── page.tsx     # Main betting page
+│       └── page.tsx.backup     # Main betting page
 └── betting/             # API routes for betting
     ├── history/
     ├── leaderboard/
@@ -35,7 +35,7 @@ src/app/
 - **Demo account option** - Quick testing
 - **Responsive design** - Works on all devices
 
-### 3. Updated Betting Page (`src/app/(betting)/betting/page.tsx`)
+### 3. Updated Betting Page (`src/app/(betting)/betting/page.tsx.backup`)
 - Shows **BettingLogin** when user is not authenticated
 - Shows **betting interface** when user is logged in
 - Includes **logout button** in the header
@@ -72,7 +72,7 @@ src/app/
 
 ### New Components
 1. `BettingLogin` - Login/registration screen
-2. Updated `betting/page.tsx` - Main betting interface with auth check
+2. Updated `betting/page.tsx.backup` - Main betting interface with auth check
 
 ### Existing Components (Updated for dark theme)
 - `BetHistory`
@@ -86,14 +86,14 @@ src/app/
 ### Authentication
 Currently using mockup authentication. To integrate real auth:
 
-1. Update `BettingLogin.onLogin` handler in `page.tsx`
+1. Update `BettingLogin.onLogin` handler in `page.tsx.backup`
 2. Call Supabase auth service
 3. Redirect on success
 
 ### Logout
 Currently shows alert. To implement:
 
-1. Update logout button handler in `page.tsx`
+1. Update logout button handler in `page.tsx.backup`
 2. Call Supabase signOut
 3. Refresh page to show login screen
 
@@ -137,7 +137,7 @@ To test the new layout:
 
 ## Migration Notes
 
-**Old Location**: `src/app/(main)/betting/page.tsx`
-**New Location**: `src/app/(betting)/betting/page.tsx`
+**Old Location**: `src/app/(main)/betting/page.tsx.backup`
+**New Location**: `src/app/(betting)/betting/page.tsx.backup`
 
 The page was moved from the `(main)` route group to the `(betting)` route group to apply the custom layout.

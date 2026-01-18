@@ -15,9 +15,9 @@ interface UseMatchVideosResult {
 }
 
 /**
- * Hook to manage videos for a specific match
+ * Hook to manage video for a specific match
  * @param matchId - The ID of the match
- * @returns Object containing videos, loading state, error state, and management functions
+ * @returns Object containing video, loading state, error state, and management functions
  */
 export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -66,7 +66,7 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
         return;
       }
 
-      // Then fetch the videos with their category
+      // Then fetch the video with their category
       const videoIds = matchVideoIds.map((item: any) => item.video_id);
       const {data: videosData, error: videosError} = await supabase
         .from('videos')
@@ -96,7 +96,7 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
         .order('created_at', {ascending: false});
 
       if (videosError) {
-        console.error('Error fetching videos:', videosError);
+        console.error('Error fetching video:', videosError);
         throw videosError;
       }
 
@@ -108,7 +108,7 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
 
       setVideos(processedVideos);
     } catch (err) {
-      console.error('Error fetching match videos:', err);
+      console.error('Error fetching match video:', err);
       setError(err instanceof Error ? err.message : 'Chyba při načítání videí zápasu');
       setVideos([]);
     } finally {
@@ -138,7 +138,7 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
           throw insertError;
         }
 
-        // Refresh videos after adding
+        // Refresh video after adding
         await fetchVideos(matchId);
       } catch (err) {
         console.error('Error adding video to match:', err);
@@ -171,7 +171,7 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
           throw deleteError;
         }
 
-        // Refresh videos after removing
+        // Refresh video after removing
         await fetchVideos(matchId);
       } catch (err) {
         console.error('Error removing video from match:', err);

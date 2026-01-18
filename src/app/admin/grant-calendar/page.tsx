@@ -1,83 +1,86 @@
 'use client';
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 
-import {useCustomModal} from '@/components/ui/modals/UnifiedModal';
-
-import {AdminContainer, UnifiedTable, DeleteConfirmationModal, GrantModal} from '@/components';
-import {ActionTypes} from '@/enums';
-import {useGrants} from '@/hooks';
+import {AdminContainer, DeleteConfirmationModal, GrantModal, UnifiedTable} from '@/components';
+import {ActionTypes, ModalMode} from '@/enums';
+import {getMonthName} from '@/helpers';
+import {useFetchGrants, useGrantForm, useGrants, useCustomModal} from '@/hooks';
 import {translations} from '@/lib';
 import {Grant} from '@/types';
 
 export default function GrantCalendar() {
   const t = translations.grantCalendar;
   const tAction = translations.action;
-  const {grants, loading, error, fetchGrants, createGrant, updateGrant, deleteGrant} = useGrants();
-
-  const [selectedGrant, setSelectedGrant] = useState<Grant | null>(null);
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const {data: grants, loading, refetch} = useFetchGrants();
+  const {
+    createGrant,
+    updateGrant,
+    deleteGrant,
+    setLoading: setCRUDLoading,
+    loading: crudLoading,
+  } = useGrants();
+  const {
+    modalMode,
+    selectedItem: selectedGrant,
+    openAddMode,
+    openEditMode,
+    validateForm,
+    formData,
+    setFormData,
+    resetForm,
+  } = useGrantForm();
 
   const grantModal = useCustomModal();
   const deleteModal = useCustomModal();
 
-  useEffect(() => {
-    fetchGrants();
-  }, [fetchGrants]);
-
   const handleAddClick = () => {
-    setModalMode('create');
-    setSelectedGrant(null);
+    openAddMode();
     grantModal.onOpen();
   };
 
-  const handleEditClick = (grant: Grant) => {
-    setModalMode('edit');
-    setSelectedGrant(grant);
+  const handleEditClick = (item: Grant) => {
+    openEditMode(item);
     grantModal.onOpen();
   };
 
-  const handleDeleteClick = (grant: Grant) => {
-    setSelectedGrant(grant);
-    deleteModal.onOpen();
-  };
-
-  const handleSaveGrant = async (grantData: {
-    name: string;
-    description?: string;
-    month: number;
-  }) => {
-    if (modalMode === 'create') {
-      await createGrant(grantData);
-    } else if (selectedGrant) {
-      await updateGrant(selectedGrant.id, grantData);
+  const handleSubmit = async () => {
+    const {valid, errors} = validateForm();
+    if (!valid) {
+      console.error('Form validation errors:', errors);
+      return;
     }
+
+    try {
+      if (modalMode === ModalMode.EDIT && selectedGrant) {
+        await updateGrant(selectedGrant.id, formData);
+        setCRUDLoading(false);
+      } else {
+        await createGrant(formData);
+        setCRUDLoading(false);
+      }
+      await refetch();
+      grantModal.onClose();
+      resetForm();
+      setCRUDLoading(false);
+    } catch (error) {
+      console.error('Failed to save grant:', error);
+    }
+  };
+
+  const handleDeleteClick = (item: Grant) => {
+    openEditMode(item);
+    deleteModal.onOpen();
   };
 
   const handleConfirmDelete = async () => {
     if (selectedGrant) {
-      try {
-        await deleteGrant(selectedGrant.id);
-        deleteModal.onClose();
-      } catch (error) {
-        console.error('Failed to delete grant:', error);
-      }
+      await deleteGrant(selectedGrant.id);
+      await refetch();
+      deleteModal.onClose();
+      resetForm();
+      setCRUDLoading(false);
     }
   };
-
-  const monthNames = [
-    t.months.january,
-    t.months.february,
-    t.months.march,
-    t.months.april,
-    t.months.may,
-    t.months.june,
-    t.months.july,
-    t.months.august,
-    t.months.september,
-    t.months.october,
-    t.months.november,
-    t.months.december,
-  ];
 
   const grantTableColumns = [
     {key: 'month', label: t.table.column.month},
@@ -105,7 +108,7 @@ export default function GrantCalendar() {
   const renderGrantTableData = (grantData: Grant, columnKey: string) => {
     switch (columnKey) {
       case 'month':
-        return <span className="font-medium">{monthNames[grantData.month - 1]}</span>;
+        return <span className="font-medium">{getMonthName(grantData.month)}</span>;
       case 'name':
         return <span className="font-medium">{grantData.name}</span>;
       case 'description':
@@ -140,9 +143,11 @@ export default function GrantCalendar() {
       <GrantModal
         isOpen={grantModal.isOpen}
         onClose={grantModal.onClose}
-        onSave={handleSaveGrant}
-        grant={selectedGrant}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmit}
         mode={modalMode}
+        isLoading={crudLoading}
       />
 
       <DeleteConfirmationModal
@@ -151,6 +156,7 @@ export default function GrantCalendar() {
         onConfirm={handleConfirmDelete}
         title={t.modal.deleteTitle}
         message={t.modal.deleteMessage}
+        isLoading={crudLoading}
       />
     </>
   );

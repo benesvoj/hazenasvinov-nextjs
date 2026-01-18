@@ -78,11 +78,11 @@ WHERE role = 'coach' AND user_id = 'your-user-id-here';
 ```
 src/app/coaches/
 ├── videos/
-│   └── page.tsx                 # Main coaches videos page
+│   └── page.tsx.backup                 # Main coaches videos page
 ├── dashboard/
-│   └── page.tsx                 # Updated with videos link
+│   └── page.tsx.backup                 # Updated with videos link
 └── login/
-    └── page.tsx                 # Coach login page
+    └── page.tsx.backup                 # Coach login page
 
 src/app/admin/videos/components/
 ├── VideoFormModal.tsx           # Updated to support availableCategories
@@ -100,7 +100,7 @@ docs/
 
 ### CoachesVideosPage
 
-- **Location**: `src/app/coaches/videos/page.tsx`
+- **Location**: `src/app/coaches/videos/page.tsx.backup`
 - **Features**:
   - Fetches coach's assigned categories from `user_profiles.assigned_categories`
   - Filters videos by assigned categories only
@@ -167,7 +167,7 @@ WHERE up.role IN ('coach', 'head_coach');
 ### Recommended RLS Policies
 
 ```sql
--- Example RLS policy for videos table
+-- Example RLS policy for video table
 CREATE POLICY "Coaches can view assigned category videos" ON videos
   FOR SELECT USING (
     auth.role() = 'authenticated' AND (

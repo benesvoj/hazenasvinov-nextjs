@@ -4,16 +4,29 @@ import {useMemo} from 'react';
 
 import Image from 'next/image';
 
-import {Card, Button, Chip} from '@heroui/react';
+import {Card, Button} from '@heroui/react';
 
-import {CalendarIcon} from '@heroicons/react/24/outline';
-
+import {CategoryChip, DateChip} from '@/components/ui/chips';
 import Link from '@/components/ui/link/Link';
 
 import {useAppDataSafe} from '@/contexts/AppDataContext';
 
-import {formatDateString} from '@/helpers';
-import {BlogPostCard as BlogPostCardProps, Category} from '@/types';
+import {Blog, Category} from '@/types';
+
+interface BlogPostCardProps {
+  post: Blog;
+  index?: number;
+  /**
+   * @default 'landing'
+   * @description 'landing' for landing page, 'blog' for blog page
+   */
+  variant?: 'landing' | 'blog';
+  className?: string;
+  /**
+   * @description Optional category data - if not provided, will be fetched from context (requires AppDataProvider)
+   */
+  category?: Category;
+}
 
 export default function BlogPostCard({
   post,
@@ -40,18 +53,6 @@ export default function BlogPostCard({
 
     return undefined;
   }, [categoryProp, contextCategories, post.category_id]);
-
-  const CategoryChip = ({category}: {category: Category}) => {
-    return (
-      <Chip size="sm" variant="solid" color="primary" className="text-xs px-2 py-1">
-        {category.name}
-      </Chip>
-    );
-  };
-
-  const DateChip = ({date}: {date: string}) => {
-    return <span>{formatDateString(date)}</span>;
-  };
 
   if (isLandingVariant) {
     // Landing page variant - background image with overlay text
@@ -92,10 +93,7 @@ export default function BlogPostCard({
               {category && <CategoryChip category={category} />}
 
               {/* Date */}
-              <div className="flex items-center gap-1 text-xs text-gray-300">
-                <CalendarIcon className="w-3 h-3" />
-                <DateChip date={post.created_at} />
-              </div>
+              <DateChip date={post.created_at} showIcon={false} className="text-xs text-gray-300" />
             </div>
 
             {/* Read Button */}
@@ -156,10 +154,7 @@ export default function BlogPostCard({
 
         {/* Post Meta */}
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-          <div className="flex items-center gap-1">
-            <CalendarIcon className="w-4 h-4" />
-            <DateChip date={post.created_at} />
-          </div>
+          <DateChip date={post.created_at} showIcon={true} />
         </div>
 
         {/* Read More Button */}

@@ -1,9 +1,12 @@
-echo "🧪 Running tests before push..."
-npm run test:run
+#!/bin/sh
 
-if [ $? -ne 0 ]; then
+echo "🧪 Running tests before push..."
+
+if ! npm run test:run; then
   echo "❌ Tests failed. Please fix the failing tests before pushing."
+  echo "💡 To skip this check temporarily, use: git push --no-verify"
   exit 1
 fi
 
 echo "✅ All tests passed! Proceeding with push..."
+exit 0

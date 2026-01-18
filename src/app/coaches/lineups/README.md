@@ -30,7 +30,7 @@ This page allows coaches to:
 
 ```
 src/app/coaches/lineups/
-├── page.tsx                           # Main page component (512 lines)
+├── page.tsx.backup                           # Main page component (512 lines)
 ├── components/
 │   ├── AddMemberModal.tsx            # Modal for adding members to lineup
 │   ├── CreateMemberModal.tsx         # Modal for creating new members
@@ -63,7 +63,7 @@ src/app/coaches/lineups/
 ```
 User Action
     ↓
-Handler Function (page.tsx)
+Handler Function (page.tsx.backup)
     ↓
 Hook (useCategoryLineups, useCategoryLineupMember)
     ↓

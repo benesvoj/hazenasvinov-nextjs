@@ -77,7 +77,7 @@ That's it! You're ready to start betting.
 - `LeaderboardTable.tsx` - Rankings with multiple sort options
 
 #### 5. **Main Page**
-- `src/app/(main)/betting/page.tsx` - Complete betting interface with tabs
+- `src/app/(main)/betting/page.tsx.backup` - Complete betting interface with tabs
 
 #### 6. **Database Schema**
 - `wallets` table - User balances
@@ -193,7 +193,7 @@ Edit in respective service files:
 
 2. **Mock Matches**: Using hardcoded matches
    - Replace with your actual matches API
-   - Location: `app/(main)/betting/page.tsx` - `mockMatches`
+   - Location: `app/(main)/betting/page.tsx.backup` - `mockMatches`
 
 3. **Manual Bet Settlement**: Requires admin action
    - Implement automated settlement after match completion
@@ -208,7 +208,7 @@ Edit in respective service files:
 ### 1. Integration with Real Data
 
 ```typescript
-// In betting/page.tsx, replace:
+// In betting/page.tsx.backup, replace:
 const mockMatches = [...];
 
 // With:

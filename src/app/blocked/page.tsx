@@ -8,6 +8,8 @@ import {Button, Card, CardBody, CardHeader} from '@heroui/react';
 
 import {ShieldExclamationIcon, ArrowLeftIcon, EnvelopeIcon} from '@heroicons/react/24/outline';
 
+export const dynamic = 'force-dynamic';
+
 export default function BlockedPage() {
   const router = useRouter();
 

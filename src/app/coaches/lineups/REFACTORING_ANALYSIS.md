@@ -1,7 +1,7 @@
 # CoachesLineupsPage - Refactoring Analysis & Implementation Plan
 
 **Date:** 2025-11-06 (Updated)
-**File:** `src/app/coaches/lineups/page.tsx`
+**File:** `src/app/coaches/lineups/page.tsx.backup`
 **Current Status:** ⚠️ Has TypeScript errors - code is incomplete
 **Lines of Code:** 512 (Target: <250)
 
@@ -276,7 +276,7 @@ const [lineups, setLineups] = useState<CategoryLineup[]>([]);
 setLineups((prev) => [...prev, response.data]); // ✅ Updates internal state
 
 return {
-    lineups,  // ⚠️ But page.tsx never uses this!
+    lineups,  // ⚠️ But page.tsx.backup never uses this!
     // ...
 };
 ```
@@ -392,7 +392,7 @@ const handleEditLineup = (lineup: CategoryLineup) => {  // ✅ Properly typed
   - Remove `setLineupMembers` calls
   - Keep only: `loading`, `error`, CRUD functions
 
-- [ ] **Task 2.3:** Update page.tsx if needed
+- [ ] **Task 2.3:** Update page.tsx.backup if needed
   - Ensure page only uses data from fetch hooks
   - Add manual `refetch()` calls after mutations if needed
 
@@ -402,7 +402,7 @@ const handleEditLineup = (lineup: CategoryLineup) => {  // ✅ Properly typed
 
 ### Phase 3: Component Extraction (Priority: 🟡 Medium - 8 hours)
 
-**Goal:** Reduce page.tsx from 512 to <250 lines
+**Goal:** Reduce page.tsx.backup from 512 to <250 lines
 
 #### 3.1 Extract Category/Season Selector
 - [ ] Create `components/CategorySeasonSelector.tsx`
@@ -428,7 +428,7 @@ const handleEditLineup = (lineup: CategoryLineup) => {  // ✅ Properly typed
 **Expected Structure:**
 ```
 src/app/coaches/lineups/
-├── page.tsx (< 250 lines - orchestrator only)
+├── page.tsx.backup (< 250 lines - orchestrator only)
 ├── components/
 │   ├── CategorySeasonSelector.tsx
 │   ├── LineupsPanel/

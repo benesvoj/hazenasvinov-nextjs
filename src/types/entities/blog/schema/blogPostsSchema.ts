@@ -9,31 +9,28 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-11
+ * Last generated: 2025-11-25
  */
 
 export interface BlogPostSchema {
-  author_id: string | null
-  category_id: string | null
-  content: string
-  created_at: string | null
-  id: string
-  image_url: string | null
-  match_id: string | null
-  published_at: string | null
-  slug: string
-  status: string
-  title: string
-  updated_at: string | null
+  author_id: string | null;
+  category_id: string | null;
+  content: string;
+  created_at: string | null;
+  id: string;
+  image_url: string | null;
+  match_id: string | null;
+  published_at: string | null;
+  slug: string;
+  status: string;
+  title: string;
+  updated_at: string | null;
 }
 
 /**
  * Type for INSERT operations (auto-generated fields excluded)
  */
-export type BlogPostInsert = Omit<
-  BlogPostSchema,
-  'id' | 'created_at' | 'updated_at'
-> & {
+export type BlogPostInsert = Omit<BlogPostSchema, 'id' | 'created_at' | 'updated_at'> & {
   id?: string; // Optional for inserts
 };
 

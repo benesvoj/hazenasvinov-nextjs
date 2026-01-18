@@ -117,12 +117,12 @@ Team → Club → Access to logo, venue, web, etc.
 - `src/types/types.ts` - Extended Club interface
 
 ### **Components**
-- `src/app/admin/clubs/page.tsx` - Enhanced forms and display
-- `src/app/admin/clubs/[id]/page.tsx` - Updated with new fields
-- `src/app/admin/clubs/new/page.tsx` - Enhanced creation form
+- `src/app/admin/clubs/page.tsx.backup` - Enhanced forms and display
+- `src/app/admin/clubs/[id]/page.tsx.backup` - Updated with new fields
+- `src/app/admin/clubs/new/page.tsx.backup` - Enhanced creation form
 
 ### **Data Fetching**
-- `src/app/admin/matches/page.tsx` - Updated to use club-based system
+- `src/app/admin/matches/page.tsx.backup` - Updated to use club-based system
 
 ## ⚠️ **Important Notes**
 

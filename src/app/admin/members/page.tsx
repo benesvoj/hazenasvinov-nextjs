@@ -1,3 +1,5 @@
+// TODO: hooks
+
 'use client';
 import React, {useMemo, useState} from 'react';
 
@@ -17,7 +19,7 @@ import MembersStatisticTab from '@/app/admin/members/components/MembersStatistic
 import PaymentFormModal from '@/app/admin/members/components/PaymentFormModal';
 
 import {AdminContainer, DeleteConfirmationModal} from '@/components';
-import {ActionTypes, Genders, getGenderOptions, ModalMode} from '@/enums';
+import {ActionTypes, Genders, ModalMode} from '@/enums';
 import {
   useBulkEditMembers,
   useFetchMembersExternal,
@@ -28,6 +30,7 @@ import {
 } from '@/hooks';
 import {translations} from '@/lib';
 import {BaseMember, MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
+import {genderOptions} from '@/utils';
 
 export default function MembersAdminPage() {
   const t = translations.members;
@@ -38,16 +41,12 @@ export default function MembersAdminPage() {
   const shouldFetchExternal = activeTab === 'members-external';
   const shouldFetchOnLoan = activeTab === 'members-on-loan';
 
-  const genderOptions = getGenderOptions().reduce(
-    (acc, {value, label}) => {
-      acc[value] = label;
-      return acc;
-    },
-    {} as Record<string, string>
-  );
+  const genderOpts = genderOptions();
 
   // Use AppDataContext for members and category data
-  const {categories: {data: categories}} = useAppData();
+  const {
+    categories: {data: categories},
+  } = useAppData();
 
   // Add hooks for all three tab types (for refresh functionality)
   const {
@@ -230,7 +229,7 @@ export default function MembersAdminPage() {
             content: shouldFetchInternal ? (
               <MembersInternalTab
                 categoriesData={categories}
-                sexOptions={genderOptions}
+                sexOptions={genderOpts}
                 openPayment={openPaymentInternal}
                 openDelete={openDeleteInternal}
                 openDetail={openDetailInternal}
@@ -335,7 +334,7 @@ export default function MembersAdminPage() {
         formData={formData}
         setFormData={setFormData}
         categories={categories || []}
-        sexOptions={genderOptions}
+        sexOptions={genderOpts}
         isEditMode={false}
       />
 
@@ -380,7 +379,7 @@ export default function MembersAdminPage() {
               {} as Record<string, string>
             ) || {}
           }
-          sexOptions={genderOptions}
+          sexOptions={genderOpts}
         />
       </div>
     </>

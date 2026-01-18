@@ -1,10 +1,10 @@
 'use client';
 
-import {useState, useEffect, useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
 import {getMatchesWithTeamsOptimized} from '@/services/optimizedMatchQueries';
 
-import {useSeasons} from '@/hooks';
+import {useFetchSeasons, useSeasonFiltering} from '@/hooks';
 import {Match} from '@/types';
 
 interface AllCategoriesOwnClubMatchesResult {
@@ -19,7 +19,8 @@ export function useAllCategoriesOwnClubMatches(): AllCategoriesOwnClubMatchesRes
   const [error, setError] = useState<string | null>(null);
 
   // Get active season for suffix logic
-  const {activeSeason, loading: seasonLoading, error: seasonError} = useSeasons();
+  const {data: seasons, loading: seasonLoading} = useFetchSeasons();
+  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
 
   const fetchMatches = useCallback(async () => {
     // Don't fetch if we don't have an active season yet

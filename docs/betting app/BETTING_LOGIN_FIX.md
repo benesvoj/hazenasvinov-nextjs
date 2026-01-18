@@ -67,7 +67,7 @@ if (result.success) {
 
 ### 2. Logout Fix
 
-#### File: `src/app/(betting)/betting/page.tsx`
+#### File: `src/app/(betting)/betting/page.tsx.backup`
 
 **Changed:**
 ```typescript

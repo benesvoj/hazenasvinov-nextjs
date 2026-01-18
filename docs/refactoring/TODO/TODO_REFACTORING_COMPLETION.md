@@ -48,7 +48,7 @@ The TODO feature has been refactored into a **clean 4-layer architecture** follo
 │   └── src/enums/todoStatuses.ts               [Status Enum]
 │
 ├── 🖥️ Component Layer
-│   ├── src/app/admin/page.tsx                  [Main Page - Orchestrator]
+│   ├── src/app/admin/page.tsx.backup                  [Main Page - Orchestrator]
 │   ├── src/app/admin/components/dashboard/
 │   │   └── TodoStatsCards.tsx                  [Statistics Display]
 │   ├── src/app/admin/components/modals/
@@ -242,7 +242,7 @@ const { filteredTodos, todoStats } = useTodoFiltering({
 ## 🎨 UI Components
 
 ### 1. Main Page: `AdminDashboard`
-**Location**: `src/app/admin/page.tsx`
+**Location**: `src/app/admin/page.tsx.backup`
 
 **Role**: Orchestrator
 
@@ -943,7 +943,7 @@ export const useTodoFiltering = ({todos, todoFilter}) => {
 
 ### 2. TodoStatsCards Props Mismatch
 **Severity**: 🟡 Medium
-**Location**: `src/app/admin/page.tsx:204-208`
+**Location**: `src/app/admin/page.tsx.backup:204-208`
 
 **Problem**: Props don't match component interface
 

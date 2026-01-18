@@ -10,45 +10,11 @@ import {VideoCameraIcon, PlayIcon, LinkIcon, CheckIcon} from '@heroicons/react/2
 
 import {LoadingSpinner} from '@/components';
 import {formatDateString} from '@/helpers';
-
-interface Video {
-  id: string;
-  title: string;
-  description?: string;
-  youtube_url: string;
-  youtube_id: string;
-  thumbnail_url?: string;
-  duration?: string;
-  recording_date?: string;
-  clubs?: {
-    id: string;
-    name: string;
-    short_name: string;
-  };
-  // Match information when video is related to a match
-  match?: {
-    id: string;
-    home_team: {
-      id: string;
-      name: string;
-      short_name?: string;
-    };
-    away_team: {
-      id: string;
-      name: string;
-      short_name?: string;
-    };
-    home_score?: number;
-    away_score?: number;
-    home_score_halftime?: number;
-    away_score_halftime?: number;
-    status: 'upcoming' | 'completed';
-    date: string;
-  };
-}
+import {VideoWithMatch} from '@/types';
+import {copyUrl, playUrl} from '@/utils';
 
 interface CompactVideoListProps {
-  videos: Video[];
+  videos: VideoWithMatch[];
   loading: boolean;
   title: string;
   emptyMessage?: string;
@@ -61,24 +27,6 @@ export default function CompactVideoList({
   emptyMessage = 'Žádná videa k dispozici',
 }: CompactVideoListProps) {
   const [copiedVideoId, setCopiedVideoId] = useState<string | null>(null);
-
-  const handleVideoClick = (video: Video) => {
-    window.open(video.youtube_url, '_blank');
-  };
-
-  const handleCopyLink = async (video: Video) => {
-    try {
-      await navigator.clipboard.writeText(video.youtube_url);
-      setCopiedVideoId(video.id);
-
-      // Reset the copied state after 2 seconds
-      setTimeout(() => {
-        setCopiedVideoId(null);
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy link:', err);
-    }
-  };
 
   return (
     <Card className="h-full mx-1 sm:mx-2">
@@ -104,7 +52,7 @@ export default function CompactVideoList({
                   <div
                     key={video.id}
                     className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                    onClick={() => handleVideoClick(video)}
+                    onClick={() => playUrl(video.youtube_url)}
                   >
                     {/* Thumbnail */}
                     <div className="relative w-12 h-9 sm:w-16 sm:h-12 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden flex-shrink-0">
@@ -187,7 +135,7 @@ export default function CompactVideoList({
                         variant="light"
                         color={copiedVideoId === video.id ? 'success' : 'default'}
                         className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10"
-                        onPress={() => handleCopyLink(video)}
+                        onPress={() => copyUrl(video.youtube_url)}
                         title={copiedVideoId === video.id ? 'Link zkopírován!' : 'Zkopírovat odkaz'}
                       >
                         {copiedVideoId === video.id ? (

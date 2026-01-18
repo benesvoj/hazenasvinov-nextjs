@@ -29,7 +29,7 @@ if (type === 'recovery') {
 
 ### 2. Updated Reset Password Page
 
-The `/src/app/reset-password/page.tsx` has been updated to work with the new flow:
+The `/src/app/reset-password/page.tsx.backup` has been updated to work with the new flow:
 
 - Removed requirement for `access_token` in URL parameters
 - Users are now authenticated when they reach the page (via auth/confirm route)

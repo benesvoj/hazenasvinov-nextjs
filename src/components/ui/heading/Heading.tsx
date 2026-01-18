@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * @description Heading component
  * @param param0 { size: HeadingLevel, children: React.ReactNode }
@@ -17,6 +19,7 @@ import {Nullish} from '@/types';
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type HeadingAlign = 'start' | 'center' | 'end';
+
 export interface HeadingProps {
   isSingleLine?: boolean;
   alternative?: true;
@@ -39,7 +42,7 @@ export function Heading(props: HeadingProps) {
       case 3:
         return 'text-lg font-semibold';
       case 4:
-        return 'text-md font-medium mb-3 flex items-center gap-2';
+        return 'text-md font-medium';
       case 5:
         return 'text-sm font-medium';
       case 6:

@@ -1,29 +1,22 @@
 'use client';
 
-import React from 'react';
+import React, {memo} from 'react';
 
-import {Card, CardBody, Button, Skeleton} from '@heroui/react';
+import {Skeleton} from '@heroui/react';
 
-import {VideoCameraIcon, PlusIcon} from '@heroicons/react/24/outline';
-
-import {Video, VideoFilters as VideoFiltersType, Category, Season} from '@/types';
+import {VideoPagination} from '@/components';
+import {Category, Club, Season, VideoSchema} from '@/types';
 
 import {VideoCard} from './VideoCard';
-import {VideoPagination} from './VideoPagination';
 
 interface VideoGridProps {
-  videos: Video[];
+  videos: VideoSchema[];
   loading: boolean;
-  filters: VideoFiltersType;
   categories: Category[];
   seasons: Season[];
-  onEdit: (video: Video) => void;
-  onDelete: (video: Video) => void;
-  onAddVideo: () => void;
-  emptyStateTitle?: string;
-  emptyStateDescription?: string;
-  showAddButton?: boolean;
-  // Pagination props
+  clubs: Club[];
+  onEdit: (video: VideoSchema) => void;
+  onDelete: (video: VideoSchema) => void;
   currentPage?: number;
   totalPages?: number;
   totalCount?: number;
@@ -31,26 +24,20 @@ interface VideoGridProps {
   onPageChange?: (page: number) => void;
 }
 
-export function VideoGrid({
+export const VideoGrid = memo(function VideoGrid({
   videos,
   loading,
-  filters,
   categories,
   seasons,
+  clubs,
   onEdit,
   onDelete,
-  onAddVideo,
-  emptyStateTitle = 'Žádná videa',
-  emptyStateDescription,
-  showAddButton = true,
-  // Pagination props
   currentPage = 1,
   totalPages = 1,
   totalCount = 0,
   itemsPerPage = 20,
   onPageChange,
 }: VideoGridProps) {
-  // Show loading skeleton
   if (loading && videos.length === 0) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -61,36 +48,6 @@ export function VideoGrid({
     );
   }
 
-  // Show empty state
-  if (videos.length === 0) {
-    const hasActiveFilters =
-      filters.search || filters.category_id || filters.is_active !== undefined;
-
-    const defaultDescription = hasActiveFilters
-      ? 'Nebyla nalezena žádná videa odpovídající filtru.'
-      : 'Zatím nejsou přidána žádná videa.';
-
-    return (
-      <Card>
-        <CardBody className="text-center py-12">
-          <VideoCameraIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{emptyStateTitle}</h3>
-          <p className="text-gray-600 mb-4">{emptyStateDescription || defaultDescription}</p>
-          {showAddButton && !hasActiveFilters && (
-            <Button
-              color="primary"
-              startContent={<PlusIcon className="w-5 h-5" />}
-              onPress={onAddVideo}
-            >
-              Přidat první video
-            </Button>
-          )}
-        </CardBody>
-      </Card>
-    );
-  }
-
-  // Show videos grid with pagination
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -102,11 +59,11 @@ export function VideoGrid({
             onDelete={onDelete}
             categories={categories}
             seasons={seasons}
+            clubs={clubs}
           />
         ))}
       </div>
 
-      {/* Pagination */}
       {onPageChange && totalPages > 1 && (
         <VideoPagination
           currentPage={currentPage}
@@ -118,4 +75,4 @@ export function VideoGrid({
       )}
     </div>
   );
-}
+});

@@ -67,7 +67,7 @@ interface BaseMember {
 ```
 src/app/admin/members/components/MemberInfoTab.tsx         (translation key only)
 src/app/admin/members/components/MemberFormModal.tsx       (needs review)
-src/app/admin/categories/page.tsx                          (Category.gender - different entity!)
+src/app/admin/categories/page.tsx.backup                          (Category.gender - different entity!)
 src/app/admin/categories/components/CategoryModal.tsx      (Category.gender - different entity!)
 src/hooks/entities/category/state/useCategoriesState.ts    (Category.gender - different entity!)
 src/hooks/entities/category/useCategories.ts               (Category.gender - different entity!)

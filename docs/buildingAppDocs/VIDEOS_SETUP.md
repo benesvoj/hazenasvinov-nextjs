@@ -63,7 +63,7 @@ CREATE TABLE videos (
 ### 1. **Database Setup**
 Run the setup script to create the videos table:
 ```bash
-npm run setup:videos-table
+npm run setup:video-table
 ```
 
 Or manually execute the SQL from `scripts/create_videos_table.sql` in your Supabase dashboard.

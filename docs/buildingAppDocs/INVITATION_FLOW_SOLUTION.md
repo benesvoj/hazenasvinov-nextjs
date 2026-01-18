@@ -21,7 +21,7 @@ We've created a complete user invitation flow that provides a professional, user
   - Fallback for email clients that don't support HTML
   - Clean, readable format
 
-### 2. **Set Password Page** (`src/app/set-password/page.tsx`)
+### 2. **Set Password Page** (`src/app/set-password/page.tsx.backup`)
 - Dedicated page for new users to set their password
 - Password strength validation
 - Professional UI with club branding

@@ -503,15 +503,3 @@ export function useUser() {
   }
   return context;
 }
-
-// Helper hook for backward compatibility
-export function useUserData() {
-  const {user, userProfile, userCategories, loading, error} = useUser();
-  return {
-    user,
-    userProfile,
-    userCategories,
-    loading,
-    error,
-  };
-}

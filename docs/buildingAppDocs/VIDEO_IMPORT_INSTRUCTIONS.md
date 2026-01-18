@@ -24,12 +24,12 @@ The video import script parses the `docs/video-mens-html.md` file and imports al
 
 ### Option 1: Using npm script (Recommended)
 ```bash
-npm run import:videos
+npm run import:video
 ```
 
 ### Option 2: Direct execution
 ```bash
-node scripts/import-videos-simple.js
+node scripts/import-video-simple.js
 ```
 
 ## What the Script Does

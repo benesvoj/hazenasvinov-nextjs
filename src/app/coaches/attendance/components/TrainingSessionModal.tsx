@@ -1,18 +1,19 @@
 'use client';
 
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 
 import {
-  Input,
-  Textarea,
   Button,
+  Input,
   Modal,
-  ModalContent,
-  ModalHeader,
   ModalBody,
+  ModalContent,
   ModalFooter,
+  ModalHeader,
+  Textarea,
 } from '@heroui/react';
 
+import {TrainingSessionStatusEnum} from '@/enums';
 import {TrainingSession, TrainingSessionFormData} from '@/types';
 
 interface TrainingSessionModalProps {
@@ -23,6 +24,19 @@ interface TrainingSessionModalProps {
   selectedCategoryId: string;
   selectedSeason: string;
 }
+
+const InitialFormData = {
+  title: '',
+  description: '',
+  session_date: '',
+  session_time: '',
+  category_id: '',
+  season_id: '',
+  location: '',
+  status: TrainingSessionStatusEnum.PLANNED, // Add default
+  coach_id: '', // Add from current user
+  status_reason: null, // Add default
+};
 
 export default function TrainingSessionModal({
   isOpen,
@@ -40,6 +54,9 @@ export default function TrainingSessionModal({
     category_id: selectedCategoryId,
     season_id: selectedSeason,
     location: '',
+    status: TrainingSessionStatusEnum.PLANNED,
+    coach_id: '',
+    status_reason: null,
   });
 
   // Update form data when session prop changes (for editing)
@@ -53,33 +70,20 @@ export default function TrainingSessionModal({
         category_id: session.category_id,
         season_id: session.season_id,
         location: session.location || '',
+        status: session.status,
+        coach_id: session.coach_id,
+        status_reason: session.status_reason || null,
       });
     } else {
       // Reset form for new session
-      setSessionFormData({
-        title: '',
-        description: '',
-        session_date: '',
-        session_time: '',
-        category_id: selectedCategoryId,
-        season_id: selectedSeason,
-        location: '',
-      });
+      setSessionFormData(InitialFormData);
     }
   }, [session, selectedCategoryId, selectedSeason]);
 
   // Reset form when modal opens for new session
   useEffect(() => {
     if (isOpen && !session) {
-      setSessionFormData({
-        title: '',
-        description: '',
-        session_date: '',
-        session_time: '',
-        category_id: selectedCategoryId,
-        season_id: selectedSeason,
-        location: '',
-      });
+      setSessionFormData(InitialFormData);
     }
   }, [isOpen, session, selectedCategoryId, selectedSeason]);
 
@@ -89,15 +93,7 @@ export default function TrainingSessionModal({
 
   const handleClose = () => {
     // Reset form when closing
-    setSessionFormData({
-      title: '',
-      description: '',
-      session_date: '',
-      session_time: '',
-      category_id: selectedCategoryId,
-      season_id: selectedSeason,
-      location: '',
-    });
+    setSessionFormData(InitialFormData);
     onClose();
   };
 
@@ -123,7 +119,7 @@ export default function TrainingSessionModal({
             <Textarea
               label="Popis"
               placeholder="Zadejte popis tréninku"
-              value={sessionFormData.description}
+              value={sessionFormData.description || ''}
               onChange={(e) =>
                 setSessionFormData((prev) => ({
                   ...prev,
@@ -149,7 +145,7 @@ export default function TrainingSessionModal({
               <Input
                 label="Čas"
                 type="time"
-                value={sessionFormData.session_time}
+                value={sessionFormData.session_time || ''}
                 onChange={(e) =>
                   setSessionFormData((prev) => ({
                     ...prev,
@@ -162,7 +158,7 @@ export default function TrainingSessionModal({
             <Input
               label="Místo"
               placeholder="Zadejte místo konání"
-              value={sessionFormData.location}
+              value={sessionFormData.location || ''}
               onChange={(e) =>
                 setSessionFormData((prev) => ({
                   ...prev,

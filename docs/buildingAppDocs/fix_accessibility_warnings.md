@@ -109,9 +109,9 @@ Many buttons, especially those with icons (`startContent`), are missing `aria-la
 ### 3. **Files to Prioritize**
 
 #### **High Priority (Most Warnings)**
-1. `src/app/admin/matches/page.tsx` - Many action buttons
-2. `src/app/admin/clubs/page.tsx` - CRUD operations
-3. `src/app/admin/categories/page.tsx` - Table actions
+1. `src/app/admin/matches/page.tsx.backup` - Many action buttons
+2. `src/app/admin/clubs/page.tsx.backup` - CRUD operations
+3. `src/app/admin/categories/page.tsx.backup` - Table actions
 4. `src/app/admin/components/TopBar.tsx` - User actions
 
 #### **Medium Priority**

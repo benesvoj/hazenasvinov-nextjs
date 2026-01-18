@@ -19,7 +19,7 @@ import {
   AttendeesModal,
   MeetingMinutesCard,
 } from '@/components';
-import {useMeetingMinutes, useSeasons} from '@/hooks';
+import {useFetchSeasons, useMeetingMinutes} from '@/hooks';
 import {API_ROUTES, translations} from '@/lib';
 import {
   MeetingMinutes,
@@ -52,10 +52,16 @@ export const MeetingMinutesContainer = forwardRef<
     deleteMeetingMinutes,
     getNextMeetingNumber,
   } = useMeetingMinutes();
-  const {seasons, loading: seasonsLoading, fetchAllSeasons} = useSeasons();
+  const {data: seasons, refetch: fetchAllSeasons} = useFetchSeasons();
 
   const [users, setUsers] = useState<any[]>([]);
   const t = translations.components.meetingMinutes;
+
+  // Modal functions - declared before useImperativeHandle
+  const openCreateModal = () => {
+    setEditingMeetingMinutes(null);
+    setIsFormModalOpen(true);
+  };
 
   // Expose functions to parent component
   useImperativeHandle(ref, () => ({
@@ -97,11 +103,6 @@ export const MeetingMinutesContainer = forwardRef<
   const handleClearFilters = () => {
     setFilters({});
     fetchMeetingMinutes({});
-  };
-
-  const openCreateModal = () => {
-    setEditingMeetingMinutes(null);
-    setIsFormModalOpen(true);
   };
 
   const openEditModal = (meetingMinutes: MeetingMinutes) => {
