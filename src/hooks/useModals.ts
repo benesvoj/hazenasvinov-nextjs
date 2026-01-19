@@ -26,8 +26,12 @@ export interface ModalState {
  * <Modal isOpen={modal.isOpen} onClose={modal.onClose}>...</Modal>
  * ```
  */
-export function useModal(): ModalState {
-  return useDisclosure();
+export function useModal(): ModalState & {onToggle: () => void} {
+  const disclosure = useDisclosure();
+  return {
+    ...disclosure,
+    onToggle: () => (disclosure.isOpen ? disclosure.onClose() : disclosure.onOpen()),
+  };
 }
 
 // Function overloads for type-safe useModals with 2-5 arguments

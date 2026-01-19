@@ -1,16 +1,19 @@
 'use client';
 import React from 'react';
 
+import {useModal, useModalWithItem} from '@/hooks/useModals';
+
 import {AdminContainer, DeleteConfirmationModal, GrantModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {getMonthName} from '@/helpers';
-import {useFetchGrants, useGrantForm, useGrants, useCustomModal} from '@/hooks';
+import {useFetchGrants, useGrantForm, useGrants} from '@/hooks';
 import {translations} from '@/lib';
 import {Grant} from '@/types';
 
+const t = translations.grantCalendar;
+const tAction = translations.action;
+
 export default function GrantCalendar() {
-  const t = translations.grantCalendar;
-  const tAction = translations.action;
   const {data: grants, loading, refetch} = useFetchGrants();
   const {
     createGrant,
@@ -30,8 +33,8 @@ export default function GrantCalendar() {
     resetForm,
   } = useGrantForm();
 
-  const grantModal = useCustomModal();
-  const deleteModal = useCustomModal();
+  const grantModal = useModal();
+  const deleteModal = useModalWithItem<Grant>();
 
   const handleAddClick = () => {
     openAddMode();

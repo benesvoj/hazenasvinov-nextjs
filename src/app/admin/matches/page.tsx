@@ -1,12 +1,13 @@
 'use client';
 
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
-import {Alert, Select, SelectItem, Tabs, Tab, Card, CardBody, useDisclosure} from '@heroui/react';
+import {Alert, Card, CardBody, Select, SelectItem, Tab, Tabs, useDisclosure} from '@heroui/react';
 
 import {useQueryClient} from '@tanstack/react-query';
 
 import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
+import {useModals} from '@/hooks/useModals';
 
 import {translations} from '@/lib/translations';
 
@@ -18,39 +19,40 @@ import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
 import {getCategoryInfo} from '@/helpers/getCategoryInfo';
 
 import {
-  DeleteConfirmationModal,
-  showToast,
   AdminContainer,
+  DeleteConfirmationModal,
   LoadingSpinner,
+  showToast,
   UnifiedStandingTable,
 } from '@/components';
 import {matchStatusesKeys} from '@/constants';
 import {ActionTypes} from '@/enums';
 import {
-  useFilteredTeams,
-  useStandings,
-  useFetchMembers,
-  useTeams,
   useExcelImport,
-  useTeamDisplayLogic,
   useFetchCategories,
+  useFetchMembers,
   useFetchSeasons,
+  useFilteredTeams,
   useSeasonFiltering,
+  useStandings,
+  useTeamDisplayLogic,
+  useTeams,
 } from '@/hooks';
-import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
-import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
+import {AddMatchFormData, EditMatchFormData, Match} from '@/types';
+import {calculateStandings, createClient, generateInitialStandings} from '@/utils';
 
 import {
   AddMatchModal,
   AddResultModal,
-  EditMatchModal,
   BulkUpdateMatchweekModal,
+  CategoryMatches,
+  EditMatchModal,
   ExcelImportModal,
+  LineupManagerModal,
   MatchActionsModal,
   MatchProcessWizardModal,
-  LineupManagerModal,
-  CategoryMatches,
 } from './components';
+import {getMatchweekOptions} from './helpers/getMatchweekOptions';
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');
@@ -67,31 +69,8 @@ export default function MatchesAdminPage() {
   const {teams, loading: allTeamsLoading, fetchTeams} = useTeams();
 
   // Modal states
-  const {
-    isOpen: isAddMatchOpen,
-    onOpen: onAddMatchOpen,
-    onClose: onAddMatchClose,
-  } = useDisclosure();
-  const {
-    isOpen: isAddResultOpen,
-    onOpen: onAddResultOpen,
-    onClose: onAddResultClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditMatchOpen,
-    onOpen: onEditMatchOpen,
-    onClose: onEditMatchClose,
-  } = useDisclosure();
-  const {
-    isOpen: isBulkUpdateOpen,
-    onOpen: onBulkUpdateOpen,
-    onClose: onBulkUpdateClose,
-  } = useDisclosure();
-  const {
-    isOpen: isLineupModalOpen,
-    onOpen: onLineupModalOpen,
-    onClose: onLineupModalClose,
-  } = useDisclosure();
+  const modal = useModals('addMatch', 'addResult', 'editMatch', 'bulkUpdate', 'lineup');
+
   const {
     isOpen: isExcelImportOpen,
     onOpen: onExcelImportOpen,
@@ -414,7 +393,8 @@ export default function MatchesAdminPage() {
         queryKey: ['matches'],
       });
 
-      onAddMatchClose();
+      modal.addMatch.onClose();
+
       setFormData({
         date: '',
         time: '',
@@ -490,7 +470,7 @@ export default function MatchesAdminPage() {
         showToast.warning(t.toasts.matchResultSavedWithoutUpdateStandingTable);
       }
 
-      onAddResultClose();
+      modal.addResult.onClose();
       setResultData({home_score: 0, away_score: 0, home_score_halftime: 0, away_score_halftime: 0});
       setSelectedMatch(null);
 
@@ -599,7 +579,7 @@ export default function MatchesAdminPage() {
       fetchFilteredTeams(match.category_id, selectedSeason);
     }
 
-    onEditMatchOpen();
+    modal.editMatch.onOpen();
   };
 
   // Update match
@@ -721,7 +701,7 @@ export default function MatchesAdminPage() {
         showToast.warning(t.toasts.matchSavedWithoutUpdatedScore);
       }
 
-      onEditMatchClose();
+      modal.editMatch.onClose();
       setEditData({
         date: '',
         time: '',
@@ -832,7 +812,7 @@ export default function MatchesAdminPage() {
       });
 
       setError('');
-      onBulkUpdateClose();
+      modal.bulkUpdate.onClose();
       setBulkUpdateData({categoryId: '', matchweek: '', action: 'set'});
     } catch (error) {
       console.error('Full error details:', error);
@@ -842,26 +822,6 @@ export default function MatchesAdminPage() {
         setError('Chyba při hromadné aktualizaci');
       }
     }
-  };
-
-  /**
-   * @description Generates matchweek options based on the selected category.
-   * @deprecated Matchweek count is now fixed to 22 for all categories, needs to be refactored, this should be combo of season+category in future
-   * @returns Array of matchweek options
-   */
-  // Helper function to generate matchweek options based on category
-  const getMatchweekOptions = () => {
-    const options = [];
-    // Add "No matchweek" option
-    options.push({value: '', label: 'Bez kola'});
-
-    const maxMatchweeks = 22; // Default to 20 matchweeks since column doesn't exist
-
-    // Add matchweek numbers based on category setting
-    for (let i = 1; i <= maxMatchweeks; i++) {
-      options.push({value: i.toString(), label: `${i}. kolo`});
-    }
-    return options;
   };
 
   const handleExcelImport = useCallback(
@@ -924,7 +884,7 @@ export default function MatchesAdminPage() {
       actions={[
         {
           label: translations.matches.actions.addMatch,
-          onClick: onAddMatchOpen,
+          onClick: modal.addMatch.onOpen,
           variant: 'solid',
           buttonType: ActionTypes.CREATE,
           isDisabled: isSeasonClosed(),
@@ -932,7 +892,7 @@ export default function MatchesAdminPage() {
         },
         {
           label: translations.matches.actions.bulkUpdateMatchweek,
-          onClick: onBulkUpdateOpen,
+          onClick: modal.bulkUpdate.onOpen,
           buttonType: ActionTypes.UPDATE,
           color: 'secondary',
           isDisabled: isSeasonClosed(),
@@ -1060,12 +1020,12 @@ export default function MatchesAdminPage() {
                             isMatchweekExpanded={isMatchweekExpanded}
                             onAddResult={(match) => {
                               setSelectedMatch(match);
-                              onAddResultOpen();
+                              modal.addResult.onOpen();
                             }}
                             onEditMatch={handleEditMatch}
                             onLineupModalOpen={(match) => {
                               setSelectedMatch(match);
-                              onLineupModalOpen();
+                              modal.lineup.onOpen();
                             }}
                             onDeleteClick={handleDeleteClick}
                             onMatchActionsOpen={(match) => {
@@ -1090,8 +1050,8 @@ export default function MatchesAdminPage() {
 
       {/* Add Match Modal */}
       <AddMatchModal
-        isOpen={isAddMatchOpen}
-        onClose={onAddMatchClose}
+        isOpen={modal.addMatch.isOpen}
+        onClose={modal.addMatch.onClose}
         onAddMatch={handleAddMatch}
         formData={formData}
         setFormData={setFormData}
@@ -1103,8 +1063,8 @@ export default function MatchesAdminPage() {
 
       {/* Add Result Modal */}
       <AddResultModal
-        isOpen={isAddResultOpen}
-        onClose={onAddResultClose}
+        isOpen={modal.addResult.isOpen}
+        onClose={modal.addResult.onClose}
         selectedMatch={selectedMatch}
         resultData={resultData}
         onResultDataChange={setResultData}
@@ -1114,8 +1074,8 @@ export default function MatchesAdminPage() {
 
       {/* Edit Match Modal */}
       <EditMatchModal
-        isOpen={isEditMatchOpen}
-        onClose={onEditMatchClose}
+        isOpen={modal.editMatch.isOpen}
+        onClose={modal.editMatch.onClose}
         selectedMatch={selectedMatch}
         editData={editData}
         onEditDataChange={setEditData}
@@ -1127,8 +1087,8 @@ export default function MatchesAdminPage() {
 
       {/* Bulk Update Matchweek Modal */}
       <BulkUpdateMatchweekModal
-        isOpen={isBulkUpdateOpen}
-        onClose={onBulkUpdateClose}
+        isOpen={modal.bulkUpdate.isOpen}
+        onClose={modal.bulkUpdate.onClose}
         bulkUpdateData={bulkUpdateData}
         onBulkUpdateDataChange={setBulkUpdateData}
         onBulkUpdate={handleBulkUpdateMatchweek}
@@ -1140,8 +1100,8 @@ export default function MatchesAdminPage() {
 
       {/* Lineup Management Modal */}
       <LineupManagerModal
-        isOpen={isLineupModalOpen}
-        onClose={onLineupModalClose}
+        isOpen={modal.lineup.isOpen}
+        onClose={modal.lineup.onClose}
         selectedMatch={selectedMatch}
         members={members}
         onMemberCreated={fetchMembers}
@@ -1178,9 +1138,9 @@ export default function MatchesAdminPage() {
         isOpen={isMatchActionsOpen}
         onClose={onMatchActionsClose}
         match={selectedMatch}
-        onAddResult={onAddResultOpen}
+        onAddResult={modal.addResult.onOpen}
         onEditMatch={handleEditMatch}
-        onLineupModalOpen={onLineupModalOpen}
+        onLineupModalOpen={modal.lineup.onOpen}
         onDeleteClick={handleDeleteClick}
         onMatchProcessOpen={onMatchProcessOpen}
         isSeasonClosed={isSeasonClosed}
