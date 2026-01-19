@@ -1,88 +1,35 @@
-import {buildDeleteQuery, buildInsertQuery, buildUpdateQuery} from '@/queries';
 import {DB_TABLE, ENTITY} from '@/queries/categoryLineups';
-import {QueryContext, QueryResult} from '@/queries/shared/types';
+import {createMutationHelpers} from '@/queries/shared/createMutationHelpers';
+import {QueryContext} from '@/queries/shared/types';
 import {CategoryLineup, CreateCategoryLineup} from '@/types';
 
-export async function createCategoryLineup(
-  ctx: QueryContext,
-  data: CreateCategoryLineup
-): Promise<QueryResult<CategoryLineup>> {
-  try {
-    const query = buildInsertQuery(ctx.supabase, DB_TABLE, data);
-    const {data: lineup, error} = await query;
+/**
+ * CRUD mutations for CategoryLineups
+ * Uses memoized createMutationHelpers factory
+ */
 
-    if (error) {
-      return {
-        data: null,
-        error: error.message,
-      };
-    }
+// Memoized helper instance
+let helpers: ReturnType<typeof createMutationHelpers<CategoryLineup, CreateCategoryLineup>> | null =
+  null;
 
-    return {
-      data: lineup as unknown as CategoryLineup,
-      error: null,
-    };
-  } catch (err: any) {
-    console.error(`Exception in create${ENTITY.singular}:`, err);
-    return {
-      data: null,
-      error: err.message || 'Unknown error',
-    };
+const getHelpers = () => {
+  if (!helpers) {
+    helpers = createMutationHelpers<CategoryLineup, CreateCategoryLineup>({
+      tableName: DB_TABLE,
+      entityName: ENTITY.singular,
+    });
   }
-}
+  return helpers;
+};
 
-export async function updateCategoryLineup(
+// Export mutation functions
+export const createCategoryLineup = (ctx: QueryContext, data: CreateCategoryLineup) =>
+  getHelpers().create(ctx, data);
+
+export const updateCategoryLineup = (
   ctx: QueryContext,
   id: string,
   data: Partial<CreateCategoryLineup>
-): Promise<QueryResult<CategoryLineup>> {
-  try {
-    const query = buildUpdateQuery(ctx.supabase, DB_TABLE, id, data);
-    const {data: lineup, error} = await query;
+) => getHelpers().update(ctx, id, data);
 
-    if (error) {
-      return {
-        data: null,
-        error: error.message,
-      };
-    }
-    return {
-      data: lineup as unknown as CategoryLineup,
-      error: null,
-    };
-  } catch (err: any) {
-    console.error(`Exception in update${ENTITY.singular}:`, err);
-    return {
-      data: null,
-      error: err.message || 'Unknown error',
-    };
-  }
-}
-
-export async function deleteCategoryLineup(
-  ctx: QueryContext,
-  id: string
-): Promise<QueryResult<{success: boolean}>> {
-  try {
-    const query = buildDeleteQuery(ctx.supabase, DB_TABLE, id);
-    const {error} = await query;
-
-    if (error) {
-      return {
-        data: null,
-        error: error.message,
-      };
-    }
-
-    return {
-      data: {success: true},
-      error: null,
-    };
-  } catch (err: any) {
-    console.error(`Exception in delete${ENTITY.singular}:`, err);
-    return {
-      data: null,
-      error: err.message || 'Unknown error',
-    };
-  }
-}
+export const deleteCategoryLineup = (ctx: QueryContext, id: string) => getHelpers().delete(ctx, id);

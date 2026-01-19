@@ -178,13 +178,16 @@ export default function AddPostModal({
                 label="Stav"
                 placeholder="Vyberte stav"
                 selectedKeys={[formData.status]}
+                aria-label="stav"
                 onSelectionChange={(keys) =>
                   handleInputChange('status', Array.from(keys)[0] as string)
                 }
                 isRequired
               >
                 {getBlogPostStatusOptions().map(({value, label}) => (
-                  <SelectItem key={value}>{label}</SelectItem>
+                  <SelectItem key={value} aria-label={value}>
+                    {label}
+                  </SelectItem>
                 ))}
               </Select>
 

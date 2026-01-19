@@ -7,3 +7,5 @@ export {
 } from './queryBuilder';
 
 export {handleSupabasePaginationBug} from './utils';
+
+export {createMutationHelpers} from './createMutationHelpers';

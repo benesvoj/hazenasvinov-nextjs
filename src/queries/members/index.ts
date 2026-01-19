@@ -27,3 +27,5 @@ export type {
   MemberFunction,
   MemberPayment,
 } from './types';
+
+export {DB_TABLE, ENTITY} from './constants';
