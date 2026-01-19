@@ -3,22 +3,23 @@
 import React, {useState} from 'react';
 
 import {
+  Button,
   Card,
   CardBody,
-  Button,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
   Chip,
   Select,
   SelectItem,
-  useDisclosure,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
 } from '@heroui/react';
 
-import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {PencilIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
+
+import {useModal, useModalWithItem} from '@/hooks/useModals';
 
 import {DeleteConfirmationModal} from '@/components';
 import {useMemberPayments} from '@/hooks';
@@ -36,9 +37,8 @@ export default function MemberPaymentsTab({member}: MemberPaymentsTabProps) {
 
   const {payments, loading, deletePayment} = useMemberPayments(member.id, selectedYear);
 
-  const {isOpen: isFormOpen, onOpen: onFormOpen, onClose: onFormClose} = useDisclosure();
-
-  const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
+  const modal = useModal();
+  const deleteModal = useModalWithItem<MembershipFeePayment>();
 
   const [selectedPayment, setSelectedPayment] = useState<MembershipFeePayment | null>(null);
 
@@ -58,13 +58,13 @@ export default function MemberPaymentsTab({member}: MemberPaymentsTabProps) {
 
   const handleEdit = (payment: MembershipFeePayment) => {
     setSelectedPayment(payment);
-    onFormOpen();
+    modal.onOpen();
   };
 
   const handleDelete = async () => {
     if (selectedPayment) {
       await deletePayment(selectedPayment.id);
-      onDeleteClose();
+      deleteModal.onClose();
     }
   };
 
@@ -122,7 +122,7 @@ export default function MemberPaymentsTab({member}: MemberPaymentsTabProps) {
           startContent={<PlusIcon className="w-5 h-5" />}
           onPress={() => {
             setSelectedPayment(null);
-            onFormOpen();
+            modal.onOpen();
           }}
         >
           Přidat platbu
@@ -176,7 +176,7 @@ export default function MemberPaymentsTab({member}: MemberPaymentsTabProps) {
                     color="danger"
                     onPress={() => {
                       setSelectedPayment(payment);
-                      onDeleteOpen();
+                      deleteModal.onOpen();
                     }}
                   >
                     <TrashIcon className="w-4 h-4" />
@@ -190,16 +190,16 @@ export default function MemberPaymentsTab({member}: MemberPaymentsTabProps) {
 
       {/* Modals */}
       <PaymentFormModal
-        isOpen={isFormOpen}
-        onClose={onFormClose}
+        isOpen={modal.isOpen}
+        onClose={modal.onClose}
         payment={selectedPayment}
         member={member}
         defaultYear={selectedYear}
       />
 
       <DeleteConfirmationModal
-        isOpen={isDeleteOpen}
-        onClose={onDeleteClose}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
         onConfirm={handleDelete}
         title="Smazat platbu"
         message="Opravdu chcete smazat tuto platbu?"

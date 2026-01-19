@@ -3,21 +3,23 @@
 import React, {useMemo, useState} from 'react';
 
 import {
+  Button,
+  Pagination,
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
   TableRow,
-  Button,
-  Pagination,
 } from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
+import {isEmpty} from '@/utils/arrayHelper';
+
 import {ActionTypes} from '@/enums';
 import {getDefaultActionIcon} from '@/helpers';
-import {UnifiedTableProps, ColumnType, ActionConfig} from '@/types';
+import {ActionConfig, ColumnType, UnifiedTableProps} from '@/types';
 
 export default function UnifiedTable<T = any>({
   columns,
@@ -110,11 +112,11 @@ export default function UnifiedTable<T = any>({
 
   // Render action column
   const renderActionColumn = (item: T, column: ColumnType<T>) => {
-    if (!column.actions || column.actions.length === 0) return null;
+    if (isEmpty(column.actions)) return null;
 
     return (
       <div className="flex justify-center gap-2">
-        {column.actions.map((action, index) => {
+        {column?.actions?.map((action, index) => {
           const isDisabled = action.disabled ? action.disabled(item) : false;
           const icon = action.icon || getDefaultIcon(action.type);
           const color = action.color || getDefaultColor(action.type);

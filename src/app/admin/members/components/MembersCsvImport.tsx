@@ -1,25 +1,25 @@
 // TODO: direct supbase imports to /supabase instead of /utils/supabase/client
-import React, {useState, useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 
 import {
   Modal,
-  ModalContent,
-  ModalHeader,
   ModalBody,
+  ModalContent,
   ModalFooter,
+  ModalHeader,
   useDisclosure,
 } from '@heroui/modal';
-import {Select, SelectItem, Button, Input, Checkbox} from '@heroui/react';
+import {Button, Checkbox, Input, Select, SelectItem} from '@heroui/react';
 
 import {
+  CheckCircleIcon,
   DocumentArrowUpIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 
 import {createClient} from '@/utils/supabase/client';
 
-import {Genders, getMemberFunctionOptions, MemberFunction, getGenderOptions} from '@/enums';
+import {Genders, getGenderOptions, getMemberFunctionOptions, MemberFunction} from '@/enums';
 
 interface CsvMember {
   regNumber: string;
@@ -40,12 +40,7 @@ interface MembersCsvImportProps {
   sexOptions: Record<string, string>;
 }
 
-export default function MembersCsvImport({
-  onImportComplete,
-  categories,
-  sexOptions,
-}: MembersCsvImportProps) {
-  const {isOpen, onOpen, onClose} = useDisclosure();
+export default function MembersCsvImport({onImportComplete, categories}: MembersCsvImportProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<CsvMember[]>([]);
   const [importing, setImporting] = useState(false);
@@ -53,6 +48,8 @@ export default function MembersCsvImport({
   const [defaultCategory, setDefaultCategory] = useState(Genders.MALE);
   const [defaultSex, setDefaultSex] = useState<Genders>(Genders.MALE);
   const [defaultFunctions, setDefaultFunctions] = useState<string[]>([MemberFunction.PLAYER]);
+
+  const {isOpen, onOpen, onClose} = useDisclosure();
 
   const supabase = createClient();
 
@@ -71,10 +68,7 @@ export default function MembersCsvImport({
       const firstLine = lines[0];
       const separator = firstLine.includes(';') ? ';' : ',';
 
-      console.log('🔍 Detected CSV separator:', separator);
-
       // Parse header and data
-      const header = firstLine.split(separator).map((h) => h.trim().toLowerCase());
       const data: CsvMember[] = [];
 
       for (let i = 1; i < lines.length; i++) {

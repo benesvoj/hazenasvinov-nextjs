@@ -10,6 +10,7 @@ import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
 
 import {translations} from '@/lib/translations';
 
+import {hasItems, isEmpty} from '@/utils/arrayHelper';
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
 import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
 import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
@@ -236,12 +237,12 @@ export default function MatchesAdminPage() {
     seasonsLoading ||
     allTeamsLoading ||
     membersLoading ||
-    categories.length === 0 ||
-    members.length === 0;
+    isEmpty(categories) ||
+    isEmpty(members);
 
   // Set active season as default when seasons are loaded
   useEffect(() => {
-    if (sortedSeasons.length > 0 && !selectedSeason && activeSeason) {
+    if (hasItems(sortedSeasons) && !selectedSeason && activeSeason) {
       setSelectedSeason(activeSeason.id);
     }
   }, [sortedSeasons, selectedSeason, activeSeason]);
@@ -258,7 +259,7 @@ export default function MatchesAdminPage() {
 
   // Set first category as default when categories are loaded
   useEffect(() => {
-    if (categories.length > 0 && !selectedCategory) {
+    if (hasItems(categories) && !selectedCategory) {
       setSelectedCategory(categories[0].id);
     }
   }, [categories, selectedCategory]);
@@ -313,7 +314,7 @@ export default function MatchesAdminPage() {
         (s) => s.category_id === selectedCategory && s.season_id === selectedSeason
       );
 
-      if (existingStandings.length === 0) {
+      if (isEmpty(existingStandings)) {
         // No standings exist - generate initial ones
         await handleGenerateInitialStandings();
       } else {
@@ -594,7 +595,7 @@ export default function MatchesAdminPage() {
     });
 
     // Ensure filteredTeams is loaded for this category
-    if (match.category_id && selectedSeason && filteredTeams.length === 0) {
+    if (match.category_id && selectedSeason && isEmpty(filteredTeams)) {
       fetchFilteredTeams(match.category_id, selectedSeason);
     }
 
@@ -782,7 +783,7 @@ export default function MatchesAdminPage() {
           (match) => match.category_id === bulkUpdateData.categoryId && !match.matchweek
         );
 
-        if (matchesToUpdate.length === 0) {
+        if (isEmpty(matchesToUpdate)) {
           setError('Nebyly nalezeny žádné zápasy bez kola pro vybranou kategorii');
           return;
         }
@@ -798,7 +799,7 @@ export default function MatchesAdminPage() {
             match.matchweek !== undefined
         );
 
-        if (matchesToUpdate.length === 0) {
+        if (isEmpty(matchesToUpdate)) {
           setError('Nebyly nalezeny žádné zápasy s kolem pro vybranou kategorii');
           return;
         }
@@ -890,7 +891,7 @@ export default function MatchesAdminPage() {
           showToast.success(t.toasts.matchSuccessImport);
         }
 
-        if (result.errors.length > 0) {
+        if (hasItems(result.errors)) {
           console.error('Import errors:', result.errors);
           setError(
             `Import dokončen s chybami. Úspěšně: ${result.success}, Selhalo: ${result.failed}. Zkontrolujte konzoli pro detaily.`
@@ -912,11 +913,11 @@ export default function MatchesAdminPage() {
     ]
   );
 
-  const generateStandingsLabel =
+  const generateStandingsLabel = isEmpty(
     standings.filter((s) => s.category_id === selectedCategory && s.season_id === selectedSeason)
-      .length === 0
-      ? translations.matches.actions.generateStandings
-      : translations.matches.actions.recalculateStandings;
+  )
+    ? translations.matches.actions.generateStandings
+    : translations.matches.actions.recalculateStandings;
 
   return (
     <AdminContainer
@@ -972,7 +973,7 @@ export default function MatchesAdminPage() {
       ]}
       filters={
         <div className="w-full">
-          {sortedSeasons.length === 0 ? (
+          {isEmpty(sortedSeasons) ? (
             <div className="w-full flex justify-center items-center">
               <LoadingSpinner />
             </div>
@@ -1036,7 +1037,7 @@ export default function MatchesAdminPage() {
                         {/* Show loading or no category message */}
                         {!selectedCategoryId && (
                           <div className="text-center py-8 text-gray-500">
-                            {categories.length === 0
+                            {isEmpty(categories)
                               ? 'Načítání kategorií...'
                               : 'Vyberte kategorii pro zobrazení zápasů'}
                           </div>

@@ -4,6 +4,8 @@ import {useEffect, useState} from 'react';
 
 import {redirect} from 'next/navigation';
 
+import {useModalWithItem} from '@/hooks/useModals';
+
 import {useUser} from '@/contexts/UserContext';
 
 import {
@@ -52,7 +54,8 @@ export default function AdminDashboard() {
     todos: todosData || [],
     todoFilter,
   });
-  const todoModal = useCustomModal();
+  // const todoModal = useCustomModal();
+  const todoModal = useModalWithItem<TodoItem>();
 
   const {
     data: commentsData,

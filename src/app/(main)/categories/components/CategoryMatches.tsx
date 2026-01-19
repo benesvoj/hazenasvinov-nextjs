@@ -17,6 +17,8 @@ import {
   Image,
 } from '@heroui/react';
 
+import {isEmpty} from '@/utils/arrayHelper';
+
 import {LoadingSpinner} from '@/components';
 import {formatDateString, formatTime} from '@/helpers';
 import {Match} from '@/types';
@@ -47,7 +49,7 @@ export function CategoryMatches({
   };
 
   const renderMatchesTable = (seasonMatches: Match[], seasonName: string) => {
-    if (seasonMatches.length === 0) {
+    if (isEmpty(seasonMatches)) {
       return (
         <div className="text-center text-gray-500 dark:text-gray-400 py-8">
           <p>Pro {seasonName} zatím nejsou k dispozici žádné zápasy.</p>
@@ -186,7 +188,7 @@ export function CategoryMatches({
   }
 
   // Check if there are any matches at all
-  if (matches.autumn.length === 0 && matches.spring.length === 0) {
+  if (isEmpty(matches.autumn) && isEmpty(matches.spring)) {
     return <CategoryMatchesFallback categoryName={categoryName} />;
   }
 

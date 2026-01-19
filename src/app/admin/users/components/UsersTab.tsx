@@ -4,45 +4,46 @@ import {useState} from 'react';
 
 import {
   Avatar,
-  Input,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
   Button,
   Card,
   CardBody,
   CardHeader,
+  Chip,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
   TableRow,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  useDisclosure,
-  Chip,
 } from '@heroui/react';
 
 import {
-  PlusIcon,
   EllipsisVerticalIcon,
-  PencilIcon,
+  EnvelopeIcon,
+  KeyIcon,
   LockClosedIcon,
   LockOpenIcon,
-  KeyIcon,
+  PencilIcon,
+  PlusIcon,
   UserIcon,
-  EnvelopeIcon,
 } from '@heroicons/react/24/outline';
+
+import {useModals} from '@/hooks/useModals';
 
 import RoleAssignmentModal from '@/app/admin/users/components/RoleAssignmentModal';
 import UserFormModal from '@/app/admin/users/components/UserFormModal';
 
-import {showToast, LoadingSpinner} from '@/components';
+import {LoadingSpinner, showToast} from '@/components';
 import {SupabaseUser} from '@/types';
 
 interface UsersTabProps {
@@ -52,13 +53,7 @@ interface UsersTabProps {
 }
 
 export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) => {
-  const {isOpen: isAddOpen, onOpen: onAddOpen, onOpenChange: onAddOpenChange} = useDisclosure();
-  const {isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange} = useDisclosure();
-  const {
-    isOpen: isPasswordResetOpen,
-    onOpen: onPasswordResetOpen,
-    onOpenChange: onPasswordResetOpenChange,
-  } = useDisclosure();
+  const modal = useModals('add', 'edit', 'passwordReset');
 
   const [selectedUser, setSelectedUser] = useState<SupabaseUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,13 +66,13 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
   // Initialize form data when adding new user
   const handleAddUser = () => {
     setSelectedUser(null);
-    onAddOpen();
+    modal.add.onOpen();
   };
 
   // Initialize form data when editing
   const handleEditUser = (user: SupabaseUser) => {
     setSelectedUser(user);
-    onEditOpen();
+    modal.edit.onOpen();
   };
 
   // Handle form submission for adding/editing users
@@ -108,7 +103,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
       // If it's a new user creation, show role assignment modal
       if (action === 'create' && responseData.userId && responseData.userEmail) {
         // Close the user form modal first
-        onAddOpenChange();
+        modal.add.onOpenChange;
         setSelectedUser(null);
 
         // Then show role assignment modal
@@ -202,7 +197,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
       }
 
       showToast.success('Email pro obnovení hesla byl odeslán');
-      onPasswordResetOpenChange();
+      modal.passwordReset.onOpenChange;
       setPasswordResetEmail('');
     } catch (error) {
       console.error('Error sending password reset:', error);
@@ -355,7 +350,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
                             startContent={<KeyIcon className="w-4 h-4" />}
                             onPress={() => {
                               setPasswordResetEmail(user.email || '');
-                              onPasswordResetOpen();
+                              modal.passwordReset.onOpen();
                             }}
                           >
                             Obnovit heslo
@@ -387,23 +382,27 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
 
       {/* Add/Edit User Modal */}
       <UserFormModal
-        isOpen={isAddOpen || isEditOpen}
-        onOpenChange={isAddOpen ? onAddOpenChange : onEditOpenChange}
+        isOpen={modal.add.isOpen || modal.edit.isOpen}
+        onOpenChange={modal.add.isOpen ? modal.add.onOpenChange : modal.edit.onOpenChange}
         selectedUser={selectedUser}
         onSubmit={handleSubmit}
         onSuccess={() => {
           // Close modal and reset form
-          if (isEditOpen) {
-            onEditOpenChange();
-          } else if (isAddOpen) {
-            onAddOpenChange();
+          if (modal.edit.isOpen) {
+            modal.edit.onOpenChange;
+          } else if (modal.add.isOpen) {
+            modal.add.onOpenChange;
           }
           setSelectedUser(null);
         }}
       />
 
       {/* Password Reset Modal */}
-      <Modal isOpen={isPasswordResetOpen} onOpenChange={onPasswordResetOpenChange} size="md">
+      <Modal
+        isOpen={modal.passwordReset.isOpen}
+        onOpenChange={modal.passwordReset.onOpenChange}
+        size="md"
+      >
         <ModalContent>
           {(onClose) => (
             <>

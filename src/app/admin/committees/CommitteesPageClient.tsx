@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-import {useDisclosure} from '@heroui/react';
-
 import {useQuery} from '@tanstack/react-query';
+
+import {useModal, useModalWithItem} from '@/hooks/useModals';
 
 import {translations} from '@/lib/translations';
 
@@ -18,7 +18,11 @@ import {CommitteeModal} from './components/CommitteeModal';
 
 export function CommitteesPageClient() {
   // Data - NOW using React Query instead of useFetchCommittees
-  const {data = [], isLoading: committeesLoading, refetch} = useQuery({
+  const {
+    data = [],
+    isLoading: committeesLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['committees'],
     queryFn: fetchCommittees,
   });
@@ -47,28 +51,20 @@ export function CommitteesPageClient() {
   const t = translations.admin.committees;
   const tAction = translations.action;
 
-  // Modal states/controls
-  const {
-    isOpen: isCommitteeModalOpen,
-    onOpen: onCommitteeModalOpen,
-    onClose: onCommitteeModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteCommitteeOpen,
-    onOpen: onDeleteCommitteeOpen,
-    onClose: onDeleteCommitteeClose,
-  } = useDisclosure();
+  // Modal states - using helpers for cleaner code
+  const committeeModal = useModal();
+  const deleteModal = useModalWithItem<Committee>();
 
   // Handle modal open for add
   const handleAddClick = () => {
     openAddMode();
-    onCommitteeModalOpen();
+    committeeModal.onOpen();
   };
 
   // Handle modal open for edit
   const handleEditClick = (committee: Committee) => {
     openEditMode(committee);
-    onCommitteeModalOpen();
+    committeeModal.onOpen();
   };
 
   // Handle submit
@@ -88,7 +84,7 @@ export function CommitteesPageClient() {
         setCrudLoading(false);
       }
       await refetch();
-      onCommitteeModalClose();
+      committeeModal.onClose();
       resetForm();
       setCrudLoading(false);
     } catch (error) {
@@ -98,16 +94,14 @@ export function CommitteesPageClient() {
 
   // Handle delete
   const handleDeleteClick = (committee: Committee) => {
-    openEditMode(committee); // Set selected committee
-    onDeleteCommitteeOpen();
+    deleteModal.openWith(committee);
   };
 
   const handleConfirmDelete = async () => {
-    if (selectedCommittee) {
-      await deleteCommittee(selectedCommittee.id);
+    if (deleteModal.selectedItem) {
+      await deleteCommittee(deleteModal.selectedItem.id);
       await refetch();
-      onDeleteCommitteeClose();
-      resetForm();
+      deleteModal.closeAndClear();
       setCrudLoading(false);
     }
   };
@@ -173,8 +167,8 @@ export function CommitteesPageClient() {
       </AdminContainer>
 
       <CommitteeModal
-        isOpen={isCommitteeModalOpen}
-        onClose={onCommitteeModalClose}
+        isOpen={committeeModal.isOpen}
+        onClose={committeeModal.onClose}
         formData={formData}
         setFormData={setFormData}
         onSubmit={handleSubmit}
@@ -183,8 +177,8 @@ export function CommitteesPageClient() {
       />
 
       <DeleteConfirmationModal
-        isOpen={isDeleteCommitteeOpen}
-        onClose={onDeleteCommitteeClose}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeAndClear}
         onConfirm={handleConfirmDelete}
         title={t.deleteCommittee}
         message={t.deleteCommitteeMessage}
