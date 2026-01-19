@@ -24,5 +24,3 @@ export interface ClubCategoryWithRelations extends ClubCategorySchema {
   category: Pick<Category, 'id' | 'name'> | null;
   season: Pick<Season, 'id' | 'name'> | null;
 }
-
-export interface ClubCategoryNew extends ClubCategorySchema {}

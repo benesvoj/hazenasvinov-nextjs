@@ -1,7 +1,7 @@
 import {DB_TABLE, ENTITY} from '@/queries/clubCategories';
 import {createMutationHelpers} from '@/queries/shared/createMutationHelpers';
 import {QueryContext} from '@/queries/shared/types';
-import {ClubCategoryInsert, ClubCategoryNew} from '@/types';
+import {ClubCategoryInsert, ClubCategorySchema} from '@/types';
 
 /**
  * CRUD mutations for ClubCategories
@@ -9,12 +9,13 @@ import {ClubCategoryInsert, ClubCategoryNew} from '@/types';
  */
 
 // Memoized helper instance
-let helpers: ReturnType<typeof createMutationHelpers<ClubCategoryNew, ClubCategoryInsert>> | null =
-  null;
+let helpers: ReturnType<
+  typeof createMutationHelpers<ClubCategorySchema, ClubCategoryInsert>
+> | null = null;
 
 const getHelpers = () => {
   if (!helpers) {
-    helpers = createMutationHelpers<ClubCategoryNew, ClubCategoryInsert>({
+    helpers = createMutationHelpers<ClubCategorySchema, ClubCategoryInsert>({
       tableName: DB_TABLE,
       entityName: ENTITY.singular,
     });
