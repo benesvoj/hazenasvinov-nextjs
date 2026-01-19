@@ -1,88 +1,30 @@
-import {buildDeleteQuery, buildInsertQuery, buildUpdateQuery} from '@/queries';
-import {DB_TABLE, ENTITY} from '@/queries/grants/constants';
-import {QueryContext, QueryResult} from '@/queries/shared/types';
+import {DB_TABLE, ENTITY} from '@/queries/grants';
+import {createMutationHelpers} from '@/queries/shared/createMutationHelpers';
+import {QueryContext} from '@/queries/shared/types';
 import {Grant, GrantInsert} from '@/types';
 
-export async function createGrant(
-  ctx: QueryContext,
-  data: GrantInsert
-): Promise<QueryResult<Grant>> {
-  try {
-    const query = buildInsertQuery(ctx.supabase, DB_TABLE, data);
-    const {data: grant, error} = await query;
+/**
+ * CRUD mutations for Grants
+ * Uses memoized createMutationHelpers factory
+ */
 
-    if (error) {
-      return {
-        data: null,
-        error: error.message,
-      };
-    }
+// Memoized helper instance
+let helpers: ReturnType<typeof createMutationHelpers<Grant, GrantInsert>> | null = null;
 
-    return {
-      data: grant as unknown as Grant,
-      error: null,
-    };
-  } catch (err: any) {
-    console.error(`Exception in create${ENTITY.singular}:`, err);
-    return {
-      data: null,
-      error: err.message || 'Unknown error',
-    };
+const getHelpers = () => {
+  if (!helpers) {
+    helpers = createMutationHelpers<Grant, GrantInsert>({
+      tableName: DB_TABLE,
+      entityName: ENTITY.singular,
+    });
   }
-}
+  return helpers;
+};
 
-export async function updateGrant(
-  ctx: QueryContext,
-  id: string,
-  data: Partial<GrantInsert>
-): Promise<QueryResult<Grant>> {
-  try {
-    const query = buildUpdateQuery(ctx.supabase, DB_TABLE, id, data);
-    const {data: grant, error} = await query;
+// Export mutation functions
+export const createGrant = (ctx: QueryContext, data: GrantInsert) => getHelpers().create(ctx, data);
 
-    if (error) {
-      return {
-        data: null,
-        error: error.message,
-      };
-    }
-    return {
-      data: grant as unknown as Grant,
-      error: null,
-    };
-  } catch (err: any) {
-    console.error(`Exception in update${ENTITY.singular}:`, err);
-    return {
-      data: null,
-      error: err.message || 'Unknown error',
-    };
-  }
-}
+export const updateGrant = (ctx: QueryContext, id: string, data: Partial<GrantInsert>) =>
+  getHelpers().update(ctx, id, data);
 
-export async function deleteGrant(
-  ctx: QueryContext,
-  id: string
-): Promise<QueryResult<{success: boolean}>> {
-  try {
-    const query = buildDeleteQuery(ctx.supabase, DB_TABLE, id);
-    const {error} = await query;
-
-    if (error) {
-      return {
-        data: null,
-        error: error.message,
-      };
-    }
-
-    return {
-      data: {success: true},
-      error: null,
-    };
-  } catch (err: any) {
-    console.error(`Exception in delete${ENTITY.singular}:`, err);
-    return {
-      data: null,
-      error: err.message || 'Unknown error',
-    };
-  }
-}
+export const deleteGrant = (ctx: QueryContext, id: string) => getHelpers().delete(ctx, id);

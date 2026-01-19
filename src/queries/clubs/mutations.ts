@@ -1,85 +1,30 @@
-import {buildDeleteQuery, buildInsertQuery, buildUpdateQuery} from '@/queries';
-import {DB_TABLE, ENTITY} from "@/queries/clubs";
-import {QueryContext, QueryResult} from '@/queries/shared/types';
+import {DB_TABLE, ENTITY} from '@/queries/clubs';
+import {createMutationHelpers} from '@/queries/shared/createMutationHelpers';
+import {QueryContext} from '@/queries/shared/types';
 import {Club, ClubInsert} from '@/types';
 
-export async function createClub(ctx: QueryContext, data: ClubInsert): Promise<QueryResult<Club>> {
-	try {
-		const query = buildInsertQuery(ctx.supabase, DB_TABLE, data);
-		const {data: club, error} = await query;
+/**
+ * CRUD mutations for Club
+ * Uses memoized createMutationHelpers factory
+ */
 
-		if (error) {
-			return {
-				data: null,
-				error: error.message,
-			};
-		}
+// Memoized helper instance
+let helpers: ReturnType<typeof createMutationHelpers<Club, ClubInsert>> | null = null;
 
-		return {
-			data: club as unknown as Club,
-			error: null,
-		};
-	} catch (err: any) {
-		console.error(`Exception in create${ENTITY.singular}:`, err);
-		return {
-			data: null,
-			error: err.message || 'Unknown error',
-		};
-	}
-}
+const getHelpers = () => {
+  if (!helpers) {
+    helpers = createMutationHelpers<Club, ClubInsert>({
+      tableName: DB_TABLE,
+      entityName: ENTITY.singular,
+    });
+  }
+  return helpers;
+};
 
-export async function updateClub(
-	ctx: QueryContext,
-	id: string,
-	data: Partial<ClubInsert>
-): Promise<QueryResult<Club>> {
-	try {
-		const query = buildUpdateQuery(ctx.supabase, DB_TABLE, id, data);
-		const {data: club, error} = await query;
+// Export mutation functions
+export const createClub = (ctx: QueryContext, data: ClubInsert) => getHelpers().create(ctx, data);
 
-		if (error) {
-			return {
-				data: null,
-				error: error.message,
-			};
-		}
-		return {
-			data: club as unknown as Club,
-			error: null,
-		};
-	} catch (err: any) {
-		console.error(`Exception in update${ENTITY.singular}:`, err);
-		return {
-			data: null,
-			error: err.message || 'Unknown error',
-		};
-	}
-}
+export const updateClub = (ctx: QueryContext, id: string, data: Partial<ClubInsert>) =>
+  getHelpers().update(ctx, id, data);
 
-export async function deleteClub(
-	ctx: QueryContext,
-	id: string
-): Promise<QueryResult<{ success: boolean }>> {
-	try {
-		const query = buildDeleteQuery(ctx.supabase, DB_TABLE, id);
-		const {error} = await query;
-
-		if (error) {
-			return {
-				data: null,
-				error: error.message,
-			};
-		}
-
-		return {
-			data: {success: true},
-			error: null,
-		};
-	} catch (err: any) {
-		console.error(`Exception in delete${ENTITY.singular}:`, err);
-		return {
-			data: null,
-			error: err.message || 'Unknown error',
-		};
-	}
-}
+export const deleteClub = (ctx: QueryContext, id: string) => getHelpers().delete(ctx, id);
