@@ -14,25 +14,6 @@ import {QueryContext, QueryResult} from '@/queries/shared/types';
  *
  * @returns Object with create, update, delete functions
  *
- * @example
- * ```typescript
- * // Before (88 lines):
- * export async function createSeason(ctx, data) { ... }
- * export async function updateSeason(ctx, id, data) { ... }
- * export async function deleteSeason(ctx, id) { ... }
- *
- * // After (3 lines):
- * import {createMutationHelpers} from '@/queries/shared/createMutationHelpers';
- *
- * export const {
- *   create: createSeason,
- *   update: updateSeason,
- *   delete: deleteSeason,
- * } = createMutationHelpers<Season, SeasonInsert>({
- *   tableName: 'seasons',
- *   entityName: 'Season',
- * });
- * ```
  */
 export function createMutationHelpers<TSchema, TInsert extends Record<string, any>>(config: {
   tableName: string;
