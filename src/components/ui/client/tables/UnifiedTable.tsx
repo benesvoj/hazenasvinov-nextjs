@@ -116,7 +116,7 @@ export default function UnifiedTable<T = any>({
 
     return (
       <div className="flex justify-center gap-2">
-        {column?.actions?.map((action, index) => {
+        {column.actions?.map((action, index) => {
           const isDisabled = action.disabled ? action.disabled(item) : false;
           const icon = action.icon || getDefaultIcon(action.type);
           const color = action.color || getDefaultColor(action.type);

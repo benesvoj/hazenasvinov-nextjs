@@ -247,7 +247,7 @@ export default function ClubDetailPage() {
       if (error) throw error;
 
       modal.Edit.onClose();
-      fetchClub();
+      await fetchClub();
       setError('');
     } catch (error) {
       setError('Chyba při aktualizaci klubu');
@@ -272,8 +272,8 @@ export default function ClubDetailPage() {
       if (error) throw error;
 
       deleteTeamModal.closeAndClear();
-      fetchClubTeams();
-      fetchClubCategories(); // Also refresh category to update team counts
+      await fetchClubTeams();
+      await fetchClubCategories(); // Also refresh category to update team counts
       setError('');
     } catch (error) {
       setError('Chyba při mazání týmu');

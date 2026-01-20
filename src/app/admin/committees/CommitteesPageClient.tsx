@@ -98,11 +98,13 @@ export function CommitteesPageClient() {
   };
 
   const handleConfirmDelete = async () => {
-    if (deleteModal.selectedItem) {
-      await deleteCommittee(deleteModal.selectedItem.id);
+    if (!deleteModal.selectedItem) return;
+
+    const success = await deleteCommittee(deleteModal.selectedItem.id);
+
+    if (success) {
       await refetch();
       deleteModal.closeAndClear();
-      setCrudLoading(false);
     }
   };
 

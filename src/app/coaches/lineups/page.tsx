@@ -127,7 +127,6 @@ export default function CoachesLineupsPage() {
       }
       await refetch();
       deleteModal.closeAndClear();
-      resetForm();
     } catch (err) {
       console.error(`Error deleting ${type}:`, err);
     }

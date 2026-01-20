@@ -52,21 +52,17 @@ export default function MemberFunctionsAdminPage() {
   };
 
   const handleDelete = (item: MemberFunction) => {
-    openEditMode(item);
-    deleteModal.onOpen();
+    deleteModal.openWith(item);
   };
 
   const handleConfirmDelete = async () => {
-    try {
-      if (selectedFunction) {
-        await deleteMemberFunction(selectedFunction.id);
-        await refetch();
-        deleteModal.onClose();
-        resetForm();
-      }
-    } catch (error) {
-      console.error(error);
-      showToast.danger(tCommon.responseMessage.unknownError);
+    if (!deleteModal.selectedItem) return;
+
+    const success = await deleteMemberFunction(deleteModal.selectedItem.id);
+
+    if (success) {
+      await refetch();
+      deleteModal.closeAndClear();
     }
   };
 

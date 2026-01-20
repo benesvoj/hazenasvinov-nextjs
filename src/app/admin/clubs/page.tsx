@@ -62,16 +62,17 @@ export default function ClubsAdminPage() {
   };
 
   const handleDeleteClick = (club: Club) => {
-    openEditMode(club);
-    deleteModal.onOpen();
+    deleteModal.openWith(club);
   };
 
   const handleConfirmDelete = async () => {
-    if (selectedClub) {
-      await deleteClub(selectedClub.id);
+    if (!deleteModal.selectedItem) return;
+
+    const success = await deleteClub(deleteModal.selectedItem.id);
+
+    if (success) {
       await refetch();
-      deleteModal.onClose();
-      resetForm();
+      deleteModal.closeAndClear();
     }
   };
 

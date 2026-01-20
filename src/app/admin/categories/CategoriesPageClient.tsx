@@ -87,16 +87,17 @@ export function CategoriesPageClient() {
   };
 
   const handleDelete = async (category: Category) => {
-    openEditMode(category);
-    deleteModal.onOpen();
+    deleteModal.openWith(category);
   };
 
   const handleConfirmDelete = async () => {
-    if (selectedCategory) {
-      await deleteCategory(selectedCategory.id);
+    if (!deleteModal.selectedItem) return;
+
+    const success = await deleteCategory(deleteModal.selectedItem.id);
+
+    if (success) {
       await refetch();
-      deleteModal.onClose();
-      resetForm();
+      deleteModal.closeAndClear();
     }
   };
 

@@ -98,18 +98,16 @@ export function SeasonsPageClient() {
 
   // Handle delete
   const handleDeleteClick = (season: Season) => {
-    openEditMode(season);
-    deleteModal.onOpen();
+    deleteModal.openWith(season);
   };
 
   const handleDeleteConfirm = async () => {
-    if (selectedSeason) {
-      const success = await deleteSeason(selectedSeason.id);
+    if (deleteModal.selectedItem) {
+      const success = await deleteSeason(deleteModal.selectedItem.id);
 
       if (success) {
         await refetch();
-        resetForm();
-        deleteModal.onClose();
+        deleteModal.closeAndClear();
       }
     }
   };

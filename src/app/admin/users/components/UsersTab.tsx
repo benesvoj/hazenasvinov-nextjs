@@ -103,7 +103,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
       // If it's a new user creation, show role assignment modal
       if (action === 'create' && responseData.userId && responseData.userEmail) {
         // Close the user form modal first
-        modal.add.onOpenChange;
+        modal.add.onClose();
         setSelectedUser(null);
 
         // Then show role assignment modal
@@ -197,7 +197,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
       }
 
       showToast.success('Email pro obnovení hesla byl odeslán');
-      modal.passwordReset.onOpenChange;
+      modal.passwordReset.onClose();
       setPasswordResetEmail('');
     } catch (error) {
       console.error('Error sending password reset:', error);
@@ -258,7 +258,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
                 Spravujte uživatele, kteří mají přístup do administrace
               </p>
             </div>
-            <div className="ml-4 flex-shrink-0">
+            <div className="ml-4 shrink-0">
               <Button
                 color="primary"
                 size="sm"
@@ -389,9 +389,9 @@ export const UsersTab: React.FC<UsersTabProps> = ({users, loading, onRefresh}) =
         onSuccess={() => {
           // Close modal and reset form
           if (modal.edit.isOpen) {
-            modal.edit.onOpenChange;
+            modal.edit.onClose();
           } else if (modal.add.isOpen) {
-            modal.add.onOpenChange;
+            modal.add.onClose();
           }
           setSelectedUser(null);
         }}
