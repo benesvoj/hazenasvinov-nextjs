@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, {useMemo, useState} from 'react';
 
 import {useDisclosure} from '@heroui/react';
 
@@ -15,6 +15,13 @@ export interface ModalState {
 }
 
 /**
+ * Extended modal state with toggle functionality
+ */
+export interface ModalStateWithToggle extends ModalState {
+  onToggle: () => void;
+}
+
+/**
  * Simple alias for useDisclosure - for single modal cases.
  * Use this when you only have one modal in a component.
  *
@@ -26,7 +33,7 @@ export interface ModalState {
  * <Modal isOpen={modal.isOpen} onClose={modal.onClose}>...</Modal>
  * ```
  */
-export function useModal(): ModalState & {onToggle: () => void} {
+export function useModal(): ModalStateWithToggle {
   const disclosure = useDisclosure();
   return {
     ...disclosure,
@@ -34,93 +41,39 @@ export function useModal(): ModalState & {onToggle: () => void} {
   };
 }
 
-// Function overloads for type-safe useModals with 2-5 arguments
-export function useModals<K1 extends string, K2 extends string>(
-  name1: K1,
-  name2: K2
-): {[K in K1 | K2]: ModalState};
-
-export function useModals<K1 extends string, K2 extends string, K3 extends string>(
-  name1: K1,
-  name2: K2,
-  name3: K3
-): {[K in K1 | K2 | K3]: ModalState};
-
-export function useModals<
-  K1 extends string,
-  K2 extends string,
-  K3 extends string,
-  K4 extends string,
->(name1: K1, name2: K2, name3: K3, name4: K4): {[K in K1 | K2 | K3 | K4]: ModalState};
-
-export function useModals<
-  K1 extends string,
-  K2 extends string,
-  K3 extends string,
-  K4 extends string,
-  K5 extends string,
->(
-  name1: K1,
-  name2: K2,
-  name3: K3,
-  name4: K4,
-  name5: K5
-): {[K in K1 | K2 | K3 | K4 | K5]: ModalState};
-
 /**
  * Creates a typed record of modal states from modal names.
- * Supports 2-5 modals with full type inference.
+ * Supports unlimited number of modals with full type inference.
  *
  * @example
  * ```typescript
- * // 2 modals
- * const modals = useModals('Edit', 'Delete');
- * modals.Edit.isOpen;    // boolean
- * modals.Edit.onOpen();  // open the modal
- * modals.Delete.onClose(); // close the modal
- *
- * // 3 modals
- * const modals = useModals('Add', 'Edit', 'Delete');
- *
- * // 4 modals
- * const modals = useModals('Add', 'Edit', 'Delete', 'Detail');
- *
- * // Use in JSX
- * <Modal isOpen={modals.Edit.isOpen} onClose={modals.Edit.onClose}>
- * <Button onPress={modals.Delete.onOpen}>Delete</Button>
- * ```
- *
- * @example
- * ```typescript
- * // Before (verbose):
- * const {isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose} = useDisclosure();
- * const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
- *
- * // After (clean):
- * const modals = useModals('Edit', 'Delete');
- * // modals.Edit.isOpen, modals.Delete.onOpen, etc.
+ * const modals = useModalsNew('Add', 'Edit', 'Delete', 'Detail', 'Confirm', 'Settings');
+ * modals.Edit.isOpen;     // boolean
+ * modals.Edit.onOpen();   // open the modal
+ * modals.Edit.onToggle(); // toggle the modal
  * ```
  */
-export function useModals(...names: string[]): Record<string, ModalState> {
-  // Always call all 5 hooks to satisfy React's rules of hooks
-  // (hooks must be called in the same order every render)
-  const modal1 = useDisclosure();
-  const modal2 = useDisclosure();
-  const modal3 = useDisclosure();
-  const modal4 = useDisclosure();
-  const modal5 = useDisclosure();
+export function useModals<T extends string>(...names: T[]): Record<T, ModalStateWithToggle> {
+  const [openState, setOpenState] = useState<Record<string, boolean>>({});
 
-  const allModals = [modal1, modal2, modal3, modal4, modal5];
+  // Memoize the names key to avoid unnecessary recalculations
+  const namesKey = names.join(',');
 
-  // Build result object with only the requested modals
-  const result: Record<string, ModalState> = {};
-  names.forEach((name, index) => {
-    if (index < allModals.length) {
-      result[name] = allModals[index];
+  return useMemo(() => {
+    const result = {} as Record<T, ModalStateWithToggle>;
+
+    for (const name of names) {
+      result[name] = {
+        isOpen: openState[name] ?? false,
+        onOpen: () => setOpenState((s) => ({...s, [name]: true})),
+        onClose: () => setOpenState((s) => ({...s, [name]: false})),
+        onOpenChange: (open: boolean) => setOpenState((s) => ({...s, [name]: open})),
+        onToggle: () => setOpenState((s) => ({...s, [name]: !s[name]})),
+      };
     }
-  });
-
-  return result;
+    return result;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openState, namesKey]);
 }
 
 /**

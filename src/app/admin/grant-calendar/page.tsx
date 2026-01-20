@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 
-import {useModal, useModalWithItem} from '@/hooks/useModals';
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {AdminContainer, DeleteConfirmationModal, GrantModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';

@@ -38,7 +38,7 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 
-import {useModals} from '@/hooks/useModals';
+import {useModals} from '@/hooks/shared/useModals';
 
 import RoleAssignmentModal from '@/app/admin/users/components/RoleAssignmentModal';
 import UserFormModal from '@/app/admin/users/components/UserFormModal';

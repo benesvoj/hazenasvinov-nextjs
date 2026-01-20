@@ -6,12 +6,14 @@ import {Button, Input, Select, SelectItem, Textarea} from '@heroui/react';
 
 import {MagnifyingGlassIcon, PhotoIcon, XMarkIcon} from '@heroicons/react/24/outline';
 
+import {useModal} from '@/hooks/shared/useModals';
+
 import MatchSelectionModal from '@/app/admin/posts/components/MatchSelectionModal';
 
 import {UnifiedModal} from '@/components';
 import {getBlogPostStatusOptions, ModalMode} from '@/enums';
 import {formatDateString} from '@/helpers';
-import {useBlogPostForm, useCustomModal} from '@/hooks';
+import {useBlogPostForm} from '@/hooks';
 import {BlogPostFormData, Category, SupabaseUser} from '@/types';
 
 interface BlogPostModalProps {
@@ -25,7 +27,7 @@ interface BlogPostModalProps {
   blogPostForm: ReturnType<typeof useBlogPostForm>;
   mode: ModalMode;
   users: SupabaseUser[];
-  matchModalControl: ReturnType<typeof useCustomModal>;
+  matchModalControl: ReturnType<typeof useModal>;
   isLoading?: boolean;
 }
 

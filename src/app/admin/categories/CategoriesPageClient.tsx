@@ -6,7 +6,7 @@ import {Input, Tab, Tabs} from '@heroui/react';
 
 import {useQuery} from '@tanstack/react-query';
 
-import {useModal, useModalWithItem} from '@/hooks/useModals';
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {getAgeGroupLabel, getGenderLabel, getStatusClasses, getStatusLabel} from '@/helpers/ui';
 

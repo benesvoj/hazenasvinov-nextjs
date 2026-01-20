@@ -1,2 +1,2 @@
-export {default as AddPostModal} from './AddPostModal';
-export {default as EditPostModal} from './EditPostModal';
+export {BlogPostModal} from './BlogPostModal';
+export {getStatusBadge} from './StatusBadge';

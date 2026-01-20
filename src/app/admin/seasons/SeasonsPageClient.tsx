@@ -6,7 +6,7 @@ import {Chip} from '@heroui/react';
 
 import {useQuery} from '@tanstack/react-query';
 
-import {useModal, useModalWithItem} from '@/hooks/useModals';
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {
   AdminContainer,

@@ -4,7 +4,7 @@ import React from 'react';
 
 import {useQuery} from '@tanstack/react-query';
 
-import {useModal, useModalWithItem} from '@/hooks/useModals';
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
 

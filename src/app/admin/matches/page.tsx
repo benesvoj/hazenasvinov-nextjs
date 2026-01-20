@@ -2,12 +2,12 @@
 
 import React, {useCallback, useEffect, useState} from 'react';
 
-import {Alert, Card, CardBody, Select, SelectItem, Tab, Tabs, useDisclosure} from '@heroui/react';
+import {Alert, Card, CardBody, Select, SelectItem, Tab, Tabs} from '@heroui/react';
 
 import {useQueryClient} from '@tanstack/react-query';
 
 import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
-import {useModals} from '@/hooks/useModals';
+import {useModals, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
 
@@ -54,6 +54,9 @@ import {
 } from './components';
 import {getMatchweekOptions} from './helpers/getMatchweekOptions';
 
+// TODO: move into admin translations
+const t = translations.matches;
+
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -69,46 +72,23 @@ export default function MatchesAdminPage() {
   const {teams, loading: allTeamsLoading, fetchTeams} = useTeams();
 
   // Modal states
-  const modal = useModals('addMatch', 'addResult', 'editMatch', 'bulkUpdate', 'lineup');
+  const modal = useModals(
+    'addMatch',
+    'addResult',
+    'editMatch',
+    'bulkUpdate',
+    'lineup',
+    'excelImport',
+    'matchProcess',
+    'deleteAllConfirm'
+  );
+  const deleteConfirm = useModalWithItem<Match>();
+  const matchActions = useModalWithItem<Match>();
 
-  const {
-    isOpen: isExcelImportOpen,
-    onOpen: onExcelImportOpen,
-    onClose: onExcelImportClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteConfirmOpen,
-    onOpen: onDeleteConfirmOpen,
-    onClose: onDeleteConfirmClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteAllConfirmOpen,
-    onOpen: onDeleteAllConfirmOpen,
-    onClose: onDeleteAllConfirmClose,
-  } = useDisclosure();
-  const {
-    isOpen: isMatchActionsOpen,
-    onOpen: onMatchActionsOpen,
-    onClose: onMatchActionsClose,
-  } = useDisclosure();
-  const {
-    isOpen: isMatchProcessOpen,
-    onOpen: onMatchProcessOpen,
-    onClose: onMatchProcessClose,
-  } = useDisclosure();
   const {importMatches} = useExcelImport();
-
-  // TODO: move into admin translations
-  const t = translations.matches;
 
   // Use the team display logic hook
   const {fetchTeamCounts} = useTeamDisplayLogic(selectedCategory);
-
-  // Reset matchToDelete when confirmation modal closes
-  const handleDeleteConfirmClose = () => {
-    onDeleteConfirmClose();
-    setMatchToDelete(null);
-  };
 
   // Toggle matchweek expansion
   const toggleMatchweek = (categoryId: string, matchweek: number) => {
@@ -173,7 +153,6 @@ export default function MatchesAdminPage() {
     action: 'set' as 'set' | 'remove',
   });
 
-  const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
   const [expandedMatchweeks, setExpandedMatchweeks] = useState<Set<string>>(new Set());
 
   const supabase = createClient();
@@ -488,15 +467,9 @@ export default function MatchesAdminPage() {
     }
   };
 
-  // Open delete confirmation modal
-  const handleDeleteClick = (match: Match) => {
-    setMatchToDelete(match);
-    onDeleteConfirmOpen();
-  };
-
   // Delete match (after confirmation)
   const handleDeleteMatch = async () => {
-    if (!matchToDelete) return;
+    if (!deleteConfirm.selectedItem) return;
 
     if (isSeasonClosed()) {
       setError('Nelze smazat zápas z uzavřené sezóny');
@@ -504,7 +477,10 @@ export default function MatchesAdminPage() {
     }
 
     try {
-      const {error} = await supabase.from('matches').delete().eq('id', matchToDelete.id);
+      const {error} = await supabase
+        .from('matches')
+        .delete()
+        .eq('id', deleteConfirm.selectedItem.id);
 
       if (error) throw error;
 
@@ -520,7 +496,7 @@ export default function MatchesAdminPage() {
       });
 
       setError('');
-      handleDeleteConfirmClose();
+      deleteConfirm.closeAndClear();
     } catch (error) {
       setError('Chyba při mazání zápasu');
     }
@@ -548,7 +524,7 @@ export default function MatchesAdminPage() {
       });
 
       setError('');
-      onDeleteAllConfirmClose();
+      modal.deleteAllConfirm.onClose();
       setSelectedCategory('');
     } catch (error) {
       setError('Chyba při mazání všech zápasů');
@@ -862,7 +838,7 @@ export default function MatchesAdminPage() {
         setError(`Import selhal: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
       }
     },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+
     [
       selectedSeason,
       importMatches,
@@ -908,7 +884,7 @@ export default function MatchesAdminPage() {
         },
         {
           label: translations.matches.actions.import,
-          onClick: onExcelImportOpen,
+          onClick: modal.excelImport.onOpen,
           buttonType: ActionTypes.UPDATE,
           color: 'secondary',
           isDisabled: isSeasonClosed(),
@@ -924,7 +900,7 @@ export default function MatchesAdminPage() {
         },
         {
           label: translations.matches.actions.deleteAllMatches,
-          onClick: onDeleteAllConfirmOpen,
+          onClick: modal.deleteAllConfirm.onOpen,
           buttonType: ActionTypes.DELETE,
           color: 'danger',
           isDisabled: isSeasonClosed() || !selectedSeason,
@@ -1027,10 +1003,10 @@ export default function MatchesAdminPage() {
                               setSelectedMatch(match);
                               modal.lineup.onOpen();
                             }}
-                            onDeleteClick={handleDeleteClick}
+                            onDeleteClick={(match) => deleteConfirm.openWith(match)}
                             onMatchActionsOpen={(match) => {
                               setSelectedMatch(match);
-                              onMatchActionsOpen();
+                              matchActions.openWith(match);
                             }}
                             isSeasonClosed={isSeasonClosed()}
                           />
@@ -1109,8 +1085,8 @@ export default function MatchesAdminPage() {
 
       {/* Excel Import Modal */}
       <ExcelImportModal
-        isOpen={isExcelImportOpen}
-        onClose={onExcelImportClose}
+        isOpen={modal.excelImport.isOpen}
+        onClose={modal.excelImport.onClose}
         onImport={handleExcelImport}
         categories={categories}
         teams={teams}
@@ -1119,44 +1095,44 @@ export default function MatchesAdminPage() {
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
-        isOpen={isDeleteConfirmOpen}
-        onClose={handleDeleteConfirmClose}
+        isOpen={deleteConfirm.isOpen}
+        onClose={deleteConfirm.closeAndClear}
         onConfirm={handleDeleteMatch}
         title="Potvrdit smazání zápasu"
         message={`
           Opravdu chcete smazat zápas <strong>${
-            matchToDelete?.home_team?.name || 'Domácí tým'
+            deleteConfirm.selectedItem?.home_team?.name || 'Domácí tým'
           } vs ${
-            matchToDelete?.away_team?.name || 'Hostující tým'
-          }</strong> ze dne ${matchToDelete?.date}?<br><br>
+            deleteConfirm.selectedItem?.away_team?.name || 'Hostující tým'
+          }</strong> ze dne ${deleteConfirm.selectedItem?.date}?<br><br>
           <span class="text-sm text-gray-600">Tato akce je nevratná a smaže všechny související údaje o zápasu.</span>
         `}
       />
 
       {/* Match Actions Modal */}
       <MatchActionsModal
-        isOpen={isMatchActionsOpen}
-        onClose={onMatchActionsClose}
+        isOpen={matchActions.isOpen}
+        onClose={matchActions.onClose}
         match={selectedMatch}
         onAddResult={modal.addResult.onOpen}
         onEditMatch={handleEditMatch}
         onLineupModalOpen={modal.lineup.onOpen}
-        onDeleteClick={handleDeleteClick}
-        onMatchProcessOpen={onMatchProcessOpen}
+        onDeleteClick={() => deleteConfirm.openWith(selectedMatch!)}
+        onMatchProcessOpen={modal.matchProcess.onOpen}
         isSeasonClosed={isSeasonClosed}
       />
 
       {/* Match Process Wizard Modal */}
       <MatchProcessWizardModal
-        isOpen={isMatchProcessOpen}
-        onClose={onMatchProcessClose}
+        isOpen={modal.matchProcess.isOpen}
+        onClose={modal.matchProcess.onClose}
         match={selectedMatch}
       />
 
       {/* Delete All Matches Confirmation Modal */}
       <DeleteConfirmationModal
-        isOpen={isDeleteAllConfirmOpen}
-        onClose={onDeleteAllConfirmClose}
+        isOpen={modal.deleteAllConfirm.isOpen}
+        onClose={modal.deleteAllConfirm.onClose}
         onConfirm={handleDeleteAllMatches}
         title="Potvrdit smazání všech zápasů"
         message={`

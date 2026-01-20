@@ -6,16 +6,14 @@ import {Button, Card, CardBody, CardHeader, Chip, useDisclosure} from '@heroui/r
 
 import {UserPlusIcon} from '@heroicons/react/24/outline';
 
+import {useModal} from '@/hooks/shared/useModals';
+
+import AddMemberModal from '@/app/coaches/lineups/components/AddMemberModal';
 import {getPositionColor, getPositionText} from '@/app/coaches/lineups/helpers/helpers';
 
 import {Heading, UnifiedTable} from '@/components';
 import {ActionTypes, ColumnAlignType} from '@/enums';
-import {
-  useCategoryLineupMember,
-  useCustomModal,
-  useFetchCategories,
-  useFetchCategoryLineupMembers,
-} from '@/hooks';
+import {useCategoryLineupMember, useFetchCategories, useFetchCategoryLineupMembers} from '@/hooks';
 import {translations} from '@/lib';
 import {
   CategoryLineupMemberWithMember,
@@ -23,8 +21,6 @@ import {
   CreateCategoryLineupMemberModal,
   UpdateCategoryLineupMember,
 } from '@/types';
-
-import AddMemberModal from './AddMemberModal';
 
 interface LineupMembersProps {
   lineupId: string;
@@ -44,14 +40,12 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
   const {createLineupMember, updateLineupMember} = useCategoryLineupMember();
   const {data: categories} = useFetchCategories();
 
-  const {
-    isOpen: isAddMemberModalOpen,
-    onOpen: onAddMemberModalOpen,
-    onClose: onAddMemberModalClose,
-  } = useCustomModal();
+  const modal = useModal();
 
   const [deleteOption, setDeleteOption] = useState<string>('');
   const [memberToDelete, setMemberToDelete] = useState<any>(null);
+
+  // TODO: Implement delete functionality
   const {
     isOpen: isDeleteModalOpen,
     onOpen: onDeleteModalOpen,
@@ -59,7 +53,7 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
   } = useDisclosure();
 
   const handleAddMemberToLineup = () => {
-    onAddMemberModalOpen();
+    modal.onOpen();
   };
 
   // Fetch lineup members when lineup changes
@@ -225,8 +219,8 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
       </div>
 
       <AddMemberModal
-        isOpen={isAddMemberModalOpen}
-        onClose={onAddMemberModalClose}
+        isOpen={modal.isOpen}
+        onClose={modal.onClose}
         onAddMember={handleAddMember}
         selectedCategoryName={categories.find((c) => c.id === categoryId)?.name || ''}
         selectedCategoryId={categoryId}

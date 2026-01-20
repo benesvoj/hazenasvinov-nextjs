@@ -9,7 +9,7 @@ import {Tabs, Tab, Input, Button, Image} from '@heroui/react';
 
 import {PencilIcon, UserGroupIcon, TrophyIcon} from '@heroicons/react/24/outline';
 
-import {useModals, useModalWithItem} from '@/hooks/useModals';
+import {useModals, useModalWithItem} from '@/hooks/shared/useModals';
 
 import LogoUpload from '@/components/ui/client/LogoUpload';
 import {DeleteConfirmationModal, UnifiedModal} from '@/components/ui/modals';
@@ -38,7 +38,7 @@ export default function ClubDetailPage() {
   const [error, setError] = useState('');
 
   // Modal states - using useModals helper for cleaner code
-  const modals = useModals('Edit', 'AssignCategory');
+  const modal = useModals('Edit', 'AssignCategory');
   const deleteTeamModal = useModalWithItem<Team>();
 
   // Form states
@@ -246,7 +246,7 @@ export default function ClubDetailPage() {
 
       if (error) throw error;
 
-      modals.Edit.onClose();
+      modal.Edit.onClose();
       fetchClub();
       setError('');
     } catch (error) {
@@ -302,7 +302,7 @@ export default function ClubDetailPage() {
 
       if (error) throw error;
 
-      modals.AssignCategory.onClose();
+      modal.AssignCategory.onClose();
       fetchClubCategories(); // Refresh the list
       setError('');
     } catch (error) {
@@ -405,7 +405,7 @@ export default function ClubDetailPage() {
           <Button
             color="primary"
             startContent={<PencilIcon className="w-4 h-4" />}
-            onPress={modals.Edit.onOpen}
+            onPress={modal.Edit.onOpen}
             size="sm"
           >
             Upravit klub
@@ -464,7 +464,7 @@ export default function ClubDetailPage() {
           <CategoriesTab
             clubCategories={clubCategories}
             categories={categories}
-            onAssignCategory={modals.AssignCategory.onOpen}
+            onAssignCategory={modal.AssignCategory.onOpen}
             onGenerateTeams={handleGenerateTeams}
             onDeleteClubCategory={handleDeleteClubCategory}
           />
@@ -473,8 +473,8 @@ export default function ClubDetailPage() {
 
       {/* Edit Club Modal */}
       <UnifiedModal
-        isOpen={modals.Edit.isOpen}
-        onClose={modals.Edit.onClose}
+        isOpen={modal.Edit.isOpen}
+        onClose={modal.Edit.onClose}
         title={'Upravit klub'}
         size={'lg'}
         onSubmit={handleUpdateClub}
@@ -526,8 +526,8 @@ export default function ClubDetailPage() {
 
       {/* Assign Category Modal */}
       <AssignCategoryModal
-        isOpen={modals.AssignCategory.isOpen}
-        onClose={modals.AssignCategory.onClose}
+        isOpen={modal.AssignCategory.isOpen}
+        onClose={modal.AssignCategory.onClose}
         onAssignCategory={handleAssignCategory}
         clubId={memoizedClubId}
         assignedCategoryIds={clubCategories.map((cc) => cc.category_id)}

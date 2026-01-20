@@ -6,7 +6,7 @@ import {useRouter} from 'next/navigation';
 
 import {Image, Input} from '@heroui/react';
 
-import {useModal, useModalWithItem} from '@/hooks/useModals';
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {ClubFormModal} from '@/app/admin/clubs/components/ClubFormModal';
 

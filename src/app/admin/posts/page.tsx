@@ -2,23 +2,25 @@
 
 import React, {useState} from 'react';
 
-import {Chip, Image, Input, Select, SelectItem} from '@heroui/react';
+import {Image, Input, Select, SelectItem} from '@heroui/react';
 
 import {PhotoIcon, TagIcon} from '@heroicons/react/24/outline';
+
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {uploadClubAsset} from '@/utils/supabase/storage';
 
 import {BlogPostModal} from '@/app/admin/posts/components/BlogPostModal';
+import {getStatusBadge} from '@/app/admin/posts/components/StatusBadge';
 
 import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
 import {adminStatusFilterOptions} from '@/constants';
-import {ActionTypes, BlogPostStatuses, ModalMode} from '@/enums';
+import {ActionTypes, ModalMode} from '@/enums';
 import {formatDateString} from '@/helpers';
 import {
   useBlogPost,
   useBlogPostFiltering,
   useBlogPostForm,
-  useCustomModal,
   useFetchBlog,
   useFetchCategories,
   useFetchUsers,
@@ -26,8 +28,9 @@ import {
 import {translations} from '@/lib';
 import {Blog} from '@/types';
 
+const t = translations.admin.posts;
+
 export default function BlogPostsPage() {
-  const t = translations.admin.posts;
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -45,9 +48,9 @@ export default function BlogPostsPage() {
     categories: categories || [],
   });
 
-  const blogPostModal = useCustomModal();
-  const deleteModal = useCustomModal();
-  const matchModal = useCustomModal();
+  const blogPostModal = useModalWithItem<Blog>();
+  const deleteModal = useModalWithItem<Blog>();
+  const matchModal = useModal();
 
   // Event handlers
   const handleAddPostClick = () => {
@@ -111,7 +114,7 @@ export default function BlogPostsPage() {
         await createBlogPost(sanitizedData);
       }
       await refetchBlog();
-      blogPostModal.onClose();
+      blogPostModal.closeAndClear();
       blogPostForm.resetForm();
     } catch (error) {
       showToast.danger('Chyba při ukládání příspěvku na blog.');
@@ -119,43 +122,16 @@ export default function BlogPostsPage() {
   };
 
   const handleDeletePostClick = (item: Blog) => {
-    blogPostForm.openEditMode(item);
-    deleteModal.onOpen();
+    deleteModal.openWith(item);
   };
 
   const handleDeleteConfirm = async () => {
-    if (blogPostForm.selectedItem) {
-      const success = await deleteBlogPost(blogPostForm.selectedItem.id);
-      if (success) {
-        await refetchBlog();
-        blogPostForm.resetForm();
-        deleteModal.onClose();
-      }
-    }
-  };
+    if (!deleteModal.selectedItem) return;
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case BlogPostStatuses.PUBLISHED:
-        return (
-          <Chip color="success" variant="flat">
-            {adminStatusFilterOptions.published}
-          </Chip>
-        );
-      case BlogPostStatuses.DRAFT:
-        return (
-          <Chip color="warning" variant="flat">
-            {adminStatusFilterOptions.draft}
-          </Chip>
-        );
-      case BlogPostStatuses.ARCHIVED:
-        return (
-          <Chip color="secondary" variant="flat">
-            {adminStatusFilterOptions.archived}
-          </Chip>
-        );
-      default:
-        return null;
+    const success = await deleteBlogPost(deleteModal.selectedItem.id);
+    if (success) {
+      await refetchBlog();
+      deleteModal.closeAndClear();
     }
   };
 
@@ -277,7 +253,7 @@ export default function BlogPostsPage() {
 
       <BlogPostModal
         isOpen={blogPostModal.isOpen}
-        onClose={blogPostModal.onClose}
+        onClose={blogPostModal.closeAndClear}
         onSubmit={handleSubmitPost}
         mode={blogPostForm.modalMode}
         categories={categories || []}
@@ -292,7 +268,7 @@ export default function BlogPostsPage() {
 
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        onClose={deleteModal.closeAndClear}
         onConfirm={handleDeleteConfirm}
         message={t.deletePostMessage}
         title={t.deletePost}

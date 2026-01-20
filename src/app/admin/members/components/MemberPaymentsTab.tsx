@@ -19,7 +19,7 @@ import {
 
 import {PencilIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
 
-import {useModal, useModalWithItem} from '@/hooks/useModals';
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {DeleteConfirmationModal} from '@/components';
 import {useMemberPayments} from '@/hooks';

@@ -1,8 +1,8 @@
 'use client';
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 
-import {useVideos} from '@/hooks/entities/video/state/useVideos';
+import {useModalWithItem} from '@/hooks/shared/useModals';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
@@ -14,7 +14,7 @@ import {
   VideoGrid,
 } from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
-import {useCustomModal, useFetchVideos, useVideoFiltering, useVideoForm} from '@/hooks';
+import {useFetchVideos, useVideoFiltering, useVideoForm, useVideos} from '@/hooks';
 import {translations} from '@/lib';
 import {VideoSchema} from '@/types';
 import {transformToVideoInsert} from '@/utils';
@@ -49,13 +49,16 @@ export default function VideosPage() {
     currentPage,
   });
 
-  const videoFormModal = useCustomModal();
-  const deleteModal = useCustomModal();
+  const videoFormModal = useModalWithItem<VideoSchema>();
+  const deleteModal = useModalWithItem<VideoSchema>();
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters]);
+  const handleFiltersChange = useCallback(
+    (newFilters: typeof filters) => {
+      setFilters(newFilters);
+      setCurrentPage(1);
+    },
+    [setFilters]
+  );
 
   const openAddModal = useCallback(() => {
     openAddMode();
@@ -70,22 +73,17 @@ export default function VideosPage() {
     [openEditMode, videoFormModal]
   );
 
-  const openDeleteModal = useCallback(
-    (item: VideoSchema) => {
-      openEditMode(item);
-      deleteModal.onOpen();
-    },
-    [openEditMode, deleteModal]
-  );
+  const openDeleteModal = (item: VideoSchema) => {
+    deleteModal.openWith(item);
+  };
 
   const handleConfirmDelete = useCallback(async () => {
-    if (selectedItem) {
-      await deleteVideo(selectedItem.id);
+    if (deleteModal.selectedItem) {
+      await deleteVideo(deleteModal.selectedItem.id);
       await refetch();
-      deleteModal.onClose();
-      resetForm();
+      deleteModal.closeAndClear();
     }
-  }, [selectedItem, deleteVideo, refetch, deleteModal, resetForm]);
+  }, [deleteVideo, refetch, deleteModal]);
 
   const handleFormSubmit = useCallback(async () => {
     const {valid, errors} = validateForm();
@@ -104,7 +102,7 @@ export default function VideosPage() {
         await createVideo(videoData);
       }
       await refetch();
-      videoFormModal.onClose();
+      videoFormModal.closeAndClear();
       resetForm();
     } catch (error) {
       console.error(error);
@@ -133,10 +131,10 @@ export default function VideosPage() {
         categories={categories}
         clubs={clubs}
         seasons={seasons}
-        onFiltersChange={setFilters}
+        onFiltersChange={handleFiltersChange}
       />
     ),
-    [filters, categories, clubs, seasons, setFilters]
+    [filters, categories, clubs, seasons, handleFiltersChange]
   );
 
   return (
@@ -170,7 +168,7 @@ export default function VideosPage() {
 
       <VideoFormModal
         isOpen={videoFormModal.isOpen}
-        onClose={videoFormModal.onClose}
+        onClose={videoFormModal.closeAndClear}
         onSubmit={handleFormSubmit}
         formData={formData}
         setFormData={setFormData}
@@ -183,7 +181,7 @@ export default function VideosPage() {
 
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        onClose={deleteModal.closeAndClear}
         onConfirm={handleConfirmDelete}
         title={t.deleteModal.title}
         message={t.deleteModal.description}

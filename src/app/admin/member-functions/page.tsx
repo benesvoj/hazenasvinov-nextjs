@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import {useModal, useModalWithItem} from '@/hooks/useModals';
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
 import {ActionTypes, ColumnAlignType, ModalMode} from '@/enums';
