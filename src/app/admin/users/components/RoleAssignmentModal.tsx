@@ -12,8 +12,6 @@ import {createClient} from '@/utils/supabase/client';
 
 import {CategorySelectionModal} from '@/app/admin/users/components/CategorySelectionModal';
 
-import {useFetchCategories} from '@/hooks';
-
 interface RoleAssignmentModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -45,8 +43,6 @@ export default function RoleAssignmentModal({
   const [error, setError] = useState<string | null>(null);
 
   // Category selection state
-  const {data: categories, refetch} = useFetchCategories();
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const showCategoryModal = useModal();
 
   const [pendingRole, setPendingRole] = useState('');
@@ -55,13 +51,6 @@ export default function RoleAssignmentModal({
   const roleRequiresCategories = (role: string) => {
     return role === 'coach' || role === 'head_coach';
   };
-
-  // Load category on component mount
-  useEffect(() => {
-    if (isOpen) {
-      refetch();
-    }
-  }, [isOpen, refetch]);
 
   const handleAssignRole = async () => {
     if (!selectedRole) {
@@ -72,7 +61,6 @@ export default function RoleAssignmentModal({
     // If role requires category, show category selection modal
     if (roleRequiresCategories(selectedRole)) {
       setPendingRole(selectedRole);
-      setSelectedCategories([]);
       showCategoryModal.onOpen();
       return;
     }
@@ -90,11 +78,17 @@ export default function RoleAssignmentModal({
       const supabase = createClient();
 
       // Create user profile with assigned role
-      const {error: profileError} = await supabase.from('user_profiles').insert({
-        user_id: userId,
-        role: role,
-        assigned_categories: categories,
-      });
+      const {error: profileError} = await supabase.from('user_profiles').upsert(
+        {
+          user_id: userId,
+          role: role,
+          assigned_categories: categories,
+        },
+        {
+          onConflict: 'user_id,role',
+          ignoreDuplicates: false,
+        }
+      );
 
       if (profileError) {
         throw profileError;
@@ -111,13 +105,12 @@ export default function RoleAssignmentModal({
   };
 
   // Handle category selection confirmation
-  const handleCategorySelectionConfirm = async () => {
+  const handleCategorySelectionConfirm = async (categories: string[]) => {
     if (!pendingRole) return;
 
-    await assignRoleToDatabase(pendingRole, selectedCategories);
+    await assignRoleToDatabase(pendingRole, categories);
     showCategoryModal.onClose();
     setPendingRole('');
-    setSelectedCategories([]);
   };
 
   return (
@@ -172,7 +165,6 @@ export default function RoleAssignmentModal({
       <CategorySelectionModal
         isOpen={showCategoryModal.isOpen}
         onClose={showCategoryModal.onClose}
-        categories={categories || []}
         onConfirm={handleCategorySelectionConfirm}
         isLoading={isLoading}
       />

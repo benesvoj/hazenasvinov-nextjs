@@ -8,13 +8,12 @@ import {UnifiedModal} from '@/components/ui/modals';
 
 import {hasItems, isEmpty} from '@/utils/arrayHelper';
 
-import {Category} from '@/types';
+import {useFetchCategories} from '@/hooks';
 
 interface CategorySelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (selectedCategories: string[]) => void;
-  categories: Category[];
   title?: string;
   subtitle?: string;
   isLoading?: boolean;
@@ -24,11 +23,12 @@ export const CategorySelectionModal = ({
   isOpen,
   onClose,
   onConfirm,
-  categories,
   title = 'Výběr kategorií',
   subtitle = 'Vyberte kategorie, které budou přiřazeny této roli.',
   isLoading = false,
 }: CategorySelectionModalProps) => {
+  const {data: categories} = useFetchCategories();
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const handleConfirm = () => {
