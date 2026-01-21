@@ -1,21 +1,26 @@
-// TODO: direct supbase imports to /supabase instead of /utils/supabase/client
+// TODO: direct supabase imports to /supabase instead of /utils/supabase/client
 import React, {useCallback, useState} from 'react';
 
 import {
+  Button,
+  Checkbox,
+  Input,
+  Select,
+  SelectItem,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
-  useDisclosure,
-} from '@heroui/modal';
-import {Button, Checkbox, Input, Select, SelectItem} from '@heroui/react';
+} from '@heroui/react';
 
 import {
   CheckCircleIcon,
   DocumentArrowUpIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+
+import {useModal} from '@/hooks/shared/useModals';
 
 import {createClient} from '@/utils/supabase/client';
 
@@ -49,7 +54,7 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
   const [defaultSex, setDefaultSex] = useState<Genders>(Genders.MALE);
   const [defaultFunctions, setDefaultFunctions] = useState<string[]>([MemberFunction.PLAYER]);
 
-  const {isOpen, onOpen, onClose} = useDisclosure();
+  const modal = useModal();
 
   const supabase = createClient();
 
@@ -176,8 +181,8 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
     setFile(null);
     setPreview([]);
     setImportResult(null);
-    onClose();
-  }, [onClose]);
+    modal.onClose();
+  }, [modal]);
 
   const handleImportComplete = useCallback(() => {
     handleClose();
@@ -191,12 +196,12 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
         color="secondary"
         variant="flat"
         startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
-        onPress={onOpen}
+        onPress={modal.onOpen}
       >
         Import CSV
       </Button>
 
-      <Modal isOpen={isOpen} onClose={handleClose} size="4xl">
+      <Modal isOpen={modal.isOpen} onClose={handleClose} size="4xl">
         <ModalContent>
           <ModalHeader>Import členů z CSV</ModalHeader>
           <ModalBody>
