@@ -4,6 +4,8 @@ import React, {useEffect, useMemo, useRef, useState} from 'react';
 
 import {Alert, Skeleton, Tab, Tabs} from '@heroui/react';
 
+import {hasItems, isEmpty} from '@/utils/arrayHelper';
+
 import CategoryMatchesAndResults from '@/app/(main)/components/CategoryMatchesAndResults';
 
 import {Heading, LoadingSpinner, UnifiedStandingTable} from '@/components';
@@ -110,7 +112,7 @@ export default function MatchSchedule({
     if (selectedCategoryId) {
       // Use external category selection
       setSelectedCategory(selectedCategoryId);
-    } else if (availableCategories.length > 0) {
+    } else if (hasItems(availableCategories)) {
       // If no category is selected or current selected category is not available, select the first available one
       if (!selectedCategory || !availableCategories.some((cat) => cat.id === selectedCategory)) {
         setSelectedCategory(availableCategories[0].id);
@@ -120,7 +122,7 @@ export default function MatchSchedule({
 
   // Fetch standings when category or active season changes
   useEffect(() => {
-    if (availableCategories.length > 0 && activeSeason && selectedCategoryData) {
+    if (hasItems(availableCategories) && activeSeason && selectedCategoryData) {
       const categoryId = selectedCategoryData.id;
       const seasonId = activeSeason.id;
 
@@ -212,13 +214,13 @@ export default function MatchSchedule({
               </p>
             </div>
           )}
-          {allMatches.length === 0 && !loading && !matchesError && (
+          {isEmpty(allMatches) && !loading && !matchesError && (
             <Skeleton className="w-full h-full" />
           )}
         </div>
 
         {/* Category Tabs - only show if no external category is provided */}
-        {!selectedCategoryId && availableCategories.length > 0 ? (
+        {!selectedCategoryId && hasItems(availableCategories) ? (
           <Tabs
             selectedKey={selectedCategory}
             onSelectionChange={(key) => setSelectedCategory(key as string)}
@@ -244,7 +246,7 @@ export default function MatchSchedule({
         ) : null}
 
         {/* Content */}
-        {availableCategories.length > 0 && (
+        {hasItems(availableCategories) && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column - Matches and Results */}
             <CategoryMatchesAndResults

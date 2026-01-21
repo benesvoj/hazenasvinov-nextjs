@@ -1,15 +1,17 @@
 'use client';
 
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
-import {Alert, Select, SelectItem, Tabs, Tab, Card, CardBody, useDisclosure} from '@heroui/react';
+import {Alert, Card, CardBody, Select, SelectItem, Tab, Tabs} from '@heroui/react';
 
 import {useQueryClient} from '@tanstack/react-query';
 
 import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
+import {useModals, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
 
+import {hasItems, isEmpty} from '@/utils/arrayHelper';
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
 import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
 import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
@@ -17,39 +19,43 @@ import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
 import {getCategoryInfo} from '@/helpers/getCategoryInfo';
 
 import {
-  DeleteConfirmationModal,
-  showToast,
   AdminContainer,
+  DeleteConfirmationModal,
   LoadingSpinner,
+  showToast,
   UnifiedStandingTable,
 } from '@/components';
 import {matchStatusesKeys} from '@/constants';
 import {ActionTypes} from '@/enums';
 import {
-  useFilteredTeams,
-  useStandings,
-  useFetchMembers,
-  useTeams,
   useExcelImport,
-  useTeamDisplayLogic,
   useFetchCategories,
+  useFetchMembers,
   useFetchSeasons,
+  useFilteredTeams,
   useSeasonFiltering,
+  useStandings,
+  useTeamDisplayLogic,
+  useTeams,
 } from '@/hooks';
-import {Match, AddMatchFormData, EditMatchFormData} from '@/types';
-import {calculateStandings, generateInitialStandings, createClient} from '@/utils';
+import {AddMatchFormData, EditMatchFormData, Match} from '@/types';
+import {calculateStandings, createClient, generateInitialStandings} from '@/utils';
 
 import {
   AddMatchModal,
   AddResultModal,
-  EditMatchModal,
   BulkUpdateMatchweekModal,
+  CategoryMatches,
+  EditMatchModal,
   ExcelImportModal,
+  LineupManagerModal,
   MatchActionsModal,
   MatchProcessWizardModal,
-  LineupManagerModal,
-  CategoryMatches,
 } from './components';
+import {getMatchweekOptions} from './helpers/getMatchweekOptions';
+
+// TODO: move into admin translations
+const t = translations.matches;
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');
@@ -66,69 +72,23 @@ export default function MatchesAdminPage() {
   const {teams, loading: allTeamsLoading, fetchTeams} = useTeams();
 
   // Modal states
-  const {
-    isOpen: isAddMatchOpen,
-    onOpen: onAddMatchOpen,
-    onClose: onAddMatchClose,
-  } = useDisclosure();
-  const {
-    isOpen: isAddResultOpen,
-    onOpen: onAddResultOpen,
-    onClose: onAddResultClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditMatchOpen,
-    onOpen: onEditMatchOpen,
-    onClose: onEditMatchClose,
-  } = useDisclosure();
-  const {
-    isOpen: isBulkUpdateOpen,
-    onOpen: onBulkUpdateOpen,
-    onClose: onBulkUpdateClose,
-  } = useDisclosure();
-  const {
-    isOpen: isLineupModalOpen,
-    onOpen: onLineupModalOpen,
-    onClose: onLineupModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isExcelImportOpen,
-    onOpen: onExcelImportOpen,
-    onClose: onExcelImportClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteConfirmOpen,
-    onOpen: onDeleteConfirmOpen,
-    onClose: onDeleteConfirmClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteAllConfirmOpen,
-    onOpen: onDeleteAllConfirmOpen,
-    onClose: onDeleteAllConfirmClose,
-  } = useDisclosure();
-  const {
-    isOpen: isMatchActionsOpen,
-    onOpen: onMatchActionsOpen,
-    onClose: onMatchActionsClose,
-  } = useDisclosure();
-  const {
-    isOpen: isMatchProcessOpen,
-    onOpen: onMatchProcessOpen,
-    onClose: onMatchProcessClose,
-  } = useDisclosure();
-  const {importMatches} = useExcelImport();
+  const modal = useModals(
+    'addMatch',
+    'addResult',
+    'editMatch',
+    'bulkUpdate',
+    'lineup',
+    'excelImport',
+    'matchProcess',
+    'deleteAllConfirm'
+  );
+  const deleteConfirm = useModalWithItem<Match>();
+  const matchActions = useModalWithItem<Match>();
 
-  // TODO: move into admin translations
-  const t = translations.matches;
+  const {importMatches} = useExcelImport();
 
   // Use the team display logic hook
   const {fetchTeamCounts} = useTeamDisplayLogic(selectedCategory);
-
-  // Reset matchToDelete when confirmation modal closes
-  const handleDeleteConfirmClose = () => {
-    onDeleteConfirmClose();
-    setMatchToDelete(null);
-  };
 
   // Toggle matchweek expansion
   const toggleMatchweek = (categoryId: string, matchweek: number) => {
@@ -193,7 +153,6 @@ export default function MatchesAdminPage() {
     action: 'set' as 'set' | 'remove',
   });
 
-  const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
   const [expandedMatchweeks, setExpandedMatchweeks] = useState<Set<string>>(new Set());
 
   const supabase = createClient();
@@ -236,12 +195,12 @@ export default function MatchesAdminPage() {
     seasonsLoading ||
     allTeamsLoading ||
     membersLoading ||
-    categories.length === 0 ||
-    members.length === 0;
+    isEmpty(categories) ||
+    isEmpty(members);
 
   // Set active season as default when seasons are loaded
   useEffect(() => {
-    if (sortedSeasons.length > 0 && !selectedSeason && activeSeason) {
+    if (hasItems(sortedSeasons) && !selectedSeason && activeSeason) {
       setSelectedSeason(activeSeason.id);
     }
   }, [sortedSeasons, selectedSeason, activeSeason]);
@@ -258,7 +217,7 @@ export default function MatchesAdminPage() {
 
   // Set first category as default when categories are loaded
   useEffect(() => {
-    if (categories.length > 0 && !selectedCategory) {
+    if (hasItems(categories) && !selectedCategory) {
       setSelectedCategory(categories[0].id);
     }
   }, [categories, selectedCategory]);
@@ -313,7 +272,7 @@ export default function MatchesAdminPage() {
         (s) => s.category_id === selectedCategory && s.season_id === selectedSeason
       );
 
-      if (existingStandings.length === 0) {
+      if (isEmpty(existingStandings)) {
         // No standings exist - generate initial ones
         await handleGenerateInitialStandings();
       } else {
@@ -413,7 +372,8 @@ export default function MatchesAdminPage() {
         queryKey: ['matches'],
       });
 
-      onAddMatchClose();
+      modal.addMatch.onClose();
+
       setFormData({
         date: '',
         time: '',
@@ -489,7 +449,7 @@ export default function MatchesAdminPage() {
         showToast.warning(t.toasts.matchResultSavedWithoutUpdateStandingTable);
       }
 
-      onAddResultClose();
+      modal.addResult.onClose();
       setResultData({home_score: 0, away_score: 0, home_score_halftime: 0, away_score_halftime: 0});
       setSelectedMatch(null);
 
@@ -507,15 +467,9 @@ export default function MatchesAdminPage() {
     }
   };
 
-  // Open delete confirmation modal
-  const handleDeleteClick = (match: Match) => {
-    setMatchToDelete(match);
-    onDeleteConfirmOpen();
-  };
-
   // Delete match (after confirmation)
   const handleDeleteMatch = async () => {
-    if (!matchToDelete) return;
+    if (!deleteConfirm.selectedItem) return;
 
     if (isSeasonClosed()) {
       setError('Nelze smazat zápas z uzavřené sezóny');
@@ -523,7 +477,10 @@ export default function MatchesAdminPage() {
     }
 
     try {
-      const {error} = await supabase.from('matches').delete().eq('id', matchToDelete.id);
+      const {error} = await supabase
+        .from('matches')
+        .delete()
+        .eq('id', deleteConfirm.selectedItem.id);
 
       if (error) throw error;
 
@@ -539,7 +496,7 @@ export default function MatchesAdminPage() {
       });
 
       setError('');
-      handleDeleteConfirmClose();
+      deleteConfirm.closeAndClear();
     } catch (error) {
       setError('Chyba při mazání zápasu');
     }
@@ -567,7 +524,7 @@ export default function MatchesAdminPage() {
       });
 
       setError('');
-      onDeleteAllConfirmClose();
+      modal.deleteAllConfirm.onClose();
       setSelectedCategory('');
     } catch (error) {
       setError('Chyba při mazání všech zápasů');
@@ -594,11 +551,11 @@ export default function MatchesAdminPage() {
     });
 
     // Ensure filteredTeams is loaded for this category
-    if (match.category_id && selectedSeason && filteredTeams.length === 0) {
+    if (match.category_id && selectedSeason && isEmpty(filteredTeams)) {
       fetchFilteredTeams(match.category_id, selectedSeason);
     }
 
-    onEditMatchOpen();
+    modal.editMatch.onOpen();
   };
 
   // Update match
@@ -720,7 +677,7 @@ export default function MatchesAdminPage() {
         showToast.warning(t.toasts.matchSavedWithoutUpdatedScore);
       }
 
-      onEditMatchClose();
+      modal.editMatch.onClose();
       setEditData({
         date: '',
         time: '',
@@ -782,7 +739,7 @@ export default function MatchesAdminPage() {
           (match) => match.category_id === bulkUpdateData.categoryId && !match.matchweek
         );
 
-        if (matchesToUpdate.length === 0) {
+        if (isEmpty(matchesToUpdate)) {
           setError('Nebyly nalezeny žádné zápasy bez kola pro vybranou kategorii');
           return;
         }
@@ -798,7 +755,7 @@ export default function MatchesAdminPage() {
             match.matchweek !== undefined
         );
 
-        if (matchesToUpdate.length === 0) {
+        if (isEmpty(matchesToUpdate)) {
           setError('Nebyly nalezeny žádné zápasy s kolem pro vybranou kategorii');
           return;
         }
@@ -831,7 +788,7 @@ export default function MatchesAdminPage() {
       });
 
       setError('');
-      onBulkUpdateClose();
+      modal.bulkUpdate.onClose();
       setBulkUpdateData({categoryId: '', matchweek: '', action: 'set'});
     } catch (error) {
       console.error('Full error details:', error);
@@ -841,26 +798,6 @@ export default function MatchesAdminPage() {
         setError('Chyba při hromadné aktualizaci');
       }
     }
-  };
-
-  /**
-   * @description Generates matchweek options based on the selected category.
-   * @deprecated Matchweek count is now fixed to 22 for all categories, needs to be refactored, this should be combo of season+category in future
-   * @returns Array of matchweek options
-   */
-  // Helper function to generate matchweek options based on category
-  const getMatchweekOptions = () => {
-    const options = [];
-    // Add "No matchweek" option
-    options.push({value: '', label: 'Bez kola'});
-
-    const maxMatchweeks = 22; // Default to 20 matchweeks since column doesn't exist
-
-    // Add matchweek numbers based on category setting
-    for (let i = 1; i <= maxMatchweeks; i++) {
-      options.push({value: i.toString(), label: `${i}. kolo`});
-    }
-    return options;
   };
 
   const handleExcelImport = useCallback(
@@ -890,7 +827,7 @@ export default function MatchesAdminPage() {
           showToast.success(t.toasts.matchSuccessImport);
         }
 
-        if (result.errors.length > 0) {
+        if (hasItems(result.errors)) {
           console.error('Import errors:', result.errors);
           setError(
             `Import dokončen s chybami. Úspěšně: ${result.success}, Selhalo: ${result.failed}. Zkontrolujte konzoli pro detaily.`
@@ -901,7 +838,7 @@ export default function MatchesAdminPage() {
         setError(`Import selhal: ${error instanceof Error ? error.message : 'Neznámá chyba'}`);
       }
     },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+
     [
       selectedSeason,
       importMatches,
@@ -912,18 +849,18 @@ export default function MatchesAdminPage() {
     ]
   );
 
-  const generateStandingsLabel =
+  const generateStandingsLabel = isEmpty(
     standings.filter((s) => s.category_id === selectedCategory && s.season_id === selectedSeason)
-      .length === 0
-      ? translations.matches.actions.generateStandings
-      : translations.matches.actions.recalculateStandings;
+  )
+    ? translations.matches.actions.generateStandings
+    : translations.matches.actions.recalculateStandings;
 
   return (
     <AdminContainer
       actions={[
         {
           label: translations.matches.actions.addMatch,
-          onClick: onAddMatchOpen,
+          onClick: modal.addMatch.onOpen,
           variant: 'solid',
           buttonType: ActionTypes.CREATE,
           isDisabled: isSeasonClosed(),
@@ -931,7 +868,7 @@ export default function MatchesAdminPage() {
         },
         {
           label: translations.matches.actions.bulkUpdateMatchweek,
-          onClick: onBulkUpdateOpen,
+          onClick: modal.bulkUpdate.onOpen,
           buttonType: ActionTypes.UPDATE,
           color: 'secondary',
           isDisabled: isSeasonClosed(),
@@ -947,7 +884,7 @@ export default function MatchesAdminPage() {
         },
         {
           label: translations.matches.actions.import,
-          onClick: onExcelImportOpen,
+          onClick: modal.excelImport.onOpen,
           buttonType: ActionTypes.UPDATE,
           color: 'secondary',
           isDisabled: isSeasonClosed(),
@@ -963,7 +900,7 @@ export default function MatchesAdminPage() {
         },
         {
           label: translations.matches.actions.deleteAllMatches,
-          onClick: onDeleteAllConfirmOpen,
+          onClick: modal.deleteAllConfirm.onOpen,
           buttonType: ActionTypes.DELETE,
           color: 'danger',
           isDisabled: isSeasonClosed() || !selectedSeason,
@@ -972,7 +909,7 @@ export default function MatchesAdminPage() {
       ]}
       filters={
         <div className="w-full">
-          {sortedSeasons.length === 0 ? (
+          {isEmpty(sortedSeasons) ? (
             <div className="w-full flex justify-center items-center">
               <LoadingSpinner />
             </div>
@@ -1036,7 +973,7 @@ export default function MatchesAdminPage() {
                         {/* Show loading or no category message */}
                         {!selectedCategoryId && (
                           <div className="text-center py-8 text-gray-500">
-                            {categories.length === 0
+                            {isEmpty(categories)
                               ? 'Načítání kategorií...'
                               : 'Vyberte kategorii pro zobrazení zápasů'}
                           </div>
@@ -1059,17 +996,17 @@ export default function MatchesAdminPage() {
                             isMatchweekExpanded={isMatchweekExpanded}
                             onAddResult={(match) => {
                               setSelectedMatch(match);
-                              onAddResultOpen();
+                              modal.addResult.onOpen();
                             }}
                             onEditMatch={handleEditMatch}
                             onLineupModalOpen={(match) => {
                               setSelectedMatch(match);
-                              onLineupModalOpen();
+                              modal.lineup.onOpen();
                             }}
-                            onDeleteClick={handleDeleteClick}
+                            onDeleteClick={(match) => deleteConfirm.openWith(match)}
                             onMatchActionsOpen={(match) => {
                               setSelectedMatch(match);
-                              onMatchActionsOpen();
+                              matchActions.openWith(match);
                             }}
                             isSeasonClosed={isSeasonClosed()}
                           />
@@ -1089,8 +1026,8 @@ export default function MatchesAdminPage() {
 
       {/* Add Match Modal */}
       <AddMatchModal
-        isOpen={isAddMatchOpen}
-        onClose={onAddMatchClose}
+        isOpen={modal.addMatch.isOpen}
+        onClose={modal.addMatch.onClose}
         onAddMatch={handleAddMatch}
         formData={formData}
         setFormData={setFormData}
@@ -1102,8 +1039,8 @@ export default function MatchesAdminPage() {
 
       {/* Add Result Modal */}
       <AddResultModal
-        isOpen={isAddResultOpen}
-        onClose={onAddResultClose}
+        isOpen={modal.addResult.isOpen}
+        onClose={modal.addResult.onClose}
         selectedMatch={selectedMatch}
         resultData={resultData}
         onResultDataChange={setResultData}
@@ -1113,8 +1050,8 @@ export default function MatchesAdminPage() {
 
       {/* Edit Match Modal */}
       <EditMatchModal
-        isOpen={isEditMatchOpen}
-        onClose={onEditMatchClose}
+        isOpen={modal.editMatch.isOpen}
+        onClose={modal.editMatch.onClose}
         selectedMatch={selectedMatch}
         editData={editData}
         onEditDataChange={setEditData}
@@ -1126,8 +1063,8 @@ export default function MatchesAdminPage() {
 
       {/* Bulk Update Matchweek Modal */}
       <BulkUpdateMatchweekModal
-        isOpen={isBulkUpdateOpen}
-        onClose={onBulkUpdateClose}
+        isOpen={modal.bulkUpdate.isOpen}
+        onClose={modal.bulkUpdate.onClose}
         bulkUpdateData={bulkUpdateData}
         onBulkUpdateDataChange={setBulkUpdateData}
         onBulkUpdate={handleBulkUpdateMatchweek}
@@ -1139,8 +1076,8 @@ export default function MatchesAdminPage() {
 
       {/* Lineup Management Modal */}
       <LineupManagerModal
-        isOpen={isLineupModalOpen}
-        onClose={onLineupModalClose}
+        isOpen={modal.lineup.isOpen}
+        onClose={modal.lineup.onClose}
         selectedMatch={selectedMatch}
         members={members}
         onMemberCreated={fetchMembers}
@@ -1148,8 +1085,8 @@ export default function MatchesAdminPage() {
 
       {/* Excel Import Modal */}
       <ExcelImportModal
-        isOpen={isExcelImportOpen}
-        onClose={onExcelImportClose}
+        isOpen={modal.excelImport.isOpen}
+        onClose={modal.excelImport.onClose}
         onImport={handleExcelImport}
         categories={categories}
         teams={teams}
@@ -1158,44 +1095,44 @@ export default function MatchesAdminPage() {
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
-        isOpen={isDeleteConfirmOpen}
-        onClose={handleDeleteConfirmClose}
+        isOpen={deleteConfirm.isOpen}
+        onClose={deleteConfirm.closeAndClear}
         onConfirm={handleDeleteMatch}
         title="Potvrdit smazání zápasu"
         message={`
           Opravdu chcete smazat zápas <strong>${
-            matchToDelete?.home_team?.name || 'Domácí tým'
+            deleteConfirm.selectedItem?.home_team?.name || 'Domácí tým'
           } vs ${
-            matchToDelete?.away_team?.name || 'Hostující tým'
-          }</strong> ze dne ${matchToDelete?.date}?<br><br>
+            deleteConfirm.selectedItem?.away_team?.name || 'Hostující tým'
+          }</strong> ze dne ${deleteConfirm.selectedItem?.date}?<br><br>
           <span class="text-sm text-gray-600">Tato akce je nevratná a smaže všechny související údaje o zápasu.</span>
         `}
       />
 
       {/* Match Actions Modal */}
       <MatchActionsModal
-        isOpen={isMatchActionsOpen}
-        onClose={onMatchActionsClose}
+        isOpen={matchActions.isOpen}
+        onClose={matchActions.onClose}
         match={selectedMatch}
-        onAddResult={onAddResultOpen}
+        onAddResult={modal.addResult.onOpen}
         onEditMatch={handleEditMatch}
-        onLineupModalOpen={onLineupModalOpen}
-        onDeleteClick={handleDeleteClick}
-        onMatchProcessOpen={onMatchProcessOpen}
+        onLineupModalOpen={modal.lineup.onOpen}
+        onDeleteClick={() => deleteConfirm.openWith(selectedMatch!)}
+        onMatchProcessOpen={modal.matchProcess.onOpen}
         isSeasonClosed={isSeasonClosed}
       />
 
       {/* Match Process Wizard Modal */}
       <MatchProcessWizardModal
-        isOpen={isMatchProcessOpen}
-        onClose={onMatchProcessClose}
+        isOpen={modal.matchProcess.isOpen}
+        onClose={modal.matchProcess.onClose}
         match={selectedMatch}
       />
 
       {/* Delete All Matches Confirmation Modal */}
       <DeleteConfirmationModal
-        isOpen={isDeleteAllConfirmOpen}
-        onClose={onDeleteAllConfirmClose}
+        isOpen={modal.deleteAllConfirm.isOpen}
+        onClose={modal.deleteAllConfirm.onClose}
         onConfirm={handleDeleteAllMatches}
         title="Potvrdit smazání všech zápasů"
         message={`

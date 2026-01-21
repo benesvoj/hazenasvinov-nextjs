@@ -1,17 +1,10 @@
 'use client';
 
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 
 import {Button} from '@heroui/button';
 import {Input, Textarea} from '@heroui/input';
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-} from '@heroui/modal';
+import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from '@heroui/modal';
 import {Select, SelectItem} from '@heroui/select';
 
 import {translations} from '@/lib/translations';

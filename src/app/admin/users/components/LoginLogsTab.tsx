@@ -1,16 +1,15 @@
 'use client';
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
+  Button,
   Card,
   CardBody,
   CardHeader,
-  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Select,
   SelectItem,
   Table,
@@ -19,21 +18,25 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
 } from '@heroui/react';
 
 import {
-  ArrowRightOnRectangleIcon,
   ArrowLeftOnRectangleIcon,
+  ArrowRightOnRectangleIcon,
   CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ClockIcon,
   FunnelIcon,
+  XCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
 import {LoginLog, PaginationInfo} from '@/hooks/entities/user/useFetchUsers';
+import {useModal} from '@/hooks/shared/useModals';
+
+import {isEmpty} from '@/utils/arrayHelper';
 
 import {translations} from '@/lib';
 import {SupabaseUser} from '@/types';
@@ -59,7 +62,7 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({
   onUserFilterChange,
   onClearFilters,
 }) => {
-  const {isOpen, onOpen, onClose} = useDisclosure();
+  const modal = useModal();
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('cs-CZ', {
@@ -129,7 +132,7 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({
 
   const handleClearFilters = () => {
     onClearFilters();
-    onClose();
+    modal.onClose();
   };
 
   if (loading) {
@@ -173,7 +176,7 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({
                 variant="light"
                 size="sm"
                 startContent={<FunnelIcon className="w-4 h-4" />}
-                onPress={onOpen}
+                onPress={modal.onOpen}
               >
                 Filtry
                 {selectedUser && (
@@ -190,7 +193,7 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({
             </div>
           </div>
 
-          {loginLogs.length === 0 ? (
+          {isEmpty(loginLogs) ? (
             <div className="text-center py-12 text-gray-500">
               <div className="mb-2">Žádné záznamy o přihlášení</div>
               <div className="text-sm text-gray-400">
@@ -326,7 +329,7 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({
       </Card>
 
       {/* Filter Modal */}
-      <Modal isOpen={isOpen} onClose={onClose} size="md">
+      <Modal isOpen={modal.isOpen} onClose={modal.onClose} size="md">
         <ModalContent>
           <ModalHeader>
             <div className="flex items-center gap-2">
@@ -347,7 +350,7 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({
                     onUserFilterChange(selected || '');
                     // Close dialog automatically when filter is applied
                     if (selected !== selectedUser) {
-                      onClose();
+                      modal.onClose();
                     }
                   }}
                   placeholder="Vyberte uživatele"
@@ -391,7 +394,7 @@ export const LoginLogsTab: React.FC<LoginLogsTabProps> = ({
               variant="light"
               onPress={() => {
                 onClearFilters();
-                onClose();
+                modal.onClose();
               }}
             >
               Reset

@@ -2,11 +2,19 @@
 
 import React from 'react';
 
-import {Chip, useDisclosure} from '@heroui/react';
+import {Chip} from '@heroui/react';
 
 import {useQuery} from '@tanstack/react-query';
 
-import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedCard, UnifiedTable} from '@/components';
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
+
+import {
+  AdminContainer,
+  DeleteConfirmationModal,
+  showToast,
+  UnifiedCard,
+  UnifiedTable,
+} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {formatDateString} from '@/helpers';
 import {useSeasonForm, useSeasons} from '@/hooks';
@@ -20,7 +28,11 @@ const tAction = translations.action;
 
 export function SeasonsPageClient() {
   // ✅ React Query - hydrated from server, also gets caching/refetch benefits
-  const {data: seasons = [], isLoading: fetchLoading, refetch} = useQuery({
+  const {
+    data: seasons = [],
+    isLoading: fetchLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['seasons'],
     queryFn: fetchSeasons,
   });
@@ -38,20 +50,19 @@ export function SeasonsPageClient() {
 
   const {loading: crudLoading, createSeason, updateSeason, deleteSeason} = useSeasons();
 
-  // Modal states
-  const {isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose} = useDisclosure();
-  const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
+  const modal = useModal();
+  const deleteModal = useModalWithItem<Season>();
 
   // Handle modal open for add
   const handleAddClick = () => {
     openAddMode();
-    onModalOpen();
+    modal.onOpen();
   };
 
   // Handle modal open for edit
   const handleEditClick = (season: Season) => {
     openEditMode(season);
-    onModalOpen();
+    modal.onOpen();
   };
 
   // Handle season submission
@@ -81,24 +92,22 @@ export function SeasonsPageClient() {
     } finally {
       await refetch();
       resetForm();
-      onModalClose();
+      modal.onClose();
     }
   };
 
   // Handle delete
   const handleDeleteClick = (season: Season) => {
-    openEditMode(season);
-    onDeleteOpen();
+    deleteModal.openWith(season);
   };
 
   const handleDeleteConfirm = async () => {
-    if (selectedSeason) {
-      const success = await deleteSeason(selectedSeason.id);
+    if (deleteModal.selectedItem) {
+      const success = await deleteSeason(deleteModal.selectedItem.id);
 
       if (success) {
         await refetch();
-        resetForm();
-        onDeleteClose();
+        deleteModal.closeAndClear();
       }
     }
   };
@@ -131,7 +140,9 @@ export function SeasonsPageClient() {
         return (
           <div className="flex gap-1">
             <Chip size="sm" color={season.is_active ? 'success' : 'default'} variant="flat">
-              {season.is_active ? translations.season.activeLabel : translations.season.inactiveLabel}
+              {season.is_active
+                ? translations.season.activeLabel
+                : translations.season.inactiveLabel}
             </Chip>
             <Chip size="sm" color={season.is_closed ? 'default' : 'secondary'} variant="flat">
               {season.is_closed ? translations.season.closedLabel : translations.season.openLabel}
@@ -171,8 +182,8 @@ export function SeasonsPageClient() {
       </AdminContainer>
 
       <SeasonModal
-        isOpen={isModalOpen}
-        onClose={onModalClose}
+        isOpen={modal.isOpen}
+        onClose={modal.onClose}
         formData={formData}
         setFormData={setFormData}
         onSubmit={handleSubmit}
@@ -181,8 +192,8 @@ export function SeasonsPageClient() {
       />
 
       <DeleteConfirmationModal
-        isOpen={isDeleteOpen}
-        onClose={onDeleteClose}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
         onConfirm={handleDeleteConfirm}
         title={translations.season.deleteSeason}
         message={translations.season.deleteSeasonMessage}

@@ -1,21 +1,16 @@
 'use client';
 
-import {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  RadioGroup,
-  Radio,
-} from '@heroui/react';
+import {Radio, RadioGroup} from '@heroui/react';
 
-import {XMarkIcon} from '@heroicons/react/24/outline';
+import {useModal} from '@/hooks/shared/useModals';
+
+import {UnifiedModal} from '@/components/ui/modals';
 
 import {createClient} from '@/utils/supabase/client';
+
+import {CategorySelectionModal} from '@/app/admin/users/components/CategorySelectionModal';
 
 interface RoleAssignmentModalProps {
   isOpen: boolean;
@@ -48,35 +43,14 @@ export default function RoleAssignmentModal({
   const [error, setError] = useState<string | null>(null);
 
   // Category selection state
-  const [categories, setCategories] = useState<{id: string; name: string}[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const showCategoryModal = useModal();
+
   const [pendingRole, setPendingRole] = useState('');
-
-  // Load category
-  const loadCategories = async () => {
-    try {
-      const supabase = createClient();
-      const {data, error} = await supabase.from('categories').select('id, name').order('name');
-
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (error) {
-      console.error('Error loading category:', error);
-    }
-  };
 
   // Check if role requires category
   const roleRequiresCategories = (role: string) => {
     return role === 'coach' || role === 'head_coach';
   };
-
-  // Load category on component mount
-  useEffect(() => {
-    if (isOpen) {
-      loadCategories();
-    }
-  }, [isOpen]);
 
   const handleAssignRole = async () => {
     if (!selectedRole) {
@@ -87,8 +61,7 @@ export default function RoleAssignmentModal({
     // If role requires category, show category selection modal
     if (roleRequiresCategories(selectedRole)) {
       setPendingRole(selectedRole);
-      setSelectedCategories([]);
-      setShowCategoryModal(true);
+      showCategoryModal.onOpen();
       return;
     }
 
@@ -105,11 +78,17 @@ export default function RoleAssignmentModal({
       const supabase = createClient();
 
       // Create user profile with assigned role
-      const {error: profileError} = await supabase.from('user_profiles').insert({
-        user_id: userId,
-        role: role,
-        assigned_categories: categories,
-      });
+      const {error: profileError} = await supabase.from('user_profiles').upsert(
+        {
+          user_id: userId,
+          role: role,
+          assigned_categories: categories,
+        },
+        {
+          onConflict: 'user_id,role',
+          ignoreDuplicates: false,
+        }
+      );
 
       if (profileError) {
         throw profileError;
@@ -126,164 +105,69 @@ export default function RoleAssignmentModal({
   };
 
   // Handle category selection confirmation
-  const handleCategorySelectionConfirm = async () => {
+  const handleCategorySelectionConfirm = async (categories: string[]) => {
     if (!pendingRole) return;
 
-    await assignRoleToDatabase(pendingRole, selectedCategories);
-    setShowCategoryModal(false);
+    await assignRoleToDatabase(pendingRole, categories);
+    showCategoryModal.onClose();
     setPendingRole('');
-    setSelectedCategories([]);
-  };
-
-  // Handle category selection cancel
-  const handleCategorySelectionCancel = () => {
-    setShowCategoryModal(false);
-    setPendingRole('');
-    setSelectedCategories([]);
-  };
-
-  const handleSkip = () => {
-    onClose();
   };
 
   return (
     <>
-      <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" backdrop="blur">
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                <h3 className="text-lg font-semibold">Přiřazení role uživateli</h3>
-              </ModalHeader>
+      <UnifiedModal
+        isFooterWithActions
+        isOpen={isOpen}
+        onClose={onClose}
+        onPress={handleAssignRole}
+        isDisabled={!selectedRole}
+        title={'Přiřazení role uživateli'}
+        size="md"
+        placement="center"
+        backdrop="blur"
+      >
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-2">
+            Uživatel: <span className="font-medium">{userEmail}</span>
+          </p>
+          <p className="text-sm text-gray-500">
+            Vyberte roli pro tohoto uživatele. Bez přiřazené role nebude mít přístup k aplikaci.
+          </p>
+        </div>
 
-              <ModalBody>
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Uživatel: <span className="font-medium">{userEmail}</span>
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Vyberte roli pro tohoto uživatele. Bez přiřazené role nebude mít přístup k
-                    aplikaci.
-                  </p>
-                </div>
+        <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="gap-3">
+          {ROLE_OPTIONS.map((role) => (
+            <Radio
+              key={role.value}
+              value={role.value}
+              className="p-3 border rounded-lg hover:bg-gray-50"
+            >
+              <div className="flex flex-col">
+                <div className="font-medium">{role.label}</div>
+                <div className="text-sm text-gray-500">{role.description}</div>
+              </div>
+            </Radio>
+          ))}
+        </RadioGroup>
 
-                <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="gap-3">
-                  {ROLE_OPTIONS.map((role) => (
-                    <Radio
-                      key={role.value}
-                      value={role.value}
-                      className="p-3 border rounded-lg hover:bg-gray-50"
-                    >
-                      <div className="flex flex-col">
-                        <div className="font-medium">{role.label}</div>
-                        <div className="text-sm text-gray-500">{role.description}</div>
-                      </div>
-                    </Radio>
-                  ))}
-                </RadioGroup>
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
 
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                    <p className="text-sm text-red-600">{error}</p>
-                  </div>
-                )}
+        <p className="text-xs text-gray-500">
+          Poznámka: Pokud přeskočíte, uživatel nebude mít přístup k aplikaci, dokud mu nebude
+          přiřazena role.
+        </p>
+      </UnifiedModal>
 
-                <p className="text-xs text-gray-500">
-                  Poznámka: Pokud přeskočíte, uživatel nebude mít přístup k aplikaci, dokud mu
-                  nebude přiřazena role.
-                </p>
-              </ModalBody>
-
-              <ModalFooter>
-                <Button color="default" variant="light" onPress={handleSkip} isDisabled={isLoading}>
-                  Přeskočit
-                </Button>
-                <Button
-                  color="primary"
-                  onPress={handleAssignRole}
-                  isLoading={isLoading}
-                  isDisabled={!selectedRole}
-                >
-                  {isLoading ? 'Přiřazování...' : 'Přiřadit roli'}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
-      {/* Category Selection Modal */}
-      <Modal isOpen={showCategoryModal} onOpenChange={setShowCategoryModal} size="lg">
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                <h3 className="text-lg font-semibold">Výběr kategorií</h3>
-                <p className="text-sm text-gray-600">
-                  Vyberte kategorie pro roli:{' '}
-                  <strong>{ROLE_OPTIONS.find((r) => r.value === pendingRole)?.label}</strong>
-                </p>
-              </ModalHeader>
-              <ModalBody>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-700">
-                    Kategorie můžete vybrat později, ale pro správné fungování systému je doporučeno
-                    přiřadit alespoň jednu kategorii.
-                  </p>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Dostupné kategorie:</label>
-                    <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto border rounded-lg p-3">
-                      {categories.map((category) => (
-                        <label
-                          key={category.id}
-                          className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedCategories.includes(category.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedCategories([...selectedCategories, category.id]);
-                              } else {
-                                setSelectedCategories(
-                                  selectedCategories.filter((id) => id !== category.id)
-                                );
-                              }
-                            }}
-                            className="rounded border-gray-300 text-primary focus:ring-primary"
-                          />
-                          <span className="text-sm">{category.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {selectedCategories.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <p className="text-sm text-blue-800">
-                        <strong>Vybrané kategorie:</strong> {selectedCategories.length}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="default" variant="light" onPress={handleCategorySelectionCancel}>
-                  Zrušit
-                </Button>
-                <Button
-                  color="primary"
-                  onPress={handleCategorySelectionConfirm}
-                  isDisabled={selectedCategories.length === 0}
-                >
-                  Potvrdit výběr
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <CategorySelectionModal
+        isOpen={showCategoryModal.isOpen}
+        onClose={showCategoryModal.onClose}
+        onConfirm={handleCategorySelectionConfirm}
+        isLoading={isLoading}
+      />
     </>
   );
 }

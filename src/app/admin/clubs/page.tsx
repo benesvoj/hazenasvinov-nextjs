@@ -4,7 +4,9 @@ import React, {useCallback, useState} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {Image, Input, useDisclosure} from '@heroui/react';
+import {Image, Input} from '@heroui/react';
+
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {ClubFormModal} from '@/app/admin/clubs/components/ClubFormModal';
 
@@ -29,7 +31,16 @@ export default function ClubsAdminPage() {
     loading: crudLoading,
     setLoading: setCrudLoading,
   } = useClubs();
-  const {selectedItem: selectedClub, formData, setFormData, openAddMode, openEditMode, resetForm, validateForm, modalMode} = useClubForm();
+  const {
+    selectedItem: selectedClub,
+    formData,
+    setFormData,
+    openAddMode,
+    openEditMode,
+    resetForm,
+    validateForm,
+    modalMode,
+  } = useClubForm();
 
   // Memoize search handler to prevent unnecessary re-renders
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,38 +48,31 @@ export default function ClubsAdminPage() {
   }, []);
 
   // Modal states
-  const {
-    isOpen: isClubModalOpen,
-    onOpen: onClubModalOpen,
-    onClose: onClubModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteClubOpen,
-    onOpen: onDeleteClubOpen,
-    onClose: onDeleteClubClose,
-  } = useDisclosure();
+  const modal = useModal();
+  const deleteModal = useModalWithItem<Club>();
 
   const handleAddClick = () => {
     openAddMode();
-    onClubModalOpen();
+    modal.onOpen();
   };
 
   const handleEditClick = (club: Club) => {
     openEditMode(club);
-    onClubModalOpen();
+    modal.onOpen();
   };
 
   const handleDeleteClick = (club: Club) => {
-    openEditMode(club);
-    onDeleteClubOpen();
+    deleteModal.openWith(club);
   };
 
   const handleConfirmDelete = async () => {
-    if (selectedClub) {
-      await deleteClub(selectedClub.id);
+    if (!deleteModal.selectedItem) return;
+
+    const success = await deleteClub(deleteModal.selectedItem.id);
+
+    if (success) {
       await refetch();
-      onDeleteClubClose();
-      resetForm();
+      deleteModal.closeAndClear();
     }
   };
 
@@ -89,7 +93,7 @@ export default function ClubsAdminPage() {
         setCrudLoading(false);
       }
       await refetch();
-      onClubModalClose();
+      modal.onClose();
       resetForm();
       setCrudLoading(false);
     } catch (error) {
@@ -179,8 +183,8 @@ export default function ClubsAdminPage() {
       </AdminContainer>
 
       <ClubFormModal
-        isOpen={isClubModalOpen}
-        onClose={onClubModalClose}
+        isOpen={modal.isOpen}
+        onClose={modal.onClose}
         formData={formData}
         setFormData={setFormData}
         onSubmit={handleSubmit}
@@ -189,8 +193,8 @@ export default function ClubsAdminPage() {
       />
 
       <DeleteConfirmationModal
-        isOpen={isDeleteClubOpen}
-        onClose={onDeleteClubClose}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
         onConfirm={handleConfirmDelete}
         title={t.deleteClub}
         message={t.deleteClubMessage}

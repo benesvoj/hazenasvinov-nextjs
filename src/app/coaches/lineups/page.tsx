@@ -6,6 +6,7 @@ import React, {useEffect, useState} from 'react';
 import {Card, CardBody, Spinner, Tab, Tabs} from '@heroui/react';
 
 import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
+import {useModalWithItem} from '@/hooks/shared/useModals';
 
 import {LineupMembers, LineupModal, LineupsList} from '@/app/coaches/lineups/components';
 
@@ -16,7 +17,6 @@ import {
   useCategoryLineupForm,
   useCategoryLineupMember,
   useCategoryLineups,
-  useCustomModal,
   useFetchCategories,
   useFetchCategoryLineups,
   useFetchSeasons,
@@ -24,14 +24,17 @@ import {
 import {translations} from '@/lib';
 import {CategoryLineup} from '@/types';
 
+interface DeleteItem {
+  type: 'lineup' | 'member';
+  id: string;
+}
+
 const t = translations.coachPortal.lineupList;
 
 export default function CoachesLineupsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSeason, setSelectedSeason] = useState<string>('');
   const [selectedLineup, setSelectedLineup] = useState<CategoryLineup | null>(null);
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
-  const [deleteOption, setDeleteOption] = useState<'lineup' | 'member' | null>(null);
 
   const {
     data: lineups,
@@ -48,7 +51,6 @@ export default function CoachesLineupsPage() {
     selectedItem: selectedLineupId,
     modalMode,
     openAddMode,
-    openEditMode,
     validateForm,
     resetForm,
   } = useCategoryLineupForm();
@@ -61,17 +63,8 @@ export default function CoachesLineupsPage() {
   // Get user's assigned category
   const [userCategories, setUserCategories] = useState<string[]>([]);
 
-  const {
-    isOpen: isLineupModalOpen,
-    onOpen: onLineupModalOpen,
-    onClose: onLineupModalClose,
-  } = useCustomModal();
-
-  const {
-    isOpen: isDeleteModalOpen,
-    onOpen: onDeleteModalOpen,
-    onClose: onDeleteModalClose,
-  } = useCustomModal();
+  const lineupModal = useModalWithItem<CategoryLineup>();
+  const deleteModal = useModalWithItem<DeleteItem>();
 
   // Fetch initial data
   useEffect(() => {
@@ -94,17 +87,19 @@ export default function CoachesLineupsPage() {
 
   useEffect(() => {
     if (activeSeason && !selectedSeason) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSeason(activeSeason.id);
     }
   }, [activeSeason, selectedSeason]);
 
   const handleAddLineup = () => {
     openAddMode();
-    onLineupModalOpen();
+    lineupModal.onOpen();
   };
 
   const handleEditLineup = (lineup: CategoryLineup) => {
-    openEditMode(lineup);
+    lineupModal.openWith(lineup);
+
     setFormData({
       name: lineup.name,
       description: lineup.description || '',
@@ -113,40 +108,27 @@ export default function CoachesLineupsPage() {
       created_by: lineup.created_by,
       is_active: lineup.is_active,
     });
-    onLineupModalOpen();
   };
 
-  const handleDeleteLineup = async (lineupId: string) => {
-    setDeleteOption('lineup');
-    setItemToDelete(lineupId);
-    onDeleteModalOpen();
+  const handleDeleteLineup = (lineupId: string) => {
+    deleteModal.openWith({type: 'lineup', id: lineupId});
   };
 
   const handleConfirmDelete = async () => {
-    if (deleteOption === 'lineup' && itemToDelete) {
-      try {
-        await deleteLineup(itemToDelete);
-        await refetch();
-        onDeleteModalClose();
-        setItemToDelete(null);
-        setDeleteOption(null);
-        resetForm();
-      } catch (err) {
-        console.error('Error deleting lineup:', err);
+    if (!deleteModal.selectedItem) return;
+
+    const {type, id} = deleteModal.selectedItem;
+
+    try {
+      if (type === 'lineup') {
+        await deleteLineup(id);
+      } else if (type === 'member' && selectedCategory && selectedLineup) {
+        await removeLineupMember(selectedCategory, selectedLineup.id, id);
       }
-    } else {
-      if (deleteOption === 'member' && selectedCategory && selectedLineup && itemToDelete) {
-        try {
-          await removeLineupMember(selectedCategory, selectedLineup.id, itemToDelete);
-          await refetch();
-          onDeleteModalClose();
-          setItemToDelete(null);
-          setDeleteOption(null);
-          resetForm();
-        } catch (err) {
-          console.error('Error deleting member:', err);
-        }
-      }
+      await refetch();
+      deleteModal.closeAndClear();
+    } catch (err) {
+      console.error(`Error deleting ${type}:`, err);
     }
   };
 
@@ -181,14 +163,11 @@ export default function CoachesLineupsPage() {
         await createLineup(dataToCreate);
       }
       await refetch();
-      onLineupModalClose();
-      resetForm();
+      lineupModal.closeAndClear();
     } catch (error) {
       console.error(error);
     }
   };
-
-  const isDeleteOptionLineup = deleteOption === 'lineup';
 
   return (
     <>
@@ -232,8 +211,8 @@ export default function CoachesLineupsPage() {
 
       {/* Lineup Modal */}
       <LineupModal
-        isOpen={isLineupModalOpen}
-        onClose={onLineupModalClose}
+        isOpen={lineupModal.isOpen}
+        onClose={lineupModal.closeAndClear}
         formData={formData}
         setFormData={setFormData}
         onSubmit={handleSubmitLineup}
@@ -242,11 +221,15 @@ export default function CoachesLineupsPage() {
       />
 
       <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={onDeleteModalClose}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeAndClear}
         onConfirm={handleConfirmDelete}
-        title={isDeleteOptionLineup ? t.deleteLineup : t.deleteLineupMember}
-        message={isDeleteOptionLineup ? t.deleteLineupMessage : t.deleteLineupMemberMessage}
+        title={deleteModal.selectedItem?.type === 'lineup' ? t.deleteLineup : t.deleteLineupMember}
+        message={
+          deleteModal.selectedItem?.type === 'lineup'
+            ? t.deleteLineupMessage
+            : t.deleteLineupMemberMessage
+        }
       />
     </>
   );

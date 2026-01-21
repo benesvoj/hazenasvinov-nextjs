@@ -9,6 +9,8 @@ import {TrashIcon, UserGroupIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
+import {isEmpty} from '@/utils/arrayHelper';
+
 interface TeamsTabProps {
   teams: any[];
   onDeleteTeam: (team: any) => void;
@@ -24,7 +26,7 @@ export default function TeamsTab({teams, onDeleteTeam}: TeamsTabProps) {
         </div>
       </CardHeader>
       <CardBody>
-        {teams.length === 0 ? (
+        {isEmpty(teams) ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
             <UserGroupIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <h4 className="text-lg font-medium text-gray-700 mb-2">Žádné týmy</h4>

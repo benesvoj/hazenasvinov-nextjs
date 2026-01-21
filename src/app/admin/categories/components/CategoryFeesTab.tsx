@@ -13,10 +13,11 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-  useDisclosure,
 } from '@heroui/react';
 
 import {PencilIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
+
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
@@ -35,12 +36,13 @@ export default function CategoryFeesTab() {
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
   const {data, loading: fetchLoading, refetch} = useFetchCategoryMembershipFees({selectedYear});
-  const {categories: {data: categories}} = useAppData();
+  const {
+    categories: {data: categories},
+  } = useAppData();
   const {fees, loading, deleteFee} = useCategoryMembershipFees(selectedYear);
 
-  const {isOpen: isFormOpen, onOpen: onFormOpen, onClose: onFormClose} = useDisclosure();
-
-  const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure();
+  const modal = useModal();
+  const deleteModal = useModalWithItem<CategoryMembershipFee>();
 
   const [selectedFee, setSelectedFee] = useState<CategoryMembershipFee | null>(null);
 
@@ -49,13 +51,13 @@ export default function CategoryFeesTab() {
 
   const handleEdit = (fee: CategoryMembershipFee) => {
     setSelectedFee(fee);
-    onFormOpen();
+    modal.onOpen();
   };
 
   const handleDelete = async () => {
     if (selectedFee) {
       await deleteFee(selectedFee.id);
-      onDeleteClose();
+      deleteModal.onClose();
     }
   };
 
@@ -81,7 +83,7 @@ export default function CategoryFeesTab() {
           startContent={<PlusIcon className="w-5 h-5" />}
           onPress={() => {
             setSelectedFee(null);
-            onFormOpen();
+            modal.onOpen();
           }}
         >
           Přidat poplatek
@@ -130,7 +132,7 @@ export default function CategoryFeesTab() {
                       color="danger"
                       onPress={() => {
                         setSelectedFee(fee);
-                        onDeleteOpen();
+                        deleteModal.onOpen();
                       }}
                     >
                       <TrashIcon className="w-4 h-4" />
@@ -145,16 +147,16 @@ export default function CategoryFeesTab() {
 
       {/* Modals */}
       <CategoryFeeFormModal
-        isOpen={isFormOpen}
-        onClose={onFormClose}
+        isOpen={modal.isOpen}
+        onClose={modal.onClose}
         fee={selectedFee}
         categories={categories || []}
         defaultYear={selectedYear}
       />
 
       <DeleteConfirmationModal
-        isOpen={isDeleteOpen}
-        onClose={onDeleteClose}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
         onConfirm={handleDelete}
         title="Smazat členský poplatek"
         message="Opravdu chcete smazat tento členský poplatek?"

@@ -4,6 +4,8 @@ import {useEffect, useState} from 'react';
 
 import {redirect} from 'next/navigation';
 
+import {useModalWithItem} from '@/hooks/shared/useModals';
+
 import {useUser} from '@/contexts/UserContext';
 
 import {
@@ -18,7 +20,6 @@ import {ModalMode, TodoFilter, TodoStatuses} from '@/enums';
 import {
   useCommentForm,
   useComments,
-  useCustomModal,
   useFetchComments,
   useFetchTodos,
   useTodoFiltering,
@@ -52,7 +53,8 @@ export default function AdminDashboard() {
     todos: todosData || [],
     todoFilter,
   });
-  const todoModal = useCustomModal();
+
+  const todoModal = useModalWithItem<TodoItem>();
 
   const {
     data: commentsData,
@@ -61,11 +63,10 @@ export default function AdminDashboard() {
   } = useFetchComments();
   const {createComment, updateComment, deleteComment, loading: crudCommentLoading} = useComments();
   const commentForm = useCommentForm();
-  const commentModal = useCustomModal();
+  const commentModal = useModalWithItem<Comment>();
 
   // Delete confirmation state
-  const deleteModal = useCustomModal();
-  const [deleteItem, setDeleteItem] = useState<DeleteItem | null>(null);
+  const deleteModal = useModalWithItem<DeleteItem>();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -110,30 +111,28 @@ export default function AdminDashboard() {
       await updateComment(commentForm.selectedItem.id, commentForm.formData);
     }
 
-    commentModal.onClose();
+    commentModal.closeAndClear();
     await commentsRefetch();
   };
 
   // Handle delete confirmation
   const handleDeleteClick = (type: 'todo' | 'comment', id: string, title: string) => {
-    setDeleteItem({type, id, title});
-    deleteModal.onOpen();
+    deleteModal.openWith({type, id, title});
   };
 
   const handleDeleteConfirm = async () => {
-    if (!deleteItem) return;
+    if (!deleteModal.selectedItem) return;
 
-    if (deleteItem.type === 'todo') {
-      await deleteTodo(deleteItem.id);
-      deleteModal.onClose();
+    const {type, id} = deleteModal.selectedItem;
+
+    if (type === 'todo') {
+      await deleteTodo(id);
       await refetchTodos();
-      setDeleteItem(null);
     } else {
-      await deleteComment(deleteItem.id);
-      deleteModal.onClose();
+      await deleteComment(id);
       await commentsRefetch();
-      setDeleteItem(null);
     }
+    deleteModal.closeAndClear();
   };
 
   // ============ Todo Handlers ============
@@ -168,7 +167,7 @@ export default function AdminDashboard() {
     }
 
     await refetchTodos();
-    todoModal.onClose();
+    todoModal.closeAndClear();
   };
 
   const handleTodoUpdateStatus = async (id: string, status: TodoStatuses) => {
@@ -225,7 +224,7 @@ export default function AdminDashboard() {
 
       <TodoModal
         isOpen={todoModal.isOpen}
-        onClose={todoModal.onClose}
+        onClose={todoModal.closeAndClear}
         todoFormData={todoForm.formData}
         setTodoFormData={todoForm.setFormData}
         onSubmit={handleTodoSubmit}
@@ -235,7 +234,7 @@ export default function AdminDashboard() {
 
       <CommentModal
         isOpen={commentModal.isOpen}
-        onClose={commentModal.onClose}
+        onClose={commentModal.closeAndClear}
         onSubmit={handleCommentSubmit}
         commentFormData={commentForm.formData}
         setCommentFormData={commentForm.setFormData}
@@ -245,10 +244,10 @@ export default function AdminDashboard() {
 
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        onClose={deleteModal.closeAndClear}
         onConfirm={handleDeleteConfirm}
-        title={`Delete ${deleteItem?.type === 'todo' ? 'Todo' : 'Comment'}`}
-        message={`Are you sure you want to delete "${deleteItem?.title}"? This action cannot be undone.`}
+        title={`Delete ${deleteModal.selectedItem?.type === 'todo' ? 'Todo' : 'Comment'}`}
+        message={`Are you sure you want to delete "${deleteModal.selectedItem?.title}"? This action cannot be undone.`}
         isLoading={crudTodoLoading || crudCommentLoading}
       />
     </>

@@ -5,26 +5,19 @@ import React, {useState, useEffect, useCallback} from 'react';
 import Link from 'next/link';
 import {useParams} from 'next/navigation';
 
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-  Tabs,
-  Tab,
-  Input,
-  Button,
-  Image,
-} from '@heroui/react';
+import {Tabs, Tab, Input, Button, Image} from '@heroui/react';
 
 import {PencilIcon, UserGroupIcon, TrophyIcon} from '@heroicons/react/24/outline';
 
-import LogoUpload from '@/components/ui/client/LogoUpload';
+import {useModals, useModalWithItem} from '@/hooks/shared/useModals';
 
+import LogoUpload from '@/components/ui/client/LogoUpload';
+import {DeleteConfirmationModal, UnifiedModal} from '@/components/ui/modals';
+
+import {isEmpty} from '@/utils/arrayHelper';
 import {createClient} from '@/utils/supabase/client';
 
+import {LoadingSpinner} from '@/components';
 import {Category, Season, Club, Team} from '@/types';
 
 import {AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation} from './components';
@@ -44,18 +37,9 @@ export default function ClubDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Modal states
-  const {isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose} = useDisclosure();
-  const {
-    isOpen: isDeleteTeamOpen,
-    onOpen: onDeleteTeamOpen,
-    onClose: onDeleteTeamClose,
-  } = useDisclosure();
-  const {
-    isOpen: isAssignCategoryOpen,
-    onOpen: onAssignCategoryOpen,
-    onClose: onAssignCategoryClose,
-  } = useDisclosure();
+  // Modal states - using useModals helper for cleaner code
+  const modal = useModals('Edit', 'AssignCategory');
+  const deleteTeamModal = useModalWithItem<Team>();
 
   // Form states
   const [editForm, setEditForm] = useState({
@@ -65,8 +49,6 @@ export default function ClubDetailPage() {
     founded_year: '',
     logo_url: '',
   });
-
-  const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
 
   const supabase = createClient();
 
@@ -113,7 +95,7 @@ export default function ClubDetailPage() {
         throw clubCategoriesError;
       }
 
-      if (!clubCategoriesData || clubCategoriesData.length === 0) {
+      if (isEmpty(clubCategoriesData)) {
         setTeams([]);
         return;
       }
@@ -264,8 +246,8 @@ export default function ClubDetailPage() {
 
       if (error) throw error;
 
-      onEditClose();
-      fetchClub();
+      modal.Edit.onClose();
+      await fetchClub();
       setError('');
     } catch (error) {
       setError('Chyba při aktualizaci klubu');
@@ -278,18 +260,20 @@ export default function ClubDetailPage() {
 
   // Delete team from club
   const handleDeleteTeam = async () => {
-    if (!teamToDelete) return;
+    if (!deleteTeamModal.selectedItem) return;
 
     try {
       // Delete from club_category_teams (this is the new structure)
-      const {error} = await supabase.from('club_category_teams').delete().eq('id', teamToDelete.id);
+      const {error} = await supabase
+        .from('club_category_teams')
+        .delete()
+        .eq('id', deleteTeamModal.selectedItem.id);
 
       if (error) throw error;
 
-      onDeleteTeamClose();
-      setTeamToDelete(null);
-      fetchClubTeams();
-      fetchClubCategories(); // Also refresh category to update team counts
+      deleteTeamModal.closeAndClear();
+      await fetchClubTeams();
+      await fetchClubCategories(); // Also refresh category to update team counts
       setError('');
     } catch (error) {
       setError('Chyba při mazání týmu');
@@ -318,7 +302,7 @@ export default function ClubDetailPage() {
 
       if (error) throw error;
 
-      onAssignCategoryClose();
+      modal.AssignCategory.onClose();
       fetchClubCategories(); // Refresh the list
       setError('');
     } catch (error) {
@@ -395,7 +379,7 @@ export default function ClubDetailPage() {
   }, [memoizedClubId, fetchClub, fetchClubTeams, fetchCategoriesAndSeasons, fetchClubCategories]);
 
   if (loading) {
-    return <div className="p-6 text-center">Načítání...</div>;
+    return <LoadingSpinner />;
   }
 
   if (!club) {
@@ -421,7 +405,7 @@ export default function ClubDetailPage() {
           <Button
             color="primary"
             startContent={<PencilIcon className="w-4 h-4" />}
-            onPress={onEditOpen}
+            onPress={modal.Edit.onOpen}
             size="sm"
           >
             Upravit klub
@@ -465,13 +449,7 @@ export default function ClubDetailPage() {
             </div>
           }
         >
-          <TeamsTab
-            teams={teams}
-            onDeleteTeam={(team) => {
-              setTeamToDelete(team);
-              onDeleteTeamOpen();
-            }}
-          />
+          <TeamsTab teams={teams} onDeleteTeam={(team) => deleteTeamModal.openWith(team)} />
         </Tab>
 
         <Tab
@@ -486,7 +464,7 @@ export default function ClubDetailPage() {
           <CategoriesTab
             clubCategories={clubCategories}
             categories={categories}
-            onAssignCategory={onAssignCategoryOpen}
+            onAssignCategory={modal.AssignCategory.onOpen}
             onGenerateTeams={handleGenerateTeams}
             onDeleteClubCategory={handleDeleteClubCategory}
           />
@@ -494,83 +472,62 @@ export default function ClubDetailPage() {
       </Tabs>
 
       {/* Edit Club Modal */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} size="lg">
-        <ModalContent>
-          <ModalHeader>Upravit klub</ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Název klubu *"
-                placeholder="např. Hazena Švínov"
-                value={editForm.name}
-                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-              />
-              <Input
-                label="Krátký název"
-                placeholder="např. Švínov"
-                value={editForm.short_name}
-                onChange={(e) => setEditForm({...editForm, short_name: e.target.value})}
-              />
-              <Input
-                label="Město"
-                placeholder="např. Švínov"
-                value={editForm.city}
-                onChange={(e) => setEditForm({...editForm, city: e.target.value})}
-              />
-              <Input
-                label="Rok založení"
-                type="number"
-                placeholder="např. 1920"
-                value={editForm.founded_year}
-                onChange={(e) => setEditForm({...editForm, founded_year: e.target.value})}
-              />
-              <LogoUpload
-                value={editForm.logo_url}
-                onChange={(logoUrl) => setEditForm({...editForm, logo_url: logoUrl})}
-                label="Logo klubu"
-                description="Nahrajte logo klubu (max 5MB, JPG/PNG)"
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onEditClose}>
-              Zrušit
-            </Button>
-            <Button color="primary" onPress={handleUpdateClub}>
-              Uložit změny
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <UnifiedModal
+        isOpen={modal.Edit.isOpen}
+        onClose={modal.Edit.onClose}
+        title={'Upravit klub'}
+        size={'lg'}
+        onSubmit={handleUpdateClub}
+      >
+        <div className="space-y-4">
+          <Input
+            label="Název klubu *"
+            placeholder="např. Hazena Švínov"
+            value={editForm.name}
+            onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+          />
+          <Input
+            label="Krátký název"
+            placeholder="např. Švínov"
+            value={editForm.short_name}
+            onChange={(e) => setEditForm({...editForm, short_name: e.target.value})}
+          />
+          <Input
+            label="Město"
+            placeholder="např. Švínov"
+            value={editForm.city}
+            onChange={(e) => setEditForm({...editForm, city: e.target.value})}
+          />
+          <Input
+            label="Rok založení"
+            type="number"
+            placeholder="např. 1920"
+            value={editForm.founded_year}
+            onChange={(e) => setEditForm({...editForm, founded_year: e.target.value})}
+          />
+          <LogoUpload
+            value={editForm.logo_url}
+            onChange={(logoUrl) => setEditForm({...editForm, logo_url: logoUrl})}
+            label="Logo klubu"
+            description="Nahrajte logo klubu (max 5MB, JPG/PNG)"
+          />
+        </div>
+      </UnifiedModal>
 
-      {/* Delete Team Modal */}
-      <Modal isOpen={isDeleteTeamOpen} onClose={onDeleteTeamClose} size="md">
-        <ModalContent>
-          <ModalHeader>Potvrdit smazání týmu</ModalHeader>
-          <ModalBody>
-            <p>
-              Opravdu chcete smazat tým <strong>{teamToDelete?.name}</strong>?
-            </p>
-            <p className="text-sm text-gray-600 mt-2">
-              Tato akce je nevratná. Tým můžete znovu vygenerovat pomocí tlačítka &quot;Generovat
-              týmy&quot; v kategorii.
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="flat" onPress={onDeleteTeamClose}>
-              Zrušit
-            </Button>
-            <Button color="danger" onPress={handleDeleteTeam}>
-              Smazat tým
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <DeleteConfirmationModal
+        isOpen={deleteTeamModal.isOpen}
+        onClose={deleteTeamModal.closeAndClear}
+        onConfirm={handleDeleteTeam}
+        title={'Potvrdit smazání týmu'}
+        message={
+          'Tato akce je nevratná. Tým můžete znovu vygenerovat pomocí tlačítka &quot;Generovat týmy&quot; v kategorii.'
+        }
+      />
 
       {/* Assign Category Modal */}
       <AssignCategoryModal
-        isOpen={isAssignCategoryOpen}
-        onClose={onAssignCategoryClose}
+        isOpen={modal.AssignCategory.isOpen}
+        onClose={modal.AssignCategory.onClose}
         onAssignCategory={handleAssignCategory}
         clubId={memoizedClubId}
         assignedCategoryIds={clubCategories.map((cc) => cc.category_id)}

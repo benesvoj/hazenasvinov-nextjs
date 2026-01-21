@@ -3,8 +3,9 @@
 import React, {useState} from 'react';
 
 import {Input} from '@heroui/input';
-import {useDisclosure} from '@heroui/modal';
 import {Select, SelectItem} from '@heroui/react';
+
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
 
@@ -18,7 +19,6 @@ import {
   useFetchClubCategories,
   useFetchClubs,
   useFetchSeasons,
-  useCustomModal,
 } from '@/hooks';
 import {ClubCategorySchema, ClubCategoryWithRelations, Season} from '@/types';
 
@@ -49,17 +49,17 @@ export default function ClubCategoriesAdminPage() {
     selectedSeason,
   });
 
-  const clubCategoryModal = useCustomModal();
-  const deleteModal = useCustomModal();
+  const modal = useModal();
+  const deleteModal = useModalWithItem<ClubCategorySchema>();
 
   const handleAddClick = () => {
     openAddMode();
-    clubCategoryModal.onOpen();
+    modal.onOpen();
   };
 
   const handleEditClick = (data: ClubCategorySchema) => {
     openEditMode(data);
-    clubCategoryModal.onOpen();
+    modal.onOpen();
   };
 
   const handleDeleteClick = (data: ClubCategorySchema) => {
@@ -79,7 +79,7 @@ export default function ClubCategoriesAdminPage() {
         await createClubCategory(formData);
       }
       await refetch();
-      clubCategoryModal.onClose();
+      modal.onClose();
       resetForm();
     } catch (error) {
       showToast.danger('Chyba při ukládání přiřazení kategorie klubu.');
@@ -189,8 +189,8 @@ export default function ClubCategoriesAdminPage() {
       </AdminContainer>
 
       <ClubCategoriesModal
-        isOpen={clubCategoryModal.isOpen}
-        onClose={clubCategoryModal.onClose}
+        isOpen={modal.isOpen}
+        onClose={modal.onClose}
         onPress={handleSubmit}
         mode={modalMode}
         formData={formData}

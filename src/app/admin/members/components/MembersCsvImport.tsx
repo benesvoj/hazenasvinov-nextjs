@@ -1,25 +1,30 @@
-// TODO: direct supbase imports to /supabase instead of /utils/supabase/client
-import React, {useState, useCallback} from 'react';
+// TODO: direct supabase imports to /supabase instead of /utils/supabase/client
+import React, {useCallback, useState} from 'react';
 
 import {
+  Button,
+  Checkbox,
+  Input,
+  Select,
+  SelectItem,
   Modal,
-  ModalContent,
-  ModalHeader,
   ModalBody,
+  ModalContent,
   ModalFooter,
-  useDisclosure,
-} from '@heroui/modal';
-import {Select, SelectItem, Button, Input, Checkbox} from '@heroui/react';
+  ModalHeader,
+} from '@heroui/react';
 
 import {
+  CheckCircleIcon,
   DocumentArrowUpIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+
+import {useModal} from '@/hooks/shared/useModals';
 
 import {createClient} from '@/utils/supabase/client';
 
-import {Genders, getMemberFunctionOptions, MemberFunction, getGenderOptions} from '@/enums';
+import {Genders, getGenderOptions, getMemberFunctionOptions, MemberFunction} from '@/enums';
 
 interface CsvMember {
   regNumber: string;
@@ -40,12 +45,7 @@ interface MembersCsvImportProps {
   sexOptions: Record<string, string>;
 }
 
-export default function MembersCsvImport({
-  onImportComplete,
-  categories,
-  sexOptions,
-}: MembersCsvImportProps) {
-  const {isOpen, onOpen, onClose} = useDisclosure();
+export default function MembersCsvImport({onImportComplete, categories}: MembersCsvImportProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<CsvMember[]>([]);
   const [importing, setImporting] = useState(false);
@@ -53,6 +53,8 @@ export default function MembersCsvImport({
   const [defaultCategory, setDefaultCategory] = useState(Genders.MALE);
   const [defaultSex, setDefaultSex] = useState<Genders>(Genders.MALE);
   const [defaultFunctions, setDefaultFunctions] = useState<string[]>([MemberFunction.PLAYER]);
+
+  const modal = useModal();
 
   const supabase = createClient();
 
@@ -71,10 +73,7 @@ export default function MembersCsvImport({
       const firstLine = lines[0];
       const separator = firstLine.includes(';') ? ';' : ',';
 
-      console.log('🔍 Detected CSV separator:', separator);
-
       // Parse header and data
-      const header = firstLine.split(separator).map((h) => h.trim().toLowerCase());
       const data: CsvMember[] = [];
 
       for (let i = 1; i < lines.length; i++) {
@@ -182,8 +181,8 @@ export default function MembersCsvImport({
     setFile(null);
     setPreview([]);
     setImportResult(null);
-    onClose();
-  }, [onClose]);
+    modal.onClose();
+  }, [modal]);
 
   const handleImportComplete = useCallback(() => {
     handleClose();
@@ -197,12 +196,12 @@ export default function MembersCsvImport({
         color="secondary"
         variant="flat"
         startContent={<DocumentArrowUpIcon className="w-4 h-4" />}
-        onPress={onOpen}
+        onPress={modal.onOpen}
       >
         Import CSV
       </Button>
 
-      <Modal isOpen={isOpen} onClose={handleClose} size="4xl">
+      <Modal isOpen={modal.isOpen} onClose={handleClose} size="4xl">
         <ModalContent>
           <ModalHeader>Import členů z CSV</ModalHeader>
           <ModalBody>

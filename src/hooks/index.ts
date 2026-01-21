@@ -1,7 +1,7 @@
 export * from './admin/useExcelImport';
 export * from './admin/usePerformanceMonitoring';
 export * from './auth/useAuth';
-export { useAuth as useAuthNew } from './auth/useAuthNew';
+export {useAuth as useAuthNew} from './auth/useAuthNew';
 export * from './coach/useStrategyPreparation';
 export * from './coach/useUpcomingBirthdays';
 export * from './entities/attendance/data/useFetchAttendanceStatistics';
@@ -121,22 +121,21 @@ export * from './features/betting/useMatchOdds';
 export * from './features/betting/useMatches';
 export * from './features/betting/useTeamFormAndStandings';
 export * from './features/betting/useWallet';
-export { 
-          useMatchesWithTeams,
-          useMatchesSeasonal,
-          useMatchById,
-          useOwnClubMatches as useOwnClubMatchesQuery,
-          usePublicMatches as usePublicMatchesQuery,
-          useUpcomingMatches,
-          useCompletedMatches,
-          useMatchesByMatchweek,
-          useMatchesByDateRange,
-          useCreateMatch,
-          useUpdateMatch,
-          useDeleteMatch,
-          useOptimisticMatchUpdate
-        } from './shared/queries/useMatchQueries';
-export * from './shared/useCustomModal';
+export {
+  useMatchesWithTeams,
+  useMatchesSeasonal,
+  useMatchById,
+  useOwnClubMatches as useOwnClubMatchesQuery,
+  usePublicMatches as usePublicMatchesQuery,
+  useUpcomingMatches,
+  useCompletedMatches,
+  useMatchesByMatchweek,
+  useMatchesByDateRange,
+  useCreateMatch,
+  useUpdateMatch,
+  useDeleteMatch,
+  useOptimisticMatchUpdate,
+} from './shared/queries/useMatchQueries';
 export * from './shared/useDebounce';
 export * from './shared/usePageVisibility';
 export * from './shared/usePortalAccess';
