@@ -20,7 +20,7 @@ The component `CompactVideoList` expects videos with match data, but receives `V
 ### Relevant Files
 - `src/types/entities/video/schema/videosSchema.ts` - Base VideoSchema (no match)
 - `src/types/entities/video/data/video.ts` - Video type with relations (has `match_ids` array, not full match)
-- `src/types/entities/match/data/match.ts` - Match type definition
+- `src/types/entities/match/data/matches.ts` - Match type definition
 - `src/hooks/coach/useStrategyPreparation.ts` - Adds match property dynamically
 - `src/app/coaches/matches/components/CompactVideoList.tsx` - Consumes videos with match
 

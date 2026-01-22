@@ -62,6 +62,7 @@ export * from './entities/match/data/useFetchVideoMatch';
 export * from './entities/match/data/useOwnClubMatches';
 export * from './entities/match/data/usePublicMatches';
 export * from './entities/match/state/useCachedMatches';
+export * from './entities/match/state/useMatchMutations';
 export * from './entities/match/state/useMatchVideos';
 export * from './entities/match/state/useOptimizedMatches';
 export * from './entities/meeting-minute/useMeetingMinutes';
@@ -137,6 +138,7 @@ export {
   useOptimisticMatchUpdate,
 } from './shared/queries/useMatchQueries';
 export * from './shared/useDebounce';
+export * from './shared/useModals';
 export * from './shared/usePageVisibility';
 export * from './shared/usePortalAccess';
 export * from './shared/useSupabaseClient';

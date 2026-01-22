@@ -9,7 +9,7 @@ import {Button} from '@heroui/react';
 
 import {ArrowLeftIcon, TrophyIcon, ArrowTopRightOnSquareIcon} from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 import {LoadingSpinner} from '@/components';
 import {TeamTypes} from '@/enums';
@@ -76,10 +76,10 @@ export default function MatchDetailPage() {
             <TrophyIcon className="w-16 h-16 text-gray-400 mx-auto" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            {translations.matchDetail.noMatchFound}
+            {translations.matches.matchDetail.noMatchFound}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {error || translations.matchDetail.noMatchFoundDescription}
+            {error || translations.matches.matchDetail.noMatchFoundDescription}
           </p>
           <Button
             as={Link}
@@ -87,7 +87,7 @@ export default function MatchDetailPage() {
             color="primary"
             startContent={<ArrowLeftIcon className="w-4 h-4" />}
           >
-            {translations.matchDetail.backToMatches}
+            {translations.matches.matchDetail.backToMatches}
           </Button>
         </div>
       </div>
@@ -105,7 +105,7 @@ export default function MatchDetailPage() {
           color="primary"
           startContent={<ArrowLeftIcon className="w-4 h-4" />}
         >
-          {translations.matchDetail.backToMatches}
+          {translations.matches.matchDetail.backToMatches}
         </Button>
       </div>
 

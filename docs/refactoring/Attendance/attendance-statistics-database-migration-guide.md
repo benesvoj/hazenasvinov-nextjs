@@ -3,7 +3,7 @@
 **Version:** 1.0
 **Date:** 2025-11-25
 **Status:** Ready for Implementation
-**Related Docs:** [attendance-statistics-optimization.md](./attendance-statistics-optimization.md)
+**Related Docs:** [attendance-statistics-optimization.md](attendance-statistics-optimization.md)
 
 ---
 
@@ -859,7 +859,7 @@ After successful database migration:
 ## Support & References
 
 ### Documentation
-- Main optimization doc: [attendance-statistics-optimization.md](./attendance-statistics-optimization.md)
+- Main optimization doc: [attendance-statistics-optimization.md](attendance-statistics-optimization.md)
 - API endpoint: `/api/attendance/statistics/route.ts`
 - React Query hook: `useFetchAttendanceStatistics.ts`
 

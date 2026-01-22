@@ -5,15 +5,15 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, Card, CardBody, Select, SelectItem, Tab, Tabs} from '@heroui/react';
 
 import {useQueryClient} from '@tanstack/react-query';
+import {isNilOrEmpty} from 'ramda-adjunct';
+import {match} from 'ts-pattern';
 
 import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
 import {useModals, useModalWithItem} from '@/hooks/shared/useModals';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 import {hasItems, isEmpty} from '@/utils/arrayHelper';
-import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
-import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
 import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
 
 import {getCategoryInfo} from '@/helpers/getCategoryInfo';
@@ -25,21 +25,34 @@ import {
   showToast,
   UnifiedStandingTable,
 } from '@/components';
-import {matchStatusesKeys} from '@/constants';
-import {ActionTypes} from '@/enums';
+import {ActionTypes, MatchStatus} from '@/enums';
 import {
   useExcelImport,
   useFetchCategories,
   useFetchMembers,
   useFetchSeasons,
   useFilteredTeams,
+  useMatchMutations,
   useSeasonFiltering,
   useStandings,
   useTeamDisplayLogic,
   useTeams,
 } from '@/hooks';
 import {AddMatchFormData, EditMatchFormData, Match} from '@/types';
-import {calculateStandings, createClient, generateInitialStandings} from '@/utils';
+import {
+  autoRecalculateStandings,
+  buildMatchInsertData,
+  buildMatchUpdateData,
+  calculateStandings,
+  createClient,
+  generateInitialStandings,
+  isNilOrZero,
+  refreshMaterializedViewWithCallback,
+  validateAddMatchForm,
+  validateEditMatchForm,
+  validateResultData,
+  validateSeasonNotClosed,
+} from '@/utils';
 
 import {
   AddMatchModal,
@@ -53,9 +66,44 @@ import {
   MatchProcessWizardModal,
 } from './components';
 import {getMatchweekOptions} from './helpers/getMatchweekOptions';
+import {isSeasonClosedHelper} from './helpers/isSeasonClosedHelper';
 
-// TODO: move into admin translations
-const t = translations.matches;
+const INITIAL_FORM_DATA: AddMatchFormData = {
+  date: '',
+  time: '',
+  home_team_id: '',
+  away_team_id: '',
+  venue: '',
+  category_id: '',
+  season_id: '',
+  matchweek: undefined,
+  match_number: undefined,
+  video_ids: [],
+};
+
+const INITIAL_EDIT_DATA: EditMatchFormData = {
+  date: '',
+  time: '',
+  home_team_id: '',
+  away_team_id: '',
+  venue: '',
+  home_score: 0,
+  away_score: 0,
+  home_score_halftime: 0,
+  away_score_halftime: 0,
+  status: MatchStatus.COMPLETED,
+  matchweek: 0,
+  match_number: 0,
+  category_id: '',
+  video_ids: [],
+};
+
+const INITIAL_RESULT_DATA = {
+  home_score: 0,
+  away_score: 0,
+  home_score_halftime: 0,
+  away_score_halftime: 0,
+};
 
 export default function MatchesAdminPage() {
   const [error, setError] = useState('');
@@ -90,6 +138,26 @@ export default function MatchesAdminPage() {
   // Use the team display logic hook
   const {fetchTeamCounts} = useTeamDisplayLogic(selectedCategory);
 
+  // Check if matchweek is expanded
+  const isMatchweekExpanded = (categoryId: string, matchweek: number) => {
+    const key = `${categoryId}-${matchweek}`;
+    return expandedMatchweeks.has(key);
+  };
+
+  const [formData, setFormData] = useState<AddMatchFormData>(INITIAL_FORM_DATA);
+
+  const [resultData, setResultData] = useState(INITIAL_RESULT_DATA);
+
+  const [editData, setEditData] = useState<EditMatchFormData>(INITIAL_EDIT_DATA);
+
+  const [bulkUpdateData, setBulkUpdateData] = useState({
+    categoryId: '',
+    matchweek: '',
+    action: 'set' as 'set' | 'remove',
+  });
+
+  const [expandedMatchweeks, setExpandedMatchweeks] = useState<Set<string>>(new Set());
+
   // Toggle matchweek expansion
   const toggleMatchweek = (categoryId: string, matchweek: number) => {
     const key = `${categoryId}-${matchweek}`;
@@ -104,71 +172,20 @@ export default function MatchesAdminPage() {
     });
   };
 
-  // Check if matchweek is expanded
-  const isMatchweekExpanded = (categoryId: string, matchweek: number) => {
-    const key = `${categoryId}-${matchweek}`;
-    return expandedMatchweeks.has(key);
-  };
-
-  const [formData, setFormData] = useState<AddMatchFormData>({
-    date: '',
-    time: '',
-    home_team_id: '',
-    away_team_id: '',
-    venue: '',
-    category_id: '',
-    season_id: '',
-    matchweek: undefined,
-    match_number: undefined,
-    video_ids: [],
-  });
-
-  const [resultData, setResultData] = useState({
-    home_score: 0,
-    away_score: 0,
-    home_score_halftime: 0,
-    away_score_halftime: 0,
-  });
-
-  const [editData, setEditData] = useState<EditMatchFormData>({
-    date: '',
-    time: '',
-    home_team_id: '',
-    away_team_id: '',
-    venue: '',
-    home_score: 0,
-    away_score: 0,
-    home_score_halftime: 0,
-    away_score_halftime: 0,
-    status: 'completed' as 'upcoming' | 'completed',
-    matchweek: '',
-    match_number: 0,
-    category_id: '',
-    video_ids: [],
-  });
-
-  const [bulkUpdateData, setBulkUpdateData] = useState({
-    categoryId: '',
-    matchweek: '',
-    action: 'set' as 'set' | 'remove',
-  });
-
-  const [expandedMatchweeks, setExpandedMatchweeks] = useState<Set<string>>(new Set());
-
   const supabase = createClient();
 
   // Use the enhanced seasons hook
   const {data: seasons, loading: seasonsLoading} = useFetchSeasons();
   const {activeSeason, sortedSeasons} = useSeasonFiltering({seasons: seasons || []});
 
-  const [selectedSeason, setSelectedSeason] = useState<string>('');
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string>('');
   const queryClient = useQueryClient();
 
   // Use the matches hook - pass category code instead of ID, and show ALL matches (admin mode)
   const selectedCategoryId = categories.find((cat) => cat.id === selectedCategory)?.id || '';
   const {data: seasonalMatchesData, error: matchesError} = useMatchesSeasonal({
     categoryId: selectedCategoryId,
-    seasonId: selectedSeason,
+    seasonId: selectedSeasonId,
     ownClubOnly: false,
     includeTeamDetails: true,
     includeCategory: true,
@@ -184,7 +201,7 @@ export default function MatchesAdminPage() {
     : [];
 
   // Use the filtered teams hook
-  const {filteredTeams, fetchFilteredTeams} = useFilteredTeams(selectedCategory, selectedSeason);
+  const {filteredTeams, fetchFilteredTeams} = useFilteredTeams(selectedCategory, selectedSeasonId);
 
   // Use the standings hook
   const {standings, fetchStandings, loading: standingsLoading} = useStandings();
@@ -200,10 +217,10 @@ export default function MatchesAdminPage() {
 
   // Set active season as default when seasons are loaded
   useEffect(() => {
-    if (hasItems(sortedSeasons) && !selectedSeason && activeSeason) {
-      setSelectedSeason(activeSeason.id);
+    if (hasItems(sortedSeasons) && !selectedSeasonId && activeSeason) {
+      setSelectedSeasonId(activeSeason.id);
     }
-  }, [sortedSeasons, selectedSeason, activeSeason]);
+  }, [sortedSeasons, selectedSeasonId, activeSeason]);
 
   // Teams are now automatically fetched when selectedCategory or selectedSeason changes
   // No need for manual useEffect since useFilteredTeams handles this internally
@@ -231,28 +248,28 @@ export default function MatchesAdminPage() {
 
   // Fetch standings when filters change (matches are automatically fetched by useFetchMatches hook)
   useEffect(() => {
-    if (selectedCategory && selectedSeason) {
-      fetchStandings(selectedCategory, selectedSeason);
+    if (selectedCategory && selectedSeasonId) {
+      fetchStandings(selectedCategory, selectedSeasonId);
     }
-  }, [fetchStandings, selectedCategory, selectedSeason]);
+  }, [fetchStandings, selectedCategory, selectedSeasonId]);
 
   // Calculate standings
   const handleCalculateStandings = async () => {
     if (
       !selectedCategory ||
-      !selectedSeason ||
+      !selectedSeasonId ||
       selectedCategory.trim() === '' ||
-      selectedSeason.trim() === ''
+      selectedSeasonId.trim() === ''
     ) {
       setError('Vyberte kategorii a sezónu');
       return;
     }
 
-    const result = await calculateStandings(selectedCategory, selectedSeason, isSeasonClosed);
+    const result = await calculateStandings(selectedCategory, selectedSeasonId, isSeasonClosed);
 
     if (result.success) {
       // Refresh standings
-      await fetchStandings(selectedCategory, selectedSeason);
+      await fetchStandings(selectedCategory, selectedSeasonId);
       setError('');
     } else {
       setError(result.error || 'Chyba při výpočtu tabulky');
@@ -261,7 +278,7 @@ export default function MatchesAdminPage() {
 
   // Smart standings function - generates or recalculates based on current state
   const handleStandingsAction = async () => {
-    if (isSeasonClosed()) {
+    if (isSeasonClosed) {
       setError('Nelze upravovat tabulku pro uzavřenou sezónu');
       return;
     }
@@ -269,7 +286,7 @@ export default function MatchesAdminPage() {
     try {
       // Check if standings already exist for this category/season
       const existingStandings = standings.filter(
-        (s) => s.category_id === selectedCategory && s.season_id === selectedSeason
+        (s) => s.category_id === selectedCategory && s.season_id === selectedSeasonId
       );
 
       if (isEmpty(existingStandings)) {
@@ -288,92 +305,77 @@ export default function MatchesAdminPage() {
   const handleGenerateInitialStandings = async () => {
     if (
       !selectedCategory ||
-      !selectedSeason ||
+      !selectedSeasonId ||
       selectedCategory.trim() === '' ||
-      selectedSeason.trim() === ''
+      selectedSeasonId.trim() === ''
     ) {
       setError('Vyberte kategorii a sezónu');
       return;
     }
 
-    const result = await generateInitialStandings(selectedCategory, selectedSeason, isSeasonClosed);
+    const result = await generateInitialStandings(
+      selectedCategory,
+      selectedSeasonId,
+      isSeasonClosed
+    );
 
     if (result.success) {
       // Refresh standings
-      await fetchStandings(selectedCategory, selectedSeason);
+      await fetchStandings(selectedCategory, selectedSeasonId);
       setError('');
     } else {
       setError(result.error || 'Chyba při generování počáteční tabulky');
     }
   };
 
-  // Check if selected season is closed
-  const isSeasonClosed = () => {
-    const season = sortedSeasons.find((s) => s.id === selectedSeason);
-    return season?.is_closed || false;
-  };
+  const isSeasonClosed = isSeasonClosedHelper(sortedSeasons, selectedSeasonId);
+
+  // Match mutations hook - provides CRUD operations with proper error handling and cache invalidation
+  const {
+    loading: mutationLoading,
+    error: mutationError,
+    createMatch,
+    updateMatch,
+    updateMatchResult,
+    deleteMatch: deleteMatchMutation,
+    deleteAllMatchesBySeason,
+    bulkUpdateMatchweek: bulkUpdateMatchweekMutation,
+    clearError: clearMutationError,
+  } = useMatchMutations({
+    selectedCategory,
+    selectedSeason: selectedSeasonId,
+    onStandingsRefresh: () => fetchStandings(selectedCategory, selectedSeasonId),
+  });
 
   // Add new match
   const handleAddMatch = async () => {
-    if (isSeasonClosed()) {
-      setError('Nelze přidat zápas do uzavřené sezóny');
+    // Validate season is not closed
+    const seasonValidation = validateSeasonNotClosed(isSeasonClosed, 'přidat zápas');
+    if (!seasonValidation.valid) {
+      setError(seasonValidation.error!);
       return;
     }
 
-    try {
-      if (
-        !formData.date ||
-        !formData.time ||
-        !formData.home_team_id ||
-        !formData.away_team_id ||
-        !formData.venue
-      ) {
-        setError('Prosím vyplňte všechna povinná pole');
-        return;
-      }
+    // Validate form data
+    const validation = validateAddMatchForm(formData);
+    if (!validation.valid) {
+      setError(validation.error!);
+      return;
+    }
 
-      const insertData: any = {
-        category_id: selectedCategory,
-        season_id: selectedSeason,
-        date: formData.date,
-        time: formData.time,
-        home_team_id: formData.home_team_id,
-        away_team_id: formData.away_team_id,
-        venue: formData.venue,
-        competition: getCategoryInfo(selectedCategory, categories).competition,
-        is_home: true,
-        status: matchStatusesKeys[0],
-      };
+    // Build insert data using the builder utility
+    const insertData = buildMatchInsertData(
+      formData,
+      selectedCategory,
+      selectedSeasonId,
+      categories
+    );
 
-      // Handle matchweek - allow setting to null if empty, or use the value
-      if (formData.matchweek === undefined || formData.matchweek === '0') {
-        insertData.matchweek = null;
-      } else {
-        insertData.matchweek = formData.matchweek;
-      }
+    // Use the hook to create match (handles Supabase call, cache invalidation, materialized view refresh)
+    const success = await createMatch(insertData);
 
-      // Handle match_number - only add if provided
-      if (formData.match_number && formData.match_number > 0) {
-        insertData.match_number = formData.match_number;
-      }
-
-      const {error} = await supabase.from('matches').insert(insertData);
-
-      if (error) throw error;
-
-      // Refresh materialized view to ensure it has the latest data
-      await refreshMaterializedViewWithCallback('admin match insert');
-
-      // Invalidate React Query cache to refresh matches list
-      await queryClient.invalidateQueries({
-        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['matches'],
-      });
-
+    if (success) {
       modal.addMatch.onClose();
-
       setFormData({
         date: '',
         time: '',
@@ -387,152 +389,88 @@ export default function MatchesAdminPage() {
         video_ids: [],
       });
       setError('');
-    } catch (error) {
-      setError('Chyba při přidávání zápasu');
-      console.error('Error adding match:', error);
     }
   };
 
   // Update match result
+  // Refactored to use validation utilities and useMatchMutations hook
+  // See: docs/refactoring/Matches/PHASE5_CODE_ORGANIZATION_PLAN.md
   const handleUpdateResult = async () => {
-    if (isSeasonClosed()) {
-      setError('Nelze upravit výsledek v uzavřené sezóně');
+    // 1. Validate season is not closed
+    const seasonValidation = validateSeasonNotClosed(isSeasonClosed, 'aktualizovat výsledek');
+    if (!seasonValidation.valid) {
+      setError(seasonValidation.error!);
       return;
     }
 
+    // 2. Check if match is selected
     if (!selectedMatch) return;
 
-    try {
-      if (
-        resultData.home_score === null ||
-        resultData.away_score === null ||
-        resultData.home_score === undefined ||
-        resultData.away_score === undefined
-      ) {
-        setError('Prosím vyplňte oba skóre');
-        return;
-      }
+    // 3. Validate result data using the proper validation utility
+    const validation = validateResultData(resultData);
+    if (!validation.valid) {
+      setError(validation.error!);
+      return;
+    }
 
-      const {error} = await supabase
-        .from('matches')
-        .update({
-          home_score: resultData.home_score,
-          away_score: resultData.away_score,
-          home_score_halftime: resultData.home_score_halftime,
-          away_score_halftime: resultData.away_score_halftime,
-          status: matchStatusesKeys[1],
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', selectedMatch.id);
+    // 4. Use the hook to update match result
+    // (handles Supabase call, cache invalidation, materialized view refresh, standings recalculation, toasts)
+    const success = await updateMatchResult(selectedMatch.id, resultData);
 
-      if (error) throw error;
-
-      // Refresh materialized view to ensure it has the latest data
-      await refreshMaterializedViewWithCallback('admin result update');
-
-      // Automatically recalculate standings for this match's category and season
-      try {
-        const standingsResult = await autoRecalculateStandings(selectedMatch.id);
-
-        if (standingsResult.success && standingsResult.recalculated) {
-          // Refresh standings to show updated data
-          if (selectedCategory && selectedSeason) {
-            await fetchStandings(selectedCategory, selectedSeason);
-          }
-          showToast.success(t.toasts.matchWithResultWasSaved);
-        } else if (standingsResult.success && !standingsResult.recalculated) {
-          showToast.success(t.toasts.matchResultWasSaved);
-        } else {
-          showToast.warning(t.toasts.matchResultSavedWithoutUpdateStandingTable);
-        }
-      } catch (standingsError) {
-        showToast.warning(t.toasts.matchResultSavedWithoutUpdateStandingTable);
-      }
-
+    // 5. Clean up UI state on success
+    if (success) {
       modal.addResult.onClose();
       setResultData({home_score: 0, away_score: 0, home_score_halftime: 0, away_score_halftime: 0});
       setSelectedMatch(null);
-
-      // Invalidate React Query cache to refresh matches list
-      await queryClient.invalidateQueries({
-        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['matches'],
-      });
-
       setError('');
-    } catch (error) {
-      setError('Chyba při aktualizaci výsledku');
     }
   };
 
   // Delete match (after confirmation)
+  // Refactored to use validation utilities and useMatchMutations hook
+  // See: docs/refactoring/Matches/PHASE5_CODE_ORGANIZATION_PLAN.md
   const handleDeleteMatch = async () => {
     if (!deleteConfirm.selectedItem) return;
 
-    if (isSeasonClosed()) {
-      setError('Nelze smazat zápas z uzavřené sezóny');
+    const seasonValidation = validateSeasonNotClosed(isSeasonClosed, 'smazat zápas');
+    if (!seasonValidation.valid) {
+      setError(seasonValidation.error!);
       return;
     }
 
-    try {
-      const {error} = await supabase
-        .from('matches')
-        .delete()
-        .eq('id', deleteConfirm.selectedItem.id);
+    const success = await deleteMatchMutation(deleteConfirm.selectedItem.id);
 
-      if (error) throw error;
-
-      // Refresh materialized view to ensure it has the latest data
-      await refreshMaterializedViewWithCallback('admin match delete');
-
-      // Invalidate React Query cache to refresh matches list
-      await queryClient.invalidateQueries({
-        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['matches'],
-      });
-
+    if (success) {
       setError('');
       deleteConfirm.closeAndClear();
-    } catch (error) {
-      setError('Chyba při mazání zápasu');
     }
   };
 
   // Delete all matches (after confirmation)
+  // Refactored to use validation utilities and useMatchMutations hook
+  // See: docs/refactoring/Matches/PHASE5_CODE_ORGANIZATION_PLAN.md
   const handleDeleteAllMatches = async () => {
-    if (isSeasonClosed()) {
-      setError('Nelze smazat zápasy z uzavřené sezóny');
+    if (isNilOrEmpty(selectedSeasonId)) return;
+
+    const seasonValidation = validateSeasonNotClosed(isSeasonClosed, 'smazat zápasy');
+    if (!seasonValidation.valid) {
+      setError(seasonValidation.error!);
       return;
     }
 
-    try {
-      // Delete all matches for the selected season
-      const {error} = await supabase.from('matches').delete().eq('season_id', selectedSeason);
+    const success = await deleteAllMatchesBySeason(selectedSeasonId);
 
-      if (error) throw error;
-
-      // Invalidate React Query cache to refresh matches list
-      await queryClient.invalidateQueries({
-        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['matches'],
-      });
-
+    if (success) {
       setError('');
       modal.deleteAllConfirm.onClose();
       setSelectedCategory('');
-    } catch (error) {
-      setError('Chyba při mazání všech zápasů');
     }
   };
 
   // Open edit match modal
   const handleEditMatch = (match: Match) => {
+    if (!match) return;
+
     setSelectedMatch(match);
     setEditData({
       date: match.date,
@@ -545,172 +483,54 @@ export default function MatchesAdminPage() {
       home_score_halftime: match.home_score_halftime ?? 0,
       away_score_halftime: match.away_score_halftime ?? 0,
       status: match.status,
-      matchweek: match.matchweek ? match.matchweek.toString() : '',
+      matchweek: isNilOrZero(match.matchweek) ? 0 : match.matchweek,
       match_number: match.match_number ? match.match_number : 0,
       category_id: match.category_id,
     });
 
     // Ensure filteredTeams is loaded for this category
-    if (match.category_id && selectedSeason && isEmpty(filteredTeams)) {
-      fetchFilteredTeams(match.category_id, selectedSeason);
+    if (match.category_id && selectedSeasonId && isEmpty(filteredTeams)) {
+      fetchFilteredTeams(match.category_id, selectedSeasonId);
     }
 
+    // Opens modal
     modal.editMatch.onOpen();
   };
 
   // Update match
+  // Refactored to use validation utilities and useMatchMutations hook
+  // See: docs/refactoring/Matches/PHASE5_CODE_ORGANIZATION_PLAN.md
   const handleUpdateMatch = async () => {
-    if (isSeasonClosed()) {
-      setError(t.toasts.matchNotSavedClosedSeason);
-      showToast.warning(t.toasts.matchNotSavedClosedSeason);
+    // 1. Validate season is not closed
+    const seasonValidation = validateSeasonNotClosed(isSeasonClosed, 'aktualizovat zápas');
+    if (!seasonValidation.valid) {
+      setError(seasonValidation.error!);
       return;
     }
 
-    if (!selectedMatch) {
-      showToast.danger(t.toasts.noMatchSelected);
+    // 2. Check if match is selected
+    if (!selectedMatch) return;
+
+    // 3. Validate form data using the proper validation utility
+    const validation = validateEditMatchForm(editData);
+    if (!validation.valid) {
+      setError(validation.error!);
       return;
     }
 
-    try {
-      // Validate required fields
-      if (!editData.date || !editData.time || !editData.venue) {
-        setError(t.toasts.mandatoryFieldsMissing);
-        showToast.danger(t.toasts.mandatoryFieldsMissing);
-        return;
-      }
+    // 4. build update data using builder utility
+    const updateData = buildMatchUpdateData(editData);
 
-      // Validate team selection
-      if (!editData.home_team_id || !editData.away_team_id) {
-        setError(t.toasts.selectBothTeams);
-        showToast.danger(t.toasts.selectBothTeams);
-        return;
-      }
+    // 5. use hook to update match
+    // (handles Supabase call, cache invalidation, materialized view refresh, standings recalculation, toasts)
+    const success = await updateMatch(selectedMatch.id, updateData, selectedMatch);
 
-      // Validate teams are different
-      if (editData.home_team_id === editData.away_team_id) {
-        setError(t.toasts.selectDifferentTeams);
-        showToast.danger(t.toasts.selectDifferentTeams);
-        return;
-      }
-
-      // Result is now computed from scores when needed, no need to store it
-
-      const updateData: any = {
-        date: editData.date,
-        time: editData.time,
-        home_team_id: editData.home_team_id,
-        away_team_id: editData.away_team_id,
-        venue: editData.venue,
-        status: editData.status,
-      };
-
-      // Handle matchweek - allow setting to null if empty, or parse the value
-      if (editData.matchweek === '') {
-        updateData.matchweek = null;
-      } else if (editData.matchweek) {
-        updateData.matchweek = parseInt(editData.matchweek);
-      }
-
-      // Handle match_number - only add if provided
-      if (editData.match_number && editData.match_number) {
-        updateData.match_number = editData.match_number;
-      } else {
-        updateData.match_number = 0;
-      }
-
-      // Only update scores if they are provided (check for null/undefined, not falsiness since 0 is valid)
-      if (
-        editData.home_score !== null &&
-        editData.home_score !== undefined &&
-        editData.away_score !== null &&
-        editData.away_score !== undefined
-      ) {
-        updateData.home_score = editData.home_score;
-        updateData.away_score = editData.away_score;
-      }
-      if (
-        editData.home_score_halftime !== null &&
-        editData.home_score_halftime !== undefined &&
-        editData.away_score_halftime !== null &&
-        editData.away_score_halftime !== undefined
-      ) {
-        updateData.home_score_halftime = editData.home_score_halftime;
-        updateData.away_score_halftime = editData.away_score_halftime;
-      }
-
-      const {error} = await supabase.from('matches').update(updateData).eq('id', selectedMatch.id);
-
-      if (error) {
-        throw error;
-      }
-
-      // Refresh materialized view to ensure it has the latest data
-      await refreshMaterializedViewWithCallback('admin match update');
-
-      // Check if scores were updated and trigger standings recalculation
-      const scoresWereUpdated =
-        editData.home_score !== selectedMatch.home_score ||
-        editData.away_score !== selectedMatch.away_score ||
-        editData.home_score_halftime !== selectedMatch.home_score_halftime ||
-        editData.away_score_halftime !== selectedMatch.away_score_halftime;
-
-      if (scoresWereUpdated) {
-        try {
-          const standingsResult = await autoRecalculateStandings(selectedMatch.id);
-
-          if (standingsResult.success && standingsResult.recalculated) {
-            // Refresh standings to show updated data
-            if (selectedCategory && selectedSeason) {
-              await fetchStandings(selectedCategory, selectedSeason);
-            }
-            showToast.success(t.toasts.matchSavedWithUpdateStandingTable);
-          } else if (standingsResult.success && !standingsResult.recalculated) {
-            showToast.success(t.toasts.matchSavedSuccessfully);
-          } else {
-            showToast.warning(t.toasts.matchSavedWithoutUpdateStandingTable);
-          }
-        } catch (standingsError) {
-          showToast.warning(t.toasts.matchSavedWithoutUpdateStandingTable);
-        }
-      } else {
-        // Scores weren't updated, just show success
-        showToast.warning(t.toasts.matchSavedWithoutUpdatedScore);
-      }
-
+    // 6. Clean up UI state on success
+    if (success) {
       modal.editMatch.onClose();
-      setEditData({
-        date: '',
-        time: '',
-        home_team_id: '',
-        away_team_id: '',
-        venue: '',
-        home_score: 0,
-        away_score: 0,
-        home_score_halftime: 0,
-        away_score_halftime: 0,
-        status: 'completed',
-        matchweek: '',
-        match_number: 0,
-        category_id: '',
-        video_ids: [],
-      });
+      setEditData(INITIAL_EDIT_DATA);
       setSelectedMatch(null);
-
-      // Invalidate React Query cache to refresh matches list
-      await queryClient.invalidateQueries({
-        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['matches'],
-      });
-
       setError('');
-    } catch (error) {
-      if (error && typeof error === 'object' && 'message' in error) {
-        setError(`Chyba při aktualizaci zápasu: ${error.message}`);
-      } else {
-        setError('Chyba při aktualizaci zápasu');
-      }
     }
   };
 
@@ -781,7 +601,7 @@ export default function MatchesAdminPage() {
 
       // Invalidate React Query cache to refresh matches list
       await queryClient.invalidateQueries({
-        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
+        queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeasonId],
       });
       await queryClient.invalidateQueries({
         queryKey: ['matches'],
@@ -802,29 +622,29 @@ export default function MatchesAdminPage() {
 
   const handleExcelImport = useCallback(
     async (matches: any[]) => {
-      if (!selectedSeason) {
+      if (!selectedSeasonId) {
         setError('Vyberte prosím sezónu před importem.');
         return;
       }
 
       try {
-        const result = await importMatches(matches, selectedSeason);
+        const result = await importMatches(matches, selectedSeasonId);
 
         if (result.success > 0) {
           // Invalidate React Query cache to refresh matches list
           await queryClient.invalidateQueries({
-            queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeason],
+            queryKey: ['matches', 'seasonal', selectedCategoryId, selectedSeasonId],
           });
           await queryClient.invalidateQueries({
             queryKey: ['matches'],
           });
 
           // Refresh data
-          await fetchStandings(selectedCategory, selectedSeason);
+          await fetchStandings(selectedCategory, selectedSeasonId);
           setError('');
 
           // Show success message
-          showToast.success(t.toasts.matchSuccessImport);
+          showToast.success(translations.matches.toasts.matchSuccessImport);
         }
 
         if (hasItems(result.errors)) {
@@ -840,7 +660,7 @@ export default function MatchesAdminPage() {
     },
 
     [
-      selectedSeason,
+      selectedSeasonId,
       importMatches,
       fetchStandings,
       selectedCategory,
@@ -849,11 +669,15 @@ export default function MatchesAdminPage() {
     ]
   );
 
-  const generateStandingsLabel = isEmpty(
-    standings.filter((s) => s.category_id === selectedCategory && s.season_id === selectedSeason)
+  const generateStandingsLabel = match(
+    isEmpty(
+      standings.filter(
+        (s) => s.category_id === selectedCategory && s.season_id === selectedSeasonId
+      )
+    )
   )
-    ? translations.matches.actions.generateStandings
-    : translations.matches.actions.recalculateStandings;
+    .with(true, () => translations.matches.actions.generateStandings)
+    .otherwise(() => translations.matches.actions.recalculateStandings);
 
   return (
     <AdminContainer
@@ -863,7 +687,7 @@ export default function MatchesAdminPage() {
           onClick: modal.addMatch.onOpen,
           variant: 'solid',
           buttonType: ActionTypes.CREATE,
-          isDisabled: isSeasonClosed(),
+          isDisabled: isSeasonClosed,
           priority: 'primary', // Most important action - always visible
         },
         {
@@ -871,7 +695,7 @@ export default function MatchesAdminPage() {
           onClick: modal.bulkUpdate.onOpen,
           buttonType: ActionTypes.UPDATE,
           color: 'secondary',
-          isDisabled: isSeasonClosed(),
+          isDisabled: isSeasonClosed,
           priority: 'secondary', // Less important - hidden under 3 dots menu
         },
         {
@@ -879,7 +703,7 @@ export default function MatchesAdminPage() {
           onClick: handleStandingsAction,
           buttonType: ActionTypes.UPDATE,
           color: 'secondary',
-          isDisabled: isSeasonClosed(),
+          isDisabled: isSeasonClosed,
           priority: 'secondary', // Less important - hidden under 3 dots menu
         },
         {
@@ -887,7 +711,7 @@ export default function MatchesAdminPage() {
           onClick: modal.excelImport.onOpen,
           buttonType: ActionTypes.UPDATE,
           color: 'secondary',
-          isDisabled: isSeasonClosed(),
+          isDisabled: isSeasonClosed,
           priority: 'secondary', // Less important - hidden under 3 dots menu
         },
         {
@@ -895,7 +719,7 @@ export default function MatchesAdminPage() {
           onClick: testMaterializedViewRefresh,
           color: 'secondary',
           buttonType: ActionTypes.UPDATE,
-          isDisabled: isSeasonClosed(),
+          isDisabled: isSeasonClosed,
           priority: 'secondary', // Less important - hidden under 3 dots menu
         },
         {
@@ -903,7 +727,7 @@ export default function MatchesAdminPage() {
           onClick: modal.deleteAllConfirm.onOpen,
           buttonType: ActionTypes.DELETE,
           color: 'danger',
-          isDisabled: isSeasonClosed() || !selectedSeason,
+          isDisabled: isSeasonClosed || !selectedSeasonId,
           priority: 'secondary', // Less important - hidden under 3 dots menu
         },
       ]}
@@ -916,18 +740,18 @@ export default function MatchesAdminPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2">
               <Select
-                label={translations.season.title}
-                placeholder={translations.season.selectSeason}
-                selectedKeys={selectedSeason ? [selectedSeason] : []}
+                label={translations.seasons.title}
+                placeholder={translations.seasons.selectSeason}
+                selectedKeys={selectedSeasonId ? [selectedSeasonId] : []}
                 onSelectionChange={(keys) => {
                   const selectedKey = Array.from(keys)[0] as string;
-                  setSelectedSeason(selectedKey || '');
+                  setSelectedSeasonId(selectedKey || '');
                 }}
                 className="w-full"
               >
                 {sortedSeasons.map((season) => (
                   <SelectItem key={season.id} textValue={season.name}>
-                    {season.name} {season.is_closed ? `(${translations.season.closed})` : ''}
+                    {season.name} {season.is_closed ? `(${translations.seasons.closed})` : ''}
                   </SelectItem>
                 ))}
               </Select>
@@ -937,24 +761,24 @@ export default function MatchesAdminPage() {
       }
     >
       {/* Season closed warning */}
-      {selectedSeason && isSeasonClosed() && (
-        <Alert color="warning">
-          <strong>Upozornění:</strong> Tato sezóna je uzavřená. Nelze přidávat ani upravovat zápasy.
-        </Alert>
+      {selectedSeasonId && isSeasonClosed && (
+        <Alert
+          color="warning"
+          title={translations.common.alerts.warning}
+          description={translations.seasons.alerts.warning.closedSeasonMessage}
+        />
       )}
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
-        </div>
+        <Alert color="danger" description={error} title={translations.common.alerts.error} />
       )}
 
-      {selectedSeason && (
+      {selectedSeasonId && (
         <>
           <Card>
             <CardBody>
               {loading ? (
-                <div className="text-center py-8">{translations.loading}</div>
+                <div className="text-center py-8">{translations.common.loading}</div>
               ) : (
                 <Tabs
                   aria-label="Categories"
@@ -981,9 +805,11 @@ export default function MatchesAdminPage() {
 
                         {/* Show error if matches hook failed */}
                         {selectedCategoryId && matchesError && (
-                          <div className="text-center py-8 text-red-500">
-                            Chyba při načítání zápasů: {matchesError.message}
-                          </div>
+                          <Alert
+                            color={'danger'}
+                            description={matchesError.message}
+                            title={translations.matches.alerts.danger.matchesFetchingErrorTitle}
+                          />
                         )}
 
                         {/* Matches for this category grouped by matchweek */}
@@ -1008,7 +834,7 @@ export default function MatchesAdminPage() {
                               setSelectedMatch(match);
                               matchActions.openWith(match);
                             }}
-                            isSeasonClosed={isSeasonClosed()}
+                            isSeasonClosed={isSeasonClosed}
                           />
                         )}
 
@@ -1033,7 +859,7 @@ export default function MatchesAdminPage() {
         setFormData={setFormData}
         filteredTeams={filteredTeams}
         selectedCategory={selectedCategory}
-        selectedSeason={selectedSeason}
+        selectedSeason={selectedSeasonId}
         getMatchweekOptions={getMatchweekOptions}
       />
 
@@ -1045,7 +871,7 @@ export default function MatchesAdminPage() {
         resultData={resultData}
         onResultDataChange={setResultData}
         onUpdateResult={handleUpdateResult}
-        isSeasonClosed={isSeasonClosed()}
+        isSeasonClosed={isSeasonClosed}
       />
 
       {/* Edit Match Modal */}
@@ -1058,7 +884,7 @@ export default function MatchesAdminPage() {
         onUpdateMatch={handleUpdateMatch}
         teams={filteredTeams}
         getMatchweekOptions={getMatchweekOptions}
-        isSeasonClosed={isSeasonClosed()}
+        isSeasonClosed={isSeasonClosed}
       />
 
       {/* Bulk Update Matchweek Modal */}
@@ -1071,7 +897,7 @@ export default function MatchesAdminPage() {
         categories={categories}
         matches={matches}
         getMatchweekOptions={getMatchweekOptions}
-        isSeasonClosed={isSeasonClosed()}
+        isSeasonClosed={isSeasonClosed}
       />
 
       {/* Lineup Management Modal */}
@@ -1090,7 +916,7 @@ export default function MatchesAdminPage() {
         onImport={handleExcelImport}
         categories={categories}
         teams={teams}
-        selectedSeason={selectedSeason}
+        selectedSeason={selectedSeasonId}
       />
 
       {/* Delete Confirmation Modal */}
@@ -1148,7 +974,7 @@ export default function MatchesAdminPage() {
             <div class="space-y-2">
               <p>
                 Opravdu chcete smazat všechny zápasy pro sezónu <strong>${
-                  sortedSeasons.find((s) => s.id === selectedSeason)?.name || 'Neznámá sezóna'
+                  sortedSeasons.find((s) => s.id === selectedSeasonId)?.name || 'Neznámá sezóna'
                 }</strong>?
               </p>
               <p class="text-sm text-gray-600">

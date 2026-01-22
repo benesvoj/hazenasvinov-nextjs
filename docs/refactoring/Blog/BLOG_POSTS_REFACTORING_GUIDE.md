@@ -2,7 +2,7 @@
 
 ## 🎯 Executive Summary
 
-The Blog Posts feature needs refactoring to align with the **4-layer Independent Hooks architecture** established in the codebase (see [TODO_ARCHITECTURE_FINAL.md](./TODO/TODO_ARCHITECTURE_FINAL.md) and [ARCHITECTURAL_PATTERN_CLARIFICATION.md](./ARCHITECTURAL_PATTERN_CLARIFICATION.md)).
+The Blog Posts feature needs refactoring to align with the **4-layer Independent Hooks architecture** established in the codebase (see [TODO_ARCHITECTURE_FINAL.md](../TODO/TODO_ARCHITECTURE_FINAL.md) and [ARCHITECTURAL_PATTERN_CLARIFICATION.md](../ARCHITECTURAL_PATTERN_CLARIFICATION.md)).
 
 **Status:** ✅ COMPLETED (2025-11-12)
 
@@ -1006,7 +1006,7 @@ This refactoring aligns Blog Posts with the TODO feature architecture:
 | **Business** | useTodoFiltering | useBlogPostFiltering |
 | **Component** | AdminDashboard | BlogPostsPage |
 
-See [TODO_ARCHITECTURE_FINAL.md](./TODO/TODO_ARCHITECTURE_FINAL.md) for detailed architecture reference.
+See [TODO_ARCHITECTURE_FINAL.md](../TODO/TODO_ARCHITECTURE_FINAL.md) for detailed architecture reference.
 
 ---
 
@@ -1090,9 +1090,9 @@ grep -r "useBlogPosts" src/
 
 ## 🔗 Related Documentation
 
-- [ARCHITECTURAL_PATTERN_CLARIFICATION.md](./ARCHITECTURAL_PATTERN_CLARIFICATION.md) - Independent Hooks pattern
-- [TODO_ARCHITECTURE_FINAL.md](./TODO/TODO_ARCHITECTURE_FINAL.md) - Reference implementation
-- [TODO_DEVELOPER_GUIDE.md](./TODO/TODO_DEVELOPER_GUIDE.md) - Developer patterns
+- [ARCHITECTURAL_PATTERN_CLARIFICATION.md](../ARCHITECTURAL_PATTERN_CLARIFICATION.md) - Independent Hooks pattern
+- [TODO_ARCHITECTURE_FINAL.md](../TODO/TODO_ARCHITECTURE_FINAL.md) - Reference implementation
+- [TODO_DEVELOPER_GUIDE.md](../TODO/TODO_DEVELOPER_GUIDE.md) - Developer patterns
 
 ---
 

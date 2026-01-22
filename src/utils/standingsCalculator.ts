@@ -12,7 +12,7 @@ import {Standing, Match} from '@/types';
 export async function calculateStandings(
   categoryId: string,
   seasonId: string,
-  isSeasonClosed: () => boolean
+  isSeasonClosed: boolean
 ): Promise<{success: boolean; error?: string}> {
   // Validate input parameters FIRST - before any database operations
   if (!categoryId || categoryId.trim() === '') {
@@ -23,7 +23,7 @@ export async function calculateStandings(
     return {success: false, error: 'Neplatné ID sezóny'};
   }
 
-  if (isSeasonClosed()) {
+  if (isSeasonClosed) {
     return {success: false, error: 'Nelze přepočítat tabulku pro uzavřenou sezónu'};
   }
 

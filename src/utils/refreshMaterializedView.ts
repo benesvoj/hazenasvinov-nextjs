@@ -7,17 +7,17 @@ import {createClient} from '@/utils/supabase/client';
 export async function refreshOwnClubMatchesView(): Promise<boolean> {
   const supabase = createClient();
 
-  console.log('Refreshing own_club_matches materialized view...');
+  // console.log('Refreshing own_club_matches materialized view...');
 
   try {
     // First try RPC function
-    console.log('Attempting RPC refresh...');
+    // console.log('Attempting RPC refresh...');
     const {error: rpcError} = await supabase.rpc('refresh_materialized_view', {
       view_name: 'own_club_matches',
     });
 
     if (!rpcError) {
-      console.log('✅ Materialized view refreshed successfully via RPC');
+      // console.log('✅ Materialized view refreshed successfully via RPC');
       return true;
     }
 
@@ -29,7 +29,7 @@ export async function refreshOwnClubMatchesView(): Promise<boolean> {
     });
 
     if (!sqlError) {
-      console.log('✅ Materialized view refreshed successfully via exec_sql');
+      // console.log('✅ Materialized view refreshed successfully via exec_sql');
       return true;
     }
 
@@ -37,10 +37,10 @@ export async function refreshOwnClubMatchesView(): Promise<boolean> {
 
     // Last resort: Try to force refresh by querying the view
     // This doesn't actually refresh but can help with some caching issues
-    console.log('Trying fallback query approach...');
+    // console.log('Trying fallback query approach...');
     await supabase.from('own_club_matches').select('id').limit(1);
 
-    console.log('⚠️ Materialized view refresh attempted via fallback method');
+    // console.log('⚠️ Materialized view refresh attempted via fallback method');
     return false; // Indicate fallback was used
   } catch (error) {
     console.error('❌ Materialized view refresh failed with error:', error);
@@ -59,7 +59,7 @@ export async function refreshMaterializedViewWithCallback(
   onSuccess?: () => void,
   onError?: (error: any) => void
 ): Promise<void> {
-  console.log(`Refreshing materialized view after ${operationName}...`);
+  // console.log(`Refreshing materialized view after ${operationName}...`);
 
   const success = await refreshOwnClubMatchesView();
 

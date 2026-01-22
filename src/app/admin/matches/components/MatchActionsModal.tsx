@@ -23,7 +23,7 @@ interface MatchActionsModalProps {
   onLineupModalOpen: () => void;
   onDeleteClick: (match: Match) => void;
   onMatchProcessOpen: () => void;
-  isSeasonClosed: () => boolean;
+  isSeasonClosed: boolean;
 }
 
 const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
@@ -98,7 +98,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
                 startContent={<EyeIcon className="w-4 h-4" />}
                 onPress={handleAddResult}
                 className="w-full justify-start h-auto py-3 px-4"
-                isDisabled={isSeasonClosed()}
+                isDisabled={isSeasonClosed}
               >
                 <div className="flex flex-col items-start text-left">
                   <span className="font-medium">Přidat výsledek</span>
@@ -114,7 +114,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
               startContent={<PencilIcon className="w-4 h-4" />}
               onPress={handleEditMatch}
               className="w-full justify-start h-auto py-3 px-4"
-              isDisabled={isSeasonClosed()}
+              isDisabled={isSeasonClosed}
             >
               <div className="flex flex-col items-start text-left">
                 <span className="font-medium">Upravit zápas</span>
@@ -129,7 +129,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
               startContent={<UserGroupIcon className="w-4 h-4" />}
               onPress={handleLineupModalOpen}
               className="w-full justify-start h-auto py-3 px-4"
-              isDisabled={isSeasonClosed()}
+              isDisabled={isSeasonClosed}
             >
               <div className="flex flex-col items-start text-left">
                 <span className="font-medium">Správa sestav</span>
@@ -144,7 +144,7 @@ const MatchActionsModal: React.FC<MatchActionsModalProps> = ({
               startContent={<TrashIcon className="w-4 h-4" />}
               onPress={handleDeleteClick}
               className="w-full justify-start h-auto py-3 px-4"
-              isDisabled={isSeasonClosed()}
+              isDisabled={isSeasonClosed}
             >
               <div className="flex flex-col items-start text-left">
                 <span className="text-left">

@@ -343,7 +343,7 @@ export async function generateMatchOdds(matchId: string): Promise<OddsSet> {
 - Current implementation: `src/components/features/betting/MatchBettingCard.tsx:25-39`
 - Odds utilities: `src/services/features/betting/oddsCalculator.ts`
 - Database schema: `docs/BETTING_DATABASE_SCHEMA.md`
-- Match types: `src/types/entities/match/data/match.ts`
+- Match types: `src/types/entities/match/data/matches.ts`
 
 ---
 

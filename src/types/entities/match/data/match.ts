@@ -1,6 +1,5 @@
-import {Nullish, Category, Season, Team} from '@/types';
-
-export type MatchStatus = 'upcoming' | 'completed';
+import {MatchStatus} from '@/enums';
+import {Category, Nullish, Team} from '@/types';
 
 export interface Match {
   id: string;
