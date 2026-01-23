@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 
-import {validateAddMatchForm, validateEditMatchForm} from '@/utils';
+import {validateAddMatchForm} from '@/utils';
 
 describe('validateAddMatchForm', () => {
   it('should return error when date is missing', () => {

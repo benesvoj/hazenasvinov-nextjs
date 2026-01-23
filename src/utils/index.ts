@@ -20,6 +20,6 @@ export * from './isValidPositiveNumber';
 export * from './isNilOrZero';
 export * from './isNotNilOrEmpty';
 
-/** * Builders and validators * **/
+/** Builders and validators **/
 export * from './builders/matchDataBuilder';
 export * from './validation/matchValidation';

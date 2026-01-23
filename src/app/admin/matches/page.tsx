@@ -40,7 +40,6 @@ import {
 } from '@/hooks';
 import {AddMatchFormData, EditMatchFormData, Match} from '@/types';
 import {
-  autoRecalculateStandings,
   buildMatchInsertData,
   buildMatchUpdateData,
   calculateStandings,
@@ -332,15 +331,11 @@ export default function MatchesAdminPage() {
 
   // Match mutations hook - provides CRUD operations with proper error handling and cache invalidation
   const {
-    loading: mutationLoading,
-    error: mutationError,
     createMatch,
     updateMatch,
     updateMatchResult,
     deleteMatch: deleteMatchMutation,
     deleteAllMatchesBySeason,
-    bulkUpdateMatchweek: bulkUpdateMatchweekMutation,
-    clearError: clearMutationError,
   } = useMatchMutations({
     selectedCategory,
     selectedSeason: selectedSeasonId,

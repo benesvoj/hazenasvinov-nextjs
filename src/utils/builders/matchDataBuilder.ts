@@ -60,7 +60,7 @@ export function buildMatchUpdateData(formData: EditMatchFormData): MatchUpdateDa
   if (isNilOrZero(formData.matchweek)) {
     updateData.matchweek = null;
   } else if (formData.matchweek) {
-    updateData.matchweek = parseInt(formData.matchweek.toString());
+    updateData.matchweek = formData.matchweek;
   }
 
   // Handle match_number

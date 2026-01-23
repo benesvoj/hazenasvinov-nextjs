@@ -120,7 +120,7 @@ export function validateResultData(data: MatchResultData): ValidationResult {
   if (data.away_score === null || data.away_score === undefined) {
     return {
       valid: false,
-      error: translations.matches.validationRules.homeMatchResultRequired,
+      error: translations.matches.validationRules.awayMatchResultRequired,
       field: 'away_score',
     };
   }

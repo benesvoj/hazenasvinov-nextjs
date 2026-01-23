@@ -3,7 +3,7 @@ import {isNotNil} from 'ramda-adjunct';
 import {Nullish} from '@/types';
 
 /**
- * @about Utility function to get check if number is a valid positive number
+ * @about Utility function to check if number is a valid positive number
  * @returns boolean
  * @param value
  */
