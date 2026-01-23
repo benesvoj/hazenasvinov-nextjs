@@ -63,7 +63,11 @@ export default function CoachesAttendancePage() {
     loading: appDataLoading,
   } = useAppData();
 
-  const {data: sessions, loading: trainingSessionsLoading} = useFetchTrainingSessions({
+  const {
+    data: sessions,
+    loading: trainingSessionsLoading,
+    refetch: refetchSessions,
+  } = useFetchTrainingSessions({
     categoryId: selectedCategory,
     seasonId: selectedSeason,
   });
@@ -196,9 +200,13 @@ export default function CoachesAttendancePage() {
       if (editingSession) {
         await updateTrainingSession(editingSession.id, dataWithCategory);
         setEditingSession(null);
+        // Refresh the sessions list after update
+        await refetchSessions();
       } else {
         // Create new training session
         const createdSession = await createTrainingSession(dataWithCategory);
+
+        await refetchSessions();
 
         // Check if session was created successfully
         if (!createdSession) {
@@ -303,6 +311,7 @@ export default function CoachesAttendancePage() {
       }
       setIsDeleteModalOpen(false);
       setSessionToDelete(null);
+      await refetchSessions();
     } catch (err) {
       console.error('Error deleting session:', err);
     }
@@ -334,6 +343,7 @@ export default function CoachesAttendancePage() {
 
     try {
       await recordAttendance(memberId, selectedSession, status);
+      await fetchAttendanceRecords();
     } catch (err) {
       console.error('Error recording attendance:', err);
       // Show error to user - you might want to add a toast notification here
