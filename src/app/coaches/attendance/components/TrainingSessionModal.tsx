@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
 import {
   Button,
@@ -12,6 +12,10 @@ import {
   ModalHeader,
   Textarea,
 } from '@heroui/react';
+
+import {translations} from '@/lib/translations/index';
+
+import {useUser} from '@/contexts/UserContext';
 
 import {TrainingSessionStatusEnum} from '@/enums';
 import {TrainingSession, TrainingSessionFormData} from '@/types';
@@ -25,19 +29,6 @@ interface TrainingSessionModalProps {
   selectedSeason: string;
 }
 
-const InitialFormData = {
-  title: '',
-  description: '',
-  session_date: '',
-  session_time: '',
-  category_id: '',
-  season_id: '',
-  location: '',
-  status: TrainingSessionStatusEnum.PLANNED, // Add default
-  coach_id: '', // Add from current user
-  status_reason: null, // Add default
-};
-
 export default function TrainingSessionModal({
   isOpen,
   onClose,
@@ -46,22 +37,35 @@ export default function TrainingSessionModal({
   selectedCategoryId,
   selectedSeason,
 }: TrainingSessionModalProps) {
-  const [sessionFormData, setSessionFormData] = useState<TrainingSessionFormData>({
-    title: '',
-    description: '',
-    session_date: '',
-    session_time: '',
-    category_id: selectedCategoryId,
-    season_id: selectedSeason,
-    location: '',
-    status: TrainingSessionStatusEnum.PLANNED,
-    coach_id: '',
-    status_reason: null,
-  });
+  // Get current user's ID for coach_id field
+  const {user} = useUser();
+  const currentUserId = user?.id ?? '';
+
+  // Memoize initial form data to include current user's ID
+  // This ensures coach_id is set correctly when creating new sessions
+  const initialFormData = useMemo<TrainingSessionFormData>(
+    () => ({
+      title: '',
+      description: '',
+      session_date: '',
+      session_time: '',
+      category_id: selectedCategoryId,
+      season_id: selectedSeason,
+      location: '',
+      status: TrainingSessionStatusEnum.PLANNED,
+      coach_id: currentUserId, // Use current user's ID instead of empty string
+      status_reason: null,
+    }),
+    [selectedCategoryId, selectedSeason, currentUserId]
+  );
+
+  const [sessionFormData, setSessionFormData] = useState<TrainingSessionFormData>(initialFormData);
 
   // Update form data when session prop changes (for editing)
   useEffect(() => {
     if (session) {
+      // Editing existing session - use session's coach_id
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSessionFormData({
         title: session.title,
         description: session.description || '',
@@ -75,17 +79,18 @@ export default function TrainingSessionModal({
         status_reason: session.status_reason || null,
       });
     } else {
-      // Reset form for new session
-      setSessionFormData(InitialFormData);
+      // Reset form for new session - use current user's ID
+      setSessionFormData(initialFormData);
     }
-  }, [session, selectedCategoryId, selectedSeason]);
+  }, [session, initialFormData]);
 
   // Reset form when modal opens for new session
   useEffect(() => {
     if (isOpen && !session) {
-      setSessionFormData(InitialFormData);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSessionFormData(initialFormData);
     }
-  }, [isOpen, session, selectedCategoryId, selectedSeason]);
+  }, [isOpen, session, initialFormData]);
 
   const handleSubmit = () => {
     onSubmit(sessionFormData);
@@ -93,14 +98,18 @@ export default function TrainingSessionModal({
 
   const handleClose = () => {
     // Reset form when closing
-    setSessionFormData(InitialFormData);
+    setSessionFormData(initialFormData);
     onClose();
   };
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="2xl">
       <ModalContent>
-        <ModalHeader>{session ? 'Upravit trénink' : 'Nový trénink'}</ModalHeader>
+        <ModalHeader>
+          {session
+            ? translations.attendance.modal.title.editSession
+            : translations.attendance.modal.title.addSession}
+        </ModalHeader>
         <ModalBody>
           <div className="space-y-4">
             <Input

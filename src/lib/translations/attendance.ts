@@ -5,4 +5,10 @@ export const attendanceTranslations = {
   completionRate: 'Míra dokončení',
   noDataMessage: 'Pro tuto kategorii a sezónu nejsou k dispozici žádné statistiky.',
   errorMessage: 'Nepodařilo se načíst statistiky. Zkuste to prosím znovu.',
+  modal: {
+    title: {
+      addSession: 'Nový trénink',
+      editSession: 'Upravit trénink',
+    },
+  },
 };
