@@ -73,14 +73,24 @@ export default function CoachesAttendancePage() {
   });
 
   const {userCategories, isAdmin} = useUser();
-  const {data: lineupMembers} = useFetchCategoryLineupMembers(
-    selectedCategory,
-    selectedSession || ''
-  );
-  const {refetch: fetchLineups} = useFetchCategoryLineups({
+
+  // Fetch category lineups to get the active lineup ID
+  const {data: lineups, refetch: fetchLineups} = useFetchCategoryLineups({
     categoryId: selectedCategory,
     seasonId: selectedSeason,
   });
+
+  // Find the active lineup for this category/season
+  // Note: useFetchCategoryLineupMembers requires a lineup ID, not a session ID
+  const activeLineup = useMemo(() => {
+    return lineups?.find((lineup) => lineup.is_active) ?? null;
+  }, [lineups]);
+
+  // Fetch lineup members using the correct lineup ID (not session ID!)
+  const {data: lineupMembers} = useFetchCategoryLineupMembers(
+    selectedCategory,
+    activeLineup?.id || ''
+  );
 
   // Get admin category simulation from localStorage (for admin users testing coach portal)
   const [adminSimulationCategories, setAdminSimulationCategories] = useState<string[]>([]);

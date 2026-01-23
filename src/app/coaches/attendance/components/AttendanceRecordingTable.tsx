@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 
 import {
   Button,
@@ -27,6 +27,17 @@ interface AttendanceRecordingTableProps {
   ) => Promise<void>;
 }
 
+/**
+ * Type guard to check if an attendance record has a valid member
+ */
+function hasValidMember(
+  record: MemberAttendanceWithMember
+): record is MemberAttendanceWithMember & {
+  member: NonNullable<MemberAttendanceWithMember['member']>;
+} {
+  return record.member != null && typeof record.member.id === 'string';
+}
+
 export const AttendanceRecordingTable = ({
   attendanceRecords,
   selectedSession,
@@ -34,15 +45,30 @@ export const AttendanceRecordingTable = ({
   loading,
   handleRecordAttendance,
 }: AttendanceRecordingTableProps) => {
+  // Filter out records with invalid/missing members and sort by surname, then name
+  // This prevents runtime errors when member data is missing (deleted member, orphaned record, etc.)
+  const validRecords = useMemo(() => {
+    return attendanceRecords.filter(hasValidMember).sort((a, b) => {
+      const surnameComparison = (a.member.surname || '').localeCompare(b.member.surname || '');
+      if (surnameComparison !== 0) {
+        return surnameComparison;
+      }
+      return (a.member.name || '').localeCompare(b.member.name || '');
+    });
+  }, [attendanceRecords]);
+
+  // Count of records with missing member data (for debugging/monitoring)
+  const invalidRecordsCount = attendanceRecords.length - validRecords.length;
+
   return (
     <div className="lg:col-span-2">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between w-full">
             <h3 className="text-lg font-semibold">
-              Docházka {attendanceRecords ? `(${attendanceRecords.length})` : ''}
+              Docházka {validRecords.length > 0 ? `(${validRecords.length})` : ''}
             </h3>
-            {selectedSession && attendanceRecords.length === 0 && (
+            {selectedSession && validRecords.length === 0 && (
               <Button
                 size="sm"
                 color="primary"
@@ -63,31 +89,27 @@ export const AttendanceRecordingTable = ({
                 <Skeleton key={i} className="h-12 rounded-lg" />
               ))}
             </div>
-          ) : attendanceRecords.length === 0 ? (
+          ) : validRecords.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
               Žádné záznamy docházky pro tento trénink
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <Table aria-label="Attendance records">
-                <TableHeader>
-                  <TableColumn>ČLEN</TableColumn>
-                  <TableColumn>STATUS</TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {attendanceRecords
-                    .sort((a, b) => {
-                      // Sort by surname, then by name
-                      if (!a.member || !b.member) return 0;
-                      const surnameComparison = (a.member.surname || '').localeCompare(
-                        b.member.surname || ''
-                      );
-                      if (surnameComparison !== 0) {
-                        return surnameComparison;
-                      }
-                      return (a.member.name || '').localeCompare(b.member.name || '');
-                    })
-                    .map((record) => (
+            <>
+              {/* Warning if some records have missing member data */}
+              {invalidRecordsCount > 0 && (
+                <p className="text-amber-600 text-sm mb-4">
+                  Upozornění: {invalidRecordsCount} záznamů má chybějící data člena a nebude
+                  zobrazeno.
+                </p>
+              )}
+              <div className="overflow-x-auto">
+                <Table aria-label="Attendance records">
+                  <TableHeader>
+                    <TableColumn>ČLEN</TableColumn>
+                    <TableColumn>STATUS</TableColumn>
+                  </TableHeader>
+                  <TableBody>
+                    {validRecords.map((record) => (
                       <TableRow key={record.id}>
                         <TableCell>
                           <div>
@@ -108,8 +130,6 @@ export const AttendanceRecordingTable = ({
                                 className="text-xs sm:text-sm"
                               >
                                 <span className="hidden sm:inline">{getStatusText(status)}</span>
-
-                                {/*TODO: make as a function*/}
                                 <span className="sm:hidden">
                                   {status === 'present'
                                     ? 'P'
@@ -125,9 +145,10 @@ export const AttendanceRecordingTable = ({
                         </TableCell>
                       </TableRow>
                     ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardBody>
       </Card>

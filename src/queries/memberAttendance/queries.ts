@@ -14,8 +14,10 @@ export async function getAllMembersOfTrainingSession(
   options?: GetMembersAttendanceOptions
 ): Promise<QueryResult<MemberAttendanceWithMember[]>> {
   try {
+    // Use alias 'member:members' to match the TypeScript interface MemberAttendanceWithMember
+    // which expects 'member' (singular) not 'members' (plural table name)
     const query = buildSelectQuery(ctx.supabase, DB_TABLE, {
-      select: '*, members(id, name, surname, category_id)',
+      select: '*, member:members(id, name, surname, category_id)',
       filters: options?.filters,
       sorting: options?.sorting,
       pagination: options?.pagination,
