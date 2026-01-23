@@ -2,8 +2,6 @@ import {Card, CardBody, CardFooter, CardHeader} from '@heroui/card';
 
 import {CalendarIcon, ClockIcon, MapPinIcon} from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations';
-
 import {formatDateWithWeekday} from '@/helpers/formatDate';
 import {formatTime} from '@/helpers/formatTime';
 

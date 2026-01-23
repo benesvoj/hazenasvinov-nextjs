@@ -21,3 +21,4 @@ export * from './todoPriorities';
 export * from './todoStatuses';
 export * from './trainingSessionStatus';
 export * from './userRoles';
+export * from './matchStatus';

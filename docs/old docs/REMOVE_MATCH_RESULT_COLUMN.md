@@ -12,7 +12,7 @@ This document outlines the steps to remove the redundant `result` column from th
 - Includes proper documentation
 
 ### 2. TypeScript Interface Update
-**File**: `src/types/match.ts`
+**File**: `src/types/matches.ts`
 - Removed `result?: 'win' | 'loss' | 'draw'` property from `Match` interface
 - Interface now relies on computed values from scores
 
@@ -79,7 +79,7 @@ If issues arise, the result column can be re-added:
 ## Files Modified
 - `scripts/building-app/remove_match_result_column.sql` (NEW)
 - `src/utils/matchResult.ts` (NEW)
-- `src/types/match.ts`
+- `src/types/matches.ts`
 - `src/app/admin/matches/page.tsx.backup`
 - `src/app/admin/posts/components/MatchSelectionModal.tsx`
 

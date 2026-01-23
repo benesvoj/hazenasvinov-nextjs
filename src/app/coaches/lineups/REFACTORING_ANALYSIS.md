@@ -552,7 +552,7 @@ src/app/coaches/lineups/
 
 ## 📚 Related Documentation
 
-- [Hook Architecture Guide](../../../../docs/refactoring/COACHES_PAGES_REFACTORING_GUIDE.md)
+- [Hook Architecture Guide](../../../../docs/refactoring/coaches/COACHES_PAGES_REFACTORING_GUIDE.md)
 - [API Routes](../../../api/categories/[id]/lineups/)
 - [Type Definitions](../../../../types/entities/category/)
 - [README](./README.md) - Quick reference for this page

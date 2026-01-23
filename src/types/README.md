@@ -40,7 +40,7 @@ Contains types organized by business domain/entity. Each entity folder follows t
 
 **Examples**:
 ```typescript
-// match/data/match.ts
+// match/data/matches.ts
 export interface MatchApiResponse {
   id: string;
   home_team_id: string;
@@ -231,7 +231,7 @@ The `index.ts` file is automatically generated using the `generate-type-exports.
 - Use **singular** form for entity names
 
 **Examples**:
-- `match.ts` ✅
+- `matches.ts` ✅
 - `lineupPlayer.ts` ✅
 - `clubMemberRelationship.ts` ✅
 - `match-data.ts` ❌ (use camelCase)

@@ -1,4 +1,4 @@
-import {MatchStatus} from './match';
+import {MatchStatus} from '@/enums';
 
 export interface AddMatchFormData {
   date: string;
@@ -8,7 +8,7 @@ export interface AddMatchFormData {
   venue?: string;
   category_id: string;
   season_id: string;
-  matchweek?: string;
+  matchweek?: number;
   match_number?: number;
   video_ids?: string[];
 }
@@ -24,7 +24,7 @@ export interface EditMatchFormData {
   home_score_halftime: number;
   away_score_halftime: number;
   status: MatchStatus;
-  matchweek: string;
+  matchweek: number;
   match_number: number;
   category_id: string;
   video_ids?: string[];

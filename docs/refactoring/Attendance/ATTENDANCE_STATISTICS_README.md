@@ -6,19 +6,19 @@ This directory contains all documentation for the attendance statistics optimiza
 
 ## 📚 Documentation Files
 
-### 1. **[attendance-statistics-optimization.md](./attendance-statistics-optimization.md)**
+### 1. **[attendance-statistics-optimization.md](../attendance-statistics-optimization.md)**
    - **Purpose:** Master plan and architectural overview
    - **Contents:** Problem analysis, solutions comparison, 5-phase implementation plan
    - **Audience:** Technical leads, developers
    - **Status:** Complete reference document
 
-### 2. **[attendance-statistics-database-migration-guide.md](./attendance-statistics-database-migration-guide.md)**
+### 2. **[attendance-statistics-database-migration-guide.md](../attendance-statistics-database-migration-guide.md)**
    - **Purpose:** Step-by-step database migration instructions
    - **Contents:** Pre-checks, migrations, verification, rollback procedures
    - **Audience:** Database administrators, DevOps
    - **Status:** Ready for execution
 
-### 3. **[PHASE1_QUICK_REFERENCE.md](./PHASE1_QUICK_REFERENCE.md)**
+### 3. **[PHASE1_QUICK_REFERENCE.md](../PHASE1_QUICK_REFERENCE.md)**
    - **Purpose:** Quick command reference for Phase 1
    - **Contents:** TL;DR commands, success criteria, troubleshooting
    - **Audience:** Anyone executing the migration
@@ -144,18 +144,18 @@ src/
 ## 🎓 Learning Resources
 
 ### Understanding the Problem
-1. Read: [Problem Statement](./attendance-statistics-optimization.md#executive-summary)
-2. Review: [Performance Problems](./attendance-statistics-optimization.md#performance-problems)
+1. Read: [Problem Statement](../attendance-statistics-optimization.md#executive-summary)
+2. Review: [Performance Problems](../attendance-statistics-optimization.md#performance-problems)
 3. Understand: Current architecture has N+1 query pattern
 
 ### Understanding the Solution
-1. Read: [Recommended Architecture](./attendance-statistics-optimization.md#recommended-architecture)
-2. Review: [Solution Comparison](./attendance-statistics-optimization.md#solution-comparison)
+1. Read: [Recommended Architecture](../attendance-statistics-optimization.md#recommended-architecture)
+2. Review: [Solution Comparison](../attendance-statistics-optimization.md#solution-comparison)
 3. Understand: Hybrid approach with materialized views + functions
 
 ### Implementation Guide
-1. Start: [Migration Guide](./attendance-statistics-database-migration-guide.md)
-2. Execute: [Quick Reference](./PHASE1_QUICK_REFERENCE.md)
+1. Start: [Migration Guide](../attendance-statistics-database-migration-guide.md)
+2. Execute: [Quick Reference](../PHASE1_QUICK_REFERENCE.md)
 3. Verify: Run test suite
 
 ---
@@ -183,7 +183,7 @@ src/
 ## 🔧 Troubleshooting
 
 ### Database Issues
-See: [Troubleshooting section](./attendance-statistics-database-migration-guide.md#troubleshooting)
+See: [Troubleshooting section](../attendance-statistics-database-migration-guide.md#troubleshooting)
 
 ### Common Problems
 1. **Materialized view empty** → Check if you have completed training sessions

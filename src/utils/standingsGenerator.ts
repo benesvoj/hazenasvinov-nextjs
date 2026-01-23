@@ -34,7 +34,7 @@ interface TeamCategory {
 export async function generateInitialStandings(
   categoryId: string,
   seasonId: string,
-  isSeasonClosed: () => boolean
+  isSeasonClosed: boolean
 ): Promise<{success: boolean; error?: string; standings?: InitialStanding[]}> {
   // Validate input parameters FIRST - before any database operations
   if (!categoryId || categoryId.trim() === '') {
@@ -45,7 +45,7 @@ export async function generateInitialStandings(
     return {success: false, error: 'Neplatné ID sezóny'};
   }
 
-  if (isSeasonClosed()) {
+  if (isSeasonClosed) {
     return {success: false, error: 'Nelze generovat tabulku pro uzavřenou sezónu'};
   }
 

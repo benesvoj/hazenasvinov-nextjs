@@ -1,10 +1,11 @@
 'use client';
 import {useState, useEffect, useCallback} from 'react';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 import {createClient} from '@/utils/supabase/client';
 
+import {MatchStatus} from '@/enums';
 import {Category, Season, Team} from '@/types';
 
 /**
@@ -25,7 +26,7 @@ interface TransformedMatch {
   competition: string;
   home_score?: number;
   away_score?: number;
-  status: 'upcoming' | 'completed';
+  status: MatchStatus;
   matchweek?: number;
   result?: 'win' | 'loss' | 'draw';
   is_home: boolean;
@@ -159,7 +160,7 @@ export function useFetchMatch(matchId: string | null) {
             data.home_team?.club_category?.club?.name,
             data.home_team?.team_suffix || 'A',
             homeTeamCount,
-            translations.team.unknownTeam
+            translations.matches.unknownTeam
           ),
           short_name: data.home_team?.club_category?.club?.short_name,
           logo_url: data.home_team?.club_category?.club?.logo_url,
@@ -171,7 +172,7 @@ export function useFetchMatch(matchId: string | null) {
             data.away_team?.club_category?.club?.name,
             data.away_team?.team_suffix || 'A',
             awayTeamCount,
-            translations.team.unknownTeam
+            translations.matches.unknownTeam
           ),
           short_name: data.away_team?.club_category?.club?.short_name,
           logo_url: data.away_team?.club_category?.club?.logo_url,

@@ -2,9 +2,11 @@ import React from 'react';
 
 import {Button, Input, Select, SelectItem} from '@heroui/react';
 
+import {translations} from '@/lib/translations/index';
+
 import {UnifiedModal} from '@/components';
-import {translations} from '@/lib';
 import {AddMatchFormData} from '@/types';
+import {isEmpty} from '@/utils';
 
 interface FilteredTeam {
   id: string;
@@ -36,15 +38,13 @@ export default function AddMatchModal({
   selectedSeason,
   getMatchweekOptions,
 }: AddMatchModalProps) {
-  const tAction = translations.action;
-
   const footer = (
     <>
       <Button color="danger" variant="flat" onPress={onClose}>
-        {tAction.cancel}
+        {translations.common.actions.cancel}
       </Button>
       <Button color="primary" onPress={onAddMatch}>
-        {tAction.add}
+        {translations.common.actions.add}
       </Button>
     </>
   );
@@ -53,7 +53,7 @@ export default function AddMatchModal({
     <UnifiedModal
       isOpen={isOpen}
       onClose={onClose}
-      title={'Přidat nový zápas'}
+      title={translations.matches.modal.titles.addMatch}
       size="2xl"
       classNames={{
         base: 'mx-2',
@@ -68,21 +68,21 @@ export default function AddMatchModal({
     >
       <div className="space-y-4">
         <Input
-          label="Datum"
+          label={translations.common.labels.date}
           type="date"
           value={formData.date}
           onChange={(e) => setFormData({...formData, date: e.target.value})}
         />
         <Input
-          label="Čas"
+          label={translations.common.labels.time}
           type="time"
           value={formData.time}
           onChange={(e) => setFormData({...formData, time: e.target.value})}
         />
         <div>
           <Select
-            label="Domácí tým"
-            placeholder="Vyberte domácí tým"
+            label={translations.matches.homeTeam}
+            placeholder={translations.matches.homeTeamPlaceholder}
             selectedKeys={formData.home_team_id ? [formData.home_team_id] : []}
             onSelectionChange={(keys) => {
               const selectedTeamId = Array.from(keys)[0] as string;
@@ -100,16 +100,12 @@ export default function AddMatchModal({
               <SelectItem key={team.id}>{team.display_name || team.name}</SelectItem>
             ))}
           </Select>
-          {filteredTeams.length === 0 && selectedCategory && selectedSeason && (
-            <p className="text-sm text-red-600 mt-1">
-              Žádné týmy nejsou přiřazeny k této kategorii a sezóně
-            </p>
-          )}
+          {isEmpty(filteredTeams) && selectedCategory && selectedSeason && <NoTeamsAvailable />}
         </div>
         <div>
           <Select
-            label="Hostující tým"
-            placeholder="Vyberte hostující tým"
+            label={translations.matches.awayTeam}
+            placeholder={translations.matches.awayTeamPlaceholder}
             selectedKeys={formData.away_team_id ? [formData.away_team_id] : []}
             onSelectionChange={(keys) => {
               const selectedTeamId = Array.from(keys)[0] as string;
@@ -122,26 +118,25 @@ export default function AddMatchModal({
               <SelectItem key={team.id}>{team.display_name || team.name}</SelectItem>
             ))}
           </Select>
-          {filteredTeams.length === 0 && selectedCategory && selectedSeason && (
-            <p className="text-sm text-red-600 mt-1">
-              Žádné týmy nejsou přiřazeny k této kategorii a sezóně
-            </p>
-          )}
+          {isEmpty(filteredTeams) && selectedCategory && selectedSeason && <NoTeamsAvailable />}
         </div>
         <Input
-          label="Místo konání"
+          label={translations.matches.venue}
           value={formData.venue}
           onChange={(e) => setFormData({...formData, venue: e.target.value})}
-          placeholder="Místo konání se automaticky vyplní podle domácího týmu"
+          placeholder={translations.matches.venuePlaceholder}
         />
         <div>
           <Select
-            label="Kolo"
-            placeholder="Vyberte kolo"
-            selectedKeys={formData.matchweek ? [formData.matchweek.toString()] : []}
+            label={translations.matches.matchweek}
+            placeholder={translations.matches.matchweekPlaceholder}
+            selectedKeys={formData.matchweek ? [String(formData.matchweek)] : []}
             onSelectionChange={(keys) => {
               const selectedMatchweek = Array.from(keys)[0] as string;
-              setFormData({...formData, matchweek: selectedMatchweek || '0'});
+              setFormData({
+                ...formData,
+                matchweek: selectedMatchweek ? parseInt(selectedMatchweek, 10) : undefined,
+              });
             }}
             className="w-full"
           >
@@ -151,8 +146,8 @@ export default function AddMatchModal({
           </Select>
         </div>
         <Input
-          label="Číslo zápasu"
-          placeholder="např. 1, 2, Finále, Semifinále"
+          label={translations.matches.matchNumber}
+          placeholder={translations.matches.matchNumberPlaceholder}
           value={formData.match_number?.toString() || ''}
           onChange={(e) =>
             setFormData({
@@ -165,3 +160,7 @@ export default function AddMatchModal({
     </UnifiedModal>
   );
 }
+
+const NoTeamsAvailable = () => {
+  return <p className="text-sm text-red-600 mt-1">{translations.matches.noTeamForSelection}</p>;
+};

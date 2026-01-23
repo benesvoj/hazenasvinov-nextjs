@@ -25,7 +25,7 @@ types/
 │   │   │   ├── lineupManager.ts
 │   │   │   └── lineupPlayer.ts
 │   │   ├── data/
-│   │   │   ├── match.ts
+│   │   │   ├── matches.ts
 │   │   │   ├── matchForms.ts
 │   │   │   ├── matchMetadata.ts
 │   │   │   └── matchVideo.ts

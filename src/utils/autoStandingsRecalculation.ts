@@ -86,11 +86,7 @@ export async function autoRecalculateStandings(
       `Recalculating standings for category ${finalCategoryId} and season ${finalSeasonId}`
     );
 
-    const result = await calculateStandings(
-      finalCategoryId,
-      finalSeasonId,
-      () => season?.is_closed || false
-    );
+    const result = await calculateStandings(finalCategoryId, finalSeasonId, season?.is_closed);
 
     if (result.success) {
       console.log('Standings recalculated successfully');
