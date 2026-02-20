@@ -2,7 +2,7 @@ import {translations} from '@/lib/translations/index';
 
 import {AddMatchFormData, EditMatchFormData} from '@/types';
 
-export interface ValidationResult {
+export interface ValidationMatchResult {
   valid: boolean;
   error?: string;
   field?: string;
@@ -11,7 +11,7 @@ export interface ValidationResult {
 /**
  * Validates the add match form data
  */
-export function validateAddMatchForm(formData: AddMatchFormData): ValidationResult {
+export function validateAddMatchForm(formData: AddMatchFormData): ValidationMatchResult {
   if (!formData.date) {
     return {
       valid: false,
@@ -66,7 +66,7 @@ export function validateAddMatchForm(formData: AddMatchFormData): ValidationResu
 /**
  * Validates the edit match form data
  */
-export function validateEditMatchForm(formData: EditMatchFormData): ValidationResult {
+export function validateEditMatchForm(formData: EditMatchFormData): ValidationMatchResult {
   if (!formData.date) {
     return {valid: false, error: translations.matches.toasts.mandatoryFieldsMissing, field: 'date'};
   }
@@ -108,7 +108,7 @@ export interface MatchResultData {
   away_score_halftime: number;
 }
 
-export function validateResultData(data: MatchResultData): ValidationResult {
+export function validateResultData(data: MatchResultData): ValidationMatchResult {
   if (data.home_score === null || data.home_score === undefined) {
     return {
       valid: false,
@@ -145,7 +145,7 @@ export interface BulkUpdateValidationData {
   action: 'set' | 'remove';
 }
 
-export function validateBulkUpdateData(data: BulkUpdateValidationData): ValidationResult {
+export function validateBulkUpdateData(data: BulkUpdateValidationData): ValidationMatchResult {
   if (!data.categoryId) {
     return {
       valid: false,
@@ -168,7 +168,7 @@ export function validateBulkUpdateData(data: BulkUpdateValidationData): Validati
 /**
  * Validates season is not closed
  */
-export function validateSeasonNotClosed(isClosed: boolean, action: string): ValidationResult {
+export function validateSeasonNotClosed(isClosed: boolean, action: string): ValidationMatchResult {
   if (isClosed) {
     return {
       valid: false,

@@ -1,6 +1,6 @@
-import {createClient} from '@/utils/supabase/client';
+import {supabaseBrowserClient} from '@/utils/supabase/client';
 
-import {Standing, Match} from '@/types';
+import {Match} from '@/types';
 
 /**
  * Calculates standings for a specific category and season
@@ -15,6 +15,8 @@ export async function calculateStandings(
   isSeasonClosed: boolean
 ): Promise<{success: boolean; error?: string}> {
   // Validate input parameters FIRST - before any database operations
+  const supabase = supabaseBrowserClient();
+
   if (!categoryId || categoryId.trim() === '') {
     return {success: false, error: 'Neplatné ID kategorie'};
   }
@@ -28,8 +30,6 @@ export async function calculateStandings(
   }
 
   try {
-    const supabase = createClient();
-
     // Get completed matches for the selected category and season
     let {data: completedMatches, error: matchesError} = await supabase
       .from('matches')

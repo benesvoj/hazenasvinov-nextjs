@@ -1,57 +1,29 @@
 'use client';
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useMemo,
-} from 'react';
+import React, {createContext, useContext, useState, useEffect, useCallback, useRef} from 'react';
 
 import {User} from '@supabase/supabase-js';
 
-import {createClient} from '@/utils/supabase/client';
-
-// Types for user data
-export interface UserProfile {
-  id: string;
-  user_id: string;
-  role: 'admin' | 'coach' | 'head_coach' | 'member';
-  assigned_categories: string[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface UserRole {
-  id: string;
-  user_id: string;
-  role: string;
-  created_at: string;
-}
+import {useSupabaseClient} from '@/hooks';
+import {UserProfile} from '@/types';
 
 export interface UserContextType {
   // User data
   user: User | null;
   userProfile: UserProfile | null;
-  userRoles: UserRole[];
   userCategories: string[];
 
   // Loading states
   loading: boolean;
   profileLoading: boolean;
-  rolesLoading: boolean;
 
   // Error states
   error: string | null;
   profileError: string | null;
-  rolesError: string | null;
 
   // Actions
   refreshUser: () => Promise<void>;
   refreshProfile: () => Promise<void>;
-  refreshRoles: () => Promise<void>;
   refreshAll: () => Promise<void>;
   getCurrentUserCategories: () => Promise<string[]>;
 
@@ -64,7 +36,6 @@ export interface UserContextType {
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
-
 // Request deduplication
 const requestCache = new Map<string, Promise<any>>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -110,20 +81,18 @@ const getCachedData = async <T,>(key: string, fetchFn: () => Promise<T>): Promis
 };
 
 export function UserProvider({children}: {children: React.ReactNode}) {
+  const supabase = useSupabaseClient();
+
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [userCategories, setUserCategories] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [rolesLoading, setRolesLoading] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
-  const [rolesError, setRolesError] = useState<string | null>(null);
 
-  const supabase = useMemo(() => createClient(), []);
   const hasProcessedInitialSession = useRef(false);
 
   // Fetch user data
@@ -178,7 +147,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
         throw err;
       }
     });
-  }, [supabase]);
+  }, [supabase.auth]);
 
   // Fetch user profile
   const fetchUserProfile = useCallback(
@@ -186,14 +155,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
       return getCachedData(`profile-${userId}`, async () => {
         const {data, error} = await supabase
           .from('user_profiles')
-          .select(
-            `
-          id,
-          user_id,
-          role,
-          assigned_categories
-        `
-          )
+          .select('*')
           .eq('user_id', userId)
           .order('created_at', {ascending: false});
 
@@ -209,27 +171,11 @@ export function UserProvider({children}: {children: React.ReactNode}) {
           id: profile.id,
           user_id: profile.user_id,
           role: profile.role,
+          role_id: profile.role_id,
           assigned_categories: profile.assigned_categories || [],
           created_at: profile.created_at,
           updated_at: profile.updated_at,
         };
-      });
-    },
-    [supabase]
-  );
-
-  // Fetch user roles (legacy system)
-  const fetchUserRoles = useCallback(
-    async (userId: string): Promise<UserRole[]> => {
-      return getCachedData(`roles-${userId}`, async () => {
-        const {data, error} = await supabase
-          .from('user_roles')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', {ascending: false});
-
-        if (error) throw error;
-        return data || [];
       });
     },
     [supabase]
@@ -243,14 +189,10 @@ export function UserProvider({children}: {children: React.ReactNode}) {
       setUser(userData);
 
       if (userData) {
-        // Fetch profile and roles in parallel
-        const [profile, roles] = await Promise.all([
-          fetchUserProfile(userData.id),
-          fetchUserRoles(userData.id),
-        ]);
+        // Fetch profile
+        const [profile] = await Promise.all([fetchUserProfile(userData.id)]);
 
         setUserProfile(profile);
-        setUserRoles(roles);
 
         // Extract category from profile
         if (profile) {
@@ -259,7 +201,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
       } else {
         // No user authenticated - clear all data
         setUserProfile(null);
-        setUserRoles([]);
         setUserCategories([]);
       }
     } catch (err) {
@@ -274,7 +215,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
         // This is expected for unauthenticated users, don't log as error
         setUser(null);
         setUserProfile(null);
-        setUserRoles([]);
         setUserCategories([]);
       } else if (
         err &&
@@ -285,7 +225,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
         // This is expected for unauthenticated users, don't log as error
         setUser(null);
         setUserProfile(null);
-        setUserRoles([]);
         setUserCategories([]);
       } else {
         console.error('Error refreshing user:', err);
@@ -293,11 +232,10 @@ export function UserProvider({children}: {children: React.ReactNode}) {
         // Clear user data on error
         setUser(null);
         setUserProfile(null);
-        setUserRoles([]);
         setUserCategories([]);
       }
     }
-  }, [fetchUser, fetchUserProfile, fetchUserRoles]);
+  }, [fetchUser, fetchUserProfile]);
 
   // Refresh profile only
   const refreshProfile = useCallback(async () => {
@@ -325,28 +263,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
     }
   }, [user, fetchUserProfile]);
 
-  // Refresh roles only
-  const refreshRoles = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      setRolesLoading(true);
-      setRolesError(null);
-
-      // Clear cache for this user's roles
-      requestCache.delete(`roles-${user.id}`);
-      cacheTimestamps.delete(`roles-${user.id}`);
-
-      const roles = await fetchUserRoles(user.id);
-      setUserRoles(roles);
-    } catch (err) {
-      console.error('Error refreshing roles:', err);
-      setRolesError(err instanceof Error ? err.message : 'Failed to refresh roles');
-    } finally {
-      setRolesLoading(false);
-    }
-  }, [user, fetchUserRoles]);
-
   // Refresh all data
   const refreshAll = useCallback(async () => {
     // Clear all caches
@@ -363,10 +279,9 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 
   const hasRole = useCallback(
     (role: string): boolean => {
-      if (userProfile?.role === role) return true;
-      return userRoles.some((r) => r.role === role);
+      return userProfile?.role === role || false;
     },
-    [userProfile, userRoles]
+    [userProfile]
   );
 
   const hasCategory = useCallback(
@@ -427,7 +342,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
           // This is expected for unauthenticated users, don't log as error
           setUser(null);
           setUserProfile(null);
-          setUserRoles([]);
           setUserCategories([]);
         } else if (
           err &&
@@ -438,7 +352,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
           // This is expected for unauthenticated users, don't log as error
           setUser(null);
           setUserProfile(null);
-          setUserRoles([]);
           setUserCategories([]);
         } else {
           console.error('Error initializing user:', err);
@@ -446,7 +359,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
           // Clear user data on initialization error
           setUser(null);
           setUserProfile(null);
-          setUserRoles([]);
           setUserCategories([]);
         }
       } finally {
@@ -454,8 +366,8 @@ export function UserProvider({children}: {children: React.ReactNode}) {
       }
     };
 
-    initializeUser();
-  }, []); // Only run once on mount
+    void initializeUser();
+  }, [refreshUser]); // Only run once on mount
 
   // No auth state change listener - let Supabase handle session management
   // This prevents unnecessary re-fetches when switching tabs
@@ -464,23 +376,19 @@ export function UserProvider({children}: {children: React.ReactNode}) {
     // User data
     user,
     userProfile,
-    userRoles,
     userCategories,
 
     // Loading states
     loading,
     profileLoading,
-    rolesLoading,
 
     // Error states
     error,
     profileError,
-    rolesError,
 
     // Actions
     refreshUser,
     refreshProfile,
-    refreshRoles,
     refreshAll,
     getCurrentUserCategories,
 

@@ -1,23 +1,22 @@
 import {useQuery} from '@tanstack/react-query';
 
-import {createClient} from '@/utils/supabase/client';
-
 import {
-  LeaderboardEntry,
-  LeaderboardQuery,
-  UserRankInfo,
-  LeaderboardStats,
-  LeaderboardPeriod,
-  LeaderboardSortBy,
-  calculatePercentile,
   Bet,
+  calculatePercentile,
+  LeaderboardEntry,
+  LeaderboardPeriod,
+  LeaderboardQuery,
+  LeaderboardSortBy,
+  LeaderboardStats,
+  UserRankInfo,
 } from '@/types';
+import {supabaseBrowserClient} from '@/utils';
 
 /**
  * Get leaderboard entries
  */
 async function getLeaderboard(query: LeaderboardQuery): Promise<LeaderboardEntry[]> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     // This would typically query a materialized view or aggregated table
@@ -135,8 +134,6 @@ async function getUserRank(
   userId: string,
   period: LeaderboardPeriod
 ): Promise<UserRankInfo | null> {
-  const supabase = createClient();
-
   try {
     // Get all users for ranking
     const allEntries = await getLeaderboard({
@@ -166,7 +163,7 @@ async function getUserRank(
  * Get leaderboard statistics
  */
 async function getLeaderboardStats(period: LeaderboardPeriod): Promise<LeaderboardStats | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data: bets, error} = await supabase

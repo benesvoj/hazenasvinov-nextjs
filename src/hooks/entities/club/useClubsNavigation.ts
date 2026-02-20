@@ -2,8 +2,7 @@
 
 import {useState, useEffect, useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
+import {useSupabaseClient} from '@/hooks';
 import {Club} from '@/types';
 
 export interface ClubsNavigationData {
@@ -22,7 +21,7 @@ export function useClubsNavigation(currentClubId: string): ClubsNavigationData {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const fetchClubs = useCallback(async () => {
     try {

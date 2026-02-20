@@ -1,13 +1,12 @@
-import {createClient} from '@/utils/supabase/client';
-
 import {
-  Wallet,
-  Transaction,
   CreateTransactionInput,
-  WalletSummary,
-  TransactionType,
   Currency,
+  Transaction,
+  TransactionType,
+  Wallet,
+  WalletSummary,
 } from '@/types';
+import {supabaseBrowserClient} from '@/utils';
 
 /**
  * Wallet Service
@@ -23,7 +22,7 @@ const DEFAULT_CURRENCY: Currency = 'POINTS';
  * @returns User's wallet
  */
 export async function getOrCreateWallet(userId: string): Promise<Wallet | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     // Try to get existing wallet
@@ -88,7 +87,7 @@ export async function getBalance(userId: string): Promise<number> {
 export async function createTransaction(
   input: CreateTransactionInput
 ): Promise<Transaction | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     // Get current wallet
@@ -225,7 +224,7 @@ export async function getTransactionHistory(
   limit: number = 50,
   offset: number = 0
 ): Promise<Transaction[]> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data, error} = await supabase
@@ -259,7 +258,7 @@ export async function getTransactionsByType(
   type: TransactionType,
   limit: number = 50
 ): Promise<Transaction[]> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data, error} = await supabase
@@ -288,7 +287,7 @@ export async function getTransactionsByType(
  * @returns Wallet summary
  */
 export async function getWalletSummary(userId: string): Promise<WalletSummary | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const wallet = await getOrCreateWallet(userId);

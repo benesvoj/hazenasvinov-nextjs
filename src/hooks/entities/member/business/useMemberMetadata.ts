@@ -1,14 +1,14 @@
 'use client';
-import {useState, useCallback} from 'react';
 
-import {MemberMetadata, MemberWithMetadata} from '@/types/entities/member/data/memberMetadata';
+import {useCallback, useState} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useSupabaseClient} from '@/hooks';
+import {MemberMetadata, MemberWithMetadata} from '@/types';
 
 export function useMemberMetadata() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   // Get member metadata by member ID
   const getMemberMetadata = useCallback(

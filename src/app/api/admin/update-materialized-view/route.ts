@@ -1,10 +1,10 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Check if user is authenticated and has admin privileges
     const {

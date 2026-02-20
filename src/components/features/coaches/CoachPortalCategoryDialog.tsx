@@ -3,27 +3,27 @@
 import React, {useState} from 'react';
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
-  Select,
-  SelectItem,
-  SelectedItems,
   Chip,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Select,
+  SelectedItems,
+  SelectItem,
 } from '@heroui/react';
 
 import {AcademicCapIcon} from '@heroicons/react/24/outline';
 
-import {createClient} from '@/utils/supabase/client';
-
 import {useAdminCategorySimulation} from '@/contexts/AdminCategorySimulationContext';
 
+import {useSupabaseClient} from '@/hooks';
 import {Category} from '@/types';
 
 import LoadingSpinner from '../../ui/feedback/LoadingSpinner';
+
 interface CoachPortalCategoryDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,14 +35,9 @@ export function CoachPortalCategoryDialog({
   onClose,
   onConfirm,
 }: CoachPortalCategoryDialogProps) {
-  const {
-    selectedCategories,
-    availableCategories,
-    selectCategory,
-    deselectCategory,
-    clearSelection,
-    loading,
-  } = useAdminCategorySimulation();
+  const {selectedCategories, availableCategories, selectCategory, deselectCategory, loading} =
+    useAdminCategorySimulation();
+  const supabase = useSupabaseClient();
 
   const [tempSelectedCategories, setTempSelectedCategories] = useState<string[]>([]);
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
@@ -58,8 +53,6 @@ export function CoachPortalCategoryDialog({
 
   // Function to ensure user has a profile and admin role
   const ensureUserProfile = async () => {
-    const supabase = createClient();
-
     try {
       // Get current user
       const {

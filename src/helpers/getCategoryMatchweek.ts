@@ -1,7 +1,7 @@
-import {createClient} from '@/utils/supabase/client';
+import {supabaseBrowserClient} from '@/utils';
 
 export const getCategoryMatchweeks = async (categoryId: string) => {
-  const supabase = await createClient();
+  const supabase = await supabaseBrowserClient();
 
   const {data, error} = await supabase
     .from('categories')

@@ -12,7 +12,16 @@ import {ThemeProviders} from '@/app/theme-providers';
 import {ChunkErrorBoundary, DatabaseErrorBoundary} from '@/components';
 
 // Pages that should NOT load UserContext and AppDataContext
-const EXCLUDED_PAGES = ['/reset-password', '/set-password', '/login', '/', '/error', '/blocked'];
+const EXCLUDED_PAGES = [
+  '/reset-password',
+  '/set-password',
+  '/login',
+  '/',
+  '/error',
+  '/blocked',
+  '/auth',
+  '/api/auth',
+];
 
 // Pages that should NOT load AppDataContext (but can load UserContext)
 const NO_APP_DATA_PAGES = [

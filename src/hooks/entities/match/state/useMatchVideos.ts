@@ -1,8 +1,8 @@
 'use client';
-import {useState, useEffect, useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useCallback, useEffect, useState} from 'react';
 
+import {useSupabaseClient} from '@/hooks';
 import {Video} from '@/types';
 
 interface UseMatchVideosResult {
@@ -24,6 +24,8 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const supabase = useSupabaseClient();
+
   const fetchVideos = useCallback(async (id: string) => {
     try {
       setLoading(true);
@@ -34,9 +36,6 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
         setVideos([]);
         return;
       }
-
-      const supabase = createClient();
-
       // Check if match_videos table exists first
       const {data: tableCheck, error: tableError} = await supabase
         .from('match_videos')
@@ -122,7 +121,6 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
 
       try {
         setError(null);
-        const supabase = createClient();
 
         const {error: insertError} = await supabase.from('match_videos').insert({
           match_id: matchId,
@@ -154,7 +152,6 @@ export function useMatchVideos(matchId: string | null): UseMatchVideosResult {
 
       try {
         setError(null);
-        const supabase = createClient();
 
         const {error: deleteError} = await supabase
           .from('match_videos')

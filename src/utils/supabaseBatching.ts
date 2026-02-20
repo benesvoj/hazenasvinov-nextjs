@@ -1,4 +1,4 @@
-import {createClient as createServerClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 /**
  * Standard error interface for Supabase operations
@@ -112,7 +112,7 @@ export class SupabaseServerBatcher {
   private supabaseClientFactory: () => Promise<SupabaseClient>;
 
   constructor(supabaseClientFactory?: () => Promise<SupabaseClient>) {
-    this.supabaseClientFactory = supabaseClientFactory || createServerClient;
+    this.supabaseClientFactory = supabaseClientFactory || supabaseServerClient;
   }
 
   addQuery<T = any>(

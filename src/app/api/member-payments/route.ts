@@ -1,9 +1,9 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
   const searchParams = request.nextUrl.searchParams;
   const memberId = searchParams.get('member_id');
   const year = searchParams.get('year');
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
 
   try {
     const body = await request.json();
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
 
   try {
     const body = await request.json();
@@ -93,7 +93,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
   const searchParams = request.nextUrl.searchParams;
   const id = searchParams.get('id');
 

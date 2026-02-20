@@ -1,18 +1,17 @@
 'use client';
-import {useState, useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useCallback, useState} from 'react';
+
 import {generateUUID} from '@/utils/uuid';
 
 import {PlayerPosition} from '@/enums';
-import {LineupFormData, LineupSummary, LineupValidation, LineupCoach, LineupPlayer} from '@/types';
-
-const supabase = createClient();
+import {useSupabaseClient} from '@/hooks';
+import {LineupCoach, LineupFormData, LineupPlayer, LineupSummary, LineupValidation} from '@/types';
 
 export const useLineupData = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const supabase = useSupabaseClient();
   // Fetch lineup data
   const fetchLineup = useCallback(async (matchId: string, teamId: string) => {
     try {

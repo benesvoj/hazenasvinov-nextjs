@@ -2,17 +2,26 @@
 
 import {useState} from 'react';
 
-import {Card, CardBody, Tabs, Tab} from '@heroui/react';
+import {Card, CardBody} from '@heroui/react';
 
-import {translations} from '@/lib/translations';
+import {useModals} from '@/hooks/shared/useModals';
 
-import {AdminContainer} from '@/components';
-import {useFetchUsers} from '@/hooks';
+import {translations} from '@/lib/translations/index';
 
-import {LoginLogsTab} from './components/LoginLogsTab';
-import {UsersTab} from './components/UsersTab';
+import {AdminContainer, showToast} from '@/components';
+import {ActionTypes} from '@/enums';
+import {useFetchUsers, useUserManagement} from '@/hooks';
+import {CreateUserData, SupabaseUser} from '@/types';
 
-export default function Page() {
+import {
+  LoginLogsTab,
+  PasswordResetModal,
+  RoleAssignmentModal,
+  UserFormModal,
+  UsersTab,
+} from './components';
+
+export default function UsersPage() {
   const [selectedTab, setSelectedTab] = useState<string>('users');
   const {
     users,
@@ -20,12 +29,99 @@ export default function Page() {
     loading,
     error,
     pagination,
-    selectedUser,
     changePage,
     changeUserFilter,
     clearFilters,
     fetchUsers,
   } = useFetchUsers(selectedTab === 'loginLogs');
+
+  const {
+    createUser,
+    updateUser,
+    toggleUserBlock,
+    resetPassword,
+    isCreating,
+    isUpdating,
+    isResettingPassword,
+  } = useUserManagement();
+
+  const modals = useModals('form', 'passwordReset', 'roleAssignment');
+
+  const [selectedUser, setSelectedUser] = useState<SupabaseUser | null>(null);
+  const [passwordResetEmail, setPasswordResetEmail] = useState<string>('');
+  const [newlyCreatedUser, setNewlyCreatedUser] = useState<{id: string; email: string} | null>(
+    null
+  );
+
+  const handleOpenAddModal = () => {
+    setSelectedUser(null);
+    modals.form.onOpen();
+  };
+
+  const handleOpenEditModal = (user: SupabaseUser) => {
+    setSelectedUser(user);
+    modals.form.onOpen();
+  };
+
+  const handleOpenPasswordResetModal = (user: SupabaseUser) => {
+    setPasswordResetEmail(user.email || '');
+    modals.passwordReset.onOpen();
+  };
+
+  const handleFormSubmit = async (formData: CreateUserData) => {
+    if (selectedUser) {
+      const result = await updateUser(selectedUser.id, formData);
+      if (result.success) {
+        showToast.success('Uživatel byl úspěšně aktualizován!');
+        modals.form.onClose();
+        fetchUsers();
+      } else {
+        showToast.danger(result.error || 'Nepodařilo se aktualizovat uživatele');
+      }
+    } else {
+      const result = await createUser(formData);
+      if (result.success && result.userId && result.userEmail) {
+        showToast.success('Pozvánka byla úspěšně odeslána!');
+        modals.form.onClose();
+        setNewlyCreatedUser({id: result.userId, email: result.userEmail});
+        modals.roleAssignment.onOpen();
+      } else {
+        showToast.danger(result.error || 'Nepodařilo se vytvořit uživatele');
+      }
+    }
+  };
+
+  const handleToggleBlock = async (user: SupabaseUser) => {
+    const result = await toggleUserBlock(user.id);
+    if (result.success) {
+      fetchUsers();
+    } else {
+      showToast.danger(result.error || 'Nepodařilo se změnit stav uživatele');
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    const result = await resetPassword(passwordResetEmail);
+    if (result.success) {
+      showToast.success('Email pro obnovení hesla byl odeslán');
+      modals.passwordReset.onClose();
+    } else {
+      showToast.danger(result.error || 'Nepodařilo se odeslat email');
+    }
+  };
+
+  const handleOnRoleAssigned = () => {
+    modals.roleAssignment.onClose();
+    setNewlyCreatedUser(null);
+    showToast.success('Role byla úspěšně přiřazena!');
+    fetchUsers();
+  };
+
+  const handleRoleAssignmentClose = () => {
+    modals.roleAssignment.onClose();
+    setNewlyCreatedUser(null);
+    fetchUsers();
+  };
 
   if (error) {
     return (
@@ -48,43 +144,77 @@ export default function Page() {
   }
 
   return (
-    <AdminContainer loading={loading}>
-      {/* Tabs */}
-      <Tabs
-        selectedKey={selectedTab}
-        onSelectionChange={(key) => setSelectedTab(key as string)}
-        className="w-full"
-        color="primary"
-        variant="underlined"
-        size="lg"
-        classNames={{
-          tabList: 'gap-6 w-full relative rounded-none p-0 border-b border-divider',
-          cursor: 'w-full bg-primary',
-          tab: 'max-w-fit px-0 h-12 flex-1 bg-transparent',
-          tabContent: 'group-data-[selected=true]:text-primary',
-        }}
-      >
-        <Tab key="users" title={translations.users.tabs.users} />
-        <Tab key="loginLogs" title={translations.users.tabs.loginLogs} />
-      </Tabs>
+    <>
+      <AdminContainer
+        loading={loading}
+        tabs={[
+          {
+            key: 'users',
+            title: translations.admin.users.tabs.users,
+            content: (
+              <UsersTab
+                users={users}
+                loading={loading}
+                onEdit={handleOpenEditModal}
+                onResetPassword={handleOpenPasswordResetModal}
+                onToggleBlock={handleToggleBlock}
+              />
+            ),
+            actions: [
+              {
+                label: translations.admin.users.actions.addUser,
+                onClick: handleOpenAddModal,
+                variant: 'solid',
+                buttonType: ActionTypes.CREATE,
+              },
+            ],
+          },
+          {
+            key: 'loginLogs',
+            title: translations.admin.users.tabs.loginLogs,
+            content: (
+              <LoginLogsTab
+                loginLogs={loginLogs}
+                loading={loading}
+                users={users}
+                pagination={pagination}
+                onPageChange={changePage}
+                onUserFilterChange={changeUserFilter}
+                onClearFilters={clearFilters}
+              />
+            ),
+          },
+        ]}
+        activeTab={selectedTab}
+        onTabChange={setSelectedTab}
+      />
 
-      {/* Tab Content */}
-      {selectedTab === 'users' && (
-        <UsersTab users={users} loading={loading} onRefresh={() => fetchUsers(1, selectedUser)} />
-      )}
+      <UserFormModal
+        isOpen={modals.form.isOpen}
+        onOpenChange={modals.form.onOpenChange}
+        key={selectedUser?.id ?? 'new-user'}
+        selectedUser={selectedUser}
+        onSubmit={handleFormSubmit}
+        isSubmitting={isCreating || isUpdating}
+      />
 
-      {selectedTab === 'loginLogs' && (
-        <LoginLogsTab
-          loginLogs={loginLogs}
-          loading={loading}
-          users={users}
-          pagination={pagination}
-          selectedUser={selectedUser}
-          onPageChange={changePage}
-          onUserFilterChange={changeUserFilter}
-          onClearFilters={clearFilters}
+      <PasswordResetModal
+        isOpen={modals.passwordReset.isOpen}
+        onClose={modals.passwordReset.onClose}
+        onSubmit={handlePasswordReset}
+        passwordResetEmail={passwordResetEmail}
+        isSubmitting={isResettingPassword}
+      />
+
+      {newlyCreatedUser && (
+        <RoleAssignmentModal
+          isOpen={modals.roleAssignment.isOpen}
+          onClose={handleRoleAssignmentClose}
+          userId={newlyCreatedUser.id}
+          userEmail={newlyCreatedUser.email}
+          onRoleAssigned={handleOnRoleAssigned}
         />
       )}
-    </AdminContainer>
+    </>
   );
 }

@@ -1,7 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
 
-import {createClient} from '@/utils/supabase/client';
-
+import {useSupabaseClient} from '@/hooks';
 import {Match} from '@/types';
 
 interface UseHeadToHeadMatchesOptions {
@@ -30,14 +29,14 @@ export function useHeadToHeadMatches({
 }: UseHeadToHeadMatchesOptions): UseHeadToHeadMatchesResult {
   const queryKey = ['headToHeadMatches', categoryId, opponentTeamId, ownClubTeamId, limit];
 
+  const supabase = useSupabaseClient();
+
   return useQuery({
     queryKey,
     queryFn: async () => {
       if (!categoryId || !opponentTeamId || !ownClubTeamId) {
         return [];
       }
-
-      const supabase = createClient();
 
       // Step 1: Get the opponent's club ID from the opponent team ID
       const {data: opponentTeamData, error: opponentTeamError} = await supabase

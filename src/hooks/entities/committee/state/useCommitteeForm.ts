@@ -1,10 +1,10 @@
 'use client';
 
+import {translations} from '@/lib/translations/index';
+
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {Committee, CommitteeFormData} from '@/types';
 
-const t = translations.admin.committees.responseMessages;
 const initialFormData: CommitteeFormData = {
   code: '',
   name: '',
@@ -21,8 +21,8 @@ export function useCommitteeForm() {
   return createFormHook<Committee, CommitteeFormData>({
     initialFormData,
     validationRules: [
-      {field: 'code', message: t.mandatoryCode},
-      {field: 'name', message: t.mandatoryName},
+      {field: 'code', message: translations.committees.responseMessages.mandatoryCode},
+      {field: 'name', message: translations.committees.responseMessages.mandatoryName},
     ],
   })();
 }

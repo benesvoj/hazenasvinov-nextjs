@@ -3,26 +3,25 @@
 import React, {useState} from 'react';
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
-  Input,
-  Checkbox,
-  CheckboxGroup,
   Card,
   CardBody,
+  Checkbox,
+  CheckboxGroup,
   Divider,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   TimeInput,
 } from '@heroui/react';
 
 import {CalendarIcon, ClockIcon, PlusIcon} from '@heroicons/react/24/outline';
 
-import {useAttendance} from '@/hooks/entities/attendance/useAttendance';
-
 import {formatDateString, formatTime} from '@/helpers';
+import {useSupabaseClient} from '@/hooks';
 
 interface TrainingSessionGeneratorProps {
   isOpen: boolean;
@@ -57,17 +56,11 @@ export default function TrainingSessionGenerator({
   const [error, setError] = useState<string | null>(null);
   const [createAttendanceRecords, setCreateAttendanceRecords] = useState(true);
 
-  // const {createTrainingSession, createAttendanceForLineupMembers} = useAttendance();
-  const {createAttendanceForLineupMembers} = useAttendance();
-
-  // Use userCategories from UserContext instead of local state
+  const supabase = useSupabaseClient();
 
   // Function to fetch lineup members directly
   const fetchLineupMembersForCategory = async (categoryId: string, seasonId: string) => {
     try {
-      const {createClient} = await import('@/utils/supabase/client');
-      const supabase = createClient();
-
       // First get the lineup for this category and season
       const {data: lineupData, error: lineupError} = await supabase
         .from('category_lineups')
@@ -196,9 +189,6 @@ export default function TrainingSessionGenerator({
 
           // If no lineup members found, try to get all members from the category
           if (memberIds.length === 0) {
-            const {createClient} = await import('@/utils/supabase/client');
-            const supabase = createClient();
-
             if (selectedCategory) {
               const {data: membersData, error: membersError} = await supabase
                 .from('members')

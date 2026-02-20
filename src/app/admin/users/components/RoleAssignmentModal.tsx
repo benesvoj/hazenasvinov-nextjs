@@ -1,16 +1,20 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 
-import {Radio, RadioGroup} from '@heroui/react';
+import {Alert, RadioGroup, Skeleton} from '@heroui/react';
 
 import {useModal} from '@/hooks/shared/useModals';
 
-import {UnifiedModal} from '@/components/ui/modals';
+import {CustomRadio} from '@/components/ui/radio/CustomRadio';
 
-import {createClient} from '@/utils/supabase/client';
+import {translations} from '@/lib/translations/index';
 
 import {CategorySelectionModal} from '@/app/admin/users/components/CategorySelectionModal';
+
+import {showToast, UnifiedModal} from '@/components';
+import {useUserRoles} from '@/hooks';
+import {RoleDefinitionSchema} from '@/types';
 
 interface RoleAssignmentModalProps {
   isOpen: boolean;
@@ -20,17 +24,6 @@ interface RoleAssignmentModalProps {
   onRoleAssigned: () => void;
 }
 
-const ROLE_OPTIONS = [
-  {value: 'admin', label: 'Admin', description: 'Plný přístup ke všem funkcím'},
-  {
-    value: 'head_coach',
-    label: 'Hlavní trenér',
-    description: 'Přístup k trenérským funkcím a správě týmů',
-  },
-  {value: 'coach', label: 'Trenér', description: 'Přístup k trenérským funkcím'},
-  {value: 'member', label: 'Člen', description: 'Základní přístup pro členy'},
-];
-
 export default function RoleAssignmentModal({
   isOpen,
   onClose,
@@ -38,79 +31,75 @@ export default function RoleAssignmentModal({
   userEmail,
   onRoleAssigned,
 }: RoleAssignmentModalProps) {
-  const [selectedRole, setSelectedRole] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedRoleId, setSelectedRoleId] = useState<string>('');
+  const [pendingRole, setPendingRole] = useState<RoleDefinitionSchema | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Category selection state
-  const showCategoryModal = useModal();
+  const categoryModal = useModal();
 
-  const [pendingRole, setPendingRole] = useState('');
-
-  // Check if role requires category
-  const roleRequiresCategories = (role: string) => {
-    return role === 'coach' || role === 'head_coach';
-  };
+  const {
+    roleDefinitions,
+    rolesLoading,
+    upsertUserProfile,
+    loading,
+    checkRoleRequiresCategories,
+    getRoleById,
+  } = useUserRoles();
 
   const handleAssignRole = async () => {
+    if (!selectedRoleId) {
+      setError(translations.admin.userRoles.errors.roleNotFound);
+      return;
+    }
+
+    const selectedRole = getRoleById(selectedRoleId);
     if (!selectedRole) {
-      setError('Prosím vyberte roli');
+      setError(translations.admin.userRoles.errors.roleNotFound);
       return;
     }
 
     // If role requires category, show category selection modal
-    if (roleRequiresCategories(selectedRole)) {
+    if (checkRoleRequiresCategories(selectedRoleId)) {
       setPendingRole(selectedRole);
-      showCategoryModal.onOpen();
+      categoryModal.onOpen();
       return;
     }
-
     // For roles that don't require category, assign directly
-    await assignRoleToDatabase(selectedRole, null);
+    await assignRole(selectedRole, null);
   };
 
-  // Assign role to database
-  const assignRoleToDatabase = async (role: string, categories: string[] | null) => {
-    setIsLoading(true);
+  const assignRole = async (role: RoleDefinitionSchema, categories: string[] | null) => {
     setError(null);
 
-    try {
-      const supabase = createClient();
+    const result = await upsertUserProfile({
+      userId,
+      roleId: role.id,
+      roleName: role.name,
+      assignedCategories: categories,
+    });
 
-      // Create user profile with assigned role
-      const {error: profileError} = await supabase.from('user_profiles').upsert(
-        {
-          user_id: userId,
-          role: role,
-          assigned_categories: categories,
-        },
-        {
-          onConflict: 'user_id,role',
-          ignoreDuplicates: false,
-        }
-      );
-
-      if (profileError) {
-        throw profileError;
-      }
-
+    if (result.success) {
+      showToast.success(translations.admin.userRoles.success.roleAssigned);
       onRoleAssigned();
       onClose();
-    } catch (error: any) {
-      console.error('Error assigning role:', error);
-      setError(error.message || 'Chyba při přiřazování role');
-    } finally {
-      setIsLoading(false);
+      setSelectedRoleId('');
+    } else {
+      setError(result.error || translations.admin.userRoles.errors.assignmentFailed);
     }
   };
 
-  // Handle category selection confirmation
-  const handleCategorySelectionConfirm = async (categories: string[]) => {
+  const handleCategoryConfirm = async (categories: string[]) => {
     if (!pendingRole) return;
+    await assignRole(pendingRole, categories);
+    categoryModal.onClose();
+    setPendingRole(null);
+  };
 
-    await assignRoleToDatabase(pendingRole, categories);
-    showCategoryModal.onClose();
-    setPendingRole('');
+  const handleClose = () => {
+    setSelectedRoleId('');
+    setError(null);
+    onClose();
   };
 
   return (
@@ -118,37 +107,37 @@ export default function RoleAssignmentModal({
       <UnifiedModal
         isFooterWithActions
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         onPress={handleAssignRole}
-        isDisabled={!selectedRole}
-        title={'Přiřazení role uživateli'}
-        size="md"
+        isDisabled={!selectedRoleId || loading}
+        title={translations.admin.userRoles.title.assignRole}
+        size="2xl"
         placement="center"
         backdrop="blur"
       >
         <div className="mb-4">
           <p className="text-sm text-gray-600 mb-2">
-            Uživatel: <span className="font-medium">{userEmail}</span>
-          </p>
-          <p className="text-sm text-gray-500">
-            Vyberte roli pro tohoto uživatele. Bez přiřazené role nebude mít přístup k aplikaci.
+            {translations.common.labels.user}: <span className="font-medium">{userEmail}</span>
           </p>
         </div>
 
-        <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="gap-3">
-          {ROLE_OPTIONS.map((role) => (
-            <Radio
-              key={role.value}
-              value={role.value}
-              className="p-3 border rounded-lg hover:bg-gray-50"
-            >
-              <div className="flex flex-col">
-                <div className="font-medium">{role.label}</div>
-                <div className="text-sm text-gray-500">{role.description}</div>
-              </div>
-            </Radio>
-          ))}
-        </RadioGroup>
+        {rolesLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-16 rounded-lg" />
+            <Skeleton className="h-16 rounded-lg" />
+            <Skeleton className="h-16 rounded-lg" />
+          </div>
+        ) : (
+          <RadioGroup value={selectedRoleId} onValueChange={setSelectedRoleId} className="gap-3">
+            <div className={'grid grid-cols-2'}>
+              {roleDefinitions.map((role) => (
+                <CustomRadio key={role.id} value={role.id} description={role.description}>
+                  {role.display_name}
+                </CustomRadio>
+              ))}
+            </div>
+          </RadioGroup>
+        )}
 
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-md">
@@ -156,17 +145,18 @@ export default function RoleAssignmentModal({
           </div>
         )}
 
-        <p className="text-xs text-gray-500">
-          Poznámka: Pokud přeskočíte, uživatel nebude mít přístup k aplikaci, dokud mu nebude
-          přiřazena role.
-        </p>
+        <Alert
+          color={'warning'}
+          title={translations.common.labels.note}
+          description={translations.admin.userRoles.descriptions.skipRoleAssignment}
+        />
       </UnifiedModal>
 
       <CategorySelectionModal
-        isOpen={showCategoryModal.isOpen}
-        onClose={showCategoryModal.onClose}
-        onConfirm={handleCategorySelectionConfirm}
-        isLoading={isLoading}
+        isOpen={categoryModal.isOpen}
+        onClose={categoryModal.onClose}
+        onConfirm={handleCategoryConfirm}
+        isLoading={loading}
       />
     </>
   );

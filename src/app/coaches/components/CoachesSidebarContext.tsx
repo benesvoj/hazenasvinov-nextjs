@@ -33,6 +33,7 @@ export function CoachesSidebarProvider({children}: {children: React.ReactNode}) 
   useEffect(() => {
     const saved = localStorage.getItem('coaches-sidebar-collapsed');
     if (saved !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsCollapsed(JSON.parse(saved));
     }
   }, []);

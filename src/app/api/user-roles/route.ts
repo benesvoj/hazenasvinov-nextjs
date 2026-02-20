@@ -2,11 +2,11 @@ import {NextRequest, NextResponse} from 'next/server';
 
 import {createClient as createServiceClient} from '@supabase/supabase-js';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Fetch role summaries from the secure view
     const {data: roleData, error: roleError} = await supabase

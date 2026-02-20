@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({error: 'Email is required'}, {status: 400});
     }
 
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Get the origin from the request headers or use environment variable
     // In production, we should always use the production URL
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
           process.env.NEXT_PUBLIC_PRODUCTION_URL ||
           process.env.NEXT_PUBLIC_BASE_URL ||
           'http://localhost:3000';
-    const redirectUrl = `${origin}/auth/confirm`;
+    const redirectUrl = `${origin}/api/auth/confirm`;
 
     console.log('Sending password reset email to:', email);
     console.log('Origin detected:', origin);

@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for recent duplicate login attempts (within 10 seconds)
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
     const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
 
     const {data: recentLogs} = await supabase

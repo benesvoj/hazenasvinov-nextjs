@@ -1,8 +1,8 @@
 'use client';
+
 import {useState, useEffect} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
+import {useSupabaseClient} from '@/hooks';
 import {Match} from '@/types';
 
 interface UseFetchVideoMatchResult {
@@ -21,6 +21,8 @@ export function useFetchVideoMatch(videoId: string | null): UseFetchVideoMatchRe
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const supabase = useSupabaseClient();
+
   useEffect(() => {
     if (!videoId) {
       setMatch(null);
@@ -33,8 +35,6 @@ export function useFetchVideoMatch(videoId: string | null): UseFetchVideoMatchRe
       try {
         setLoading(true);
         setError(null);
-
-        const supabase = createClient();
 
         // First, get the match_id from the video
         const {data: videoData, error: videoError} = await supabase

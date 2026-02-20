@@ -1,9 +1,18 @@
 'use client';
-import {useState, useCallback, useRef} from 'react';
+
+import {useCallback, useMemo, useRef, useState} from 'react';
 
 import {useUser} from '@/contexts';
-import {useSupabaseClient} from '@/hooks';
-import {UserRoleSummary, RoleAssignment} from '@/types';
+import {useFetchRoleDefinitions, useSupabaseClient} from '@/hooks';
+import {
+  RoleAssignment,
+  RoleOperationResult,
+  UpsertUserProfileInput,
+  UserProfile,
+  UserRoleSummary,
+  ValidationResult,
+} from '@/types';
+import {getRoleById, getRoleByName, hasItems, isValidRole, roleRequiresCategories} from '@/utils';
 
 export function useUserRoles() {
   const [userRoleSummaries, setUserRoleSummaries] = useState<UserRoleSummary[]>([]);
@@ -11,10 +20,153 @@ export function useUserRoles() {
   const [error, setError] = useState<string | null>(null);
 
   const supabase = useSupabaseClient();
-  const {user, userProfile, userRoles, userCategories, refreshProfile, refreshRoles} = useUser();
+  const {user, userProfile, userCategories, refreshProfile} = useUser();
   const fetchUserRoleSummariesRef = useRef<() => Promise<void>>();
   const supabaseRef = useRef(supabase);
   supabaseRef.current = supabase;
+
+  const {
+    data: roleDefinitions,
+    loading: rolesLoading,
+    error: rolesError,
+    refetch: refetchRoles,
+  } = useFetchRoleDefinitions();
+
+  // Filter to only active roles, maybe add as parameter to the hook later
+  const activeRoles = useMemo(() => {
+    return (roleDefinitions || []).filter((rd) => rd.is_active !== false);
+  }, [roleDefinitions]);
+
+  // Validate role assignment before upsert
+  const validateRoleAssignment = useCallback(
+    (input: UpsertUserProfileInput): ValidationResult => {
+      const errors: string[] = [];
+
+      if (!input.userId) {
+        errors.push('User ID is required');
+      }
+
+      if (!input.roleId) {
+        errors.push('Role ID is required');
+      }
+
+      // Validate role exists and is active
+      const roleDef = getRoleById(input.roleId, roleDefinitions || []);
+      if (!roleDef) {
+        errors.push(`Role with ID "${input.roleId}" not found`);
+      } else if (roleDef.is_active === false) {
+        errors.push(`Role "${roleDef.display_name}" is inactive`);
+      }
+
+      // Check category requirements
+      if (roleDef && roleRequiresCategories(roleDef)) {
+        if (!input.assignedCategories || input.assignedCategories.length === 0) {
+          errors.push(`Role "${roleDef.display_name}" requires at least one category assignment`);
+        }
+      }
+
+      return {
+        valid: errors.length === 0,
+        errors: hasItems(errors) ? errors : undefined,
+      };
+    },
+    [roleDefinitions]
+  );
+
+  // Upsert user profile (single source of truth for role assignment)
+  const upsertUserProfile = useCallback(
+    async (input: UpsertUserProfileInput): Promise<RoleOperationResult> => {
+      const validation = validateRoleAssignment(input);
+      if (!validation.valid) {
+        const errorMessage = validation.errors?.join('; ');
+        setError(errorMessage || 'Invalid role assignment');
+        return {success: false, error: errorMessage};
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const {
+          data: {user: currentUser},
+        } = await supabaseRef.current.auth.getUser();
+
+        // Use upsert with correct constraint (user_id only)
+        const {data, error: upsertError} = await supabaseRef.current
+          .from('user_profiles')
+          .upsert(
+            {
+              user_id: input.userId,
+              role: input.roleName, // Backward compat
+              role_id: input.roleId, // New FK reference
+              assigned_categories: input.assignedCategories,
+              updated_at: new Date().toISOString(),
+            },
+            {
+              onConflict: ['user_id', 'role_id'],
+              ignoreDuplicates: false,
+            }
+          )
+          .select()
+          .single();
+
+        if (upsertError) {
+          throw upsertError;
+        }
+
+        return {success: true, data: data as UserProfile};
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to update user profile';
+        console.error('Error upserting user profile:', err);
+        setError(errorMessage);
+        return {success: false, error: errorMessage};
+      } finally {
+        setLoading(false);
+      }
+    },
+    [validateRoleAssignment]
+  );
+
+  // Fetch profiles for a specific user
+  const fetchUserProfiles = useCallback(async (userId: string): Promise<UserProfile[]> => {
+    try {
+      const {data, error} = await supabaseRef.current
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', {ascending: false});
+
+      if (error) throw error;
+      return (data || []) as UserProfile[];
+    } catch (err) {
+      console.error('Error fetching user profiles:', err);
+      throw err;
+    }
+  }, []);
+
+  // Delete a user profile
+  const deleteUserProfile = useCallback(async (profileId: string): Promise<RoleOperationResult> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const {error: deleteError} = await supabaseRef.current
+        .from('user_profiles')
+        .delete()
+        .eq('id', profileId);
+
+      if (deleteError) throw deleteError;
+
+      return {success: true};
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete profile';
+      console.error('Error deleting user profile:', err);
+      setError(errorMessage);
+      return {success: false, error: errorMessage};
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Fetch all user role summaries
   const fetchUserRoleSummaries = useCallback(async () => {
@@ -115,7 +267,6 @@ export function useUserRoles() {
           user_id: userId,
           role: primaryRole,
           assigned_categories: primaryRole === 'coach' ? [] : null,
-          created_by: currentUser?.id,
         });
 
         if (error) throw error;
@@ -202,23 +353,11 @@ export function useUserRoles() {
 
   // Check if current user has a specific role
   const hasRole = useCallback(
-    async (role: 'admin' | 'coach'): Promise<boolean> => {
-      try {
-        if (!user) return false;
-
-        // Check user_profiles table (primary system)
-        if (userProfile?.role === role) {
-          return true;
-        }
-
-        // Fallback: Check user_roles table (legacy system)
-        return userRoles.some((r) => r.role === role);
-      } catch (err) {
-        console.error('Error checking user role:', err);
-        return false;
-      }
+    async (role: string): Promise<boolean> => {
+      if (!user || !userProfile) return false;
+      return userProfile.role === role;
     },
-    [user, userProfile, userRoles]
+    [user, userProfile]
   );
 
   // Get current user's assigned category (for coaches)
@@ -251,20 +390,53 @@ export function useUserRoles() {
 
   // Removed automatic fetch - components should call fetchUserRoleSummaries explicitly
 
+  // Check if a role requires categories (dynamic)
+  const checkRoleRequiresCategories = useCallback(
+    (roleIdOrName: string): boolean => {
+      const roleDef =
+        getRoleById(roleIdOrName, roleDefinitions || []) ||
+        getRoleByName(roleIdOrName, roleDefinitions || []);
+      return roleRequiresCategories(roleDef || null);
+    },
+    [roleDefinitions]
+  );
+
   return {
+    // State
     userRoleSummaries,
-    loading,
-    error,
+    loading: loading || rolesLoading,
+    error: error || rolesError,
+
+    // Role definitions (dynamic)
+    roleDefinitions: activeRoles,
+    rolesLoading,
+    refetchRoles,
+
+    // Core operations
+    upsertUserProfile,
+    deleteUserProfile,
+    fetchUserProfiles,
+    validateRoleAssignment,
+
+    // Existing operations
     fetchUserRoleSummaries,
+    hasRole,
+    getCurrentUserCategories,
+
+    // UserContext data
+    coachCategories: userCategories,
     fetchUserRoles,
+
+    // Utilities (dynamic)
+    checkRoleRequiresCategories,
+    getRoleByName: (name: string) => getRoleByName(name, roleDefinitions || []),
+    getRoleById: (id: string) => getRoleById(id, roleDefinitions || []),
+    inValidRole: (name: string) => isValidRole(name, roleDefinitions || []),
+
+    // Backwards compatibility
     fetchCoachCategories,
     assignRoles,
     assignCoachCategories,
     assignUserRoles,
-    hasRole,
-    getCurrentUserCategories,
-    // Add UserContext data for backward compatibility
-    userRoles,
-    coachCategories: userCategories,
   };
 }

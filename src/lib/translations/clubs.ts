@@ -1,0 +1,32 @@
+export const clubsTranslations = {
+  title: 'Správa klubů',
+  description: 'Správa klubů, které jsou dostupné v systému.',
+  addClub: 'Přidat klub',
+  deleteClub: 'Smazat klub',
+  deleteClubMessage: 'Opravdu chcete smazat klub? Tato akce je nevratná.',
+  noClubs: 'Žádné kluby nebyly nalezeny',
+  filters: {
+    placeholder: 'Hledat kluby...',
+  },
+  table: {
+    name: 'Název',
+    shortName: 'Kráký název',
+    city: 'Město',
+    foundedYear: 'Rok založení',
+    venue: 'Místo',
+    logo: 'Logo',
+    actions: 'Akce',
+    noClubs: 'Žádné kluby nebyly nalezeny',
+  },
+  responseMessages: {
+    clubsFetchError: 'Nepodařilo se načíst oddíly.',
+    clubsFetchSuccess: 'Seznam oddílů načten.',
+    createSuccess: 'Oddíl byl úspěšně přidán.',
+    createError: 'Chyba při přidávání oddílu.',
+    updateSuccess: 'Oddíl byl úspěšně aktualizován.',
+    updateError: 'Chyba při aktualizaci oddílu.',
+    deleteSuccess: 'Oddíl byl úspěšně smazán.',
+    deleteError: 'Chyba při mazání oddílu.',
+    mandatoryName: 'Název je povinný',
+  },
+};

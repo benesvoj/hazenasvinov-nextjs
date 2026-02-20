@@ -1,5 +1,3 @@
-import {createClient} from '@/utils/supabase/client';
-
 import {generateMatchOdds, validateOdds} from '@/services';
 import {
   BettingOdd,
@@ -9,6 +7,7 @@ import {
   OddsHistory,
   OddsSource,
 } from '@/types';
+import {supabaseBrowserClient} from '@/utils';
 
 /**
  * Odds Service
@@ -27,7 +26,7 @@ export async function saveOddsToDatabase(
   source: OddsSource = 'CALCULATED',
   margin: number = 0.05
 ): Promise<boolean> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     // First, mark any existing active odds as expired
@@ -141,7 +140,7 @@ export async function saveOddsToDatabase(
  * @returns Match odds or null
  */
 export async function getOddsForMatch(matchId: string): Promise<MatchOdds | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     // Get active odds (no effective_until date)
@@ -263,7 +262,7 @@ export async function updateMatchOdds(
  * @returns Success status
  */
 export async function lockOdds(matchId: string): Promise<boolean> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const now = new Date().toISOString();
@@ -294,7 +293,7 @@ export async function lockOdds(matchId: string): Promise<boolean> {
  * @returns Array of odds history
  */
 export async function getOddsHistory(matchId: string, limit: number = 50): Promise<OddsHistory[]> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data, error} = await supabase
@@ -322,7 +321,7 @@ export async function getOddsHistory(matchId: string, limit: number = 50): Promi
  * @returns Number of matches processed
  */
 export async function generateOddsForUpcomingMatches(dayLimit: number = 7): Promise<number> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const today = new Date();
@@ -372,7 +371,7 @@ export async function generateOddsForUpcomingMatches(dayLimit: number = 7): Prom
  * @returns True if odds exist
  */
 export async function hasOdds(matchId: string): Promise<boolean> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {count, error} = await supabase
@@ -397,7 +396,7 @@ export async function hasOdds(matchId: string): Promise<boolean> {
  * @returns Success status
  */
 export async function deleteOdds(matchId: string): Promise<boolean> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {error} = await supabase.from('betting_odds').delete().eq('match_id', matchId);
@@ -420,7 +419,7 @@ export async function deleteOdds(matchId: string): Promise<boolean> {
  * @returns Array of match IDs
  */
 export async function getMatchesWithOdds(limit: number = 100): Promise<string[]> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data, error} = await supabase

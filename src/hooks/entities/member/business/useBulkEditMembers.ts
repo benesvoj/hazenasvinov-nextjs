@@ -1,10 +1,10 @@
 'use client';
-import {useState} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useState} from 'react';
 
 import {showToast} from '@/components';
 import {Genders} from '@/enums';
+import {useSupabaseClient} from '@/hooks';
 
 interface BulkEditFormData {
   sex: Genders;
@@ -18,6 +18,7 @@ interface UseBulkEditMembersProps {
 
 export function useBulkEditMembers({onSuccess}: UseBulkEditMembersProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const supabase = useSupabaseClient();
 
   const bulkEditMembers = async (
     memberIds: string[],
@@ -41,7 +42,6 @@ export function useBulkEditMembers({onSuccess}: UseBulkEditMembersProps) {
       if (formData.category) updateData.category_id = formData.category;
       if (formData.functions.length > 0) updateData.functions = formData.functions;
 
-      const supabase = createClient();
       const {error} = await supabase.from('members').update(updateData).in('id', memberIds);
 
       if (error) {

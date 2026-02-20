@@ -1,7 +1,7 @@
-import {createClient} from '@/utils/supabase/client';
 import {transformMatchWithTeamNames} from '@/utils/teamDisplay';
 
 import {Match} from '@/types';
+import {supabaseBrowserClient} from '@/utils';
 
 // Types for query options
 export interface MatchQueryOptions {
@@ -78,8 +78,8 @@ const MATCH_WITH_TEAMS_SELECT = `
  * Get basic match data without team details
  */
 export async function getMatchesBasic(options: MatchQueryOptions = {}): Promise<MatchQueryResult> {
+  const supabase = supabaseBrowserClient();
   try {
-    const supabase = createClient();
     let query = supabase.from('matches').select(BASIC_MATCH_SELECT);
 
     // Apply filters
@@ -129,8 +129,8 @@ export async function getMatchesBasic(options: MatchQueryOptions = {}): Promise<
 export async function getMatchesWithTeams(
   options: MatchQueryOptions = {}
 ): Promise<MatchQueryResult> {
+  const supabase = supabaseBrowserClient();
   try {
-    const supabase = createClient();
     let query = supabase.from('matches').select(MATCH_WITH_TEAMS_SELECT);
 
     // Apply filters
@@ -236,8 +236,8 @@ export async function getOwnClubMatches(
  * Get a single match by ID
  */
 export async function getMatchById(matchId: string): Promise<MatchQueryResult> {
+  const supabase = supabaseBrowserClient();
   try {
-    const supabase = createClient();
     const {data, error} = await supabase
       .from('matches')
       .select(MATCH_WITH_TEAMS_SELECT)

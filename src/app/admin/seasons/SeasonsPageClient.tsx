@@ -8,6 +8,8 @@ import {useQuery} from '@tanstack/react-query';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations/index';
+
 import {
   AdminContainer,
   DeleteConfirmationModal,
@@ -18,13 +20,10 @@ import {
 import {ActionTypes, ModalMode} from '@/enums';
 import {formatDateString} from '@/helpers';
 import {useSeasonForm, useSeasons} from '@/hooks';
-import {translations} from '@/lib';
 import {fetchSeasons} from '@/queries/seasons/queries';
 import {Season, SeasonInsert} from '@/types';
 
 import {SeasonModal} from './components/SeasonModal';
-
-const tAction = translations.action;
 
 export function SeasonsPageClient() {
   // ✅ React Query - hydrated from server, also gets caching/refetch benefits
@@ -113,17 +112,25 @@ export function SeasonsPageClient() {
   };
 
   const columns = [
-    {key: 'name', label: translations.season.table.name},
-    {key: 'start_date', label: translations.season.table.startDate},
-    {key: 'end_date', label: translations.season.table.endDate},
-    {key: 'status', label: translations.season.table.status},
+    {key: 'name', label: translations.seasons.table.name},
+    {key: 'start_date', label: translations.seasons.table.startDate},
+    {key: 'end_date', label: translations.seasons.table.endDate},
+    {key: 'status', label: translations.seasons.table.status},
     {
       key: 'actions',
-      label: translations.season.table.actions,
+      label: translations.seasons.table.actions,
       isActionColumn: true,
       actions: [
-        {type: ActionTypes.UPDATE, onPress: handleEditClick, title: tAction.edit},
-        {type: ActionTypes.DELETE, onPress: handleDeleteClick, title: tAction.delete},
+        {
+          type: ActionTypes.UPDATE,
+          onPress: handleEditClick,
+          title: translations.common.actions.edit,
+        },
+        {
+          type: ActionTypes.DELETE,
+          onPress: handleDeleteClick,
+          title: translations.common.actions.delete,
+        },
       ],
     },
   ];
@@ -141,11 +148,11 @@ export function SeasonsPageClient() {
           <div className="flex gap-1">
             <Chip size="sm" color={season.is_active ? 'success' : 'default'} variant="flat">
               {season.is_active
-                ? translations.season.activeLabel
-                : translations.season.inactiveLabel}
+                ? translations.seasons.activeLabel
+                : translations.seasons.inactiveLabel}
             </Chip>
             <Chip size="sm" color={season.is_closed ? 'default' : 'secondary'} variant="flat">
-              {season.is_closed ? translations.season.closedLabel : translations.season.openLabel}
+              {season.is_closed ? translations.seasons.closedLabel : translations.seasons.openLabel}
             </Chip>
           </div>
         );
@@ -160,7 +167,7 @@ export function SeasonsPageClient() {
         loading={fetchLoading}
         actions={[
           {
-            label: translations.season.addSeason,
+            label: translations.seasons.labels.addSeason,
             onClick: handleAddClick,
             variant: 'solid',
             buttonType: ActionTypes.CREATE,
@@ -171,11 +178,11 @@ export function SeasonsPageClient() {
           <UnifiedTable
             columns={columns}
             data={seasons}
-            ariaLabel={translations.season.title}
+            ariaLabel={translations.seasons.title}
             renderCell={renderSeasonCell}
             getKey={(season) => season.id}
             isLoading={fetchLoading}
-            emptyContent={translations.season.noSeasons}
+            emptyContent={translations.seasons.noSeasons}
             isStriped
           />
         </UnifiedCard>
@@ -195,8 +202,8 @@ export function SeasonsPageClient() {
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.onClose}
         onConfirm={handleDeleteConfirm}
-        title={translations.season.deleteSeason}
-        message={translations.season.deleteSeasonMessage}
+        title={translations.seasons.modal.deleteSeasonTitle}
+        message={translations.seasons.modal.deleteSeasonMessage}
       />
     </>
   );

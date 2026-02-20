@@ -2,15 +2,11 @@
 
 import React, {useState} from 'react';
 
-import {Input, Select, SelectItem, Card, CardBody, Button, Textarea} from '@heroui/react';
-
-import {UserPlusIcon} from '@heroicons/react/24/outline';
-
-import {createClient} from '@/utils/supabase/client';
+import {Card, CardBody, Input, Select, SelectItem, Textarea} from '@heroui/react';
 
 import {UnifiedModal} from '@/components';
 import {Genders, getGenderOptions, MemberFunction} from '@/enums';
-import {useFetchMembers, useMemberMetadata} from '@/hooks';
+import {useFetchMembers, useMemberMetadata, useSupabaseClient} from '@/hooks';
 import {MemberMetadaFormData} from '@/types';
 
 interface CreateMemberModalProps {
@@ -21,6 +17,38 @@ interface CreateMemberModalProps {
   selectedCategoryName: string;
 }
 
+const INITIAL_FORM_DATA: MemberMetadaFormData = {
+  // Basic Information
+  name: '',
+  surname: '',
+  registration_number: '',
+  date_of_birth: '',
+  sex: Genders.MALE,
+  functions: MemberFunction.PLAYER,
+
+  // Contact Information
+  phone: '',
+  email: '',
+  address: '',
+
+  // Parent/Guardian Information
+  parent_name: '',
+  parent_phone: '',
+  parent_email: '',
+
+  // Medical Information
+  medical_notes: '',
+  allergies: '',
+  emergency_contact_name: '',
+  emergency_contact_phone: '',
+
+  // Additional Information
+  notes: '',
+  preferred_position: '',
+  jersey_size: '',
+  shoe_size: '',
+};
+
 export default function CreateMemberModal({
   isOpen,
   onClose,
@@ -28,41 +56,12 @@ export default function CreateMemberModal({
   selectedCategoryId,
   selectedCategoryName,
 }: CreateMemberModalProps) {
-  const [formData, setFormData] = useState<MemberMetadaFormData>({
-    // Basic Information
-    name: '',
-    surname: '',
-    registration_number: '',
-    date_of_birth: '',
-    sex: Genders.MALE,
-    functions: MemberFunction.PLAYER,
-
-    // Contact Information
-    phone: '',
-    email: '',
-    address: '',
-
-    // Parent/Guardian Information
-    parent_name: '',
-    parent_phone: '',
-    parent_email: '',
-
-    // Medical Information
-    medical_notes: '',
-    allergies: '',
-    emergency_contact_name: '',
-    emergency_contact_phone: '',
-
-    // Additional Information
-    notes: '',
-    preferred_position: '',
-    jersey_size: '',
-    shoe_size: '',
-  });
+  const [formData, setFormData] = useState<MemberMetadaFormData>(INITIAL_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const {refetch: fetchMembers} = useFetchMembers();
   const {createMemberMetadata} = useMemberMetadata();
+  const supabase = useSupabaseClient();
 
   const handleInputChange = (field: keyof MemberMetadaFormData, value: string) => {
     setFormData((prev) => ({...prev, [field]: value}));
@@ -87,8 +86,6 @@ export default function CreateMemberModal({
 
       // Generate registration number if not provided
       const registrationNumber = formData.registration_number || generateRegistrationNumber();
-
-      const supabase = createClient();
 
       const {data, error} = await supabase
         .from('members')

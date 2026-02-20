@@ -14,7 +14,7 @@ import {
   UserPlusIcon,
 } from '@heroicons/react/24/outline';
 
-import {createClient} from '@/utils/supabase/client';
+import {useSupabaseClient} from '@/hooks';
 
 function SetPasswordContent() {
   const router = useRouter();
@@ -35,6 +35,8 @@ function SetPasswordContent() {
     special: false,
   });
 
+  const supabase = useSupabaseClient();
+
   // Check for Supabase error parameters
   const supabaseError = searchParams.get('error');
   const supabaseErrorCode = searchParams.get('error_code');
@@ -54,8 +56,6 @@ function SetPasswordContent() {
         supabaseErrorDescription,
         allParams: Object.fromEntries(searchParams.entries()),
       });
-
-      const supabase = createClient();
 
       // Check if user is authenticated via session (from auth confirm route)
       const {
@@ -129,8 +129,6 @@ function SetPasswordContent() {
     setError('');
 
     try {
-      const supabase = createClient();
-
       // Update the user's password
       const {error} = await supabase.auth.updateUser({
         password: password,

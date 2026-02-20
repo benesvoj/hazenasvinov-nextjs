@@ -6,7 +6,7 @@ import {useQuery} from '@tanstack/react-query';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
@@ -47,9 +47,6 @@ export function CommitteesPageClient() {
     resetForm,
     validateForm,
   } = useCommitteeForm();
-
-  const t = translations.admin.committees;
-  const tAction = translations.action;
 
   // Modal states - using helpers for cleaner code
   const committeeModal = useModal();
@@ -109,18 +106,26 @@ export function CommitteesPageClient() {
   };
 
   const committeeColumns = [
-    {key: 'code', label: t.table.code},
-    {key: 'name', label: t.table.name},
-    {key: 'description', label: t.table.description},
-    {key: 'status', label: t.table.status},
-    {key: 'sort_order', label: t.table.sortOrder},
+    {key: 'code', label: translations.committees.table.code},
+    {key: 'name', label: translations.committees.table.name},
+    {key: 'description', label: translations.committees.table.description},
+    {key: 'status', label: translations.committees.table.status},
+    {key: 'sort_order', label: translations.committees.table.sortOrder},
     {
       key: 'actions',
-      label: t.table.actions,
+      label: translations.common.table.columns.actions,
       isActionColumn: true,
       actions: [
-        {type: ActionTypes.UPDATE, onPress: handleEditClick, title: tAction.edit},
-        {type: ActionTypes.DELETE, onPress: handleDeleteClick, title: tAction.delete},
+        {
+          type: ActionTypes.UPDATE,
+          onPress: handleEditClick,
+          title: translations.common.actions.edit,
+        },
+        {
+          type: ActionTypes.DELETE,
+          onPress: handleDeleteClick,
+          title: translations.common.actions.delete,
+        },
       ],
     },
   ];
@@ -136,7 +141,9 @@ export function CommitteesPageClient() {
       case 'status':
         return (
           <span className="font-medium">
-            {committee.is_active ? t.table.activeLabel : t.table.inactiveLabel}
+            {committee.is_active
+              ? translations.committees.table.activeLabel
+              : translations.committees.table.inactiveLabel}
           </span>
         );
       case 'sort_order':
@@ -149,7 +156,7 @@ export function CommitteesPageClient() {
       <AdminContainer
         actions={[
           {
-            label: t.addCommittee,
+            label: translations.committees.addCommittee,
             onClick: handleAddClick,
             variant: 'solid',
             buttonType: ActionTypes.CREATE,
@@ -160,10 +167,10 @@ export function CommitteesPageClient() {
           isLoading={committeesLoading}
           columns={committeeColumns}
           data={data}
-          ariaLabel={t.title}
+          ariaLabel={translations.committees.title}
           renderCell={renderCommitteeCell}
           getKey={(committee: Committee) => committee.id}
-          emptyContent={t.table.noCommittees}
+          emptyContent={translations.committees.table.noCommittees}
           isStriped
         />
       </AdminContainer>
@@ -182,8 +189,8 @@ export function CommitteesPageClient() {
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeAndClear}
         onConfirm={handleConfirmDelete}
-        title={t.deleteCommittee}
-        message={t.deleteCommitteeMessage}
+        title={translations.committees.deleteCommittee}
+        message={translations.committees.deleteCommitteeMessage}
         isLoading={crudLoading}
       />
     </>

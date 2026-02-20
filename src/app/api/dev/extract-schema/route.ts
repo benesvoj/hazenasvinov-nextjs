@@ -1,6 +1,6 @@
 import {NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function POST(request: Request) {
   try {
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({error: 'SQL query is required'}, {status: 400});
     }
 
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Execute the custom SQL query
     const {data, error} = await supabase.rpc('exec_sql', {sql_query: sql});
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Get all tables and their columns
     const {data: tables, error: tablesError} = await supabase

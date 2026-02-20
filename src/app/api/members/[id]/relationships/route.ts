@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 
 import supabaseAdmin from '@/utils/supabase/admin';
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 import {RelationshipType, RelationshipStatus} from '@/enums';
 
@@ -9,7 +9,7 @@ import {RelationshipType, RelationshipStatus} from '@/enums';
 export async function POST(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
     const {id} = await params;
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Check authentication
     const {
@@ -59,7 +59,7 @@ export async function POST(request: Request, {params}: {params: Promise<{id: str
 export async function GET(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
     const {id} = await params;
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Check authentication
     const {

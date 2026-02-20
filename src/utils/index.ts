@@ -1,4 +1,3 @@
-export * from './supabaseQueries';
 export * from './matchTransformers';
 export * from './teamDisplay';
 export * from './uuid';
@@ -23,3 +22,6 @@ export * from './isNotNilOrEmpty';
 /** Builders and validators **/
 export * from './builders/matchDataBuilder';
 export * from './validation/matchValidation';
+
+/** User roles and profiles utilities **/
+export * from './userRoles';

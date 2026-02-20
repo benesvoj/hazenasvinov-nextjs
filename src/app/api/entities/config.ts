@@ -10,10 +10,12 @@ import * as commentsQueries from '@/queries/comments';
 import * as committeeQueries from '@/queries/committees';
 import * as grantQueries from '@/queries/grants';
 import * as memberAttendanceQueries from '@/queries/memberAttendance';
+import * as roleDefinitionsQueries from '@/queries/roleDefinitions';
 import * as seasonQueries from '@/queries/seasons';
 import {QueryContext, QueryResult} from '@/queries/shared/types';
 import * as todoQueries from '@/queries/todos';
 import * as trainingSessionsQueries from '@/queries/trainingSessions';
+import * as userQueries from '@/queries/users';
 import * as videoQueries from '@/queries/videos';
 
 export interface EntityQueryLayer<T = any, Options = any> {
@@ -256,6 +258,23 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     queryLayer: {
       getAll: categoryLineupMembersQueries.getAllCategoryLineupMembers,
       getById: categoryLineupMembersQueries.getCategoryLineupMemberById,
+    },
+  },
+  role_definitions: {
+    tableName: roleDefinitionsQueries.DB_TABLE,
+    sortBy: [{column: 'name', ascending: true}],
+    requiresAdmin: true,
+    queryLayer: {
+      getAll: roleDefinitionsQueries.getAllRoleDefinitions,
+      getById: roleDefinitionsQueries.getRoleDefinitionById,
+    },
+  },
+  users: {
+    tableName: userQueries.DB_TABLE,
+    sortBy: [{column: 'email', ascending: true}],
+    requiresAdmin: true,
+    queryLayer: {
+      getAll: userQueries.getAllUsers,
     },
   },
 };

@@ -1,9 +1,9 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
   const searchParams = request.nextUrl.searchParams;
   const year = searchParams.get('year') || new Date().getFullYear();
 

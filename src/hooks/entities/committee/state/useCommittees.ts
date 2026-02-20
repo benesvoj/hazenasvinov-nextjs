@@ -1,10 +1,10 @@
 'use client';
 
-import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
-import {Committee, CommitteeInsert} from '@/types';
+import {translations} from '@/lib/translations/index';
 
-const t = translations.admin.committees.responseMessages;
+import {createCRUDHook} from '@/hooks';
+import {API_ROUTES} from '@/lib';
+import {Committee, CommitteeInsert} from '@/types';
 
 /**
  * Hook for managing committees (CRUD operations)
@@ -19,12 +19,12 @@ export function useCommittees() {
     byIdEndpoint: (id) => API_ROUTES.entities.byId('committees', id),
     entityName: 'committee',
     messages: {
-      createSuccess: t.createSuccess,
-      updateSuccess: t.updateSuccess,
-      deleteSuccess: t.deleteSuccess,
-      createError: t.createError,
-      updateError: t.updateError,
-      deleteError: t.deleteError,
+      createSuccess: translations.committees.responseMessages.createSuccess,
+      updateSuccess: translations.committees.responseMessages.updateSuccess,
+      deleteSuccess: translations.committees.responseMessages.deleteSuccess,
+      createError: translations.committees.responseMessages.createError,
+      updateError: translations.committees.responseMessages.updateError,
+      deleteError: translations.committees.responseMessages.deleteError,
     },
   })();
 

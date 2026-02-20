@@ -8,30 +8,29 @@ import {usePathname} from 'next/navigation';
 import {Button} from '@heroui/button';
 
 import {
-  HomeIcon,
-  UserGroupIcon,
-  CalendarIcon,
-  TrophyIcon,
-  UsersIcon,
-  Cog6ToothIcon,
-  CogIcon,
+  AcademicCapIcon,
   BuildingOfficeIcon,
-  DocumentTextIcon,
-  HeartIcon,
-  TagIcon,
-  PhotoIcon,
-  VideoCameraIcon,
-  ShieldCheckIcon,
+  CalendarIcon,
+  ChevronDoubleLeftIcon,
+  ChevronDoubleRightIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   ClipboardDocumentListIcon,
-  AcademicCapIcon,
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
+  Cog6ToothIcon,
+  CogIcon,
+  DocumentTextIcon,
+  HeartIcon,
+  HomeIcon,
+  PhotoIcon,
+  ShieldCheckIcon,
+  TagIcon,
+  TrophyIcon,
+  UsersIcon,
+  VideoCameraIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 import {coachesRoutes} from '@/app/coaches/routes/routes';
 
@@ -150,34 +149,34 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
       );
 
       return {
-        title: translations.admin.title,
-        subtitle: 'Administrace',
+        title: translations.common.admin.title,
+        subtitle: translations.common.admin.subtitle,
         icon: <TrophyIcon className="w-6 h-6 text-white" />,
         iconBg: 'bg-gradient-to-br from-blue-500 to-blue-600',
         groupedItems,
         groupLabels: {
-          'team-management': 'Správa týmů',
-          'user-management': 'Správa uživatelů',
-          'members-management': 'Správa členů',
-          'club-management': 'Správa klubu',
-          other: 'Ostatní',
+          'team-management': translations.common.admin.groups.teamManagement,
+          'user-management': translations.common.admin.groups.userManagement,
+          'members-management': translations.common.admin.groups.membersManagement,
+          'club-management': translations.common.admin.groups.clubManagement,
+          other: translations.common.admin.groups.other,
         },
         footer: {
-          title: 'TJ Sokol Svinov',
-          subtitle: 'Administrace',
+          title: translations.common.clubTitle,
+          subtitle: translations.common.admin.title,
         },
       };
     } else {
       return {
-        title: 'Trenérský Portal',
+        title: translations.coachPortal.title,
         subtitle: '',
         icon: <AcademicCapIcon className="w-8 h-8 text-green-600 dark:text-green-400" />,
         iconBg: '',
         groupedItems: {main: coachesRoutes},
         groupLabels: {},
         footer: {
-          title: 'TJ Sokol Svinov',
-          subtitle: 'Trenérský Portal',
+          title: translations.common.clubTitle,
+          subtitle: translations.common.coachPortal.title,
         },
       };
     }
@@ -519,7 +518,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                 className={`transition-all duration-300 ease-in-out overflow-hidden ${
                   variant === 'admin' && collapsedGroups.has(groupKey)
                     ? 'max-h-0 opacity-0'
-                    : 'max-h-96 opacity-100'
+                    : variant === 'coach'
+                      ? 'max-h-[600px] opacity-100'
+                      : 'max-h-96 opacity-100'
                 }`}
               >
                 {groupItems.map((item: AdminRouteItem | CoachRouteItem) => {

@@ -1,7 +1,8 @@
 'use client';
-import {useState, useEffect, useCallback, useMemo} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+
+import {useSupabaseClient} from '@/hooks';
 
 interface FilteredTeam {
   id: string;
@@ -42,7 +43,7 @@ export function useFilteredTeams(
   const [teams, setTeams] = useState<FilteredTeam[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const fetchTeams = useCallback(async () => {
     try {

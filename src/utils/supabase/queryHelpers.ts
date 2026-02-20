@@ -1,5 +1,6 @@
 import {SupabaseClient} from '@supabase/supabase-js';
-import {createClient} from '@/utils/supabase/client';
+
+import {supabaseBrowserClient} from '@/utils/supabase/client';
 
 type SupabaseQuery<T> = PromiseLike<{data: T | null; error: any}>;
 
@@ -28,7 +29,7 @@ export function withClientQuery<T>(
   queryBuilder: (supabase: SupabaseClient) => SupabaseQuery<T>
 ): () => Promise<T> {
   return async () => {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
     const {data, error} = await queryBuilder(supabase);
 
     if (error) {
@@ -59,7 +60,7 @@ export function withClientQueryList<T>(
   queryBuilder: (supabase: SupabaseClient) => SupabaseQuery<T[]>
 ): () => Promise<T[]> {
   return async () => {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
     const {data, error} = await queryBuilder(supabase);
 
     if (error) {
@@ -86,7 +87,7 @@ export function withClientQuerySingle<T, TParams extends any[] = []>(
   queryBuilder: (supabase: SupabaseClient, ...params: TParams) => SupabaseQuery<T>
 ): (...params: TParams) => Promise<T | null> {
   return async (...params: TParams) => {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
     const {data, error} = await queryBuilder(supabase, ...params);
 
     if (error) {

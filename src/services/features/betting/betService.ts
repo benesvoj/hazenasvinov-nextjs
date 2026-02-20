@@ -1,24 +1,23 @@
 import {
   Bet,
-  BetLeg,
-  CreateBetInput,
-  BetStatus,
   BetHistoryFilters,
-  UserBetStats,
+  BetLeg,
+  BetStatus,
   BetValidation,
+  CreateBetInput,
+  UserBetStats,
 } from '@/types/features/betting/bet';
 
-import {createClient} from '@/utils/supabase/client';
-
 import {
-  calculateTotalOdds,
   calculateReturn,
-  validateStake,
-  deductBetStake,
+  calculateTotalOdds,
   creditBetWinnings,
-  refundVoidBet,
+  deductBetStake,
   hasSufficientBalance,
+  refundVoidBet,
+  validateStake,
 } from '@/services';
+import {supabaseBrowserClient} from '@/utils';
 
 /**
  * Bet Service
@@ -106,7 +105,7 @@ export function validateBet(input: CreateBetInput, userBalance: number): BetVali
  * @returns Created bet or null if failed
  */
 export async function createBet(input: CreateBetInput): Promise<Bet | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     // Validate sufficient balance
@@ -231,7 +230,7 @@ export async function createBet(input: CreateBetInput): Promise<Bet | null> {
  * @returns Bet with legs
  */
 export async function getBetById(betId: string): Promise<Bet | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data: bet, error: betError} = await supabase
@@ -279,7 +278,7 @@ export async function getUserBets(
   limit: number = 50,
   offset: number = 0
 ): Promise<Bet[]> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     let query = supabase
@@ -431,7 +430,7 @@ export async function settleBet(
   betId: string,
   status: 'WON' | 'LOST' | 'VOID'
 ): Promise<Bet | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     // Get bet details
@@ -496,7 +495,7 @@ export async function settleBetLeg(
   legId: string,
   status: 'WON' | 'LOST' | 'VOID'
 ): Promise<BetLeg | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data, error} = await supabase
@@ -560,7 +559,7 @@ export async function checkAndSettleAccumulator(betId: string): Promise<Bet | nu
  * @returns User bet stats
  */
 export async function getUserBetStats(userId: string): Promise<UserBetStats | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data: bets, error} = await supabase
@@ -636,7 +635,7 @@ export async function cancelBet(betId: string): Promise<boolean> {
  * @returns Array of bets
  */
 export async function getBetsForMatch(matchId: string): Promise<Bet[]> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data: legs, error: legsError} = await supabase

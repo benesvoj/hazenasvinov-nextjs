@@ -3,9 +3,17 @@
  * Please use the new data fetching utilities in src/lib/data instead.
  * @todo REFACTOR: This file is getting quite large and complex. Consider breaking it down into smaller modules. Consider if it is still needed.
  */
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
-import {Category, Match, BlogPost, ProcessedStanding, SeasonCategoryPageData, Blog} from '@/types';
+import {getPublishedCoachCadsByCategory} from '@/queries/coachCards';
+import {
+  Blog,
+  Category,
+  Match,
+  ProcessedStanding,
+  PublicCoachCard,
+  SeasonCategoryPageData,
+} from '@/types';
 
 export interface CategoryPageServerData {
   category: Category | null;
@@ -16,6 +24,7 @@ export interface CategoryPageServerData {
   posts: Blog[];
   standings: ProcessedStanding[];
   season: SeasonCategoryPageData;
+  coachCards: PublicCoachCard[];
 }
 
 /**
@@ -39,7 +48,7 @@ export async function getCategoryPageData(
     postsLimit = 3,
   } = options;
 
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
 
   try {
     // Batch 1: Get category and active season in parallel
@@ -404,6 +413,8 @@ export async function getCategoryPageData(
     autumnMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+    const coachCardsResult = await getPublishedCoachCadsByCategory({supabase}, category.id);
+
     return {
       category: category as any,
       matches: {
@@ -413,6 +424,7 @@ export async function getCategoryPageData(
       posts,
       standings: standings,
       season,
+      coachCards: coachCardsResult.data || [],
     };
   } catch (error) {
     throw error;

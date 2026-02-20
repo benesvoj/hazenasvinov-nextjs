@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 
 import supabaseAdmin from '@/utils/supabase/admin';
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 /**
  * GET /api/members/[id] - Get single member
@@ -9,7 +9,7 @@ import {createClient} from '@/utils/supabase/server';
 export async function GET(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
     const {id} = await params;
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Check authentication
     const {
@@ -42,7 +42,7 @@ export async function GET(request: Request, {params}: {params: Promise<{id: stri
 export async function PATCH(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
     const {id} = await params;
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Check authentication
     const {
@@ -98,7 +98,7 @@ export async function PATCH(request: Request, {params}: {params: Promise<{id: st
 export async function DELETE(request: Request, {params}: {params: Promise<{id: string}>}) {
   try {
     const {id} = await params;
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Check authentication
     const {

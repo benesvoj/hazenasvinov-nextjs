@@ -4,6 +4,9 @@
 
 export {Card} from './cards/Card';
 export {default as UnifiedCard} from './cards/UnifiedCard';
+export {CustomCheckbox} from './checkbox/CustomCheckbox';
+export {CategoryChip} from './chips/CategoryChip';
+export {DateChip} from './chips/DateChip';
 export * from './client';
 export {default as PageContainer} from './containers/PageContainer';
 export {default as DropdownMenu} from './dropdown-menu/DropdownMenu';
@@ -15,4 +18,5 @@ export {default as Link} from './link/Link';
 export {default as DeleteConfirmationModal} from './modals/DeleteConfirmationModal';
 export {default as UnifiedModal} from './modals/UnifiedModal';
 export {default as MobileActionsMenu} from './navigation/MobileActionsMenu';
+export {CustomRadio} from './radio/CustomRadio';
 export {ButtonWithTooltip} from './server/buttons/ButtonWithTooltip';

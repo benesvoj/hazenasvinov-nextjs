@@ -17,11 +17,11 @@ import {
 } from '@heroui/react';
 
 import {isEmpty} from '@/utils/arrayHelper';
-import {createClient} from '@/utils/supabase/client';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {LoadingSpinner} from '@/components';
+import {useSupabaseClient} from '@/hooks';
 import {Category, Season} from '@/types';
 
 interface AssignCategoryModalProps {
@@ -58,7 +58,7 @@ export default function AssignCategoryModal({
   } = useAppData();
 
   const loading = appDataLoading;
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   // Fetch data when modal opens
   useEffect(() => {

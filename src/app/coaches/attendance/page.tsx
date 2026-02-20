@@ -19,6 +19,7 @@ import {
   useFetchCategoryLineups,
   useFetchMembersAttendance,
   useFetchTrainingSessions,
+  useSupabaseClient,
   useTrainingSession,
 } from '@/hooks';
 import {TrainingSessionFormData} from '@/types';
@@ -45,6 +46,7 @@ export default function CoachesAttendancePage() {
   const [sessionForStatusUpdate, setSessionForStatusUpdate] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'attendance' | 'statistics'>('attendance');
 
+  const supabase = useSupabaseClient();
   const {
     loading,
     fetchAttendanceSummary,
@@ -106,6 +108,8 @@ export default function CoachesAttendancePage() {
         try {
           const {selectedCategories} = JSON.parse(simulationData);
           if (selectedCategories && selectedCategories.length > 0) {
+            // TODO: refactor - this is a bit hacky but allows admin to simulate being assigned to specific categories without affecting real user data
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setAdminSimulationCategories(selectedCategories);
           }
         } catch (e) {
@@ -155,13 +159,15 @@ export default function CoachesAttendancePage() {
   // Fetch lineups when category and season change
   useEffect(() => {
     if (selectedCategory && selectedSeason) {
-      fetchLineups();
+      void fetchLineups();
     }
   }, [selectedCategory, selectedSeason, fetchLineups]);
 
   // Update selectedCategory when effectiveSelectedCategory changes
   useEffect(() => {
     if (effectiveSelectedCategory && effectiveSelectedCategory !== selectedCategory) {
+      //TODO: refactor
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCategory(effectiveSelectedCategory);
     }
   }, [effectiveSelectedCategory, selectedCategory]);
@@ -169,6 +175,8 @@ export default function CoachesAttendancePage() {
   // Set initial season from AppDataContext
   useEffect(() => {
     if (activeSeason && !selectedSeason) {
+      // TODO: refactor
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSeason(activeSeason.id);
     }
   }, [activeSeason, selectedSeason]);
@@ -220,9 +228,6 @@ export default function CoachesAttendancePage() {
 
           // Try to get lineup members first
           try {
-            const {createClient} = await import('@/utils/supabase/client');
-            const supabase = createClient();
-
             // First get the lineup for this category and season
             const {data: lineupData, error: lineupError} = await supabase
               .from('category_lineups')

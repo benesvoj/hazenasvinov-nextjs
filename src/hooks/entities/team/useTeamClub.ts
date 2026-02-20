@@ -2,8 +2,7 @@
 
 import {useState, useEffect, useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
+import {useSupabaseClient} from '@/hooks';
 import {TeamClub, UseTeamClubOptions} from '@/types';
 
 export function useTeamClub(teamIdOrOptions?: string | UseTeamClubOptions) {
@@ -13,7 +12,7 @@ export function useTeamClub(teamIdOrOptions?: string | UseTeamClubOptions) {
   const [teamClub, setTeamClub] = useState<TeamClub | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const fetchTeamClub = useCallback(async () => {
     if (!options.teamId && !options.clubId) return;

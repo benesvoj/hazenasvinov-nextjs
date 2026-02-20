@@ -1,4 +1,4 @@
-import {createClient} from '@/utils/supabase/client';
+import {supabaseBrowserClient} from '@/utils/supabase/client';
 
 interface InitialStanding {
   team_id: string;
@@ -37,6 +37,8 @@ export async function generateInitialStandings(
   isSeasonClosed: boolean
 ): Promise<{success: boolean; error?: string; standings?: InitialStanding[]}> {
   // Validate input parameters FIRST - before any database operations
+  const supabase = supabaseBrowserClient();
+
   if (!categoryId || categoryId.trim() === '') {
     return {success: false, error: 'Neplatné ID kategorie'};
   }
@@ -54,8 +56,6 @@ export async function generateInitialStandings(
       categoryId,
       seasonId,
     });
-
-    const supabase = createClient();
 
     // Get teams for this category and season
     let teamCategories: TeamCategory[] = [];

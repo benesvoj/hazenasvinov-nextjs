@@ -1,14 +1,14 @@
 import {useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-import {generateLineupId} from '@/utils/uuid';
+import {useSupabaseClient} from '@/hooks';
+import {generateLineupId} from '@/utils';
 
 /**
  * Hook for managing lineup-related Supabase operations
  * Extracted from lineup-manager component to separate business logic
  */
 export function useLineupManager() {
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   /**
    * Find existing lineup ID for a match and team

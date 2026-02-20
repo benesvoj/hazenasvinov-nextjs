@@ -3,16 +3,16 @@
 import React from 'react';
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalProps,
   Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalProps,
 } from '@heroui/react';
 
-import {translations} from '@/lib';
+import {translations} from '@/lib/translations/index';
 
 import {Heading, HeadingLevel} from '../heading/Heading';
 
@@ -31,6 +31,7 @@ interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> 
   isFooterWithActions?: boolean;
   isOnlyCloseButton?: boolean;
   onPress?: () => void;
+  onPressButtonLabel?: string;
   isDisabled?: boolean;
   isLoading?: boolean;
 }
@@ -48,13 +49,12 @@ export default function UnifiedModal({
   actions,
   isFooterWithActions = false,
   onPress,
+  onPressButtonLabel = translations.common.actions.save,
   isDisabled,
   isLoading,
   isOnlyCloseButton = false,
   ...props
 }: UnifiedModalProps) {
-  const tAction = translations.action;
-
   return (
     <Modal
       isOpen={isOpen}
@@ -86,20 +86,20 @@ export default function UnifiedModal({
             <Button
               variant="flat"
               onPress={onClose}
-              aria-label={tAction.cancel}
+              aria-label={translations.common.actions.cancel}
               isDisabled={isLoading}
             >
-              {tAction.cancel}
+              {translations.common.actions.cancel}
             </Button>
             {!isOnlyCloseButton && (
               <Button
                 color="primary"
                 onPress={onPress}
                 isDisabled={isDisabled || isLoading}
-                aria-label={tAction.save}
+                aria-label={onPressButtonLabel}
                 isLoading={isLoading}
               >
-                {tAction.save}
+                {onPressButtonLabel}
               </Button>
             )}
           </ModalFooter>

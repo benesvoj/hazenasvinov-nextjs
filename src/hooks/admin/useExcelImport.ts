@@ -1,8 +1,7 @@
 import {useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
 import {CompetitionTypes} from '@/enums';
+import {useSupabaseClient} from '@/hooks';
 
 interface ExcelMatch {
   date: string;
@@ -22,7 +21,7 @@ interface ImportResult {
 }
 
 export const useExcelImport = () => {
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   // Helper function to determine matchweek from date
   const determineMatchweek = (date: Date, seasonStartDate?: string): number => {

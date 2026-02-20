@@ -1,7 +1,6 @@
-import {createClient} from '@/utils/supabase/client';
-
 import {AgeGroups} from '@/enums';
-import {Match, MatchBettingData} from '@/types';
+import {MatchBettingData} from '@/types';
+import {supabaseBrowserClient} from '@/utils';
 
 /**
  * Match Service for Betting System
@@ -35,7 +34,7 @@ export async function getUpcomingBettingMatches(
   } = options;
 
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     // Calculate date range
     const today = new Date();
@@ -162,7 +161,7 @@ export async function getUpcomingBettingMatches(
  */
 export async function getBettingMatchById(matchId: string): Promise<MatchBettingData | null> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     // First, get adult category IDs
     const {data: adultCategories} = await supabase

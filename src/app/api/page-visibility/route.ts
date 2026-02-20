@@ -1,10 +1,10 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     const {data, error} = await supabase
       .from('page_visibility')
@@ -26,7 +26,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
     const {id, is_visible, sort_order, page_route, page_title} = await request.json();
 
     // Build update object with only provided fields

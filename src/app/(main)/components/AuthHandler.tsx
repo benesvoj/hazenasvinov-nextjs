@@ -4,10 +4,11 @@ import {useEffect} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {createClient} from '@/utils/supabase/client';
+import {useSupabaseClient} from '@/hooks';
 
 export default function AuthHandler() {
   const router = useRouter();
+  const supabase = useSupabaseClient();
 
   useEffect(() => {
     const handleAuthFromFragment = async () => {
@@ -34,10 +35,8 @@ export default function AuthHandler() {
         });
 
         if (accessToken && refreshToken) {
-          const supabase = createClient();
-
           console.log('Setting session from URL fragment');
-          const {data, error} = await supabase.auth.setSession({
+          const {error} = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
@@ -77,7 +76,7 @@ export default function AuthHandler() {
     };
 
     handleAuthFromFragment();
-  }, [router]);
+  }, [router, supabase.auth]);
 
   // This component doesn't render anything
   return null;

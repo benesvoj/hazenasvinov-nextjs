@@ -1,15 +1,18 @@
 import {
+  ArrowLeftEndOnRectangleIcon,
   BookmarkIcon,
   CheckIcon,
   Cog6ToothIcon,
   EyeIcon,
+  KeyIcon,
+  LockClosedIcon,
+  LockOpenIcon,
   PencilIcon,
-  TrashIcon,
-  XMarkIcon,
-  ArrowLeftEndOnRectangleIcon,
   PlusCircleIcon,
   Square3Stack3DIcon,
+  TrashIcon,
   WalletIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/solid';
 
 import {ActionTypes} from '@/enums';
@@ -48,6 +51,15 @@ export const getDefaultActionIcon = (type: ActionTypes) => {
   }
   if (type === ActionTypes.PAYMENT) {
     return <WalletIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.BLOCKED) {
+    return <LockOpenIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.UNBLOCK) {
+    return <LockClosedIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.PASSWORD_RESET) {
+    return <KeyIcon className="w-4 h-4" />;
   }
   return <PlusCircleIcon className="w-4 h-4" />; // Default fallback
 };

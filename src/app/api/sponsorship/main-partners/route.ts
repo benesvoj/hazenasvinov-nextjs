@@ -1,11 +1,11 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 // GET - Fetch all main partners
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     const {data, error} = await supabase
       .from('main_partners')
@@ -27,7 +27,7 @@ export async function GET() {
 // POST - Create new main partner
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
     const body = await request.json();
 
     const {data, error} = await supabase.from('main_partners').insert([body]).select().single();

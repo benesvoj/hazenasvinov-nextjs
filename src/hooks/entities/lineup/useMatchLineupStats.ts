@@ -1,8 +1,8 @@
 'use client';
-import {useState, useEffect} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useEffect, useState} from 'react';
 
+import {useSupabaseClient} from '@/hooks';
 import {Match} from '@/types';
 
 export interface PlayerMatchStats {
@@ -33,6 +33,8 @@ export function useMatchLineupStats(matches: Match[]): UseMatchLineupStatsResult
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const supabase = useSupabaseClient();
+
   useEffect(() => {
     const fetchLineupStats = async () => {
       if (!matches || matches.length === 0) {
@@ -44,7 +46,6 @@ export function useMatchLineupStats(matches: Match[]): UseMatchLineupStatsResult
         setLoading(true);
         setError(null);
 
-        const supabase = createClient();
         const playerStatsMap = new Map<string, PlayerMatchStats>();
 
         // Process each completed match

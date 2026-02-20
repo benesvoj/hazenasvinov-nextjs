@@ -1,53 +1,60 @@
 import {
   ChartBarIcon,
+  ClipboardDocumentListIcon,
   HomeIcon,
   UserGroupIcon,
-  VideoCameraIcon,
-  ClipboardDocumentListIcon,
   UsersIcon,
+  VideoCameraIcon,
 } from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
+
+const COACH_PORTAL_BASE = '/coaches';
 
 export const coachesRoutes = [
   {
-    name: translations.coaches.routes.dashboard,
-    href: '/coaches/dashboard',
+    name: translations.coachPortal.routes.dashboard,
+    href: `${COACH_PORTAL_BASE}/dashboard`,
     icon: HomeIcon,
   },
   {
-    name: translations.coaches.routes.matches,
-    href: '/coaches/matches',
+    name: translations.coachPortal.routes.matches,
+    href: `${COACH_PORTAL_BASE}/matches`,
     icon: ClipboardDocumentListIcon,
   },
   {
-    name: translations.coaches.routes.lineups,
-    href: '/coaches/lineups',
+    name: translations.coachPortal.routes.lineups,
+    href: `${COACH_PORTAL_BASE}/lineups`,
     icon: UserGroupIcon,
   },
   {
-    name: translations.coaches.routes.attendance,
-    href: '/coaches/attendance',
+    name: translations.coachPortal.routes.attendance,
+    href: `${COACH_PORTAL_BASE}/attendance`,
     icon: ClipboardDocumentListIcon,
   },
   {
-    name: translations.coaches.routes.members,
-    href: '/coaches/members',
+    name: translations.coachPortal.routes.members,
+    href: `${COACH_PORTAL_BASE}/members`,
     icon: UsersIcon,
   },
   {
-    name: translations.coaches.routes.videos,
-    href: '/coaches/video',
+    name: translations.coachPortal.routes.videos,
+    href: `${COACH_PORTAL_BASE}/video`,
     icon: VideoCameraIcon,
   },
   {
-    name: translations.coaches.routes.statistics,
-    href: '/coaches/statistics',
+    name: translations.coachPortal.routes.statistics,
+    href: `${COACH_PORTAL_BASE}/statistics`,
     icon: ChartBarIcon,
   },
   {
-    name: translations.coaches.routes.meetingMinutes,
-    href: '/coaches/meeting-minutes',
+    name: translations.coachPortal.routes.meetingMinutes,
+    href: `${COACH_PORTAL_BASE}/meeting-minutes`,
     icon: ClipboardDocumentListIcon,
+  },
+  {
+    name: translations.coachPortal.routes.profile,
+    href: `${COACH_PORTAL_BASE}/profile`,
+    icon: UsersIcon,
   },
 ];

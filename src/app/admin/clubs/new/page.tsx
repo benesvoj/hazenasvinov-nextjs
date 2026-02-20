@@ -5,30 +5,30 @@ import React, {useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 
-import {Button} from '@heroui/button';
-import {Card, CardBody, CardHeader} from '@heroui/card';
-import {Input} from '@heroui/input';
+import {Button, Card, CardBody, CardHeader, Input} from '@heroui/react';
 
-import {BuildingOfficeIcon, ArrowLeftIcon} from '@heroicons/react/24/outline';
+import {ArrowLeftIcon, BuildingOfficeIcon} from '@heroicons/react/24/outline';
 
 import LogoUpload from '@/components/ui/client/LogoUpload';
 
-import {createClient} from '@/utils/supabase/client';
+import {useSupabaseClient} from '@/hooks';
+
+const INITIAL_FORM_DATA = {
+  name: '',
+  short_name: '',
+  city: '',
+  founded_year: '',
+  logo_url: '',
+};
 
 export default function NewClubPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const [formData, setFormData] = useState({
-    name: '',
-    short_name: '',
-    city: '',
-    founded_year: '',
-    logo_url: '',
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,14 +1,13 @@
 'use client';
 
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useState} from 'react';
 
 import {showToast} from '@/components/ui/feedback';
-
-import {createClient} from '@/utils/supabase/client';
 
 import {useUser} from '@/contexts/UserContext';
 
 import {TrainingSessionStatusEnum} from '@/enums';
+import {useSupabaseClient} from '@/hooks';
 import {
   AttendanceRecord,
   AttendanceStats,
@@ -16,7 +15,6 @@ import {
   AttendanceTrendData,
   CoachAnalytics,
   MemberAttendanceStats,
-  RawAttendanceRecord,
   ToastOptions,
   TrainingSession,
   TrainingSessionStats,
@@ -30,7 +28,7 @@ export function useAttendance() {
   const [error, setError] = useState<string | null>(null);
 
   const {user, hasRole} = useUser();
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useSupabaseClient();
 
   // Fetch attendance summary for a category and season
   const fetchAttendanceSummary = useCallback(

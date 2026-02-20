@@ -1,9 +1,9 @@
-import {createClient} from '@/utils/supabase/client';
 import {transformMatchWithTeamNames} from '@/utils/teamDisplay';
 
 import {getClubTeamCounts} from '@/services/optimizedMatchQueries';
 
 import {Match} from '@/types';
+import {supabaseBrowserClient} from '@/utils';
 
 // Enhanced query options with more granular control
 export interface MatchQueryBuilderOptions {
@@ -139,7 +139,7 @@ export class MatchQueryBuilder {
 
   constructor(options: MatchQueryBuilderOptions = {}) {
     this.options = {...options};
-    this.supabase = createClient();
+    this.supabase = supabaseBrowserClient();
   }
 
   // Filter methods

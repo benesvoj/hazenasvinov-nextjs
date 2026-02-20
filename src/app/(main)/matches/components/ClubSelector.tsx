@@ -1,13 +1,13 @@
 // TODO: refactor to remove supabase from component
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {Button, Image} from '@heroui/react';
 
 import {BuildingOfficeIcon} from '@heroicons/react/24/outline';
 
-import {useFetchCategories, useFetchSeasons, useSeasonFiltering} from '@/hooks';
+import {useFetchCategories, useFetchSeasons, useSeasonFiltering, useSupabaseClient} from '@/hooks';
 import {ClubWithTeams} from '@/types';
 
 interface ClubSelectorProps {
@@ -33,7 +33,7 @@ export default function ClubSelector({
   const {data: seasons, refetch: fetchActiveSeason} = useFetchSeasons();
   const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
   const {data: categories, refetch: fetchCategories} = useFetchCategories();
-
+  const supabase = useSupabaseClient();
   // Fetch required data when component mounts
   useEffect(() => {
     if (!activeSeason?.id) {
@@ -57,8 +57,6 @@ export default function ClubSelector({
         setError(null);
 
         // Import Supabase client dynamically to avoid SSR issues
-        const {createClient} = await import('@/utils/supabase/client');
-        const supabase = createClient();
 
         // Build query based on whether we have a selected category
         let clubQuery = supabase

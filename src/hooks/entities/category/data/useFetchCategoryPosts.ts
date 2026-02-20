@@ -1,8 +1,8 @@
 'use client';
 
-import {useState, useEffect, useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useSupabaseClient} from '@/hooks';
 
 export interface BlogPost {
   id: string;
@@ -26,12 +26,12 @@ export const useFetchCategoryPosts = (categorySlug: string, limit: number = 3) =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const supabase = useSupabaseClient();
+
   const fetchPosts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-
-      const supabase = createClient();
 
       // First, try to get the category ID from the category slug
       const {data: categoryData, error: categoryError} = await supabase

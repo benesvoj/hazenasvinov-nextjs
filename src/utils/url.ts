@@ -1,4 +1,4 @@
-import {showToast} from '@/components';
+import {showToast} from '@/components/ui/feedback/Toast';
 /**
  * Build URL with query parameters
  * @param baseUrl - Base API route URL

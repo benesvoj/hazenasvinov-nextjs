@@ -5,14 +5,13 @@ import {
   UpdateAlbumData,
   CreatePhotoData,
   UpdatePhotoData,
-} from '@/types/features/gallery/photoGallery';
-
-import {createClient} from './client';
+} from '@/types';
+import {supabaseBrowserClient} from '@/utils';
 
 // Album operations
 export async function getPhotoAlbums(): Promise<PhotoAlbum[]> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {data, error} = await supabase
       .from('photo_albums')
@@ -42,7 +41,7 @@ export async function getPhotoAlbums(): Promise<PhotoAlbum[]> {
 
 export async function getPhotoAlbum(id: string): Promise<PhotoAlbum | null> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {data, error} = await supabase.from('photo_albums').select('*').eq('id', id).single();
 
@@ -60,7 +59,7 @@ export async function getPhotoAlbum(id: string): Promise<PhotoAlbum | null> {
 
 export async function createPhotoAlbum(albumData: CreateAlbumData): Promise<PhotoAlbum | null> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {data, error} = await supabase.from('photo_albums').insert(albumData).select().single();
 
@@ -81,7 +80,7 @@ export async function updatePhotoAlbum(
   albumData: UpdateAlbumData
 ): Promise<PhotoAlbum | null> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {data, error} = await supabase
       .from('photo_albums')
@@ -104,7 +103,7 @@ export async function updatePhotoAlbum(
 
 export async function deletePhotoAlbum(id: string): Promise<boolean> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {error} = await supabase.from('photo_albums').delete().eq('id', id);
 
@@ -123,7 +122,7 @@ export async function deletePhotoAlbum(id: string): Promise<boolean> {
 // Photo operations
 export async function getPhotosByAlbum(albumId: string): Promise<Photo[]> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {data, error} = await supabase
       .from('photos')
@@ -146,7 +145,7 @@ export async function getPhotosByAlbum(albumId: string): Promise<Photo[]> {
 
 export async function getPhoto(id: string): Promise<Photo | null> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {data, error} = await supabase.from('photos').select('*').eq('id', id).single();
 
@@ -164,7 +163,7 @@ export async function getPhoto(id: string): Promise<Photo | null> {
 
 export async function createPhoto(photoData: CreatePhotoData): Promise<Photo | null> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {data, error} = await supabase.from('photos').insert(photoData).select().single();
 
@@ -182,7 +181,7 @@ export async function createPhoto(photoData: CreatePhotoData): Promise<Photo | n
 
 export async function updatePhoto(id: string, photoData: UpdatePhotoData): Promise<Photo | null> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {data, error} = await supabase
       .from('photos')
@@ -205,7 +204,7 @@ export async function updatePhoto(id: string, photoData: UpdatePhotoData): Promi
 
 export async function deletePhoto(id: string): Promise<boolean> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     const {error} = await supabase.from('photos').delete().eq('id', id);
 
@@ -223,7 +222,7 @@ export async function deletePhoto(id: string): Promise<boolean> {
 
 export async function reorderPhotos(photoIds: string[]): Promise<boolean> {
   try {
-    const supabase = createClient();
+    const supabase = supabaseBrowserClient();
 
     // Update photos one by one to avoid upsert issues
     for (let i = 0; i < photoIds.length; i++) {
