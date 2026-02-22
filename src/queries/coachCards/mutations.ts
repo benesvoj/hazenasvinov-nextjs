@@ -38,7 +38,7 @@ export async function updateCoachCard(
   try {
     const {data: card, error} = await ctx.supabase
       .from(DB_TABLE)
-      .update({...data, update_at: new Date().toISOString()})
+      .update({...data, updated_at: new Date().toISOString()})
       .eq('id', id)
       .select()
       .single();

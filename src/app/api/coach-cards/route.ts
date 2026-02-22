@@ -50,7 +50,7 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   return withAuth(async (user, supabase) => {
-    const isCoach = hasCoachRole(supabase, user.id);
+    const isCoach = await hasCoachRole(supabase, user.id);
     if (!isCoach) {
       return errorResponse('Only coaches can create coach cards', 403);
     }

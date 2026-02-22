@@ -29,7 +29,7 @@ export async function getAllUsers(
     console.error(`Exception in getAll${ENTITY.plural}:`, err);
     return {
       data: null,
-      error: err.mesage || 'Unknown error',
+      error: err.message || 'Unknown error',
       count: 0,
     };
   }

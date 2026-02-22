@@ -10,7 +10,7 @@ export const clubsTranslations = {
   },
   table: {
     name: 'Název',
-    shortName: 'Kráký název',
+    shortName: 'Krátký název',
     city: 'Město',
     foundedYear: 'Rok založení',
     venue: 'Místo',
