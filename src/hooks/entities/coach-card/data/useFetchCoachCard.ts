@@ -2,9 +2,10 @@
 
 import {useEffect, useMemo} from 'react';
 
+import {createDataFetchHook} from '@/hooks/factories';
+
 import {translations} from '@/lib/translations/index';
 
-import {createDataFetchHook} from '@/hooks';
 import {API_ROUTES} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/coachCards';
 import {CoachCard} from '@/types';
