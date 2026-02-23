@@ -5,6 +5,7 @@ import * as categoriesQueries from '@/queries/categories';
 import * as categoryLineupMembersQueries from '@/queries/categoryLineupMembers';
 import * as categoryLineupQueries from '@/queries/categoryLineups';
 import * as clubCategoriesQueries from '@/queries/clubCategories';
+import * as clubConfigQueries from '@/queries/clubConfig';
 import * as clubsQueries from '@/queries/clubs';
 import * as commentsQueries from '@/queries/comments';
 import * as committeeQueries from '@/queries/committees';
@@ -19,7 +20,7 @@ import * as userQueries from '@/queries/users';
 import * as videoQueries from '@/queries/videos';
 
 export interface EntityQueryLayer<T = any, Options = any> {
-  getAll: (ctx: QueryContext, options?: Options) => Promise<QueryResult<T[]>>;
+  getAll: (ctx: QueryContext, options?: Options) => Promise<QueryResult<T[] | T>>;
   getById?: (ctx: QueryContext, id: string) => Promise<QueryResult<T>>;
   create?: (ctx: QueryContext, data: any) => Promise<QueryResult<T>>;
   update?: (ctx: QueryContext, id: string, data: any) => Promise<QueryResult<T>>;
@@ -133,6 +134,14 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     pagination: {
       defaultLimit: 25,
       maxLimit: 100,
+    },
+  },
+  club_config: {
+    tableName: clubConfigQueries.DB_TABLE,
+    requiresAdmin: true,
+    queryLayer: {
+      getAll: clubConfigQueries.getClubConfig, // Only one config record expected, so getAll returns the config
+      update: clubConfigQueries.updateClubConfig,
     },
   },
   grants: {

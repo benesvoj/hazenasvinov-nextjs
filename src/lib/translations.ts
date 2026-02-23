@@ -193,17 +193,6 @@ export const translations = {
         actions: 'Akce',
         noClubs: 'Žádné kluby nebyly nalezeny',
       },
-      responseMessages: {
-        clubsFetchError: 'Nepodařilo se načíst oddíly.',
-        clubsFetchSuccess: 'Seznam oddílů načten.',
-        createSuccess: 'Oddíl byl úspěšně přidán.',
-        createError: 'Chyba při přidávání oddílu.',
-        updateSuccess: 'Oddíl byl úspěšně aktualizován.',
-        updateError: 'Chyba při aktualizaci oddílu.',
-        deleteSuccess: 'Oddíl byl úspěšně smazán.',
-        deleteError: 'Chyba při mazání oddílu.',
-        mandatoryName: 'Název je povinný',
-      },
     },
     clubCategories: {
       title: 'Správa kategorií klubů',

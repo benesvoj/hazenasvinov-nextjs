@@ -9,11 +9,13 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2026-01-28
+ * Last generated: 2026-02-23
  */
 
 export interface ClubConfigSchema {
   address: string | null;
+  bank_name: string | null;
+  bank_number: string | null;
   club_logo_path: string | null;
   club_logo_url: string | null;
   club_name: string;
@@ -30,6 +32,7 @@ export interface ClubConfigSchema {
   hero_subtitle: string | null;
   hero_title: string | null;
   id: string;
+  identity_number: string | null;
   instagram_url: string | null;
   is_active: boolean | null;
   updated_at: string | null;

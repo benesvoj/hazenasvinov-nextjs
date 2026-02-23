@@ -1,6 +1,7 @@
 export const commonTranslations = {
   clubTitle: 'TJ Sokol Svinov',
   loading: 'Načítání ...',
+  fullPageLoading: 'Načítání stránky...',
   underConstruction:
     'Tato stránka je v testovacím provozu. Některé funkce mohou být nedostupné nebo nefunkční',
   alerts: {

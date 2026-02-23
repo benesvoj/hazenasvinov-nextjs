@@ -1,6 +1,6 @@
 import {Spinner} from '@heroui/spinner';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -9,12 +9,22 @@ interface LoadingSpinnerProps {
   label?: string;
 }
 
+/**
+ * Renders a loading spinner with customizable size, color, and label.
+ *
+ * @param {Object} props - The properties object.
+ * @param {'sm' | 'md' | 'lg'} [props.size='md'] - The size of the spinner. Can be 'sm', 'md', or 'lg'.
+ * @param {'primary' | 'secondary' | 'tertiary'} [props.color='primary'] - The color of the spinner. Can be 'primary', 'secondary', or 'tertiary'.
+ * @param {string} [props.className=''] - Additional CSS classes to apply to the container element.
+ * @param {string} [props.label=translations.common.loading] - Optional label text displayed below the spinner.
+ * @return {JSX.Element} A JSX element displaying a loading spinner with an optional label.
+ */
 export default function LoadingSpinner({
   size = 'md',
   color = 'primary',
   className = '',
-  label = translations.loading,
-}: LoadingSpinnerProps) {
+  label = translations.common.loading,
+}: LoadingSpinnerProps): JSX.Element {
   return (
     <div className={`flex flex-col items-center justify-center p-4 ${className}`}>
       <Spinner size={size} color={color} />
@@ -23,9 +33,16 @@ export default function LoadingSpinner({
   );
 }
 
-// Full page loading spinner
+/**
+ * Displays a full-page spinner component, typically used to indicate loading state.
+ *
+ * @param {Object} options - The options for the FullPageSpinner component.
+ * @param {string} [options.label=translations.common.fullPageLoading] - The loading label text to display.
+ * @param {string} [options.className=''] - Additional CSS class names to apply to the spinner container.
+ * @return {JSX.Element} A JSX element representing the full-page spinner.
+ */
 export function FullPageSpinner({
-  label = 'Načítání stránky...',
+  label = translations.common.fullPageLoading,
   className = '',
 }: {
   label?: string;
@@ -38,7 +55,14 @@ export function FullPageSpinner({
   );
 }
 
-// Inline loading spinner
+/**
+ * A functional component that renders an inline spinner.
+ *
+ * @param {Object} props - The props object.
+ * @param {'sm' | 'md' | 'lg'} [props.size='sm'] - The size of the spinner. Options are 'sm', 'md', or 'lg'.
+ * @param {string} [props.className=''] - Additional CSS classes to apply to the spinner container.
+ * @return {JSX.Element} The rendered inline spinner component.
+ */
 export function InlineSpinner({
   size = 'sm',
   className = '',

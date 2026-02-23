@@ -1,11 +1,8 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
-import Image from 'next/image';
-
-import {Card, CardHeader, CardBody, Input, Textarea, Button} from '@heroui/react';
+import {Button, Input, Textarea} from '@heroui/react';
 
 import {
-  Cog6ToothIcon,
   BuildingOfficeIcon,
   EnvelopeIcon,
   GlobeAltIcon,
@@ -16,35 +13,43 @@ import {
 
 import Logo from '@/components/ui/layout/Logo';
 
-import {uploadClubAsset, deleteClubAsset} from '@/utils/supabase/storage';
+import {translations} from '@/lib/translations/index';
 
-import {useFetchClubConfig, useClubConfig} from "@/hooks";
+import {deleteClubAsset, uploadClubAsset} from '@/utils/supabase/storage';
+
+import {Heading, showToast, UnifiedCard} from '@/components';
+import {ACTION_TYPE_LABELS, ActionTypes} from '@/enums';
+import {useClubConfig, useFetchClubConfig} from '@/hooks';
+
+const INITIAL_STATE = {
+  club_name: '',
+  club_logo_path: '',
+  club_logo_url: '',
+  hero_image_path: '',
+  hero_image_url: '',
+  hero_title: '',
+  hero_subtitle: '',
+  hero_button_text: '',
+  hero_button_link: '',
+  contact_email: '',
+  contact_phone: '',
+  address: '',
+  facebook_url: '',
+  instagram_url: '',
+  website_url: '',
+  founded_year: 1920,
+  description: '',
+  bank_number: '',
+  bank_name: '',
+  identity_number: '',
+};
 
 export default function ClubConfigCard() {
-  const {data: clubConfig, loading, error} = useFetchClubConfig();
-  const {updateClubConfig} = useClubConfig();
-  const [isEditing, setIsEditing] = useState(false);
+  const {data: clubConfig, loading} = useFetchClubConfig();
+  const {updateClubConfig, loading: updateLoading} = useClubConfig();
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingHero, setUploadingHero] = useState(false);
-  const [formData, setFormData] = useState({
-    club_name: '',
-    club_logo_path: '',
-    club_logo_url: '',
-    hero_image_path: '',
-    hero_image_url: '',
-    hero_title: '',
-    hero_subtitle: '',
-    hero_button_text: '',
-    hero_button_link: '',
-    contact_email: '',
-    contact_phone: '',
-    address: '',
-    facebook_url: '',
-    instagram_url: '',
-    website_url: '',
-    founded_year: 1920,
-    description: '',
-  });
+  const [formData, setFormData] = useState(INITIAL_STATE);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize form data when clubConfig is loaded
   useEffect(() => {
@@ -67,42 +72,18 @@ export default function ClubConfigCard() {
         website_url: clubConfig.website_url || '',
         founded_year: clubConfig.founded_year || 1920,
         description: clubConfig.description || '',
+        bank_name: clubConfig.bank_name || '',
+        bank_number: clubConfig.bank_number || '',
+        identity_number: clubConfig.identity_number || '',
       });
     }
   }, [clubConfig]);
 
-  const handleSave = async (id: string) => {
+  const handleSubmitChanges = async (id: string) => {
     try {
       await updateClubConfig(id, formData);
-      setIsEditing(false);
     } catch (error) {
       console.error('Error saving club config:', error);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    // Reset form to current values
-    if (clubConfig) {
-      setFormData({
-        club_name: clubConfig.club_name || '',
-        club_logo_path: clubConfig.club_logo_path || '',
-        club_logo_url: clubConfig.club_logo_url || '',
-        hero_image_path: clubConfig.hero_image_path || '',
-        hero_image_url: clubConfig.hero_image_url || '',
-        hero_title: clubConfig.hero_title || '',
-        hero_subtitle: clubConfig.hero_subtitle || '',
-        hero_button_text: clubConfig.hero_button_text || '',
-        hero_button_link: clubConfig.hero_button_link || '',
-        contact_email: clubConfig.contact_email || '',
-        contact_phone: clubConfig.contact_phone || '',
-        address: clubConfig.address || '',
-        facebook_url: clubConfig.facebook_url || '',
-        instagram_url: clubConfig.instagram_url || '',
-        website_url: clubConfig.website_url || '',
-        founded_year: clubConfig.founded_year || 1920,
-        description: clubConfig.description || '',
-      });
     }
   };
 
@@ -116,18 +97,16 @@ export default function ClubConfigCard() {
       const result = await uploadClubAsset(file, path);
 
       if (result.error) {
-        alert(`Chyba při nahrávání loga: ${result.error}`);
+        showToast.danger(`Chyba při nahrávání loga: ${result.error}`);
         return;
       }
 
-      // Update form data with new logo
       setFormData((prev) => ({
         ...prev,
         club_logo_path: result.path,
         club_logo_url: result.url,
       }));
 
-      // Delete old logo if it exists
       if (formData.club_logo_path && formData.club_logo_path !== result.path) {
         await deleteClubAsset(formData.club_logo_path);
       }
@@ -139,462 +118,181 @@ export default function ClubConfigCard() {
     }
   };
 
-  const handleHeroUpload = async (file: File) => {
-    setUploadingHero(true);
-    try {
-      const timestamp = Date.now();
-      const extension = file.name.split('.').pop() || 'jpg';
-      const path = `club-assets/hero-${timestamp}.${extension}`;
-
-      const result = await uploadClubAsset(file, path);
-
-      if (result.error) {
-        alert(`Chyba při nahrávání hero obrázku: ${result.error}`);
-        return;
-      }
-
-      // Update form data with new hero image
-      setFormData((prev) => ({
-        ...prev,
-        hero_image_path: result.path,
-        hero_image_url: result.url,
-      }));
-
-      // Delete old hero image if it exists
-      if (formData.hero_image_path && formData.hero_image_path !== result.path) {
-        await deleteClubAsset(formData.hero_image_path);
-      }
-    } catch (error) {
-      console.error('Hero upload failed:', error);
-      alert('Chyba při nahrávání hero obrázku');
-    } finally {
-      setUploadingHero(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <Card>
-        <CardBody className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Načítání konfigurace klubu...</p>
-        </CardBody>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardBody className="text-center py-12">
-          <div className="text-red-500 mb-4">
-            <Cog6ToothIcon className="w-16 h-16 mx-auto" />
-          </div>
-          <div className="mb-2 text-red-600">Chyba při načítání konfigurace</div>
-          <div className="text-sm text-gray-500 mb-4">{error}</div>
-        </CardBody>
-      </Card>
-    );
-  }
+  const footer = (
+    <div className={'w-full flex justify-end'}>
+      <Button
+        color={'primary'}
+        aria-label={ACTION_TYPE_LABELS[ActionTypes.SAVE]}
+        type={'submit'}
+        onPress={() => handleSubmitChanges(clubConfig!.id)}
+        isLoading={updateLoading}
+      >
+        {ACTION_TYPE_LABELS[ActionTypes.SAVE]}
+      </Button>
+    </div>
+  );
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between w-full items-center">
-          <div className="flex items-center gap-3">
-            <Cog6ToothIcon className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold">Konfigurace klubu</h1>
-              <p className="text-gray-600">Správa základních informací a nastavení klubu</p>
-            </div>
-          </div>
-          {!isEditing ? (
-            <Button
-              color="primary"
-              onPress={() => setIsEditing(true)}
-              startContent={<Cog6ToothIcon className="w-5 h-5" />}
-            >
-              Upravit konfiguraci
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button color="secondary" variant="bordered" onPress={handleCancel}>
-                Zrušit
+    <UnifiedCard isLoading={loading} footer={footer}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <Heading size={3}>
+            <BuildingOfficeIcon className="w-5 h-5 text-blue-600" />
+            {translations.clubConfig.editor.sections.basic}
+          </Heading>
+
+          <Input
+            label={translations.clubConfig.editor.fields.name}
+            value={formData.club_name}
+            onChange={(e) => setFormData((prev) => ({...prev, club_name: e.target.value}))}
+            placeholder={translations.clubConfig.editor.fields.name}
+          />
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {translations.clubConfig.editor.fields.logo}
+            </label>
+            <div className="flex items-center gap-3">
+              {formData.club_logo_url ? (
+                <Logo size="md" className="rounded-lg" fallbackSrc={formData.club_logo_url} />
+              ) : (
+                <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <PhotoIcon className="w-6 h-6 text-gray-400" />
+                </div>
+              )}
+              <Button
+                size="sm"
+                variant="bordered"
+                onPress={() => logoInputRef.current?.click()}
+                isDisabled={uploadingLogo}
+                isLoading={uploadingLogo}
+              >
+                {translations.clubConfig.editor.upload.logo}
               </Button>
-              <Button color="primary" onPress={() => handleSave(clubConfig!.id)}>
-                Uložit změny
-              </Button>
+              <Input
+                ref={logoInputRef}
+                type={'file'}
+                accept={'image/*'}
+                className={'hidden'}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleLogoUpload(file);
+                }}
+              />
             </div>
-          )}
+          </div>
+
+          <Input
+            label={translations.clubConfig.editor.fields.foundedYear}
+            type="number"
+            value={formData.founded_year.toString()}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                founded_year: parseInt(e.target.value) || 1920,
+              }))
+            }
+            placeholder={translations.clubConfig.editor.placeholders.foundedYear}
+          />
+
+          <Textarea
+            label={translations.clubConfig.editor.fields.description}
+            value={formData.description}
+            onChange={(e) => setFormData((prev) => ({...prev, description: e.target.value}))}
+            placeholder={translations.clubConfig.editor.placeholders.description}
+            rows={3}
+          />
         </div>
-      </CardHeader>
-      <CardBody>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Club Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <BuildingOfficeIcon className="w-5 h-5 text-blue-600" />
-              Základní informace
-            </h3>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Název klubu</label>
-              {isEditing ? (
-                <Input
-                  value={formData.club_name}
-                  onChange={(e) => setFormData((prev) => ({...prev, club_name: e.target.value}))}
-                  placeholder="Název klubu"
-                />
-              ) : (
-                <p className="text-gray-900 font-medium">{clubConfig?.club_name}</p>
-              )}
-            </div>
+        <div className="space-y-4">
+          <Heading size={3}>
+            <EnvelopeIcon className="w-5 h-5 text-blue-600" />
+            {translations.clubConfig.editor.sections.contact}
+          </Heading>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Logo klubu</label>
-              {isEditing ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    {formData.club_logo_url ? (
-                      <Logo size="md" className="rounded-lg" fallbackSrc={formData.club_logo_url} />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                        <PhotoIcon className="w-6 h-6 text-gray-400" />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            handleLogoUpload(file);
-                          }
-                        }}
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                      />
-                    </div>
-                  </div>
-                  {uploadingLogo && (
-                    <div className="flex items-center gap-2 text-sm text-blue-600">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                      Nahrávání loga...
-                    </div>
-                  )}
-                  {formData.club_logo_path && (
-                    <div className="text-xs text-gray-500">Cesta: {formData.club_logo_path}</div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  {clubConfig?.club_logo_url ? (
-                    <Logo size="md" className="rounded-lg" fallbackSrc={clubConfig.club_logo_url} />
-                  ) : (
-                    <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                      <PhotoIcon className="w-6 h-6 text-gray-400" />
-                    </div>
-                  )}
-                  <span className="text-gray-600">
-                    {clubConfig?.club_logo_path || 'Logo není nastaveno'}
-                  </span>
-                </div>
-              )}
-            </div>
+          <Input
+            label={translations.clubConfig.editor.fields.contactEmail}
+            type="email"
+            value={formData.contact_email}
+            onChange={(e) => setFormData((prev) => ({...prev, contact_email: e.target.value}))}
+            placeholder={translations.clubConfig.editor.placeholders.contactEmail}
+            startContent={<EnvelopeIcon className="w-4 h-4 text-gray-400" />}
+          />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Rok založení</label>
-              {isEditing ? (
-                <Input
-                  type="number"
-                  value={formData.founded_year.toString()}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      founded_year: parseInt(e.target.value) || 1920,
-                    }))
-                  }
-                  placeholder="1920"
-                />
-              ) : (
-                <p className="text-gray-900">{clubConfig?.founded_year}</p>
-              )}
-            </div>
+          <Input
+            label={translations.clubConfig.editor.fields.contactPhone}
+            value={formData.contact_phone}
+            onChange={(e) => setFormData((prev) => ({...prev, contact_phone: e.target.value}))}
+            placeholder={translations.clubConfig.editor.placeholders.contactPhone}
+            startContent={<PhoneIcon className="w-4 h-4 text-gray-400" />}
+          />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Popis klubu</label>
-              {isEditing ? (
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData((prev) => ({...prev, description: e.target.value}))}
-                  placeholder="Popis klubu"
-                  rows={3}
-                />
-              ) : (
-                <p className="text-gray-600">{clubConfig?.description || 'Popis není nastaven'}</p>
-              )}
-            </div>
-          </div>
+          <Textarea
+            label={translations.clubConfig.editor.fields.address}
+            value={formData.address}
+            onChange={(e) => setFormData((prev) => ({...prev, address: e.target.value}))}
+            placeholder={translations.clubConfig.editor.placeholders.address}
+            rows={2}
+            startContent={<MapPinIcon className="w-4 h-4 text-gray-400" />}
+          />
 
-          {/* Hero Section Configuration */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <PhotoIcon className="w-5 h-5 text-blue-600" />
-              Hlavní stránka (Hero)
-            </h3>
+          <Input
+            type="text"
+            label={translations.clubConfig.editor.fields.identityNumber}
+            placeholder={translations.clubConfig.editor.placeholders.identityNumber}
+            value={formData.identity_number}
+            onChange={(e) => setFormData((prev) => ({...prev, identity_number: e.target.value}))}
+          />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Hero obrázek</label>
-              {isEditing ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    {formData.hero_image_url ? (
-                      <Image
-                        src={formData.hero_image_url}
-                        alt="Hero Image"
-                        width={64}
-                        height={48}
-                        className="rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="w-16 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                        <PhotoIcon className="w-6 h-6 text-gray-400" />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            handleHeroUpload(file);
-                          }
-                        }}
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                      />
-                    </div>
-                  </div>
-                  {uploadingHero && (
-                    <div className="flex items-center gap-2 text-sm text-blue-600">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                      Nahrávání hero obrázku...
-                    </div>
-                  )}
-                  {formData.hero_image_path && (
-                    <div className="text-xs text-gray-500">Cesta: {formData.hero_image_path}</div>
-                  )}
-                  <div className="text-xs text-gray-500">
-                    Doporučená velikost: 1920x1080px nebo větší
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  {clubConfig?.hero_image_url ? (
-                    <Image
-                      src={clubConfig.hero_image_url}
-                      alt="Hero Image"
-                      width={64}
-                      height={48}
-                      className="rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                      <PhotoIcon className="w-6 h-6 text-gray-400" />
-                    </div>
-                  )}
-                  <span className="text-gray-600">
-                    {clubConfig?.hero_image_path || 'Hero obrázek není nastaven'}
-                  </span>
-                </div>
-              )}
-            </div>
+          <Input
+            type="text"
+            label={translations.clubConfig.editor.fields.bankName}
+            placeholder={translations.clubConfig.editor.placeholders.bankName}
+            value={formData.bank_name}
+            onChange={(e) => setFormData((prev) => ({...prev, bank_name: e.target.value}))}
+          />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Hlavní nadpis</label>
-              {isEditing ? (
-                <Input
-                  value={formData.hero_title}
-                  onChange={(e) => setFormData((prev) => ({...prev, hero_title: e.target.value}))}
-                  placeholder="Hlavní nadpis"
-                />
-              ) : (
-                <p className="text-gray-900 font-medium">{clubConfig?.hero_title}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Podnadpis</label>
-              {isEditing ? (
-                <Textarea
-                  value={formData.hero_subtitle}
-                  onChange={(e) =>
-                    setFormData((prev) => ({...prev, hero_subtitle: e.target.value}))
-                  }
-                  placeholder="Podnadpis"
-                  rows={2}
-                />
-              ) : (
-                <p className="text-gray-600">
-                  {clubConfig?.hero_subtitle || 'Podnadpis není nastaven'}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Text tlačítka
-                </label>
-                {isEditing ? (
-                  <Input
-                    value={formData.hero_button_text}
-                    onChange={(e) =>
-                      setFormData((prev) => ({...prev, hero_button_text: e.target.value}))
-                    }
-                    placeholder="Více informací"
-                  />
-                ) : (
-                  <p className="text-gray-900">{clubConfig?.hero_button_text}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Odkaz tlačítka
-                </label>
-                {isEditing ? (
-                  <Input
-                    value={formData.hero_button_link}
-                    onChange={(e) =>
-                      setFormData((prev) => ({...prev, hero_button_link: e.target.value}))
-                    }
-                    placeholder="/about"
-                  />
-                ) : (
-                  <p className="text-gray-900">{clubConfig?.hero_button_link}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Contact Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <EnvelopeIcon className="w-5 h-5 text-blue-600" />
-              Kontaktní informace
-            </h3>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              {isEditing ? (
-                <Input
-                  type="email"
-                  value={formData.contact_email}
-                  onChange={(e) =>
-                    setFormData((prev) => ({...prev, contact_email: e.target.value}))
-                  }
-                  placeholder="info@hazenasvinov.cz"
-                  startContent={<EnvelopeIcon className="w-4 h-4 text-gray-400" />}
-                />
-              ) : (
-                <p className="text-gray-900">
-                  {clubConfig?.contact_email || 'Email není nastaven'}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
-              {isEditing ? (
-                <Input
-                  value={formData.contact_phone}
-                  onChange={(e) =>
-                    setFormData((prev) => ({...prev, contact_phone: e.target.value}))
-                  }
-                  placeholder="+420 123 456 789"
-                  startContent={<PhoneIcon className="w-4 h-4 text-gray-400" />}
-                />
-              ) : (
-                <p className="text-gray-900">
-                  {clubConfig?.contact_phone || 'Telefon není nastaven'}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Adresa</label>
-              {isEditing ? (
-                <Textarea
-                  value={formData.address}
-                  onChange={(e) => setFormData((prev) => ({...prev, address: e.target.value}))}
-                  placeholder="Adresa klubu"
-                  rows={2}
-                  startContent={<MapPinIcon className="w-4 h-4 text-gray-400" />}
-                />
-              ) : (
-                <p className="text-gray-600">{clubConfig?.address || 'Adresa není nastavena'}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Social Media & Website */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <GlobeAltIcon className="w-5 h-5 text-blue-600" />
-              Web a sociální sítě
-            </h3>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Webové stránky</label>
-              {isEditing ? (
-                <Input
-                  type="url"
-                  value={formData.website_url}
-                  onChange={(e) => setFormData((prev) => ({...prev, website_url: e.target.value}))}
-                  placeholder="https://hazenasvinov.cz"
-                  startContent={<GlobeAltIcon className="w-4 h-4 text-gray-400" />}
-                />
-              ) : (
-                <p className="text-gray-900">{clubConfig?.website_url || 'Web není nastaven'}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Facebook</label>
-              {isEditing ? (
-                <Input
-                  type="url"
-                  value={formData.facebook_url}
-                  onChange={(e) => setFormData((prev) => ({...prev, facebook_url: e.target.value}))}
-                  placeholder="https://facebook.com/hazenasvinov"
-                />
-              ) : (
-                <p className="text-gray-900">
-                  {clubConfig?.facebook_url || 'Facebook není nastaven'}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
-              {isEditing ? (
-                <Input
-                  type="url"
-                  value={formData.instagram_url}
-                  onChange={(e) =>
-                    setFormData((prev) => ({...prev, instagram_url: e.target.value}))
-                  }
-                  placeholder="https://instagram.com/hazenasvinov"
-                />
-              ) : (
-                <p className="text-gray-900">
-                  {clubConfig?.instagram_url || 'Instagram není nastaven'}
-                </p>
-              )}
-            </div>
-          </div>
+          <Input
+            type="text"
+            label={translations.clubConfig.editor.fields.bankNumber}
+            placeholder={translations.clubConfig.editor.placeholders.bankNumber}
+            value={formData.bank_number}
+            onChange={(e) => setFormData((prev) => ({...prev, bank_number: e.target.value}))}
+          />
         </div>
-      </CardBody>
-    </Card>
+
+        <div className="space-y-4">
+          <Heading size={3}>
+            <GlobeAltIcon className="w-5 h-5 text-blue-600" />
+            {translations.clubConfig.editor.sections.social}
+          </Heading>
+
+          <Input
+            type="url"
+            label={translations.clubConfig.editor.fields.website}
+            value={formData.website_url}
+            onChange={(e) => setFormData((prev) => ({...prev, website_url: e.target.value}))}
+            placeholder={translations.clubConfig.editor.placeholders.website}
+            startContent={<GlobeAltIcon className="w-4 h-4 text-gray-400" />}
+          />
+
+          <Input
+            type="url"
+            label={translations.clubConfig.editor.fields.facebook}
+            value={formData.facebook_url}
+            onChange={(e) => setFormData((prev) => ({...prev, facebook_url: e.target.value}))}
+            placeholder={translations.clubConfig.editor.placeholders.facebook}
+          />
+
+          <Input
+            type="url"
+            label={translations.clubConfig.editor.fields.instagram}
+            value={formData.instagram_url}
+            onChange={(e) => setFormData((prev) => ({...prev, instagram_url: e.target.value}))}
+            placeholder={translations.clubConfig.editor.placeholders.instagram}
+          />
+        </div>
+      </div>
+    </UnifiedCard>
   );
 }

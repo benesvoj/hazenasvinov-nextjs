@@ -1,11 +1,11 @@
 'use client';
 
+import {translations} from '@/lib/translations/index';
+
 import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {API_ROUTES} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/clubs';
 import {Club, ClubInsert} from '@/types';
-
-const t = translations.admin.clubs.responseMessages;
 
 /**
  * Hook for managing clubs (CRUD operations)
@@ -18,12 +18,12 @@ export function useClubs() {
       byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
       entityName: ENTITY.singular,
       messages: {
-        createSuccess: t.createSuccess,
-        updateSuccess: t.updateSuccess,
-        deleteSuccess: t.deleteSuccess,
-        createError: t.createError,
-        updateError: t.updateError,
-        deleteError: t.deleteError,
+        createSuccess: translations.clubs.responseMessages.createSuccess,
+        updateSuccess: translations.clubs.responseMessages.updateSuccess,
+        deleteSuccess: translations.clubs.responseMessages.deleteSuccess,
+        createError: translations.clubs.responseMessages.createError,
+        updateError: translations.clubs.responseMessages.updateError,
+        deleteError: translations.clubs.responseMessages.deleteError,
       },
     }
   )();
