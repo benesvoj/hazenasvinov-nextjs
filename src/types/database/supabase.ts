@@ -1164,6 +1164,7 @@ export type Database = {
           instagram_url: string | null;
           is_active: boolean | null;
           updated_at: string | null;
+          venue_address: string | null;
           website_url: string | null;
         };
         Insert: {
@@ -1190,6 +1191,7 @@ export type Database = {
           instagram_url?: string | null;
           is_active?: boolean | null;
           updated_at?: string | null;
+          venue_address?: string | null;
           website_url?: string | null;
         };
         Update: {
@@ -1216,6 +1218,7 @@ export type Database = {
           instagram_url?: string | null;
           is_active?: boolean | null;
           updated_at?: string | null;
+          venue_address?: string | null;
           website_url?: string | null;
         };
         Relationships: [];

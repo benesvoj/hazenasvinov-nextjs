@@ -4,29 +4,28 @@ import {Card, CardBody, CardHeader} from '@heroui/react';
 
 import {UserGroupIcon} from '@heroicons/react/24/outline';
 
-import {Heading} from '@/components/ui/heading/Heading';
-
 import {translations} from '@/lib/translations/index';
 
-import CoachCardDisplay from '@/app/(main)/categories/components/CoachCardDisplay';
-
-import {PublicCoachCard} from '@/types';
+import {Heading, ProfileCard} from '@/components';
+import {PublicProfileCard} from '@/types';
 import {isEmpty} from '@/utils';
 
-interface CoachContactsSectionProps {
-  coaches: PublicCoachCard[];
+interface ContactsSectionProps {
+  contacts: PublicProfileCard[];
   title?: string;
 }
 
 /**
- * Server component that displays coach cards for a category
- * Receives data as props from the parent server component (CategoryPage)
+ * Renders a section that displays a list of contact profiles in a card layout.
+ *
+ * @param params - Component parameters.
+ * @returns The rendered contact section as a card element, or `null` if the `contacts` array is empty.
  */
-export default function CoachContactsSection({
-  coaches,
+export default function ContactsSection({
+  contacts,
   title = translations.coachCards.section.title,
-}: CoachContactsSectionProps) {
-  if (isEmpty(coaches)) return null;
+}: ContactsSectionProps) {
+  if (isEmpty(contacts)) return null;
 
   return (
     <Card>
@@ -39,15 +38,15 @@ export default function CoachContactsSection({
       <CardBody>
         <div
           className={`grid gap-4 ${
-            coaches.length === 1
+            contacts.length === 1
               ? 'grid-cols-1 max-w-sm mx-auto'
-              : coaches.length === 2
+              : contacts.length === 2
                 ? 'grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto'
                 : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
           }`}
         >
-          {coaches.map((coach) => (
-            <CoachCardDisplay key={coach.id} coach={coach} />
+          {contacts.map((contact) => (
+            <ProfileCard key={contact.id} profile={contact} />
           ))}
         </div>
       </CardBody>

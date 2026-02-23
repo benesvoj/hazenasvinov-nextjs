@@ -36,6 +36,7 @@ export interface ClubConfigSchema {
   instagram_url: string | null;
   is_active: boolean | null;
   updated_at: string | null;
+  venue_address: string | null;
   website_url: string | null;
 }
 

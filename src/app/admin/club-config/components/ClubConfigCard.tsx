@@ -42,6 +42,7 @@ const INITIAL_STATE = {
   bank_number: '',
   bank_name: '',
   identity_number: '',
+  venue_address: '',
 };
 
 export default function ClubConfigCard() {
@@ -75,6 +76,7 @@ export default function ClubConfigCard() {
         bank_name: clubConfig.bank_name || '',
         bank_number: clubConfig.bank_number || '',
         identity_number: clubConfig.identity_number || '',
+        venue_address: clubConfig.venue_address || '',
       });
     }
   }, [clubConfig]);
@@ -225,6 +227,15 @@ export default function ClubConfigCard() {
             onChange={(e) => setFormData((prev) => ({...prev, contact_phone: e.target.value}))}
             placeholder={translations.clubConfig.editor.placeholders.contactPhone}
             startContent={<PhoneIcon className="w-4 h-4 text-gray-400" />}
+          />
+
+          <Textarea
+            label={translations.clubConfig.editor.fields.venueAddress}
+            value={formData.venue_address}
+            onChange={(e) => setFormData((prev) => ({...prev, venue_address: e.target.value}))}
+            placeholder={translations.clubConfig.editor.placeholders.venueAddress}
+            rows={2}
+            startContent={<MapPinIcon className="w-4 h-4 text-gray-400" />}
           />
 
           <Textarea

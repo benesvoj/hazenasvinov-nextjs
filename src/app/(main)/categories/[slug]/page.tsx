@@ -7,8 +7,8 @@ import {
   CategoryPosts,
   CategoryStandings,
 } from '@/app/(main)/categories/components';
-import CoachContactsSection from '@/app/(main)/categories/components/CoachContactsSection';
 
+import {ContactsSection} from '@/components';
 import {hasItems, isNotNilOrEmpty} from '@/utils';
 
 interface CategoryPageProps {
@@ -64,7 +64,7 @@ export default async function CategoryPage({params}: CategoryPageProps) {
         )}
         {hasItems(coachCards) && (
           <div className="order-4">
-            <CoachContactsSection coaches={coachCards} />
+            <ContactsSection contacts={coachCards} />
           </div>
         )}
       </div>

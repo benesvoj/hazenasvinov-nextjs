@@ -1,33 +1,27 @@
-import {UnifiedCard} from '@/components';
-import {ClubConfig} from '@/types';
+import {translations} from '@/lib/translations/index';
 
-interface ContactHeroProps {
-  data: ClubConfig | null;
-}
+import {ContactsSection} from '@/components';
+import {PublicProfileCard} from '@/types';
 
-export const ContactHero = ({data}: ContactHeroProps) => {
-  return (
-    <UnifiedCard>
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Kontakt</h1>
-        </div>
-        <div className={'grid grid-cols-2'}>
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-xl font-semibold">Adresa</h2>
-              <p>{data?.address}</p>
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold">Telefon</h2>
-              <p>{data?.contact_phone}</p>
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold">Email</h2>
-            </div>
-          </div>
-        </div>
-      </div>
-    </UnifiedCard>
-  );
+const PROFILE_DATA: PublicProfileCard[] = [
+  {
+    id: '1',
+    name: 'Zbyněk',
+    surname: 'Planka',
+    email: 'zbynek.planka@seznam.cz',
+    photo_url: 'https://example.com/profile-photo.jpg',
+    role: 'Předseda oddílu',
+  },
+  {
+    id: '2',
+    name: 'Vít',
+    surname: 'Horáček',
+    email: 'vitja1@seznam.cz',
+    photo_url: 'https://example.com/profile-photo.jpg',
+    role: 'Organizační pracovník',
+  },
+];
+
+export const ContactHero = () => {
+  return <ContactsSection contacts={PROFILE_DATA} title={translations.common.labels.contacts} />;
 };

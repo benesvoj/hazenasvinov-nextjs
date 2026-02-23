@@ -99,6 +99,7 @@ export * from './features/blog/blogPost';
 export * from './features/gallery/photoGallery';
 export * from './features/meetings/meetingMinutes';
 export * from './features/meetings/meetingMinutesContainer';
+export * from './features/profileCard/profileCard';
 export * from './features/releases/releaseNote';
 export * from './shared/Nullish';
 export * from './shared/ValueByDevice';

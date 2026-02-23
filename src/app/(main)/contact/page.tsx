@@ -2,7 +2,7 @@
 
 import {Skeleton} from '@heroui/react';
 
-import {ContactHero, ContactInfoCard} from '@/app/(main)/about/components';
+import {BillingInfoCard, ContactHero, VenueCard} from '@/app/(main)/about/components';
 
 import {Heading} from '@/components';
 import {useFetchClubConfig} from '@/hooks';
@@ -18,9 +18,10 @@ export default function ContactPage() {
         <Heading size={1}>Kontakt</Heading>
       </div>
       <div className={'grid grid-cols-2 gap-8'}>
-        <ContactHero data={data} />
-        <ContactInfoCard data={data} />
+        <VenueCard data={data} />
+        <BillingInfoCard data={data} />
       </div>
+      <ContactHero />
     </div>
   );
 }

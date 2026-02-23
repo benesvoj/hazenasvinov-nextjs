@@ -61,6 +61,11 @@ export const commonTranslations = {
     identityNumber: 'IČO',
     bankName: 'Název banky',
     bankNumber: 'Číslo účtu',
+    venueAddressAndContacts: 'Adresa sportoviště a kontaktní informace',
+    venueAddress: 'Adresa sportoviště',
+    contactPhone: 'Kontaktní telefon',
+    contactEmail: 'Kontaktní email',
+    contacts: 'Kontakty',
   },
   tabs: {
     overview: 'Přehled',

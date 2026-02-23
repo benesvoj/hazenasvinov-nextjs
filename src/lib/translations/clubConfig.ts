@@ -31,6 +31,7 @@ export const clubConfigTranslations = {
       facebook: 'Facebook',
       instagram: 'Instagram',
       logo: 'Logo klubu',
+      venueAddress: 'Adresa sportoviště',
     },
     placeholders: {
       identityNumber: 'Nezadávejte, pokud nemáte (např. sportovní kluby)',
@@ -42,8 +43,9 @@ export const clubConfigTranslations = {
       description: 'Krátký popis klubu, který se zobrazí na hlavní stránce.',
       foundedYear: 'Rok založení klubu (např. 1990)',
       contactEmail: 'E-mail pro kontakt s klubem (např. email@email.cz)',
-      address: 'Vložte adresu klubu',
+      address: 'Vložte adresu klubu pro fakturaci a další komunikaci (např. Ulice 123, Město, PSČ)',
       contactPhone: '+420 123 123 123',
+      venueAddress: 'Adresa sportoviště, kde klub trénuje nebo hraje zápasy',
     },
     upload: {
       logo: 'Nahrávání loga...',
