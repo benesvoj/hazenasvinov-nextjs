@@ -1,10 +1,10 @@
-import {createClient} from '@/utils/supabase/client';
+import {supabaseBrowserClient} from '@/utils/supabase/client';
 
 /**
  * Test function to debug materialized view refresh issues
  */
 export async function testMaterializedViewRefresh() {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   console.log('🔍 Testing materialized view refresh...');
 

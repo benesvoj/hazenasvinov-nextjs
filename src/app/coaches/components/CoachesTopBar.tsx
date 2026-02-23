@@ -4,7 +4,7 @@ import React from 'react';
 
 import {usePathname} from 'next/navigation';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 import {useUser} from '@/contexts/UserContext';
 
@@ -24,19 +24,19 @@ const getPageInfo = (pathname: string) => {
     const routeKey = route.href.replace(
       '/coaches/',
       ''
-    ) as keyof typeof translations.coaches.routes;
-    const descriptionKey = routeKey as keyof typeof translations.coaches.descriptions;
+    ) as keyof typeof translations.coachPortal.routes;
+    const descriptionKey = routeKey as keyof typeof translations.coachPortal.descriptions;
 
     return {
-      title: translations.coaches.routes[routeKey],
-      description: translations.coaches.descriptions[descriptionKey],
+      title: translations.coachPortal.routes[routeKey],
+      description: translations.coachPortal.descriptions[descriptionKey],
     };
   }
 
   // Fallback for unknown routes
   return {
-    title: translations.coaches.title,
-    description: translations.coaches.description || '',
+    title: translations.coachPortal.title,
+    description: translations.coachPortal.description || '',
   };
 };
 

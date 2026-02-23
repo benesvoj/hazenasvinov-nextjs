@@ -1,13 +1,13 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
     console.log('🧪 Testing login log functionality...');
 
     // Test 1: Check if we can create a client
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
     console.log('✅ Supabase client created');
 
     // Test 2: Check if we can access the table

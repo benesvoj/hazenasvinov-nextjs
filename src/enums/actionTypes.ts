@@ -1,6 +1,4 @@
-import {translations} from '@/lib/translations';
-
-const t = translations.action;
+import {translations} from '@/lib/translations/index';
 
 export enum ActionTypes {
   CREATE = 'create',
@@ -20,26 +18,32 @@ export enum ActionTypes {
   BULK = 'bulk',
   STATUS_TRANSITION = 'status-transition',
   PAYMENT = 'payment',
+  PASSWORD_RESET = 'password-reset',
+  BLOCKED = 'blocked',
+  UNBLOCK = 'unblock',
 }
 
 export const ACTION_TYPE_LABELS = {
-  [ActionTypes.CREATE]: t.add,
-  [ActionTypes.READ]: t.read,
-  [ActionTypes.UPDATE]: t.update,
-  [ActionTypes.DELETE]: t.delete,
-  [ActionTypes.CANCEL]: t.cancel,
-  [ActionTypes.SAVE]: t.save,
-  [ActionTypes.CLOSE]: t.close,
-  [ActionTypes.APPLY]: t.apply,
-  [ActionTypes.RESET]: t.reset,
-  [ActionTypes.SEARCH]: t.search,
-  [ActionTypes.FILTER]: t.filter,
-  [ActionTypes.SORT]: t.sort,
-  [ActionTypes.EXPORT]: t.export,
-  [ActionTypes.IMPORT]: t.import,
-  [ActionTypes.BULK]: t.bulk,
-  [ActionTypes.STATUS_TRANSITION]: t.statusTransition,
-  [ActionTypes.PAYMENT]: t.payment,
+  [ActionTypes.CREATE]: translations.common.actions.add,
+  [ActionTypes.READ]: translations.common.actions.read,
+  [ActionTypes.UPDATE]: translations.common.actions.update,
+  [ActionTypes.DELETE]: translations.common.actions.delete,
+  [ActionTypes.CANCEL]: translations.common.actions.cancel,
+  [ActionTypes.SAVE]: translations.common.actions.save,
+  [ActionTypes.CLOSE]: translations.common.actions.close,
+  [ActionTypes.APPLY]: translations.common.actions.apply,
+  [ActionTypes.RESET]: translations.common.actions.reset,
+  [ActionTypes.SEARCH]: translations.common.actions.search,
+  [ActionTypes.FILTER]: translations.common.actions.filter,
+  [ActionTypes.SORT]: translations.common.actions.sort,
+  [ActionTypes.EXPORT]: translations.common.actions.export,
+  [ActionTypes.IMPORT]: translations.common.actions.import,
+  [ActionTypes.BULK]: translations.common.actions.bulk,
+  [ActionTypes.STATUS_TRANSITION]: translations.common.actions.statusTransition,
+  [ActionTypes.PAYMENT]: translations.common.actions.payment,
+  [ActionTypes.PASSWORD_RESET]: translations.admin.users.table.actions.passwordReset,
+  [ActionTypes.BLOCKED]: translations.admin.users.table.actions.blocked,
+  [ActionTypes.UNBLOCK]: translations.admin.users.table.actions.unblock,
 } as const;
 
 export const getActionTypeOptions = () => {

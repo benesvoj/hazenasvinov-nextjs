@@ -1,19 +1,18 @@
 'use client';
-import {useState, useCallback} from 'react';
+
+import {useCallback, useState} from 'react';
 
 import {
-  UnifiedPlayer,
   PlayerSearchFilters,
   PlayerSearchResult,
+  UnifiedPlayer,
 } from '@/types/entities/member/data/unifiedPlayer';
 
-import {createClient} from '@/utils/supabase/client';
-
 import {getClubName} from '@/constants';
-
-const supabase = createClient();
+import {useSupabaseClient} from '@/hooks';
 
 export function useUnifiedPlayers() {
+  const supabase = useSupabaseClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

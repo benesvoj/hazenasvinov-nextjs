@@ -1271,6 +1271,59 @@ export type Database = {
         };
         Relationships: [];
       };
+      coach_cards: {
+        Row: {
+          created_at: string | null;
+          email: string | null;
+          id: string;
+          name: string;
+          note: string | null;
+          phone: string | null;
+          photo_path: string | null;
+          photo_url: string | null;
+          published_categories: string[] | null;
+          surname: string;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          email?: string | null;
+          id?: string;
+          name: string;
+          note?: string | null;
+          phone?: string | null;
+          photo_path?: string | null;
+          photo_url?: string | null;
+          published_categories?: string[] | null;
+          surname: string;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          email?: string | null;
+          id?: string;
+          name?: string;
+          note?: string | null;
+          phone?: string | null;
+          photo_path?: string | null;
+          photo_url?: string | null;
+          published_categories?: string[] | null;
+          surname?: string;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'coach_cards_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
       coach_categories: {
         Row: {
           category_id: string;
@@ -1342,6 +1395,80 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'betting_leaderboard';
             referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      coach_category_assignments: {
+        Row: {
+          assigned_at: string | null;
+          assigned_by: string | null;
+          category_id: string;
+          id: string;
+          user_profile_id: string;
+        };
+        Insert: {
+          assigned_at?: string | null;
+          assigned_by?: string | null;
+          category_id: string;
+          id?: string;
+          user_profile_id: string;
+        };
+        Update: {
+          assigned_at?: string | null;
+          assigned_by?: string | null;
+          category_id?: string;
+          id?: string;
+          user_profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'coach_category_assignments_assigned_by_fkey';
+            columns: ['assigned_by'];
+            isOneToOne: false;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'coach_category_assignments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'coach_category_assignments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'coach_category_assignments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['category_id_full'];
+          },
+          {
+            foreignKeyName: 'coach_category_assignments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'coach_category_assignments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'coach_category_assignments_user_profile_id_fkey';
+            columns: ['user_profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_profiles';
+            referencedColumns: ['id'];
           },
         ];
       };
@@ -3345,6 +3472,36 @@ export type Database = {
           },
         ];
       };
+      role_definitions: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          display_name: string;
+          id: string;
+          is_active: boolean | null;
+          name: string;
+          permissions: Json | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          display_name: string;
+          id?: string;
+          is_active?: boolean | null;
+          name: string;
+          permissions?: Json | null;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          display_name?: string;
+          id?: string;
+          is_active?: boolean | null;
+          name?: string;
+          permissions?: Json | null;
+        };
+        Relationships: [];
+      };
       seasons: {
         Row: {
           created_at: string | null;
@@ -3821,6 +3978,7 @@ export type Database = {
           created_at: string | null;
           id: string;
           role: string;
+          role_id: string | null;
           updated_at: string | null;
           user_id: string;
         };
@@ -3829,6 +3987,7 @@ export type Database = {
           created_at?: string | null;
           id?: string;
           role?: string;
+          role_id?: string | null;
           updated_at?: string | null;
           user_id: string;
         };
@@ -3837,18 +3996,53 @@ export type Database = {
           created_at?: string | null;
           id?: string;
           role?: string;
+          role_id?: string | null;
           updated_at?: string | null;
           user_id?: string;
         };
         Relationships: [
           {
+            foreignKeyName: 'user_profiles_role_id_fkey';
+            columns: ['role_id'];
+            isOneToOne: false;
+            referencedRelation: 'role_definitions';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'user_profiles_user_id_fkey';
             columns: ['user_id'];
-            isOneToOne: true;
+            isOneToOne: false;
             referencedRelation: 'betting_leaderboard';
             referencedColumns: ['user_id'];
           },
         ];
+      };
+      user_profiles_backup_20240127: {
+        Row: {
+          assigned_categories: string[] | null;
+          created_at: string | null;
+          id: string | null;
+          role: string | null;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          assigned_categories?: string[] | null;
+          created_at?: string | null;
+          id?: string | null;
+          role?: string | null;
+          updated_at?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          assigned_categories?: string[] | null;
+          created_at?: string | null;
+          id?: string | null;
+          role?: string | null;
+          updated_at?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
       };
       user_roles: {
         Row: {
@@ -4214,6 +4408,33 @@ export type Database = {
           total_teams: number | null;
         };
         Relationships: [];
+      };
+      coach_cards_with_categories: {
+        Row: {
+          assigned_categories: string[] | null;
+          created_at: string | null;
+          email: string | null;
+          id: string | null;
+          name: string | null;
+          note: string | null;
+          phone: string | null;
+          photo_path: string | null;
+          photo_url: string | null;
+          published_categories: string[] | null;
+          role: string | null;
+          surname: string | null;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'coach_cards_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
+          },
+        ];
       };
       match_stats: {
         Row: {
@@ -5225,6 +5446,20 @@ export type Database = {
       };
       get_attendance_summary:
         | {
+            Args: {p_category: string; p_season_id: string};
+            Returns: {
+              absent_count: number;
+              attendance_percentage: number;
+              excused_count: number;
+              late_count: number;
+              member_id: string;
+              member_name: string;
+              member_surname: string;
+              present_count: number;
+              total_sessions: number;
+            }[];
+          }
+        | {
             Args: {
               p_category_id: string;
               p_season_id: string;
@@ -5239,20 +5474,6 @@ export type Database = {
               session_id: string;
               session_title: string;
               total_members: number;
-            }[];
-          }
-        | {
-            Args: {p_category: string; p_season_id: string};
-            Returns: {
-              absent_count: number;
-              attendance_percentage: number;
-              excused_count: number;
-              late_count: number;
-              member_id: string;
-              member_name: string;
-              member_surname: string;
-              present_count: number;
-              total_sessions: number;
             }[];
           };
       get_attendance_trends: {

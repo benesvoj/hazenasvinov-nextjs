@@ -1,6 +1,6 @@
 import {NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function GET(request: Request) {
   const {searchParams} = new URL(request.url);
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const functionFilter = searchParams.get('function');
 
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Check authentication
     const {

@@ -13,7 +13,7 @@ import {NextResponse} from 'next/server';
 import type {SupabaseClient, User} from '@supabase/supabase-js';
 
 import supabaseAdmin from './admin';
-import {createClient} from './server';
+import {supabaseServerClient} from './server';
 
 /**
  * API Helper Utilities for Next.js API Routes
@@ -81,7 +81,7 @@ type AdminAuthHandler = (
  */
 export async function withAuth(handler: AuthHandler): Promise<NextResponse> {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Check if user is authenticated
     const {
@@ -125,7 +125,7 @@ export async function withPublicAccess(
   handler: ((supabase: SupabaseClient) => Promise<NextResponse>) | AuthHandler
 ): Promise<NextResponse> {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Execute handler with supabase client (no auth check)
     // If handler expects (user, supabase), pass null as user for compatibility
@@ -233,7 +233,7 @@ export async function withOptionalAuth(
   handler: (user: User | null, supabase: SupabaseClient) => Promise<NextResponse>
 ): Promise<NextResponse> {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     const {
       data: {user},

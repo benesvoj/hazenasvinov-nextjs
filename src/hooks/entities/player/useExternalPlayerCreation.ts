@@ -1,11 +1,10 @@
 'use client';
-import {useState, useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useCallback, useState} from 'react';
 
 import {showToast} from '@/components';
 import {Genders, MemberFunction} from '@/enums';
-import {useMemberClubRelationships} from '@/hooks';
+import {useMemberClubRelationships, useSupabaseClient} from '@/hooks';
 import {ExternalPlayerFormData, PlayerSearchResult} from '@/types';
 
 /**
@@ -16,7 +15,7 @@ export function useExternalPlayerCreation() {
   const [isLoading, setIsLoading] = useState(false);
   const [categoryGender, setCategoryGender] = useState<Genders | null>(null);
 
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
   const {createRelationship} = useMemberClubRelationships();
 
   /**

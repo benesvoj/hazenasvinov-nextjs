@@ -1,12 +1,11 @@
 'use client';
 
-import {useState, useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
-import {User, Session} from '@supabase/supabase-js';
-
-import {createClient} from '@/utils/supabase/client';
+import {Session, User} from '@supabase/supabase-js';
 
 import {showToast} from '@/components';
+import {useSupabaseClient} from '@/hooks';
 
 // Global flag to prevent multiple login logs for the same session
 let globalLoginLogged = false;
@@ -20,21 +19,22 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
+const INITiAL_AUTH_STATE: AuthState = {
+  user: null,
+  session: null,
+  loading: true,
+  error: null,
+  isAuthenticated: false,
+};
+
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    session: null,
-    loading: true,
-    error: null,
-    isAuthenticated: false,
-  });
+  const [authState, setAuthState] = useState<AuthState>(INITiAL_AUTH_STATE);
+  const supabase = useSupabaseClient();
 
   // Track if we've already processed the initial session
   const hasProcessedInitialSession = useRef(false);
 
   useEffect(() => {
-    const supabase = createClient();
-
     // Get initial session
     const getInitialSession = async () => {
       try {
@@ -159,7 +159,6 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
-      const supabase = createClient();
       await supabase.auth.signOut();
     } catch (error) {
       showToast.danger(`Error signing out: ${error}`);

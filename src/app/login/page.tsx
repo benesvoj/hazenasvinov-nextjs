@@ -17,12 +17,13 @@ import {
 import {PasswordInput} from '@/components/ui/client/inputs/PasswordInput';
 
 import {logSuccessfulLogin, logFailedLogin} from '@/utils/loginLogger';
-import {createClient} from '@/utils/supabase/client';
 
 import {LoadingSpinner} from '@/components';
+import {useSupabaseClient} from '@/hooks';
 import {publicRoutes} from '@/routes/routes';
 
 function LoginForm() {
+  const supabase = useSupabaseClient();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('admin');
   const [email, setEmail] = useState('');
@@ -52,7 +53,6 @@ function LoginForm() {
     setError('');
 
     try {
-      const supabase = createClient();
       const {error, data} = await supabase.auth.signInWithPassword({
         email,
         password,

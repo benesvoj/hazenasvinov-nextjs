@@ -1,11 +1,10 @@
-import {createClient} from '@/utils/supabase/client';
-import {withClientQueryList} from "@/utils/supabase/queryHelpers";
+import {withClientQueryList} from '@/utils/supabase/queryHelpers';
 
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
-import {DB_TABLE, ENTITY} from "@/queries/seasons";
+import {DB_TABLE, ENTITY} from '@/queries/seasons';
 import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
 import {Season} from '@/types';
-
+import {supabaseBrowserClient} from '@/utils';
 
 export async function getAllSeasons(
   ctx: QueryContext,
@@ -73,10 +72,7 @@ export async function getSeasonById(ctx: QueryContext, id: string): Promise<Quer
  * Use with useQuery in client components
  */
 export const fetchSeasons = withClientQueryList<Season>((supabase) =>
-supabase
-    .from(DB_TABLE)
-    .select('*')
-    .order('created_at', {ascending: false})
+  supabase.from(DB_TABLE).select('*').order('created_at', {ascending: false})
 );
 
 /**
@@ -84,13 +80,9 @@ supabase
  * Use with useQuery in client components
  */
 export async function fetchSeasonById(id: string): Promise<Season> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
-  const {data, error} = await supabase
-    .from(DB_TABLE)
-    .select('*')
-    .eq('id', id)
-    .single();
+  const {data, error} = await supabase.from(DB_TABLE).select('*').eq('id', id).single();
 
   if (error) {
     console.error(`Error fetching season ${id}:`, error);

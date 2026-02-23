@@ -4,6 +4,8 @@ import React from 'react';
 
 import {Alert} from '@heroui/react';
 
+import {translations} from '@/lib/translations/index';
+
 export interface PageContainerProps {
   children: React.ReactNode;
   isUnderConstruction?: boolean;
@@ -15,8 +17,8 @@ export default function PageContainer({children, isUnderConstruction = false}: P
       {isUnderConstruction && (
         <Alert
           color="warning"
-          title="Upozornění"
-          description="Tato stránka je v testovacím provozu. Některé funkce mohou být nedostupné nebo nefunkční."
+          title={translations.common.alerts.warning}
+          description={translations.common.underConstruction}
         />
       )}
       {children}

@@ -1,8 +1,8 @@
 'use client';
+
 import {useState, useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
+import {useSupabaseClient} from '@/hooks';
 import {
   PlayerLoan,
   PlayerLoanWithDetails,
@@ -11,9 +11,8 @@ import {
   PlayerLoanFilters,
 } from '@/types';
 
-const supabase = createClient();
-
 export function usePlayerLoans() {
+  const supabase = useSupabaseClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,7 +66,7 @@ export function usePlayerLoans() {
         setLoading(false);
       }
     },
-    []
+    [supabase]
   );
 
   // Get active loans
@@ -141,33 +140,36 @@ export function usePlayerLoans() {
         setLoading(false);
       }
     },
-    []
+    [supabase]
   );
 
   // End a loan
-  const endLoan = useCallback(async (loanId: string): Promise<boolean> => {
-    try {
-      setLoading(true);
-      setError(null);
+  const endLoan = useCallback(
+    async (loanId: string): Promise<boolean> => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const {error: endError} = await supabase.rpc('end_player_loan', {
-        p_loan_id: loanId,
-      });
+        const {error: endError} = await supabase.rpc('end_player_loan', {
+          p_loan_id: loanId,
+        });
 
-      if (endError) {
-        console.error('Error ending loan:', endError);
-        throw endError;
+        if (endError) {
+          console.error('Error ending loan:', endError);
+          throw endError;
+        }
+
+        return true;
+      } catch (err) {
+        console.error('Error in endLoan:', err);
+        setError(err instanceof Error ? err.message : 'Failed to end loan');
+        return false;
+      } finally {
+        setLoading(false);
       }
-
-      return true;
-    } catch (err) {
-      console.error('Error in endLoan:', err);
-      setError(err instanceof Error ? err.message : 'Failed to end loan');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [supabase]
+  );
 
   // Update a loan
   const updateLoan = useCallback(
@@ -197,7 +199,7 @@ export function usePlayerLoans() {
         setLoading(false);
       }
     },
-    []
+    [supabase]
   );
 
   // Get loan statistics
@@ -259,7 +261,7 @@ export function usePlayerLoans() {
         setLoading(false);
       }
     },
-    []
+    [supabase]
   );
 
   return {

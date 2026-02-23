@@ -1,16 +1,15 @@
 'use client';
 
-import React, {useState, useEffect, Suspense} from 'react';
+import React, {Suspense, useEffect, useState} from 'react';
 
 import {useRouter, useSearchParams} from 'next/navigation';
 
-import {Button, Input, Card, CardBody, CardHeader} from '@heroui/react';
+import {Button, Card, CardBody, CardHeader, Input} from '@heroui/react';
 
-import {LockClosedIcon, EyeIcon, EyeSlashIcon, CheckCircleIcon} from '@heroicons/react/24/outline';
-
-import {createClient} from '@/utils/supabase/client';
+import {CheckCircleIcon, EyeIcon, EyeSlashIcon, LockClosedIcon} from '@heroicons/react/24/outline';
 
 import {Heading} from '@/components';
+import {useSupabaseClient} from '@/hooks';
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -33,6 +32,8 @@ function ResetPasswordContent() {
     special: false,
   });
 
+  const supabase = useSupabaseClient();
+
   // Check for Supabase error parameters
   const supabaseError = searchParams.get('error');
   const supabaseErrorCode = searchParams.get('error_code');
@@ -47,8 +48,6 @@ function ResetPasswordContent() {
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const supabase = createClient();
-
       try {
         // First check if there's a session to avoid AuthSessionMissingError
         const {
@@ -191,8 +190,6 @@ function ResetPasswordContent() {
     setError('');
 
     try {
-      const supabase = createClient();
-
       // First, check if there's a session
       const {
         data: {session},

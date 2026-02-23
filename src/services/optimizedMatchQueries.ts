@@ -5,15 +5,15 @@
 import type {Match} from '@/types/entities/match/data/match';
 
 import {
+  cacheKeys,
+  categoryCache,
+  invalidateCache,
   matchCache,
   teamCache,
-  categoryCache,
-  cacheKeys,
-  invalidateCache,
 } from '@/lib/performanceCache';
 
-import {createClient} from '@/utils/supabase/client';
-import {transformMatchWithTeamNames, getTeamDisplayNameSafe} from '@/utils/teamDisplay';
+import {supabaseBrowserClient} from '@/utils/supabase/client';
+import {getTeamDisplayNameSafe, transformMatchWithTeamNames} from '@/utils/teamDisplay';
 
 import type {MatchQueryOptions, MatchQueryResult, SeasonalMatchQueryResult} from './matchQueries';
 
@@ -83,7 +83,7 @@ export async function getClubTeamCounts(
     cacheKey,
     teamCache,
     async () => {
-      const supabase = createClient();
+      const supabase = supabaseBrowserClient();
       const {data, error} = await supabase
         .from('club_category_teams')
         .select(
@@ -167,7 +167,7 @@ export async function getMatchesBasicOptimized(
     cacheKey,
     matchCache,
     async () => {
-      const supabase = createClient();
+      const supabase = supabaseBrowserClient();
       let query = supabase.from('matches').select(OPTIMIZED_MATCH_SELECT);
 
       // Apply filters efficiently
@@ -205,7 +205,7 @@ export async function getMatchesWithTeamsOptimized(
     cacheKey,
     matchCache,
     async () => {
-      const supabase = createClient();
+      const supabase = supabaseBrowserClient();
       let query = supabase.from('matches').select(OPTIMIZED_MATCH_WITH_TEAMS_SELECT);
 
       // Apply filters
@@ -297,7 +297,7 @@ export async function getMatchesSeasonalOptimized(
     cacheKey,
     matchCache,
     async () => {
-      const supabase = createClient();
+      const supabase = supabaseBrowserClient();
       let query = supabase
         .from('matches')
         .select(OPTIMIZED_MATCH_WITH_TEAMS_SELECT)
@@ -378,7 +378,7 @@ export async function getOwnClubMatchesOptimized(
     cacheKey,
     matchCache,
     async () => {
-      const supabase = createClient();
+      const supabase = supabaseBrowserClient();
       let query = supabase
         .from('own_club_matches')
         .select('*')

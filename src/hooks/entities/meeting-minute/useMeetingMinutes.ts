@@ -1,22 +1,20 @@
 'use client';
-import {useState, useCallback} from 'react';
+import {useCallback, useState} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
-import {MeetingMinutes, MeetingMinutesFilters, MeetingAttendee} from '@/types';
-import {API_ROUTES} from "@/lib";
+import {useSupabaseClient} from '@/hooks';
+import {API_ROUTES} from '@/lib';
+import {MeetingAttendee, MeetingMinutes, MeetingMinutesFilters} from '@/types';
 
 export function useMeetingMinutes() {
   const [meetingMinutes, setMeetingMinutes] = useState<MeetingMinutes[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const supabase = useSupabaseClient();
 
   const fetchMeetingMinutes = useCallback(async (filters: MeetingMinutesFilters = {}) => {
     try {
       setLoading(true);
       setError(null);
-
-      const supabase = createClient();
 
       let query = supabase
         .from('meeting_minutes')
@@ -136,8 +134,6 @@ export function useMeetingMinutes() {
         setLoading(true);
         setError(null);
 
-        const supabase = createClient();
-
         // Create meeting minutes
         const {data: meetingData, error: meetingError} = await supabase
           .from('meeting_minutes')
@@ -201,8 +197,6 @@ export function useMeetingMinutes() {
         setLoading(true);
         setError(null);
 
-        const supabase = createClient();
-
         // Update meeting minutes
         const {data: meetingData, error: meetingError} = await supabase
           .from('meeting_minutes')
@@ -264,8 +258,6 @@ export function useMeetingMinutes() {
         setLoading(true);
         setError(null);
 
-        const supabase = createClient();
-
         // Delete meeting minutes (attendees will be deleted automatically due to CASCADE)
         const {error} = await supabase.from('meeting_minutes').delete().eq('id', id);
 
@@ -286,8 +278,6 @@ export function useMeetingMinutes() {
 
   const getNextMeetingNumber = useCallback(async (year: number) => {
     try {
-      const supabase = createClient();
-
       const {data, error} = await supabase
         .from('meeting_minutes')
         .select('meeting_number')

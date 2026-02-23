@@ -5,7 +5,7 @@ import {createServerClient} from '@supabase/ssr';
 /**
  * Creates a Supabase server client for use in Server Components and API routes
  *
- * @deprecated For API routes, prefer using helper utilities from '@/utils/supabase/apiHelpers'
+ * @description For API routes, prefer using helper utilities from '@/utils/supabase/apiHelpers'
  * which provide built-in authentication and error handling.
  *
  * @example
@@ -26,7 +26,7 @@ import {createServerClient} from '@supabase/ssr';
  *
  * @returns Supabase client with cookie-based authentication
  */
-export async function createClient() {
+export async function supabaseServerClient() {
   const cookieStore = await cookies();
 
   return createServerClient(

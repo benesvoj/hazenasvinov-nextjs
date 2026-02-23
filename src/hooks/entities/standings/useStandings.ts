@@ -1,8 +1,8 @@
 'use client';
-import {useState, useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useCallback, useState} from 'react';
 
+import {useSupabaseClient} from '@/hooks';
 import {EnhancedStanding} from '@/types';
 
 /**
@@ -42,7 +42,7 @@ export function useStandings() {
   const [standings, setStandings] = useState<EnhancedStanding[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastFetchedCategoryId, setLastFetchedCategoryId] = useState<string | null>(null);
+  const supabase = useSupabaseClient();
 
   const fetchStandings = useCallback(async (categoryId?: string, seasonId?: string) => {
     try {
@@ -50,12 +50,6 @@ export function useStandings() {
       setError(null);
       setStandings([]); // Clear previous standings when fetching new ones
 
-      // console.log('🔍 Fetching standings...', {
-      //   categoryId,
-      //   seasonId
-      // });
-
-      const supabase = createClient();
       let query = supabase
         .from('standings')
         .select(
@@ -112,32 +106,12 @@ export function useStandings() {
         };
       });
 
-      // console.log('🔍 Standings fetched:', {
-      //   standingsCount: enhancedStandings.length,
-      //   standings: enhancedStandings,
-      //   rawData: data
-      // });
-
-      // Debug: Check if standings have team data
-      // enhancedStandings.forEach((standing: any, index: number) => {
-      //   console.log(`🔍 Standing ${index}:`, {
-      //     id: standing.id,
-      //     team_id: standing.team_id,
-      //     team: standing.team,
-      //     club: standing.club,
-      //     category_id: standing.category_id,
-      //     season_id: standing.season_id
-      //   });
-      // });
-
       setStandings(enhancedStandings);
-      setLastFetchedCategoryId(categoryId || null);
       setError(null);
     } catch (error) {
       setError('Chyba při načítání tabulky');
       console.error('Error fetching standings:', error);
       setStandings([]);
-      setLastFetchedCategoryId(null);
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,8 @@
 export const commonTranslations = {
+  clubTitle: 'TJ Sokol Svinov',
   loading: 'Načítání ...',
+  underConstruction:
+    'Tato stránka je v testovacím provozu. Některé funkce mohou být nedostupné nebo nefunkční',
   alerts: {
     warning: 'Upozornění',
     error: 'Chyba',
@@ -33,6 +36,8 @@ export const commonTranslations = {
     moveStatusTo: 'Přesunout ze stavu',
     moveStatusFrom: 'do stavu',
     payment: 'Platba',
+    create: 'Vytvořit',
+    send: 'Odeslat',
   },
   labels: {
     date: 'Datum',
@@ -46,5 +51,43 @@ export const commonTranslations = {
     player: 'Hráč',
     position: 'Pozice',
     actions: 'Akce',
+    user: 'Uživatel',
+    note: 'Poznámka',
+  },
+  tabs: {
+    overview: 'Přehled',
+    details: 'Detaily',
+    settings: 'Nastavení',
+    history: 'Historie',
+    basicInfo: 'Základní informace',
+  },
+  table: {
+    columns: {
+      actions: 'Akce',
+    },
+    actions: {
+      update: 'Upravit',
+      delete: 'Smazat',
+    },
+  },
+  admin: {
+    title: 'Administrace',
+    subtitle: 'Administrace',
+    groups: {
+      teamManagement: 'Správa týmů',
+      userManagement: 'Správa uživatelů',
+      membersManagement: 'Správa členů',
+      clubManagement: 'Správa klubu',
+      other: 'Ostatní',
+    },
+  },
+  coachPortal: {
+    title: 'Trenérský Portal',
+  },
+  userRoles: {
+    admin: 'Admin',
+    coach: 'Trenér',
+    headCoach: 'Hlavní trenér',
+    member: 'Člen',
   },
 };

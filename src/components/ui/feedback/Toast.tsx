@@ -24,7 +24,14 @@ const toastConfigs = {
   },
 };
 
-// Toast utility functions
+/**
+ * Utility for showing toasts with predefined types and options.
+ * Each method accepts a description and optional overrides for the toast configuration.
+ * Example usage:
+ * showToast.success('Data byla úspěšně uložena!');
+ * showToast.danger('Nastala chyba při ukládání dat.', { duration: 10000 });
+ * showToast.warning('Tato akce může mít nečekané důsledky.', { title: 'Varování' });
+ */
 export const showToast = {
   success: (description: string, options?: Partial<ToastOptions>) => {
     return addToast({

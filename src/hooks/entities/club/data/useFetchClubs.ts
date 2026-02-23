@@ -2,10 +2,10 @@
 
 import {createDataFetchHook} from '@/hooks/factories';
 
-import {API_ROUTES, translations} from '@/lib';
-import {Club} from '@/types';
+import {translations} from '@/lib/translations/index';
 
-const t = translations.admin.clubs.responseMessages;
+import {API_ROUTES} from '@/lib';
+import {Club} from '@/types';
 
 /**
  * Hook for fetching clubs
@@ -15,6 +15,6 @@ export function useFetchClubs() {
   return createDataFetchHook<Club>({
     endpoint: API_ROUTES.entities.root('clubs'),
     entityName: 'clubs',
-    errorMessage: t.clubsFetchError,
+    errorMessage: translations.clubs.responseMessages.clubsFetchError,
   })();
 }

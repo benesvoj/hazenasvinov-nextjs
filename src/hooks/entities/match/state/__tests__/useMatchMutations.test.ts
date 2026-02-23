@@ -11,7 +11,7 @@ let mockInsertResponse: {error: {message: string} | null} = {error: null};
 
 // Mock Supabase client with configurable responses
 vi.mock('@/utils/supabase/client', () => ({
-  createClient: () => ({
+  supabaseBrowserClient: () => ({
     from: vi.fn(() => ({
       insert: vi.fn(() => Promise.resolve(mockInsertResponse)),
       update: vi.fn().mockReturnThis(),

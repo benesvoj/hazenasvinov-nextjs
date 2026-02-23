@@ -1,13 +1,13 @@
 'use client';
 
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import Link from 'next/link';
 import {useParams} from 'next/navigation';
 
-import {Tabs, Tab, Input, Button, Image} from '@heroui/react';
+import {Button, Image, Input, Tab, Tabs} from '@heroui/react';
 
-import {PencilIcon, UserGroupIcon, TrophyIcon} from '@heroicons/react/24/outline';
+import {PencilIcon, TrophyIcon, UserGroupIcon} from '@heroicons/react/24/outline';
 
 import {useModals, useModalWithItem} from '@/hooks/shared/useModals';
 
@@ -15,24 +15,24 @@ import LogoUpload from '@/components/ui/client/LogoUpload';
 import {DeleteConfirmationModal, UnifiedModal} from '@/components/ui/modals';
 
 import {isEmpty} from '@/utils/arrayHelper';
-import {createClient} from '@/utils/supabase/client';
 
 import {LoadingSpinner} from '@/components';
-import {Category, Season, Club, Team} from '@/types';
+import {useFetchClubs, useSupabaseClient} from '@/hooks';
+import {Category, Club, Season, Team} from '@/types';
 
-import {AssignCategoryModal, TeamsTab, CategoriesTab, ClubsNavigation} from './components';
+import {AssignCategoryModal, CategoriesTab, ClubsNavigation, TeamsTab} from './components';
 
 export default function ClubDetailPage() {
   const params = useParams();
   const clubId = params.id as string;
 
+  const {data} = useFetchClubs();
   // Memoize clubId to prevent unnecessary re-renders
   const memoizedClubId = React.useMemo(() => clubId, [clubId]);
 
   const [club, setClub] = useState<Club | null>(null);
   const [teams, setTeams] = useState<any[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [seasons, setSeasons] = useState<Season[]>([]);
   const [clubCategories, setClubCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -50,7 +50,7 @@ export default function ClubDetailPage() {
     logo_url: '',
   });
 
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   // Fetch club data
   const fetchClub = useCallback(async () => {
@@ -172,7 +172,6 @@ export default function ClubDetailPage() {
       if (seasonsResult.error) throw seasonsResult.error;
 
       setCategories(categoriesResult.data || []);
-      setSeasons(seasonsResult.data || []);
     } catch (error) {
       console.error('Error fetching category and seasons:', error);
     }

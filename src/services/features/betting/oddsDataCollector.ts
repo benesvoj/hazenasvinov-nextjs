@@ -1,6 +1,5 @@
-import {createClient} from '@/utils/supabase/client';
-
 import {Match, TeamStats} from '@/types';
+import {supabaseBrowserClient} from '@/utils';
 
 /**
  * Odds Data Collector Service
@@ -17,7 +16,7 @@ export async function getTeamStats(
   teamId: string,
   matchLimit: number = 15
 ): Promise<TeamStats | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     // Fetch completed matches for this team (home and away)
@@ -248,7 +247,7 @@ export async function getHeadToHeadStats(
   draws: number;
   avg_goals: number;
 } | null> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   try {
     const {data: matches, error} = await supabase

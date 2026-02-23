@@ -1,14 +1,14 @@
 'use client';
 
-import {useState, useEffect, useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
+import {useSupabaseClient} from '@/hooks';
 
 export function useTeamClubId(teamId?: string) {
   const [clubId, setClubId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const fetchClubId = useCallback(async () => {
     if (!teamId) {

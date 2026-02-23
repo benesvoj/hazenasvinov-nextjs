@@ -1,12 +1,9 @@
 'use client';
 
-import {useState, useEffect, useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
-import {Member} from '@/types/entities/member/data/member';
-
-import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
-
-import {createClient} from '@/utils/supabase/client';
+import {useSupabaseClient, useUserRoles} from '@/hooks';
+import {Member} from '@/types';
 
 interface BirthdayMember extends Member {
   daysUntilBirthday: number;
@@ -25,6 +22,7 @@ export function useUpcomingBirthdays(
   const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
 
   const {getCurrentUserCategories} = useUserRoles();
+  const supabase = useSupabaseClient();
 
   const calculateDaysUntilBirthday = (
     dateOfBirth: string
@@ -80,8 +78,6 @@ export function useUpcomingBirthdays(
     try {
       setLoading(true);
       setError(null);
-
-      const supabase = createClient();
 
       // Build query based on filtering requirements
       let query = supabase.from('members').select('*').not('date_of_birth', 'is', null);

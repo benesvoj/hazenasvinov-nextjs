@@ -1,13 +1,13 @@
-import {createClient} from '@/utils/supabase/client';
-
 import {useUser} from '@/contexts/UserContext';
+
+import {useSupabaseClient} from '@/hooks';
 
 // Simplified useAuth hook that uses UserContext
 export function useAuth() {
   const {user, loading, error, isAuthenticated, refreshUser} = useUser();
+  const supabase = useSupabaseClient();
 
   const signOut = async () => {
-    const supabase = createClient();
     await supabase.auth.signOut();
     // UserContext will automatically update when auth state changes
   };
@@ -21,13 +21,4 @@ export function useAuth() {
     refreshUser,
     signOut,
   };
-}
-
-// Export the AuthState interface for backward compatibility
-export interface AuthState {
-  user: any;
-  session: any;
-  loading: boolean;
-  error: string | null;
-  isAuthenticated: boolean;
 }

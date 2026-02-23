@@ -13,7 +13,7 @@ import DropdownMenu from '@/components/ui/dropdown-menu/DropdownMenu';
 import Logo from '@/components/ui/layout/Logo';
 import Link from '@/components/ui/link/Link';
 
-
+// TODO: remove this
 import {texts} from '@/utils/texts';
 
 import {buildMenuFromPages, fallbackRoutes, MenuItem} from '@/routes/dynamicRoutes';
@@ -26,6 +26,7 @@ const Header = () => {
   const menuItems: MenuItem[] = loading ? [] : buildMenuFromPages(visiblePages);
 
   // Fallback menu items if none are available
+  // TODO: should be replaced with static routes or a more robust fallback mechanism
   const fallbackMenuItems: MenuItem[] = [
     {title: 'Domů', route: '/'},
     {title: 'O nás', route: '/about'},

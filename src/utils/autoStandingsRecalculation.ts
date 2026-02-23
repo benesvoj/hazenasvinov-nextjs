@@ -1,4 +1,4 @@
-import {createClient} from '@/utils/supabase/client';
+import {supabaseBrowserClient} from '@/utils/supabase/client';
 
 import {calculateStandings} from './standingsCalculator';
 
@@ -14,9 +14,9 @@ export async function autoRecalculateStandings(
   categoryId?: string,
   seasonId?: string
 ): Promise<{success: boolean; error?: string; recalculated?: boolean}> {
-  try {
-    const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
+  try {
     // If categoryId or seasonId not provided, fetch them from the match
     let finalCategoryId = categoryId;
     let finalSeasonId = seasonId;
@@ -100,75 +100,6 @@ export async function autoRecalculateStandings(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Neočekávaná chyba při přepočtu tabulky',
-    };
-  }
-}
-
-/**
- * Recalculates standings for multiple matches (useful for batch operations)
- * @param matchIds - Array of match IDs
- * @returns Promise<{ success: boolean; error?: string; recalculatedCount?: number }>
- */
-export async function autoRecalculateStandingsForMatches(
-  matchIds: string[]
-): Promise<{success: boolean; error?: string; recalculatedCount?: number}> {
-  try {
-    const supabase = createClient();
-
-    // Get unique category/season combinations from matches
-    const {data: matches, error: matchError} = await supabase
-      .from('matches')
-      .select('category_id, season_id')
-      .in('id', matchIds);
-
-    if (matchError) {
-      console.error('Error fetching matches for batch standings recalculation:', matchError);
-      return {success: false, error: 'Nepodařilo se načíst data zápasů'};
-    }
-
-    if (!matches || matches.length === 0) {
-      return {success: true, recalculatedCount: 0};
-    }
-
-    // Get unique category/season combinations
-    const uniqueCombinations = new Set(
-      matches.map(
-        (match: {category_id: string; season_id: string}) =>
-          `${match.category_id}-${match.season_id}`
-      )
-    );
-
-    let recalculatedCount = 0;
-    const errors: string[] = [];
-
-    // Recalculate standings for each unique combination
-    for (const combination of uniqueCombinations) {
-      const [categoryId, seasonId] = (combination as string).split('-');
-
-      const result = await autoRecalculateStandings('', categoryId, seasonId);
-
-      if (result.success && result.recalculated) {
-        recalculatedCount++;
-      } else if (result.error) {
-        errors.push(`${categoryId}/${seasonId}: ${result.error}`);
-      }
-    }
-
-    if (errors.length > 0) {
-      return {
-        success: false,
-        error: `Chyby při přepočtu tabulek: ${errors.join('; ')}`,
-        recalculatedCount,
-      };
-    }
-
-    return {success: true, recalculatedCount};
-  } catch (error) {
-    console.error('Unexpected error in batch standings recalculation:', error);
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Neočekávaná chyba při dávkovém přepočtu tabulek',
     };
   }
 }

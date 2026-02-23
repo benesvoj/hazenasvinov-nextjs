@@ -9,7 +9,7 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2025-11-25
+ * Last generated: 2026-01-28
  */
 
 export interface MembersInternalSchema {

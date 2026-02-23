@@ -1,11 +1,10 @@
 'use client';
-import {useState, useEffect, useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
 import {translations} from '@/lib/translations/index';
 
-import {createClient} from '@/utils/supabase/client';
-
 import {MatchStatus} from '@/enums';
+import {useSupabaseClient} from '@/hooks';
 import {Category, Season, Team} from '@/types';
 
 /**
@@ -57,6 +56,7 @@ export function useFetchMatch(matchId: string | null) {
   const [match, setMatch] = useState<TransformedMatch | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const supabase = useSupabaseClient();
 
   const fetchMatch = useCallback(async () => {
     if (!matchId) return;
@@ -65,7 +65,6 @@ export function useFetchMatch(matchId: string | null) {
       setLoading(true);
       setError(null);
 
-      const supabase = createClient();
       const {data, error} = await supabase
         .from('matches')
         .select(

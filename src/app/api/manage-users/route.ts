@@ -1,6 +1,8 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@supabase/supabase-js';
+import supabaseAdmin from '@/utils/supabase/admin';
+
+import {getDefaultRoleId} from '@/queries/roleDefinitions/queries';
 
 export async function POST(request: NextRequest) {
   let body: any = null;
@@ -12,29 +14,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({error: 'Action is required'}, {status: 400});
     }
 
-    // Use service role key for admin operations
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      console.error('Missing Supabase configuration:', {
-        supabaseUrl: !!supabaseUrl,
-        serviceRoleKey: !!serviceRoleKey,
-        supabaseUrlValue: supabaseUrl?.substring(0, 20) + '...',
-        serviceRoleKeyValue: serviceRoleKey?.substring(0, 20) + '...',
-      });
-      return NextResponse.json({error: 'Server configuration error'}, {status: 500});
-    }
-
-    console.log('Supabase configuration loaded successfully');
-
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-
     switch (action) {
       case 'update':
         if (!userId || !userData) {
@@ -45,7 +24,7 @@ export async function POST(request: NextRequest) {
         }
 
         // For existing users, only update metadata, not email
-        const {error: updateError} = await supabase.auth.admin.updateUserById(userId, {
+        const {error: updateError} = await supabaseAdmin.auth.admin.updateUserById(userId, {
           user_metadata: {
             full_name: userData.full_name,
             phone: userData.phone,
@@ -85,7 +64,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if user already exists by listing users and filtering by email
-        const {data: allUsers, error: checkError} = await supabase.auth.admin.listUsers();
+        const {data: allUsers, error: checkError} = await supabaseAdmin.auth.admin.listUsers();
         const existingUser = allUsers?.users?.find((user) => user.email === userData.email);
         if (existingUser) {
           return NextResponse.json(
@@ -98,7 +77,7 @@ export async function POST(request: NextRequest) {
 
         // Test Supabase connection first
         console.log('Testing Supabase connection...');
-        const {data: testData, error: testError} = await supabase.auth.admin.listUsers({
+        const {data: testData, error: testError} = await supabaseAdmin.auth.admin.listUsers({
           page: 1,
           perPage: 1,
         });
@@ -122,7 +101,7 @@ export async function POST(request: NextRequest) {
 
         // Check if there are any database constraints or issues
         console.log('Checking database configuration...');
-        const {data: dbInfo, error: dbError} = await supabase
+        const {data: dbInfo, error: dbError} = await supabaseAdmin
           .from('information_schema.tables')
           .select('table_name')
           .eq('table_schema', 'public')
@@ -137,17 +116,40 @@ export async function POST(request: NextRequest) {
         // Try creating user with inviteUserByEmail (invitation flow)
         console.log('Attempting user creation with inviteUserByEmail:', userData.email);
 
-        const {data: createData, error: createError} = await supabase.auth.admin.inviteUserByEmail(
-          userData.email,
-          {
+        const {data: createData, error: createError} =
+          await supabaseAdmin.auth.admin.inviteUserByEmail(userData.email, {
             data: {
               full_name: userData.full_name || '',
               phone: userData.phone || '',
               bio: userData.bio || '',
               position: userData.position || '',
             },
-          }
+          });
+
+        const {data: defaultRoleId, error} = await getDefaultRoleId(
+          {
+            supabase: supabaseAdmin,
+          },
+          'member'
         );
+        if (error || !defaultRoleId) {
+          console.error('Failed to fetch default role ID:', error);
+          return NextResponse.json(
+            {error: 'Server configuration error - default role not found'},
+            {status: 500}
+          );
+        }
+        const {error: profileError} = await supabaseAdmin.from('user_profiles').insert({
+          user_id: userId,
+          role_id: defaultRoleId,
+          // Legacy compatibility, remove in future
+          role: 'member',
+          assigned_categories: null,
+        });
+
+        if (profileError) {
+          console.error('Failed to create user profile:', profileError);
+        }
 
         if (createError) {
           console.error('Supabase inviteUserByEmail error:', createError);
@@ -214,7 +216,7 @@ export async function POST(request: NextRequest) {
 
         // First get current user metadata
         const {data: currentUser, error: fetchError} =
-          await supabase.auth.admin.getUserById(userId);
+          await supabaseAdmin.auth.admin.getUserById(userId);
         if (fetchError) {
           throw fetchError;
         }
@@ -222,7 +224,7 @@ export async function POST(request: NextRequest) {
         const currentMetadata = currentUser.user?.user_metadata || {};
         const isBlocked = currentMetadata.is_blocked;
 
-        const {error: blockError} = await supabase.auth.admin.updateUserById(userId, {
+        const {error: blockError} = await supabaseAdmin.auth.admin.updateUserById(userId, {
           user_metadata: {
             ...currentMetadata,
             is_blocked: !isBlocked,

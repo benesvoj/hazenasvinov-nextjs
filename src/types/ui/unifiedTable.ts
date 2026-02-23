@@ -27,7 +27,7 @@ export type ColumnType<T = any> = {
   isRowHeader?: boolean;
   textValue?: string;
   isActionColumn?: boolean;
-  actions?: ActionConfig<T>[];
+  actions?: ActionConfig<T>[] | ((item: T) => ActionConfig<T>[]);
   className?: string;
 };
 

@@ -1,9 +1,8 @@
 'use server';
 
 import {revalidatePath} from 'next/cache';
-import {redirect} from 'next/navigation';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 /**
  * Betting Authentication Actions
@@ -11,7 +10,7 @@ import {createClient} from '@/utils/supabase/server';
  */
 
 export async function bettingLogin(email: string, password: string) {
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
 
   const {data, error} = await supabase.auth.signInWithPassword({
     email,
@@ -37,7 +36,7 @@ export async function bettingLogin(email: string, password: string) {
 }
 
 export async function bettingSignup(email: string, password: string, fullName?: string) {
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
 
   const {data: signupData, error} = await supabase.auth.signUp({
     email,
@@ -80,7 +79,7 @@ export async function bettingSignup(email: string, password: string, fullName?: 
 }
 
 export async function bettingLogout() {
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
 
   const {error} = await supabase.auth.signOut();
 
@@ -103,7 +102,7 @@ export async function bettingLogout() {
 }
 
 export async function getCurrentBettingUser() {
-  const supabase = await createClient();
+  const supabase = await supabaseServerClient();
 
   const {
     data: {user},

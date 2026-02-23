@@ -1,6 +1,6 @@
 import {type NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 import {privateRoutes, publicRoutes} from '@/routes/routes';
 
@@ -11,7 +11,7 @@ export async function proxy(request: NextRequest) {
       request.nextUrl.pathname.startsWith(privateRoutes.admin) ||
       request.nextUrl.pathname.startsWith('/coaches')
     ) {
-      const supabase = await createClient();
+      const supabase = await supabaseServerClient();
       const {
         data: {user},
       } = await supabase.auth.getUser();

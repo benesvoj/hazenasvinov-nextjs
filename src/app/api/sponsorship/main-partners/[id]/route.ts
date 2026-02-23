@@ -1,12 +1,12 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 // GET - Fetch single main partner by ID
 export async function GET(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
   try {
     const {id} = await params;
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     const {data, error} = await supabase.from('main_partners').select('*').eq('id', id).single();
 
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{id: 
 export async function PUT(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
   try {
     const {id} = await params;
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
     const body = await request.json();
 
     const {data, error} = await supabase
@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest, {params}: {params: Promise<{id: 
 export async function DELETE(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
   try {
     const {id} = await params;
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     const {error} = await supabase.from('main_partners').delete().eq('id', id);
 

@@ -1,11 +1,11 @@
-import {createClient} from '@/utils/supabase/client';
+import {supabaseBrowserClient} from '@/utils/supabase/client';
 
 /**
  * Centralized function to refresh the own_club_matches materialized view
  * This ensures all match operations use the same refresh logic
  */
 export async function refreshOwnClubMatchesView(): Promise<boolean> {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   // console.log('Refreshing own_club_matches materialized view...');
 

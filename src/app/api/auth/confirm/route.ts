@@ -3,7 +3,7 @@ import {type NextRequest} from 'next/server';
 
 import {type EmailOtpType} from '@supabase/supabase-js';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 import {publicRoutes} from '@/routes/routes';
 
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       tokenValue: token ? `${token.substring(0, 10)}...` : 'none',
     });
     try {
-      const supabase = await createClient();
+      const supabase = await supabaseServerClient();
 
       let error;
       let result;

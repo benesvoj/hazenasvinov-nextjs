@@ -2,10 +2,10 @@
 
 import {createDataFetchHook} from '@/hooks/factories';
 
-import {API_ROUTES, translations} from '@/lib';
-import {Committee} from '@/types';
+import {translations} from '@/lib/translations/index';
 
-const t = translations.admin.committees.responseMessages;
+import {API_ROUTES} from '@/lib';
+import {Committee} from '@/types';
 
 /**
  * Hook for fetching committees
@@ -15,6 +15,6 @@ export function useFetchCommittees() {
   return createDataFetchHook<Committee>({
     endpoint: API_ROUTES.entities.root('committees'),
     entityName: 'committees',
-    errorMessage: t.committeesFetchFailed,
+    errorMessage: translations.committees.responseMessages.committeesFetchFailed,
   })();
 }

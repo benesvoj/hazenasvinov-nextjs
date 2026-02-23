@@ -1,10 +1,10 @@
 import {NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Test 1: Check if table exists
     const {data: tableCheck, error: tableError} = await supabase

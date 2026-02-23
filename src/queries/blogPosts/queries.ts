@@ -1,10 +1,10 @@
-import {createClient} from '@/utils/supabase/client';
 import {withClientQueryList} from '@/utils/supabase/queryHelpers';
 
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
 import {DB_TABLE, ENTITY} from '@/queries/blogPosts/constants';
 import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
 import {Blog} from '@/types';
+import {supabaseBrowserClient} from '@/utils';
 
 export async function getAllBlogPosts(
   ctx: QueryContext,
@@ -85,7 +85,7 @@ export const fetchBlogPosts = withClientQueryList<Blog>((supabase) =>
  * Use with useQuery or prefetchQuery in Server Components
  */
 export async function fetchBlogPostBySlug(slug: string) {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   // Fetch blog post
   const {data: post, error: postError} = await supabase
@@ -128,7 +128,7 @@ export async function fetchBlogPostBySlug(slug: string) {
  * Use when blog post has match_id
  */
 export async function fetchBlogPostMatch(matchId: string) {
-  const supabase = createClient();
+  const supabase = supabaseBrowserClient();
 
   const {data: matchData, error} = await supabase
     .from('matches')

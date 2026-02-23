@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({error: 'Email is required'}, {status: 400});
     }
 
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Get the origin from the request headers or use environment variable
     const origin =

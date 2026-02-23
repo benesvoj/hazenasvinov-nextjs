@@ -1,6 +1,4 @@
-import {translations} from '@/lib/translations';
-
-const t = translations.userRoles;
+import {translations} from '@/lib/translations/index';
 
 export enum UserRoles {
   ADMIN = 'admin',
@@ -10,10 +8,10 @@ export enum UserRoles {
 }
 
 export const USER_ROLES_LABELS: Record<UserRoles, string> = {
-  [UserRoles.ADMIN]: t.admin,
-  [UserRoles.COACH]: t.coach,
-  [UserRoles.HEAD_COACH]: t.headCoach,
-  [UserRoles.MEMBER]: t.member,
+  [UserRoles.ADMIN]: translations.common.userRoles.admin,
+  [UserRoles.COACH]: translations.common.userRoles.coach,
+  [UserRoles.HEAD_COACH]: translations.common.userRoles.headCoach,
+  [UserRoles.MEMBER]: translations.common.userRoles.member,
 };
 
 export const getUserRolesOptions = () =>

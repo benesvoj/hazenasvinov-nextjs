@@ -4,18 +4,17 @@ import {useEffect} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {createClient} from '@/utils/supabase/client';
+import {useSupabaseClient} from '@/hooks';
 
 export const dynamic = 'force-dynamic';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
+  const supabase = useSupabaseClient();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const supabase = createClient();
-
         // Get the URL hash parameters
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');

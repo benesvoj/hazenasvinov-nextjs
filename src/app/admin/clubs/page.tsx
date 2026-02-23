@@ -8,16 +8,14 @@ import {Image, Input} from '@heroui/react';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations/index';
+
 import {ClubFormModal} from '@/app/admin/clubs/components/ClubFormModal';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {useClubFiltering, useClubForm, useClubs, useFetchClubs} from '@/hooks';
-import {translations} from '@/lib';
 import {Club} from '@/types';
-
-const tAction = translations.action;
-const t = translations.admin.clubs;
 
 export default function ClubsAdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,7 +105,7 @@ export default function ClubsAdminPage() {
 
   const filters = (
     <Input
-      placeholder={t.filters.placeholder}
+      placeholder={translations.clubs.filters.placeholder}
       value={searchTerm}
       onChange={handleSearchChange}
       className="max-w-md"
@@ -115,20 +113,28 @@ export default function ClubsAdminPage() {
   );
 
   const clubColumns = [
-    {key: 'logo', label: t.table.logo},
-    {key: 'name', label: t.table.name},
-    {key: 'short_name', label: t.table.shortName},
-    {key: 'city', label: t.table.city},
-    {key: 'founded_year', label: t.table.foundedYear},
-    {key: 'venue', label: t.table.venue},
+    {key: 'logo', label: translations.clubs.table.logo},
+    {key: 'name', label: translations.clubs.table.name},
+    {key: 'short_name', label: translations.clubs.table.shortName},
+    {key: 'city', label: translations.clubs.table.city},
+    {key: 'founded_year', label: translations.clubs.table.foundedYear},
+    {key: 'venue', label: translations.clubs.table.venue},
     {
       key: 'actions',
-      label: t.table.actions,
+      label: translations.common.table.columns.actions,
       isActionColumn: true,
       actions: [
-        {type: ActionTypes.READ, onPress: openViewModal, title: tAction.read},
-        {type: ActionTypes.UPDATE, onPress: handleEditClick, title: tAction.edit},
-        {type: ActionTypes.DELETE, onPress: handleDeleteClick, title: tAction.delete},
+        {type: ActionTypes.READ, onPress: openViewModal, title: translations.common.actions.read},
+        {
+          type: ActionTypes.UPDATE,
+          onPress: handleEditClick,
+          title: translations.common.actions.edit,
+        },
+        {
+          type: ActionTypes.DELETE,
+          onPress: handleDeleteClick,
+          title: translations.common.actions.delete,
+        },
       ],
     },
   ];
@@ -161,7 +167,7 @@ export default function ClubsAdminPage() {
       <AdminContainer
         actions={[
           {
-            label: t.addClub,
+            label: translations.clubs.addClub,
             onClick: handleAddClick,
             variant: 'solid',
             buttonType: ActionTypes.CREATE,
@@ -174,10 +180,10 @@ export default function ClubsAdminPage() {
           isLoading={fetchLoading}
           columns={clubColumns}
           data={data}
-          ariaLabel={t.title}
+          ariaLabel={translations.clubs.title}
           renderCell={renderClubCell}
           getKey={(club: Club) => club.id}
-          emptyContent={t.table.noClubs}
+          emptyContent={translations.clubs.table.noClubs}
           isStriped
         />
       </AdminContainer>
@@ -196,8 +202,8 @@ export default function ClubsAdminPage() {
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.onClose}
         onConfirm={handleConfirmDelete}
-        title={t.deleteClub}
-        message={t.deleteClubMessage}
+        title={translations.clubs.deleteClub}
+        message={translations.clubs.deleteClubMessage}
         isLoading={crudLoading}
       />
     </>

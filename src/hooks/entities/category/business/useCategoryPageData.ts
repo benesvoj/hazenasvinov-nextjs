@@ -2,8 +2,7 @@
 
 import {useState, useEffect, useCallback} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
+import {useSupabaseClient} from '@/hooks';
 import {Category, Match, BlogPost} from '@/types';
 import {createMatchQuery} from '@/utils';
 
@@ -41,6 +40,8 @@ export function useCategoryPageData(
     postsLimit = 3,
   } = options;
 
+  const supabase = useSupabaseClient();
+
   const [data, setData] = useState<CategoryPageData>({
     category: null,
     matches: {autumn: [], spring: []},
@@ -58,7 +59,6 @@ export function useCategoryPageData(
 
     try {
       setData((prev) => ({...prev, loading: true, error: null}));
-      const supabase = createClient();
 
       // Batch 1: Get category and active season in parallel
       const [categoryResult, seasonResult] = await Promise.all([

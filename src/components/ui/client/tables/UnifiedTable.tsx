@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@heroui/react';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 import {isEmpty} from '@/utils/arrayHelper';
 
@@ -49,8 +49,6 @@ export default function UnifiedTable<T = any>({
   totalPages: externalTotalPages,
   onPageChange: externalOnPageChange,
 }: UnifiedTableProps<T>) {
-  const t = translations.unifiedTable;
-
   // Determine if using server-side or client-side pagination
   const isServerPagination = externalPage !== undefined && externalOnPageChange !== undefined;
 
@@ -105,6 +103,10 @@ export default function UnifiedTable<T = any>({
         return 'danger';
       case ActionTypes.READ:
         return 'default';
+      case ActionTypes.BLOCKED:
+        return 'success';
+      case ActionTypes.UNBLOCK:
+        return 'danger';
       default:
         return 'default';
     }
@@ -112,11 +114,13 @@ export default function UnifiedTable<T = any>({
 
   // Render action column
   const renderActionColumn = (item: T, column: ColumnType<T>) => {
-    if (isEmpty(column.actions)) return null;
+    const actions = typeof column.actions === 'function' ? column.actions(item) : column.actions;
+
+    if (isEmpty(actions)) return null;
 
     return (
       <div className="flex justify-center gap-2">
-        {column.actions?.map((action, index) => {
+        {actions?.map((action, index) => {
           const isDisabled = action.disabled ? action.disabled(item) : false;
           const icon = action.icon || getDefaultIcon(action.type);
           const color = action.color || getDefaultColor(action.type);
@@ -204,7 +208,7 @@ export default function UnifiedTable<T = any>({
       </TableHeader>
       <TableBody
         items={paginatedData}
-        emptyContent={emptyContent || t.emptyMessage}
+        emptyContent={emptyContent || translations.components.unifiedTable.emptyMessage}
         isLoading={isLoading}
         loadingContent={loadingContent}
       >

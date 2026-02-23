@@ -2,20 +2,17 @@
 
 import React, {useEffect, useState} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
-import {useUserRoles} from '@/hooks';
+import {useSupabaseClient, useUserRoles} from '@/hooks';
 
 export default function AuthDebugger() {
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const {hasRole} = useUserRoles();
+  const supabase = useSupabaseClient();
 
   useEffect(() => {
     const debugAuth = async () => {
       try {
-        const supabase = createClient();
-
         // Get current user
         const {
           data: {user},
@@ -81,7 +78,7 @@ export default function AuthDebugger() {
     };
 
     debugAuth();
-  }, [hasRole]);
+  }, [hasRole, supabase]);
 
   if (loading) {
     return <div>Loading debug info...</div>;

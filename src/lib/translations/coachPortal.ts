@@ -1,0 +1,25 @@
+export const coachPortalTranslations = {
+  title: 'Trenérský portál',
+  description: 'Přehled vašich týmů a aktivit',
+  routes: {
+    dashboard: 'Dashboard',
+    matches: 'Zápasy',
+    lineups: 'Soupisky týmů',
+    videos: 'Videa',
+    attendance: 'Docházka členů',
+    statistics: 'Statistiky',
+    meetingMinutes: 'Zápisy z výborových schůzí',
+    members: 'Seznam členů',
+    profile: 'Profil trenéra',
+  },
+  descriptions: {
+    dashboard: 'Přehled vašich týmů a aktivit',
+    matches: 'Zápasy pro vaše přiřazené kategorie',
+    lineups: 'Správa soupisek vašich týmů',
+    videos: 'Videa a tréninkové materiály',
+    attendance: 'Sledování docházky členů',
+    statistics: 'Statistiky a analýzy týmů',
+    meetingMinutes: 'Zápisy z výborových schůzí',
+    profile: 'Správa vašeho trenérského profilu',
+  },
+};

@@ -35,6 +35,7 @@ import {
   useMatchMutations,
   useSeasonFiltering,
   useStandings,
+  useSupabaseClient,
   useTeamDisplayLogic,
   useTeams,
 } from '@/hooks';
@@ -43,7 +44,6 @@ import {
   buildMatchInsertData,
   buildMatchUpdateData,
   calculateStandings,
-  createClient,
   generateInitialStandings,
   isNilOrZero,
   refreshMaterializedViewWithCallback,
@@ -117,6 +117,7 @@ export default function MatchesAdminPage() {
   } = useFetchCategories();
   const {data: members, loading: membersLoading, refetch: fetchMembers} = useFetchMembers();
   const {teams, loading: allTeamsLoading, fetchTeams} = useTeams();
+  const supabase = useSupabaseClient();
 
   // Modal states
   const modal = useModals(
@@ -170,8 +171,6 @@ export default function MatchesAdminPage() {
       return newSet;
     });
   };
-
-  const supabase = createClient();
 
   // Use the enhanced seasons hook
   const {data: seasons, loading: seasonsLoading} = useFetchSeasons();
@@ -746,7 +745,8 @@ export default function MatchesAdminPage() {
               >
                 {sortedSeasons.map((season) => (
                   <SelectItem key={season.id} textValue={season.name}>
-                    {season.name} {season.is_closed ? `(${translations.seasons.closed})` : ''}
+                    {season.name}{' '}
+                    {season.is_closed ? `(${translations.seasons.labels.closed})` : ''}
                   </SelectItem>
                 ))}
               </Select>

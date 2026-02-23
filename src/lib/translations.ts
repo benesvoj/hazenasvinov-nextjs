@@ -119,7 +119,6 @@ export const translations = {
   authenticationRequired: 'Vyžadováno přihlášení',
   loginRequiredForAccess: 'Pro přístup k této stránce se musíte přihlásit.',
   admin: {
-    title: 'Administrace',
     posts: {
       title: 'Správa článků',
       description: 'Správa článků, které jsou dostupné v systému.',
@@ -247,48 +246,6 @@ export const translations = {
         createError: 'Chyba při vytváření přiřazení kategorie klubu.',
         updateError: 'Chyba při aktualizaci přiřazení kategorie klubu.',
         deleteError: 'Chyba při mazání přiřazení kategorie klubu.',
-      },
-    },
-    committees: {
-      title: 'Správa komisí',
-      description: 'Správa komisí, které jsou dostupné v systému.',
-      addCommittee: 'Přidat komisi',
-      deleteCommittee: 'Smazat komisi',
-      deleteCommitteeMessage: 'Opravdu chcete smazat komisi? Tato akce je nevratná.',
-      modal: {
-        titleAdd: 'Přidat komisi',
-        titleEdit: 'Upravit komisi',
-        code: 'Kód',
-        codePlaceholder: 'např. OSK_OSTRAVA',
-        name: 'Název',
-        namePlaceholder: 'např. Oblastní soutěžní komise Ostrava',
-        description: 'Popis',
-        descriptionPlaceholder: 'Volitelný popis komise',
-        sortOrder: 'Pořadí',
-        active: 'Aktivní',
-      },
-      table: {
-        code: 'Kód',
-        name: 'Název',
-        description: 'Popis',
-        status: 'Status',
-        sortOrder: 'Pořadí',
-        actions: 'Akce',
-        activeLabel: 'Aktivní',
-        inactiveLabel: 'Neaktivní',
-        noCommittees: 'Žádné komise nebyly nalezeny',
-      },
-      responseMessages: {
-        createSuccess: 'Komise byla úspěšně přidána',
-        updateSuccess: 'Komise byla úspěšně aktualizována',
-        deleteSuccess: 'Komise byla úspěšně smazána',
-        createError: 'Chyba při přidávání komise',
-        updateError: 'Chyba při aktualizaci komise',
-        deleteError: 'Chyba při mazání komise',
-        committeesFetchFailed: 'Chyba při načítání komisí',
-        committeesUpdateSuccess: 'Komise byla úspěšně aktualizována',
-        mandatoryCode: 'Kod je povinný',
-        mandatoryName: 'Název je povinny',
       },
     },
     seasons: {
@@ -523,28 +480,12 @@ export const translations = {
   users: {
     title: 'Správa uživatelů',
     description: 'Správa uživatelů, kteří se mohou přihlásit do systému.',
-    tabs: {
-      users: 'Uživatelé',
-      loginLogs: 'Historie přihlášení',
-    },
     table: {
       id: 'ID',
       email: 'Email',
       createdAt: 'Vytvořeno',
       updatedAt: 'Aktualizováno',
       actions: 'Akce',
-    },
-    loginLogs: {
-      title: 'Historie přihlášení',
-      description: 'Přehled přihlášení uživatelů do systému.',
-      table: {
-        user: 'Uživatel',
-        email: 'Email',
-        loginTime: 'Čas přihlášení',
-        ipAddress: 'IP adresa',
-        userAgent: 'Prohlížeč',
-        status: 'Status',
-      },
     },
     modal: {
       title: 'Přidat uživatele',
@@ -561,48 +502,6 @@ export const translations = {
     description: 'Správa sezón pro organizaci soutěží a týmů.',
     fetchActiveSeasonError: 'Chyba při načítání aktivní sezóny',
     fetchAllSeasonsError: 'Chyba při načítání sezón',
-  },
-  season: {
-    activeLabel: 'Aktivní',
-    inactiveLabel: 'Neaktivní',
-    closedLabel: 'Uzavřená',
-    openLabel: 'Otevřená',
-    table: {
-      name: 'Název',
-      startDate: 'Datum začátku',
-      endDate: 'Datum konce',
-      status: 'Status',
-      actions: 'Akce',
-    },
-    title: 'Sezóna',
-    description: 'Správa sezón, které jsou dostupné v systému.',
-    selectSeason: 'Vyberte sezónu',
-    noSeasons: 'Žádné sezóny nebyly načteny',
-    addSeason: 'Přidat sezónu',
-    editSeason: 'Upravit sezónu',
-    deleteSeason: 'Smazat sezónu',
-    deleteSeasonMessage:
-      'Opravdu chcete smazat sezónu? Tato akce je nevratná a může ovlivnit související data.',
-    addSeasonModal: {
-      title: 'Přidat sezónu',
-      description: 'Přidejte novou sezónu pro organizaci soutěží a týmů.',
-    },
-    active: 'Aktivní sezóna',
-    closed: 'Uzavřená sezóna',
-    input: {
-      name: 'Název sezóny',
-      namePlaceholder: 'např. 2024/2025',
-      startDate: 'Datum začátku',
-      endDate: 'Datum konce',
-    },
-    responseMessages: {
-      createSuccess: 'Sezóna byla úspěšně vytvořena.',
-      updateSuccess: 'Sezóna byla úspěšně aktualizována.',
-      deleteSuccess: 'Sezóna byla úspěšně smazána.',
-      createError: 'Chyba při vytváření sezóny.',
-      updateError: 'Chyba při aktualizaci sezóny.',
-      deleteError: 'Chyba při mazání sezóny.',
-    },
   },
   error: {
     fetchCategories: 'Chyba při načítání kategorií',
@@ -1019,16 +918,6 @@ export const translations = {
   coaches: {
     title: 'Trenérský Portal',
     description: 'Přehled vašich týmů a aktivit',
-    routes: {
-      dashboard: 'Dashboard',
-      matches: 'Zápasy',
-      lineups: 'Soupisky týmů',
-      videos: 'Videa',
-      attendance: 'Docházka členů',
-      statistics: 'Statistiky',
-      meetingMinutes: 'Zápisy z výborových schůzí',
-      members: 'Seznam členů',
-    },
     descriptions: {
       dashboard: 'Přehled vašich týmů a aktivit',
       matches: 'Zápasy pro vaše přiřazené kategorie',
@@ -1084,9 +973,6 @@ export const translations = {
       statistics: 'Statistiky',
     },
   },
-  unifiedTable: {
-    emptyMessage: 'Žádné záznamy k zobrazení.',
-  },
   unifiedPlayerManager: {
     loading: 'Načítání hráčů...',
     error: 'Chyba při načítání hráčů',
@@ -1123,12 +1009,6 @@ export const translations = {
   teamTypes: {
     home: 'Domácí',
     away: 'Hosté',
-  },
-  userRoles: {
-    admin: 'Admin',
-    coach: 'Trenér',
-    headCoach: 'Hlavní trenér',
-    member: 'Člen',
   },
   lineupRole: {
     captain: 'Kapitán',

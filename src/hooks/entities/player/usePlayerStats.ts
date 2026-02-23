@@ -1,9 +1,9 @@
 'use client';
+
 import {useState, useEffect, useMemo} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
-import {useUser} from '@/contexts/UserContext';
+import {useUser} from '@/contexts';
+import {useSupabaseClient} from '@/hooks';
 
 export interface PlayerStats {
   id: string;
@@ -37,6 +37,8 @@ export function usePlayerStats(categoryId?: string): UsePlayerStatsResult {
   const [error, setError] = useState<string | null>(null);
   const {user, userCategories, getCurrentUserCategories} = useUser();
 
+  const supabase = useSupabaseClient();
+
   useEffect(() => {
     const fetchPlayerStats = async () => {
       if (!user?.id) return;
@@ -55,7 +57,6 @@ export function usePlayerStats(categoryId?: string): UsePlayerStatsResult {
         // If categoryId is provided, filter by that category, otherwise use all assigned category
         const categoryIdsToUse = categoryId ? [categoryId] : assignedCategoryIds;
 
-        const supabase = createClient();
         const playerStatsMap = new Map<string, PlayerStats>();
 
         // Use a single query with joins to get all data at once

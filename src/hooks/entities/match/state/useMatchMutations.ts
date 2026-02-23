@@ -8,20 +8,14 @@ import {translations} from '@/lib/translations/index';
 
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
 import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
-import {createClient} from '@/utils/supabase/client';
 
 import {showToast} from '@/components';
+import {useSupabaseClient} from '@/hooks';
 import {
-  createMatch as createMatchMutation,
-  updateMatch as updateMatchMutation,
-  deleteMatch as deleteMatchMutation,
-  bulkUpdateMatchweek as bulkUpdateMutation,
-} from '@/queries/matches';
-import {
-  MatchInsertData,
-  MatchUpdateData,
-  MatchResultData,
   BulkMatchweekUpdateData,
+  MatchInsertData,
+  MatchResultData,
+  MatchUpdateData,
 } from '@/queries/matches/types';
 import {Match} from '@/types';
 
@@ -49,7 +43,7 @@ export function useMatchMutations(options: UseMatchMutationsOptions): UseMatchMu
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const invalidateMatchQueries = useCallback(async () => {
     await queryClient.invalidateQueries({

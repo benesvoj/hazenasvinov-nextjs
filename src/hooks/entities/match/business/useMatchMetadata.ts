@@ -1,15 +1,12 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 
-import {createClient} from '@/utils/supabase/client';
-
+import {useSupabaseClient} from '@/hooks';
 import {
   MatchMetadata,
   CreateMatchMetadataRequest,
   UpdateMatchMetadataRequest,
   MetadataType,
 } from '@/types';
-
-const supabase = createClient();
 
 // Query keys
 export const matchMetadataKeys = {
@@ -21,6 +18,8 @@ export const matchMetadataKeys = {
 
 // Fetch metadata for a match
 export function useMatchMetadata(matchId: string, type?: MetadataType) {
+  const supabase = useSupabaseClient();
+
   return useQuery({
     queryKey: type
       ? matchMetadataKeys.byMatchAndType(matchId, type)
@@ -50,6 +49,8 @@ export function useMatchMetadata(matchId: string, type?: MetadataType) {
 
 // Fetch primary metadata of a specific type
 export function usePrimaryMatchMetadata(matchId: string, type: MetadataType) {
+  const supabase = useSupabaseClient();
+
   return useQuery({
     queryKey: [...matchMetadataKeys.byMatchAndType(matchId, type), 'primary'],
     queryFn: async () => {
@@ -74,6 +75,7 @@ export function usePrimaryMatchMetadata(matchId: string, type: MetadataType) {
 // Add new metadata
 export function useAddMatchMetadata() {
   const queryClient = useQueryClient();
+  const supabase = useSupabaseClient();
 
   return useMutation({
     mutationFn: async (data: CreateMatchMetadataRequest) => {
@@ -104,6 +106,7 @@ export function useAddMatchMetadata() {
 // Update existing metadata
 export function useUpdateMatchMetadata() {
   const queryClient = useQueryClient();
+  const supabase = useSupabaseClient();
 
   return useMutation({
     mutationFn: async ({id, ...data}: UpdateMatchMetadataRequest) => {
@@ -135,6 +138,7 @@ export function useUpdateMatchMetadata() {
 // Delete metadata
 export function useDeleteMatchMetadata() {
   const queryClient = useQueryClient();
+  const supabase = useSupabaseClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
@@ -173,6 +177,7 @@ export function useDeleteMatchMetadata() {
 // Set primary metadata (unset others of same type)
 export function useSetPrimaryMatchMetadata() {
   const queryClient = useQueryClient();
+  const supabase = useSupabaseClient();
 
   return useMutation({
     mutationFn: async ({id, matchId, type}: {id: string; matchId: string; type: MetadataType}) => {

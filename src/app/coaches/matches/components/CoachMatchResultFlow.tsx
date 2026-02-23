@@ -1,30 +1,26 @@
 'use client';
 
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
-  Textarea,
-  Progress,
   Card,
   CardBody,
   Image,
-  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Progress,
+  Textarea,
 } from '@heroui/react';
 
 import {
-  XMarkIcon,
+  CameraIcon,
+  CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CheckIcon,
-  CameraIcon,
-  DocumentTextIcon,
-  TrophyIcon,
 } from '@heroicons/react/24/outline';
 
 import {useQueryClient} from '@tanstack/react-query';
@@ -34,13 +30,12 @@ import {showToast} from '@/components/ui/feedback/Toast';
 import {translations} from '@/lib/translations';
 
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
-import {createClient} from '@/utils/supabase/client';
 
 import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
 
 import {Heading, MatchResultInput} from '@/components';
 import {formatDateString} from '@/helpers';
-import {useAddMatchMetadata} from '@/hooks';
+import {useAddMatchMetadata, useSupabaseClient} from '@/hooks';
 import {Match} from '@/types';
 
 interface CoachMatchResultFlowProps {
@@ -82,6 +77,8 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
 
   const t = translations.match;
   const totalSteps = 3;
+
+  const supabase = useSupabaseClient();
 
   // Handle keyboard events and scroll to active input
   useEffect(() => {
@@ -202,8 +199,6 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
     setError('');
 
     try {
-      const supabase = createClient();
-
       // Upload photo to storage if provided
       let photoUrl = null;
       if (formData.matchPhoto) {

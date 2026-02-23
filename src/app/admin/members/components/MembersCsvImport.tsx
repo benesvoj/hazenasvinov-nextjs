@@ -5,13 +5,13 @@ import {
   Button,
   Checkbox,
   Input,
-  Select,
-  SelectItem,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
 } from '@heroui/react';
 
 import {
@@ -22,9 +22,8 @@ import {
 
 import {useModal} from '@/hooks/shared/useModals';
 
-import {createClient} from '@/utils/supabase/client';
-
 import {Genders, getGenderOptions, getMemberFunctionOptions, MemberFunction} from '@/enums';
+import {useSupabaseClient} from '@/hooks';
 
 interface CsvMember {
   regNumber: string;
@@ -54,9 +53,8 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
   const [defaultSex, setDefaultSex] = useState<Genders>(Genders.MALE);
   const [defaultFunctions, setDefaultFunctions] = useState<string[]>([MemberFunction.PLAYER]);
 
+  const supabase = useSupabaseClient();
   const modal = useModal();
-
-  const supabase = createClient();
 
   const parseCsvFile = useCallback((csvFile: File) => {
     const reader = new FileReader();
@@ -89,8 +87,6 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
           }
         }
       }
-
-      console.log('🔍 Parsed CSV data:', data);
       setPreview(data);
     };
     reader.readAsText(csvFile);
@@ -112,6 +108,8 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
     [parseCsvFile]
   );
 
+  // TODO: optimize import by batching inserts and handling errors more gracefully (e.g. show which rows failed)
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const handleImport = useCallback(async () => {
     if (!preview.length) return;
 
@@ -175,7 +173,7 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
 
     setImportResult(result);
     setImporting(false);
-  }, [preview, defaultCategory, defaultSex, defaultFunctions, supabase]);
+  }, [preview, defaultCategory, defaultSex, defaultFunctions]);
 
   const handleClose = useCallback(() => {
     setFile(null);

@@ -1,10 +1,8 @@
 'use client';
 
-import {useState, useEffect, useMemo, useCallback} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 
-import {createClient} from '@/utils/supabase/client';
-
-import {useHeadToHeadMatches, useMatchesWithTeams} from '@/hooks';
+import {useHeadToHeadMatches, useMatchesWithTeams, useSupabaseClient} from '@/hooks';
 import {Match, Nullish} from '@/types';
 
 export function useStrategyPreparation(selectedMatch: Match | Nullish) {
@@ -20,6 +18,8 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     includeTeamDetails: true,
     includeCategory: true,
   });
+
+  const supabase = useSupabaseClient();
 
   // Get opponent team info
   const opponentTeam = useMemo(() => {
@@ -111,7 +111,6 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
 
       try {
         setClubIdLoading(true);
-        const supabase = createClient();
 
         const {data: clubCategory, error} = await supabase
           .from('club_categories')
@@ -146,8 +145,6 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     try {
       setVideosLoading(true);
       setVideosError(null);
-
-      const supabase = createClient();
 
       if (filters.club_id && (filters.club_id === 'undefined' || filters.club_id === 'null')) {
         setOpponentVideos([]);

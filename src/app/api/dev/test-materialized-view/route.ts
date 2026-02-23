@@ -1,10 +1,10 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {createClient} from '@/utils/supabase/server';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await supabaseServerClient();
 
     // Check if the materialized view exists and what columns it has
     const {data: viewInfo, error: viewError} = await supabase.rpc('exec_sql', {
