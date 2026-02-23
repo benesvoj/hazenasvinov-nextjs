@@ -98,7 +98,7 @@ export async function getCoachCardByUserId(
  * Filters by:
  * - published_categories contains the given categoryId (card is published to this category)
  */
-export async function getPublishedCoachCadsByCategory(
+export async function getPublishedCoachCardsByCategory(
   ctx: QueryContext,
   categoryId: string
 ): Promise<QueryResult<CoachCardWithCategories[]>> {
@@ -118,7 +118,7 @@ export async function getPublishedCoachCadsByCategory(
       count: data?.length ?? 0,
     };
   } catch (err: any) {
-    console.error(`Exception in getPublishedCoachCadsByCategory:`, err);
+    console.error(`Exception in getPublishedCoachCardsByCategory:`, err);
     return {data: null, error: err.message || 'Unknown error', count: 0};
   }
 }

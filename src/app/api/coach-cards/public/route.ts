@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 
 import {supabaseServerClient} from '@/utils/supabase/server';
 
-import {getPublishedCoachCadsByCategory} from '@/queries/coachCards';
+import {getPublishedCoachCardsByCategory} from '@/queries/coachCards';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = await supabaseServerClient();
-    const result = await getPublishedCoachCadsByCategory({supabase}, categoryId);
+    const result = await getPublishedCoachCardsByCategory({supabase}, categoryId);
 
     if (result.error) {
       return NextResponse.json({error: result.error}, {status: 500});

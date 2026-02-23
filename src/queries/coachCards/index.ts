@@ -4,7 +4,7 @@ export {
   getAllCoachCards,
   getCoachCardById,
   getCoachCardByUserId,
-  getPublishedCoachCadsByCategory,
+  getPublishedCoachCardsByCategory,
 } from './queries';
 
 export {createCoachCard, updateCoachCard, deleteCoachCard} from './mutations';

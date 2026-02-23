@@ -12,13 +12,6 @@ export interface UserRoleSummary {
   email?: string;
   full_name?: string;
 }
-
-export interface RoleAssignment {
-  userId: string;
-  roles: string[];
-  categories: string[]; // category IDs for coach role
-}
-
 /**
  * Strongly-typed role permissions
  * Replaces generic Json type from database schema
@@ -66,18 +59,6 @@ export interface UserProfile {
   assigned_categories: string[] | null;
   created_at: string;
   updated_at: string;
-}
-
-/** Summary of user roles for admin view */
-export interface UserRoleSummary {
-  user_id: string;
-  profile_role: string;
-  roles: string[];
-  assigned_categories: string[];
-  assigned_category_names: string[];
-  assigned_category_codes: string[];
-  email?: string;
-  full_name?: string;
 }
 
 /** Input for role assignment */

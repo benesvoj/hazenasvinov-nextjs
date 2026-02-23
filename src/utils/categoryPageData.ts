@@ -5,7 +5,7 @@
  */
 import {supabaseServerClient} from '@/utils/supabase/server';
 
-import {getPublishedCoachCadsByCategory} from '@/queries/coachCards';
+import {getPublishedCoachCardsByCategory} from '@/queries/coachCards';
 import {
   Blog,
   Category,
@@ -413,7 +413,7 @@ export async function getCategoryPageData(
     autumnMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    const coachCardsResult = await getPublishedCoachCadsByCategory({supabase}, category.id);
+    const coachCardsResult = await getPublishedCoachCardsByCategory({supabase}, category.id);
 
     return {
       category: category as any,
