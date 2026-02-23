@@ -1,10 +1,10 @@
 'use client';
 
+import {translations} from '@/lib/translations/index';
+
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {Club, ClubFormData} from '@/types';
 
-const t = translations.admin.clubs.responseMessages;
 const initialFormData: ClubFormData = {
   name: '',
   short_name: '',
@@ -25,6 +25,6 @@ const initialFormData: ClubFormData = {
 export function useClubForm() {
   return createFormHook<Club, ClubFormData>({
     initialFormData,
-    validationRules: [{field: 'name', message: t.mandatoryName}],
+    validationRules: [{field: 'name', message: translations.clubs.responseMessages.mandatoryName}],
   })();
 }

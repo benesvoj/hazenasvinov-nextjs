@@ -31,9 +31,6 @@ export default function ClubHighlightSection() {
             sportovní průpravu a pevné zázemí v přátelském kolektivu.
           </p>
           <p>Přijďte si vyzkoušet národní házenou a staňte se součástí naší sportovní rodiny!</p>
-          <Button as={Link} href="/about" color="primary">
-            Více o nás
-          </Button>
         </CardBody>
       </Card>
 

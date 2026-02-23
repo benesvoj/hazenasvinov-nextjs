@@ -1,6 +1,7 @@
 export const commonTranslations = {
   clubTitle: 'TJ Sokol Svinov',
   loading: 'Načítání ...',
+  fullPageLoading: 'Načítání stránky...',
   underConstruction:
     'Tato stránka je v testovacím provozu. Některé funkce mohou být nedostupné nebo nefunkční',
   alerts: {
@@ -53,6 +54,18 @@ export const commonTranslations = {
     actions: 'Akce',
     user: 'Uživatel',
     note: 'Poznámka',
+    address: 'Adresa',
+    email: 'Email',
+    phone: 'Telefon',
+    billingInformation: 'Fakturační údaje a bankovní spojení',
+    identityNumber: 'IČO',
+    bankName: 'Název banky',
+    bankNumber: 'Číslo účtu',
+    venueAddressAndContacts: 'Adresa sportoviště a kontaktní informace',
+    venueAddress: 'Adresa sportoviště',
+    contactPhone: 'Kontaktní telefon',
+    contactEmail: 'Kontaktní email',
+    contacts: 'Kontakty',
   },
   tabs: {
     overview: 'Přehled',
@@ -89,5 +102,9 @@ export const commonTranslations = {
     coach: 'Trenér',
     headCoach: 'Hlavní trenér',
     member: 'Člen',
+  },
+  responseMessages: {
+    copyToClipboardSuccess: 'Zkopírováno do schránky',
+    copyToClipboardError: 'Nepodařilo se zkopírovat do schránky',
   },
 };

@@ -27,6 +27,12 @@ export async function GET(
       return NextResponse.json({error: 'getById not supported for this entity'}, {status: 400});
     }
 
+    if (config.queryLayer?.getOne) {
+      const result = await config.queryLayer.getOne({supabase});
+      if (result.error) throw new Error(result.error);
+      return successResponse(result.data);
+    }
+
     if (config.queryLayer) {
       const result = await config.queryLayer.getById({supabase}, id);
 

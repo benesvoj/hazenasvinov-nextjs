@@ -46,7 +46,17 @@ export const ACTION_TYPE_LABELS = {
   [ActionTypes.UNBLOCK]: translations.admin.users.table.actions.unblock,
 } as const;
 
-export const getActionTypeOptions = () => {
+/**
+ * Retrieves a list of action type options derived from predefined labels.
+ *
+ * This function maps over the entries of the `ACTION_TYPE_LABELS` object
+ * and transforms them into an array of option objects. Each option object
+ * consists of a `value` property, which is cast to the `ActionTypes` type,
+ * and a `label` property.
+ *
+ * @returns {Array<{value: ActionTypes, label: string}>} An array of action type options.
+ */
+export const getActionTypeOptions = (): Array<{value: ActionTypes; label: string}> => {
   return Object.entries(ACTION_TYPE_LABELS).map(([value, label]) => ({
     value: value as ActionTypes,
     label,

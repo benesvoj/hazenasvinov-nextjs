@@ -1,3 +1,5 @@
+'use client';
+
 import {createDataFetchHook} from '@/hooks/factories';
 
 import {ENTITY} from '@/queries/userProfiles';

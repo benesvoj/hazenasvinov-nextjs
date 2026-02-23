@@ -13,12 +13,12 @@ export interface CRUDHookConfig {
   entityName: string;
   /** Success messages */
   messages: {
-    createSuccess: string;
-    updateSuccess: string;
-    deleteSuccess: string;
-    createError: string;
-    updateError: string;
-    deleteError: string;
+    createSuccess?: string;
+    updateSuccess?: string;
+    deleteSuccess?: string;
+    createError?: string;
+    updateError?: string;
+    deleteError?: string;
   };
 }
 
@@ -181,7 +181,7 @@ export function createCRUDHook<T, TInsert>(
           throw new Error(response.error || messages.createError);
         }
 
-        showToast.success(messages.createSuccess);
+        showToast.success(messages.createSuccess || `${entityName} created successfully`);
         return response.data as T;
       } catch (err: any) {
         console.error(`Error creating ${entityName}:`, err);
@@ -210,7 +210,7 @@ export function createCRUDHook<T, TInsert>(
           throw new Error(response.error || messages.updateError);
         }
 
-        showToast.success(messages.updateSuccess);
+        showToast.success(messages.updateSuccess || `${entityName} updated successfully`);
         return response.data as T;
       } catch (err: any) {
         console.error(`Error updating ${entityName}:`, err);
@@ -237,7 +237,7 @@ export function createCRUDHook<T, TInsert>(
           throw new Error(response.error || messages.deleteError);
         }
 
-        showToast.success(messages.deleteSuccess);
+        showToast.success(messages.deleteSuccess || `${entityName} deleted successfully`);
         return {success: true};
       } catch (err: any) {
         console.error(`Error deleting ${entityName}:`, err);

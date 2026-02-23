@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 import {Button, Card, CardBody, CardFooter, CardHeader} from '@heroui/react';
 
 import {LoadingSpinner, Heading, showToast} from '@/components';
@@ -8,6 +10,27 @@ import {UnifiedCardProps} from '@/types';
 
 import {renderEmptyState} from '../feedback/EmptyState';
 
+/**
+ * Renders a customizable, reusable card component with optional header, footer, content, and action buttons.
+ *
+ * @param {Object} props The properties for configuring the UnifiedCard component.
+ * @param {React.ReactNode} props.children The content to be displayed within the card body.
+ * @param {function} [props.onPress] A callback function to handle card press actions.
+ * @param {string} [props.title] The title to be displayed in the card header.
+ * @param {number} [props.titleSize=2] The size level of the title, determining its visual appearance.
+ * @param {string} [props.subtitle] The subtitle to be displayed beneath the title in the card header.
+ * @param {boolean} [props.isSelected=false] Indicates if the card is in a selected state.
+ * @param {boolean} [props.fullWidth=false] Determines if the card should span the full width of its container.
+ * @param {'left'|'center'|'right'|'justify-between'} [props.contentAlignment='left'] Controls the alignment of card content.
+ * @param {'none'|'sm'|'md'|'lg'} [props.padding='sm'] Specifies the internal padding of the card.
+ * @param {'default'|'actions'|'filters'|'content'} [props.variant='default'] Determines the style variant of the card.
+ * @param {React.ReactNode} [props.footer] Content to be rendered in the footer of the card.
+ * @param {boolean} [props.isLoading=false] Displays a loading spinner when set to true.
+ * @param {string} [props.emptyStateType] Indicates the type of empty state to be displayed if no content is available.
+ * @param {boolean} [props.isPressable=false] Specifies if the card is pressable (has hover and click interactions).
+ * @param {Array} [props.actions] A list of actions (buttons) to be displayed in the card header.
+ * @return {React.ReactElement} A rendered card component with the configured properties and structure.
+ */
 export default function UnifiedCard({
   children,
   onPress,
@@ -24,7 +47,7 @@ export default function UnifiedCard({
   emptyStateType,
   isPressable = false,
   actions,
-}: UnifiedCardProps) {
+}: UnifiedCardProps): React.ReactElement {
   const selectedClass = isSelected
     ? 'bg-primary-50 border-2 border-primary-500 shadow-md'
     : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary-300 hover:shadow-md';

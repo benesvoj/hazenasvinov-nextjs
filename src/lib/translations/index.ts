@@ -1,5 +1,6 @@
 import {adminTranslations} from './admin';
 import {attendanceTranslations} from './attendance';
+import {clubConfigTranslations} from './clubConfig';
 import {clubsTranslations} from './clubs';
 import {coachCardsTranslations} from './coachCards';
 import {coachPortalTranslations} from './coachPortal';
@@ -20,4 +21,5 @@ export const translations = {
   clubs: clubsTranslations,
   committees: committeesTranslations,
   components: componentsTranslations,
+  clubConfig: clubConfigTranslations,
 } as const;
