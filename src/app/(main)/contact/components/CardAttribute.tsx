@@ -23,12 +23,9 @@ export const CardAttribute = ({
     {isPossibleToCopy && value ? (
       <div className={'flex gap-4 items-center'}>
         <p className={'text-gray-500'}>{value}</p>
-        <Button
-          isIconOnly
-          size={'sm'}
-          onPress={() => copyToClipboard(value)}
-          startContent={<DocumentDuplicateIcon height={16} width={16} />}
-        />
+        <Button isIconOnly size={'sm'} onPress={() => copyToClipboard(value)}>
+          <DocumentDuplicateIcon height={16} width={16} />
+        </Button>
       </div>
     ) : (
       <p className={multiline ? 'text-gray-500 whitespace-pre-wrap' : 'text-gray-500'}>{value}</p>

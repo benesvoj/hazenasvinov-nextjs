@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations/index';
 
-import {CardAttribute} from '@/app/(main)/about/components';
+import {CardAttribute} from '@/app/(main)/contact/components';
 
 import {UnifiedCard} from '@/components';
 import {ClubConfig} from '@/types';

@@ -2,7 +2,7 @@
 
 import {Skeleton} from '@heroui/react';
 
-import {BillingInfoCard, ContactHero, VenueCard} from '@/app/(main)/about/components';
+import {BillingInfoCard, ContactHero, VenueCard} from '@/app/(main)/contact/components';
 
 import {Heading} from '@/components';
 import {useFetchClubConfig} from '@/hooks';
