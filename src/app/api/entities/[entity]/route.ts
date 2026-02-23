@@ -59,6 +59,15 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{enti
         filters,
       };
 
+      if (config.queryLayer?.getOne) {
+        const result = await config.queryLayer.getOne({supabase});
+        if (result.error) throw new Error(result.error);
+        return successResponse(result.data);
+      }
+
+      if (!config.queryLayer.getAll) {
+        return errorResponse(`Entity '${entity}' does not support list queries`, 405);
+      }
       const result = await config.queryLayer.getAll({supabase}, options);
 
       if (result.error) {
@@ -91,7 +100,7 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{enti
     return withPublicAccess(handler);
   }
 
-  return withAuth(async (user, supabase) => handler(supabase));
+  return withAuth(async (_user, supabase) => handler(supabase));
 }
 
 /**
@@ -109,7 +118,7 @@ export async function POST(request: NextRequest, {params}: {params: Promise<{ent
     return errorResponse(`Entity '${entity}' not found`, 404);
   }
 
-  return withAdminAuth(async (user, supabase, admin) => {
+  return withAdminAuth(async (_user, _supabase, admin) => {
     const body = await request.json();
 
     // Use query layer if available

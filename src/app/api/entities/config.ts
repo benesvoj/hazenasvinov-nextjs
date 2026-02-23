@@ -20,7 +20,8 @@ import * as userQueries from '@/queries/users';
 import * as videoQueries from '@/queries/videos';
 
 export interface EntityQueryLayer<T = any, Options = any> {
-  getAll: (ctx: QueryContext, options?: Options) => Promise<QueryResult<T[] | T>>;
+  getAll?: (ctx: QueryContext, options?: Options) => Promise<QueryResult<T[]>>;
+  getOne?: (ctx: QueryContext) => Promise<QueryResult<T>>;
   getById?: (ctx: QueryContext, id: string) => Promise<QueryResult<T>>;
   create?: (ctx: QueryContext, data: any) => Promise<QueryResult<T>>;
   update?: (ctx: QueryContext, id: string, data: any) => Promise<QueryResult<T>>;
@@ -140,7 +141,7 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     tableName: clubConfigQueries.DB_TABLE,
     requiresAdmin: true,
     queryLayer: {
-      getAll: clubConfigQueries.getClubConfig, // Only one config record expected, so getAll returns the config
+      getOne: clubConfigQueries.getClubConfig, // Only one config record expected, so getAll returns the config
       update: clubConfigQueries.updateClubConfig,
     },
   },

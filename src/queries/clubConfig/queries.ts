@@ -1,11 +1,11 @@
-import {buildSelectQuery} from '@/queries';
+import {buildSelectOneQuery, buildSelectQuery} from '@/queries';
 import {DB_TABLE, ENTITY} from '@/queries/clubConfig';
 import {QueryContext, QueryResult} from '@/queries/shared/types';
 import {ClubConfig} from '@/types';
 
 export async function getClubConfig(ctx: QueryContext): Promise<QueryResult<ClubConfig>> {
   try {
-    const query = buildSelectQuery(ctx.supabase, DB_TABLE);
+    const query = buildSelectQuery(ctx.supabase, DB_TABLE).single();
 
     const {data, error} = await query;
 
