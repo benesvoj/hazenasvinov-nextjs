@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect, useState, useRef, useMemo} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 
 import {
   Avatar,
@@ -12,19 +12,19 @@ import {
   CheckboxGroup,
   Chip,
   Input,
-  Textarea,
   Skeleton,
+  Textarea,
 } from '@heroui/react';
 
-import {CameraIcon, TrashIcon, UserCircleIcon, GlobeAltIcon} from '@heroicons/react/24/outline';
+import {CameraIcon, GlobeAltIcon, TrashIcon, UserCircleIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations/index';
 
 import {useUser} from '@/contexts/UserContext';
 
 import {LoadingSpinner, showToast} from '@/components';
-import {useFetchCoachCard, useCoachCard, useCoachCardPhoto, useFetchCategories} from '@/hooks';
-import {CoachCardFormData, Category} from '@/types';
+import {useCoachCard, useCoachCardPhoto, useFetchCategories, useFetchCoachCard} from '@/hooks';
+import {Category, CoachCardFormData} from '@/types';
 
 interface CoachCardEditorProps {
   onSaveSuccess?: () => void;
@@ -44,13 +44,7 @@ export default function CoachCardEditor({onSaveSuccess}: CoachCardEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch existing card using factory-based hook
-  const {
-    data: existingCard,
-    loading: fetchLoading,
-    refetch,
-  } = useFetchCoachCard({
-    userId: user?.id ?? '',
-  });
+  const {data: existingCard, loading: fetchLoading, refetch} = useFetchCoachCard();
 
   // Fetch all categories to display names (user's assigned categories come from profile)
   const {data: allCategories, loading: categoriesLoading} = useFetchCategories();

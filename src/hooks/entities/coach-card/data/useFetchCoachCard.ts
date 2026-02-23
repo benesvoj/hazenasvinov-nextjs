@@ -1,52 +1,54 @@
 'use client';
 
-import {useEffect, useMemo} from 'react';
-
-import {createDataFetchHook} from '@/hooks/factories';
+import {useCallback, useEffect, useState} from 'react';
 
 import {translations} from '@/lib/translations/index';
 
+import {showToast} from '@/components';
 import {API_ROUTES} from '@/lib';
-import {DB_TABLE, ENTITY} from '@/queries/coachCards';
 import {CoachCard} from '@/types';
 
-// Base hook created by factory (returns array)
-const useBaseFetchCoachCard = createDataFetchHook<CoachCard, {userId: string}>({
-  endpoint: (params) => {
-    const searchParams = new URLSearchParams();
-    searchParams.set('userId', params.userId);
-    return `${API_ROUTES.coachCards.root}?${searchParams.toString()}`;
-  },
-  entityName: ENTITY.singular,
-  errorMessage: translations.coachCards.toasts.fetchError,
-  fetchOnMount: false, // We'll control this manually
-});
-
 /**
- * Hook to fetch coach card for a specific user.
- * Wraps the factory hook to extract single item from array.
- * Returns CoachCard | null instead of CoachCard[].
+ * Hook to fetch the authenticated user's own coach card.
+ *
+ * The GET endpoint uses the session to resolve the user — no userId param needed.
+ * Returns CoachCard | null (null = no card created yet, not an error).
  */
-export function useFetchCoachCard(params: {userId: string}) {
-  const {data: dataArray, loading, error, refetch} = useBaseFetchCoachCard(params);
+export function useFetchCoachCard() {
+  const [data, setData] = useState<CoachCard | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Extract single item from array (user has one card max)
-  const data = useMemo(() => {
-    return dataArray.length > 0 ? dataArray[0] : null;
-  }, [dataArray]);
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-  // Only fetch if userId is provided
-  useEffect(() => {
-    if (params.userId) {
-      refetch();
+    try {
+      const response = await fetch(API_ROUTES.coachCards.root);
+
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}));
+        const message = json?.error ?? translations.coachCards.toasts.fetchError;
+        setError(message);
+        showToast.danger(message);
+        return;
+      }
+
+      const json = await response.json();
+      // API returns { data: CoachCard | null }
+      setData(json.data ?? null);
+    } catch {
+      const message = translations.coachCards.toasts.fetchError;
+      setError(message);
+      showToast.danger(message);
+    } finally {
+      setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.userId]);
+  }, []);
 
-  return {
-    data,
-    loading,
-    error,
-    refetch,
-  };
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return {data, loading, error, refetch};
 }

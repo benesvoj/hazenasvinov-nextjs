@@ -50,7 +50,7 @@ export async function GET(request: NextRequest, {params}: RouteParams) {
 }
 
 /**
- * PUT /api/coach-cards/[id]
+ * PATCH /api/coach-cards/[id]
  *
  * Updates a coach card.
  *
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest, {params}: RouteParams) {
  * @body Partial<CoachCard> fields to update
  * @returns { data: CoachCard, error: null }
  */
-export async function PUT(request: NextRequest, {params}: RouteParams) {
+export async function PATCH(request: NextRequest, {params}: RouteParams) {
   const {id} = await params;
 
   return withAuth(async (user, supabase) => {

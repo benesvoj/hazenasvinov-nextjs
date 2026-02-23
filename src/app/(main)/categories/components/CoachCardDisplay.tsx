@@ -1,3 +1,5 @@
+'use client';
+
 import {Avatar, Card, CardBody, Link} from '@heroui/react';
 
 import {EnvelopeIcon, PhoneIcon} from '@heroicons/react/24/outline';

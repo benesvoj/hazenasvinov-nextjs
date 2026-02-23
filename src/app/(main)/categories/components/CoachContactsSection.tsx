@@ -1,3 +1,5 @@
+'use client';
+
 import {Card, CardBody, CardHeader} from '@heroui/react';
 
 import {UserGroupIcon} from '@heroicons/react/24/outline';
