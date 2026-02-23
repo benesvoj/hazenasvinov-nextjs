@@ -18,6 +18,7 @@ export * from './arrayHelper';
 export * from './isValidPositiveNumber';
 export * from './isNilOrZero';
 export * from './isNotNilOrEmpty';
+export * from './copyToClipboard';
 
 /** Builders and validators **/
 export * from './builders/matchDataBuilder';

@@ -54,6 +54,13 @@ export const commonTranslations = {
     actions: 'Akce',
     user: 'Uživatel',
     note: 'Poznámka',
+    address: 'Adresa',
+    email: 'Email',
+    phone: 'Telefon',
+    billingInformation: 'Fakturační údaje a bankovní spojení',
+    identityNumber: 'IČO',
+    bankName: 'Název banky',
+    bankNumber: 'Číslo účtu',
   },
   tabs: {
     overview: 'Přehled',
@@ -90,5 +97,9 @@ export const commonTranslations = {
     coach: 'Trenér',
     headCoach: 'Hlavní trenér',
     member: 'Člen',
+  },
+  responseMessages: {
+    copyToClipboardSuccess: 'Zkopírováno do schránky',
+    copyToClipboardError: 'Nepodařilo se zkopírovat do schránky',
   },
 };
