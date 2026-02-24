@@ -8,174 +8,115 @@ UI components for the attendance section: training session management (list, cre
 
 | File | Lines | Status | Translations |
 |---|---|---|---|
-| `index.ts` | 11 | Active | N/A |
+| `index.ts` | 9 | Active | N/A |
 | `TrainingSessionList.tsx` | 145 | Clean | Yes |
-| `TrainingSessionModal.tsx` | 196 | Active | **No** — hardcoded Czech |
-| `TrainingSessionGenerator.tsx` | 455 | **Non-functional** | **No** — hardcoded Czech |
-| `TrainingSessionStatusDialog.tsx` | 134 | Active | **No** — hardcoded Czech |
+| `TrainingSessionModal.tsx` | 192 | Clean | Yes |
+| `TrainingSessionGenerator.tsx` | 434 | **Non-functional** | Yes (partial — see issues) |
+| `TrainingSessionStatusDialog.tsx` | 131 | Active | Yes (partial — `statusOptions` hardcoded) |
 | `TrainingSessionStatusBadge.tsx` | 40 | Clean | Yes (via `enumHelpers`) |
-| `AttendanceRecordingTable.tsx` | 154 | Active | **No** — hardcoded Czech |
-| `AttendanceModal.tsx` | 171 | **Legacy** | **No** — hardcoded Czech |
-| `AttendanceStatisticsLazy.tsx` | 192 | Active | **Partial** — English tab headers |
-| `AttendanceStatistics.tsx` | 481 | **Redundant** | **No** — hardcoded Czech |
-| `AttendanceChart.tsx` | 114 | Active | **No** — hardcoded Czech |
-| `AttendanceTrendsChart.tsx` | 10 | **Empty stub** | N/A |
-| `SummaryCards.tsx` | 7 | **Empty stub** | N/A |
+| `AttendanceRecordingTable.tsx` | 130 | Active | Yes (has `any` type) |
+| `AttendanceStatisticsLazy.tsx` | 192 | Active | Yes (partial — one English string) |
+| `AttendanceChart.tsx` | 112 | Active | Yes (partial — legend percentages hardcoded) |
 | `SummarySessionCard.tsx` | 18 | Clean | N/A |
+| `AttendanceTrendsChart.tsx` | 10 | **Empty stub** | N/A |
 | `InsightsPanel.tsx` | 7 | **Empty stub** | N/A |
 | `MemberPerformanceTable.tsx` | 7 | **Empty stub** | N/A |
 | `RecommendationsPanel.tsx` | 7 | **Placeholder stub** | N/A |
 
-**Clean components (no issues):** `TrainingSessionList`, `TrainingSessionStatusBadge`, `SummarySessionCard`
+**Deleted (previous refactoring):** `AttendanceModal.tsx`, `AttendanceStatistics.tsx`, `SummaryCards.tsx`
+
+**Clean components (no issues):** `TrainingSessionList`, `TrainingSessionModal`, `TrainingSessionStatusBadge`, `SummarySessionCard`
 
 ---
 
-## Issue Summary
+## Remaining Issues
 
-### 1. Hardcoded Czech strings (8 components)
+### 1. Hardcoded strings (4 components — minor)
 
-Most components hardcode Czech strings instead of using `@/lib/translations`. This is the single biggest issue across the folder.
+Most components have been migrated to translations. A few remnants remain:
 
-| Component | Hardcoded strings | Examples |
-|---|---|---|
-| `TrainingSessionModal.tsx` | ~12 | Field labels (`"Název tréninku"`, `"Datum"`, `"Místo"`), button labels (`"Zrušit"`, `"Uložit změny"`) |
-| `TrainingSessionStatusDialog.tsx` | ~10 | Status labels/descriptions, `"Změnit stav tréninku"`, `"Důvod zrušení *"`, warning text |
-| `AttendanceRecordingTable.tsx` | ~7 | Heading, button text, table headers (`"ČLEN"`, `"STATUS"`), empty/error states |
-| `AttendanceChart.tsx` | ~6 | Chart title, legend labels, summary labels |
-| `TrainingSessionGenerator.tsx` | ~15 | Day names, field labels, validation messages, button labels |
-| `AttendanceStatisticsLazy.tsx` | 4 | English tab headers (`"Insights"`, `"Member Performance"`, `"Attendance Trends"`, `"Recommendations"`) |
-| `AttendanceStatistics.tsx` | ~30+ | Extensive — all section headers, column headers, labels |
-| `AttendanceModal.tsx` | ~8 | Table headers, member count heading, button labels |
+| Component | Issue |
+|---|---|
+| `TrainingSessionStatusDialog.tsx` | `statusOptions` array has hardcoded Czech labels/descriptions (`"Naplánován"`, `"Proveden"`, `"Zrušen"`). Should derive from enum + translations like `TrainingSessionStatusBadge` does. |
+| `AttendanceStatisticsLazy.tsx` | `"Insights"` (line 123) — English string, should be Czech translation |
+| `AttendanceChart.tsx` | Legend labels `"80%+"`, `"60-79%"`, `"<60%"` — arguably not translatable, but worth reviewing |
+| `TrainingSessionGenerator.tsx` | Default value `"Trénink"` (line 251) — should use translation |
 
-### 2. Empty stub components (5 files)
-
-These render nothing (`<> </>`) or placeholder text. They are imported by `AttendanceStatisticsLazy` but do nothing:
-
-- `AttendanceTrendsChart.tsx` — props typed as `any`, returns empty fragment
-- `SummaryCards.tsx` — props typed as `any`, returns empty fragment
-- `InsightsPanel.tsx` — props typed as `any`, returns empty fragment
-- `MemberPerformanceTable.tsx` — props typed as `any`, returns empty fragment
-- `RecommendationsPanel.tsx` — returns `<div>Recommendations Panel</div>`
-
-### 3. Non-functional TrainingSessionGenerator
-
-Creation logic (lines 208-238) is commented out with a TODO. The "Create" button does nothing — `successCount` stays 0 and the function returns without creating sessions. Also uses direct Supabase client instead of mutation hooks.
-
-### 4. Redundant statistics implementations
-
-Two files serve similar purposes:
-- `AttendanceStatisticsLazy.tsx` (192 lines) — uses `useFetchAttendanceStatistics` hook, composes stub components
-- `AttendanceStatistics.tsx` (481 lines) — full standalone implementation with its own data handling via `onLoadAnalytics` callback
-
-Only `AttendanceStatisticsLazy` is exported from `index.ts` and used by the page. `AttendanceStatistics` appears unused.
-
-### 5. `any` types
+### 2. `any` types (2 active components + 4 stubs)
 
 | File | Location | Proper type |
 |---|---|---|
 | `AttendanceRecordingTable.tsx` | `selectedSession: any` | `string \| null` |
-| `AttendanceModal.tsx` | `filteredMembers: any[]`, `attendanceRecords: any[]` | Proper entity types |
-| `TrainingSessionGenerator.tsx` | `item: any` (line 98), `membersData: any` (line 193) | Proper entity types |
-| All 5 stubs | Props typed as `any` | N/A (stubs) |
+| `TrainingSessionGenerator.tsx` | `item: any` (line 98), `membersData: any` (line 188) | Proper entity types |
+| All 4 stubs | Props typed as `any` | N/A (stubs — fix when implementing or delete) |
+
+### 3. Non-functional TrainingSessionGenerator
+
+Creation logic (lines ~208-238) is commented out with a TODO. The "Create" button does nothing — `successCount` stays 0. Also uses direct Supabase client instead of mutation hooks.
+
+### 4. Empty stub components (4 files)
+
+Imported by `AttendanceStatisticsLazy` but render nothing:
+
+- `AttendanceTrendsChart.tsx` — props `any`, returns empty fragment
+- `InsightsPanel.tsx` — props `any`, returns empty fragment
+- `MemberPerformanceTable.tsx` — props `any`, returns empty fragment
+- `RecommendationsPanel.tsx` — returns `<div>Recommendations Panel</div>`
 
 ---
 
 ## Refactoring Plan
 
-### Step 1: Delete dead code
+### Step 1: Decide on statistics stubs
 
-Remove files that are unused or redundant. This clears noise before meaningful work.
-
-| Action | File | Reason |
-|---|---|---|
-| Delete | `AttendanceModal.tsx` | Legacy, not exported in barrel, not used by page |
-| Delete | `AttendanceStatistics.tsx` | Redundant with `AttendanceStatisticsLazy`, not exported in barrel |
-| Delete | `SummaryCards.tsx` | Empty stub, not exported in barrel |
-
-After deletion, regenerate barrels (`/generate-barrels`).
-
----
-
-### Step 2: Decide on statistics stubs
-
-The remaining stubs (`AttendanceTrendsChart`, `InsightsPanel`, `MemberPerformanceTable`, `RecommendationsPanel`) are imported by `AttendanceStatisticsLazy`. Two options:
+The 4 stubs are imported by `AttendanceStatisticsLazy`. Two options:
 
 **Option A: Remove stubs and simplify `AttendanceStatisticsLazy`**
-- Remove the 4 stub files
-- Remove the tabs in `AttendanceStatisticsLazy` that reference them (Insights, Member Performance, Trends, Recommendations)
-- Keep only the working summary cards section
-- Simplest approach — ship what works, add features when needed
+- Delete the 4 stub files
+- Remove the tabs in `AttendanceStatisticsLazy` that reference them
+- Keep only the working summary cards and chart sections
+- Simplest — ship what works, add features when needed
 
 **Option B: Implement the stubs**
-- Implement each using data already fetched by `useFetchAttendanceStatistics`
-- `MemberPerformanceTable` — table with member name, present/absent/late counts, percentage
-- `AttendanceTrendsChart` — reuse/extend `AttendanceChart` with date range selection
+- Data is already fetched by `useFetchAttendanceStatistics`
+- `MemberPerformanceTable` — member name, present/absent/late counts, percentage
+- `AttendanceTrendsChart` — extend `AttendanceChart` with date range selection
 - `InsightsPanel` — render insights array from statistics data
-- `RecommendationsPanel` — render recommendations array from statistics data
-- More work, but the data is already available
+- `RecommendationsPanel` — render recommendations array
 
 ---
 
-### Step 3: Move hardcoded strings to translations — `TrainingSessionModal`
+### Step 2: Fix remaining hardcoded strings
 
-Add translation keys under `translations.attendance.modal`:
-```typescript
-modal: {
-  fields: {
-    title: { label: '...', placeholder: '...' },
-    description: { label: '...', placeholder: '...' },
-    date: { label: '...' },
-    time: { label: '...' },
-    location: { label: '...', placeholder: '...' },
-  },
-  buttons: {
-    cancel: '...',
-    save: '...',
-    create: '...',
-  },
-}
-```
+| Component | Fix |
+|---|---|
+| `TrainingSessionStatusDialog` | Derive `statusOptions` from `TrainingSessionStatusEnum` + translations (same pattern as `TrainingSessionStatusBadge` uses `trainingSessionStatusOptions`) |
+| `AttendanceStatisticsLazy` | Replace `"Insights"` with translation key |
+| `TrainingSessionGenerator` | Replace `"Trénink"` default with translation |
 
 ---
 
-### Step 4: Move hardcoded strings to translations — `TrainingSessionStatusDialog`
+### Step 3: Fix `any` types
 
-Extract `statusOptions` labels/descriptions and dialog text to translations. Derive `statusOptions` from enum + translations (same pattern as `TrainingSessionStatusBadge` uses `trainingSessionStatusOptions`).
-
----
-
-### Step 5: Move hardcoded strings to translations — `AttendanceRecordingTable`
-
-Fix `any` type (`selectedSession: any` → `string | null`) at the same time.
+- `AttendanceRecordingTable.tsx`: `selectedSession: any` → `string | null`
+- `TrainingSessionGenerator.tsx`: `item: any` → proper type, `membersData: any` → proper type
 
 ---
 
-### Step 6: Move hardcoded strings to translations — `AttendanceChart`
+### Step 4: Fix TrainingSessionGenerator
 
-Chart title, legend labels, summary labels.
-
----
-
-### Step 7: Move hardcoded strings to translations — `AttendanceStatisticsLazy`
-
-Fix English tab headers → Czech translations.
-
----
-
-### Step 8: Fix `TrainingSessionGenerator`
-
-This is the largest task. Three sub-steps:
+Largest task. Three sub-steps:
 1. Re-enable creation logic using mutation hooks (replace direct Supabase client)
-2. Move hardcoded Czech strings to translations (day names, field labels, validation messages)
-3. Fix `any` types
+2. Fix `any` types (from Step 3)
+3. Test end-to-end flow
 
 ---
 
 ### Suggested priority
 
-| Priority | Steps | Effort | Impact |
+| Priority | Step | Effort | Impact |
 |---|---|---|---|
-| 1 | Step 1 (delete dead code) | Low | Reduces noise |
-| 2 | Step 2 (decide stubs) | Low–Medium | Clarifies scope |
-| 3 | Steps 3-7 (translations) | Medium | Consistency |
-| 4 | Step 8 (generator) | High | Restores broken feature |
+| 1 | Step 1 (decide stubs) | Low–Medium | Clarifies scope, removes dead code |
+| 2 | Step 2 (hardcoded strings) | Low | Consistency |
+| 3 | Step 3 (any types) | Low | Type safety |
+| 4 | Step 4 (generator) | High | Restores broken feature |

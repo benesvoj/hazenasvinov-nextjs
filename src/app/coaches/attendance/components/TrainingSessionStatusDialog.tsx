@@ -20,19 +20,19 @@ interface TrainingSessionStatusDialogProps {
 const statusOptions = [
   {
     key: TrainingSessionStatusEnum.PLANNED,
-    label: 'Naplánován',
+    label: translations.trainingSessions.statuses.planned,
     description: translations.trainingSessions.statuses.description.planned,
     color: 'default',
   },
   {
     key: TrainingSessionStatusEnum.DONE,
-    label: 'Proveden',
+    label: translations.trainingSessions.statuses.done,
     description: translations.trainingSessions.statuses.description.done,
     color: 'success',
   },
   {
     key: TrainingSessionStatusEnum.CANCELLED,
-    label: 'Zrušen',
+    label: translations.trainingSessions.statuses.cancelled,
     description: translations.trainingSessions.statuses.description.cancelled,
     color: 'danger',
   },

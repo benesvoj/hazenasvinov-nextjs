@@ -22,7 +22,7 @@ import {getShortAttendanceStatusText, getStatusColor} from '../helpers';
 
 interface AttendanceRecordingTableProps {
   attendanceRecords: MemberAttendanceWithMember[];
-  selectedSession: any;
+  selectedSession: string | null;
   handleCreateAttendanceForSession: () => void;
   loading: boolean;
   handleRecordAttendance: (id: string, status: AttendanceStatuses) => Promise<void>;

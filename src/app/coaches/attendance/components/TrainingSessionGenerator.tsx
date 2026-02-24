@@ -17,7 +17,7 @@ import {CalendarIcon, ClockIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations/index';
 
-import {UnifiedModal} from '@/components';
+import {showToast, UnifiedModal} from '@/components';
 import {formatDateString, formatTime} from '@/helpers';
 import {useSupabaseClient} from '@/hooks';
 import {hasItems} from '@/utils';
@@ -37,6 +37,8 @@ interface GeneratedSession {
   category_id: string;
 }
 
+const DEFAULT_TITLE_TEMPLATE = translations.trainingSessions.titleShort;
+
 export default function TrainingSessionGenerator({
   isOpen,
   onClose,
@@ -48,7 +50,7 @@ export default function TrainingSessionGenerator({
   const [dateTo, setDateTo] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [trainingTime, setTrainingTime] = useState('');
-  const [titleTemplate, setTitleTemplate] = useState('Trénink');
+  const [titleTemplate, setTitleTemplate] = useState(DEFAULT_TITLE_TEMPLATE);
   const [includeNumber, setIncludeNumber] = useState(false);
   const [generatedSessions, setGeneratedSessions] = useState<GeneratedSession[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -94,8 +96,7 @@ export default function TrainingSessionGenerator({
         return [];
       }
 
-      const memberIds = membersData?.map((item: any) => item.member_id).filter(Boolean) || [];
-      return memberIds;
+      return membersData?.map((item: any) => item.member_id).filter(Boolean) || [];
     } catch (err) {
       return [];
     }
@@ -103,13 +104,13 @@ export default function TrainingSessionGenerator({
 
   // Days of the week options
   const dayOptions = [
-    {value: 'monday', label: 'Pondělí'},
-    {value: 'tuesday', label: 'Úterý'},
-    {value: 'wednesday', label: 'Středa'},
-    {value: 'thursday', label: 'Čtvrtek'},
-    {value: 'friday', label: 'Pátek'},
-    {value: 'saturday', label: 'Sobota'},
-    {value: 'sunday', label: 'Neděle'},
+    {value: 'monday', label: translations.common.labels.weekDays.monday},
+    {value: 'tuesday', label: translations.common.labels.weekDays.tuesday},
+    {value: 'wednesday', label: translations.common.labels.weekDays.wednesday},
+    {value: 'thursday', label: translations.common.labels.weekDays.thursday},
+    {value: 'friday', label: translations.common.labels.weekDays.friday},
+    {value: 'saturday', label: translations.common.labels.weekDays.saturday},
+    {value: 'sunday', label: translations.common.labels.weekDays.sunday},
   ];
 
   // Day mapping for JavaScript Date.getDay() to our day values
@@ -128,7 +129,7 @@ export default function TrainingSessionGenerator({
   // Generate sessions based on criteria
   const generateSessions = () => {
     if (!dateFrom || !dateTo || selectedDays.length === 0 || !trainingTime) {
-      setError('Vyplňte všechna povinná pole');
+      setError(translations.trainingSessions.responseMessages.mandatoryFieldsMissing);
       return;
     }
 
@@ -138,7 +139,7 @@ export default function TrainingSessionGenerator({
 
     // Validate date range
     if (startDate >= endDate) {
-      setError('Datum do musí být později než datum od');
+      setError(translations.common.responseMessages.dateFromAfterDateTo);
       return;
     }
 
@@ -243,11 +244,15 @@ export default function TrainingSessionGenerator({
       }
 
       if (errorCount > 0) {
-        setError(`Vytvořeno ${successCount} tréninků, ${errorCount} se nepodařilo vytvořit`);
+        setError(
+          translations.trainingSessions.responseMessages.trainingGenerationSummary(
+            successCount,
+            errorCount
+          )
+        );
       }
     } catch (err) {
-      setError('Chyba při vytváření tréninků');
-      console.error('Error creating sessions:', err);
+      showToast.danger(translations.trainingSessions.responseMessages.createError);
     } finally {
       setIsGenerating(false);
     }
@@ -259,7 +264,7 @@ export default function TrainingSessionGenerator({
     setDateTo('');
     setSelectedDays([]);
     setTrainingTime('');
-    setTitleTemplate('Trénink');
+    setTitleTemplate(DEFAULT_TITLE_TEMPLATE);
     setIncludeNumber(false);
     setGeneratedSessions([]);
     setError(null);
@@ -275,7 +280,7 @@ export default function TrainingSessionGenerator({
   const footer = (
     <>
       <Button color="danger" variant="light" onPress={handleClose}>
-        Zrušit
+        {translations.common.actions.cancel}
       </Button>
       {generatedSessions.length > 0 && (
         <Button
@@ -284,7 +289,7 @@ export default function TrainingSessionGenerator({
           isLoading={isGenerating}
           isDisabled={isGenerating}
         >
-          {isGenerating ? 'Vytváření...' : `Vytvořit ${generatedSessions.length} tréninků`}
+          {translations.common.actions.create}
         </Button>
       )}
     </>

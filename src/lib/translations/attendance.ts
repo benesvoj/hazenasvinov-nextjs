@@ -20,6 +20,12 @@ export const attendanceTranslations = {
     newSession: 'Nový trénink',
     newSessionShort: 'Nový',
     attendanceList: (count: number) => `Docházka (${count})`,
+    memberPerformance: 'Výkon člena',
+    attendanceTrend: 'Trend docházky',
+    recommendation: 'Doporučení pro trénink',
+    generatedAt: 'Generováno dne',
+    queries: 'Dotazy',
+    insights: 'Postřehy',
   },
   ariaLabels: {
     sessionGeneration: 'Generovat tréninky',

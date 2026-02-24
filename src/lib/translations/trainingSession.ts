@@ -1,5 +1,6 @@
 export const trainingSessionsTranslations = {
   title: 'Tréninkové jednotky',
+  titleShort: 'Trénink',
   noTrainingSession: 'Žádné tréninky',
   cancelTrainingSessionReason: 'Důvod zrušení:',
   changeTrainingSessionStatus: 'Změnit stav tréninku',
@@ -55,6 +56,9 @@ export const trainingSessionsTranslations = {
     createError: 'Chyba při vytváření tréninkové jednotky.',
     updateError: 'Chyba při aktualizaci tréninkové jednotky.',
     deleteError: 'Chyba při mazání tréninkové jednotky.',
+    mandatoryFieldsMissing: 'Vyplňte všechny povinné údaje',
+    trainingGenerationSummary: (successCount: number, errorCount: number) =>
+      `Vytvořeno ${successCount} tréninků, ${errorCount} se nepodařilo vytvořit`,
   },
   actions: {
     preview: 'Generovat náhled',

@@ -70,6 +70,15 @@ export const commonTranslations = {
     dateFrom: 'Datum od',
     dateTo: 'Datum do',
     weekDaysTitle: 'Dny v týdnu',
+    weekDays: {
+      monday: 'Pondělí',
+      tuesday: 'Úterý',
+      wednesday: 'Středa',
+      thursday: 'Čtvrtek',
+      friday: 'Pátek',
+      saturday: 'Sobota',
+      sunday: 'Neděle',
+    },
   },
   tabs: {
     overview: 'Přehled',
@@ -111,6 +120,7 @@ export const commonTranslations = {
     copyToClipboardSuccess: 'Zkopírováno do schránky',
     copyToClipboardError: 'Nepodařilo se zkopírovat do schránky',
     errorLoadingPage: 'Při načítání stránky došlo k chybě. Zkuste to prosím znovu později.',
+    dateFromAfterDateTo: 'Datum do musí být později než datum od',
   },
   emptyStateTypes: {
     todos: 'Úkoly',
