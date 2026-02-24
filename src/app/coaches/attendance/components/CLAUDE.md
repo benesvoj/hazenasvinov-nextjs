@@ -11,7 +11,7 @@ UI components for the attendance section: training session management (list, cre
 | `index.ts` | 9 | Active | N/A |
 | `TrainingSessionList.tsx` | 145 | Clean | Yes |
 | `TrainingSessionModal.tsx` | 192 | Clean | Yes |
-| `TrainingSessionGenerator.tsx` | 434 | **Non-functional** | Yes (partial — see issues) |
+| `TrainingSessionGenerator.tsx` | 310 | **Functional** — refactored | Yes |
 | `TrainingSessionStatusDialog.tsx` | 131 | Active | Yes (partial — `statusOptions` hardcoded) |
 | `TrainingSessionStatusBadge.tsx` | 40 | Clean | Yes (via `enumHelpers`) |
 | `AttendanceRecordingTable.tsx` | 130 | Active | Yes (has `any` type) |
@@ -25,7 +25,7 @@ UI components for the attendance section: training session management (list, cre
 
 **Deleted (previous refactoring):** `AttendanceModal.tsx`, `AttendanceStatistics.tsx`, `SummaryCards.tsx`
 
-**Clean components (no issues):** `TrainingSessionList`, `TrainingSessionModal`, `TrainingSessionStatusBadge`, `SummarySessionCard`
+**Clean components (no issues):** `TrainingSessionList`, `TrainingSessionModal`, `TrainingSessionGenerator`, `TrainingSessionStatusBadge`, `SummarySessionCard`
 
 ---
 
@@ -40,19 +40,18 @@ Most components have been migrated to translations. A few remnants remain:
 | `TrainingSessionStatusDialog.tsx` | `statusOptions` array has hardcoded Czech labels/descriptions (`"Naplánován"`, `"Proveden"`, `"Zrušen"`). Should derive from enum + translations like `TrainingSessionStatusBadge` does. |
 | `AttendanceStatisticsLazy.tsx` | `"Insights"` (line 123) — English string, should be Czech translation |
 | `AttendanceChart.tsx` | Legend labels `"80%+"`, `"60-79%"`, `"<60%"` — arguably not translatable, but worth reviewing |
-| `TrainingSessionGenerator.tsx` | Default value `"Trénink"` (line 251) — should use translation |
+| `TrainingSessionGenerator.tsx` | ~~Default value `"Trénink"`~~ — **RESOLVED**, uses `translations.trainingSessions.titleShort` |
 
-### 2. `any` types (2 active components + 4 stubs)
+### 2. `any` types (1 active component + 4 stubs)
 
 | File | Location | Proper type |
 |---|---|---|
 | `AttendanceRecordingTable.tsx` | `selectedSession: any` | `string \| null` |
-| `TrainingSessionGenerator.tsx` | `item: any` (line 98), `membersData: any` (line 188) | Proper entity types |
 | All 4 stubs | Props typed as `any` | N/A (stubs — fix when implementing or delete) |
 
-### 3. Non-functional TrainingSessionGenerator
+### 3. ~~Non-functional TrainingSessionGenerator~~ — RESOLVED
 
-Creation logic (lines ~208-238) is commented out with a TODO. The "Create" button does nothing — `successCount` stays 0. Also uses direct Supabase client instead of mutation hooks.
+Refactored with bulk API endpoint (`POST /api/training-sessions/bulk`), dedicated `useBulkCreateTrainingSessions` hook, and extracted `generateSessionDates` utility. No more direct Supabase, no `any` types. See `TRAINING_SESSION_GENERATOR_REFACTOR.md` for full details and 5 minor remaining issues.
 
 ### 4. Empty stub components (4 files)
 
@@ -99,16 +98,13 @@ The 4 stubs are imported by `AttendanceStatisticsLazy`. Two options:
 ### Step 3: Fix `any` types
 
 - `AttendanceRecordingTable.tsx`: `selectedSession: any` → `string | null`
-- `TrainingSessionGenerator.tsx`: `item: any` → proper type, `membersData: any` → proper type
+- ~~`TrainingSessionGenerator.tsx`: `item: any`, `membersData: any`~~ — **RESOLVED** (no `any` types after refactor)
 
 ---
 
-### Step 4: Fix TrainingSessionGenerator
+### ~~Step 4: Fix TrainingSessionGenerator~~ — RESOLVED
 
-Largest task. Three sub-steps:
-1. Re-enable creation logic using mutation hooks (replace direct Supabase client)
-2. Fix `any` types (from Step 3)
-3. Test end-to-end flow
+Fully refactored. See `TRAINING_SESSION_GENERATOR_REFACTOR.md` for implementation details and 5 minor remaining issues (unused import, misleading variable name, `err: any` in hook, hardcoded errorCount, unused error state).
 
 ---
 
@@ -119,4 +115,4 @@ Largest task. Three sub-steps:
 | 1 | Step 1 (decide stubs) | Low–Medium | Clarifies scope, removes dead code |
 | 2 | Step 2 (hardcoded strings) | Low | Consistency |
 | 3 | Step 3 (any types) | Low | Type safety |
-| 4 | Step 4 (generator) | High | Restores broken feature |
+| ~~4~~ | ~~Step 4 (generator)~~ | ~~High~~ | ~~DONE~~ |

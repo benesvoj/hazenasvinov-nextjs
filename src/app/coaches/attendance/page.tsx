@@ -66,8 +66,12 @@ export default function CoachesAttendancePage() {
   const {loading, updateTrainingSessionStatus, recordAttendance, createAttendanceForLineupMembers} =
     useAttendance();
 
-  const {createTrainingSession, updateTrainingSession, deleteTrainingSession} =
-    useTrainingSession();
+  const {
+    createTrainingSession,
+    updateTrainingSession,
+    deleteTrainingSession,
+    loading: loadingCrudOperations,
+  } = useTrainingSession();
 
   const {
     seasons: {data: seasons},
@@ -363,6 +367,7 @@ export default function CoachesAttendancePage() {
         onClose={generatorModal.onClose}
         selectedCategory={selectedCategory}
         selectedSeason={selectedSeason}
+        memberIds={resolveMemberIds()}
         onSuccess={() => {
           void refetchSessions();
         }}
@@ -374,6 +379,7 @@ export default function CoachesAttendancePage() {
         onConfirm={confirmDeleteSession}
         title={translations.attendance.modal.title.deleteSession}
         message={translations.attendance.modal.description.deleteSession}
+        isLoading={loadingCrudOperations}
       />
 
       <TrainingSessionStatusDialog

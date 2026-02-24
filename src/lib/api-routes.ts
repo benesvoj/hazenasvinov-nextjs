@@ -119,6 +119,10 @@ export const API_ROUTES = {
     root: '/api/todos' as const,
     byId: (id: string | number) => `/api/todos/${id}`,
   },
+  trainingSessions: {
+    bulk: '/api/training-sessions/bulk' as const,
+  },
+  userProfiles: '/api/user-profiles' as const,
   userRoles: '/api/user-roles' as const,
   users: '/api/users' as const,
 } as const;

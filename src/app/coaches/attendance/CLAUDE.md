@@ -11,7 +11,7 @@ Manages training session attendance for coaches. Coaches create/generate trainin
 | `page.tsx` | ~382 | Master orchestrator — state, modals, data fetching |
 | `components/TrainingSessionList.tsx` | ~140 | Lists sessions with selection, status change, edit, delete actions |
 | `components/TrainingSessionModal.tsx` | ~195 | Create/edit session form (title, description, date, time, location) |
-| `components/TrainingSessionGenerator.tsx` | ~454 | Bulk session generation by date range + weekdays |
+| `components/TrainingSessionGenerator.tsx` | ~310 | Bulk session generation by date range + weekdays |
 | `components/TrainingSessionStatusDialog.tsx` | ~134 | Modal for changing session status (planned/done/cancelled) |
 | `components/TrainingSessionStatusBadge.tsx` | ~40 | Visual status indicator chip |
 | `components/AttendanceRecordingTable.tsx` | ~188 | Core recording UI — 4 status buttons per member |
@@ -87,7 +87,7 @@ const generatorModal = useModal();                             // simple open/cl
 
 2. **No RLS policies** on `training_sessions` or `member_attendance` tables.
 
-3. **Training session generator is non-functional** — Creation logic in `TrainingSessionGenerator.tsx` is commented out.
+3. ~~**Training session generator is non-functional**~~ — **RESOLVED.** Generator refactored with bulk API endpoint, dedicated hook, and extracted date utilities. See `components/TRAINING_SESSION_GENERATOR_REFACTOR.md` for details.
 
 ### Medium
 

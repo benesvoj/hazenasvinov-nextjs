@@ -15,19 +15,25 @@ import {
 
 import {CalendarIcon, ClockIcon} from '@heroicons/react/24/outline';
 
+import {TimeValue} from '@react-types/datepicker';
+
 import {translations} from '@/lib/translations/index';
 
-import {showToast, UnifiedModal} from '@/components';
-import {formatDateString, formatTime} from '@/helpers';
-import {useSupabaseClient} from '@/hooks';
-import {hasItems} from '@/utils';
+import {UnifiedModal} from '@/components';
+import {useUser} from '@/contexts';
+import {TrainingSessionStatusEnum} from '@/enums';
+import {formatDateString, formatTime, generateSessionDates, WEEKDAY_MAP} from '@/helpers';
+import {useBulkCreateTrainingSessions} from '@/hooks';
+import {TrainingSessionInsert} from '@/types';
+import {hasItems, isEmpty} from '@/utils';
 
 interface TrainingSessionGeneratorProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
-  selectedCategory?: string;
-  selectedSeason?: string;
+  onSuccess: () => void;
+  selectedCategory: string;
+  selectedSeason: string;
+  memberIds: string[];
 }
 
 interface GeneratedSession {
@@ -45,6 +51,7 @@ export default function TrainingSessionGenerator({
   onSuccess,
   selectedCategory,
   selectedSeason,
+  memberIds,
 }: TrainingSessionGeneratorProps) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -53,54 +60,11 @@ export default function TrainingSessionGenerator({
   const [titleTemplate, setTitleTemplate] = useState(DEFAULT_TITLE_TEMPLATE);
   const [includeNumber, setIncludeNumber] = useState(false);
   const [generatedSessions, setGeneratedSessions] = useState<GeneratedSession[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createAttendanceRecords, setCreateAttendanceRecords] = useState(true);
 
-  const supabase = useSupabaseClient();
-
-  // Function to fetch lineup members directly
-  const fetchLineupMembersForCategory = async (categoryId: string, seasonId: string) => {
-    try {
-      // First get the lineup for this category and season
-      const {data: lineupData, error: lineupError} = await supabase
-        .from('category_lineups')
-        .select('id')
-        .eq('category_id', categoryId)
-        .eq('season_id', seasonId)
-        .eq('is_active', true)
-        .single();
-
-      if (lineupError || !lineupData) {
-        return [];
-      }
-
-      // Then get the lineup members
-      const {data: membersData, error: membersError} = await supabase
-        .from('category_lineup_members')
-        .select(
-          `
-          member_id,
-          members!inner (
-            id,
-            name,
-            surname,
-            category_id
-          )
-        `
-        )
-        .eq('lineup_id', lineupData.id)
-        .eq('is_active', true);
-
-      if (membersError) {
-        return [];
-      }
-
-      return membersData?.map((item: any) => item.member_id).filter(Boolean) || [];
-    } catch (err) {
-      return [];
-    }
-  };
+  const {user} = useUser();
+  const {bulkCreate, loading: bulkLoading} = useBulkCreateTrainingSessions();
 
   // Days of the week options
   const dayOptions = [
@@ -113,148 +77,59 @@ export default function TrainingSessionGenerator({
     {value: 'sunday', label: translations.common.labels.weekDays.sunday},
   ];
 
-  // Day mapping for JavaScript Date.getDay() to our day values
-  const dayMap: {[key: string]: number} = {
-    monday: 1,
-    tuesday: 2,
-    wednesday: 3,
-    thursday: 4,
-    friday: 5,
-    saturday: 6,
-    sunday: 0,
-  };
+  const isGenerateDisabled = !dateFrom || !dateTo || isEmpty(selectedDays) || !trainingTime;
 
-  // assignedCategories is now provided by UserContext
-
-  // Generate sessions based on criteria
   const generateSessions = () => {
-    if (!dateFrom || !dateTo || selectedDays.length === 0 || !trainingTime) {
+    if (isGenerateDisabled) {
       setError(translations.trainingSessions.responseMessages.mandatoryFieldsMissing);
       return;
     }
 
-    const sessions: GeneratedSession[] = [];
     const startDate = new Date(dateFrom);
     const endDate = new Date(dateTo);
 
-    // Validate date range
     if (startDate >= endDate) {
       setError(translations.common.responseMessages.dateFromAfterDateTo);
       return;
     }
 
-    // Generate sessions for each day in the range
-    const currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
-      const dayOfWeek = currentDate.getDay();
-      const dayName = Object.keys(dayMap).find((day) => dayMap[day] === dayOfWeek);
+    const dates = generateSessionDates(startDate, endDate, selectedDays);
 
-      if (dayName && selectedDays.includes(dayName)) {
-        const sessionNumber = sessions.length + 1;
-        const title = includeNumber ? `${titleTemplate} ${sessionNumber}` : titleTemplate;
-
-        // Use category ID directly
-        sessions.push({
-          date: currentDate.toISOString().split('T')[0],
-          time: trainingTime,
-          title,
-          category_id: selectedCategory || '',
-        });
-      }
-
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
+    const sessions: GeneratedSession[] = dates.map((date, index) => ({
+      date,
+      time: trainingTime,
+      title: includeNumber ? `${titleTemplate} ${index + 1}` : titleTemplate,
+      category_id: selectedCategory,
+    }));
 
     setGeneratedSessions(sessions);
     setError(null);
   };
 
-  // Create all generated sessions
   const createAllSessions = async () => {
-    if (generatedSessions.length === 0) return;
+    if (isEmpty(generatedSessions)) return;
 
-    setIsGenerating(true);
-    setError(null);
+    const sessionToCreate: TrainingSessionInsert[] = generatedSessions.map((session) => ({
+      title: session.title,
+      session_date: session.date,
+      session_time: session.time,
+      category_id: session.category_id,
+      season_id: selectedSeason,
+      coach_id: user?.id || '',
+      status: TrainingSessionStatusEnum.PLANNED,
+      description: null,
+      location: null,
+      status_reason: null,
+    }));
 
-    try {
-      let successCount = 0;
-      let errorCount = 0;
-      const createdSessionIds: string[] = [];
+    const attendanceMemberIds = createAttendanceRecords ? memberIds : [];
 
-      // Get lineup members for the selected category and season
-      let memberIds: string[] = [];
-      if (createAttendanceRecords && selectedCategory && selectedSeason) {
-        try {
-          memberIds = await fetchLineupMembersForCategory(selectedCategory, selectedSeason);
+    const result = await bulkCreate(sessionToCreate, attendanceMemberIds);
 
-          // If no lineup members found, try to get all members from the category
-          if (memberIds.length === 0) {
-            if (selectedCategory) {
-              const {data: membersData, error: membersError} = await supabase
-                .from('members')
-                .select('id')
-                .eq('category_id', selectedCategory);
-
-              if (!membersError && membersData) {
-                memberIds = membersData.map((m: any) => m.id);
-              }
-            }
-          }
-        } catch (err) {
-          // Could not fetch lineup members, skipping attendance creation
-        }
-      }
-
-      // TODO: Crate training sessions logic here, currently commented out during refactor
-      // for (const session of generatedSessions) {
-      //   try {
-      //     const createdSession = await createTrainingSession({
-      //       title: session.title,
-      //       session_date: session.date,
-      //       session_time: session.time,
-      //       category_id: session.category_id,
-      //       season_id: selectedSeason || '', // Use the selected season ID
-      //       description: `Automaticky vygenerovaný trénink - ${session.title}`,
-      //     });
-      //
-      //     createdSessionIds.push(createdSession.id);
-      //     successCount++;
-      //
-      //     // Create attendance records for lineup members if enabled
-      //     if (createAttendanceRecords && memberIds.length > 0) {
-      //       try {
-      //         await createAttendanceForLineupMembers(
-      //           createdSession.id,
-      //           memberIds,
-      //           'present' // Default status for generated sessions
-      //         );
-      //       } catch (attendanceErr) {
-      //         // Don't fail the entire process if attendance creation fails
-      //       }
-      //     }
-      //   } catch (err) {
-      //     errorCount++;
-      //   }
-      // }
-
-      if (successCount > 0) {
-        setGeneratedSessions([]);
-        onSuccess?.();
-        onClose();
-      }
-
-      if (errorCount > 0) {
-        setError(
-          translations.trainingSessions.responseMessages.trainingGenerationSummary(
-            successCount,
-            errorCount
-          )
-        );
-      }
-    } catch (err) {
-      showToast.danger(translations.trainingSessions.responseMessages.createError);
-    } finally {
-      setIsGenerating(false);
+    if (result) {
+      resetForm();
+      onSuccess();
+      onClose();
     }
   };
 
@@ -271,7 +146,6 @@ export default function TrainingSessionGenerator({
     setCreateAttendanceRecords(true);
   };
 
-  // Handle modal close
   const handleClose = () => {
     resetForm();
     onClose();
@@ -284,10 +158,10 @@ export default function TrainingSessionGenerator({
       </Button>
       {generatedSessions.length > 0 && (
         <Button
-          color="success"
+          color="primary"
           onPress={createAllSessions}
-          isLoading={isGenerating}
-          isDisabled={isGenerating}
+          isLoading={bulkLoading}
+          isDisabled={bulkLoading}
         >
           {translations.common.actions.create}
         </Button>
@@ -310,7 +184,6 @@ export default function TrainingSessionGenerator({
         </div>
       )}
 
-      {/* Date Range */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           type="date"
@@ -347,20 +220,17 @@ export default function TrainingSessionGenerator({
         </CheckboxGroup>
       </div>
 
-      {/* Time Selection */}
       <div>
         <TimeInput
-          // value={trainingTime}
           onChange={(e) => setTrainingTime(e?.toString() || '')}
           label={translations.trainingSessions.trainingSessionTime}
           isRequired
           hourCycle={24}
-          aria-label="Čas tréninku"
+          aria-label={translations.trainingSessions.trainingSessionTime}
           startContent={<ClockIcon className="w-4 h-4 text-gray-400" />}
         />
       </div>
 
-      {/* Title Template */}
       <div>
         <Input
           value={titleTemplate}
@@ -381,7 +251,6 @@ export default function TrainingSessionGenerator({
         </div>
       </div>
 
-      {/* Attendance Records Option */}
       <div>
         <Checkbox
           isSelected={createAttendanceRecords}
@@ -395,13 +264,8 @@ export default function TrainingSessionGenerator({
         </p>
       </div>
 
-      {/* Generate Button */}
       <div className="flex justify-center pt-4">
-        <Button
-          color="primary"
-          onPress={generateSessions}
-          isDisabled={!dateFrom || !dateTo || selectedDays.length === 0 || !trainingTime}
-        >
+        <Button color="primary" onPress={generateSessions} isDisabled={isGenerateDisabled}>
           {translations.trainingSessions.actions.preview}
         </Button>
       </div>
@@ -430,8 +294,8 @@ export default function TrainingSessionGenerator({
                           dayOptions.find(
                             (d) =>
                               d.value ===
-                              Object.keys(dayMap).find(
-                                (day) => dayMap[day] === new Date(session.date).getDay()
+                              Object.keys(WEEKDAY_MAP).find(
+                                (day) => WEEKDAY_MAP[day] === new Date(session.date).getDay()
                               )
                           )?.label
                         }

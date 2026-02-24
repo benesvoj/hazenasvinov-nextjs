@@ -59,6 +59,7 @@ export const trainingSessionsTranslations = {
     mandatoryFieldsMissing: 'Vyplňte všechny povinné údaje',
     trainingGenerationSummary: (successCount: number, errorCount: number) =>
       `Vytvořeno ${successCount} tréninků, ${errorCount} se nepodařilo vytvořit`,
+    noTrainingSessionsProvided: 'Nebyl vybrán žádný trénink k vytvoření',
   },
   actions: {
     preview: 'Generovat náhled',

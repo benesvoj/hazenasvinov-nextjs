@@ -47,6 +47,12 @@ export const attendanceTranslations = {
       `Upozornění: ${count} záznamů má chybějící data člena a nebude zobrazeno.`,
   },
   responseMessages: {
+    createSuccess: 'Docházka byla úspěšně vytvořena',
+    updateSuccess: 'Docházka byla úspěšně aktualizována',
+    deleteSuccess: 'Docházka byla úspěšně smazána',
+    createError: 'Chyba při vytváření docházky',
+    updateError: 'Chyba při aktualizaci docházky',
+    deleteError: 'Chyba při mazání docházky',
     sessionStateUpdateFailed: 'Chyba při změně stavu tréninku',
     noMembersForSession: 'Žádní členové nejsou k dispozici pro vybranou kategorii',
     sessionCreationFailed: 'Chyba při vytváření záznamů docházky',
