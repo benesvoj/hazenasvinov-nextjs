@@ -107,7 +107,7 @@ export default function CoachesAttendancePage() {
   // Fetch lineup members using the correct lineup ID (not session ID!)
   const {data: lineupMembers} = useFetchCategoryLineupMembers(
     selectedCategory,
-    activeLineup?.id || ''
+    activeLineup?.category_id === selectedCategory ? activeLineup.id : ''
   );
 
   const resolveMemberIds = useCallback((): string[] => {
