@@ -22,4 +22,11 @@ export const coachPortalTranslations = {
     meetingMinutes: 'Zápisy z výborových schůzí',
     profile: 'Správa vašeho trenérského profilu',
   },
+  birthdayCard: {
+    title: 'Nadcházející narozeniny',
+    emptyStateTitle: 'Žádné nadcházející narozeniny',
+    noBirthdays: 'Žádné nadcházející narozeniny v přiřazených kategoriích',
+    loadingError: 'Chyba při načítání narozenin: ',
+    lastBirthdaysTitle: 'Zobrazují se nejbližší 3 narozeniny',
+  },
 };

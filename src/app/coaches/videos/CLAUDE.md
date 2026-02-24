@@ -63,12 +63,20 @@ page.tsx
 
 ## Improvement Proposals
 
-1. **Add server-side category filtering** — Modify `useFetchVideos()` to accept `categoryIds` parameter and filter on the API side. Only return videos for the coach's assigned categories.
+### Security (Layers 3 + 4 — see root CLAUDE.md)
 
-2. **Add server-side category validation for mutations** — The create/update API should verify that the `category_id` in the request body is one of the coach's assigned categories.
+1. **Add server-side category filtering** — Modify the videos API to accept `categoryIds` parameter and filter server-side. Only return videos for the coach's assigned categories. This is the most impactful fix — currently ALL videos are sent to the browser.
 
-3. **Implement server-side pagination** — Replace the global fetch + client-side pagination with proper server-side pagination and filtering.
+2. **Add server-side category validation for mutations** — The create/update API must verify that the `category_id` in the request body is one of the coach's assigned categories.
 
-4. **Invalidate queries after mutations** — Ensure TanStack Query cache is properly invalidated after create/update/delete operations.
+3. **Add RLS policies** to the videos table restricting read/write access to coaches' assigned categories.
 
-5. **Add RLS policies** to the videos table restricting read/write access to coaches' assigned categories.
+### Client Architecture (Layer 2 — CoachCategoryContext)
+
+4. **Adopt `CoachCategoryContext`** (see `components/CLAUDE.md`) — Replace the per-page category resolution logic with `const { selectedCategory, availableCategories } = useCoachCategory()`. The category dropdown for filtering and the "Add Video" form can both read from context.
+
+### Code Quality
+
+5. **Implement server-side pagination** — Replace the global fetch + client-side pagination with proper server-side pagination and filtering. This becomes even more important once category filtering is server-side.
+
+6. **Invalidate queries after mutations** — Ensure TanStack Query cache is properly invalidated after create/update/delete operations.

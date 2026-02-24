@@ -80,14 +80,20 @@ page.tsx
 
 ## Improvement Proposals
 
+### Security (Layers 3 + 4 — see root CLAUDE.md)
+
 1. **Add server-side category authorization** to all lineup API routes — verify coach is assigned to the `category_id` before allowing read/write operations.
 
 2. **Add RLS policies** to `category_lineups` and `category_lineup_members` tables.
 
-3. **Refactor `page.tsx`** — Extract state into `useLineupsPage()` hook. The category/season selection pattern is identical to other pages and should be a shared hook.
+### Client Architecture (Layer 2 — CoachCategoryContext)
 
-4. **Add optimistic updates** — Use TanStack Query's optimistic update pattern for lineup and member mutations.
+3. **Adopt `CoachCategoryContext`** (see `components/CLAUDE.md`) — Replace per-page category/season selection with `const { selectedCategory, selectedSeason } = useCoachCategory()`. This eliminates the duplicated tab rendering and auto-selection logic. The context also fixes the race condition issue (#3 above) since `selectedCategory` is stable in context rather than local state that can change mid-operation.
 
-5. **Create shared `useCategorySeasonFilter()` hook** — The category tab selection + season auto-selection logic is duplicated across lineups, matches, dashboard, and attendance. Extract into a reusable hook.
+4. **Refactor `page.tsx`** — After context adoption, extract remaining lineup-specific state (selectedLineup, modals) into `useLineupsPage()` hook.
 
-6. **Capture category at operation time** — Mutation callbacks should close over the current `selectedCategory` value rather than reading it from state at execution time.
+### Code Quality
+
+5. **Add optimistic updates** — Use TanStack Query's optimistic update pattern for lineup and member mutations.
+
+6. **Capture category at operation time** — Mutation callbacks should close over the current `selectedCategory` value rather than reading it from state at execution time. (Partially solved by context — context value is more stable than per-page state.)

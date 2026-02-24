@@ -68,9 +68,13 @@ page.tsx
 
 ## Improvement Proposals
 
-1. **Add a loading skeleton** while categories are being fetched and auto-selected.
+### Client Architecture (Layer 2 — CoachCategoryContext)
 
-2. **Extract category/season filter logic** into a shared `useCategorySeasonFilter()` hook — identical pattern to matches, lineups, attendance.
+1. **Adopt `CoachCategoryContext`** (see `components/CLAUDE.md`) — Replace the per-page category selection with `const { selectedCategory, availableCategories, isLoading } = useCoachCategory()`. This solves the loading state issue (#1 above) since the context manages `isLoading` centrally, and the category selection persists from whatever page the coach visited previously.
+
+2. **Move category tabs to top bar or sidebar** — After context adoption, category switching becomes a global UI element in `CoachesTopBar`. The dashboard page no longer needs to render its own tabs — it just reads `selectedCategory` from context and passes it to child cards.
+
+### Code Quality
 
 3. **Consider pre-fetching dashboard data** — Since this is the landing page, data could be prefetched during navigation to improve perceived performance.
 

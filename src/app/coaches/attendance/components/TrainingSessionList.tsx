@@ -4,31 +4,30 @@ import {Button, Card, CardBody, CardHeader, Skeleton} from '@heroui/react';
 
 import {CalendarIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
+import {translations} from '@/lib/translations/index';
+
 import TrainingSessionStatusBadge from '@/app/coaches/attendance/components/TrainingSessionStatusBadge';
 
 import {Heading} from '@/components';
 import {TrainingSessionStatusEnum} from '@/enums';
 import {formatDateString, formatTime} from '@/helpers';
-import {translations} from '@/lib';
 import {BaseTrainingSession} from '@/types';
 
 interface TrainingSessionListProps {
   loading: boolean;
   sessions: BaseTrainingSession[];
   selectedSession: string | null;
-  onStatusChnage: (session: BaseTrainingSession) => void;
+  onStatusChange: (session: BaseTrainingSession) => void;
   onSelectedSession: (sessionId: string | null) => void;
   onEditSession: (session: BaseTrainingSession) => void;
   onDeleteSession: (sessionId: string) => void;
 }
 
-const t = translations.coachPortal.trainingSessions.trainingSessionList;
-
 export const TrainingSessionList = ({
   loading,
   sessions,
   selectedSession,
-  onStatusChnage,
+  onStatusChange,
   onSelectedSession,
   onDeleteSession,
   onEditSession,
@@ -37,7 +36,7 @@ export const TrainingSessionList = ({
     <div className="lg:col-span-1">
       <Card>
         <CardHeader>
-          <Heading size={3}>{t.title}</Heading>
+          <Heading size={3}>{translations.trainingSessions.title}</Heading>
         </CardHeader>
         <CardBody>
           {loading ? (
@@ -47,7 +46,9 @@ export const TrainingSessionList = ({
               ))}
             </div>
           ) : sessions.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">{t.noTrainingSession}</p>
+            <p className="text-gray-500 text-center py-4">
+              {translations.trainingSessions.noTrainingSession}
+            </p>
           ) : (
             <div className="space-y-2">
               {sessions.map((session) => {
@@ -84,14 +85,18 @@ export const TrainingSessionList = ({
                         )}
                         {session.description && (
                           <div className="flex items-start gap-1 text-xs text-gray-500 mt-1">
-                            <span className="font-semibold">{t.trainingSessionDescription}</span>
+                            <span className="font-semibold">
+                              {translations.trainingSessions.trainingSessionDescription}
+                            </span>
                             {session.description}
                           </div>
                         )}
                         {session.status === TrainingSessionStatusEnum.CANCELLED &&
                           session.status_reason && (
                             <div className="flex items-start gap-1 text-xs text-red-600 mt-1">
-                              <span className="font-semibold">{t.cancelTrainingSessionReason}</span>
+                              <span className="font-semibold">
+                                {translations.trainingSessions.cancelTrainingSessionReason}
+                              </span>
                               {session.status_reason}
                             </div>
                           )}
@@ -101,9 +106,9 @@ export const TrainingSessionList = ({
                           size="sm"
                           variant="light"
                           color="primary"
-                          onPress={() => onStatusChnage(session)}
+                          onPress={() => onStatusChange(session)}
                           isIconOnly
-                          aria-label={`${t.changeTrainingSessionStatus} ${session.title}`}
+                          aria-label={`${translations.trainingSessions.changeTrainingSessionStatus} ${session.title}`}
                           startContent={<CalendarIcon className="w-4 h-4" />}
                           isDisabled={isButtonDisabled}
                         />
@@ -112,7 +117,7 @@ export const TrainingSessionList = ({
                           variant="light"
                           startContent={<PencilIcon className="w-4 h-4" />}
                           isIconOnly
-                          aria-label={`${t.updateTrainingSession} ${session.title}`}
+                          aria-label={`${translations.trainingSessions.updateTrainingSession} ${session.title}`}
                           onPress={() => onEditSession(session)}
                         />
                         <Button
@@ -121,7 +126,7 @@ export const TrainingSessionList = ({
                           variant="light"
                           onPress={() => onDeleteSession(session.id)}
                           isIconOnly
-                          aria-label={`${t.deleteTrainingSession}  ${session.title}`}
+                          aria-label={`${translations.trainingSessions.deleteTrainingSession}  ${session.title}`}
                           startContent={<TrashIcon className="w-4 h-4" />}
                           isDisabled={isButtonDisabled}
                         />

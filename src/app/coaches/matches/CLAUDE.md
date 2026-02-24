@@ -79,14 +79,20 @@ page.tsx
 
 ## Improvement Proposals
 
-1. **Add category validation to `CoachMatchResultFlow`** — Before allowing result recording, verify `match.category_id` is in the coach's assigned categories. Add the same check server-side in the match update API.
+### Security (Layers 3 + 4 — see root CLAUDE.md)
 
-2. **Add category validation to metadata mutation hooks** — All match metadata operations should verify category ownership before executing.
+1. **Add category validation to `CoachMatchResultFlow`** — Server-side: the match update API must verify `match.category_id` is in the coach's `assigned_categories` before allowing score updates. Client-side: check via context as an early guard.
 
-3. **Create `useMatchesPage()` hook** — Consolidate all page-level state into a single custom hook to reduce `page.tsx` complexity.
+2. **Add category validation to metadata mutation hooks** — All match metadata operations (photos, notes, documents) must verify category ownership server-side before executing.
 
-4. **Fix the `useUserRoles()` provider issue** — Ensure the provider is always available in the coach portal layout rather than catching errors per-page.
+3. **Add RLS policies** to `matches` and `match_metadata` tables restricting write access to coaches' assigned categories.
 
-5. **Add RLS policies** to `matches` and `match_metadata` tables restricting write access to coaches' assigned categories.
+### Client Architecture (Layer 2 — CoachCategoryContext)
+
+4. **Adopt `CoachCategoryContext`** (see `components/CLAUDE.md`) — Replace the per-page category selection logic with `const { selectedCategory } = useCoachCategory()`. This also fixes the `useUserRoles()` try-catch issue — the context handles category resolution in the layout, so pages never need to call `getCurrentUserCategories()` directly.
+
+5. **Create `useMatchesPage()` hook** — After context adoption, consolidate remaining match-specific state (selectedMatch, resultFlowMatch, activeTab) into a single hook.
+
+### Code Quality
 
 6. **Split `RecentMatchDetails`** into focused sub-components: `MatchPhotos`, `MatchNotes`, `MatchLineup`, `MatchDocuments`.

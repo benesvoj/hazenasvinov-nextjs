@@ -32,15 +32,15 @@ CoachesSidebarProvider (wraps all coach pages)
 
 ## Category Filtering
 
-These components do **not** handle category filtering. The sidebar shows navigation routes; it does not display or filter by categories. Category selection is handled per-page.
-
-Note: Some projects implement category selection in the sidebar itself (as a global filter). This could be a future improvement — see proposal below.
+These components do **not** currently handle category filtering. The sidebar shows navigation routes; it does not display or filter by categories. Category selection is handled per-page, leading to significant code duplication and UX issues (selection resets on navigation).
 
 ## Issues & Technical Debt
 
-### Low
+### High (Architecture)
 
-1. **No category context in sidebar** — Each page independently implements category selection (tabs or dropdown). There's no global "selected category" state shared across pages. Navigating between pages resets the category selection.
+1. **No shared category context** — Each page independently implements ~40 lines of category selection boilerplate (get assigned → filter → auto-select → manage state). This is the single biggest source of code duplication in the coaches portal. Navigating between pages resets the selection.
+
+### Low
 
 2. **Route title lookup is string-based** — `CoachesTopBar` matches pathname against `coachesRoutes` array. If a route is renamed or restructured, the title lookup may silently fail (shows fallback "Coach Portal").
 
@@ -48,12 +48,56 @@ Note: Some projects implement category selection in the sidebar itself (as a glo
 
 ## Improvement Proposals
 
-1. **Add a global "selected category" to the sidebar context** — Instead of each page managing its own category selection, store `selectedCategory` in `CoachesSidebarContext`. This would:
-   - Persist category selection across page navigations
-   - Eliminate duplicated category selection logic in every page
-   - Allow the sidebar to display the current category
-   - Reduce per-page complexity significantly
+### Primary: Create `CoachCategoryContext` (new file in this directory)
 
-2. **Show assigned categories in the sidebar** — Add a category switcher (dropdown or pills) in the sidebar or top bar. This gives coaches a persistent, visible indication of which category they're viewing.
+This is the **highest-impact improvement** for the coaches portal. Create a new context that lives in the layout alongside `CoachesSidebarProvider`:
 
-3. **Extract `useCategorySeasonFilter()` hook** — Even without a global context, the repeated pattern of "get assigned categories → filter → auto-select → track state" should be a shared hook used by all pages.
+```typescript
+// CoachCategoryContext.tsx
+interface CoachCategoryContextType {
+  availableCategories: Category[];   // Pre-filtered: assigned for coaches, all for admins
+  selectedCategory: string;          // Persists across page navigations
+  setSelectedCategory: (id: string) => void;
+  selectedSeason: string;
+  setSelectedSeason: (id: string) => void;
+  isLoading: boolean;
+  isAdmin: boolean;
+}
+```
+
+**Responsibilities this context absorbs:**
+- Reading `userCategories` from `UserContext`
+- Filtering available categories (intersection with active categories)
+- Admin simulation mode (localStorage check) — centralized, no more per-page reads
+- Auto-selecting first category when only one is assigned
+- Managing `selectedSeason` with active season auto-selection
+
+**Layout integration:**
+```
+CoachesSidebarProvider
+  └── CoachCategoryProvider (NEW)
+      ├── CoachesSidebar (can display current category)
+      ├── CoachesTopBar (can show category switcher dropdown/tabs)
+      └── {children}
+```
+
+**Important:** This context is a UX and code-quality improvement. It does NOT replace server-side access control. See the root `CLAUDE.md` for the full layered security architecture.
+
+**Pages after this change** — each page simplifies from:
+```typescript
+// BEFORE: ~40 lines of category boilerplate per page
+const { userCategories, isAdmin } = useUser();
+const { categories } = useAppData();
+const [selectedCategory, setSelectedCategory] = useState('');
+const [adminSimulationCategories, setAdminSimulationCategories] = useState([]);
+// ... useEffect for simulation, useEffect for auto-select, useMemo for filtering ...
+```
+to:
+```typescript
+// AFTER: one line
+const { selectedCategory, availableCategories } = useCoachCategory();
+```
+
+### Secondary: Show category in sidebar or top bar
+
+Once the context exists, add a category switcher UI to `CoachesTopBar` or the sidebar. This gives coaches a persistent, visible indication of which category they're viewing — consistent across all pages instead of each page rendering its own tabs/dropdown.

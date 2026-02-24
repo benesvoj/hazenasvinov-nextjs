@@ -54,14 +54,22 @@ This is a significant access control gap — a coach assigned to "Men A" can see
 
 ## Improvement Proposals
 
-1. **Add category-based member filtering** — Pass the coach's assigned category IDs to `useFetchMembersInternal()` and use the existing `category_id` filter parameter. If the coach has multiple categories, either:
-   - Filter to all assigned categories (show members from any assigned category)
-   - Add a category selector (consistent with other pages)
+### Security (Layers 3 + 4 — see root CLAUDE.md)
 
-2. **Add server-side authorization** — The API should enforce that coaches can only query members from their assigned categories. Add a `hasCategoryAccess` check.
+1. **Add server-side authorization** — The `/api/members/internal` endpoint must enforce that coaches can only query members from their assigned categories. Add a `hasCategoryAccess` check that filters results to assigned categories only.
 
-3. **Restrict mutation permissions** — Coaches should only be able to edit/delete members that belong to their assigned categories. Consider making some operations admin-only.
+2. **Restrict mutation permissions** — Coaches should only be able to edit/delete members that belong to their assigned categories. Consider making some operations (delete) admin-only.
 
-4. **Add RLS policies** to the members table for category-based access control.
+3. **Add RLS policies** to the members table for category-based access control.
+
+### Client Architecture (Layer 2 — CoachCategoryContext)
+
+4. **Adopt `CoachCategoryContext`** and add category-based filtering — After the context is available, this page has two options:
+   - **Option A**: Use `selectedCategory` from context to show only members from the currently selected category (consistent with other pages)
+   - **Option B**: Use `availableCategories` from context to show members from ALL assigned categories (broader view, but still restricted)
+
+   Option A is recommended for consistency — the coach sees members for the category they're currently working with, matching how attendance, lineups, and matches work.
+
+### Code Quality
 
 5. **Filter inactive categories** from the display mapping — use `activeCategories` instead of `categories.data`.

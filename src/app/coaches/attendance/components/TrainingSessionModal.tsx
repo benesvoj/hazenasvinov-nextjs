@@ -18,13 +18,13 @@ import {translations} from '@/lib/translations/index';
 import {useUser} from '@/contexts/UserContext';
 
 import {TrainingSessionStatusEnum} from '@/enums';
-import {TrainingSession, TrainingSessionFormData} from '@/types';
+import {BaseTrainingSession, TrainingSession, TrainingSessionFormData} from '@/types';
 
 interface TrainingSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (formData: TrainingSessionFormData) => void;
-  session?: TrainingSession | null;
+  session?: BaseTrainingSession | null;
   selectedCategoryId: string;
   selectedSeason: string;
 }

@@ -2,8 +2,9 @@ import React from 'react';
 
 import {Chip, Input, Select, SelectItem} from '@heroui/react';
 
+import {translations} from '@/lib/translations/index';
+
 import {Genders, getMemberFunctionOptions, ModalMode} from '@/enums';
-import {translations} from '@/lib';
 import {BaseMember, Category} from '@/types';
 import {genderOptions} from '@/utils';
 
@@ -24,7 +25,7 @@ export default function MemberInfoTab({
 
   const tMember = translations.members;
 
-  const genderOpts = genderOptions();
+  const genderOpts = genderOptions;
 
   if (!formData) return null;
 

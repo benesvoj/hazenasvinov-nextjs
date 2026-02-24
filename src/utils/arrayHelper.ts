@@ -122,3 +122,14 @@ export const lastItem = <T>(arr: T[] | null | undefined): T | undefined =>
  * ```
  */
 export const getCount = <T>(arr: T[] | null | undefined): number => arr?.length || 0;
+
+/**
+ * Determines whether the provided array contains more than one element.
+ *
+ * @template T
+ * @param {T[] | null | undefined} arr - The array to check, which can be of any type,
+ *                                        or null/undefined.
+ * @returns boolean True if the array exists and contains more than one element,
+ *                    otherwise false.
+ */
+export const hasMoreThanOne = <T>(arr: T[] | null | undefined): boolean => !!arr && arr.length > 1;

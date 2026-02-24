@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Chip} from '@heroui/react';
 
-import {getTrainingSessionStatusOptions, TrainingSessionStatusEnum} from '@/enums';
+import {TrainingSessionStatusEnum} from '@/enums';
 import {trainingSessionStatusOptions} from '@/utils';
 
 interface TrainingSessionStatusBadgeProps {
@@ -30,11 +30,10 @@ export default function TrainingSessionStatusBadge({
   size = 'sm',
 }: TrainingSessionStatusBadgeProps) {
   const config = statusConfig[status];
-  const statusOptions = trainingSessionStatusOptions();
 
   return (
     <Chip color={config.color} variant={config.variant} size={size} className="font-medium">
-      {statusOptions[status]}
+      {trainingSessionStatusOptions[status]}
     </Chip>
   );
 }

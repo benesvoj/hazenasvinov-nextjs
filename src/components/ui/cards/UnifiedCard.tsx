@@ -47,6 +47,7 @@ export default function UnifiedCard({
   emptyStateType,
   isPressable = false,
   actions,
+  icon,
 }: UnifiedCardProps): React.ReactElement {
   const selectedClass = isSelected
     ? 'bg-primary-50 border-2 border-primary-500 shadow-md'
@@ -97,7 +98,10 @@ export default function UnifiedCard({
           {title && (
             <CardHeader className="flex justify-between items-center">
               <div className="flex flex-col gap-2">
-                <Heading size={titleSize}>{title}</Heading>
+                <div className="flex flex-row gap-2 items-center">
+                  {icon && <>{icon}</>}
+                  <Heading size={titleSize}>{title}</Heading>
+                </div>
                 {subtitle && <div className="text-sm text-gray-500">{subtitle}</div>}
               </div>
               {actions && actions.length > 0 && (

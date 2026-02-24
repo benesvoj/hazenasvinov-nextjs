@@ -8,7 +8,7 @@ Manages training session attendance for coaches. Coaches create/generate trainin
 
 | File | Lines | Responsibility |
 |---|---|---|
-| `page.tsx` | ~572 | Master orchestrator — state, modals, data fetching, category/season selection |
+| `page.tsx` | ~373 | Master orchestrator — state, modals, data fetching |
 | `components/TrainingSessionList.tsx` | ~140 | Lists sessions with selection, status change, edit, delete actions |
 | `components/TrainingSessionModal.tsx` | ~195 | Create/edit session form (title, description, date, time, location) |
 | `components/TrainingSessionGenerator.tsx` | ~454 | Bulk session generation by date range + weekdays |
@@ -27,13 +27,26 @@ Manages training session attendance for coaches. Coaches create/generate trainin
 | `components/RecommendationsPanel.tsx` | — | **Stub** — placeholder text only |
 | `components/index.ts` | — | Barrel exports |
 
+## Current State
+
+The page has been through two major refactoring rounds and is now at ~373 lines (down from ~572). ESLint clean.
+
+**Completed refactoring:**
+- Uses `useCoachCategory()` for category/season state (no per-page boilerplate)
+- Uses `useModalWithItem<BaseTrainingSession>()` / `useModalWithItem<string>()` / `useModal()` from `src/hooks/shared/useModals.ts`
+- Extracted `resolveMemberIds` as a `useCallback` to DRY member ID resolution
+- No direct Supabase client usage — all data through hooks
+- No `alert()` calls — uses `showToast`
+- No `any` types in modal state (typed via `useModalWithItem<T>`)
+- No `setTimeout` hacks — `openEmpty()` handles create mode
+- All user-facing strings use translations from `@/lib/translations`
+
 ## Data Flow
 
 ```
 page.tsx
-├── useAppData() → seasons[], categories[], members[]
-├── useUser() → userCategories[], isAdmin
-├── Compute availableCategories (filter by assigned)
+├── useCoachCategory() → selectedCategory, selectedSeason, availableCategories
+├── useAppData() → seasons[], members[]
 ├── useFetchTrainingSessions({categoryId, seasonId})
 │   └── GET /api/entities/training_sessions?categoryId=X&seasonId=Y
 ├── useFetchCategoryLineups({categoryId, seasonId})
@@ -51,63 +64,83 @@ page.tsx
         └── GET /api/attendance/statistics → calls 3 Supabase RPCs
 ```
 
-## Category Filtering
+## Modal State Pattern
 
-- `availableCategories` computed from intersection of `userCategories` and all active categories
-- Admins see all categories; admin simulation mode checks localStorage
-- `selectedCategory` constrains all data fetching (sessions, lineups, lineup members)
-- **Client-side only** — API endpoints do not verify category authorization
+```typescript
+const sessionModal = useModalWithItem<BaseTrainingSession>();  // create + edit
+const deleteModal = useModalWithItem<string>();                // delete by ID
+const statusDialog = useModalWithItem<BaseTrainingSession>();  // status change
+const generatorModal = useModal();                             // simple open/close
+```
 
-## Issues & Technical Debt
+---
+
+## Next Refactoring Steps
+
+### Step 1: Close modals after successful async operations
+
+**Problem:** Two handlers don't close their modals after success:
+
+1. `handleSessionSubmit` (line 127) — after creating/updating a session, `sessionModal.closeAndClear()` is never called. The `TrainingSessionModal` component does NOT auto-close after `onSubmit`.
+
+2. `confirmDeleteSession` (line 167) — after deleting a session, `deleteModal.closeAndClear()` is never called. `DeleteConfirmationModal` does NOT auto-close after `onConfirm`.
+
+Note: `handleStatusUpdate` is fine — `TrainingSessionStatusDialog` calls `onClose()` internally after `onConfirm`.
+
+**Fix:**
+```typescript
+// handleSessionSubmit — add at end of try block (before catch):
+sessionModal.closeAndClear();
+
+// confirmDeleteSession — add after refetchSessions():
+deleteModal.closeAndClear();
+```
+
+---
+
+### Step 2: Fix `as any` cast on Tabs `onSelectionChange`
+
+**Problem:** Line 292 uses `key as any`:
+```typescript
+onSelectionChange={(key) => setActiveTab(key as any)}
+```
+
+**Fix:** Cast to the union type:
+```typescript
+onSelectionChange={(key) => setActiveTab(key as 'attendance' | 'statistics')}
+```
+
+---
+
+### Step 3: Fix prop name typo `onStatusChnage`
+
+**Problem:** `TrainingSessionList.tsx` has a typo in its prop name: `onStatusChnage` (should be `onStatusChange`). This requires changing:
+
+| File | What to change |
+|---|---|
+| `components/TrainingSessionList.tsx` line 19 | Interface definition: `onStatusChnage` → `onStatusChange` |
+| `components/TrainingSessionList.tsx` line 31 | Destructuring: `onStatusChnage` → `onStatusChange` |
+| `components/TrainingSessionList.tsx` line 104 | Usage: `onStatusChnage(session)` → `onStatusChange(session)` |
+| `page.tsx` line 302 | Prop: `onStatusChnage={...}` → `onStatusChange={...}` |
+
+---
+
+## Remaining Issues & Technical Debt
 
 ### Critical
 
-1. **No backend authorization on category access** — API routes for training sessions and attendance accept any `categoryId` without verifying the coach is assigned. A coach could craft API requests to read/write attendance data for unauthorized categories.
+1. **No backend authorization on category access** — API routes for training sessions and attendance accept any `categoryId` without verifying the coach is assigned. (Server-side concern — see root `CLAUDE.md` Layers 3-4.)
 
-2. **No RLS policies** on `training_sessions` or `member_attendance` tables — database-level security absent.
+2. **No RLS policies** on `training_sessions` or `member_attendance` tables.
 
-3. **Training session generator is non-functional** — The session creation logic in `TrainingSessionGenerator.tsx` (lines ~208-238) is **commented out** with a TODO. The generator produces a preview but does not create sessions.
-
-### High
-
-4. **`page.tsx` is too large (~572 lines)** — Manages all state, modals, data fetching, and rendering in a single component. Should be split into custom hooks (`useAttendanceState`, `useCategoryFilter`, `useSessionModals`).
-
-5. **Direct Supabase queries in page component** — Lines ~232-261 contain inline queries to fetch lineup members during session creation. This duplicates logic that exists in hooks and should be centralized.
-
-6. **Admin simulation logic duplicated** — The page reads `localStorage.getItem('adminCategorySimulation')` directly instead of relying solely on `getCurrentUserCategories()`.
+3. **Training session generator is non-functional** — Creation logic in `TrainingSessionGenerator.tsx` is commented out.
 
 ### Medium
 
-7. **Multiple `setState` in `useEffect`** without proper dependency management — eslint-disable comments suppress React warnings (lines ~104-182).
-
-8. **Missing error handling** — Several operations fail silently (e.g., `handleSessionSubmit`). Uses `alert()` in some places instead of consistent toast notifications.
-
-9. **Attendance statistics endpoint** (`/api/attendance/statistics`) uses `withAuth()` but does not validate category access — coach can query statistics for any category.
+4. **Attendance statistics endpoint** (`/api/attendance/statistics`) lacks category authorization (server-side concern).
 
 ### Low
 
-10. **Prop name typo** — `TrainingSessionList.tsx` has `onStatusChnage` (should be `onStatusChange`).
+5. **5 empty stub components** — `AttendanceTrendsChart`, `SummaryCards`, `InsightsPanel`, `MemberPerformanceTable`, `RecommendationsPanel` should be implemented or removed.
 
-11. **5 empty stub components** — `AttendanceTrendsChart`, `SummaryCards`, `InsightsPanel`, `MemberPerformanceTable`, `RecommendationsPanel` are placeholders that should either be implemented or removed.
-
-12. **`AttendanceModal.tsx`** appears to be a legacy component not actively used — candidate for removal.
-
-## Improvement Proposals
-
-1. **Add server-side category authorization** to all attendance-related API routes. Use a `hasCategoryAccess(supabase, userId, categoryId)` check before executing queries.
-
-2. **Add RLS policies** to `training_sessions` and `member_attendance` tables restricting access to coaches' assigned categories.
-
-3. **Fix the training session generator** — uncomment and test the session creation logic, add proper error handling and success notifications.
-
-4. **Refactor `page.tsx`** into smaller units:
-   - `useAttendancePage()` — orchestrating hook for all page state
-   - `useCategorySeasonFilter()` — reusable category/season selection (shared pattern across pages)
-   - `useSessionModals()` — modal open/close/data state
-   - Extract the two-column layout into a presentational component
-
-5. **Centralize admin simulation** — remove localStorage reads from the page; rely solely on `getCurrentUserCategories()`.
-
-6. **Implement or remove stub components** — the 5 empty stubs add confusion. Either implement the statistics sub-features or clean them up.
-
-7. **Replace `alert()` with toast notifications** for consistent UX across the portal.
+6. **`AttendanceModal.tsx`** — Legacy component, candidate for removal.

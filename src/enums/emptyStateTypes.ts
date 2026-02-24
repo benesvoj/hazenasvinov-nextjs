@@ -1,6 +1,4 @@
-import {translations} from '@/lib/translations';
-
-const t = translations.common.emptyStateTypes;
+import {translations} from '@/lib/translations/index';
 
 export enum EmptyStateTypes {
   TODOS = 'todos',
@@ -11,17 +9,19 @@ export enum EmptyStateTypes {
   CATEGORIES = 'categories',
   SETTINGS = 'settings',
   COMMITTEES = 'committees',
+  BIRTHDAYS = 'birthdays',
 }
 
 export const EMPTY_STATE_TYPES_LABELS: Record<EmptyStateTypes, string> = {
-  [EmptyStateTypes.TODOS]: t.todos,
-  [EmptyStateTypes.POSTS]: t.posts,
-  [EmptyStateTypes.USERS]: t.users,
-  [EmptyStateTypes.MATCHES]: t.matches,
-  [EmptyStateTypes.PHOTOS]: t.photos,
-  [EmptyStateTypes.CATEGORIES]: t.categories,
-  [EmptyStateTypes.SETTINGS]: t.settings,
-  [EmptyStateTypes.COMMITTEES]: t.committees,
+  [EmptyStateTypes.TODOS]: translations.common.emptyStateTypes.todos,
+  [EmptyStateTypes.POSTS]: translations.common.emptyStateTypes.posts,
+  [EmptyStateTypes.USERS]: translations.common.emptyStateTypes.users,
+  [EmptyStateTypes.MATCHES]: translations.common.emptyStateTypes.matches,
+  [EmptyStateTypes.PHOTOS]: translations.common.emptyStateTypes.photos,
+  [EmptyStateTypes.CATEGORIES]: translations.common.emptyStateTypes.categories,
+  [EmptyStateTypes.SETTINGS]: translations.common.emptyStateTypes.settings,
+  [EmptyStateTypes.COMMITTEES]: translations.common.emptyStateTypes.committees,
+  [EmptyStateTypes.BIRTHDAYS]: translations.common.emptyStateTypes.birthdays,
 };
 
 export const getEmptyStateTypeOptions = () => {

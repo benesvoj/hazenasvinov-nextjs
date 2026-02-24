@@ -106,5 +106,17 @@ export const commonTranslations = {
   responseMessages: {
     copyToClipboardSuccess: 'Zkopírováno do schránky',
     copyToClipboardError: 'Nepodařilo se zkopírovat do schránky',
+    errorLoadingPage: 'Při načítání stránky došlo k chybě. Zkuste to prosím znovu později.',
+  },
+  emptyStateTypes: {
+    todos: 'Úkoly',
+    posts: 'Články',
+    users: 'Členové',
+    matches: 'Zápasy',
+    photos: 'Fotky',
+    categories: 'Kategorie',
+    settings: 'Nastavení',
+    committees: 'Komise',
+    birthdays: 'Narozeniny',
   },
 };
