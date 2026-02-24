@@ -2,23 +2,15 @@
 
 import {useEffect, useMemo, useState} from 'react';
 
-import {
-  Button,
-  Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Textarea,
-} from '@heroui/react';
+import {Button, Input, Textarea} from '@heroui/react';
 
 import {translations} from '@/lib/translations/index';
 
 import {useUser} from '@/contexts/UserContext';
 
+import {UnifiedModal} from '@/components';
 import {TrainingSessionStatusEnum} from '@/enums';
-import {BaseTrainingSession, TrainingSession, TrainingSessionFormData} from '@/types';
+import {BaseTrainingSession, TrainingSessionFormData} from '@/types';
 
 interface TrainingSessionModalProps {
   isOpen: boolean;
@@ -102,94 +94,98 @@ export default function TrainingSessionModal({
     onClose();
   };
 
+  const modalTitle = session
+    ? translations.attendance.modal.title.editSession
+    : translations.attendance.modal.title.addSession;
+
+  const footer = (
+    <>
+      <Button variant="light" onPress={handleClose}>
+        {translations.common.actions.cancel}
+      </Button>
+      <Button
+        color="primary"
+        onPress={handleSubmit}
+        isDisabled={!sessionFormData.title || !sessionFormData.session_date}
+      >
+        {session ? translations.common.actions.save : translations.common.actions.create}
+      </Button>
+    </>
+  );
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="2xl">
-      <ModalContent>
-        <ModalHeader>
-          {session
-            ? translations.attendance.modal.title.editSession
-            : translations.attendance.modal.title.addSession}
-        </ModalHeader>
-        <ModalBody>
-          <div className="space-y-4">
-            <Input
-              label="Název tréninku"
-              placeholder="Zadejte název tréninku"
-              value={sessionFormData.title}
-              onChange={(e) =>
-                setSessionFormData((prev) => ({
-                  ...prev,
-                  title: e.target.value,
-                }))
-              }
-              isRequired
-            />
+    <UnifiedModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={modalTitle}
+      footer={footer}
+      size={'2xl'}
+    >
+      <div className="space-y-4">
+        <Input
+          label={translations.trainingSessions.labels.title}
+          placeholder={translations.trainingSessions.placeholders.title}
+          value={sessionFormData.title}
+          onChange={(e) =>
+            setSessionFormData((prev) => ({
+              ...prev,
+              title: e.target.value,
+            }))
+          }
+          isRequired
+        />
 
-            <Textarea
-              label="Popis"
-              placeholder="Zadejte popis tréninku"
-              value={sessionFormData.description || ''}
-              onChange={(e) =>
-                setSessionFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-            />
+        <Textarea
+          label={translations.trainingSessions.labels.description}
+          placeholder={translations.trainingSessions.placeholders.description}
+          value={sessionFormData.description || ''}
+          onChange={(e) =>
+            setSessionFormData((prev) => ({
+              ...prev,
+              description: e.target.value,
+            }))
+          }
+        />
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Datum"
-                type="date"
-                value={sessionFormData.session_date}
-                onChange={(e) =>
-                  setSessionFormData((prev) => ({
-                    ...prev,
-                    session_date: e.target.value,
-                  }))
-                }
-                isRequired
-              />
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label={translations.trainingSessions.labels.date}
+            type="date"
+            value={sessionFormData.session_date}
+            onChange={(e) =>
+              setSessionFormData((prev) => ({
+                ...prev,
+                session_date: e.target.value,
+              }))
+            }
+            isRequired
+          />
 
-              <Input
-                label="Čas"
-                type="time"
-                value={sessionFormData.session_time || ''}
-                onChange={(e) =>
-                  setSessionFormData((prev) => ({
-                    ...prev,
-                    session_time: e.target.value,
-                  }))
-                }
-              />
-            </div>
+          <Input
+            label={translations.trainingSessions.labels.time}
+            type="time"
+            value={sessionFormData.session_time || ''}
+            onChange={(e) =>
+              setSessionFormData((prev) => ({
+                ...prev,
+                session_time: e.target.value,
+              }))
+            }
+          />
+        </div>
 
-            <Input
-              label="Místo"
-              placeholder="Zadejte místo konání"
-              value={sessionFormData.location || ''}
-              onChange={(e) =>
-                setSessionFormData((prev) => ({
-                  ...prev,
-                  location: e.target.value,
-                }))
-              }
-            />
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button variant="light" onPress={handleClose}>
-            Zrušit
-          </Button>
-          <Button
-            color="primary"
-            onPress={handleSubmit}
-            isDisabled={!sessionFormData.title || !sessionFormData.session_date}
-          >
-            {session ? 'Uložit změny' : 'Vytvořit trénink'}
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        <Input
+          label={translations.trainingSessions.labels.location}
+          placeholder={translations.trainingSessions.placeholders.location}
+          value={sessionFormData.location || ''}
+          onChange={(e) =>
+            setSessionFormData((prev) => ({
+              ...prev,
+              location: e.target.value,
+            }))
+          }
+        />
+      </div>
+    </UnifiedModal>
   );
 }

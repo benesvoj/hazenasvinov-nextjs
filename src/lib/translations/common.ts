@@ -4,6 +4,7 @@ export const commonTranslations = {
   fullPageLoading: 'Načítání stránky...',
   underConstruction:
     'Tato stránka je v testovacím provozu. Některé funkce mohou být nedostupné nebo nefunkční',
+  noData: 'Žádná data k zobrazení',
   alerts: {
     warning: 'Upozornění',
     error: 'Chyba',
@@ -66,6 +67,9 @@ export const commonTranslations = {
     contactPhone: 'Kontaktní telefon',
     contactEmail: 'Kontaktní email',
     contacts: 'Kontakty',
+    dateFrom: 'Datum od',
+    dateTo: 'Datum do',
+    weekDaysTitle: 'Dny v týdnu',
   },
   tabs: {
     overview: 'Přehled',

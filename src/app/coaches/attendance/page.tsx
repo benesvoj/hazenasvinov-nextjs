@@ -2,7 +2,7 @@
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-import {Button, Card, CardBody, Select, SelectItem, Tab, Tabs} from '@heroui/react';
+import {Button, Select, SelectItem, Tab, Tabs} from '@heroui/react';
 
 import {CalendarIcon, PlusIcon} from '@heroicons/react/24/outline';
 
@@ -14,8 +14,13 @@ import {useAppData} from '@/contexts/AppDataContext';
 
 import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
 
-import {DeleteConfirmationModal, PageContainer, showToast} from '@/components';
-import {ATTENDANCE_TABS_LABELS, AttendanceTabs, TrainingSessionStatusEnum} from '@/enums';
+import {DeleteConfirmationModal, PageContainer, showToast, UnifiedCard} from '@/components';
+import {
+  ATTENDANCE_TABS_LABELS,
+  AttendanceStatuses,
+  AttendanceTabs,
+  TrainingSessionStatusEnum,
+} from '@/enums';
 import {
   useAttendance,
   useFetchCategoryLineupMembers,
@@ -145,7 +150,11 @@ export default function CoachesAttendancePage() {
         try {
           const memberIds = resolveMemberIds();
           if (hasItems(memberIds)) {
-            await createAttendanceForLineupMembers(createdSession.id, memberIds, 'present');
+            await createAttendanceForLineupMembers(
+              createdSession.id,
+              memberIds,
+              AttendanceStatuses.PRESENT
+            );
           }
         } catch (attendanceErr) {
           // Don't fail the session creation if attendance fails
@@ -188,10 +197,7 @@ export default function CoachesAttendancePage() {
     }
   };
 
-  const handleRecordAttendance = async (
-    memberId: string,
-    status: 'present' | 'absent' | 'late' | 'excused'
-  ) => {
+  const handleRecordAttendance = async (memberId: string, status: AttendanceStatuses) => {
     if (!selectedSession) return;
 
     try {
@@ -212,12 +218,18 @@ export default function CoachesAttendancePage() {
       await fetchLineups();
       const memberIds = resolveMemberIds();
       if (hasItems(memberIds)) {
-        await createAttendanceForLineupMembers(selectedSession, memberIds, 'present');
+        await createAttendanceForLineupMembers(
+          selectedSession,
+          memberIds,
+          AttendanceStatuses.PRESENT
+        );
       }
 
       await fetchAttendanceRecords();
 
-      showToast.success(`Vytvořeno ${memberIds.length} záznamů docházky pro tento trénink`);
+      showToast.success(
+        translations.attendance.responseMessages.attendanceRecordsCreated(memberIds.length)
+      );
     } catch (err) {
       showToast.danger(
         `${translations.attendance.responseMessages.sessionCreationFailed} ${err instanceof Error ? err.message : ''}`
@@ -230,68 +242,64 @@ export default function CoachesAttendancePage() {
   return (
     <>
       <PageContainer isLoading={isAllLoadings}>
-        <Card className="mb-6">
-          <CardBody>
-            <div className="flex flex-col lg:flex-row gap-4 justify-between">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 flex-1 lg:w-auto">
-                <Select
-                  label={translations.categories.labels.category}
-                  placeholder={translations.categories.placeholders.category}
-                  selectedKeys={selectedCategory ? [selectedCategory] : []}
-                  onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
-                  isDisabled={appDataLoading || availableCategories.length === 1}
-                  defaultSelectedKeys={selectedCategory ? [selectedCategory] : []}
-                  className="min-w-0 w-56"
-                >
-                  {availableCategories.map((category) => (
-                    <SelectItem key={category.id}>{category.name}</SelectItem>
-                  ))}
-                </Select>
+        <UnifiedCard padding={'none'}>
+          <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 flex-1 lg:w-auto">
+              <Select
+                label={translations.categories.labels.category}
+                placeholder={translations.categories.placeholders.category}
+                selectedKeys={selectedCategory ? [selectedCategory] : []}
+                onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
+                isDisabled={appDataLoading || availableCategories.length === 1}
+                defaultSelectedKeys={selectedCategory ? [selectedCategory] : []}
+                className="min-w-0 w-56"
+              >
+                {availableCategories.map((category) => (
+                  <SelectItem key={category.id}>{category.name}</SelectItem>
+                ))}
+              </Select>
 
-                <Select
-                  label={translations.seasons.labels.season}
-                  placeholder={translations.seasons.placeholders.season}
-                  selectedKeys={selectedSeason ? [selectedSeason] : []}
-                  onSelectionChange={(keys) => setSelectedSeason(Array.from(keys)[0] as string)}
-                  isDisabled={appDataLoading}
-                  className="min-w-0 w-56"
-                >
-                  {seasons.map((season) => (
-                    <SelectItem key={season.id}>{season.name}</SelectItem>
-                  ))}
-                </Select>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
-                <Button
-                  color="primary"
-                  startContent={<PlusIcon className="w-4 h-4" />}
-                  onPress={sessionModal.openEmpty}
-                  isDisabled={!selectedCategory || !selectedSeason}
-                  className="w-full sm:w-auto"
-                >
-                  <span className="hidden sm:inline">
-                    {translations.attendance.labels.newSession}
-                  </span>
-                  <span className="sm:hidden">
-                    {translations.attendance.labels.newSessionShort}
-                  </span>
-                </Button>
-                <Button
-                  color="primary"
-                  variant="bordered"
-                  onPress={generatorModal.onOpen}
-                  isDisabled={!selectedCategory || !selectedSeason}
-                  isIconOnly
-                  aria-label={translations.attendance.ariaLabels.sessionGeneration}
-                  className="w-full sm:w-auto"
-                >
-                  <CalendarIcon className="w-4 h-4" />
-                </Button>
-              </div>
+              <Select
+                label={translations.seasons.labels.season}
+                placeholder={translations.seasons.placeholders.season}
+                selectedKeys={selectedSeason ? [selectedSeason] : []}
+                onSelectionChange={(keys) => setSelectedSeason(Array.from(keys)[0] as string)}
+                isDisabled={appDataLoading}
+                className="min-w-0 w-56"
+              >
+                {seasons.map((season) => (
+                  <SelectItem key={season.id}>{season.name}</SelectItem>
+                ))}
+              </Select>
             </div>
-          </CardBody>
-        </Card>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
+              <Button
+                color="primary"
+                startContent={<PlusIcon className="w-4 h-4" />}
+                onPress={sessionModal.openEmpty}
+                isDisabled={!selectedCategory || !selectedSeason}
+                className="w-full sm:w-auto"
+              >
+                <span className="hidden sm:inline">
+                  {translations.attendance.labels.newSession}
+                </span>
+                <span className="sm:hidden">{translations.attendance.labels.newSessionShort}</span>
+              </Button>
+              <Button
+                color="primary"
+                variant="bordered"
+                onPress={generatorModal.onOpen}
+                isDisabled={!selectedCategory || !selectedSeason}
+                isIconOnly
+                aria-label={translations.attendance.ariaLabels.sessionGeneration}
+                className="w-full sm:w-auto"
+              >
+                <CalendarIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </UnifiedCard>
 
         <Tabs
           selectedKey={activeTab}
@@ -331,19 +339,16 @@ export default function CoachesAttendancePage() {
               <AttendanceStatisticsLazy categoryId={selectedCategory} seasonId={selectedSeason} />
             )}
             {activeTab === AttendanceTabs.STATISTICS && (!selectedCategory || !selectedSeason) && (
-              <Card>
-                <CardBody>
-                  <p className="text-center text-gray-500">
-                    {translations.attendance.responseMessages.selectSeasonAndCategory}
-                  </p>
-                </CardBody>
-              </Card>
+              <UnifiedCard>
+                <p className="text-center text-gray-500">
+                  {translations.attendance.responseMessages.selectSeasonAndCategory}
+                </p>
+              </UnifiedCard>
             )}
           </Tab>
         </Tabs>
       </PageContainer>
 
-      {/* Training Session Modal */}
       <TrainingSessionModal
         isOpen={sessionModal.isOpen}
         onClose={sessionModal.closeAndClear}
@@ -353,7 +358,6 @@ export default function CoachesAttendancePage() {
         selectedSeason={selectedSeason}
       />
 
-      {/* Training Session Generator Modal */}
       <TrainingSessionGenerator
         isOpen={generatorModal.isOpen}
         onClose={generatorModal.onClose}
@@ -372,7 +376,6 @@ export default function CoachesAttendancePage() {
         message={translations.attendance.modal.description.deleteSession}
       />
 
-      {/* Training Session Status Dialog */}
       <TrainingSessionStatusDialog
         isOpen={statusDialog.isOpen}
         onClose={statusDialog.closeAndClear}

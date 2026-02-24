@@ -28,7 +28,7 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 import {useFetchMembers} from '@/hooks';
 import {MeetingAttendeeFormData} from '@/types';
@@ -53,8 +53,8 @@ export function AttendeesModal({
   const [itemsPerPage] = useState(10);
 
   const {data: members} = useFetchMembers();
-  const t = translations.components.meetingMinutes;
-  const tAction = translations.action;
+  const t = translations.meetingMinutes;
+  const tAction = translations.common.actions;
 
   // Filter members based on search
   const filteredMembers = useMemo(() => {
@@ -77,6 +77,7 @@ export function AttendeesModal({
 
   // Reset page when search term changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [searchTerm]);
 
@@ -90,6 +91,7 @@ export function AttendeesModal({
   useEffect(() => {
     if (isOpen) {
       const existingMemberIds = new Set(attendees.map((a) => a.user_id).filter(Boolean));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedMembers(existingMemberIds);
     }
   }, [isOpen, attendees]);
@@ -302,8 +304,12 @@ export function AttendeesModal({
                 className="w-48"
               >
                 <SelectItem key="all">{t.all}</SelectItem>
-                <SelectItem key="present">{t.present}</SelectItem>
-                <SelectItem key="excused">{t.excused}</SelectItem>
+                <SelectItem key="present">
+                  {translations.attendance.enums.statuses.present}
+                </SelectItem>
+                <SelectItem key="excused">
+                  {translations.attendance.enums.statuses.excused}
+                </SelectItem>
               </Select>
             </div>
 
@@ -331,8 +337,12 @@ export function AttendeesModal({
                           }}
                           className="w-full"
                         >
-                          <SelectItem key="present">{t.present}</SelectItem>
-                          <SelectItem key="excused">{t.excused}</SelectItem>
+                          <SelectItem key="present">
+                            {translations.attendance.enums.statuses.present}
+                          </SelectItem>
+                          <SelectItem key="excused">
+                            {translations.attendance.enums.statuses.excused}
+                          </SelectItem>
                         </Select>
 
                         <Input

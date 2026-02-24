@@ -10,18 +10,17 @@ import {
   CheckboxGroup,
   Divider,
   Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
   TimeInput,
 } from '@heroui/react';
 
-import {CalendarIcon, ClockIcon, PlusIcon} from '@heroicons/react/24/outline';
+import {CalendarIcon, ClockIcon} from '@heroicons/react/24/outline';
 
+import {translations} from '@/lib/translations/index';
+
+import {UnifiedModal} from '@/components';
 import {formatDateString, formatTime} from '@/helpers';
 import {useSupabaseClient} from '@/hooks';
+import {hasItems} from '@/utils';
 
 interface TrainingSessionGeneratorProps {
   isOpen: boolean;
@@ -273,182 +272,173 @@ export default function TrainingSessionGenerator({
     onClose();
   };
 
+  const footer = (
+    <>
+      <Button color="danger" variant="light" onPress={handleClose}>
+        Zrušit
+      </Button>
+      {generatedSessions.length > 0 && (
+        <Button
+          color="success"
+          onPress={createAllSessions}
+          isLoading={isGenerating}
+          isDisabled={isGenerating}
+        >
+          {isGenerating ? 'Vytváření...' : `Vytvořit ${generatedSessions.length} tréninků`}
+        </Button>
+      )}
+    </>
+  );
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="2xl" scrollBehavior="inside">
-      <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <PlusIcon className="w-5 h-5 text-blue-600" />
-            <span>Generátor tréninků</span>
-          </div>
-        </ModalHeader>
+    <UnifiedModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={translations.trainingSessions.trainingSessionGenerator}
+      size="2xl"
+      scrollBehavior="inside"
+      footer={footer}
+    >
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
 
-        <ModalBody>
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          )}
+      {/* Date Range */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+          startContent={<CalendarIcon className="w-4 h-4 text-gray-400" />}
+          label={translations.common.labels.dateFrom}
+          isRequired
+          aria-label={translations.common.labels.dateFrom}
+        />
+        <Input
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          startContent={<CalendarIcon className="w-4 h-4 text-gray-400" />}
+          label={translations.common.labels.dateTo}
+          isRequired
+          aria-label={translations.common.labels.dateTo}
+        />
+      </div>
 
-          {/* Date Range */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                startContent={<CalendarIcon className="w-4 h-4 text-gray-400" />}
-                placeholder="Vyberte datum"
-                label="Datum od"
-                isRequired
-                aria-label="Datum od"
-              />
-            </div>
-            <div>
-              <Input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                startContent={<CalendarIcon className="w-4 h-4 text-gray-400" />}
-                placeholder="Vyberte datum"
-                label="Datum do"
-                isRequired
-                aria-label="Datum do"
-              />
-            </div>
-          </div>
-
-          <div>
-            <CheckboxGroup
-              label="Dny v týdnu"
-              orientation="horizontal"
-              value={selectedDays}
-              onValueChange={(values) => setSelectedDays(values as string[])}
-            >
-              {dayOptions.map((day) => (
-                <Checkbox key={day.value} value={day.value}>
-                  {day.label}
-                </Checkbox>
-              ))}
-            </CheckboxGroup>
-          </div>
-
-          {/* Time Selection */}
-          <div>
-            <TimeInput
-              // value={trainingTime}
-              onChange={(e) => setTrainingTime(e?.toString() || '')}
-              label="Čas tréninku"
-              isRequired
-              hourCycle={24}
-              aria-label="Čas tréninku"
-              startContent={<ClockIcon className="w-4 h-4 text-gray-400" />}
-            />
-          </div>
-
-          {/* Title Template */}
-          <div>
-            <Input
-              value={titleTemplate}
-              onChange={(e) => setTitleTemplate(e.target.value)}
-              placeholder="Základní název tréninku"
-              label="Název tréninku"
-              isRequired
-              aria-label="Název tréninku"
-            />
-            <div className="mt-2">
-              <Checkbox
-                isSelected={includeNumber}
-                onValueChange={setIncludeNumber}
-                aria-label="Přidat číslo do názvu"
-              >
-                Přidat číslo do názvu (např. &quot;Trénink 1&quot;, &quot;Trénink 2&quot;)
-              </Checkbox>
-            </div>
-          </div>
-
-          {/* Attendance Records Option */}
-          <div>
-            <Checkbox
-              isSelected={createAttendanceRecords}
-              onValueChange={setCreateAttendanceRecords}
-              aria-label="Vytvořit záznamy docházky"
-            >
-              Automaticky vytvořit záznamy docházky pro členy sestavy (výchozí: přítomen)
+      <div>
+        <CheckboxGroup
+          label={translations.common.labels.weekDaysTitle}
+          orientation="horizontal"
+          value={selectedDays}
+          onValueChange={(values) => setSelectedDays(values as string[])}
+        >
+          {dayOptions.map((day) => (
+            <Checkbox key={day.value} value={day.value}>
+              {day.label}
             </Checkbox>
-            <p className="text-sm text-gray-600 mt-1">
-              Pokud je zaškrtnuto, budou automaticky vytvořeny záznamy docházky pro všechny členy
-              sestavy vybrané kategorie a sezóny.
-            </p>
+          ))}
+        </CheckboxGroup>
+      </div>
+
+      {/* Time Selection */}
+      <div>
+        <TimeInput
+          // value={trainingTime}
+          onChange={(e) => setTrainingTime(e?.toString() || '')}
+          label={translations.trainingSessions.trainingSessionTime}
+          isRequired
+          hourCycle={24}
+          aria-label="Čas tréninku"
+          startContent={<ClockIcon className="w-4 h-4 text-gray-400" />}
+        />
+      </div>
+
+      {/* Title Template */}
+      <div>
+        <Input
+          value={titleTemplate}
+          onChange={(e) => setTitleTemplate(e.target.value)}
+          placeholder={translations.trainingSessions.placeholders.title}
+          label={translations.trainingSessions.labels.title}
+          isRequired
+          aria-label={translations.trainingSessions.labels.title}
+        />
+        <div className="mt-2">
+          <Checkbox
+            isSelected={includeNumber}
+            onValueChange={setIncludeNumber}
+            aria-label={translations.trainingSessions.ariaLabel.numberInSessionTitle}
+          >
+            {translations.trainingSessions.labels.numberInSessionTitle}
+          </Checkbox>
+        </div>
+      </div>
+
+      {/* Attendance Records Option */}
+      <div>
+        <Checkbox
+          isSelected={createAttendanceRecords}
+          onValueChange={setCreateAttendanceRecords}
+          aria-label={translations.trainingSessions.ariaLabel.automaticTrainingSessionStatus}
+        >
+          {translations.trainingSessions.labels.automaticTrainingSessionStatus}
+        </Checkbox>
+        <p className="text-sm text-gray-600 mt-1">
+          {translations.trainingSessions.placeholders.automaticTrainingSessionStatus}
+        </p>
+      </div>
+
+      {/* Generate Button */}
+      <div className="flex justify-center pt-4">
+        <Button
+          color="primary"
+          onPress={generateSessions}
+          isDisabled={!dateFrom || !dateTo || selectedDays.length === 0 || !trainingTime}
+        >
+          {translations.trainingSessions.actions.preview}
+        </Button>
+      </div>
+
+      {/* Generated Sessions Preview */}
+      {hasItems(generatedSessions) && (
+        <>
+          <Divider className="my-4" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              {translations.trainingSessions.labels.preview} ({generatedSessions.length})
+            </h3>
+            <div className="space-y-2 max-h-60 overflow-y-auto p-2">
+              {generatedSessions.map((session, index) => (
+                <Card key={index} className="p-3">
+                  <CardBody className="p-0">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{session.title}</p>
+                        <p className="text-sm text-gray-600">
+                          {formatDateString(session.date)} v {formatTime(session.time)}
+                        </p>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {
+                          dayOptions.find(
+                            (d) =>
+                              d.value ===
+                              Object.keys(dayMap).find(
+                                (day) => dayMap[day] === new Date(session.date).getDay()
+                              )
+                          )?.label
+                        }
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
           </div>
-
-          {/* Generate Button */}
-          <div className="flex justify-center pt-4">
-            <Button
-              color="primary"
-              onPress={generateSessions}
-              isDisabled={!dateFrom || !dateTo || selectedDays.length === 0 || !trainingTime}
-            >
-              Generovat náhled
-            </Button>
-          </div>
-
-          {/* Generated Sessions Preview */}
-          {generatedSessions.length > 0 && (
-            <>
-              <Divider className="my-4" />
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Náhled vygenerovaných tréninků ({generatedSessions.length})
-                </h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto p-2">
-                  {generatedSessions.map((session, index) => (
-                    <Card key={index} className="p-3">
-                      <CardBody className="p-0">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{session.title}</p>
-                            <p className="text-sm text-gray-600">
-                              {formatDateString(session.date)} v {formatTime(session.time)}
-                            </p>
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {
-                              dayOptions.find(
-                                (d) =>
-                                  d.value ===
-                                  Object.keys(dayMap).find(
-                                    (day) => dayMap[day] === new Date(session.date).getDay()
-                                  )
-                              )?.label
-                            }
-                          </div>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-        </ModalBody>
-
-        <ModalFooter>
-          <Button color="danger" variant="light" onPress={handleClose}>
-            Zrušit
-          </Button>
-          {generatedSessions.length > 0 && (
-            <Button
-              color="success"
-              onPress={createAllSessions}
-              isLoading={isGenerating}
-              isDisabled={isGenerating}
-            >
-              {isGenerating ? 'Vytváření...' : `Vytvořit ${generatedSessions.length} tréninků`}
-            </Button>
-          )}
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </>
+      )}
+    </UnifiedModal>
   );
 }

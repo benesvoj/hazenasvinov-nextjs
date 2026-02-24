@@ -2,7 +2,9 @@
 
 import React, {useState} from 'react';
 
-import {Select, SelectItem, Textarea, Card, CardBody} from '@heroui/react';
+import {Alert, Select, SelectItem, Textarea} from '@heroui/react';
+
+import {translations} from '@/lib/translations/index';
 
 import {UnifiedModal} from '@/components';
 import {TrainingSessionStatusEnum} from '@/enums';
@@ -17,21 +19,21 @@ interface TrainingSessionStatusDialogProps {
 
 const statusOptions = [
   {
-    key: 'planned',
+    key: TrainingSessionStatusEnum.PLANNED,
     label: 'Naplánován',
-    description: 'Trénink je naplánován a čeká na provedení',
+    description: translations.trainingSessions.statuses.description.planned,
     color: 'default',
   },
   {
-    key: 'done',
+    key: TrainingSessionStatusEnum.DONE,
     label: 'Proveden',
-    description: 'Trénink byl úspěšně proveden',
+    description: translations.trainingSessions.statuses.description.done,
     color: 'success',
   },
   {
-    key: 'cancelled',
+    key: TrainingSessionStatusEnum.CANCELLED,
     label: 'Zrušen',
-    description: 'Trénink byl zrušen',
+    description: translations.trainingSessions.statuses.description.cancelled,
     color: 'danger',
   },
 ];
@@ -48,15 +50,15 @@ export default function TrainingSessionStatusDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleConfirm = async () => {
-    if (selectedStatus === 'cancelled' && !cancellationReason.trim()) {
+    if (selectedStatus === TrainingSessionStatusEnum.CANCELLED && !cancellationReason.trim()) {
       return; // Don't allow cancellation without reason
     }
 
     setIsSubmitting(true);
     try {
-      await onConfirm(
+      onConfirm(
         selectedStatus,
-        selectedStatus === 'cancelled' ? cancellationReason : undefined
+        selectedStatus === TrainingSessionStatusEnum.CANCELLED ? cancellationReason : undefined
       );
       onClose();
     } finally {
@@ -70,14 +72,14 @@ export default function TrainingSessionStatusDialog({
     onClose();
   };
 
-  const isCancellationReasonRequired = selectedStatus === 'cancelled';
+  const isCancellationReasonRequired = selectedStatus === TrainingSessionStatusEnum.CANCELLED;
   const canConfirm = !isCancellationReasonRequired || cancellationReason.trim().length > 0;
 
   return (
     <UnifiedModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Změnit stav tréninku"
+      title={translations.trainingSessions.changeTrainingSessionStatus}
       size="md"
       isFooterWithActions
       onPress={handleConfirm}
@@ -85,14 +87,14 @@ export default function TrainingSessionStatusDialog({
     >
       <div className="space-y-4">
         <Select
-          label="Stav tréninku"
-          aria-label="Stav tréninku"
-          placeholder="Vyberte stav"
+          label={translations.trainingSessions.labels.sessionStatus}
+          aria-label={translations.trainingSessions.labels.sessionStatus}
+          placeholder={translations.trainingSessions.placeholders.sessionStatus}
           selectedKeys={[selectedStatus]}
           onSelectionChange={(keys) => {
             const status = Array.from(keys)[0] as TrainingSessionStatusEnum;
             setSelectedStatus(status);
-            if (status !== 'cancelled') {
+            if (status !== TrainingSessionStatusEnum.CANCELLED) {
               setCancellationReason('');
             }
           }}
@@ -108,24 +110,19 @@ export default function TrainingSessionStatusDialog({
         </Select>
 
         {isCancellationReasonRequired && (
-          <Card className="border-red-200 bg-red-50">
-            <CardBody className="p-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-red-800">Důvod zrušení *</label>
-                <Textarea
-                  placeholder="Zadejte důvod zrušení tréninku..."
-                  value={cancellationReason}
-                  onChange={(e) => setCancellationReason(e.target.value)}
-                  minRows={3}
-                  maxRows={6}
-                  className="w-full"
-                />
-                <p className="text-xs text-red-600">
-                  Při zrušení tréninku budou všichni členové automaticky označeni jako nepřítomní.
-                </p>
-              </div>
-            </CardBody>
-          </Card>
+          <div className="space-y-2">
+            <Textarea
+              label={translations.trainingSessions.cancelTrainingSessionReason}
+              placeholder={translations.trainingSessions.placeholders.cancelReason}
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              minRows={3}
+              maxRows={6}
+              isRequired
+              className="w-full"
+            />
+            <Alert color={'warning'} title={translations.trainingSessions.alerts.sessionCanceled} />
+          </div>
         )}
       </div>
     </UnifiedModal>

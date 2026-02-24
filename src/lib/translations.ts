@@ -804,8 +804,6 @@ export const translations = {
       wroteBy: 'Zapsal',
       attachment: 'Příloha',
       attendees: 'Účastníci',
-      present: 'Přítomen',
-      excused: 'Omluven',
       notes: 'Poznámky',
       noAttendees: 'Žádní účastníci',
       addAttendee: 'Přidat člena',

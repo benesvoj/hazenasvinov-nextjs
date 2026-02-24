@@ -8,7 +8,7 @@ Manages training session attendance for coaches. Coaches create/generate trainin
 
 | File | Lines | Responsibility |
 |---|---|---|
-| `page.tsx` | ~373 | Master orchestrator — state, modals, data fetching |
+| `page.tsx` | ~382 | Master orchestrator — state, modals, data fetching |
 | `components/TrainingSessionList.tsx` | ~140 | Lists sessions with selection, status change, edit, delete actions |
 | `components/TrainingSessionModal.tsx` | ~195 | Create/edit session form (title, description, date, time, location) |
 | `components/TrainingSessionGenerator.tsx` | ~454 | Bulk session generation by date range + weekdays |
@@ -29,17 +29,21 @@ Manages training session attendance for coaches. Coaches create/generate trainin
 
 ## Current State
 
-The page has been through two major refactoring rounds and is now at ~373 lines (down from ~572). ESLint clean.
+The page has been through three refactoring rounds and is now at ~382 lines (down from ~572). ESLint and TypeScript clean.
 
 **Completed refactoring:**
 - Uses `useCoachCategory()` for category/season state (no per-page boilerplate)
 - Uses `useModalWithItem<BaseTrainingSession>()` / `useModalWithItem<string>()` / `useModal()` from `src/hooks/shared/useModals.ts`
+- Modals properly closed after successful async operations (`closeAndClear()`)
 - Extracted `resolveMemberIds` as a `useCallback` to DRY member ID resolution
+- Tab state uses `AttendanceTabs` enum with `ATTENDANCE_TABS_LABELS` for titles
 - No direct Supabase client usage — all data through hooks
 - No `alert()` calls — uses `showToast`
-- No `any` types in modal state (typed via `useModalWithItem<T>`)
+- No `any` types — modal state typed via `useModalWithItem<T>`, tabs typed via `AttendanceTabs` enum
 - No `setTimeout` hacks — `openEmpty()` handles create mode
-- All user-facing strings use translations from `@/lib/translations`
+- Prop typo `onStatusChnage` fixed to `onStatusChange` (both page and `TrainingSessionList`)
+- Uses `UnifiedCard` instead of raw `Card`/`CardBody`
+- All user-facing strings use translations from `@/lib/translations` (including parameterized strings via function translations)
 
 ## Data Flow
 
@@ -72,56 +76,6 @@ const deleteModal = useModalWithItem<string>();                // delete by ID
 const statusDialog = useModalWithItem<BaseTrainingSession>();  // status change
 const generatorModal = useModal();                             // simple open/close
 ```
-
----
-
-## Next Refactoring Steps
-
-### Step 1: Close modals after successful async operations
-
-**Problem:** Two handlers don't close their modals after success:
-
-1. `handleSessionSubmit` (line 127) — after creating/updating a session, `sessionModal.closeAndClear()` is never called. The `TrainingSessionModal` component does NOT auto-close after `onSubmit`.
-
-2. `confirmDeleteSession` (line 167) — after deleting a session, `deleteModal.closeAndClear()` is never called. `DeleteConfirmationModal` does NOT auto-close after `onConfirm`.
-
-Note: `handleStatusUpdate` is fine — `TrainingSessionStatusDialog` calls `onClose()` internally after `onConfirm`.
-
-**Fix:**
-```typescript
-// handleSessionSubmit — add at end of try block (before catch):
-sessionModal.closeAndClear();
-
-// confirmDeleteSession — add after refetchSessions():
-deleteModal.closeAndClear();
-```
-
----
-
-### Step 2: Fix `as any` cast on Tabs `onSelectionChange`
-
-**Problem:** Line 292 uses `key as any`:
-```typescript
-onSelectionChange={(key) => setActiveTab(key as any)}
-```
-
-**Fix:** Cast to the union type:
-```typescript
-onSelectionChange={(key) => setActiveTab(key as 'attendance' | 'statistics')}
-```
-
----
-
-### Step 3: Fix prop name typo `onStatusChnage`
-
-**Problem:** `TrainingSessionList.tsx` has a typo in its prop name: `onStatusChnage` (should be `onStatusChange`). This requires changing:
-
-| File | What to change |
-|---|---|
-| `components/TrainingSessionList.tsx` line 19 | Interface definition: `onStatusChnage` → `onStatusChange` |
-| `components/TrainingSessionList.tsx` line 31 | Destructuring: `onStatusChnage` → `onStatusChange` |
-| `components/TrainingSessionList.tsx` line 104 | Usage: `onStatusChnage(session)` → `onStatusChange(session)` |
-| `page.tsx` line 302 | Prop: `onStatusChnage={...}` → `onStatusChange={...}` |
 
 ---
 

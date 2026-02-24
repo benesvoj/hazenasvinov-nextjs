@@ -1,5 +1,6 @@
 export * from './actionTypes';
 export * from './ageGroups';
+export * from './attendanceStatuses';
 export * from './attendanceTabs';
 export * from './blogPostStatutes';
 export * from './columnAlignType';

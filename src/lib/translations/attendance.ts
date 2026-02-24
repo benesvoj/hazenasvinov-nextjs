@@ -19,6 +19,7 @@ export const attendanceTranslations = {
   labels: {
     newSession: 'Nový trénink',
     newSessionShort: 'Nový',
+    attendanceList: (count: number) => `Docházka (${count})`,
   },
   ariaLabels: {
     sessionGeneration: 'Generovat tréninky',
@@ -28,6 +29,16 @@ export const attendanceTranslations = {
       attendance: 'Docházka',
       statistics: 'Statistiky a analýza',
     },
+    statuses: {
+      present: 'Přítomen',
+      excused: 'Omluven',
+      late: 'Pozdní příchod',
+      absent: 'Nepřítomen',
+    },
+  },
+  alerts: {
+    missingAttendanceRecords: (count: number) =>
+      `Upozornění: ${count} záznamů má chybějící data člena a nebude zobrazeno.`,
   },
   responseMessages: {
     sessionStateUpdateFailed: 'Chyba při změně stavu tréninku',
@@ -38,5 +49,20 @@ export const attendanceTranslations = {
     sessionDeletionFailed: 'Chyba při mazání tréninku',
     selectSeasonAndCategory: 'Vyberte sezónu a kategorii pro zobrazení statistik',
     sessionWasNotCreated: 'Nepodařilo se vytvořit trénink',
+    selectSessionToShowAttendance: 'Vyberte trénink pro zobrazení docházky',
+    attendanceRecordsCreated: (count: number) =>
+      `Vytvořeno ${count} záznamů docházky pro tento trénink`,
+  },
+  table: {
+    columns: {
+      memberName: 'Jméno člena',
+      status: 'Status',
+    },
+  },
+  charts: {
+    attendanceAverage: 'Průměr přítomných',
+    attendancePercentage: 'Průměrná docházka',
+    absenceAverage: 'Průměr nepřítomných',
+    attendanceTrend: 'Trend docházky',
   },
 };

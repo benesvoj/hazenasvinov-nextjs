@@ -1,6 +1,7 @@
 import {
   getActionTypeOptions,
   getAgeGroupsOptions,
+  getAttendanceStatusOptions,
   getAttendanceTabOptions,
   getBlogPostStatusOptions,
   getColumnTypeOptions,
@@ -44,6 +45,7 @@ export const createOptionsRecord = <T extends string>(
 // Pre-built option records for common use cases
 export const actionTypeOptions = createOptionsRecord(getActionTypeOptions());
 export const ageGroupsOptions = createOptionsRecord(getAgeGroupsOptions());
+export const attendanceStatusOptions = createOptionsRecord(getAttendanceStatusOptions());
 export const attendanceTabOptions = createOptionsRecord(getAttendanceTabOptions());
 export const blogPostStatusOptions = createOptionsRecord(getBlogPostStatusOptions());
 export const columnTypeOptions = createOptionsRecord(getColumnTypeOptions());
