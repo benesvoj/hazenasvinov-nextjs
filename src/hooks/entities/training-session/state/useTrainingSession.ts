@@ -1,11 +1,11 @@
 'use client';
 
+import {translations} from '@/lib/translations/index';
+
 import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {API_ROUTES} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/trainingSessions';
 import {BaseTrainingSession, TrainingSessionInsert} from '@/types';
-
-const t = translations.coachPortal.trainingSessions.responseMessages;
 
 export function useTrainingSession() {
   const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<
@@ -16,12 +16,12 @@ export function useTrainingSession() {
     byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
     entityName: ENTITY.plural,
     messages: {
-      createSuccess: t.createSuccess,
-      updateSuccess: t.updateSuccess,
-      deleteSuccess: t.deleteSuccess,
-      createError: t.createError,
-      updateError: t.updateError,
-      deleteError: t.deleteError,
+      createSuccess: translations.trainingSessions.responseMessages.createSuccess,
+      updateSuccess: translations.trainingSessions.responseMessages.updateSuccess,
+      deleteSuccess: translations.trainingSessions.responseMessages.deleteSuccess,
+      createError: translations.trainingSessions.responseMessages.createError,
+      updateError: translations.trainingSessions.responseMessages.updateError,
+      deleteError: translations.trainingSessions.responseMessages.deleteError,
     },
   })();
 

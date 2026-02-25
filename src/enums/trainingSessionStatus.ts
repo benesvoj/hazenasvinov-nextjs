@@ -1,6 +1,4 @@
-import {translations} from '@/lib/translations';
-
-const t = translations.coachPortal.trainingSessions.statuses;
+import {translations} from '@/lib/translations/index';
 
 export enum TrainingSessionStatusEnum {
   PLANNED = 'planned',
@@ -9,9 +7,9 @@ export enum TrainingSessionStatusEnum {
 }
 
 export const LABELS: Record<TrainingSessionStatusEnum, string> = {
-  [TrainingSessionStatusEnum.PLANNED]: t.planned,
-  [TrainingSessionStatusEnum.DONE]: t.done,
-  [TrainingSessionStatusEnum.CANCELLED]: t.cancelled,
+  [TrainingSessionStatusEnum.PLANNED]: translations.trainingSessions.statuses.planned,
+  [TrainingSessionStatusEnum.DONE]: translations.trainingSessions.statuses.done,
+  [TrainingSessionStatusEnum.CANCELLED]: translations.trainingSessions.statuses.cancelled,
 };
 
 export const getTrainingSessionStatusOptions = () =>

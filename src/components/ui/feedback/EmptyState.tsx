@@ -1,14 +1,16 @@
 import {Button} from '@heroui/button';
 
 import {
-  DocumentTextIcon,
-  UserGroupIcon,
   CalendarIcon,
+  CheckCircleIcon,
+  CogIcon,
+  DocumentTextIcon,
   PhotoIcon,
   TrophyIcon,
-  CogIcon,
-  CheckCircleIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
+
+import {translations} from '@/lib/translations/index';
 
 import {Heading} from '@/components';
 import {EmptyStateTypes} from '@/enums';
@@ -33,6 +35,8 @@ const getDefaultIcon = (type?: string) => {
       return <CheckCircleIcon className="w-12 h-12" />;
     case 'committees':
       return <UserGroupIcon className="w-12 h-12" />;
+    case 'birthdays':
+      return <CalendarIcon className="w-12 h-12" />;
     default:
       return <DocumentTextIcon className="w-12 h-12" />;
   }
@@ -110,6 +114,11 @@ const EMPTY_STATE_CONFIG = {
     title: 'Žádné komise',
     description: 'Zatím nebyly vytvořeny žádné komise. Vytvořte první komisi.',
     actionLabel: 'Vytvořit komisi',
+  },
+  [EmptyStateTypes.BIRTHDAYS]: {
+    title: translations.coachPortal.birthdayCard.emptyStateTitle,
+    description: translations.coachPortal.birthdayCard.noBirthdays,
+    actionLabel: 'Přidat člena',
   },
 };
 

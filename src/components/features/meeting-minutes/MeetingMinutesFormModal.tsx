@@ -20,9 +20,11 @@ import {
 
 import {TrashIcon, UserIcon} from '@heroicons/react/24/outline';
 
+import {translations} from '@/lib/translations/index';
+
 import {showToast} from '@/components';
 import {useAuth, useFetchMembers, useFetchSeasons, useSeasonFiltering} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {API_ROUTES} from '@/lib';
 import {MeetingMinutes, MeetingMinutesFormData} from '@/types';
 
 import {AttendeesModal} from './AttendeesModal';
@@ -62,7 +64,7 @@ export function MeetingMinutesFormModal({
   const {user} = useAuth();
   const {data: members} = useFetchMembers();
 
-  const t = translations.components.meetingMinutes;
+  const t = translations.meetingMinutes;
 
   // Fetch users
   useEffect(() => {
@@ -358,7 +360,7 @@ export function MeetingMinutesFormModal({
                 </Card>
               ) : (
                 <Card>
-                  <CardBody className="p-4 col-span-2 h-[300px] overflow-y-auto">
+                  <CardBody className="p-4 col-span-2 h-75 overflow-y-auto">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {formData.attendees.map((attendee, index) => {
                         const member = members.find((m) => m.id === attendee.user_id);
@@ -381,7 +383,9 @@ export function MeetingMinutesFormModal({
                                     color={attendee.status === 'present' ? 'success' : 'warning'}
                                     variant="flat"
                                   >
-                                    {attendee.status === 'present' ? t.present : t.excused}
+                                    {attendee.status === 'present'
+                                      ? translations.attendance.enums.statuses.present
+                                      : translations.attendance.enums.statuses.excused}
                                   </Chip>
                                   {attendee.notes && (
                                     <div className="text-xs text-gray-600 mt-2">

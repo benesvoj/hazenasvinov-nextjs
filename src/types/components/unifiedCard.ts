@@ -21,4 +21,5 @@ export interface UnifiedCardProps {
   emptyStateType?: EmptyStateTypes;
   isPressable?: boolean;
   actions?: ActionsProps[];
+  icon?: React.ReactNode;
 }

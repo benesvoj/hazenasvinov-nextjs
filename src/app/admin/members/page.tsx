@@ -3,6 +3,8 @@
 'use client';
 import React, {useMemo, useState} from 'react';
 
+import {translations} from '@/lib/translations/index';
+
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {
@@ -28,7 +30,6 @@ import {
   useMemberModals,
   useMembers,
 } from '@/hooks';
-import {translations} from '@/lib';
 import {BaseMember, MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
 import {genderOptions} from '@/utils';
 
@@ -41,7 +42,7 @@ export default function MembersAdminPage() {
   const shouldFetchExternal = activeTab === 'members-external';
   const shouldFetchOnLoan = activeTab === 'members-on-loan';
 
-  const genderOpts = genderOptions();
+  const genderOpts = genderOptions;
 
   // Use AppDataContext for members and category data
   const {

@@ -107,6 +107,7 @@ export * from './entities/todo/data/useFetchTodos';
 export * from './entities/todo/state/useTodoForm';
 export * from './entities/todo/state/useTodos';
 export * from './entities/training-session/data/useFetchTrainingSessions';
+export * from './entities/training-session/state/useBulkCreateTrainingSessions';
 export * from './entities/training-session/state/useTrainingSession';
 export * from './entities/user/data/useFetchUserProfiles';
 export * from './entities/user/data/useFetchUsers';

@@ -1,0 +1,100 @@
+# Attendance Section
+
+## Purpose
+
+Manages training session attendance for coaches. Coaches create/generate training sessions per category and season, then record per-member attendance with four statuses: Present, Absent, Late, Excused. Includes a statistics tab with trends and member performance.
+
+## Files
+
+| File | Lines | Responsibility |
+|---|---|---|
+| `page.tsx` | ~382 | Master orchestrator — state, modals, data fetching |
+| `components/TrainingSessionList.tsx` | ~140 | Lists sessions with selection, status change, edit, delete actions |
+| `components/TrainingSessionModal.tsx` | ~195 | Create/edit session form (title, description, date, time, location) |
+| `components/TrainingSessionGenerator.tsx` | ~310 | Bulk session generation by date range + weekdays |
+| `components/TrainingSessionStatusDialog.tsx` | ~134 | Modal for changing session status (planned/done/cancelled) |
+| `components/TrainingSessionStatusBadge.tsx` | ~40 | Visual status indicator chip |
+| `components/AttendanceRecordingTable.tsx` | ~188 | Core recording UI — 4 status buttons per member |
+| `components/AttendanceModal.tsx` | ~varies | Legacy attendance modal (not actively used) |
+| `components/AttendanceStatisticsLazy.tsx` | ~varies | Lazy-loaded statistics wrapper, fetches `useFetchAttendanceStatistics` |
+| `components/AttendanceStatistics.tsx` | ~480 | Full statistics view with tabs (Overview, Member Performance, Trends) |
+| `components/AttendanceChart.tsx` | ~114 | Simple bar chart — last 14 days attendance trend |
+| `components/AttendanceTrendsChart.tsx` | — | **Empty stub** |
+| `components/SummaryCards.tsx` | — | **Empty stub** |
+| `components/SummarySessionCard.tsx` | ~18 | Single metric display card (count/percentage) |
+| `components/InsightsPanel.tsx` | — | **Empty stub** |
+| `components/MemberPerformanceTable.tsx` | — | **Empty stub** |
+| `components/RecommendationsPanel.tsx` | — | **Stub** — placeholder text only |
+| `components/index.ts` | — | Barrel exports |
+
+## Current State
+
+The page has been through three refactoring rounds and is now at ~382 lines (down from ~572). ESLint and TypeScript clean.
+
+**Completed refactoring:**
+- Uses `useCoachCategory()` for category/season state (no per-page boilerplate)
+- Uses `useModalWithItem<BaseTrainingSession>()` / `useModalWithItem<string>()` / `useModal()` from `src/hooks/shared/useModals.ts`
+- Modals properly closed after successful async operations (`closeAndClear()`)
+- Extracted `resolveMemberIds` as a `useCallback` to DRY member ID resolution
+- Tab state uses `AttendanceTabs` enum with `ATTENDANCE_TABS_LABELS` for titles
+- No direct Supabase client usage — all data through hooks
+- No `alert()` calls — uses `showToast`
+- No `any` types — modal state typed via `useModalWithItem<T>`, tabs typed via `AttendanceTabs` enum
+- No `setTimeout` hacks — `openEmpty()` handles create mode
+- Prop typo `onStatusChnage` fixed to `onStatusChange` (both page and `TrainingSessionList`)
+- Uses `UnifiedCard` instead of raw `Card`/`CardBody`
+- All user-facing strings use translations from `@/lib/translations` (including parameterized strings via function translations)
+
+## Data Flow
+
+```
+page.tsx
+├── useCoachCategory() → selectedCategory, selectedSeason, availableCategories
+├── useAppData() → seasons[], members[]
+├── useFetchTrainingSessions({categoryId, seasonId})
+│   └── GET /api/entities/training_sessions?categoryId=X&seasonId=Y
+├── useFetchCategoryLineups({categoryId, seasonId})
+├── useFetchCategoryLineupMembers(categoryId, lineupId)
+│
+├── User selects a session:
+│   └── useFetchMembersAttendance({trainingSessionId})
+│       └── GET /api/entities/member_attendance?trainingSessionId=X
+│
+├── User records attendance:
+│   └── useAttendance().recordAttendance(memberId, sessionId, status)
+│
+└── User views statistics tab:
+    └── useFetchAttendanceStatistics(categoryId, seasonId, days)
+        └── GET /api/attendance/statistics → calls 3 Supabase RPCs
+```
+
+## Modal State Pattern
+
+```typescript
+const sessionModal = useModalWithItem<BaseTrainingSession>();  // create + edit
+const deleteModal = useModalWithItem<string>();                // delete by ID
+const statusDialog = useModalWithItem<BaseTrainingSession>();  // status change
+const generatorModal = useModal();                             // simple open/close
+```
+
+---
+
+## Remaining Issues & Technical Debt
+
+### Critical
+
+1. **No backend authorization on category access** — API routes for training sessions and attendance accept any `categoryId` without verifying the coach is assigned. (Server-side concern — see root `CLAUDE.md` Layers 3-4.)
+
+2. **No RLS policies** on `training_sessions` or `member_attendance` tables.
+
+3. ~~**Training session generator is non-functional**~~ — **RESOLVED.** Generator refactored with bulk API endpoint, dedicated hook, and extracted date utilities. See `components/TRAINING_SESSION_GENERATOR_REFACTOR.md` for details.
+
+### Medium
+
+4. **Attendance statistics endpoint** (`/api/attendance/statistics`) lacks category authorization (server-side concern).
+
+### Low
+
+5. **5 empty stub components** — `AttendanceTrendsChart`, `SummaryCards`, `InsightsPanel`, `MemberPerformanceTable`, `RecommendationsPanel` should be implemented or removed.
+
+6. **`AttendanceModal.tsx`** — Legacy component, candidate for removal.

@@ -7,11 +7,12 @@ import {usePathname} from 'next/navigation';
 import ProtectedCoachRoute from '@/components/routes/ProtectedCoachRoute';
 
 import {
-  CoachesTopBar,
-  CoachesSidebarProvider,
   CoachesSidebar,
+  CoachesSidebarProvider,
+  CoachesTopBar,
   useCoachesSidebar,
 } from '@/app/coaches/components';
+import {CoachCategoryProvider} from '@/app/coaches/components/CoachCategoryContext';
 
 function CoachesLayoutContent({children}: {children: React.ReactNode}) {
   const sidebarContext = useCoachesSidebar();
@@ -45,7 +46,9 @@ export default function CoachesLayout({children}: {children: React.ReactNode}) {
   return (
     <ProtectedCoachRoute>
       <CoachesSidebarProvider>
-        <CoachesLayoutContent>{children}</CoachesLayoutContent>
+        <CoachCategoryProvider>
+          <CoachesLayoutContent>{children}</CoachesLayoutContent>
+        </CoachCategoryProvider>
       </CoachesSidebarProvider>
     </ProtectedCoachRoute>
   );

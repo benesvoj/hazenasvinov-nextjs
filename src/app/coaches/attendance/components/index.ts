@@ -1,7 +1,5 @@
 export {default as TrainingSessionModal} from './TrainingSessionModal';
-export {default as AttendanceModal} from './AttendanceModal';
 export {default as TrainingSessionGenerator} from './TrainingSessionGenerator';
-export {default as AttendanceStatistics} from './AttendanceStatistics';
 export {default as TrainingSessionStatusBadge} from './TrainingSessionStatusBadge';
 export {default as TrainingSessionStatusDialog} from './TrainingSessionStatusDialog';
 export {default as AttendanceStatisticsLazy} from './AttendanceStatisticsLazy';

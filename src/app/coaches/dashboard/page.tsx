@@ -1,57 +1,26 @@
 'use client';
 
-import React, {useEffect, useState, useMemo} from 'react';
+import React, {useState} from 'react';
 
-import {Button, Tab, Tabs} from '@heroui/react';
-
-import {AcademicCapIcon} from '@heroicons/react/24/outline';
+import {Tab, Tabs} from '@heroui/react';
 
 import MatchSchedule from '@/components/shared/match/MatchSchedule';
 
-import {useUser} from '@/contexts/UserContext';
+import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
 
-import {PageContainer, LoadingSpinner} from '@/components';
-import {useFetchCategories, useUserRoles} from '@/hooks';
+import {PageContainer} from '@/components';
+import {hasMoreThanOne} from '@/utils';
 
 import CoachMatchResultFlow from '../matches/components/CoachMatchResultFlow';
 
-import {BirthdayCard, TopScorersCard, YellowCardsCard, RedCardsCard} from './components';
+import {BirthdayCard, RedCardsCard, TopScorersCard, YellowCardsCard} from './components';
 
 export default function CoachesDashboard() {
-  const {user, userProfile, loading, error} = useUser();
   const [resultFlowMatch, setResultFlowMatch] = useState<any>(null);
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
 
-  const {data: categories, refetch: fetchCategories} = useFetchCategories();
-  const {getCurrentUserCategories} = useUserRoles();
-
-  // Filter category based on assigned category
-  const availableCategories = useMemo(() => {
-    return categories.filter((cat) => assignedCategoryIds.includes(cat.id));
-  }, [categories, assignedCategoryIds]);
-
-  // Auto-select first category if none selected and only one available
-  useEffect(() => {
-    if (availableCategories.length > 0 && !selectedCategory) {
-      setSelectedCategory(availableCategories[0].id);
-    }
-  }, [availableCategories, selectedCategory]);
-
-  // Fetch data on mount
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
-
-  // Fetch assigned category if available
-  useEffect(() => {
-    if (getCurrentUserCategories) {
-      getCurrentUserCategories().then(setAssignedCategoryIds);
-    }
-  }, [getCurrentUserCategories]);
-
-  // Authentication is handled by ProtectedCoachRoute
+  const {availableCategories, selectedCategory, setSelectedCategory, isLoading} =
+    useCoachCategory();
 
   const handleStartResultFlow = (match: any) => {
     setResultFlowMatch(match);
@@ -68,36 +37,11 @@ export default function CoachesDashboard() {
     // No need to reload the entire page
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="text-red-600 mb-4">
-            <AcademicCapIcon className="w-16 h-16 mx-auto" />
-          </div>
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Chyba přístupu</h1>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Button color="primary" onPress={() => (window.location.href = '/coaches/login')}>
-            Zpět na přihlášení
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
-      <PageContainer>
+      <PageContainer isLoading={isLoading}>
         {/* Category Selection */}
-        {availableCategories.length > 1 && (
+        {hasMoreThanOne(availableCategories) && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
             <div className="overflow-x-auto">
               <Tabs

@@ -120,7 +120,7 @@ export default function AttendanceStatisticsLazy({categoryId, seasonId}: Props) 
         <Card>
           <CardHeader>
             <LightBulbIcon className="w-6 h-6 mr-2" />
-            <Heading size={3}>Insights</Heading>
+            <Heading size={3}>{translations.attendance.labels.insights}</Heading>
           </CardHeader>
           <CardBody>
             <div className="space-y-3">
@@ -150,7 +150,7 @@ export default function AttendanceStatisticsLazy({categoryId, seasonId}: Props) 
               title={
                 <div className="flex items-center gap-2">
                   <UserGroupIcon className="w-4 h-4" />
-                  Member Performance
+                  {translations.attendance.labels.memberPerformance}
                 </div>
               }
             >
@@ -162,7 +162,7 @@ export default function AttendanceStatisticsLazy({categoryId, seasonId}: Props) 
               title={
                 <div className="flex items-center gap-2">
                   <ArrowTrendingUpIcon className="w-4 h-4" />
-                  Attendance Trends
+                  {translations.attendance.labels.attendanceTrend}
                 </div>
               }
             >
@@ -173,7 +173,7 @@ export default function AttendanceStatisticsLazy({categoryId, seasonId}: Props) 
               />
             </Tab>
 
-            <Tab key="recommendations" title="Recommendations">
+            <Tab key="recommendations" title={translations.attendance.labels.recommendation}>
               <RecommendationsPanel recommendations={recommendations} />
             </Tab>
           </Tabs>
@@ -182,9 +182,10 @@ export default function AttendanceStatisticsLazy({categoryId, seasonId}: Props) 
 
       {/* Metadata */}
       <div className="text-xs text-gray-500 text-right">
-        Generated at: {new Date(metadata.generated_at).toLocaleString()}
+        {translations.attendance.labels.generatedAt}:{' '}
+        {new Date(metadata.generated_at).toLocaleString()}
         {' • '}
-        Queries: {metadata.query_count}
+        {translations.attendance.labels.queries}: {metadata.query_count}
       </div>
     </div>
   );

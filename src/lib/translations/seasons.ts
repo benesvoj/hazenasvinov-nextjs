@@ -23,6 +23,7 @@ export const seasonsTranslations = {
       'Opravdu chcete smazat sezónu? Tato akce je nevratná a může ovlivnit související data.',
   },
   labels: {
+    season: 'Sezóna',
     addSeason: 'Přidat sezónu',
     active: 'Aktivní sezóna',
     closed: 'Uzavřená sezóna',
@@ -30,6 +31,9 @@ export const seasonsTranslations = {
     namePlaceholder: 'např. 2024/2025',
     startDate: 'Datum začátku',
     endDate: 'Datum konce',
+  },
+  placeholders: {
+    season: 'Vyberte sezónu',
   },
   responseMessages: {
     createSuccess: 'Sezóna byla úspěšně vytvořena.',

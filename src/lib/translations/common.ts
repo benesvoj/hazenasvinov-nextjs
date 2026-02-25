@@ -4,6 +4,7 @@ export const commonTranslations = {
   fullPageLoading: 'Načítání stránky...',
   underConstruction:
     'Tato stránka je v testovacím provozu. Některé funkce mohou být nedostupné nebo nefunkční',
+  noData: 'Žádná data k zobrazení',
   alerts: {
     warning: 'Upozornění',
     error: 'Chyba',
@@ -66,6 +67,18 @@ export const commonTranslations = {
     contactPhone: 'Kontaktní telefon',
     contactEmail: 'Kontaktní email',
     contacts: 'Kontakty',
+    dateFrom: 'Datum od',
+    dateTo: 'Datum do',
+    weekDaysTitle: 'Dny v týdnu',
+    weekDays: {
+      monday: 'Pondělí',
+      tuesday: 'Úterý',
+      wednesday: 'Středa',
+      thursday: 'Čtvrtek',
+      friday: 'Pátek',
+      saturday: 'Sobota',
+      sunday: 'Neděle',
+    },
   },
   tabs: {
     overview: 'Přehled',
@@ -106,5 +119,18 @@ export const commonTranslations = {
   responseMessages: {
     copyToClipboardSuccess: 'Zkopírováno do schránky',
     copyToClipboardError: 'Nepodařilo se zkopírovat do schránky',
+    errorLoadingPage: 'Při načítání stránky došlo k chybě. Zkuste to prosím znovu později.',
+    dateFromAfterDateTo: 'Datum do musí být později než datum od',
+  },
+  emptyStateTypes: {
+    todos: 'Úkoly',
+    posts: 'Články',
+    users: 'Členové',
+    matches: 'Zápasy',
+    photos: 'Fotky',
+    categories: 'Kategorie',
+    settings: 'Nastavení',
+    committees: 'Komise',
+    birthdays: 'Narozeniny',
   },
 };

@@ -11,3 +11,4 @@ export * from './getCategoryInfo';
 export * from './getCategoryMatchweek';
 export * from './monthUtils';
 export * from './attendance/helpers';
+export * from './dateRangeGenerator';
