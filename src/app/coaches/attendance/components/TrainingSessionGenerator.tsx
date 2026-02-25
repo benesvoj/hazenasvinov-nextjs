@@ -15,8 +15,6 @@ import {
 
 import {CalendarIcon, ClockIcon} from '@heroicons/react/24/outline';
 
-import {TimeValue} from '@react-types/datepicker';
-
 import {translations} from '@/lib/translations/index';
 
 import {UnifiedModal} from '@/components';
@@ -184,7 +182,7 @@ export default function TrainingSessionGenerator({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2  gap-2 md:gap-4">
         <Input
           type="date"
           value={dateFrom}
@@ -220,7 +218,7 @@ export default function TrainingSessionGenerator({
         </CheckboxGroup>
       </div>
 
-      <div>
+      <div className="grid grid-cols-2 gap-2 md:gap-4">
         <TimeInput
           onChange={(e) => setTrainingTime(e?.toString() || '')}
           label={translations.trainingSessions.trainingSessionTime}

@@ -7,6 +7,7 @@ import {Button, Card, CardBody, CardFooter, CardHeader} from '@heroui/react';
 import {LoadingSpinner, Heading, showToast} from '@/components';
 import {getDefaultActionIcon, getNextStatus, getStatusButtonInfo, getStatusLabel} from '@/helpers';
 import {UnifiedCardProps} from '@/types';
+import {hasItems} from '@/utils';
 
 import {renderEmptyState} from '../feedback/EmptyState';
 
@@ -104,9 +105,9 @@ export default function UnifiedCard({
                 </div>
                 {subtitle && <div className="text-sm text-gray-500">{subtitle}</div>}
               </div>
-              {actions && actions.length > 0 && (
+              {hasItems(actions) && (
                 <div className="flex gap-2">
-                  {actions.map((action, index) => {
+                  {actions?.map((action, index) => {
                     // Handle status transition actions
                     if (action.statusTransition) {
                       const {currentStatus, onStatusChange, itemId} = action.statusTransition;
@@ -162,7 +163,7 @@ export default function UnifiedCard({
               )}
             </CardHeader>
           )}
-          {emptyStateType ? (
+          {!isLoading && emptyStateType ? (
             <CardBody className={fullWidth ? 'w-full' : ''}>
               {renderEmptyState(emptyStateType, () => onPress)}
             </CardBody>

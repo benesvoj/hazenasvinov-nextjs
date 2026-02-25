@@ -8,7 +8,7 @@ import {CalendarIcon, PlusIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations/index';
 
-import {hasItems} from '@/utils/arrayHelper';
+import {hasItems, hasMoreThanOne} from '@/utils/arrayHelper';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
@@ -247,21 +247,22 @@ export default function CoachesAttendancePage() {
       <PageContainer isLoading={isAllLoadings}>
         <UnifiedCard padding={'none'}>
           <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 flex-1 lg:w-auto">
-              <Select
-                label={translations.categories.labels.category}
-                placeholder={translations.categories.placeholders.category}
-                selectedKeys={selectedCategory ? [selectedCategory] : []}
-                onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
-                isDisabled={appDataLoading || availableCategories.length === 1}
-                defaultSelectedKeys={selectedCategory ? [selectedCategory] : []}
-                className="min-w-0 w-56"
-              >
-                {availableCategories.map((category) => (
-                  <SelectItem key={category.id}>{category.name}</SelectItem>
-                ))}
-              </Select>
-
+            <div className="flex flex-col md:flex-row items-stretch sm:items-end gap-2 flex-1 lg:w-auto">
+              {hasMoreThanOne(availableCategories) ? (
+                <Select
+                  label={translations.categories.labels.category}
+                  placeholder={translations.categories.placeholders.category}
+                  selectedKeys={selectedCategory ? [selectedCategory] : []}
+                  onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
+                  isDisabled={appDataLoading}
+                  defaultSelectedKeys={selectedCategory ? [selectedCategory] : []}
+                  className="min-w-0 w-56"
+                >
+                  {availableCategories.map((category) => (
+                    <SelectItem key={category.id}>{category.name}</SelectItem>
+                  ))}
+                </Select>
+              ) : null}
               <Select
                 label={translations.seasons.labels.season}
                 placeholder={translations.seasons.placeholders.season}
@@ -276,7 +277,7 @@ export default function CoachesAttendancePage() {
               </Select>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
+            <div className="flex items-stretch sm:items-end gap-2">
               <Button
                 color="primary"
                 startContent={<PlusIcon className="w-4 h-4" />}
@@ -287,7 +288,6 @@ export default function CoachesAttendancePage() {
                 <span className="hidden sm:inline">
                   {translations.attendance.labels.newSession}
                 </span>
-                <span className="sm:hidden">{translations.attendance.labels.newSessionShort}</span>
               </Button>
               <Button
                 color="primary"
@@ -307,8 +307,7 @@ export default function CoachesAttendancePage() {
         <Tabs
           selectedKey={activeTab}
           onSelectionChange={(key) => setActiveTab(key as AttendanceTabs)}
-          className="mb-6"
-          size="lg"
+          size="md"
         >
           <Tab
             key={AttendanceTabs.ATTENDANCE}

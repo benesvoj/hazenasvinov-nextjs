@@ -1,40 +1,39 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 
 import {useRouter} from 'next/navigation';
 
 import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Button,
-  Badge,
   Avatar,
+  Badge,
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
 } from '@heroui/react';
 
 import {
-  UserIcon,
+  AcademicCapIcon,
   ArrowRightEndOnRectangleIcon,
-  BellIcon,
+  Bars3Icon,
   Cog6ToothIcon,
   DocumentTextIcon,
-  Bars3Icon,
-  AcademicCapIcon,
   ShieldCheckIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 
 import {createPortal} from 'react-dom';
 
-import {ReleaseNotesModal, CoachPortalCategoryDialog} from '@/components/features';
+import {CoachPortalCategoryDialog, ReleaseNotesModal} from '@/components/features';
 import {ThemeSwitch} from '@/components/ui/client';
 import {showToast} from '@/components/ui/feedback';
 import {UserProfileModal} from '@/components/ui/modals';
 
 import {UserRoles} from '@/enums';
 import {useAuth, usePortalAccess} from '@/hooks';
-import {ReleaseNote, getReleaseNotes, logLogout} from '@/utils';
+import {getReleaseNotes, logLogout, ReleaseNote} from '@/utils';
 
 const LOGOUT_OVERLAY_Z_INDEX = 9999;
 
@@ -76,38 +75,23 @@ export const UnifiedTopBar = ({
 }: UnifiedTopBarProps) => {
   const router = useRouter();
   const {user, signOut} = useAuth();
-  const {hasCoachAccess, hasBothAccess, hasAdminAccess, loading} = usePortalAccess();
+  const {hasCoachAccess, hasAdminAccess} = usePortalAccess();
 
   // State
-  const [notifications, setNotifications] = useState(3);
   const [showReleaseNotes, setShowReleaseNotes] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showCoachPortalDialog, setShowCoachPortalDialog] = useState(false);
-  const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutProgress, setLogoutProgress] = useState(0);
-  const [isClient, setIsClient] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
 
-  // Set client-side flag
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Load release notes
-  useEffect(() => {
-    loadReleaseNotes();
-  }, []);
-
-  const loadReleaseNotes = () => {
+  const releaseNotes = useMemo(() => {
     try {
-      const notes = getReleaseNotes();
-      setReleaseNotes(notes);
-    } catch (error) {
-      console.error('Error loading release notes:', error);
-      setReleaseNotes([]);
+      return getReleaseNotes();
+    } catch {
+      return [];
     }
-  };
+  }, []);
 
   // Handlers
   const handleLogout = async () => {
@@ -284,11 +268,11 @@ export const UnifiedTopBar = ({
   // Get the appropriate header classes
   const getHeaderClasses = () => {
     if (variant === UserRoles.ADMIN) {
-      return `fixed top-0 right-0 bg-white h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300 ease-in-out ${
+      return `fixed top-0 right-0 bg-white md:h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300 ease-in-out ${
         sidebarContext?.isMobile ? 'left-0' : sidebarContext?.isCollapsed ? 'left-16' : 'left-56'
       }`;
     } else {
-      return `fixed top-0 right-0 bg-white h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-30 transition-all duration-300 ease-in-out ${
+      return `fixed top-0 right-0 bg-white md:h-20 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-30 transition-all duration-300 ease-in-out ${
         sidebarContext?.isMobile ? 'left-0' : sidebarContext?.isCollapsed ? 'left-16' : 'left-56'
       }`;
     }
@@ -323,7 +307,7 @@ export const UnifiedTopBar = ({
         </div>
 
         {/* Right side - User actions */}
-        <div className="flex items-center space-x-1 sm:space-x-2 xl:space-x-4 flex-shrink-0">
+        <div className="flex items-center space-x-1 sm:space-x-2 xl:space-x-4 shrink-0">
           {/* Theme Switch */}
           <ThemeSwitch />
 
@@ -348,24 +332,6 @@ export const UnifiedTopBar = ({
             )}
           </Button>
 
-          {/* Notifications - Admin only, hidden on mobile, visible from sm up */}
-          {variant === UserRoles.ADMIN && (
-            <Button
-              isIconOnly
-              variant="light"
-              size="sm"
-              className="relative hidden sm:flex"
-              title="Notifikace"
-            >
-              <BellIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-              {notifications > 0 && (
-                <Badge color="danger" size="sm" className="absolute -top-1 -right-1">
-                  {notifications}
-                </Badge>
-              )}
-            </Button>
-          )}
-
           {/* User Profile Dropdown */}
           <Dropdown placement="bottom-end">
             <DropdownTrigger>
@@ -381,7 +347,7 @@ export const UnifiedTopBar = ({
                   className={`${
                     variant === UserRoles.COACH
                       ? 'bg-green-100 text-green-700'
-                      : 'w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-medium'
+                      : 'w-8 h-8 bg-linear-to-br from-blue-500 to-blue-600 text-white text-sm font-medium'
                   }`}
                   size={variant === UserRoles.COACH ? 'sm' : undefined}
                 />
@@ -412,7 +378,7 @@ export const UnifiedTopBar = ({
                     <div className="flex items-center space-x-3">
                       <Avatar
                         name={getUserInitials()}
-                        className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white text-base font-medium"
+                        className="w-10 h-10 bg-linear-to-br from-blue-500 to-blue-600 text-white text-base font-medium"
                       />
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">
@@ -484,7 +450,6 @@ export const UnifiedTopBar = ({
                 onPress={handleLogout}
                 aria-label="Odhlásit se"
                 className={variant === UserRoles.COACH ? 'text-danger' : ''}
-                isDisabled={isLoggingOut}
               >
                 <span>{variant === UserRoles.ADMIN ? 'Odhlásit' : 'Odhlásit se'}</span>
               </DropdownItem>
@@ -513,7 +478,6 @@ export const UnifiedTopBar = ({
 
       {/* Logout Progress Overlay - Rendered via Portal */}
       {isLoggingOut &&
-        isClient &&
         createPortal(
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"

@@ -2,6 +2,8 @@ export const trainingSessionsTranslations = {
   title: 'Tréninkové jednotky',
   titleShort: 'Trénink',
   noTrainingSession: 'Žádné tréninky',
+  noTrainingSessionDescription: 'Zatím nebyly vytvořeny žádné tréninkové jednotky.',
+  noTrainingSessionsFound: 'Nenalezen žádný trénink odpovídající zadaným kritériím.',
   cancelTrainingSessionReason: 'Důvod zrušení:',
   changeTrainingSessionStatus: 'Změnit stav tréninku',
   updateTrainingSession: 'Upravit trénink',
@@ -29,7 +31,8 @@ export const trainingSessionsTranslations = {
     automaticTrainingSessionStatus:
       'Automaticky vytvořit záznamy docházky pro členy sestavy (výchozí: přítomen)',
     preview: 'Náhled vygenerovaných tréninků',
-    numberInSessionTitle: `Přidat číslo do názvu (např. &quot;Trénink 1&quot;, &quot;Trénink 2&quot;)`,
+    numberInSessionTitle: 'Přidat číslo do názvu (např. Trénink 1, Trénink 2, ...)',
+    today: 'Dnes',
   },
   placeholders: {
     title: 'Zadejte název tréninku',
@@ -63,5 +66,10 @@ export const trainingSessionsTranslations = {
   },
   actions: {
     preview: 'Generovat náhled',
+  },
+  tabs: {
+    upcoming: 'Nadcházející',
+    past: 'Minulé',
+    all: 'Vše',
   },
 };
