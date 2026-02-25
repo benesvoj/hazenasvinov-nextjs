@@ -4,6 +4,8 @@ import {Button} from '@heroui/react';
 
 import {Bars3Icon} from '@heroicons/react/24/outline';
 
+import {translations} from '@/lib/translations/index';
+
 import {UserRoles} from '@/enums';
 
 import {sidebarContextType} from '../UnifiedTopBar';
@@ -34,7 +36,7 @@ export const TopBarPageInfo = ({
           size="sm"
           className="lg:hidden"
           onPress={() => sidebarContext.setIsMobileOpen?.(true)}
-          title="Otevřít menu"
+          title={translations.common.actions.openMenu}
         >
           <Bars3Icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </Button>
@@ -50,7 +52,10 @@ export const TopBarPageInfo = ({
 
       <div className="min-w-0 flex-1">
         <h1 className="text-base sm:text-lg xl:text-xl font-semibold text-gray-900 dark:text-white truncate">
-          {pageTitle || (variant === UserRoles.ADMIN ? 'Dashboard' : 'Trenérský Portal')}
+          {pageTitle ||
+            (variant === UserRoles.ADMIN
+              ? translations.topBar.labels.dashboard
+              : translations.topBar.labels.coachPortal)}
         </h1>
         {pageDescription && (
           <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 hidden sm:block">

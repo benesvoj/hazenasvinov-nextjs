@@ -4,6 +4,8 @@ import {useState} from 'react';
 
 import {useRouter} from 'next/navigation';
 
+import {translations} from '@/lib/translations/index';
+
 import {showToast} from '@/components';
 import {useAuth} from '@/hooks';
 import {logLogout} from '@/utils';
@@ -55,7 +57,7 @@ export function useLogout() {
 
       // Step 3: Show success message
       setLogoutProgress(75);
-      showToast.success('Úspěšně odhlášen. Přesměrovávám...');
+      showToast.success(translations.common.logoutOverlay.responseMessages.successLogout);
 
       // Small delay for better UX
       await new Promise((resolve) => setTimeout(resolve, LOGOUT_DELAYS.SUCCESS_DELAY));
@@ -69,15 +71,16 @@ export function useLogout() {
       console.error('Logout error:', error);
 
       // Determine error type and message
-      const errorMessage = error instanceof Error ? error.message : 'Neznámá chyba';
+      const errorMessage =
+        error instanceof Error ? error.message : translations.common.responseMessages.unknownError;
       const isNetworkError = errorMessage.includes('network') || errorMessage.includes('fetch');
       const isAuthError = errorMessage.includes('auth') || errorMessage.includes('unauthorized');
 
-      let userMessage = 'Chyba při odhlašování.';
+      let userMessage = translations.common.logoutOverlay.responseMessages.logoutError;
       if (isNetworkError) {
-        userMessage = 'Problém s připojením. Zkuste to znovu.';
+        userMessage = translations.common.logoutOverlay.responseMessages.networkError;
       } else if (isAuthError) {
-        userMessage = 'Problém s autentizací. Zkuste obnovit stránku.';
+        userMessage = translations.common.logoutOverlay.responseMessages.authError;
       }
 
       setLogoutError(errorMessage);
@@ -89,7 +92,7 @@ export function useLogout() {
 
       // Show retry option after a short delay
       setTimeout(() => {
-        showToast.warning('Klikněte na "Odhlásit" pro opakování pokusu.');
+        showToast.warning(translations.common.logoutOverlay.responseMessages.retryLogout);
       }, LOGOUT_DELAYS.RETRY_MESSAGE_DELAY);
     }
   };

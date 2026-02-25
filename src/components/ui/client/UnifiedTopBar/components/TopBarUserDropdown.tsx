@@ -12,6 +12,8 @@ import {
 
 import {User} from '@supabase/supabase-js';
 
+import {translations} from '@/lib/translations/index';
+
 import {UserRoles} from '@/enums';
 
 import {userProfileType} from '../UnifiedTopBar';
@@ -67,14 +69,14 @@ export const TopBarUserDropdown = ({
             <p
               className={`text-sm font-medium text-gray-900 dark:text-white truncate ${USER_INFO_MAX_WIDTH} ${USER_INFO_MAX_WIDTH_XL}`}
             >
-              {variant === 'coach' ? user?.email : getDisplayName(user)}
+              {variant === UserRoles.COACH ? user?.email : getDisplayName(user)}
             </p>
             <p
               className={`text-xs text-gray-500 dark:text-gray-400 truncate ${USER_INFO_MAX_WIDTH} ${USER_INFO_MAX_WIDTH_XL}`}
             >
-              {variant === 'coach'
+              {variant === UserRoles.COACH
                 ? getRoleDisplay(variant, userProfile)
-                : user?.email || 'Načítání...'}
+                : user?.email || translations.common.loading}
             </p>
           </div>
         </Button>
@@ -86,7 +88,7 @@ export const TopBarUserDropdown = ({
               key="profile-header"
               className="py-3"
               onPress={handleProfileOpen}
-              aria-label="Otevřít profil"
+              aria-label={translations.common.actions.openProfile}
             >
               <div className="flex items-center space-x-3">
                 <Avatar
@@ -105,7 +107,7 @@ export const TopBarUserDropdown = ({
               key="divider-1"
               className="h-px bg-gray-200 dark:bg-gray-600 my-2"
               isReadOnly
-              aria-label="Oddělovač"
+              aria-label={translations.common.labels.divider}
             >
               <div className="h-px bg-gray-200 dark:bg-gray-600"></div>
             </DropdownItem>
@@ -115,9 +117,9 @@ export const TopBarUserDropdown = ({
           key="profile-action"
           startContent={<UserIcon className="w-4 h-4" />}
           onPress={handleProfileOpen}
-          aria-label="Otevřít profil"
+          aria-label={translations.common.actions.openProfile}
         >
-          <span>Profil</span>
+          <span>{translations.common.labels.profile}</span>
         </DropdownItem>
         {shouldShowPortalSwitch ? (
           <DropdownItem
@@ -134,14 +136,14 @@ export const TopBarUserDropdown = ({
             }
             aria-label={
               variant === UserRoles.ADMIN
-                ? 'Přepnout na trenérský portál'
-                : 'Přepnout na admin portál'
+                ? translations.topBar.labels.switchToCoachPortal
+                : translations.topBar.labels.switchToAdminPortal
             }
           >
             <span>
               {variant === UserRoles.ADMIN
-                ? 'Přepnout na trenérský portál'
-                : 'Přepnout na admin portál'}
+                ? translations.topBar.labels.switchToCoachPortal
+                : translations.topBar.labels.switchToAdminPortal}
             </span>
           </DropdownItem>
         ) : null}
@@ -149,9 +151,9 @@ export const TopBarUserDropdown = ({
           <DropdownItem
             key="settings"
             startContent={<Cog6ToothIcon className="w-4 h-4" />}
-            aria-label="Nastavení"
+            aria-label={translations.common.labels.settings}
           >
-            <span>Nastavení</span>
+            <span>{translations.common.labels.settings}</span>
           </DropdownItem>
         ) : null}
         <DropdownItem
@@ -159,10 +161,10 @@ export const TopBarUserDropdown = ({
           color="danger"
           startContent={<ArrowRightEndOnRectangleIcon className="w-4 h-4" />}
           onPress={handleLogout}
-          aria-label="Odhlásit se"
+          aria-label={translations.common.actions.logout}
           className={variant === UserRoles.COACH ? 'text-danger' : ''}
         >
-          <span>{variant === UserRoles.ADMIN ? 'Odhlásit' : 'Odhlásit se'}</span>
+          <span>{translations.common.actions.logout}</span>
         </DropdownItem>
       </DropdownMenu>
     </Dropdown>

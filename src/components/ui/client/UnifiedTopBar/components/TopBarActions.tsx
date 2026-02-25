@@ -4,6 +4,8 @@ import {Badge, Button} from '@heroui/react';
 
 import {DocumentTextIcon} from '@heroicons/react/24/outline';
 
+import {translations} from '@/lib/translations/index';
+
 import {hasItems} from '@/utils/arrayHelper';
 
 import {ThemeSwitch} from '@/components';
@@ -26,7 +28,7 @@ export const TopBarActions = ({releaseNotes, variant, handleReleaseNotes}: TopBa
         size="sm"
         className="relative hidden sm:flex"
         onPress={handleReleaseNotes}
-        title="Release Notes"
+        title={translations.topBar.labels.releaseNotes}
       >
         <DocumentTextIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         {hasItems(releaseNotes) && (

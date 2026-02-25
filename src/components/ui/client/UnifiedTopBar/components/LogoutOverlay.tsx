@@ -4,6 +4,10 @@ import {Button} from '@heroui/react';
 
 import {createPortal} from 'react-dom';
 
+import {translations} from '@/lib/translations/index';
+
+import {LoadingSpinner} from '@/components';
+
 interface LogoutOverlayProps {
   isLoggingOut: boolean;
   logoutProgress: number;
@@ -31,8 +35,7 @@ export const LogoutOverlay = ({
           >
             <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 shadow-xl">
               <div className="text-center">
-                {/* Spinner */}
-                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+                <LoadingSpinner />
 
                 {/* Progress Bar */}
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
@@ -44,7 +47,9 @@ export const LogoutOverlay = ({
 
                 {/* Progress Text */}
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {logoutError ? 'Chyba při odhlašování' : 'Odhlašování...'}
+                  {logoutError
+                    ? translations.common.logoutOverlay.logoutError
+                    : translations.common.logoutOverlay.title}
                 </h3>
 
                 {/* Progress Steps or Error Message */}
@@ -56,10 +61,10 @@ export const LogoutOverlay = ({
                     </div>
                     <div className="flex gap-2 justify-center">
                       <Button size="sm" color="primary" onPress={onRetry} className="text-xs">
-                        Zkusit znovu
+                        {translations.common.actions.tryAgain}
                       </Button>
                       <Button size="sm" variant="light" onPress={onCancel} className="text-xs">
-                        Zrušit
+                        {translations.common.actions.cancel}
                       </Button>
                     </div>
                   </div>
@@ -68,25 +73,25 @@ export const LogoutOverlay = ({
                     {logoutProgress >= 25 && (
                       <div className="flex items-center justify-center">
                         <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        Zaznamenávání odhlášení...
+                        {translations.common.logoutOverlay.progress.loggingOut}
                       </div>
                     )}
                     {logoutProgress >= 50 && (
                       <div className="flex items-center justify-center">
                         <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        Ukončování relace...
+                        {translations.common.logoutOverlay.progress.endingSession}
                       </div>
                     )}
                     {logoutProgress >= 75 && (
                       <div className="flex items-center justify-center">
                         <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        Připravování přesměrování...
+                        {translations.common.logoutOverlay.progress.preparingRedirect}
                       </div>
                     )}
                     {logoutProgress >= 100 && (
                       <div className="flex items-center justify-center">
                         <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        Dokončování...
+                        {translations.common.logoutOverlay.progress.finishing}
                       </div>
                     )}
                   </div>
