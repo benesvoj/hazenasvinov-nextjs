@@ -10,6 +10,7 @@ export enum EmptyStateTypes {
   SETTINGS = 'settings',
   COMMITTEES = 'committees',
   BIRTHDAYS = 'birthdays',
+  TRAINING_SESSION = 'trainingSession',
 }
 
 export const EMPTY_STATE_TYPES_LABELS: Record<EmptyStateTypes, string> = {
@@ -22,6 +23,7 @@ export const EMPTY_STATE_TYPES_LABELS: Record<EmptyStateTypes, string> = {
   [EmptyStateTypes.SETTINGS]: translations.common.emptyStateTypes.settings,
   [EmptyStateTypes.COMMITTEES]: translations.common.emptyStateTypes.committees,
   [EmptyStateTypes.BIRTHDAYS]: translations.common.emptyStateTypes.birthdays,
+  [EmptyStateTypes.TRAINING_SESSION]: translations.trainingSessions.noTrainingSession,
 };
 
 export const getEmptyStateTypeOptions = () => {

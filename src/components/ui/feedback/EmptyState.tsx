@@ -37,6 +37,8 @@ const getDefaultIcon = (type?: string) => {
       return <UserGroupIcon className="w-12 h-12" />;
     case 'birthdays':
       return <CalendarIcon className="w-12 h-12" />;
+    case 'trainingSession':
+      return <CalendarIcon className="w-12 h-12" />;
     default:
       return <DocumentTextIcon className="w-12 h-12" />;
   }
@@ -119,6 +121,11 @@ const EMPTY_STATE_CONFIG = {
     title: translations.coachPortal.birthdayCard.emptyStateTitle,
     description: translations.coachPortal.birthdayCard.noBirthdays,
     actionLabel: 'Přidat člena',
+  },
+  [EmptyStateTypes.TRAINING_SESSION]: {
+    title: translations.trainingSessions.noTrainingSession,
+    description: translations.trainingSessions.noTrainingSessionDescription,
+    actionLabel: translations.common.actions.create,
   },
 };
 
