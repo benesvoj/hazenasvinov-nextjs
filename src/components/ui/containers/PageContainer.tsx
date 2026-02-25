@@ -41,7 +41,7 @@ export default function PageContainer({
         />
       )}
       {isLoading ? <LoadingSpinner /> : children}
-      {isError && (
+      {!isLoading && isError && (
         <Alert
           color="danger"
           title={translations.common.alerts.error}

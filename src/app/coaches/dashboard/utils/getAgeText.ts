@@ -1,5 +1,5 @@
 /**
- * Returns a text representation of the given age in Slovak grammar,
+ * Returns a text representation of the given age in Czech grammar,
  * including appropriate singular and plural forms.
  *
  * @param {number} age - The age to format as text.

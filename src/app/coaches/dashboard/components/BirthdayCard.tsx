@@ -13,6 +13,7 @@ import {translations} from '@/lib/translations/index';
 import {getAgeText, getDaysUntilColor, getDaysUntilText} from '@/app/coaches/dashboard/utils';
 
 import {UnifiedCard} from '@/components';
+import {EmptyStateTypes} from '@/enums';
 import {formatDateString} from '@/helpers';
 
 interface BirthdayCardProps {

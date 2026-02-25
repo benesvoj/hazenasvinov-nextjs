@@ -52,7 +52,6 @@ export default function CoachesAttendancePage() {
     selectedSeason,
     setSelectedSeason,
     isLoading,
-    isAdmin,
   } = useCoachCategory();
 
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
