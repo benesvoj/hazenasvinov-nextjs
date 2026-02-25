@@ -110,7 +110,7 @@ export const TrainingSessionCard = ({
             variant="light"
             onPress={() => onDeleteSession(session.id)}
             isIconOnly
-            aria-label={`${translations.trainingSessions.deleteTrainingSession}  ${session.title}`}
+            aria-label={`${translations.trainingSessions.deleteTrainingSession} ${session.title}`}
             startContent={<TrashIcon className="w-4 h-4" />}
             isDisabled={isButtonDisabled}
           />

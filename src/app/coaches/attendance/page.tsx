@@ -254,7 +254,7 @@ export default function CoachesAttendancePage() {
                   placeholder={translations.categories.placeholders.category}
                   selectedKeys={selectedCategory ? [selectedCategory] : []}
                   onSelectionChange={(keys) => setSelectedCategory(Array.from(keys)[0] as string)}
-                  isDisabled={appDataLoading || availableCategories.length === 1}
+                  isDisabled={appDataLoading}
                   defaultSelectedKeys={selectedCategory ? [selectedCategory] : []}
                   className="min-w-0 w-56"
                 >
