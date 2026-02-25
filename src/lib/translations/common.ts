@@ -111,7 +111,7 @@ export const commonTranslations = {
     title: 'Trenérský Portal',
   },
   userRoles: {
-    admin: 'Admin',
+    admin: 'Administrátor',
     coach: 'Trenér',
     headCoach: 'Hlavní trenér',
     member: 'Člen',

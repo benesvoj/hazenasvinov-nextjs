@@ -7,4 +7,4 @@ export {default as Header} from '../client/Header';
 export {default as Logo} from './Logo';
 export {UnifiedSidebar} from '../client/UnifiedSidebar';
 export * from '../client/UnifiedSidebarContext';
-export {UnifiedTopBar} from '../client/UnifiedTopBar';
+export {UnifiedTopBar} from '../client/UnifiedTopBar/UnifiedTopBar';
