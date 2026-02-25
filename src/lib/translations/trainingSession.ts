@@ -31,7 +31,7 @@ export const trainingSessionsTranslations = {
     automaticTrainingSessionStatus:
       'Automaticky vytvořit záznamy docházky pro členy sestavy (výchozí: přítomen)',
     preview: 'Náhled vygenerovaných tréninků',
-    numberInSessionTitle: `Přidat číslo do názvu (např. &quot;Trénink 1&quot;, &quot;Trénink 2&quot;)`,
+    numberInSessionTitle: 'Přidat číslo do názvu (např. Trénink 1, Trénink 2, ...)',
     today: 'Dnes',
   },
   placeholders: {

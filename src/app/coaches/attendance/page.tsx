@@ -307,8 +307,7 @@ export default function CoachesAttendancePage() {
         <Tabs
           selectedKey={activeTab}
           onSelectionChange={(key) => setActiveTab(key as AttendanceTabs)}
-          className="mb-2"
-          size="lg"
+          size="md"
         >
           <Tab
             key={AttendanceTabs.ATTENDANCE}
