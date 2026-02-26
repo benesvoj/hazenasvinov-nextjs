@@ -38,15 +38,21 @@ export const TrainingSessionCard = ({
 
   return (
     <div
-      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+      className={`p-3 rounded-lg border transition-colors ${
         selectedSession === session.id
           ? 'border-blue-500 bg-blue-50'
           : 'border-gray-200 hover:border-gray-300'
       }`}
-      onClick={() => onSelectedSession(session.id)}
     >
       <div className="flex items-center justify-between">
-        <div className="flex-1">
+        <div
+          className="flex-1 cursor-pointer"
+          onClick={() => onSelectedSession(session.id)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && onSelectedSession(session.id)}
+          aria-label={`${translations.trainingSessions.ariaLabel.selectTrainingSession}${session.title}`}
+        >
           <div className="flex items-center gap-2 mb-1">
             <Heading size={4}>{session.title}</Heading>
             {isToday && (
@@ -85,7 +91,7 @@ export const TrainingSessionCard = ({
             </div>
           )}
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 ml-2">
           <Button
             size="sm"
             variant="light"

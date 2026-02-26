@@ -46,6 +46,7 @@ export const trainingSessionsTranslations = {
   ariaLabel: {
     numberInSessionTitle: 'Přidat číslo do názvu',
     automaticTrainingSessionStatus: 'Vytvořit záznamy docházky',
+    selectTrainingSession: 'Vyberte tréninkovou jednotku',
   },
   alerts: {
     sessionCanceled:

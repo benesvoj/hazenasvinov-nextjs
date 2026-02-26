@@ -7,9 +7,8 @@ import {Tab, Tabs} from '@heroui/react';
 import {translations} from '@/lib/translations/index';
 
 import {UnifiedCard} from '@/components';
-import {EmptyStateTypes} from '@/enums';
 import {BaseTrainingSession} from '@/types';
-import {hasItems, isEmpty} from '@/utils';
+import {isEmpty} from '@/utils';
 
 import {TrainingSessionCard} from './components/TrainingSessionCard';
 import {segmentSessions, SessionSegment} from './utils/segmentSessions';
