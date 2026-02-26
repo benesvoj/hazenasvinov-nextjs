@@ -15,6 +15,7 @@ import {ClubFormModal} from '@/app/admin/clubs/components/ClubFormModal';
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {useClubFiltering, useClubForm, useClubs, useFetchClubs} from '@/hooks';
+import {APP_ROUTES} from '@/lib';
 import {Club} from '@/types';
 
 export default function ClubsAdminPage() {
@@ -100,7 +101,7 @@ export default function ClubsAdminPage() {
   };
 
   const openViewModal = (club: Club) => {
-    router.push(`/admin/clubs/${club.id}`);
+    router.push(APP_ROUTES.admin.club(club.id));
   };
 
   const filters = (

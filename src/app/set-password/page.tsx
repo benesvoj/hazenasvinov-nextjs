@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import {useSupabaseClient} from '@/hooks';
+import {APP_ROUTES} from '@/lib';
 
 function SetPasswordContent() {
   const router = useRouter();
@@ -151,19 +152,19 @@ function SetPasswordContent() {
           if (profileError || !userProfile) {
             // If no profile found, user has no role - redirect to login with message
             router.push(
-              '/login?error=no_role&message=Uživatel nemá přiřazenou roli. Kontaktujte administrátora.'
+              `${APP_ROUTES.auth.login}?error=no_role&message=Uživatel nemá přiřazenou roli. Kontaktujte administrátora.`
             );
           } else if (userProfile.role === 'coach' || userProfile.role === 'head_coach') {
             // Redirect coaches to coaches dashboard
-            router.push('/coaches/dashboard');
+            router.push(APP_ROUTES.coaches.dashboard);
           } else {
             // Redirect other users to admin panel
-            router.push('/admin');
+            router.push(APP_ROUTES.admin.root);
           }
         } catch (redirectError) {
           console.error('Error determining redirect:', redirectError);
           // Fallback to admin panel
-          router.push('/admin');
+          router.push(APP_ROUTES.admin.root);
         }
       }, 3000);
     } catch (error) {
@@ -176,7 +177,7 @@ function SetPasswordContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
@@ -195,7 +196,7 @@ function SetPasswordContent() {
 
   if ((!accessToken && !user) || supabaseError) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <LockClosedIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -216,11 +217,19 @@ function SetPasswordContent() {
             )}
 
             <div className="space-y-3">
-              <Button color="primary" onPress={() => router.push('/login')} className="w-full">
+              <Button
+                color="primary"
+                onPress={() => router.push(APP_ROUTES.auth.login)}
+                className="w-full"
+              >
                 Přejít na přihlášení
               </Button>
 
-              <Button variant="light" onPress={() => router.push('/')} className="w-full">
+              <Button
+                variant="light"
+                onPress={() => router.push(APP_ROUTES.public.home)}
+                className="w-full"
+              >
                 Přejít na úvodní stránku
               </Button>
             </div>
@@ -231,10 +240,10 @@ function SetPasswordContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center pb-2">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 bg-linear-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mb-4">
             <UserPlusIcon className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -354,7 +363,11 @@ function SetPasswordContent() {
 
             {/* Back to Login */}
             <div className="text-center">
-              <Button variant="light" onPress={() => router.push('/login')} className="text-sm">
+              <Button
+                variant="light"
+                onPress={() => router.push(APP_ROUTES.auth.login)}
+                className="text-sm"
+              >
                 ← Zpět na přihlášení
               </Button>
             </div>
@@ -369,7 +382,7 @@ export default function SetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
           <Card className="w-full max-w-md">
             <CardBody className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>

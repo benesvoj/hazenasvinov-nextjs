@@ -21,6 +21,7 @@ import {isEmpty} from '@/utils/arrayHelper';
 
 import {LoadingSpinner} from '@/components';
 import {formatDateString, formatTime} from '@/helpers';
+import {APP_ROUTES} from '@/lib';
 import {Match} from '@/types';
 
 import {CategoryMatchesFallback} from './CategoryMatchesFallback';
@@ -45,7 +46,7 @@ export function CategoryMatches({
   const router = useRouter();
 
   const handleMatchClick = (matchId: string) => {
-    router.push(`/matches/${matchId}`);
+    router.push(APP_ROUTES.public.match(matchId));
   };
 
   const renderMatchesTable = (seasonMatches: Match[], seasonName: string) => {

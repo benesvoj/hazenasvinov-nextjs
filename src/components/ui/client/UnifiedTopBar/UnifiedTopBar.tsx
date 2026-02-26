@@ -2,11 +2,14 @@
 
 import React, {useMemo, useState} from 'react';
 
+import {useRouter} from 'next/navigation';
+
 import {CoachPortalCategoryDialog, ReleaseNotesModal} from '@/components/features';
 import {UserProfileModal} from '@/components/ui/modals';
 
 import {UserRoles} from '@/enums';
 import {useAuth, usePortalAccess} from '@/hooks';
+import {APP_ROUTES} from '@/lib';
 import {getReleaseNotes} from '@/utils';
 
 import {LogoutOverlay, TopBarActions, TopBarPageInfo, TopBarUserDropdown} from './components';
@@ -43,6 +46,7 @@ export const UnifiedTopBar = ({
   pageDescription,
   userProfile,
 }: UnifiedTopBarProps) => {
+  const router = useRouter();
   const {user} = useAuth();
   const {hasCoachAccess, hasAdminAccess} = usePortalAccess();
 
@@ -69,18 +73,17 @@ export const UnifiedTopBar = ({
       // Show category selection dialog first
       setShowCoachPortalDialog(true);
     } else {
-      // Direct switch for coaches
-      window.location.href = '/coaches/dashboard';
+      router.push(APP_ROUTES.coaches.dashboard);
     }
   };
 
   const handleConfirmCoachPortalSwitch = () => {
     setShowCoachPortalDialog(false);
-    window.location.href = '/coaches/dashboard';
+    router.push(APP_ROUTES.coaches.dashboard);
   };
 
   const handleSwitchToAdminPortal = () => {
-    window.location.href = '/admin';
+    router.push(APP_ROUTES.admin.root);
   };
 
   const handleProfileOpen = () => {

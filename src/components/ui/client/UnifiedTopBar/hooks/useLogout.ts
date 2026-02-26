@@ -8,6 +8,7 @@ import {translations} from '@/lib/translations/index';
 
 import {showToast} from '@/components';
 import {useAuth} from '@/hooks';
+import {APP_ROUTES} from '@/lib';
 import {logLogout} from '@/utils';
 
 // Logout timing constants
@@ -65,7 +66,7 @@ export function useLogout() {
       // Step 4: Complete and redirect
       setLogoutProgress(100);
       setTimeout(() => {
-        router.push('/login');
+        router.push(APP_ROUTES.auth.login);
       }, LOGOUT_DELAYS.FINAL_DELAY);
     } catch (error) {
       console.error('Logout error:', error);

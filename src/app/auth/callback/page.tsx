@@ -5,6 +5,7 @@ import {useEffect} from 'react';
 import {useRouter} from 'next/navigation';
 
 import {useSupabaseClient} from '@/hooks';
+import {APP_ROUTES} from '@/lib';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,7 @@ export default function AuthCallbackPage() {
             error_code: errorCode || 'unknown',
             error_description: errorDescription || error,
           });
-          router.push(`/error?${errorParams.toString()}`);
+          router.push(`${APP_ROUTES.auth.error}?${errorParams.toString()}`);
           return;
         }
 
@@ -99,7 +100,7 @@ export default function AuthCallbackPage() {
                 error_code: error.status?.toString() || 'pkce_exchange_failed',
                 error_description: error.message,
               });
-              router.push(`/error?${errorParams.toString()}`);
+              router.push(`${APP_ROUTES.auth.error}?${errorParams.toString()}`);
               return;
             }
 
@@ -132,15 +133,15 @@ export default function AuthCallbackPage() {
             if (pkceType === 'invite' || pkceType === 'signup') {
               // Redirect to set-password page for new users
               console.log('Redirecting to set-password page');
-              router.push('/set-password');
+              router.push(APP_ROUTES.auth.setPassword);
             } else if (pkceType === 'recovery') {
               // Redirect to reset-password page for password reset
               console.log('Redirecting to reset-password page');
-              router.push('/reset-password');
+              router.push(APP_ROUTES.auth.resetPassword);
             } else {
               // Default redirect to admin dashboard
               console.log('Redirecting to admin dashboard (type:', pkceType, ')');
-              router.push('/admin');
+              router.push(APP_ROUTES.admin.root);
             }
             return;
           } catch (err) {
@@ -150,7 +151,7 @@ export default function AuthCallbackPage() {
               error_code: 'pkce_processing_error',
               error_description: err instanceof Error ? err.message : 'PKCE processing failed',
             });
-            router.push(`/error?${errorParams.toString()}`);
+            router.push(`${APP_ROUTES.auth.error}?${errorParams.toString()}`);
             return;
           }
         }
@@ -164,7 +165,7 @@ export default function AuthCallbackPage() {
 
           if (error) {
             console.error('Error setting session:', error);
-            router.push('/error');
+            router.push(APP_ROUTES.auth.error);
             return;
           }
 
@@ -190,7 +191,7 @@ export default function AuthCallbackPage() {
             }
           } else {
             console.error('No user data in session:', data);
-            router.push('/error');
+            router.push(APP_ROUTES.auth.error);
             return;
           }
 
@@ -198,15 +199,15 @@ export default function AuthCallbackPage() {
           if (type === 'invite' || type === 'signup') {
             // Redirect to set-password page for new users
             console.log('Redirecting to set-password page');
-            router.push('/set-password');
+            router.push(APP_ROUTES.auth.setPassword);
           } else if (type === 'recovery') {
             // Redirect to reset-password page for password reset
             console.log('Redirecting to reset-password page');
-            router.push('/reset-password');
+            router.push(APP_ROUTES.auth.resetPassword);
           } else {
             // Default redirect to admin dashboard
             console.log('Redirecting to admin dashboard (type:', type, ')');
-            router.push('/admin');
+            router.push(APP_ROUTES.admin.root);
           }
         } else {
           console.error('Missing required tokens in URL');
@@ -218,11 +219,11 @@ export default function AuthCallbackPage() {
               Object.fromEntries(hashParams.entries())
             );
           }
-          router.push('/error');
+          router.push(APP_ROUTES.auth.error);
         }
       } catch (error) {
         console.error('Error in auth callback:', error);
-        router.push('/error');
+        router.push(APP_ROUTES.auth.error);
       }
     };
 

@@ -1,3 +1,4 @@
+import {APP_ROUTES} from '@/lib';
 import {PageVisibility} from '@/types';
 
 export interface MenuItem {
@@ -77,45 +78,4 @@ export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
 };
 
 // Fallback routes in case database is not available
-export const fallbackRoutes = {
-  home: '/',
-  error: '/error',
-  chronicle: '/chronicle',
-  downloads: '/downloads',
-  contact: '/contact',
-  about: '/about',
-  celebration: '/100',
-  blog: '/blog',
-  login: '/login',
-  matches: '/matches',
-  photoGallery: '/photo-gallery',
-  youngestKids: '/category/youngest-kids',
-  prepKids: '/category/prep-kids',
-  youngerBoys: '/category/younger-boys',
-  youngerGirls: '/category/younger-girls',
-  olderBoys: '/category/older-boys',
-  olderGirls: '/category/older-girls',
-  juniorBoys: '/category/junior-boys',
-  juniorGirls: '/category/junior-girls',
-  men: '/category/men',
-  women: '/category/women',
-} as const;
-
-export const privateRoutes = {
-  admin: '/admin',
-  users: '/admin/users',
-  posts: '/admin/posts',
-  categories: '/admin/category',
-  seasons: '/admin/seasons',
-  teams: '/admin/teams',
-  teamCategories: '/admin/team-category',
-  matches: '/admin/matches',
-  members: '/admin/members',
-  memberFunctions: '/admin/member-functions',
-  committees: '/admin/committees',
-  competitions: '/admin/competitions',
-  sponsorship: '/admin/sponsorship',
-  clubConfig: '/admin/clubConfig',
-  photoGallery: '/admin/photo-gallery',
-  grantCalendar: '/admin/grant-calendar',
-};
+export const fallbackRoutes = APP_ROUTES.public;

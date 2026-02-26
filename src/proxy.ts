@@ -2,14 +2,14 @@ import {type NextRequest, NextResponse} from 'next/server';
 
 import {supabaseServerClient} from '@/utils/supabase/server';
 
-import {privateRoutes, publicRoutes} from '@/routes/routes';
+import {APP_ROUTES} from '@/lib';
 
 export async function proxy(request: NextRequest) {
   try {
     // Check auth for admin routes and coaches routes
     if (
-      request.nextUrl.pathname.startsWith(privateRoutes.admin) ||
-      request.nextUrl.pathname.startsWith('/coaches')
+      request.nextUrl.pathname.startsWith(APP_ROUTES.admin.root) ||
+      request.nextUrl.pathname.startsWith(APP_ROUTES.coaches.root)
     ) {
       const supabase = await supabaseServerClient();
       const {
@@ -19,7 +19,7 @@ export async function proxy(request: NextRequest) {
       // If no user and trying to access protected routes
       if (!user) {
         // Redirect to login page
-        const redirectUrl = new URL(publicRoutes.login, request.url);
+        const redirectUrl = new URL(APP_ROUTES.auth.login, request.url);
         // Add the original URL as ?next= parameter
         redirectUrl.searchParams.set('next', request.nextUrl.pathname);
         return NextResponse.redirect(redirectUrl);
@@ -52,13 +52,13 @@ export async function proxy(request: NextRequest) {
 
             if (safeProfileError || !safeProfile || safeProfile.length === 0) {
               // Still no profile, redirect to login
-              const redirectUrl = new URL(publicRoutes.login, request.url);
+              const redirectUrl = new URL(APP_ROUTES.auth.login, request.url);
               redirectUrl.searchParams.set('error', 'no_role');
               return NextResponse.redirect(redirectUrl);
             }
           } catch (err) {
             // Error in fallback, redirect to login
-            const redirectUrl = new URL(publicRoutes.login, request.url);
+            const redirectUrl = new URL(APP_ROUTES.auth.login, request.url);
             redirectUrl.searchParams.set('error', 'no_role');
             return NextResponse.redirect(redirectUrl);
           }
@@ -71,10 +71,10 @@ export async function proxy(request: NextRequest) {
   } catch (error) {
     // If there's an error accessing protected routes, redirect to login
     if (
-      request.nextUrl.pathname.startsWith(privateRoutes.admin) ||
-      request.nextUrl.pathname.startsWith('/coaches')
+      request.nextUrl.pathname.startsWith(APP_ROUTES.admin.root) ||
+      request.nextUrl.pathname.startsWith(APP_ROUTES.coaches.root)
     ) {
-      return NextResponse.redirect(new URL(publicRoutes.login, request.url));
+      return NextResponse.redirect(new URL(APP_ROUTES.auth.login, request.url));
     }
     // For other routes, just proceed even with errors
     return NextResponse.next();

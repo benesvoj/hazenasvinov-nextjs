@@ -4,12 +4,14 @@ import {useEffect} from 'react';
 
 import {useRouter} from 'next/navigation';
 
+import {APP_ROUTES} from '@/lib';
+
 export default function CoachesLoginRedirect() {
   const router = useRouter();
 
   useEffect(() => {
     // Redirect to the unified login page with coach tab selected
-    router.replace('/login?tab=coach');
+    router.replace(APP_ROUTES.coaches.login);
   }, [router]);
 
   return (

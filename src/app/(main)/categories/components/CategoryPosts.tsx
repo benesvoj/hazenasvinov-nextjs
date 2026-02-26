@@ -7,7 +7,9 @@ import {TagIcon, ArrowRightIcon} from '@heroicons/react/24/outline';
 import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
 import Link from '@/components/ui/link/Link';
 
+import {APP_ROUTES} from '@/lib';
 import {Blog} from '@/types';
+import {hasItems} from '@/utils';
 
 interface CategoryPostsProps {
   categoryId: string;
@@ -77,7 +79,7 @@ export function CategoryPosts({categoryId, posts = []}: CategoryPostsProps) {
               <CardFooter className="flex justify-center">
                 <Button
                   as={Link}
-                  href="/blog"
+                  href={APP_ROUTES.public.blog}
                   color="primary"
                   variant="bordered"
                   className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
@@ -91,11 +93,11 @@ export function CategoryPosts({categoryId, posts = []}: CategoryPostsProps) {
       </div>
 
       {/* View All Button */}
-      {latestPosts && latestPosts.length > 0 && (
+      {hasItems(latestPosts) && (
         <div className="text-center mt-8">
           <Button
             as={Link}
-            href="/blog"
+            href={APP_ROUTES.public.blog}
             size="md"
             color="primary"
             variant="bordered"

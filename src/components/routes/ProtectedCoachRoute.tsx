@@ -2,11 +2,15 @@
 
 import React from 'react';
 
+import {useRouter} from 'next/navigation';
+
 import {Button, Card, CardBody} from '@heroui/react';
 
 import {AcademicCapIcon} from '@heroicons/react/24/outline';
 
 import {useUser} from '@/contexts/UserContext';
+
+import {APP_ROUTES} from '@/lib';
 
 interface ProtectedCoachRouteProps {
   children: React.ReactNode;
@@ -14,7 +18,8 @@ interface ProtectedCoachRouteProps {
 }
 
 export default function ProtectedCoachRoute({children, fallback}: ProtectedCoachRouteProps) {
-  const {user, userProfile, loading, isAuthenticated, isAdmin, isCoach, error} = useUser();
+  const router = useRouter();
+  const {loading, isAuthenticated, isAdmin, isCoach, error} = useUser();
 
   // Check if user has access to coaches portal
   const hasAccess = isAuthenticated && (isCoach || isAdmin);
@@ -47,14 +52,14 @@ export default function ProtectedCoachRoute({children, fallback}: ProtectedCoach
               <Button
                 color="primary"
                 className="w-full"
-                onPress={() => (window.location.href = '/login?tab=coach')}
+                onPress={() => router.push(APP_ROUTES.coaches.login)}
               >
                 Přihlásit se
               </Button>
               <Button
                 variant="bordered"
                 className="w-full"
-                onPress={() => (window.location.href = '/')}
+                onPress={() => router.push(APP_ROUTES.public.home)}
               >
                 Zpět na hlavní stránku
               </Button>

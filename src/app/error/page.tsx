@@ -2,11 +2,13 @@
 
 import {Suspense} from 'react';
 
-import {useSearchParams, useRouter} from 'next/navigation';
+import {useRouter, useSearchParams} from 'next/navigation';
 
-import {Button, Card, CardBody, CardHeader} from '@heroui/react';
+import {Button, Card, CardBody} from '@heroui/react';
 
-import {LockClosedIcon, ExclamationTriangleIcon} from '@heroicons/react/24/outline';
+import {ExclamationTriangleIcon, LockClosedIcon} from '@heroicons/react/24/outline';
+
+import {APP_ROUTES} from '@/lib';
 
 function ErrorPageContent() {
   const searchParams = useSearchParams();
@@ -40,7 +42,7 @@ function ErrorPageContent() {
   // Handle specific password reset errors
   if (errorCode === 'otp_expired') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <ExclamationTriangleIcon className="w-16 h-16 text-orange-500 mx-auto mb-4" />
@@ -59,13 +61,17 @@ function ErrorPageContent() {
             <div className="space-y-3">
               <Button
                 color="primary"
-                onPress={() => router.push('/reset-password')}
+                onPress={() => router.push(APP_ROUTES.auth.resetPassword)}
                 className="w-full"
               >
                 Požádat o nový odkaz
               </Button>
 
-              <Button variant="light" onPress={() => router.push('/login')} className="w-full">
+              <Button
+                variant="light"
+                onPress={() => router.push(APP_ROUTES.auth.login)}
+                className="w-full"
+              >
                 Přejít na přihlášení
               </Button>
             </div>
@@ -78,7 +84,7 @@ function ErrorPageContent() {
   // Handle missing parameters errors
   if (errorCode === 'missing_parameters') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-yellow-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <ExclamationTriangleIcon className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
@@ -93,13 +99,17 @@ function ErrorPageContent() {
             <div className="space-y-3">
               <Button
                 color="primary"
-                onPress={() => router.push('/reset-password')}
+                onPress={() => router.push(APP_ROUTES.auth.resetPassword)}
                 className="w-full"
               >
                 Požádat o nový odkaz
               </Button>
 
-              <Button variant="light" onPress={() => router.push('/login')} className="w-full">
+              <Button
+                variant="light"
+                onPress={() => router.push(APP_ROUTES.auth.login)}
+                className="w-full"
+              >
                 Přejít na přihlášení
               </Button>
             </div>
@@ -112,7 +122,7 @@ function ErrorPageContent() {
   // Handle access denied errors
   if (errorCode === 'access_denied') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <LockClosedIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -126,13 +136,17 @@ function ErrorPageContent() {
             <div className="space-y-3">
               <Button
                 color="primary"
-                onPress={() => router.push('/reset-password')}
+                onPress={() => router.push(APP_ROUTES.auth.resetPassword)}
                 className="w-full"
               >
                 Požádat o nový odkaz
               </Button>
 
-              <Button variant="light" onPress={() => router.push('/login')} className="w-full">
+              <Button
+                variant="light"
+                onPress={() => router.push(APP_ROUTES.auth.login)}
+                className="w-full"
+              >
                 Přejít na přihlášení
               </Button>
             </div>
@@ -144,7 +158,7 @@ function ErrorPageContent() {
 
   // Generic error fallback
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
       <Card className="w-full max-w-md">
         <CardBody className="text-center py-12">
           <ExclamationTriangleIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -156,11 +170,19 @@ function ErrorPageContent() {
           </p>
 
           <div className="space-y-3">
-            <Button color="primary" onPress={() => router.push('/')} className="w-full">
+            <Button
+              color="primary"
+              onPress={() => router.push(APP_ROUTES.public.home)}
+              className="w-full"
+            >
               Přejít na úvodní stránku
             </Button>
 
-            <Button variant="light" onPress={() => router.push('/login')} className="w-full">
+            <Button
+              variant="light"
+              onPress={() => router.push(APP_ROUTES.auth.login)}
+              className="w-full"
+            >
               Přejít na přihlášení
             </Button>
           </div>
@@ -174,7 +196,7 @@ export default function ErrorPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
           <Card className="w-full max-w-md">
             <CardBody className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 dark:border-red-400 mx-auto mb-4"></div>
