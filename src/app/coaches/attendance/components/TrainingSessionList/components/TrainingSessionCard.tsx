@@ -15,22 +15,22 @@ import TrainingSessionStatusBadge from './TrainingSessionStatusBadge';
 
 interface TrainingSessionRowProps {
   session: BaseTrainingSession;
-  selectedSession: string | null;
   onSelectedSession: (sessionId: string | null) => void;
   onStatusChange: (session: BaseTrainingSession) => void;
   onEditSession: (session: BaseTrainingSession) => void;
   onDeleteSession: (sessionId: string) => void;
   isToday?: boolean;
+  isSelected?: boolean;
 }
 
 export const TrainingSessionCard = ({
   session,
-  selectedSession,
   onSelectedSession,
   onStatusChange,
   onEditSession,
   onDeleteSession,
   isToday,
+  isSelected,
 }: TrainingSessionRowProps) => {
   const isButtonDisabled =
     session.status === TrainingSessionStatusEnum.CANCELLED ||
@@ -38,16 +38,18 @@ export const TrainingSessionCard = ({
 
   return (
     <div
-      className={`p-3 rounded-lg border transition-colors ${
-        selectedSession === session.id
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-200 hover:border-gray-300'
+      className={`p-3 rounded-lg border-2 transition-all ${
+        isSelected
+          ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
+          : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
       }`}
     >
       <div className="flex items-center justify-between">
         <div
           className="flex-1 cursor-pointer"
-          onClick={() => onSelectedSession(session.id)}
+          onClick={() => {
+            onSelectedSession(session.id);
+          }}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && onSelectedSession(session.id)}

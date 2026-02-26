@@ -19,7 +19,8 @@ export const attendanceTranslations = {
   labels: {
     newSession: 'Nový trénink',
     newSessionShort: 'Nový',
-    attendanceList: (count: number) => `Docházka (${count})`,
+    attendanceList: (count: number) => `Docházka (počet členů: ${count})`,
+    attendanceListEmpty: 'Docházka',
     memberPerformance: 'Výkon člena',
     attendanceTrend: 'Trend docházky',
     recommendation: 'Doporučení pro trénink',

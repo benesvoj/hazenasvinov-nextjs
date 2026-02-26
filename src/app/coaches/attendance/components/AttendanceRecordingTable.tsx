@@ -15,17 +15,19 @@ import {translations} from '@/lib/translations/index';
 
 import {UnifiedCard} from '@/components';
 import {AttendanceStatuses, getAttendanceStatusOptions} from '@/enums';
-import {MemberAttendanceWithMember} from '@/types';
-import {hasItems} from '@/utils';
+import {formatDateString, formatTime, formatTimeString} from '@/helpers';
+import {BaseTrainingSession, MemberAttendanceWithMember} from '@/types';
+import {isNotNilOrEmpty} from '@/utils';
 
 import {getShortAttendanceStatusText, getStatusColor} from '../helpers';
 
 interface AttendanceRecordingTableProps {
   attendanceRecords: MemberAttendanceWithMember[];
   selectedSession: string | null;
-  handleCreateAttendanceForSession: () => void;
   loading: boolean;
   handleRecordAttendance: (id: string, status: AttendanceStatuses) => Promise<void>;
+  handleCreateAttendanceForSession: (sessionId: string) => Promise<void>;
+  selectedSessionData: BaseTrainingSession | null;
 }
 
 /**
@@ -42,9 +44,10 @@ function hasValidMember(
 export const AttendanceRecordingTable = ({
   attendanceRecords,
   selectedSession,
-  handleCreateAttendanceForSession,
   loading,
   handleRecordAttendance,
+  handleCreateAttendanceForSession,
+  selectedSessionData,
 }: AttendanceRecordingTableProps) => {
   const validRecords = useMemo(() => {
     return attendanceRecords.filter(hasValidMember).sort((a, b) => {
@@ -59,14 +62,17 @@ export const AttendanceRecordingTable = ({
   // Count of records with missing member data (for debugging/monitoring)
   const invalidRecordsCount = attendanceRecords.length - validRecords.length;
 
+  const cardTitle = isNotNilOrEmpty(selectedSession)
+    ? translations.attendance.labels.attendanceList(validRecords.length)
+    : translations.attendance.labels.attendanceListEmpty;
+
+  const cardSubtitle = isNotNilOrEmpty(selectedSessionData)
+    ? `${formatDateString(selectedSessionData.session_date)} ${formatTime(selectedSessionData.session_time ?? '')}`
+    : '';
+
   return (
     <div className="lg:col-span-2">
-      <UnifiedCard
-        isLoading={loading}
-        title={translations.attendance.labels.attendanceList(
-          hasItems(validRecords) ? validRecords.length : 0
-        )}
-      >
+      <UnifiedCard isLoading={loading} title={cardTitle} subtitle={cardSubtitle}>
         {!selectedSession ? (
           <p className="text-gray-500 text-center py-8">
             {translations.attendance.responseMessages.selectSessionToShowAttendance}
@@ -80,7 +86,7 @@ export const AttendanceRecordingTable = ({
               />
             )}
             <div className="overflow-x-auto">
-              <Table aria-label="Attendance records">
+              <Table aria-label={translations.attendance.labels.attendanceListEmpty}>
                 <TableHeader>
                   <TableColumn>{translations.attendance.table.columns.memberName}</TableColumn>
                   <TableColumn>{translations.attendance.table.columns.status}</TableColumn>

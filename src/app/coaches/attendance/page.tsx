@@ -87,7 +87,16 @@ export default function CoachesAttendancePage() {
     seasonId: selectedSeason,
   });
 
-  const {data: attendanceRecords, refetch: fetchAttendanceRecords} = useFetchMembersAttendance({
+  const selectedSessionData = useMemo(
+    () => sessions.find((s) => s.id === selectedSession) ?? null,
+    [sessions, selectedSession]
+  );
+
+  const {
+    data: attendanceRecords,
+    loading: attendanceLoading,
+    refetch: fetchAttendanceRecords,
+  } = useFetchMembersAttendance({
     trainingSessionId: selectedSession || '',
   });
 
@@ -329,7 +338,8 @@ export default function CoachesAttendancePage() {
                 selectedSession={selectedSession}
                 handleRecordAttendance={handleRecordAttendance}
                 handleCreateAttendanceForSession={handleCreateAttendanceForSession}
-                loading={loading}
+                loading={attendanceLoading}
+                selectedSessionData={selectedSessionData}
               />
             </div>
           </Tab>
