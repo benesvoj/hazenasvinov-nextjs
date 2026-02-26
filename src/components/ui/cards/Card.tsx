@@ -163,7 +163,7 @@ export function ActionCard({
             <h3 className="text-lg font-semibold text-gray-900 truncate">{title}</h3>
             {subtitle && <p className="text-sm text-gray-600 mt-1">{subtitle}</p>}
           </div>
-          {actions && <div className="flex-shrink-0 flex items-center gap-2">{actions}</div>}
+          {actions && <div className="shrink-0 flex items-center gap-2">{actions}</div>}
         </div>
       </CardHeader>
 

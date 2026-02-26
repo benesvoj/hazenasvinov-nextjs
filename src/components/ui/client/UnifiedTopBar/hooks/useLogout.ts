@@ -73,7 +73,9 @@ export function useLogout() {
 
       // Determine error type and message
       const errorMessage =
-        error instanceof Error ? error.message : translations.common.responseMessages.unknownError;
+        error instanceof Error
+          ? error.message
+          : translations.common.logoutOverlay.responseMessages.unknownError;
       const isNetworkError = errorMessage.includes('network') || errorMessage.includes('fetch');
       const isAuthError = errorMessage.includes('auth') || errorMessage.includes('unauthorized');
 
