@@ -1,26 +1,26 @@
 'use client';
 
-import React, {useState, useEffect, Suspense} from 'react';
+import React, {Suspense, useEffect, useState} from 'react';
 
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 
-import {Button, Input, Tabs, Tab, Alert} from '@heroui/react';
+import {Alert, Button, Input, Tab, Tabs} from '@heroui/react';
 
 import {
-  LockClosedIcon,
-  UserIcon,
   AcademicCapIcon,
+  LockClosedIcon,
   ShieldCheckIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 
 import {PasswordInput} from '@/components/ui/client/inputs/PasswordInput';
 
-import {logSuccessfulLogin, logFailedLogin} from '@/utils/loginLogger';
+import {logFailedLogin, logSuccessfulLogin} from '@/utils/loginLogger';
 
 import {LoadingSpinner} from '@/components';
 import {useSupabaseClient} from '@/hooks';
-import {publicRoutes} from '@/routes/routes';
+import {APP_ROUTES} from '@/lib';
 
 function LoginForm() {
   const supabase = useSupabaseClient();
@@ -133,7 +133,7 @@ function LoginForm() {
 
           if (hasAdminRole) {
             // Redirect to admin panel
-            window.location.href = '/admin';
+            window.location.href = APP_ROUTES.admin.root;
           } else {
             setError('Nemáte oprávnění pro přístup do administrátorského portálu.');
             // Sign out the user since they don't have admin access
@@ -148,7 +148,7 @@ function LoginForm() {
 
           if (hasCoachRole) {
             // Redirect to coaches dashboard
-            window.location.href = '/coaches/dashboard';
+            window.location.href = APP_ROUTES.coaches.dashboard;
           } else {
             setError('Nemáte oprávnění pro přístup do trenérského portálu.');
             // Sign out the user since they don't have coach access
@@ -308,7 +308,7 @@ function LoginForm() {
           <div className="mt-6 text-center space-y-3">
             <div>
               <Link
-                href="/reset-password"
+                href={APP_ROUTES.auth.resetPassword}
                 className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors duration-200"
               >
                 Zapomněli jste heslo?
@@ -316,7 +316,7 @@ function LoginForm() {
             </div>
             <div>
               <Link
-                href={publicRoutes.home}
+                href={APP_ROUTES.public.home}
                 className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors duration-200 inline-flex items-center"
               >
                 ← Zpět na úvodní stránku

@@ -34,7 +34,8 @@ import {translations} from '@/lib/translations/index';
 
 import {coachesRoutes} from '@/app/coaches/routes/routes';
 
-import routes, {privateRoutes} from '@/routes/routes';
+import {APP_ROUTES} from '@/lib';
+import routes from '@/routes/routes';
 
 interface UnifiedSidebarProps {
   variant: 'admin' | 'coach';
@@ -66,41 +67,41 @@ interface CoachRouteItem {
 // Icon mapping for admin routes
 const getAdminRouteIcon = (route: string) => {
   switch (route) {
-    case privateRoutes.admin:
+    case APP_ROUTES.admin.root:
       return <HomeIcon className="w-5 h-5" />;
-    case privateRoutes.users:
+    case APP_ROUTES.admin.users:
       return <UsersIcon className="w-5 h-5" />;
-    case privateRoutes.posts:
+    case APP_ROUTES.admin.posts:
       return <DocumentTextIcon className="w-5 h-5" />;
-    case privateRoutes.categories:
+    case APP_ROUTES.admin.categories:
       return <TagIcon className="w-5 h-5" />;
-    case privateRoutes.seasons:
+    case APP_ROUTES.admin.seasons:
       return <CalendarIcon className="w-5 h-5" />;
-    case privateRoutes.matches:
+    case APP_ROUTES.admin.matches:
       return <TrophyIcon className="w-5 h-5" />;
-    case privateRoutes.members:
+    case APP_ROUTES.admin.members:
       return <UsersIcon className="w-5 h-5" />;
-    case privateRoutes.memberFunctions:
+    case APP_ROUTES.admin.memberFunctions:
       return <CogIcon className="w-5 h-5" />;
-    case privateRoutes.committees:
+    case APP_ROUTES.admin.committees:
       return <BuildingOfficeIcon className="w-5 h-5" />;
-    case privateRoutes.sponsorship:
+    case APP_ROUTES.admin.sponsorship:
       return <HeartIcon className="w-5 h-5" />;
-    case privateRoutes.clubConfig:
+    case APP_ROUTES.admin.clubConfig:
       return <Cog6ToothIcon className="w-5 h-5" />;
-    case privateRoutes.photoGallery:
+    case APP_ROUTES.admin.photoGallery:
       return <PhotoIcon className="w-5 h-5" />;
-    case privateRoutes.clubs:
+    case APP_ROUTES.admin.clubs:
       return <BuildingOfficeIcon className="w-5 h-5" />;
-    case privateRoutes.clubCategories:
+    case APP_ROUTES.admin.clubCategories:
       return <BuildingOfficeIcon className="w-5 h-5" />;
-    case privateRoutes.videos:
+    case APP_ROUTES.admin.videos:
       return <VideoCameraIcon className="w-5 h-5" />;
-    case privateRoutes.userRoles:
+    case APP_ROUTES.admin.userRoles:
       return <ShieldCheckIcon className="w-5 h-5" />;
-    case privateRoutes.meetingMinutes:
+    case APP_ROUTES.admin.meetingMinutes:
       return <ClipboardDocumentListIcon className="w-5 h-5" />;
-    case privateRoutes.grantCalendar:
+    case APP_ROUTES.admin.grantCalendar:
       return <CalendarIcon className="w-5 h-5" />;
     default:
       return <Cog6ToothIcon className="w-5 h-5" />;
@@ -301,15 +302,15 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
             <div
               className={`absolute top-0 left-0 right-0 h-4 pointer-events-none z-10 ${
                 variant === 'admin'
-                  ? 'bg-gradient-to-b from-gray-900 via-gray-900/50 to-transparent'
+                  ? 'bg-linear-to-b from-gray-900 via-gray-900/50 to-transparent'
                   : 'bg-gradient-to-b from-white dark:from-gray-800 via-white/50 dark:via-gray-800/50 to-transparent'
               }`}
             />
             <div
               className={`absolute bottom-0 left-0 right-0 h-4 pointer-events-none z-10 ${
                 variant === 'admin'
-                  ? 'bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent'
-                  : 'bg-gradient-to-t from-white dark:from-gray-800 via-white/50 dark:via-gray-800/50 to-transparent'
+                  ? 'bg-linear-to-t from-gray-900 via-gray-900/50 to-transparent'
+                  : 'bg-linear-to-t from-white dark:from-gray-800 via-white/50 dark:via-gray-800/50 to-transparent'
               }`}
             />
 
@@ -364,8 +365,8 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                           }
                           href={
                             variant === 'admin'
-                              ? (item as AdminRouteItem).route || privateRoutes.admin
-                              : (item as CoachRouteItem).href || '/coaches/dashboard'
+                              ? (item as AdminRouteItem).route || APP_ROUTES.admin.root
+                              : (item as CoachRouteItem).href || APP_ROUTES.coaches.dashboard
                           }
                           onClick={handleNavClick}
                           className={classes.navItem(isActive)}
@@ -519,7 +520,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                   variant === 'admin' && collapsedGroups.has(groupKey)
                     ? 'max-h-0 opacity-0'
                     : variant === 'coach'
-                      ? 'max-h-[600px] opacity-100'
+                      ? 'max-h-150 opacity-100'
                       : 'max-h-96 opacity-100'
                 }`}
               >
@@ -544,8 +545,8 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                       }
                       href={
                         variant === 'admin'
-                          ? (item as AdminRouteItem).route || privateRoutes.admin
-                          : (item as CoachRouteItem).href || '/coaches/dashboard'
+                          ? (item as AdminRouteItem).route || APP_ROUTES.admin.root
+                          : (item as CoachRouteItem).href || APP_ROUTES.coaches.dashboard
                       }
                       className={classes.navItem(isActive)}
                       title={

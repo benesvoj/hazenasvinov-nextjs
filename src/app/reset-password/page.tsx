@@ -10,6 +10,7 @@ import {CheckCircleIcon, EyeIcon, EyeSlashIcon, LockClosedIcon} from '@heroicons
 
 import {Heading} from '@/components';
 import {useSupabaseClient} from '@/hooks';
+import {APP_ROUTES} from '@/lib';
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -163,7 +164,7 @@ function ResetPasswordContent() {
 
       // Redirect to login page after 3 seconds
       setTimeout(() => {
-        router.push('/login');
+        router.push(APP_ROUTES.auth.login);
       }, 3000);
     } catch (error) {
       console.error('Error requesting password reset:', error);
@@ -220,7 +221,7 @@ function ResetPasswordContent() {
 
       // Redirect to login page after 3 seconds
       setTimeout(() => {
-        router.push('/login');
+        router.push(APP_ROUTES.auth.login);
       }, 3000);
     } catch (error) {
       console.error('Error updating password:', error);
@@ -232,7 +233,7 @@ function ResetPasswordContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
@@ -244,7 +245,11 @@ function ResetPasswordContent() {
                 ? 'Pokud je emailová adresa v systému registrována, byl odeslán email pro obnovení hesla. Zkontrolujte svou poštovní schránku.'
                 : 'Vaše nové heslo bylo uloženo. Budete přesměrováni na přihlašovací stránku.'}
             </p>
-            <Button color="primary" onPress={() => router.push('/login')} className="w-full">
+            <Button
+              color="primary"
+              onPress={() => router.push(APP_ROUTES.auth.login)}
+              className="w-full"
+            >
               Přejít na přihlášení
             </Button>
           </CardBody>
@@ -255,7 +260,7 @@ function ResetPasswordContent() {
 
   if (supabaseError) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
         <Card className="w-full max-w-md">
           <CardBody className="text-center py-12">
             <LockClosedIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -276,11 +281,19 @@ function ResetPasswordContent() {
             )}
 
             <div className="space-y-3">
-              <Button color="primary" onPress={() => router.push('/login')} className="w-full">
+              <Button
+                color="primary"
+                onPress={() => router.push(APP_ROUTES.auth.login)}
+                className="w-full"
+              >
                 Přejít na přihlášení
               </Button>
 
-              <Button variant="light" onPress={() => router.push('/')} className="w-full">
+              <Button
+                variant="light"
+                onPress={() => router.push(APP_ROUTES.public.home)}
+                className="w-full"
+              >
                 Přejít na úvodní stránku
               </Button>
             </div>
@@ -291,10 +304,10 @@ function ResetPasswordContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center pb-2 flex flex-col items-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 bg-linear-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mb-4">
             <LockClosedIcon className="w-8 h-8 text-white" />
           </div>
           <div>
@@ -360,7 +373,11 @@ function ResetPasswordContent() {
 
               {/* Back to Login */}
               <div className="text-center">
-                <Button variant="light" onPress={() => router.push('/login')} className="text-sm">
+                <Button
+                  variant="light"
+                  onPress={() => router.push(APP_ROUTES.auth.login)}
+                  className="text-sm"
+                >
                   ← Zpět na přihlášení
                 </Button>
               </div>
@@ -472,7 +489,11 @@ function ResetPasswordContent() {
 
               {/* Back to Login */}
               <div className="text-center">
-                <Button variant="light" onPress={() => router.push('/login')} className="text-sm">
+                <Button
+                  variant="light"
+                  onPress={() => router.push(APP_ROUTES.auth.login)}
+                  className="text-sm"
+                >
                   ← Zpět na přihlášení
                 </Button>
               </div>
@@ -488,7 +509,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
           <Card className="w-full max-w-md">
             <CardBody className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>

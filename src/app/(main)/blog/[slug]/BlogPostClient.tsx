@@ -11,10 +11,11 @@ import {MatchInfo} from '@/components/shared';
 import {Heading} from '@/components/ui';
 import {CategoryChip} from '@/components/ui/chips';
 
+import {translations} from '@/lib/translations/index';
+
 import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
 
 import {formatDateString} from '@/helpers';
-import {translations} from '@/lib';
 import {fetchBlogPostBySlug, fetchBlogPostMatch} from '@/queries/blogPosts/queries';
 
 import {BackButton, ContentDivider, ShareButtons} from './components';
@@ -24,7 +25,7 @@ interface BlogPostClientProps {
 }
 
 export function BlogPostClient({slug}: BlogPostClientProps) {
-  const t = translations.landingPage.posts;
+  const t = translations.public.landingPage.posts;
 
   // Data is already prefetched on server and hydrated here
   const {data, isLoading, error} = useQuery({

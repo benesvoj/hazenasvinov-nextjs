@@ -6,7 +6,9 @@ import {useRouter} from 'next/navigation';
 
 import {Button, Card, CardBody, CardHeader} from '@heroui/react';
 
-import {ShieldExclamationIcon, ArrowLeftIcon, EnvelopeIcon} from '@heroicons/react/24/outline';
+import {ArrowLeftIcon, EnvelopeIcon, ShieldExclamationIcon} from '@heroicons/react/24/outline';
+
+import {APP_ROUTES} from '@/lib';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,14 +57,18 @@ export default function BlockedPage() {
             <Button
               color="primary"
               variant="light"
-              onPress={() => router.push('/login')}
+              onPress={() => router.push(APP_ROUTES.auth.login)}
               className="w-full"
               startContent={<ArrowLeftIcon className="w-4 h-4" />}
             >
               Zpět na přihlášení
             </Button>
 
-            <Button variant="light" onPress={() => router.push('/')} className="w-full">
+            <Button
+              variant="light"
+              onPress={() => router.push(APP_ROUTES.public.home)}
+              className="w-full"
+            >
               Přejít na úvodní stránku
             </Button>
           </div>

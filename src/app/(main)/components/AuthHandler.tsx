@@ -5,6 +5,7 @@ import {useEffect} from 'react';
 import {useRouter} from 'next/navigation';
 
 import {useSupabaseClient} from '@/hooks';
+import {APP_ROUTES} from '@/lib';
 
 export default function AuthHandler() {
   const router = useRouter();
@@ -59,15 +60,15 @@ export default function AuthHandler() {
           if (type === 'recovery') {
             // Password reset - redirect to reset-password page
             console.log('Redirecting to reset-password page');
-            router.push('/reset-password');
+            router.push(APP_ROUTES.auth.resetPassword);
           } else if (type === 'invite' || type === 'signup') {
             // User invitation - redirect to set-password page
             console.log('Redirecting to set-password page');
-            router.push('/set-password');
+            router.push(APP_ROUTES.auth.setPassword);
           } else {
             // Default redirect to admin dashboard
             console.log('Redirecting to admin dashboard');
-            router.push('/admin');
+            router.push(APP_ROUTES.admin.root);
           }
         }
       } catch (error) {

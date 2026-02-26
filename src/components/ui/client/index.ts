@@ -7,7 +7,7 @@ export {default as LogoUpload} from './LogoUpload';
 export * from './Navigation';
 export {UnifiedSidebar} from './UnifiedSidebar';
 export * from './UnifiedSidebarContext';
-export {UnifiedTopBar} from './UnifiedTopBar';
+export {UnifiedTopBar} from './UnifiedTopBar/UnifiedTopBar';
 export {UserProfileModal} from './UserProfileModal';
 export {PasswordInput} from './inputs/PasswordInput';
 export {default as UnifiedTable} from './tables/UnifiedTable';

@@ -40,6 +40,9 @@ export const commonTranslations = {
     payment: 'Platba',
     create: 'Vytvořit',
     send: 'Odeslat',
+    openMenu: 'Otevřít menu',
+    openProfile: 'Otevřít profil',
+    logout: 'Odhlásit se',
   },
   labels: {
     date: 'Datum',
@@ -79,6 +82,9 @@ export const commonTranslations = {
       saturday: 'Sobota',
       sunday: 'Neděle',
     },
+    divider: 'Oddělovač',
+    profile: 'Profil',
+    settings: 'Nastavení',
   },
   tabs: {
     overview: 'Přehled',
@@ -111,7 +117,7 @@ export const commonTranslations = {
     title: 'Trenérský Portal',
   },
   userRoles: {
-    admin: 'Admin',
+    admin: 'Administrátor',
     coach: 'Trenér',
     headCoach: 'Hlavní trenér',
     member: 'Člen',
@@ -121,6 +127,7 @@ export const commonTranslations = {
     copyToClipboardError: 'Nepodařilo se zkopírovat do schránky',
     errorLoadingPage: 'Při načítání stránky došlo k chybě. Zkuste to prosím znovu později.',
     dateFromAfterDateTo: 'Datum do musí být později než datum od',
+    unknownError: 'Neznámá chyba',
   },
   emptyStateTypes: {
     todos: 'Úkoly',
@@ -132,5 +139,23 @@ export const commonTranslations = {
     settings: 'Nastavení',
     committees: 'Komise',
     birthdays: 'Narozeniny',
+  },
+  logoutOverlay: {
+    title: 'Odhlašování...',
+    logoutError: 'Chyba při odhlašování',
+    progress: {
+      loggingOut: 'Zaznamenávání odhlášení...',
+      endingSession: 'Ukončování relace...',
+      preparingRedirect: 'Připravování přesměrování...',
+      finishing: 'Dokončování...',
+    },
+    responseMessages: {
+      successLogout: 'Úspěšně odhlášen. Přesměrovávám...',
+      networkError: 'Problém s připojením. Zkuste to znovu.',
+      authError: 'Problém s autentizací. Zkuste obnovit stránku.',
+      unknownError: 'Neznámá chyba při odhlašování.',
+      retryLogout: 'Klikněte na "Odhlásit" pro opakování pokusu.',
+      logoutError: 'Chyba při odhlašování.',
+    },
   },
 };

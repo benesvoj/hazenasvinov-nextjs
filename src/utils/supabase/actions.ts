@@ -5,7 +5,7 @@ import {redirect} from 'next/navigation';
 
 import {supabaseServerClient} from '@/utils/supabase/server';
 
-import {publicRoutes, privateRoutes} from '@/routes/routes';
+import {APP_ROUTES} from '@/lib';
 
 export async function login(formData: FormData) {
   const supabase = await supabaseServerClient();
@@ -19,10 +19,10 @@ export async function login(formData: FormData) {
   const {error} = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    redirect(publicRoutes.error);
+    redirect(APP_ROUTES.auth.error);
   }
-  revalidatePath(privateRoutes.admin, 'layout');
-  redirect(privateRoutes.admin);
+  revalidatePath(APP_ROUTES.admin.root, 'layout');
+  redirect(APP_ROUTES.admin.root);
 }
 
 export async function signup(formData: FormData) {
@@ -38,7 +38,7 @@ export async function signup(formData: FormData) {
   const {data: signupData, error} = await supabase.auth.signUp(data);
 
   if (error) {
-    redirect(publicRoutes.error);
+    redirect(APP_ROUTES.auth.error);
   }
 
   // If user was created successfully, ensure they have a profile
@@ -60,8 +60,8 @@ export async function signup(formData: FormData) {
     }
   }
 
-  revalidatePath(privateRoutes.admin, 'layout');
-  redirect(privateRoutes.admin);
+  revalidatePath(APP_ROUTES.admin.root, 'layout');
+  redirect(APP_ROUTES.admin.root);
 }
 
 export async function logout() {
@@ -70,9 +70,9 @@ export async function logout() {
   const {error} = await supabase.auth.signOut();
 
   if (error) {
-    redirect('/error');
+    redirect(APP_ROUTES.auth.error);
   }
 
-  revalidatePath(publicRoutes.login, 'layout');
-  redirect(publicRoutes.login);
+  revalidatePath(APP_ROUTES.auth.login, 'layout');
+  redirect(APP_ROUTES.auth.login);
 }

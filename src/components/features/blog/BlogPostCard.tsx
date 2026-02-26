@@ -11,6 +11,7 @@ import Link from '@/components/ui/link/Link';
 
 import {useAppDataSafe} from '@/contexts/AppDataContext';
 
+import {APP_ROUTES} from '@/lib';
 import {Blog, Category} from '@/types';
 
 interface BlogPostCardProps {
@@ -99,7 +100,7 @@ export default function BlogPostCard({
             {/* Read Button */}
             <Button
               as={Link}
-              href={`/blog/${post.slug}`}
+              href={APP_ROUTES.public.blogPost(post.slug)}
               size="sm"
               color="primary"
               variant="solid"
@@ -130,7 +131,7 @@ export default function BlogPostCard({
             />
           </div>
         ) : (
-          <div className="w-full h-48 mb-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg flex items-center justify-center">
+          <div className="w-full h-48 mb-4 bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg flex items-center justify-center">
             <div className="text-gray-400 text-4xl">📰</div>
           </div>
         )}
@@ -160,7 +161,7 @@ export default function BlogPostCard({
         {/* Read More Button */}
         <Button
           as={Link}
-          href={`/blog/${post.slug}`}
+          href={APP_ROUTES.public.blogPost(post.slug)}
           size="sm"
           color="primary"
           variant="solid"

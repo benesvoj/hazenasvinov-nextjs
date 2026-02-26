@@ -11,7 +11,9 @@ import {componentsTranslations} from './components';
 import {matchesTranslations} from './matches';
 import {meetingMinutesTranslations} from './meetingMinutes';
 import {membersTranslations} from './members';
+import {publicTranslations} from './public';
 import {seasonsTranslations} from './seasons';
+import {topBarTranslations} from './topBar';
 import {trainingSessionsTranslations} from './trainingSession';
 
 export const translations = {
@@ -30,4 +32,6 @@ export const translations = {
   trainingSessions: trainingSessionsTranslations,
   members: membersTranslations,
   meetingMinutes: meetingMinutesTranslations,
+  topBar: topBarTranslations,
+  public: publicTranslations,
 } as const;

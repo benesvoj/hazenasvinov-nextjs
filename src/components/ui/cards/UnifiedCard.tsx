@@ -165,7 +165,7 @@ export default function UnifiedCard({
           )}
           {!isLoading && emptyStateType ? (
             <CardBody className={fullWidth ? 'w-full' : ''}>
-              {renderEmptyState(emptyStateType, () => onPress)}
+              {renderEmptyState(emptyStateType, () => onPress?.())}
             </CardBody>
           ) : (
             <CardBody className={fullWidth ? 'w-full' : ''}>

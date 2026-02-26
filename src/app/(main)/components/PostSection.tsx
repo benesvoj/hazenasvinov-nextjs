@@ -10,7 +10,10 @@ import {useFetchBlogPostsPublished} from '@/hooks/entities/blog/data/useFetchBlo
 import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
 import {Link} from '@/components/ui';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
+
+import {APP_ROUTES} from '@/lib';
+import {hasItems} from '@/utils';
 
 export default function PostSection() {
   const {
@@ -24,10 +27,10 @@ export default function PostSection() {
       {/* Section Header with enhanced styling */}
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-          {translations.landingPage.posts.title}
+          {translations.public.landingPage.posts.title}
         </h2>
         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          {translations.landingPage.posts.description}
+          {translations.public.landingPage.posts.description}
         </p>
       </div>
 
@@ -49,7 +52,7 @@ export default function PostSection() {
                   <TagIcon className="w-8 h-8 text-red-500" />
                 </div>
                 <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
-                  {translations.landingPage.posts.errorPosts}
+                  {translations.public.landingPage.posts.errorPosts}
                 </h3>
                 <p className="text-red-600 dark:text-red-400 mb-4 max-w-md mx-auto">{postsError}</p>
                 <Button
@@ -58,7 +61,7 @@ export default function PostSection() {
                   onPress={() => window.location.reload()}
                   className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
                 >
-                  {translations.action.tryAgain}
+                  {translations.common.actions.tryAgain}
                 </Button>
               </CardBody>
             </Card>
@@ -77,16 +80,16 @@ export default function PostSection() {
                   <TagIcon className="w-8 h-8 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                  {translations.landingPage.posts.noPosts}
+                  {translations.public.landingPage.posts.noPosts}
                 </h3>
                 <Button
                   as={Link}
-                  href="/blog"
+                  href={APP_ROUTES.public.blog}
                   color="primary"
                   variant="bordered"
                   className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
                 >
-                  {translations.landingPage.posts.browsePostsButton}
+                  {translations.public.landingPage.posts.browsePostsButton}
                 </Button>
               </CardBody>
             </Card>
@@ -95,18 +98,18 @@ export default function PostSection() {
       </div>
 
       {/* Enhanced View All Button */}
-      {latestPosts && latestPosts.length > 0 && (
+      {hasItems(latestPosts) && (
         <div className="text-center mt-8">
           <Button
             as={Link}
-            href="/blog"
+            href={APP_ROUTES.public.blog}
             size="md"
             color="primary"
             variant="bordered"
             className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20"
             endContent={<ArrowRightIcon className="w-4 h-4" />}
           >
-            {translations.landingPage.posts.viewAllPostsButton}
+            {translations.public.landingPage.posts.viewAllPostsButton}
           </Button>
         </div>
       )}

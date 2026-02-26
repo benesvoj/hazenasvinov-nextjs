@@ -7,9 +7,8 @@ import {Tab, Tabs} from '@heroui/react';
 import {translations} from '@/lib/translations/index';
 
 import {UnifiedCard} from '@/components';
-import {EmptyStateTypes} from '@/enums';
 import {BaseTrainingSession} from '@/types';
-import {hasItems, isEmpty} from '@/utils';
+import {isEmpty} from '@/utils';
 
 import {TrainingSessionCard} from './components/TrainingSessionCard';
 import {segmentSessions, SessionSegment} from './utils/segmentSessions';
@@ -72,10 +71,9 @@ export const TrainingSessionList = ({
           selectedKey={activeSegment}
           onSelectionChange={(key) => setActiveSegment(key as SessionSegment)}
           aria-label={translations.trainingSessions.title}
-          items={tabs}
           size="sm"
         >
-          {(tab) => (
+          {tabs.map((tab) => (
             <Tab key={tab.id} title={tab.label}>
               <div className="space-y-2">
                 {isEmpty(tab.sessions) ? (
@@ -88,17 +86,17 @@ export const TrainingSessionList = ({
                       key={session.id}
                       session={session}
                       isToday={session.session_date === today}
-                      selectedSession={selectedSession}
                       onSelectedSession={onSelectedSession}
                       onStatusChange={onStatusChange}
                       onEditSession={onEditSession}
                       onDeleteSession={onDeleteSession}
+                      isSelected={selectedSession === session.id}
                     />
                   ))
                 )}
               </div>
             </Tab>
-          )}
+          ))}
         </Tabs>
       </UnifiedCard>
     </div>

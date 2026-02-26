@@ -5,7 +5,7 @@ import {type EmailOtpType} from '@supabase/supabase-js';
 
 import {supabaseServerClient} from '@/utils/supabase/server';
 
-import {publicRoutes} from '@/routes/routes';
+import {APP_ROUTES} from '@/lib';
 
 export async function GET(request: NextRequest) {
   const {searchParams} = new URL(request.url);
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const token = searchParams.get('token');
   const type = searchParams.get('type') as EmailOtpType | null;
-  const next = searchParams.get('next') ?? publicRoutes.home;
+  const next = searchParams.get('next') ?? APP_ROUTES.public.home;
 
   console.log('Auth confirm route called with:', {
     token_hash: token_hash ? 'present' : 'missing',
@@ -124,11 +124,11 @@ export async function GET(request: NextRequest) {
           if (type === 'recovery') {
             // Password reset - redirect to reset-password page
             console.log('Redirecting to reset-password page');
-            redirect('/reset-password');
+            redirect(APP_ROUTES.auth.resetPassword);
           } else if (type === 'signup' || type === 'invite') {
             // User invitation - redirect to set-password page
             console.log('Redirecting to set-password page');
-            redirect('/set-password');
+            redirect(APP_ROUTES.auth.setPassword);
           } else {
             // Other types - use the next parameter or default to home
             console.log('Redirecting to next:', next);
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
           error_code: error.status?.toString() || 'unknown',
           error_description: error.message,
         });
-        redirect(`/reset-password?${errorParams.toString()}`);
+        redirect(`${APP_ROUTES.auth.resetPassword}?${errorParams.toString()}`);
       }
     } catch (error) {
       // Check if this is a Next.js redirect (which throws NEXT_REDIRECT error)
@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
         error_code: 'server_error',
         error_description: error instanceof Error ? error.message : 'Unknown error',
       });
-      redirect(`/reset-password?${errorParams.toString()}`);
+      redirect(`${APP_ROUTES.auth.resetPassword}?${errorParams.toString()}`);
     }
   } else {
     console.log('Missing required parameters - condition failed:', {
@@ -207,5 +207,5 @@ export async function GET(request: NextRequest) {
     error_description:
       'The password reset link is missing required parameters. Please request a new password reset email.',
   });
-  redirect(`${publicRoutes.error}?${errorParams.toString()}`);
+  redirect(`${APP_ROUTES.auth.error}?${errorParams.toString()}`);
 }
