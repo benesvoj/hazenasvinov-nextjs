@@ -1,38 +1,28 @@
-import {useMemo} from 'react';
-
 import {renderOnLoanMemberCell} from '@/components/shared/members/config/memberCellRenderers';
 import {getOnLoanMemberColumns} from '@/components/shared/members/config/memberTableColumns';
+import {useCategoryMap} from '@/components/shared/members/hooks/useCategoryMap';
+
+import {translations} from '@/lib/translations/index';
 
 import {MemberTableTab} from '@/components';
 import {useFetchMembersOnLoan} from '@/hooks';
-import {translations} from '@/lib';
 import {MemberOnLoan} from '@/types';
 
 interface MembersOnLoanTabProps {
   categoriesData: Record<string, string> | null;
   openEdit: (member: MemberOnLoan) => void;
   openDelete: (member: MemberOnLoan) => void;
-  openDetail: (member: MemberOnLoan) => void;
 }
 
-export const MembersOnLoanTab = ({
-  categoriesData,
-  openEdit,
-  openDelete,
-  openDetail,
-}: MembersOnLoanTabProps) => {
+export const MembersOnLoanTab = ({categoriesData, openEdit, openDelete}: MembersOnLoanTabProps) => {
   const t = translations.members;
   const {data, loading} = useFetchMembersOnLoan();
 
-  const categories = useMemo(() => {
-    if (!categoriesData) return {};
-    return categoriesData;
-  }, [categoriesData]);
+  const categories = useCategoryMap(categoriesData);
 
   const columns = getOnLoanMemberColumns(t, {
     onEdit: openEdit,
     onDelete: openDelete,
-    onDetail: openDetail,
   });
 
   const renderCell = (member: MemberOnLoan, columnKey: string) =>

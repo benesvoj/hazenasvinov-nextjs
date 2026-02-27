@@ -4,17 +4,15 @@ import {Button, Input, Select, SelectItem} from '@heroui/react';
 
 import {MagnifyingGlassIcon, TrashIcon} from '@heroicons/react/24/outline';
 
-import {MemberFilters} from '@/types/entities/member/data/memberWithPaymentStatus';
-
 import {Genders, getMemberFunctionOptions} from '@/enums';
 import {translations} from '@/lib';
-import {Category} from '@/types';
+import {Category, MemberTableFilters} from '@/types';
 
 interface MembersListFiltersProps {
   searchTerm: string;
   onSearchChange: (term: string) => void;
-  filters: MemberFilters;
-  onFiltersChange: (filters: MemberFilters) => void;
+  filters: MemberTableFilters;
+  onFiltersChange: (filters: MemberTableFilters) => void;
   onClearFilters: () => void;
   categories: Category[];
 }

@@ -21,11 +21,11 @@ import {PencilIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
+import {PaymentFormModal} from '@/components/shared/members/modals';
+
 import {DeleteConfirmationModal} from '@/components';
 import {useMemberPayments} from '@/hooks';
 import {BaseMember, MembershipFeePayment} from '@/types';
-
-import PaymentFormModal from './PaymentFormModal';
 
 interface MemberPaymentsTabProps {
   member: BaseMember;
@@ -190,6 +190,7 @@ export default function MemberPaymentsTab({member}: MemberPaymentsTabProps) {
 
       {/* Modals */}
       <PaymentFormModal
+        key={selectedPayment?.id ?? 'new'}
         isOpen={modal.isOpen}
         onClose={modal.onClose}
         payment={selectedPayment}

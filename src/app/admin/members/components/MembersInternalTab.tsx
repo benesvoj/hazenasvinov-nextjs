@@ -1,13 +1,14 @@
-import React, {useMemo} from 'react';
+import React from 'react';
 
 import {renderInternalMemberCell} from '@/components/shared/members/config/memberCellRenderers';
 import {getInternalMemberColumns} from '@/components/shared/members/config/memberTableColumns';
+import {useCategoryMap} from '@/components/shared/members/hooks/useCategoryMap';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 import {MemberTableTab} from '@/components';
 import {useFetchMembersInternal} from '@/hooks';
-import {Category, MemberFilters, MemberInternal} from '@/types';
+import {Category, MemberInternal, MemberTableFilters} from '@/types';
 
 interface MembersListTabProps {
   categoriesData: Category[] | null;
@@ -18,7 +19,7 @@ interface MembersListTabProps {
   selectedMembers: Set<string>;
   setSelectedMembers: React.Dispatch<React.SetStateAction<Set<string>>>;
   searchTerm: string;
-  filters: MemberFilters;
+  filters: MemberTableFilters;
 }
 
 export const MembersInternalTab = ({
@@ -38,25 +39,11 @@ export const MembersInternalTab = ({
 
   const t = translations.members;
 
-  const categories = useMemo(() => {
-    if (!categoriesData) return {};
-    // Convert if it's an array, otherwise use as-is
-    if (Array.isArray(categoriesData)) {
-      return categoriesData.reduce(
-        (acc, category) => {
-          acc[category.id] = category.name;
-          return acc;
-        },
-        {} as Record<string, string>
-      );
-    }
-    return categoriesData;
-  }, [categoriesData]);
-
+  const categories = useCategoryMap(categoriesData);
   const columns = getInternalMemberColumns(t, {
     onPayment: openPayment,
     onDelete: openDelete,
-    onDetail: openDetail,
+    onEdit: openDetail,
   });
 
   const renderCell = (member: MemberInternal, columnKey: string) =>

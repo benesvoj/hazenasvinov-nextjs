@@ -58,6 +58,7 @@ export * from './entities/member/data/baseMember';
 export * from './entities/member/data/externalPlayer';
 export * from './entities/member/data/member';
 export * from './entities/member/data/memberExternal';
+export * from './entities/member/data/memberFilters';
 export * from './entities/member/data/memberInternal';
 export * from './entities/member/data/memberMetadata';
 export * from './entities/member/data/memberOnLoan';

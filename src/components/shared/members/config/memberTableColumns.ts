@@ -20,7 +20,7 @@ export const getInternalMemberColumns = (
   actions: {
     onPayment: (member: MemberInternal) => void;
     onDelete: (member: MemberInternal) => void;
-    onDetail: (member: MemberInternal) => void;
+    onEdit: (member: MemberInternal) => void;
   }
 ): ColumnType<MemberInternal>[] => {
   return [
@@ -33,7 +33,7 @@ export const getInternalMemberColumns = (
       isActionColumn: true,
       actions: [
         {type: ActionTypes.PAYMENT, onPress: actions.onPayment},
-        {type: ActionTypes.UPDATE, onPress: actions.onDetail},
+        {type: ActionTypes.UPDATE, onPress: actions.onEdit},
         {type: ActionTypes.DELETE, onPress: actions.onDelete},
       ],
     },
@@ -46,7 +46,6 @@ export const getExternalMemberColumns = (
   actions: {
     onEdit: (member: MemberExternal) => void;
     onDelete: (member: MemberExternal) => void;
-    onDetail: (member: MemberExternal) => void;
   }
 ): ColumnType<MemberExternal>[] => {
   return [
@@ -58,7 +57,6 @@ export const getExternalMemberColumns = (
       align: ColumnAlignType.CENTER,
       isActionColumn: true,
       actions: [
-        {type: ActionTypes.READ, onPress: actions.onDetail},
         {type: ActionTypes.UPDATE, onPress: actions.onEdit},
         {type: ActionTypes.DELETE, onPress: actions.onDelete},
       ],
@@ -72,7 +70,6 @@ export const getOnLoanMemberColumns = (
   actions: {
     onEdit: (member: MemberOnLoan) => void;
     onDelete: (member: MemberOnLoan) => void;
-    onDetail: (member: MemberOnLoan) => void;
   }
 ): ColumnType<MemberOnLoan>[] => {
   return [
@@ -86,7 +83,6 @@ export const getOnLoanMemberColumns = (
       align: ColumnAlignType.CENTER,
       isActionColumn: true,
       actions: [
-        {type: ActionTypes.READ, onPress: actions.onDetail},
         {type: ActionTypes.UPDATE, onPress: actions.onEdit},
         {type: ActionTypes.DELETE, onPress: actions.onDelete},
       ],

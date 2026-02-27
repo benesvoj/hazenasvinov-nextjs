@@ -4,8 +4,9 @@
  */
 import React from 'react';
 
+import {translations} from '@/lib/translations/index';
+
 import {UnifiedTable} from '@/components';
-import {translations} from '@/lib';
 import {ColumnType} from '@/types';
 
 interface MemberTableTabProps<T> {

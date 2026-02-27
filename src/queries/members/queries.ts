@@ -4,7 +4,7 @@ import {Member} from '@/types';
 
 import {QueryResult} from '../shared/types';
 
-import {MemberWithRelations, GetMembersOptions, MemberFilters} from './types';
+import {GetMembersOptions, MemberWithRelations} from './types';
 
 /**
  * Get all members with optional filtering and sorting

@@ -1,27 +1,25 @@
-// TODO: hooks
-
 'use client';
-import React, {useMemo, useState} from 'react';
+
+import React, {useState} from 'react';
+
+import {useModalWithItem} from '@/hooks/shared/useModals';
+
+import {useCategoryMap} from '@/components/shared/members/hooks/useCategoryMap';
+import {MembersInternalSection} from '@/components/shared/members/MembersInternalSection';
+import {MemberModal, PaymentFormModal} from '@/components/shared/members/modals';
 
 import {translations} from '@/lib/translations/index';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
-import {
-  MembersExternalTab,
-  MembersInternalTab,
-  MembersOnLoanTab,
-} from '@/app/admin/members/components';
+import {MembersExternalTab, MembersOnLoanTab} from '@/app/admin/members/components';
 import BulkEditModal from '@/app/admin/members/components/BulkEditModal';
-import MemberDetailModal from '@/app/admin/members/components/MemberDetailModal';
-import MemberFormModal from '@/app/admin/members/components/MemberFormModal';
 import MembersCsvImport from '@/app/admin/members/components/MembersCsvImport';
 import {MembersListFilters} from '@/app/admin/members/components/MembersListFilters';
 import MembersStatisticTab from '@/app/admin/members/components/MembersStatisticTab';
-import PaymentFormModal from '@/app/admin/members/components/PaymentFormModal';
 
 import {AdminContainer, DeleteConfirmationModal} from '@/components';
-import {ActionTypes, Genders, ModalMode} from '@/enums';
+import {ActionTypes, Genders} from '@/enums';
 import {
   useBulkEditMembers,
   useFetchMembersExternal,
@@ -30,26 +28,40 @@ import {
   useMemberModals,
   useMembers,
 } from '@/hooks';
-import {BaseMember, MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
+import {
+  BaseMember,
+  Member,
+  MemberExternal,
+  MemberInternal,
+  MemberOnLoan,
+  MemberTableFilters,
+} from '@/types';
 import {genderOptions} from '@/utils';
+
+const FILTER_DEFAULTS = {
+  sex: '',
+  category_id: '',
+  function: '',
+};
+
+const BULK_DEFAULTS = {
+  sex: Genders.EMPTY,
+  category: '',
+  functions: [] as string[],
+};
 
 export default function MembersAdminPage() {
   const t = translations.members;
 
   const [activeTab, setActiveTab] = useState('members-internal');
+  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
+  const [bulkEditFormData, setBulkEditFormData] = useState(BULK_DEFAULTS);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<MemberTableFilters>(FILTER_DEFAULTS);
 
-  const shouldFetchInternal = activeTab === 'members-internal';
-  const shouldFetchExternal = activeTab === 'members-external';
-  const shouldFetchOnLoan = activeTab === 'members-on-loan';
-
-  const genderOpts = genderOptions;
-
-  // Use AppDataContext for members and category data
   const {
-    categories: {data: categories},
+    categories: {data: categoriesData},
   } = useAppData();
-
-  // Add hooks for all three tab types (for refresh functionality)
   const {
     data: membersInternalData,
     refresh: refreshInternal,
@@ -57,145 +69,83 @@ export default function MembersAdminPage() {
   } = useFetchMembersInternal();
   const {refresh: refreshExternal, loading: membersExternalLoading} = useFetchMembersExternal();
   const {refresh: refreshOnLoan, loading: membersOnLoanLoading} = useFetchMembersOnLoan();
-
-  const anyLoading = membersInternalLoading || membersExternalLoading || membersOnLoanLoading;
-
-  // CRUD operations
   const {createMember, updateMember, deleteMember} = useMembers();
-
-  // Filter state for the members list
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [filters, setFilters] = React.useState({
-    sex: '',
-    category_id: '',
-    function: '',
-  });
-
-  const clearFilters = () => {
-    setSearchTerm('');
-    setFilters({sex: '', category_id: '', function: ''});
-  };
-
-  // Modal state
-  const {
-    addModal,
-    paymentModal,
-    editModal,
-    deleteModal,
-    detailModal,
-    bulkEditModal,
-    modalContext, // Get the context
-    openAdd,
-    openPayment,
-    openEdit: openEditBase,
-    openDelete: openDeleteBase,
-    openDetail: openDetailBase,
-    openBulkEdit,
-    selectedMember,
-    selectedMembers,
-    setSelectedMembers,
-    formData,
-    setFormData,
-    bulkEditFormData,
-    setBulkEditFormData,
-  } = useMemberModals<BaseMember>({
-    onSuccess: () => {
-      // Use context to refresh correct tab
-      if (modalContext === 'internal') refreshInternal();
-      else if (modalContext === 'external') refreshExternal();
-      else if (modalContext === 'on_loan') refreshOnLoan();
-    },
-  });
-
-  const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState(currentYear);
-
-  // Context-aware wrappers for each tab
-  const openPaymentInternal = (member: MemberInternal) => {
-    openPayment(member as BaseMember, 'internal');
-  };
-  const openEditInternal = (member: MemberInternal) =>
-    openEditBase(member as BaseMember, 'internal');
-  const openDeleteInternal = (member: MemberInternal) => {
-    openDeleteBase(member as BaseMember, 'internal');
-  };
-  const openDetailInternal = (member: MemberInternal) => {
-    openDetailBase(member as BaseMember, 'internal');
-  };
-
-  const openEditExternal = (member: MemberExternal) =>
-    openEditBase(member as BaseMember, 'external');
-  const openDeleteExternal = (member: MemberExternal) => {
-    openDeleteBase(member as BaseMember, 'external');
-  };
-  const openDetailExternal = (member: MemberExternal) => {
-    openDetailBase(member as BaseMember, 'external');
-  };
-
-  const openEditOnLoan = (member: MemberOnLoan) => openEditBase(member as BaseMember, 'on_loan');
-  const openDeleteOnLoan = (member: MemberOnLoan) => {
-    openDeleteBase(member as BaseMember, 'on_loan');
-  };
-  const openDetailOnLoan = (member: MemberOnLoan) => {
-    openDetailBase(member as BaseMember, 'on_loan');
-  };
-
-  // Bulk edit operation
+  const modals = useMemberModals<BaseMember>();
+  const memberModal = useModalWithItem<Member>();
   const {bulkEditMembers} = useBulkEditMembers({
     onSuccess: refreshInternal,
   });
 
-  // Handlers
-  const handleAddMember = async () => {
-    // Extract only MemberFormData fields, convert null to undefined
-    const memberFormData = {
-      name: formData.name,
-      surname: formData.surname,
-      registration_number: formData.registration_number ?? '',
-      date_of_birth: formData.date_of_birth ?? undefined,
-      sex: formData.sex ?? Genders.MALE,
-      functions: formData.functions ?? [],
-    };
+  const anyLoading = membersInternalLoading || membersExternalLoading || membersOnLoanLoading;
+  const genderOpts = genderOptions;
+  const shouldFetchInternal = activeTab === 'members-internal';
+  const shouldFetchExternal = activeTab === 'members-external';
+  const shouldFetchOnLoan = activeTab === 'members-on-loan';
+  const categoriesMap = useCategoryMap(categoriesData);
+  const defaultYear = new Date().getFullYear();
 
-    await createMember(memberFormData, formData.category_id ?? undefined);
-
-    addModal.onClose();
-
-    refreshInternal();
+  const clearFilters = () => {
+    setSearchTerm('');
+    setFilters(FILTER_DEFAULTS);
   };
 
-  const handleUpdateMember = async () => {
-    if (!selectedMember) return;
+  const openPaymentInternal = (member: MemberInternal) =>
+    modals.paymentModal.openWith(member as BaseMember);
+  const openDeleteInternal = (member: MemberInternal) =>
+    modals.deleteModal.openWith(member as BaseMember);
 
-    await updateMember({
-      id: selectedMember.id,
-      name: formData.name,
-      surname: formData.surname,
-      registration_number: formData.registration_number ?? undefined,
-      date_of_birth: formData.date_of_birth ?? undefined,
-      sex: formData.sex ?? undefined,
-      functions: formData.functions ?? undefined,
-      category_id: formData.category_id ?? undefined,
-      is_active: formData.is_active ?? undefined,
-    });
+  const openEditExternal = (member: MemberExternal) =>
+    memberModal.openWith(member as unknown as Member);
+  const openDeleteExternal = (member: MemberExternal) =>
+    modals.deleteModal.openWith(member as BaseMember);
 
-    editModal.onClose();
-    detailModal.onClose();
+  const openEditOnLoan = (member: MemberOnLoan) =>
+    memberModal.openWith(member as unknown as Member);
+  const openDeleteOnLoan = (member: MemberOnLoan) =>
+    modals.deleteModal.openWith(member as BaseMember);
 
-    // Context determines which tab to refresh
-    if (modalContext === 'internal') refreshInternal();
-    else if (modalContext === 'external') refreshExternal();
-    else if (modalContext === 'on_loan') refreshOnLoan();
+  const handleMemberSuccess = async (data: Member) => {
+    if (memberModal.isEditMode) {
+      await updateMember({
+        id: memberModal.selectedItem!.id!,
+        name: data.name,
+        surname: data.surname,
+        registration_number: data.registration_number ?? undefined,
+        date_of_birth: data.date_of_birth ?? undefined,
+        sex: data.sex ?? undefined,
+        functions: data.functions ?? undefined,
+        category_id: data.category_id ?? undefined,
+        is_active: data.is_active ?? undefined,
+      });
+    } else {
+      await createMember(
+        {
+          name: data.name,
+          surname: data.surname,
+          registration_number: data.registration_number ?? '',
+          date_of_birth: data.date_of_birth ?? undefined,
+          sex: data.sex ?? Genders.MALE,
+          functions: data.functions ?? [],
+        },
+        data.category_id ?? undefined
+      );
+    }
+
+    memberModal.closeAndClear();
+
+    if (activeTab === 'members-internal') refreshInternal();
+    else if (activeTab === 'members-external') refreshExternal();
+    else if (activeTab === 'members-on-loan') refreshOnLoan();
   };
 
   const handleDeleteMember = async () => {
-    if (!selectedMember) return;
-    await deleteMember(selectedMember.id);
-    deleteModal.onClose();
+    if (!modals.deleteModal.selectedItem) return;
+    await deleteMember(modals.deleteModal.selectedItem.id);
+    modals.deleteModal.closeAndClear();
 
-    if (modalContext === 'internal') refreshInternal();
-    else if (modalContext === 'external') refreshExternal();
-    else if (modalContext === 'on_loan') refreshOnLoan();
+    if (activeTab === 'members-internal') refreshInternal();
+    else if (activeTab === 'members-external') refreshExternal();
+    else if (activeTab === 'members-on-loan') refreshOnLoan();
   };
 
   const handleBulkEdit = async () => {
@@ -203,21 +153,10 @@ export default function MembersAdminPage() {
 
     if (success) {
       setSelectedMembers(new Set());
-      setBulkEditFormData({sex: Genders.EMPTY, category: '', functions: []});
-      bulkEditModal.onClose();
+      setBulkEditFormData(BULK_DEFAULTS);
+      modals.bulkEditModal.onClose();
     }
   };
-
-  const categoriesMap = useMemo(() => {
-    if (!categories) return {};
-    return categories.reduce(
-      (acc, cat) => {
-        acc[cat.id] = cat.name;
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-  }, [categories]);
 
   return (
     <>
@@ -228,16 +167,17 @@ export default function MembersAdminPage() {
             key: 'members-internal',
             title: t.tabs.members,
             content: shouldFetchInternal ? (
-              <MembersInternalTab
-                categoriesData={categories}
-                sexOptions={genderOpts}
-                openPayment={openPaymentInternal}
-                openDelete={openDeleteInternal}
-                openDetail={openDetailInternal}
-                selectedMembers={selectedMembers}
-                setSelectedMembers={setSelectedMembers}
+              <MembersInternalSection
+                categoriesData={categoriesData}
+                ariaLabel={'members-internal-table'}
                 searchTerm={searchTerm}
                 filters={filters}
+                onPayment={openPaymentInternal}
+                onEdit={(member) => memberModal.openWith(member as unknown as Member)}
+                onDelete={openDeleteInternal}
+                enableSelection
+                selectedItems={selectedMembers}
+                onSelectionChange={(keys) => setSelectedMembers(keys as unknown as Set<string>)}
               />
             ) : null,
             filters: (
@@ -247,7 +187,7 @@ export default function MembersAdminPage() {
                 filters={filters}
                 onFiltersChange={setFilters}
                 onClearFilters={clearFilters}
-                categories={categories}
+                categories={categoriesData}
               />
             ),
             actions: [
@@ -257,7 +197,7 @@ export default function MembersAdminPage() {
                 color: 'secondary',
                 variant: 'solid',
                 isDisabled: selectedMembers.size === 0,
-                onClick: () => openBulkEdit(),
+                onClick: () => modals.bulkEditModal.onOpen(),
               },
               {
                 label: 'Import CSV',
@@ -265,7 +205,6 @@ export default function MembersAdminPage() {
                 color: 'secondary',
                 variant: 'flat',
                 onClick: () => {
-                  // This will be handled by the MembersCsvImport modal component
                   // TODO: find better solution than use DOM elements
                   document.getElementById('csv-import-trigger')?.click();
                 },
@@ -273,10 +212,10 @@ export default function MembersAdminPage() {
               },
               {
                 label: t.buttons.addMember,
-                onClick: () => openAdd(),
                 color: 'primary',
                 variant: 'solid',
                 buttonType: ActionTypes.CREATE,
+                onClick: () => memberModal.openEmpty(),
               },
             ],
           },
@@ -288,7 +227,6 @@ export default function MembersAdminPage() {
                 categoriesData={categoriesMap}
                 openEdit={openEditOnLoan}
                 openDelete={openDeleteOnLoan}
-                openDetail={openDetailOnLoan}
               />
             ) : null,
           },
@@ -300,7 +238,6 @@ export default function MembersAdminPage() {
                 categoriesData={categoriesMap}
                 openEdit={openEditExternal}
                 openDelete={openDeleteExternal}
-                openDetail={openDetailExternal}
               />
             ) : null,
           },
@@ -308,7 +245,7 @@ export default function MembersAdminPage() {
             key: 'statistics',
             title: t.tabs.statistics,
             content: (
-              <MembersStatisticTab members={membersInternalData} categoriesData={categories} />
+              <MembersStatisticTab members={membersInternalData} categoriesData={categoriesData} />
             ),
           },
         ]}
@@ -316,70 +253,51 @@ export default function MembersAdminPage() {
         onTabChange={setActiveTab}
       />
 
-      {selectedMember && (
+      {modals.paymentModal.isOpen && modals.paymentModal.selectedItem && (
         <PaymentFormModal
-          isOpen={paymentModal.isOpen}
-          onClose={paymentModal.onClose}
-          member={selectedMember}
+          key={modals.paymentModal.selectedItem?.id ?? 'payment-new'}
+          isOpen={modals.paymentModal.isOpen}
+          onClose={modals.paymentModal.onClose}
+          member={modals.paymentModal.selectedItem}
           payment={null}
-          defaultYear={selectedYear}
+          defaultYear={defaultYear}
           onSuccess={refreshInternal}
         />
       )}
 
-      {/* Modals */}
-      <MemberFormModal
-        isOpen={addModal.isOpen}
-        onClose={addModal.onClose}
-        onSubmit={handleAddMember}
-        formData={formData}
-        setFormData={setFormData}
-        categories={categories || []}
-        sexOptions={genderOpts}
-        isEditMode={false}
-      />
-
-      <MemberDetailModal
-        isOpen={detailModal.isOpen}
-        onClose={detailModal.onClose}
-        formData={formData as BaseMember}
-        setFormData={(data: BaseMember) => setFormData(data as any)}
-        mode={ModalMode.EDIT}
-        onSubmit={handleUpdateMember}
+      <MemberModal
+        key={memberModal.selectedItem?.id ?? 'new'}
+        isOpen={memberModal.isOpen}
+        onClose={memberModal.closeAndClear}
+        member={memberModal.selectedItem}
+        categories={categoriesData || []}
+        onSuccess={handleMemberSuccess}
+        showPaymentsTab={activeTab === 'members-internal'}
       />
 
       <DeleteConfirmationModal
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        isOpen={modals.deleteModal.isOpen}
+        onClose={modals.deleteModal.onClose}
         onConfirm={handleDeleteMember}
         title={t.modals.deleteMember}
         message={t.modals.deleteMemberMessage}
       />
 
       <BulkEditModal
-        isOpen={bulkEditModal.isOpen}
-        onClose={bulkEditModal.onClose}
+        isOpen={modals.bulkEditModal.isOpen}
+        onClose={modals.bulkEditModal.onClose}
         onSubmit={handleBulkEdit}
         selectedCount={selectedMembers.size}
         formData={bulkEditFormData}
         setFormData={setBulkEditFormData}
-        categories={categories || []}
+        categories={categoriesData || []}
         isLoading={anyLoading}
       />
 
-      {/* CSV Import - Hidden trigger */}
       <div className="hidden">
         <MembersCsvImport
           onImportComplete={() => refreshInternal()}
-          categories={
-            categories?.reduce(
-              (acc, cat) => {
-                acc[cat.id] = cat.name;
-                return acc;
-              },
-              {} as Record<string, string>
-            ) || {}
-          }
+          categories={categoriesMap}
           sexOptions={genderOpts}
         />
       </div>

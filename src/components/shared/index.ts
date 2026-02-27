@@ -5,8 +5,11 @@
 export {default as ContactsSection} from './contacts-section/ContactsSection';
 export * from './match';
 export {MemberTableTab} from './members/MemberTableTab';
+export {MembersInternalSection} from './members/MembersInternalSection';
 export * from './members/config/memberCellRenderers';
 export * from './members/config/memberTableColumns';
+export {useCategoryMap} from './members/hooks/useCategoryMap';
+export * from './members/modals';
 export {default as UnifiedPlayerManager} from './player-manager/UnifiedPlayerManager';
 export {default as ProfileCard} from './profile-card/ProfileCard';
 export {default as UnifiedStandingTable} from './standing-table/UnifiedStandingTable';

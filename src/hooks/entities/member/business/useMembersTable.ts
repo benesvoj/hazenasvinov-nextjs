@@ -3,13 +3,13 @@ import {useState, useMemo} from 'react';
 
 import {Genders, MemberFunction} from '@/enums';
 import {useDebounce} from '@/hooks';
-import {MemberWithPaymentStatus, MemberFilters, MemberSortDescriptor} from '@/types';
+import {MemberWithPaymentStatus, MemberSortDescriptor, MemberTableFilters} from '@/types';
 
 const ROWS_PER_PAGE = 10;
 
 export const useMembersTable = (members: MemberWithPaymentStatus[]) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState<MemberFilters>({
+  const [filters, setFilters] = useState<MemberTableFilters>({
     sex: Genders.EMPTY,
     category_id: '',
     function: '',

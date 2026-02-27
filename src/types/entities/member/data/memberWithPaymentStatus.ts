@@ -22,12 +22,6 @@ export interface MemberWithPaymentStatus extends Member {
   currency: string;
 }
 
-export type MemberFilters = {
-  sex: string;
-  category_id: string;
-  function: string;
-};
-
 export type MemberSortDescriptor = {
   column: string;
   direction: 'ascending' | 'descending';
