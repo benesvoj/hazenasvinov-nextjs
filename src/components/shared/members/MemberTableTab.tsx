@@ -22,7 +22,7 @@ interface MemberTableTabProps<T> {
   // Optional features
   enableSelection?: boolean;
   selectedItems?: Set<string>;
-  onSelectionChange?: (keys: Selection) => void;
+  onSelectionChange?: (keys: Set<string>) => void;
 
   // Pagination (server-side)
   pagination?: {
@@ -30,12 +30,6 @@ interface MemberTableTabProps<T> {
     total: number | null;
   };
   onPageChange?: (page: number) => void;
-
-  // Actions (optional)
-  onPayment?: (item: T) => void;
-  openEdit?: (item: T) => void;
-  openDelete?: (item: T) => void;
-  openDetail?: (item: T) => void;
 }
 
 export const MemberTableTab = <T,>({
@@ -79,9 +73,9 @@ export const MemberTableTab = <T,>({
                 if (keys === 'all') {
                   // Handle 'all' selection - convert to Set of all IDs
                   const allIds = new Set(data.map((item) => (item as any).id));
-                  onSelectionChange(allIds as any as Selection);
+                  onSelectionChange(allIds);
                 } else {
-                  onSelectionChange(keys as unknown as Selection);
+                  onSelectionChange(keys as Set<string>);
                 }
               }
             : undefined

@@ -12,3 +12,4 @@ export * from './getCategoryMatchweek';
 export * from './monthUtils';
 export * from './attendance/helpers';
 export * from './dateRangeGenerator';
+export * from './currentYear';

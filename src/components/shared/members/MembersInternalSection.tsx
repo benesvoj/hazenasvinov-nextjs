@@ -24,7 +24,7 @@ interface MembersInternalSectionProps {
   // Selection (admin-only feature)
   enableSelection?: boolean;
   selectedItems?: Set<string>;
-  onSelectionChange?: (keys: Selection) => void;
+  onSelectionChange?: (keys: Set<string>) => void;
 
   // Aria
   ariaLabel: string;

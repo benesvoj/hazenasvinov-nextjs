@@ -71,6 +71,7 @@ export * from './entities/member/business/useBulkEditMembers';
 export * from './entities/member/business/useMemberClubRelationships';
 export * from './entities/member/business/useMemberMetadata';
 export * from './entities/member/business/useMemberModals';
+export * from './entities/member/business/useMemberSave';
 export * from './entities/member/business/useMembersTable';
 export * from './entities/member/data/useFetchMembers';
 export * from './entities/member/data/useFetchMembersExternal';

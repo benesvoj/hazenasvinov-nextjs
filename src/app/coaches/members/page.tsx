@@ -1,32 +1,33 @@
 'use client';
 
-import {useCategoryMap} from '@/components/shared/members/hooks/useCategoryMap';
+import React, {useState} from 'react';
 
 import {translations} from '@/lib/translations/index';
 
+import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
+
 import {
-  getInternalMemberColumns,
-  MemberTableTab,
+  DeleteConfirmationModal,
+  MemberModal,
+  MembersInternalSection,
   PageContainer,
-  renderInternalMemberCell,
+  PaymentFormModal,
 } from '@/components';
 import {useAppData} from '@/contexts';
-import {useFetchMembersInternal, useMemberModals} from '@/hooks';
-import {MemberInternal} from '@/types';
+import {currentYear} from '@/helpers';
+import {useMemberModals, useMembers, useMemberSave, useModalWithItem} from '@/hooks';
+import {BaseMember, Member, MemberInternal} from '@/types';
 
 export default function CoachesMembersPage() {
-  const t = translations.members;
+  const [refreshKey, setRefreshKey] = useState(0);
   const {
     categories: {data: categoriesData},
   } = useAppData();
-
-  const {
-    data: membersInternalData,
-    refresh: refreshInternal,
-    loading: membersInternalLoading,
-  } = useFetchMembersInternal();
-
+  const {selectedCategory} = useCoachCategory();
   const modals = useMemberModals<MemberInternal>();
+  const memberModal = useModalWithItem<Member>();
+  const {deleteMember} = useMembers();
+  const {handleSave} = useMemberSave(memberModal, () => setRefreshKey((k) => k + 1));
 
   const openDeleteInternal = (member: MemberInternal) => {
     modals.deleteModal.openWith(member);
@@ -35,25 +36,54 @@ export default function CoachesMembersPage() {
     modals.paymentModal.openWith(member);
   };
 
-  const columns = getInternalMemberColumns(t, {
-    onPayment: openPaymentInternal,
-    onDelete: openDeleteInternal,
-    onEdit: modals.editModal.openWith,
-  });
+  const handleDeleteMember = async () => {
+    const selectedItem = modals.deleteModal.selectedItem;
+    if (!selectedItem?.id) return;
 
-  const categories = useCategoryMap(categoriesData);
-
-  const renderCell = (member: MemberInternal, columnKey: string) =>
-    renderInternalMemberCell(member, columnKey, categories);
+    await deleteMember(selectedItem.id);
+    modals.deleteModal.closeAndClear();
+    setRefreshKey((k) => k + 1);
+  };
 
   return (
     <PageContainer>
-      <MemberTableTab<MemberInternal>
-        data={membersInternalData}
-        loading={membersInternalLoading}
-        columns={columns}
-        renderCell={renderCell}
-        ariaLabel={t.table.ariaLabel}
+      <MembersInternalSection
+        key={refreshKey}
+        categoriesData={categoriesData}
+        categoryId={selectedCategory}
+        ariaLabel={translations.members.table.ariaLabel}
+        onEdit={(member) => memberModal.openWith(member as unknown as Member)}
+        onPayment={openPaymentInternal}
+        onDelete={openDeleteInternal}
+      />
+
+      <MemberModal
+        key={memberModal.selectedItem?.id ?? 'new'}
+        isOpen={memberModal.isOpen}
+        onClose={memberModal.closeAndClear}
+        member={memberModal.selectedItem}
+        categories={categoriesData || []}
+        onSuccess={handleSave}
+      />
+
+      {modals.paymentModal.isOpen && modals.paymentModal.selectedItem && (
+        <PaymentFormModal
+          key={modals.paymentModal.selectedItem?.id ?? 'payment-new'}
+          isOpen={modals.paymentModal.isOpen}
+          onClose={modals.paymentModal.onClose}
+          member={modals.paymentModal.selectedItem as BaseMember}
+          payment={null}
+          defaultYear={currentYear}
+          onSuccess={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
+
+      <DeleteConfirmationModal
+        isOpen={modals.deleteModal.isOpen}
+        onClose={modals.deleteModal.onClose}
+        onConfirm={handleDeleteMember}
+        title={translations.members.modals.deleteMember}
+        message={translations.members.modals.deleteMemberMessage}
       />
     </PageContainer>
   );
