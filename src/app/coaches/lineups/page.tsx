@@ -3,14 +3,14 @@
 
 import React, {useEffect, useState} from 'react';
 
-import {Card, CardBody, Spinner, Tab, Tabs} from '@heroui/react';
+import {Spinner, Tab, Tabs} from '@heroui/react';
 
 import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
 import {useModalWithItem} from '@/hooks/shared/useModals';
 
 import {LineupMembers, LineupModal, LineupsList} from '@/app/coaches/lineups/components';
 
-import {DeleteConfirmationModal, PageContainer} from '@/components';
+import {DeleteConfirmationModal, PageContainer, Show, UnifiedCard} from '@/components';
 import {useUser} from '@/contexts';
 import {ModalMode} from '@/enums';
 import {
@@ -23,6 +23,7 @@ import {
 } from '@/hooks';
 import {translations} from '@/lib';
 import {CategoryLineup} from '@/types';
+import {hasMoreThanOne} from '@/utils';
 
 interface DeleteItem {
   type: 'lineup' | 'member';
@@ -172,25 +173,20 @@ export default function CoachesLineupsPage() {
   return (
     <>
       <PageContainer>
-        {/* Category Tabs */}
-        {userCategories.length > 1 && (
-          <Card className="mb-6">
-            <CardBody>
-              <div className="overflow-x-auto">
-                <Tabs
-                  selectedKey={selectedCategory}
-                  onSelectionChange={(key) => setSelectedCategory(key as string)}
-                  className="w-full min-w-max"
-                >
-                  {userCategories.map((categoryId) => {
-                    const category = categories.find((c) => c.id === categoryId);
-                    return <Tab key={categoryId} title={category?.name || categoryId} />;
-                  })}
-                </Tabs>
-              </div>
-            </CardBody>
-          </Card>
-        )}
+        <Show when={hasMoreThanOne(userCategories)}>
+          <UnifiedCard padding={'none'}>
+            <Tabs
+              selectedKey={selectedCategory}
+              onSelectionChange={(key) => setSelectedCategory(key as string)}
+              className="w-full min-w-max"
+            >
+              {userCategories.map((categoryId) => {
+                const category = categories.find((c) => c.id === categoryId);
+                return <Tab key={categoryId} title={category?.name || categoryId} />;
+              })}
+            </Tabs>
+          </UnifiedCard>
+        </Show>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <LineupsList
