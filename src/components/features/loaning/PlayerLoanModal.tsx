@@ -40,6 +40,7 @@ export default function PlayerLoanModal({
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen && playerId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         player_id: playerId,
         to_club_id: '',

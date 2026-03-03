@@ -20,7 +20,9 @@ const AdminCategorySimulationContext = createContext<
 
 export function AdminCategorySimulationProvider({children}: {children: React.ReactNode}) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const {categories: {data: categories, loading: categoriesLoading}} = useAppData();
+  const {
+    categories: {data: categories, loading: categoriesLoading},
+  } = useAppData();
 
   const availableCategories = categories || [];
   const loading = categoriesLoading;
@@ -32,6 +34,7 @@ export function AdminCategorySimulationProvider({children}: {children: React.Rea
       if (savedState) {
         try {
           const {selectedCategories: savedCategories} = JSON.parse(savedState);
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setSelectedCategories(savedCategories || []);
         } catch (e) {
           // Ignore parsing errors

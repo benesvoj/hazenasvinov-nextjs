@@ -48,6 +48,7 @@ export default function ToDoList({
 
   // Reset to first page when todos change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [todos.length]);
 

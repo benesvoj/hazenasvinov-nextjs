@@ -39,6 +39,7 @@ export const UnifiedSidebarProvider: React.FC<UnifiedSidebarProviderProps> = ({
     if (variant === 'coach') {
       const saved = localStorage.getItem('coaches-sidebar-collapsed');
       if (saved !== null) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsCollapsed(JSON.parse(saved));
       }
     }

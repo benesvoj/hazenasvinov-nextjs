@@ -10,14 +10,13 @@ import {useUser} from '@/contexts/UserContext';
 
 import {UnifiedTopBar} from '@/components';
 import {UserRoles} from '@/enums';
-
-import {coachesRoutes} from '../routes/routes';
+import {coachesNavRoutes} from '@/lib';
 
 import {useCoachesSidebar} from './CoachesSidebarContext';
 
 const getPageInfo = (pathname: string) => {
   // Find the route that matches the current pathname
-  const route = coachesRoutes.find((route) => route.href === pathname);
+  const route = coachesNavRoutes.find((route) => route.href === pathname);
 
   if (route) {
     // Get the route key from the href (e.g., 'dashboard' from '/coaches/dashboard')

@@ -112,4 +112,10 @@ export const matchesTranslations = {
     upcoming: 'Nadcházející',
     completed: 'Dokončený',
   },
+  tabs: {
+    upcoming: 'Nadcházející',
+    recent: 'Nedávno odehrané',
+    standings: 'Tabulky',
+    statistics: 'Statistiky',
+  },
 };

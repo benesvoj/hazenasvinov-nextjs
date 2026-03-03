@@ -4,12 +4,14 @@
 
 'use client';
 
+import {translations} from '@/lib/translations/index';
+
 import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {API_ROUTES} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/categoryLineups';
 import {CategoryLineup, CreateCategoryLineup} from '@/types';
 
-const t = translations.coachPortal.lineupList.responseMessages;
+const t = translations.lineups.responseMessages;
 
 export function useCategoryLineups() {
   const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<

@@ -150,7 +150,7 @@ export function useUnifiedPlayers() {
       if (!data) return null;
 
       // Transform member data to UnifiedPlayer format
-      const unifiedPlayer: UnifiedPlayer = {
+      return {
         id: data.id,
         name: data.name,
         surname: data.surname,
@@ -166,8 +166,6 @@ export function useUnifiedPlayers() {
         updated_at: data.updated_at || new Date().toISOString(),
         current_club_name: getClubName(), // Get club name from configuration
       };
-
-      return unifiedPlayer;
     } catch (err) {
       console.error('Error in getPlayerById:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch player');

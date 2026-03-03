@@ -149,11 +149,11 @@ export function createDataFetchHook<T, TParams = void>(
       } finally {
         setLoading(false);
       }
-    }, [endpoint, entityName, errorMessage, showErrorToast]);
+    }, [endpoint]);
 
     useEffect(() => {
       if (fetchOnMount) {
-        fetchData();
+        void fetchData();
       }
 
       return () => {
@@ -161,7 +161,7 @@ export function createDataFetchHook<T, TParams = void>(
           abortControllerRef.current.abort();
         }
       };
-    }, [fetchData, fetchOnMount]);
+    }, [fetchData]);
 
     return {
       data,

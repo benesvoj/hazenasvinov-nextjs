@@ -32,9 +32,7 @@ import {
 
 import {translations} from '@/lib/translations/index';
 
-import {coachesRoutes} from '@/app/coaches/routes/routes';
-
-import {APP_ROUTES} from '@/lib';
+import {APP_ROUTES, coachesNavRoutes} from '@/lib';
 import routes from '@/routes/routes';
 
 interface UnifiedSidebarProps {
@@ -173,7 +171,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
         subtitle: '',
         icon: <AcademicCapIcon className="w-8 h-8 text-green-600 dark:text-green-400" />,
         iconBg: '',
-        groupedItems: {main: coachesRoutes},
+        groupedItems: {main: coachesNavRoutes},
         groupLabels: {},
         footer: {
           title: translations.common.clubTitle,

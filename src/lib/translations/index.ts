@@ -8,11 +8,13 @@ import {coachPortalTranslations} from './coachPortal';
 import {committeesTranslations} from './committees';
 import {commonTranslations} from './common';
 import {componentsTranslations} from './components';
+import {lineupsTranslations} from './lineups';
 import {matchesTranslations} from './matches';
 import {meetingMinutesTranslations} from './meetingMinutes';
 import {membersTranslations} from './members';
 import {publicTranslations} from './public';
 import {seasonsTranslations} from './seasons';
+import {todosTranslations} from './todos';
 import {topBarTranslations} from './topBar';
 import {trainingSessionsTranslations} from './trainingSession';
 
@@ -34,4 +36,6 @@ export const translations = {
   meetingMinutes: meetingMinutesTranslations,
   topBar: topBarTranslations,
   public: publicTranslations,
+  lineups: lineupsTranslations,
+  todos: todosTranslations,
 } as const;

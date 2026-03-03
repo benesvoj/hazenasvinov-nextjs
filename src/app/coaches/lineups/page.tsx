@@ -3,25 +3,24 @@
 
 import React, {useEffect, useState} from 'react';
 
-import {Spinner, Tab, Tabs} from '@heroui/react';
-
 import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
 import {useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations/index';
+
+import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
 import {LineupMembers, LineupModal, LineupsList} from '@/app/coaches/lineups/components';
 
-import {DeleteConfirmationModal, PageContainer, Show, UnifiedCard} from '@/components';
+import {Choice, DeleteConfirmationModal, PageContainer, Show, UnifiedCard} from '@/components';
 import {useUser} from '@/contexts';
 import {ModalMode} from '@/enums';
 import {
   useCategoryLineupForm,
   useCategoryLineupMember,
   useCategoryLineups,
-  useFetchCategories,
   useFetchCategoryLineups,
   useFetchSeasons,
 } from '@/hooks';
-import {translations} from '@/lib';
 import {CategoryLineup} from '@/types';
 import {hasMoreThanOne} from '@/utils';
 
@@ -30,12 +29,13 @@ interface DeleteItem {
   id: string;
 }
 
-const t = translations.coachPortal.lineupList;
+const t = translations.lineups;
 
 export default function CoachesLineupsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSeason, setSelectedSeason] = useState<string>('');
   const [selectedLineup, setSelectedLineup] = useState<CategoryLineup | null>(null);
+
+  const {selectedCategory, setSelectedCategory, availableCategories} = useCoachCategory();
 
   const {
     data: lineups,
@@ -45,7 +45,6 @@ export default function CoachesLineupsPage() {
 
   const {loading: crudLoading, createLineup, updateLineup, deleteLineup} = useCategoryLineups();
   const {removeLineupMember} = useCategoryLineupMember();
-  const {data: categories} = useFetchCategories();
   const {
     formData,
     setFormData,
@@ -53,7 +52,6 @@ export default function CoachesLineupsPage() {
     modalMode,
     openAddMode,
     validateForm,
-    resetForm,
   } = useCategoryLineupForm();
 
   const {data: seasons, refetch: fetchAllSeasons} = useFetchSeasons();
@@ -61,7 +59,6 @@ export default function CoachesLineupsPage() {
   const {getCurrentUserCategories} = useUserRoles();
   const {user} = useUser();
 
-  // Get user's assigned category
   const [userCategories, setUserCategories] = useState<string[]>([]);
 
   const lineupModal = useModalWithItem<CategoryLineup>();
@@ -133,16 +130,6 @@ export default function CoachesLineupsPage() {
     }
   };
 
-  if (loadingLineups && !lineups.length) {
-    return (
-      <div className="p-6">
-        <div className="flex items-center justify-center h-64">
-          <Spinner size="lg" />
-        </div>
-      </div>
-    );
-  }
-
   const handleSubmitLineup = async () => {
     const {valid, errors} = validateForm();
 
@@ -172,19 +159,18 @@ export default function CoachesLineupsPage() {
 
   return (
     <>
-      <PageContainer>
+      <PageContainer isLoading={loadingLineups}>
         <Show when={hasMoreThanOne(userCategories)}>
           <UnifiedCard padding={'none'}>
-            <Tabs
-              selectedKey={selectedCategory}
-              onSelectionChange={(key) => setSelectedCategory(key as string)}
-              className="w-full min-w-max"
-            >
-              {userCategories.map((categoryId) => {
-                const category = categories.find((c) => c.id === categoryId);
-                return <Tab key={categoryId} title={category?.name || categoryId} />;
-              })}
-            </Tabs>
+            <Choice
+              value={selectedCategory}
+              onChange={(id) => setSelectedCategory(id)}
+              items={availableCategories.map((c) => ({key: c.id, label: c.name}))}
+              label={translations.members.table.columns.category}
+              size="sm"
+              className={'md:w-1/4'}
+              disallowEmptySelection={true}
+            />
           </UnifiedCard>
         </Show>
 

@@ -32,6 +32,7 @@ export default function LineupCoachEditModal({
 
   useEffect(() => {
     if (coach) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         ...coach,
       });

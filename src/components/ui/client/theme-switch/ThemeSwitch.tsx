@@ -1,24 +1,24 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import {useSyncExternalStore} from 'react';
 
-import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button} from '@heroui/react';
+import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from '@heroui/react';
 
-import {MoonIcon, SunIcon, ComputerDesktopIcon} from '@heroicons/react/24/outline';
+import {ComputerDesktopIcon, MoonIcon, SunIcon} from '@heroicons/react/24/outline';
 
 import {useTheme} from 'next-themes';
 
-import {translations} from '@/lib/translations';
+import {translations} from '@/lib/translations/index';
 
 const ThemeSwitch = () => {
-  const [mounted, setMounted] = useState(false);
   const {theme, setTheme, resolvedTheme} = useTheme();
-  const t = translations.components.themeSwitch;
 
-  // When mounted on client, now we can show the UI
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
-  // If not mounted yet, render with invisible placeholder to avoid layout shift
   if (!mounted) {
     return (
       <div className="mr-5 flex items-center">
@@ -68,13 +68,13 @@ const ThemeSwitch = () => {
           }}
         >
           <DropdownItem key="light" startContent={<SunIcon className="w-4 h-4" />}>
-            {t.light}
+            {translations.components.themeSwitch.light}
           </DropdownItem>
           <DropdownItem key="dark" startContent={<MoonIcon className="w-4 h-4" />}>
-            {t.dark}
+            {translations.components.themeSwitch.dark}
           </DropdownItem>
           <DropdownItem key="system" startContent={<ComputerDesktopIcon className="w-4 h-4" />}>
-            {t.system}
+            {translations.components.themeSwitch.system}
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>

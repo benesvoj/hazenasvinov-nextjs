@@ -286,45 +286,13 @@ export const translations = {
         mandatoryContent: 'Content is mandatory',
       },
     },
-    todos: {
-      responseMessages: {
-        todosFetchFailed: 'Chyba při načítání úkolů',
-        createSuccess: 'Todo created successfully!',
-        updateSuccess: 'Todo updated successfully!',
-        deleteSuccess: 'Todo deleted successfully!',
-        createError: 'Failed to create todo.',
-        updateError: 'Failed to update todo.',
-        deleteError: 'Failed to delete todo.',
-        mandatoryTitle: 'Title is mandatory',
-        mandatoryDescription: 'Description is mandatory',
-      },
-    },
+    todos: {},
   },
   coachPortal: {
     memberAttendance: {
       responseMessages: {
         memberAttendanceFetchFailed: 'Chyba při načítání docházky členů',
       },
-    },
-    lineupList: {
-      responseMessages: {
-        lineupsFetchFailed: 'Chyba při načítání soupisek',
-        mandatoryName: 'Název je povinný',
-        createSuccess: 'Soupiska byla úspěšně vytvořena.',
-        updateSuccess: 'Soupiska byla úspěšně aktualizována.',
-        deleteSuccess: 'Soupiska byla úspěšně smazána.',
-        createError: 'Chyba při vytváření soupisky.',
-        updateError: 'Chyba při aktualizaci soupisky.',
-        deleteError: 'Chyba při mazání soupisky.',
-      },
-      title: 'Soupisky',
-      updateLineup: 'Upravit soupisku',
-      deleteLineup: 'Smazat soupisku',
-      deleteLineupMessage: 'Opravdu chcete smazat tuto soupisku? Tato akce je nevratná.',
-      noLineups: 'Žádné soupisky',
-      deleteLineupMember: 'Smazat člena soupisky',
-      deleteLineupMemberMessage:
-        'Opravdu chcete smazat tohoto člena ze soupisky? Tato akce je nevratná.',
     },
     lineupMembers: {
       responseMessages: {
@@ -742,12 +710,6 @@ export const translations = {
         unknownPlayer: 'Neznámý hráč',
       },
     },
-    themeSwitch: {
-      label: 'Téma',
-      light: 'Světlé',
-      dark: 'Tmavé',
-      system: 'Systém',
-    },
     passwordInput: {
       label: 'Heslo',
       placeholder: 'Vložte své heslo',
@@ -866,14 +828,6 @@ export const translations = {
       attendance: 'Sledování docházky členů',
       statistics: 'Statistiky a analýzy týmů',
       meetingMinutes: 'Zápisy z výborových schůzí',
-    },
-    matches: {
-      tabs: {
-        upcoming: 'Nadcházející',
-        recent: 'Nedávno odehrané',
-        standings: 'Tabulky',
-        statistics: 'Statistiky',
-      },
     },
   },
   lineupManager: {

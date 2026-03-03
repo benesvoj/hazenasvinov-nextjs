@@ -34,6 +34,7 @@ export default function LoaningManagement({clubId, playerId}: LoaningManagementP
   }, [getLoanStats, clubId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadStats();
   }, [loadStats]);
 

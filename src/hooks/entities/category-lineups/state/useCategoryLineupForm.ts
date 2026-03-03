@@ -1,10 +1,11 @@
 'use client';
 
+import {translations} from '@/lib/translations/index';
+
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {CategoryLineup, CategoryLineupFormData} from '@/types';
 
-const t = translations.coachPortal.lineupList.responseMessages;
+const t = translations.lineups.responseMessages;
 
 const initialFormData: CategoryLineupFormData = {
   name: '',

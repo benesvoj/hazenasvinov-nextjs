@@ -2,16 +2,16 @@
 
 import {createDataFetchHook} from '@/hooks/factories';
 
-import {API_ROUTES, translations} from '@/lib';
-import {DB_TABLE} from '@/queries/todos';
-import {TodoItem} from '@/types';
+import {translations} from '@/lib/translations/index';
 
-const t = translations.admin.todos.responseMessages;
+import {API_ROUTES} from '@/lib';
+import {DB_TABLE, ENTITY} from '@/queries/todos';
+import {TodoItem} from '@/types';
 
 export function useFetchTodos() {
   return createDataFetchHook<TodoItem>({
     endpoint: API_ROUTES.entities.root(DB_TABLE),
-    entityName: 'todos',
-    errorMessage: t.todosFetchFailed,
+    entityName: ENTITY.plural,
+    errorMessage: translations.todos.responseMessages.todosFetchFailed,
   })();
 }

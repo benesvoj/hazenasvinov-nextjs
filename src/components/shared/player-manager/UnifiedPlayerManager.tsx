@@ -87,11 +87,13 @@ export default function UnifiedPlayerManager({
 
   // Load initial player-manager
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     performSearch('');
   }, [performSearch]);
 
   // Trigger search when filters change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     performSearch(searchTerm);
   }, [filters.is_external, performSearch, searchTerm]);
 

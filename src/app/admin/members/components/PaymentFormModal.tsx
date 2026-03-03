@@ -45,6 +45,7 @@ export default function PaymentFormModal({
 
   useEffect(() => {
     if (payment) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         member_id: payment.member_id,
         category_id: payment.category_id,

@@ -4,8 +4,9 @@ import {Button, Card, CardBody, CardHeader, Skeleton} from '@heroui/react';
 
 import {PencilIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/solid';
 
+import {translations} from '@/lib/translations/index';
+
 import {Heading} from '@/components';
-import {translations} from '@/lib';
 import {CategoryLineup} from '@/types';
 
 interface LineupsListProps {
@@ -20,7 +21,7 @@ interface LineupsListProps {
   onDeleteLineup: (lineupId: string) => void;
 }
 
-const t = translations.coachPortal.lineupList;
+const t = translations.lineups;
 
 export const LineupsList = ({
   loading,

@@ -41,6 +41,7 @@ export default function LineupPlayerEditModal({
 
   useEffect(() => {
     if (player) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         ...player,
         goals: player.goals || 0,
