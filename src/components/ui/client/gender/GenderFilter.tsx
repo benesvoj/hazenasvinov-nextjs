@@ -17,7 +17,7 @@ const ITEMS = [
   {key: Genders.FEMALE, label: translations.common.gender.female},
 ];
 
-export const GenderFilter = ({value, onChange, size, className}: GenderFilterProps) => (
+export const GenderFilter = ({value, onChange, size = 'sm', className}: GenderFilterProps) => (
   <Choice
     items={ITEMS}
     value={value}

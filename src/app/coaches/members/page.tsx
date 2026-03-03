@@ -18,12 +18,14 @@ import {
   PageContainer,
   PaymentFormModal,
   Search,
+  Show,
   UnifiedCard,
 } from '@/components';
 import {useAppData} from '@/contexts';
 import {currentYear} from '@/helpers';
 import {useMemberModals, useMembers, useMemberSave, useModalWithItem} from '@/hooks';
 import {BaseMember, Member, MemberInternal} from '@/types';
+import {hasMoreThanOne} from '@/utils';
 
 export default function CoachesMembersPage() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -65,15 +67,17 @@ export default function CoachesMembersPage() {
             className={'md:w-1/2'}
           />
           <div className="flex flex-col md:flex-row gap-4 w-full justify-end items-center">
-            <Choice
-              value={selectedCategory}
-              onChange={(id) => setSelectedCategory(id)}
-              items={availableCategories.map((c) => ({key: c.id, label: c.name}))}
-              label={translations.members.table.columns.category}
-              size="sm"
-              className={'md:w-1/4'}
-              disallowEmptySelection={true}
-            />
+            <Show when={hasMoreThanOne(availableCategories)}>
+              <Choice
+                value={selectedCategory}
+                onChange={(id) => setSelectedCategory(id)}
+                items={availableCategories.map((c) => ({key: c.id, label: c.name}))}
+                label={translations.members.table.columns.category}
+                size="sm"
+                className={'md:w-1/4'}
+                disallowEmptySelection={true}
+              />
+            </Show>
             <Checkbox
               isSelected={isActiveOnly}
               onChange={() => setIsActiveOnly(!isActiveOnly)}

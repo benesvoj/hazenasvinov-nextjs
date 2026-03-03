@@ -18,7 +18,13 @@ const ITEMS = [
   {key: Genders.FEMALE, label: translations.common.gender.female},
 ];
 
-export const GenderSelect = ({value, onChange, size, className, isDisabled}: GenderSelectProps) => (
+export const GenderSelect = ({
+  value,
+  onChange,
+  size = 'sm',
+  className,
+  isDisabled,
+}: GenderSelectProps) => (
   <Choice
     disallowEmptySelection
     items={ITEMS}
