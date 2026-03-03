@@ -7,8 +7,14 @@ export const membersTranslations = {
     membersExternalAriaLabel: 'Seznam externích členů',
     membersOnLoanAriaLabel: 'Seznam členů na hostování',
     filters: {
+      title: 'Vyhledávání',
       searchPlaceholder: 'Hledat podle jména, příjmení nebo registračního čísla...',
       clearAll: 'Vymazat filtry',
+      functions: {
+        title: 'Funkce',
+        placeholder: 'Všechny funkce',
+        ariaLabel: 'Filtrovat podle funkce',
+      },
     },
     noMembersFound: 'Žádní členové nebyli nalezeni',
     noFunctionsFound: 'Žádné funkce',
@@ -76,7 +82,8 @@ export const membersTranslations = {
     deleteMemberMessage: 'Opravdu chcete smazat člena? Tato akce je nevratná.',
     memberForm: {
       registrationNumber: 'Registrační číslo',
-      registrationNumberHelper: 'Registrační číslo (volitelné - vygeneruje se automaticky)',
+      registrationNumberHelper:
+        'Vygeneruje se automaticky, pokud není zadáno. Musí být unikátní. Lze později změnit.',
       registrationNumberPlaceholder: 'např. REG-2024-0001',
       name: 'Jméno',
       surname: 'Příjmení',

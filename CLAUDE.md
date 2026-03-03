@@ -83,6 +83,23 @@ These files are **manual** — always update by hand:
 - `src/lib/api-routes.ts`
 - `src/lib/translations/index.ts`
 
+### Excluding files or folders from barrel generation
+
+The component barrel generator (`scripts/generate-component-exports.mjs`) supports two opt-out mechanisms:
+
+**File-level** — add `// @barrel-ignore` on any of the first 5 lines of a `.ts`/`.tsx` file:
+```ts
+// @barrel-ignore
+export const myHelper = ...
+```
+
+**Folder-level** — drop an empty `.barrel-ignore` file inside the directory:
+```
+SomeComponent/utils/.barrel-ignore
+```
+
+Use these for utility/helper files that live inside a component folder but are **not** public API (e.g. `UnifiedTopBar/utils/`). The generator logs `⏭️  Skipping ...` for every excluded path so you can verify it worked.
+
 # Database Migrations
 
 Migration files live in `scripts/migrations/` with naming: `{YYYYMMDD}_{snake_case_description}.sql`.

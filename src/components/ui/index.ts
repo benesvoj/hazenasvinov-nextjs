@@ -4,7 +4,6 @@
 
 export {Card} from './cards/Card';
 export {default as UnifiedCard} from './cards/UnifiedCard';
-export {CustomCheckbox} from './checkbox/CustomCheckbox';
 export {CategoryChip} from './chips/CategoryChip';
 export {DateChip} from './chips/DateChip';
 export * from './client';

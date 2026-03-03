@@ -30,6 +30,7 @@ interface MemberTableTabProps<T> {
     total: number | null;
   };
   onPageChange?: (page: number) => void;
+  pageSize?: number;
 }
 
 export const MemberTableTab = <T,>({
@@ -43,14 +44,12 @@ export const MemberTableTab = <T,>({
   onSelectionChange,
   pagination,
   onPageChange,
+  pageSize = 25,
 }: MemberTableTabProps<T>) => {
   const t = translations.members;
 
-  // Calculate total pages from server pagination info
   const totalPages =
-    pagination?.total && pagination.total > 0
-      ? Math.ceil(pagination.total / 25) // Using default page size of 25
-      : 1;
+    pagination?.total && pagination.total > 0 ? Math.ceil(pagination.total / pageSize) : 1;
 
   return (
     <>
@@ -67,6 +66,7 @@ export const MemberTableTab = <T,>({
         onPageChange={onPageChange}
         selectionMode={enableSelection ? 'multiple' : 'none'}
         selectedKeys={selectedItems}
+        rowsPerPage={pageSize}
         onSelectionChange={
           onSelectionChange
             ? (keys) => {

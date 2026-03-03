@@ -64,7 +64,7 @@ export function useMembers() {
             surname: formData.surname.trim(),
             registration_number: formData.registration_number.trim(),
             date_of_birth: formData.date_of_birth ?? null,
-            sex: formData.sex,
+            sex: formData.gender,
             functions: formData.functions,
             category_id: categoryId || null,
           }),

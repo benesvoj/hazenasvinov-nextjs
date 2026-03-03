@@ -13,13 +13,13 @@ import {translations} from '@/lib/translations/index';
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {MembersExternalTab, MembersOnLoanTab} from '@/app/admin/members/components';
-import BulkEditModal from '@/app/admin/members/components/BulkEditModal';
+import BulkEditModal, {BulkEditFormData} from '@/app/admin/members/components/BulkEditModal';
 import MembersCsvImport from '@/app/admin/members/components/MembersCsvImport';
 import {MembersListFilters} from '@/app/admin/members/components/MembersListFilters';
 import MembersStatisticTab from '@/app/admin/members/components/MembersStatisticTab';
 
 import {AdminContainer, DeleteConfirmationModal} from '@/components';
-import {ActionTypes, Genders} from '@/enums';
+import {ActionTypes, Genders, MemberFunction} from '@/enums';
 import {currentYear} from '@/helpers';
 import {
   useBulkEditMembers,
@@ -41,13 +41,14 @@ import {
 import {genderOptions} from '@/utils';
 
 const FILTER_DEFAULTS = {
-  sex: '',
+  sex: Genders.EMPTY,
   category_id: '',
-  function: '',
+  function: MemberFunction.PLAYER,
+  is_active: true,
 };
 
-const BULK_DEFAULTS = {
-  sex: Genders.EMPTY,
+const BULK_DEFAULTS: BulkEditFormData = {
+  gender: null,
   category: '',
   functions: [] as string[],
 };

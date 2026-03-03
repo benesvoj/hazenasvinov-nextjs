@@ -16,7 +16,7 @@ export const useMemberSave = (
         surname: data.surname,
         registration_number: data.registration_number ?? undefined,
         date_of_birth: data.date_of_birth ?? undefined,
-        sex: data.sex ?? undefined,
+        gender: data.sex ?? undefined,
         functions: data.functions ?? undefined,
         category_id: data.category_id ?? undefined,
         is_active: data.is_active ?? undefined,
@@ -28,7 +28,7 @@ export const useMemberSave = (
           surname: data.surname,
           registration_number: data.registration_number ?? '',
           date_of_birth: data.date_of_birth ?? undefined,
-          sex: data.sex ?? Genders.MALE,
+          gender: data.sex ?? Genders.MALE,
           functions: data.functions ?? [],
         },
         data.category_id ?? undefined

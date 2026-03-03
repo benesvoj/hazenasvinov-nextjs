@@ -10,9 +10,8 @@ const ROWS_PER_PAGE = 10;
 export const useMembersTable = (members: MemberWithPaymentStatus[]) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<MemberTableFilters>({
-    sex: Genders.EMPTY,
+    gender: Genders.EMPTY,
     category_id: '',
-    function: '',
   });
   const [page, setPage] = useState(1);
   const [sortDescriptor, setSortDescriptor] = useState<MemberSortDescriptor>({
@@ -38,8 +37,8 @@ export const useMembersTable = (members: MemberWithPaymentStatus[]) => {
     }
 
     // Sex filter
-    if (filters.sex && filters.sex !== Genders.EMPTY) {
-      filtered = filtered.filter((member) => member.sex === filters.sex);
+    if (filters.gender && filters.gender !== Genders.EMPTY) {
+      filtered = filtered.filter((member) => member.sex === filters.gender);
     }
 
     // Category filter
@@ -102,9 +101,8 @@ export const useMembersTable = (members: MemberWithPaymentStatus[]) => {
 
   const clearFilters = () => {
     setFilters({
-      sex: Genders.EMPTY,
+      gender: Genders.EMPTY,
       category_id: '',
-      function: '',
     });
   };
 

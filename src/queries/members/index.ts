@@ -7,10 +7,7 @@
 
 // Queries (read operations)
 export {
-  getAllMembers,
-  getInternalMembers,
-  getExternalMembers,
-  getMembersOnLoan,
+  getMembersAll,
   getMemberById,
   getMemberWithRelations,
   getMembersByCategory,
@@ -23,8 +20,7 @@ export {createMember, updateMember, deleteMember, bulkCreateMembers} from './mut
 export type {
   MemberWithRelations,
   GetMembersOptions,
-  MemberFilters,
-  MemberFunction,
+  MemberFunctionJoin,
   MemberPayment,
 } from './types';
 

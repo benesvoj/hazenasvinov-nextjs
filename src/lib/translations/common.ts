@@ -45,6 +45,8 @@ export const commonTranslations = {
     logout: 'Odhlásit se',
   },
   labels: {
+    gender: 'Pohlaví',
+    all: 'Vše',
     date: 'Datum',
     time: 'Čas',
     name: 'Název',
@@ -72,6 +74,7 @@ export const commonTranslations = {
     contacts: 'Kontakty',
     dateFrom: 'Datum od',
     dateTo: 'Datum do',
+    isActiveOnly: 'Pouze aktivní',
     weekDaysTitle: 'Dny v týdnu',
     weekDays: {
       monday: 'Pondělí',
@@ -157,5 +160,9 @@ export const commonTranslations = {
       retryLogout: 'Klikněte na "Odhlásit" pro opakování pokusu.',
       logoutError: 'Chyba při odhlašování.',
     },
+  },
+  gender: {
+    male: 'Muž',
+    female: 'Žena',
   },
 };

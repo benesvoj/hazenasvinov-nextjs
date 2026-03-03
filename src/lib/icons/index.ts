@@ -8,3 +8,4 @@ export {EditIcon} from './EditIcon';
 export {BallIcon} from './BallIcon';
 export {YellowCardIcon} from './YellowCardIcon';
 export {RedCardIcon} from './RedCardIcon';
+export {SearchIcon} from './SearchIcon';

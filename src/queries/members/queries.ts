@@ -1,8 +1,8 @@
-import {SupabaseClient} from '@supabase/supabase-js';
-
+import {DB_TABLE} from '@/queries/members';
+import {buildMembersViewQuery} from '@/queries/members/queryHelpers';
 import {Member} from '@/types';
 
-import {QueryResult} from '../shared/types';
+import {QueryContext, QueryResult} from '../shared/types';
 
 import {GetMembersOptions, MemberWithRelations} from './types';
 
@@ -16,113 +16,17 @@ import {GetMembersOptions, MemberWithRelations} from './types';
  *   limit: 25
  * });
  */
-export async function getAllMembers(
-  supabase: SupabaseClient,
+export async function getMembersAll(
+  ctx: QueryContext,
   options: GetMembersOptions = {}
 ): Promise<QueryResult<Member[]>> {
   try {
-    const {isInternal, isExternal, onLoan, activeOnly, page = 1, limit = 100, search} = options;
-
-    // Build base query
-    let query = supabase.from('members').select('*', {count: 'exact'});
-
-    // Apply filters
-    if (isInternal !== undefined) {
-      query = query.eq('is_internal', isInternal);
-    }
-    if (isExternal !== undefined) {
-      query = query.eq('is_external', isExternal);
-    }
-    if (onLoan !== undefined) {
-      query = query.eq('on_loan', onLoan);
-    }
-    if (activeOnly) {
-      query = query.eq('is_active', true);
-    }
-
-    // Apply search
-    if (search && search.trim().length > 0) {
-      query = query.or(
-        `name.ilike.%${search}%,surname.ilike.%${search}%,registration_number.ilike.%${search}%`
-      );
-    }
-
-    // Apply default sorting
-    query = query.order('surname', {ascending: true}).order('name', {ascending: true});
-
-    // Apply pagination
-    const offset = (page - 1) * limit;
-    query = query.range(offset, offset + limit - 1);
-
-    // Execute query
-    const {data, error, count} = await query;
-
-    if (error) {
-      console.error('Error fetching members:', error);
-      return {
-        data: null,
-        error: error.message,
-        count: 0,
-      };
-    }
-
-    return {
-      data: data as Member[],
-      error: null,
-      count: count ?? 0,
-    };
+    const {data, error, count} = await buildMembersViewQuery(ctx, DB_TABLE, options);
+    if (error) return {data: null, error: error.message, count: 0};
+    return {data: data as Member[], error: null, count: count ?? 0};
   } catch (err: any) {
-    console.error('Exception in getAllMembers:', err);
-    return {
-      data: null,
-      error: err.message || 'Unknown error',
-      count: 0,
-    };
+    return {data: null, error: err.message || 'Unknown error', count: 0};
   }
-}
-
-/**
- * Get internal members only
- *
- * @example
- * const result = await getInternalMembers(supabase);
- */
-export async function getInternalMembers(
-  supabase: SupabaseClient,
-  options: {page?: number; limit?: number} = {}
-): Promise<QueryResult<Member[]>> {
-  return getAllMembers(supabase, {
-    ...options,
-    isInternal: true,
-  });
-}
-
-/**
- * Get external members only
- *
- * @example
- * const result = await getExternalMembers(supabase);
- */
-export async function getExternalMembers(
-  supabase: SupabaseClient,
-  options: {page?: number; limit?: number} = {}
-): Promise<QueryResult<Member[]>> {
-  return getAllMembers(supabase, {
-    ...options,
-    isExternal: true,
-  });
-}
-
-/**
- * Get members on loan
- *
- * @example
- * const result = await getMembersOnLoan(supabase);
- */
-export async function getMembersOnLoan(supabase: SupabaseClient): Promise<QueryResult<Member[]>> {
-  return getAllMembers(supabase, {
-    onLoan: true,
-  });
 }
 
 /**
@@ -131,12 +35,9 @@ export async function getMembersOnLoan(supabase: SupabaseClient): Promise<QueryR
  * @example
  * const result = await getMemberById(supabase, '123');
  */
-export async function getMemberById(
-  supabase: SupabaseClient,
-  id: string
-): Promise<QueryResult<Member>> {
+export async function getMemberById(ctx: QueryContext, id: string): Promise<QueryResult<Member>> {
   try {
-    const {data, error} = await supabase.from('members').select('*').eq('id', id).single();
+    const {data, error} = await ctx.supabase.from(DB_TABLE).select('*').eq('id', id).single();
 
     if (error) {
       console.error('Error fetching member:', error);
@@ -166,12 +67,12 @@ export async function getMemberById(
  * const result = await getMemberWithRelations(supabase, '123');
  */
 export async function getMemberWithRelations(
-  supabase: SupabaseClient,
+  ctx: QueryContext,
   id: string
 ): Promise<QueryResult<MemberWithRelations>> {
   try {
-    const {data, error} = await supabase
-      .from('members')
+    const {data, error} = await ctx.supabase
+      .from(DB_TABLE)
       .select(
         `
         *,
@@ -219,12 +120,12 @@ export async function getMemberWithRelations(
  * const result = await getMembersByCategory(supabase, 'cat-123');
  */
 export async function getMembersByCategory(
-  supabase: SupabaseClient,
+  ctx: QueryContext,
   categoryId: string
 ): Promise<QueryResult<Member[]>> {
   try {
-    const {data, error, count} = await supabase
-      .from('members')
+    const {data, error, count} = await ctx.supabase
+      .from(DB_TABLE)
       .select('*', {count: 'exact'})
       .eq('category_id', categoryId)
       .order('surname', {ascending: true});

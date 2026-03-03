@@ -2,7 +2,7 @@ import {NextRequest} from 'next/server';
 
 import {successResponse, withAdminAuth, withAuth} from '@/utils/supabase/apiHelpers';
 
-import {getAllMembers} from '@/queries/members';
+import {getMembersAll} from '@/queries/members';
 import {MemberInsert} from '@/types';
 
 /**
@@ -12,7 +12,7 @@ import {MemberInsert} from '@/types';
  */
 export async function GET(request: NextRequest) {
   return withAuth(async (user, supabase) => {
-    const result = await getAllMembers(supabase);
+    const result = await getMembersAll({supabase});
 
     if (result.error) {
       throw new Error(result.error);

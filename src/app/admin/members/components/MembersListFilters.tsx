@@ -1,11 +1,15 @@
 'use client';
 
-import {Button, Input, Select, SelectItem} from '@heroui/react';
+import React from 'react';
 
-import {MagnifyingGlassIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {Button, Select, SelectItem} from '@heroui/react';
 
+import {TrashIcon} from '@heroicons/react/24/outline';
+
+import {translations} from '@/lib/translations/index';
+
+import {GenderFilter, Search} from '@/components';
 import {Genders, getMemberFunctionOptions} from '@/enums';
-import {translations} from '@/lib';
 import {Category, MemberTableFilters} from '@/types';
 
 interface MembersListFiltersProps {
@@ -26,45 +30,37 @@ export function MembersListFilters({
   categories,
 }: MembersListFiltersProps) {
   const t = translations.members;
-  const hasActiveFilters = searchTerm || filters.sex || filters.category_id || filters.function;
+  const hasActiveFilters = searchTerm || filters.gender || filters.category_id || filters.function;
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-end">
-        {/* Search Input */}
         <div className="w-full lg:w-80">
-          <Input
-            placeholder={t.table.filters.searchPlaceholder}
+          <Search
             value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
-            className="w-full"
-            size="sm"
-            aria-label="Search members"
+            onChange={onSearchChange}
+            placeholder={t.table.filters.searchPlaceholder}
+            ariaLabel={t.table.filters.searchPlaceholder}
           />
         </div>
 
-        {/* Filter Controls */}
         <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-          {/* Sex Filter */}
           <div className="w-full sm:w-40">
-            <Select
-              aria-label="Filter by gender"
-              placeholder="Všechna pohlaví"
-              selectedKeys={filters.sex && filters.sex !== Genders.EMPTY ? [filters.sex] : []}
-              onSelectionChange={(keys) => {
-                const selectedKey = Array.from(keys)[0] as Genders;
+            <GenderFilter
+              value={
+                filters.gender &&
+                filters.gender !== Genders.EMPTY &&
+                filters.gender !== Genders.MIXED
+                  ? filters.gender
+                  : null
+              }
+              onChange={(v) =>
                 onFiltersChange({
                   ...filters,
-                  sex: selectedKey || Genders.EMPTY,
-                });
-              }}
-              className="w-full"
-              size="sm"
-            >
-              <SelectItem key="male">Muži</SelectItem>
-              <SelectItem key="female">Ženy</SelectItem>
-            </Select>
+                  gender: v as Genders.MALE | Genders.FEMALE,
+                })
+              }
+            />
           </div>
 
           {/* Category Filter */}
@@ -101,7 +97,7 @@ export function MembersListFilters({
                 const selectedKey = Array.from(keys)[0] as string;
                 onFiltersChange({
                   ...filters,
-                  function: selectedKey || '',
+                  function: selectedKey ? (selectedKey as any) : undefined,
                 });
               }}
               className="w-full"

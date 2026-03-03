@@ -17,7 +17,7 @@ import {
  *  @param sex - Database sex value (string)
  *  @returns Genders enum or null
  */
-export function parseGenderFromDb(sex: string | null): Genders | null {
+export function parseGenderFromDb(sex: string | null): Genders.MALE | Genders.FEMALE | null {
   if (!sex) return null;
 
   const normalized = sex.toLowerCase().trim();
@@ -26,8 +26,6 @@ export function parseGenderFromDb(sex: string | null): Genders | null {
       return Genders.MALE;
     case 'female':
       return Genders.FEMALE;
-    case 'mixed':
-      return Genders.MIXED;
     default:
       console.warn(`Unknown gender value from DB: ${sex}`);
       return null;

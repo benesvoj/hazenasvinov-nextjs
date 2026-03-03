@@ -9,7 +9,7 @@ import {useCategoryMap} from './hooks/useCategoryMap';
 
 interface MembersInternalSectionProps {
   // Data context
-  categoryId?: string; // filter by category (coach portal)
+  categoryId?: string | null; // filter by category (coach portal)
   categoriesData: Category[] | null;
 
   // Search & filter (optional — coach portal may not expose all)
@@ -28,6 +28,8 @@ interface MembersInternalSectionProps {
 
   // Aria
   ariaLabel: string;
+
+  pageSize?: number;
 }
 
 export const MembersInternalSection = ({
@@ -42,10 +44,12 @@ export const MembersInternalSection = ({
   selectedItems,
   onSelectionChange,
   ariaLabel,
+  pageSize,
 }: MembersInternalSectionProps) => {
   const {data, loading, pagination, goToPage} = useFetchMembersInternal({
     search: searchTerm,
     filters: {...filters, category_id: categoryId ?? filters?.category_id},
+    limit: pageSize,
   });
 
   const categories = useCategoryMap(categoriesData);
@@ -72,6 +76,7 @@ export const MembersInternalSection = ({
       pagination={pagination}
       onPageChange={goToPage}
       ariaLabel={ariaLabel}
+      pageSize={pageSize}
     />
   );
 };
