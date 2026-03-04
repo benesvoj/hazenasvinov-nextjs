@@ -13,6 +13,7 @@ import {
   ChevronDoubleRightIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  Cog6ToothIcon,
   TrophyIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -286,7 +287,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                           : pathname === (item as CoachRouteItem).href;
                       const icon =
                         variant === PortalVariants.ADMIN
-                          ? React.createElement((item as NavMenuItem).icon || '')
+                          ? React.createElement((item as NavMenuItem).icon || Cog6ToothIcon)
                           : React.createElement((item as CoachRouteItem).icon, {
                               className: 'w-5 h-5',
                             });
@@ -475,7 +476,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                       : pathname === (item as CoachRouteItem).href;
                   const icon =
                     variant === PortalVariants.ADMIN
-                      ? React.createElement((item as NavMenuItem).icon || '')
+                      ? React.createElement((item as NavMenuItem).icon || Cog6ToothIcon)
                       : React.createElement((item as CoachRouteItem).icon, {
                           className: 'w-5 h-5',
                         });
