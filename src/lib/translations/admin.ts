@@ -1,4 +1,8 @@
 export const adminTranslations = {
+  root: {
+    title: 'Dashboard',
+    description: 'Správa obsahu a nastavení systému.',
+  },
   roleDefinitions: {
     table: {
       ariaLabel: 'Role Definitions Table',

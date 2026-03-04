@@ -1,14 +1,3 @@
-import {
-  ChartBarIcon,
-  ClipboardDocumentListIcon,
-  HomeIcon,
-  UserGroupIcon,
-  UsersIcon,
-  VideoCameraIcon,
-} from '@heroicons/react/24/outline';
-
-import {translations} from '@/lib/translations';
-
 const COACH_ROOT = '/coaches';
 const ADMIN_ROOT = '/admin';
 
@@ -78,51 +67,3 @@ export const APP_ROUTES = {
     login: '/login?tab=coach' as const,
   },
 } as const;
-
-export const coachesNavRoutes = [
-  {
-    name: translations.coachPortal.routes.dashboard,
-    href: APP_ROUTES.coaches.dashboard,
-    icon: HomeIcon,
-  },
-  {
-    name: translations.coachPortal.routes.matches,
-    href: APP_ROUTES.coaches.matches,
-    icon: ClipboardDocumentListIcon,
-  },
-  {
-    name: translations.coachPortal.routes.lineups,
-    href: APP_ROUTES.coaches.lineups,
-    icon: UserGroupIcon,
-  },
-  {
-    name: translations.coachPortal.routes.attendance,
-    href: APP_ROUTES.coaches.attendance,
-    icon: ClipboardDocumentListIcon,
-  },
-  {
-    name: translations.coachPortal.routes.members,
-    href: APP_ROUTES.coaches.members,
-    icon: UsersIcon,
-  },
-  {
-    name: translations.coachPortal.routes.videos,
-    href: APP_ROUTES.coaches.videos,
-    icon: VideoCameraIcon,
-  },
-  {
-    name: translations.coachPortal.routes.statistics,
-    href: APP_ROUTES.coaches.statistics,
-    icon: ChartBarIcon,
-  },
-  {
-    name: translations.coachPortal.routes.meetingMinutes,
-    href: APP_ROUTES.coaches.meetingMinutes,
-    icon: ClipboardDocumentListIcon,
-  },
-  {
-    name: translations.coachPortal.routes.profile,
-    href: APP_ROUTES.coaches.profile,
-    icon: UsersIcon,
-  },
-];

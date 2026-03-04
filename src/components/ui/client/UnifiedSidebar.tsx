@@ -9,34 +9,22 @@ import {Button} from '@heroui/button';
 
 import {
   AcademicCapIcon,
-  BuildingOfficeIcon,
-  CalendarIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  ClipboardDocumentListIcon,
-  Cog6ToothIcon,
-  CogIcon,
-  DocumentTextIcon,
-  HeartIcon,
-  HomeIcon,
-  PhotoIcon,
-  ShieldCheckIcon,
-  TagIcon,
   TrophyIcon,
-  UsersIcon,
-  VideoCameraIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-import {APP_ROUTES, coachesNavRoutes} from '@/lib/app-routes';
+import {APP_ROUTES} from '@/lib/app-routes';
+import {allRoutes, coachesNavRoutes, NavMenuItem, RouteGroups} from '@/lib/navigation';
 import {translations} from '@/lib/translations';
 
-import routes from '@/routes/routes';
+import {PortalVariants} from '@/enums';
 
 interface UnifiedSidebarProps {
-  variant: 'admin' | 'coach';
+  variant: PortalVariants;
   sidebarContext?: {
     isCollapsed?: boolean;
     setIsCollapsed?: (collapsed: boolean) => void;
@@ -47,64 +35,11 @@ interface UnifiedSidebarProps {
   };
 }
 
-interface AdminRouteItem {
-  title: string;
-  route?: string;
-  description?: string;
-  isPrivate?: boolean;
-  hidden?: boolean;
-  group?: string;
-}
-
 interface CoachRouteItem {
   name: string;
   href: string;
   icon: React.ComponentType<{className?: string}>;
 }
-
-// Icon mapping for admin routes
-const getAdminRouteIcon = (route: string) => {
-  switch (route) {
-    case APP_ROUTES.admin.root:
-      return <HomeIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.users:
-      return <UsersIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.posts:
-      return <DocumentTextIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.categories:
-      return <TagIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.seasons:
-      return <CalendarIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.matches:
-      return <TrophyIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.members:
-      return <UsersIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.memberFunctions:
-      return <CogIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.committees:
-      return <BuildingOfficeIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.sponsorship:
-      return <HeartIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.clubConfig:
-      return <Cog6ToothIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.photoGallery:
-      return <PhotoIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.clubs:
-      return <BuildingOfficeIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.clubCategories:
-      return <BuildingOfficeIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.videos:
-      return <VideoCameraIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.userRoles:
-      return <ShieldCheckIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.meetingMinutes:
-      return <ClipboardDocumentListIcon className="w-5 h-5" />;
-    case APP_ROUTES.admin.grantCalendar:
-      return <CalendarIcon className="w-5 h-5" />;
-    default:
-      return <Cog6ToothIcon className="w-5 h-5" />;
-  }
-};
 
 export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) => {
   const pathname = usePathname();
@@ -131,13 +66,13 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
 
   // Get sidebar configuration based on variant
   const getSidebarConfig = () => {
-    if (variant === 'admin') {
-      const items = routes.filter((item) => item.isPrivate === true && !item.hidden);
+    if (variant === PortalVariants.ADMIN) {
+      const items = allRoutes.filter((item) => item.isPrivate === true && !item.hidden);
 
       // Group items by group property
       const groupedItems = items.reduce(
         (acc, item) => {
-          const group = item.group || 'other';
+          const group = item.group || RouteGroups.OTHER;
           if (!acc[group]) {
             acc[group] = [];
           }
@@ -154,11 +89,11 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
         iconBg: 'bg-gradient-to-br from-blue-500 to-blue-600',
         groupedItems,
         groupLabels: {
-          'team-management': translations.common.admin.groups.teamManagement,
-          'user-management': translations.common.admin.groups.userManagement,
-          'members-management': translations.common.admin.groups.membersManagement,
-          'club-management': translations.common.admin.groups.clubManagement,
-          other: translations.common.admin.groups.other,
+          [RouteGroups.TEAM]: translations.common.admin.groups.teamManagement,
+          [RouteGroups.USER]: translations.common.admin.groups.userManagement,
+          [RouteGroups.MEMBER]: translations.common.admin.groups.membersManagement,
+          [RouteGroups.CLUB]: translations.common.admin.groups.clubManagement,
+          [RouteGroups.OTHER]: translations.common.admin.groups.other,
         },
         footer: {
           title: translations.common.clubTitle,
@@ -188,7 +123,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
 
   // Get styling classes based on variant
   const getSidebarClasses = () => {
-    if (variant === 'admin') {
+    if (variant === PortalVariants.ADMIN) {
       return {
         container: `fixed left-0 top-0 h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white transition-all duration-300 ease-in-out z-50 shadow-xl flex flex-col ${
           isCollapsed ? 'w-16' : 'w-56'
@@ -281,7 +216,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               startContent={
                 <XMarkIcon
                   className={`w-6 h-6 ${
-                    variant === 'admin' ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+                    variant === PortalVariants.ADMIN
+                      ? 'text-white'
+                      : 'text-gray-600 dark:text-gray-300'
                   }`}
                 />
               }
@@ -299,14 +236,14 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
             {/* Scroll gradient indicators */}
             <div
               className={`absolute top-0 left-0 right-0 h-4 pointer-events-none z-10 ${
-                variant === 'admin'
+                variant === PortalVariants.ADMIN
                   ? 'bg-linear-to-b from-gray-900 via-gray-900/50 to-transparent'
                   : 'bg-gradient-to-b from-white dark:from-gray-800 via-white/50 dark:via-gray-800/50 to-transparent'
               }`}
             />
             <div
               className={`absolute bottom-0 left-0 right-0 h-4 pointer-events-none z-10 ${
-                variant === 'admin'
+                variant === PortalVariants.ADMIN
                   ? 'bg-linear-to-t from-gray-900 via-gray-900/50 to-transparent'
                   : 'bg-linear-to-t from-white dark:from-gray-800 via-white/50 dark:via-gray-800/50 to-transparent'
               }`}
@@ -316,7 +253,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               {Object.entries(config.groupedItems).map(([groupKey, groupItems], groupIndex) => (
                 <div key={groupKey} className="space-y-2">
                   {/* Group Header - Admin only */}
-                  {variant === 'admin' && groupKey !== 'other' && (
+                  {variant === PortalVariants.ADMIN && groupKey !== RouteGroups.OTHER && (
                     <button onClick={() => toggleGroup(groupKey)} className={classes.groupHeader}>
                       <h3 className={classes.groupLabel}>
                         {config.groupLabels[groupKey as keyof typeof config.groupLabels]}
@@ -330,9 +267,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                   )}
 
                   {/* Group Divider - Admin only */}
-                  {variant === 'admin' && groupIndex > 0 && groupKey !== 'other' && (
-                    <div className={classes.divider}></div>
-                  )}
+                  {variant === PortalVariants.ADMIN &&
+                    groupIndex > 0 &&
+                    groupKey !== RouteGroups.OTHER && <div className={classes.divider}></div>}
 
                   {/* Group Items */}
                   <div
@@ -342,14 +279,14 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                         : 'max-h-96 opacity-100'
                     }`}
                   >
-                    {groupItems.map((item: AdminRouteItem | CoachRouteItem) => {
+                    {groupItems.map((item: NavMenuItem | CoachRouteItem) => {
                       const isActive =
-                        variant === 'admin'
-                          ? pathname === (item as AdminRouteItem).route
+                        variant === PortalVariants.ADMIN
+                          ? pathname === (item as NavMenuItem).href
                           : pathname === (item as CoachRouteItem).href;
                       const icon =
-                        variant === 'admin'
-                          ? getAdminRouteIcon((item as AdminRouteItem).route || '')
+                        variant === PortalVariants.ADMIN
+                          ? React.createElement((item as NavMenuItem).icon || '')
                           : React.createElement((item as CoachRouteItem).icon, {
                               className: 'w-5 h-5',
                             });
@@ -357,21 +294,21 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                       return (
                         <Link
                           key={
-                            variant === 'admin'
-                              ? (item as AdminRouteItem).route
+                            variant === PortalVariants.ADMIN
+                              ? (item as NavMenuItem).href
                               : (item as CoachRouteItem).href
                           }
                           href={
-                            variant === 'admin'
-                              ? (item as AdminRouteItem).route || APP_ROUTES.admin.root
+                            variant === PortalVariants.ADMIN
+                              ? (item as NavMenuItem).href || APP_ROUTES.admin.root
                               : (item as CoachRouteItem).href || APP_ROUTES.coaches.dashboard
                           }
                           onClick={handleNavClick}
                           className={classes.navItem(isActive)}
                           title={
                             isCollapsed
-                              ? variant === 'admin'
-                                ? (item as AdminRouteItem).title
+                              ? variant === PortalVariants.ADMIN
+                                ? (item as NavMenuItem).title
                                 : (item as CoachRouteItem).name
                               : undefined
                           }
@@ -379,8 +316,8 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                           <div className={`flex items-center relative z-10 space-x-3`}>
                             <div className={classes.navItemIcon(isActive)}>{icon}</div>
                             <span className="text-sm font-medium">
-                              {variant === 'admin'
-                                ? (item as AdminRouteItem).title
+                              {variant === PortalVariants.ADMIN
+                                ? (item as NavMenuItem).title
                                 : (item as CoachRouteItem).name}
                             </span>
                           </div>
@@ -398,7 +335,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
             <div className="text-center">
               <div
                 className={`text-xs mb-1 ${
-                  variant === 'admin' ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'
+                  variant === PortalVariants.ADMIN
+                    ? 'text-gray-400'
+                    : 'text-gray-500 dark:text-gray-400'
                 }`}
               >
                 {config.footer.title}
@@ -406,7 +345,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               {config.footer.subtitle && (
                 <div
                   className={`text-xs ${
-                    variant === 'admin' ? 'text-gray-500' : 'text-gray-400 dark:text-gray-500'
+                    variant === PortalVariants.ADMIN
+                      ? 'text-gray-500'
+                      : 'text-gray-400 dark:text-gray-500'
                   }`}
                 >
                   {config.footer.subtitle}
@@ -423,7 +364,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
   return (
     <aside
       className={`${classes.container} ${
-        variant === 'coach' ? 'hidden lg:block lg:translate-x-0' : 'hidden lg:block'
+        variant === PortalVariants.COACH ? 'hidden lg:block lg:translate-x-0' : 'hidden lg:block'
       }`}
     >
       {/* Header */}
@@ -438,7 +379,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
             <div>
               <h1
                 className={`text-lg font-bold ${
-                  variant === 'admin' ? 'text-white' : 'text-gray-900 dark:text-white'
+                  variant === PortalVariants.ADMIN ? 'text-white' : 'text-gray-900 dark:text-white'
                 }`}
               >
                 {config.title}
@@ -446,7 +387,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               {config.subtitle && (
                 <p
                   className={`text-xs ${
-                    variant === 'admin' ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'
+                    variant === PortalVariants.ADMIN
+                      ? 'text-gray-400'
+                      : 'text-gray-500 dark:text-gray-400'
                   }`}
                 >
                   {config.subtitle}
@@ -460,7 +403,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
             sidebarContext?.toggleSidebar?.() || sidebarContext?.setIsCollapsed?.(!isCollapsed)
           }
           className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-            variant === 'admin'
+            variant === PortalVariants.ADMIN
               ? 'hover:bg-gray-700/50'
               : 'hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
@@ -469,13 +412,13 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
           {isCollapsed ? (
             <ChevronDoubleRightIcon
               className={`w-5 h-5 ${
-                variant === 'admin' ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+                variant === PortalVariants.ADMIN ? 'text-white' : 'text-gray-600 dark:text-gray-300'
               }`}
             />
           ) : (
             <ChevronDoubleLeftIcon
               className={`w-5 h-5 ${
-                variant === 'admin' ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+                variant === PortalVariants.ADMIN ? 'text-white' : 'text-gray-600 dark:text-gray-300'
               }`}
             />
           )}
@@ -494,42 +437,45 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
           {Object.entries(config.groupedItems).map(([groupKey, groupItems], groupIndex) => (
             <div key={groupKey} className="space-y-2">
               {/* Group Header - Admin only */}
-              {variant === 'admin' && groupKey !== 'other' && !isCollapsed && (
-                <button onClick={() => toggleGroup(groupKey)} className={classes.groupHeader}>
-                  <h3 className={classes.groupLabel}>
-                    {config.groupLabels[groupKey as keyof typeof config.groupLabels]}
-                  </h3>
-                  {collapsedGroups.has(groupKey) ? (
-                    <ChevronRightIcon className="w-4 h-4 text-gray-400" />
-                  ) : (
-                    <ChevronDownIcon className="w-4 h-4 text-gray-400" />
-                  )}
-                </button>
-              )}
+              {variant === PortalVariants.ADMIN &&
+                groupKey !== RouteGroups.OTHER &&
+                !isCollapsed && (
+                  <button onClick={() => toggleGroup(groupKey)} className={classes.groupHeader}>
+                    <h3 className={classes.groupLabel}>
+                      {config.groupLabels[groupKey as keyof typeof config.groupLabels]}
+                    </h3>
+                    {collapsedGroups.has(groupKey) ? (
+                      <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+                    )}
+                  </button>
+                )}
 
               {/* Group Divider - Admin only */}
-              {variant === 'admin' && groupIndex > 0 && groupKey !== 'other' && !isCollapsed && (
-                <div className={classes.divider}></div>
-              )}
+              {variant === PortalVariants.ADMIN &&
+                groupIndex > 0 &&
+                groupKey !== RouteGroups.OTHER &&
+                !isCollapsed && <div className={classes.divider}></div>}
 
               {/* Group Items */}
               <div
                 className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                  variant === 'admin' && collapsedGroups.has(groupKey)
+                  variant === PortalVariants.ADMIN && collapsedGroups.has(groupKey)
                     ? 'max-h-0 opacity-0'
-                    : variant === 'coach'
+                    : variant === PortalVariants.COACH
                       ? 'max-h-150 opacity-100'
                       : 'max-h-96 opacity-100'
                 }`}
               >
-                {groupItems.map((item: AdminRouteItem | CoachRouteItem) => {
+                {groupItems.map((item: NavMenuItem | CoachRouteItem) => {
                   const isActive =
-                    variant === 'admin'
-                      ? pathname === (item as AdminRouteItem).route
+                    variant === PortalVariants.ADMIN
+                      ? pathname === (item as NavMenuItem).href
                       : pathname === (item as CoachRouteItem).href;
                   const icon =
-                    variant === 'admin'
-                      ? getAdminRouteIcon((item as AdminRouteItem).route || '')
+                    variant === PortalVariants.ADMIN
+                      ? React.createElement((item as NavMenuItem).icon || '')
                       : React.createElement((item as CoachRouteItem).icon, {
                           className: 'w-5 h-5',
                         });
@@ -537,20 +483,20 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                   return (
                     <Link
                       key={
-                        variant === 'admin'
-                          ? (item as AdminRouteItem).route
+                        variant === PortalVariants.ADMIN
+                          ? (item as NavMenuItem).href
                           : (item as CoachRouteItem).href
                       }
                       href={
-                        variant === 'admin'
-                          ? (item as AdminRouteItem).route || APP_ROUTES.admin.root
+                        variant === PortalVariants.ADMIN
+                          ? (item as NavMenuItem).href || APP_ROUTES.admin.root
                           : (item as CoachRouteItem).href || APP_ROUTES.coaches.dashboard
                       }
                       className={classes.navItem(isActive)}
                       title={
                         isCollapsed
-                          ? variant === 'admin'
-                            ? (item as AdminRouteItem).title
+                          ? variant === PortalVariants.ADMIN
+                            ? (item as NavMenuItem).title
                             : (item as CoachRouteItem).name
                           : undefined
                       }
@@ -563,8 +509,8 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                         <div className={classes.navItemIcon(isActive)}>{icon}</div>
                         {!isCollapsed && (
                           <span className="text-sm font-medium">
-                            {variant === 'admin'
-                              ? (item as AdminRouteItem).title
+                            {variant === PortalVariants.ADMIN
+                              ? (item as NavMenuItem).title
                               : (item as CoachRouteItem).name}
                           </span>
                         )}
@@ -583,7 +529,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
         <div className="text-center">
           <div
             className={`text-xs mb-1 ${
-              variant === 'admin' ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'
+              variant === PortalVariants.ADMIN
+                ? 'text-gray-400'
+                : 'text-gray-500 dark:text-gray-400'
             }`}
           >
             {config.footer.title}
@@ -591,7 +539,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
           {config.footer.subtitle && (
             <div
               className={`text-xs ${
-                variant === 'admin' ? 'text-gray-500' : 'text-gray-400 dark:text-gray-500'
+                variant === PortalVariants.ADMIN
+                  ? 'text-gray-500'
+                  : 'text-gray-400 dark:text-gray-500'
               }`}
             >
               {config.footer.subtitle}

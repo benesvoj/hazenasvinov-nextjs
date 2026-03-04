@@ -1,6 +1,8 @@
 export const categoriesTranslations = {
-  pageTitle: 'Kategorie',
-  description: 'Správa kategorií, které jsou dostupné v systému.',
+  page: {
+    title: 'Kategorie',
+    description: 'Správa kategorií pro týmové soutěže a členy klubu',
+  },
   editDescription:
     'Upravte informace o kategorii. Změny budou uloženy po kliknutí na tlačítko "Uložit". Úpravy se projeví na všech stránkách, které tuto kategorii používají.',
   modal: {

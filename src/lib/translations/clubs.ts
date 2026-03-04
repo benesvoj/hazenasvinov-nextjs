@@ -1,12 +1,14 @@
 export const clubsTranslations = {
+  page: {
+    title: 'Správa klubů',
+    description: 'Správa klubů a jejich týmů.',
+  },
   labels: {
     club: 'Klub',
   },
   placeholders: {
     club: 'Vyberte klub',
   },
-  title: 'Správa klubů',
-  description: 'Správa klubů, které jsou dostupné v systému.',
   addClub: 'Přidat klub',
   deleteClub: 'Smazat klub',
   deleteClubMessage: 'Opravdu chcete smazat klub? Tato akce je nevratná.',

@@ -1,4 +1,8 @@
 export const membersTranslations = {
+  page: {
+    title: 'Členové',
+    description: 'Správa členů klubu - přidávání, úprava a mazání členů.',
+  },
   title: 'Členové',
   membersDescription: 'Správa členů, které jsou dostupné v systému.',
   table: {

@@ -1,4 +1,8 @@
 export const memberFunctionsTranslations = {
+  page: {
+    title: 'Funkce členů',
+    description: 'Správa funkcí členů klubu - přidávání, úprava a mazání funkcí.',
+  },
   title: 'Správa funkcí členů',
   description: 'Správa funkcí členů, které jsou dostupné v systému.',
   list: 'Seznam funkcí',

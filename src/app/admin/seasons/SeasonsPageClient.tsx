@@ -178,7 +178,7 @@ export function SeasonsPageClient() {
           <UnifiedTable
             columns={columns}
             data={seasons}
-            ariaLabel={translations.seasons.title}
+            ariaLabel={translations.seasons.page.title}
             renderCell={renderSeasonCell}
             getKey={(season) => season.id}
             isLoading={fetchLoading}

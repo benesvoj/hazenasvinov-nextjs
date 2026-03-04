@@ -1,15 +1,7 @@
-import {APP_ROUTES} from '@/lib/app-routes';
+import {MenuItem, RouteGroups} from '@/lib/navigation';
 
 import {PageVisibility} from '@/types';
-
-export interface MenuItem {
-  title: string;
-  route?: string;
-  children?: MenuItem[];
-  description?: string;
-  isPrivate?: boolean;
-  hidden?: boolean;
-}
+import {hasItems} from '@/utils';
 
 // Function to build menu items from page visibility data
 export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
@@ -18,7 +10,7 @@ export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
   // Group pages by category
   const groupedPages = pages.reduce(
     (acc, page) => {
-      const category = page.category || 'other';
+      const category = page.category || RouteGroups.OTHER;
       if (!acc[category]) {
         acc[category] = [];
       }
@@ -33,14 +25,14 @@ export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
     groupedPages.main.forEach((page) => {
       menuItems.push({
         title: page.page_title,
-        route: page.page_route,
+        href: page.page_route,
         description: page.page_description,
       });
     });
   }
 
   // Build category section if any category pages exist
-  if (groupedPages.categories && groupedPages.categories.length > 0) {
+  if (hasItems(groupedPages.categories)) {
     const categoryChildren = groupedPages.categories.map((page) => ({
       title: page.page_title,
       route: page.page_route,
@@ -58,7 +50,7 @@ export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
     groupedPages.info.forEach((page) => {
       menuItems.push({
         title: page.page_title,
-        route: page.page_route,
+        href: page.page_route,
         description: page.page_description,
       });
     });
@@ -69,7 +61,7 @@ export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
     groupedPages.admin.forEach((page) => {
       menuItems.push({
         title: page.page_title,
-        route: page.page_route,
+        href: page.page_route,
         description: page.page_description,
       });
     });
@@ -77,6 +69,3 @@ export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
 
   return menuItems;
 };
-
-// Fallback routes in case database is not available
-export const fallbackRoutes = APP_ROUTES.public;

@@ -15,6 +15,7 @@ export * from './matchStatus';
 export * from './memberFunction';
 export * from './modalMode';
 export * from './playerPosition';
+export * from './portalVariants';
 export * from './relationshipStatus';
 export * from './relationshipType';
 export * from './teamTypes';

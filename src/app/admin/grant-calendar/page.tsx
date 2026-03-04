@@ -136,7 +136,7 @@ export default function GrantCalendar() {
           columns={grantTableColumns}
           renderCell={renderGrantTableData}
           data={grants}
-          ariaLabel={t.title}
+          ariaLabel={t.page.title}
           getKey={(grant: Grant) => grant.id}
           emptyContent={t.table.noGrants}
           isStriped

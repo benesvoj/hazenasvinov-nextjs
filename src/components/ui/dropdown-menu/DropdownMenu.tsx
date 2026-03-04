@@ -3,7 +3,7 @@ import {ChevronDownIcon} from '@heroicons/react/16/solid';
 //. TODO: find solution to do not use headlessui to ba able to remove it from package.json
 import {Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
 
-import {MenuItem} from '@/routes/routes';
+import {MenuItem} from '@/lib/navigation';
 
 interface Props {
   item: MenuItem;
@@ -40,7 +40,7 @@ export default function DropdownMenu(props: Props) {
                   className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50"
                 >
                   <div>
-                    <a href={menuItem.route} className="font-semibold text-gray-900">
+                    <a href={menuItem.href} className="font-semibold text-gray-900">
                       {menuItem.title}
                       <span className="absolute inset-0" />
                     </a>

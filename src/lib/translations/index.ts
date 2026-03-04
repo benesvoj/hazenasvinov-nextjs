@@ -23,6 +23,7 @@ import {memberClubRelationshipTranslations} from './memberClubRelationship';
 import {memberFunctionsTranslations} from './memberFunctions';
 import {membersTranslations} from './members';
 import {membershipFeesTranslations} from './membershipFees';
+import {photoGalleryTranslations} from './photoGallery';
 import {publicTranslations} from './public';
 import {seasonsTranslations} from './seasons';
 import {sponsorshipTranslations} from './sponsorship';
@@ -30,6 +31,8 @@ import {teamsTranslations} from './teams';
 import {todosTranslations} from './todos';
 import {topBarTranslations} from './topBar';
 import {trainingSessionsTranslations} from './trainingSession';
+import {userRolesTranslations} from './userRoles';
+import {usersTranslations} from './users';
 
 export const translations = {
   admin: adminTranslations,
@@ -64,4 +67,7 @@ export const translations = {
   sponsorship: sponsorshipTranslations,
   lineupMembers: lineupMembersTranslations,
   memberClubRelationship: memberClubRelationshipTranslations,
+  users: usersTranslations,
+  photoGallery: photoGalleryTranslations,
+  userRoles: userRolesTranslations,
 } as const;

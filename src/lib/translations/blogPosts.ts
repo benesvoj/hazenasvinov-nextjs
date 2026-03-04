@@ -1,6 +1,8 @@
 export const blogPostsTranslation = {
-  title: 'Správa článků',
-  description: 'Správa článků, které jsou dostupné v systému.',
+  page: {
+    title: 'Správa článků',
+    description: 'Správa článků, které jsou dostupné v systému.',
+  },
   addPost: 'Nový článek',
   deletePost: 'Smazat článek',
   deletePostMessage: 'Opravdu chcete smazat článek? Tato akce je nevratná.',

@@ -1,4 +1,8 @@
 export const clubConfigTranslations = {
+  page: {
+    title: 'Konfigurace klubu',
+    description: 'Správa nastavení a konfigurace klubu.',
+  },
   ariaLabel: 'Konfigurace klubu',
   tabTitles: {
     clubConfig: 'Konfigurace klubu',

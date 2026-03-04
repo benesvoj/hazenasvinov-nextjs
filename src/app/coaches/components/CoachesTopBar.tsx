@@ -4,7 +4,7 @@ import React from 'react';
 
 import {usePathname} from 'next/navigation';
 
-import {coachesNavRoutes} from '@/lib/app-routes';
+import {coachesNavRoutes} from '@/lib/navigation';
 import {translations} from '@/lib/translations';
 
 import {useUser} from '@/contexts/UserContext';

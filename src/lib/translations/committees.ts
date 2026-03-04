@@ -1,4 +1,8 @@
 export const committeesTranslations = {
+  page: {
+    title: 'Komise',
+    description: 'Správa oblastních soutěžních komisí',
+  },
   title: 'Správa komisí',
   description: 'Správa komisí, které jsou dostupné v systému.',
   addCommittee: 'Přidat komisi',

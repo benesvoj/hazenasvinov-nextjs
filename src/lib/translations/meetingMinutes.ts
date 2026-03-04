@@ -1,6 +1,8 @@
 export const meetingMinutesTranslations = {
-  title: 'Zápisy z výborových schůzí',
-  description: 'Správa zápisů z výborových schůzí a jejich účastníků.',
+  page: {
+    title: 'Zápisy z výborových schůzí',
+    description: 'Správa zápisů z výborových schůzí a jejich účastníků.',
+  },
   addMeetingMinutes: 'Přidat zápis',
   editMeetingMinutes: 'Upravit zápis',
   deleteMeetingMinutes: 'Smazat zápis',

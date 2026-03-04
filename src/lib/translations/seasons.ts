@@ -1,4 +1,8 @@
 export const seasonsTranslations = {
+  page: {
+    title: 'Sezóna',
+    description: 'Správa sezón, které jsou dostupné v systému.',
+  },
   activeLabel: 'Aktivní',
   inactiveLabel: 'Neaktivní',
   closedLabel: 'Uzavřená',
@@ -10,8 +14,6 @@ export const seasonsTranslations = {
     status: 'Status',
     actions: 'Akce',
   },
-  title: 'Sezóna',
-  description: 'Správa sezón, které jsou dostupné v systému.',
   selectSeason: 'Vyberte sezónu',
   noSeasons: 'Žádné sezóny nebyly načteny',
   modal: {

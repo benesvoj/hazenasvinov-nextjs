@@ -17,9 +17,9 @@ export default function CoachMeetingMinutesPage() {
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <DocumentTextIcon className="w-8 h-8 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t.page.title}</h1>
         </div>
-        <p className="text-gray-600">{t.description}</p>
+        <p className="text-gray-600">{t.page.description}</p>
       </div>
 
       <MeetingMinutesContainer />

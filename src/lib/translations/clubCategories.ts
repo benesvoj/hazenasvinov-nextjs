@@ -1,6 +1,8 @@
 export const clubCategoriesTranslations = {
-  title: 'Správa kategorií klubů',
-  description: 'Správa kategorií klubů, které jsou dostupné v systému.',
+  page: {
+    title: 'Správa kategorií klubů',
+    description: 'Správa kategorií klubů, které jsou dostupné v systému.',
+  },
   addClubCategory: 'Přidat kategorii klubu',
   editClubCategory: 'Upravit kategorii klubu',
   deleteClubCategory: 'Smazat kategorii klubu',

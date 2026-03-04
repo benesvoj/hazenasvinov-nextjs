@@ -168,7 +168,7 @@ export function CategoriesPageClient() {
         ]}
       >
         <Tabs aria-label="Categories admin tabs">
-          <Tab key="categories" title={translations.categories.pageTitle}>
+          <Tab key="categories" title={translations.categories.page.title}>
             <UnifiedTable
               columns={categoryColumns}
               data={categories}

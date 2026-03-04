@@ -197,11 +197,6 @@ export const commonTranslations = {
       december: 'Prosinec',
     },
   },
-  photoGallery: {
-    title: 'Správa fotogalerie',
-    description: 'Správa fotogalerie, které jsou dostupné v systému.',
-    addPhoto: 'Nová fotka',
-  },
   item: 'položka',
   filteredBy: 'Filtrovat podle',
   page: 'Stránka',
@@ -221,4 +216,8 @@ export const commonTranslations = {
   signup: 'Registrovat se',
   logout: 'Odhlásit se',
   returnBackToHomepage: 'Zpět na úvodní stránku',
+  portals: {
+    admin: 'Administrace',
+    coach: 'Trenérský portal',
+  },
 };

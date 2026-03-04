@@ -1,6 +1,8 @@
 export const matchRecordingsTranslations = {
-  title: 'Správa videí',
-  description: 'Správa videí, které jsou dostupné v systému.',
+  page: {
+    title: 'Záznamy zápasů',
+    description: 'Správa záznamů zápasů pro jednotlivé kategorie',
+  },
   addVideo: 'Nové video',
   editVideo: 'Upravit video',
   deleteModal: {

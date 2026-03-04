@@ -16,6 +16,7 @@ import {
   getMemberFunctionOptions,
   getModalModeOptions,
   getPlayerPositionOptions,
+  getPortalVariantsOptions,
   getRelationshipStatusOptions,
   getRelationshipTypeOptions,
   getTeamTypesOptions,
@@ -60,6 +61,7 @@ export const matchStatusOptions = createOptionsRecord(getMatchStatusOptions());
 export const memberFunctionOptions = createOptionsRecord(getMemberFunctionOptions());
 export const modalModeOptions = createOptionsRecord(getModalModeOptions());
 export const playerPositionOptions = createOptionsRecord(getPlayerPositionOptions());
+export const portalVariantsOptions = createOptionsRecord(getPortalVariantsOptions());
 export const relationshipStatusOptions = createOptionsRecord(getRelationshipStatusOptions());
 export const relationshipTypeOptions = createOptionsRecord(getRelationshipTypeOptions());
 export const teamTypesOptions = createOptionsRecord(getTeamTypesOptions());

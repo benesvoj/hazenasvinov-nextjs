@@ -1,6 +1,8 @@
 export const sponsorshipTranslations = {
-  title: 'Sponzorství',
-  description: 'Správa sponzorů, partnerů a sponzorských balíčků.',
+  page: {
+    title: 'Sponzorství',
+    description: 'Správa sponzorů, partnerů a sponzorských balíčků.',
+  },
   sponsors: 'Sponzoři',
   packages: 'Sponzorské balíčky',
   partners: 'Partneři',

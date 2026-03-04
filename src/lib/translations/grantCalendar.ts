@@ -1,6 +1,8 @@
 export const grantCalendarTranslations = {
-  title: 'Kalendář dotací',
-  description: 'Přehled a správa dotací pro váš klub.',
+  page: {
+    title: 'Kalendář dotací',
+    description: 'Přehled a správa dotací pro váš klub.',
+  },
   addGrant: 'Přidat dotaci',
   editGrant: 'Upravit dotaci',
   deleteGrant: 'Smazat dotaci',

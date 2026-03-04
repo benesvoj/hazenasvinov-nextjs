@@ -179,7 +179,7 @@ export default function ClubCategoriesAdminPage() {
         <UnifiedTable
           columns={clubCategoryColumns}
           data={filteredClubCategories}
-          ariaLabel={t.title}
+          ariaLabel={t.page.title}
           renderCell={renderClubCategoryCell}
           getKey={(clubCategory: ClubCategorySchema) => clubCategory.id}
           emptyContent={t.table.noClubCategories}

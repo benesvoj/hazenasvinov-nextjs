@@ -1,4 +1,8 @@
 export const matchesTranslations = {
+  page: {
+    title: 'Zápasy',
+    description: 'Správa zápasů, výsledků a tabulek pro všechny kategorie',
+  },
   title: 'Zápasy',
   description: 'Správa zápasů, které se konají v rámci systému.',
   matchNumber: 'Číslo zápasu',

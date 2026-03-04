@@ -181,7 +181,7 @@ export default function ClubsAdminPage() {
           isLoading={fetchLoading}
           columns={clubColumns}
           data={data}
-          ariaLabel={translations.clubs.title}
+          ariaLabel={translations.clubs.page.title}
           renderCell={renderClubCell}
           getKey={(club: Club) => club.id}
           emptyContent={translations.clubs.table.noClubs}

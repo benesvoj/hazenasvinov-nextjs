@@ -3,6 +3,7 @@
 import React from 'react';
 
 import {UnifiedSidebar} from '@/components';
+import {PortalVariants} from '@/enums';
 
 import {useCoachesSidebar} from './CoachesSidebarContext';
 
@@ -11,7 +12,7 @@ export const CoachesSidebar = () => {
 
   return (
     <UnifiedSidebar
-      variant="coach"
+      variant={PortalVariants.COACH}
       sidebarContext={{
         isCollapsed: sidebarContext.isCollapsed,
         isMobileOpen: sidebarContext.isMobileOpen,
