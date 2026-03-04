@@ -2,13 +2,14 @@
 
 import {Card, CardBody, CardHeader, Button, Spinner} from '@heroui/react';
 
+// TODO: replace lucide-react icons with Heroicons or custom icons to reduce bundle size
 import {Wallet, TrendingUp, TrendingDown} from 'lucide-react';
 
 import {formatCurrency} from '@/types/features/betting/wallet';
 
 import {useWalletBalance, useWalletSummary} from '@/hooks/features/betting/useWallet';
 
-import {translations} from '@/lib';
+import {translations} from '@/lib/translations';
 
 interface WalletBalanceProps {
   userId: string;

@@ -4,13 +4,13 @@ import React from 'react';
 
 import {usePathname} from 'next/navigation';
 
-import {translations} from '@/lib/translations/index';
+import {coachesNavRoutes} from '@/lib/app-routes';
+import {translations} from '@/lib/translations';
 
 import {useUser} from '@/contexts/UserContext';
 
 import {UnifiedTopBar} from '@/components';
 import {UserRoles} from '@/enums';
-import {coachesNavRoutes} from '@/lib';
 
 import {useCoachesSidebar} from './CoachesSidebarContext';
 

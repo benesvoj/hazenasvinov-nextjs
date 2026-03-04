@@ -11,6 +11,9 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {
   MeetingMinutesFormModal,
   DeleteConfirmationModal,
@@ -20,7 +23,6 @@ import {
   MeetingMinutesCard,
 } from '@/components';
 import {useFetchSeasons, useMeetingMinutes} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
 import {
   MeetingMinutes,
   MeetingMinutesFilters,

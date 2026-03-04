@@ -3,9 +3,9 @@ import {type NextRequest} from 'next/server';
 
 import {type EmailOtpType} from '@supabase/supabase-js';
 
-import {supabaseServerClient} from '@/utils/supabase/server';
+import {APP_ROUTES} from '@/lib/app-routes';
 
-import {APP_ROUTES} from '@/lib';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
   const {searchParams} = new URL(request.url);

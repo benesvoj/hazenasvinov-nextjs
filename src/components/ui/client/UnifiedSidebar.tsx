@@ -30,9 +30,9 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations/index';
+import {APP_ROUTES, coachesNavRoutes} from '@/lib/app-routes';
+import {translations} from '@/lib/translations';
 
-import {APP_ROUTES, coachesNavRoutes} from '@/lib';
 import routes from '@/routes/routes';
 
 interface UnifiedSidebarProps {

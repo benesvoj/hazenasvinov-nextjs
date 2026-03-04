@@ -2,14 +2,15 @@
 
 import {useState} from 'react';
 
-import {Card, CardBody, CardHeader, Input, Button, Divider, Chip, Alert} from '@heroui/react';
+import {Alert, Button, Card, CardBody, CardHeader, Divider, Input} from '@heroui/react';
 
-import {Lock, Mail, TrendingUp, Trophy, DollarSign, AlertCircle, CheckCircle} from 'lucide-react';
+import {DollarSign, Lock, Mail, TrendingUp, Trophy} from 'lucide-react';
+
+import {translations} from '@/lib/translations';
 
 import {bettingLogin} from '@/utils/supabase/bettingAuth';
 
 import {showToast} from '@/components';
-import {translations} from '@/lib';
 
 interface BettingLoginProps {
   onLoginSuccess?: () => void;

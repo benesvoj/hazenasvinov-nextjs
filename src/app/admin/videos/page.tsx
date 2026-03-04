@@ -4,7 +4,7 @@ import React, {useCallback, useMemo, useState} from 'react';
 
 import {useModalWithItem} from '@/hooks/shared/useModals';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {useAppData} from '@/contexts/AppDataContext';
 

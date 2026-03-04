@@ -10,7 +10,8 @@
  * 2. Create a helper function using buildUrl utility
  */
 
-import {API_ROUTES} from '@/lib';
+import {API_ROUTES} from '@/lib/api-routes';
+
 import {buildUrl} from '@/utils';
 
 /**

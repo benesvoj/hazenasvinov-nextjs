@@ -2,7 +2,9 @@
 
 import {createDataFetchHook} from '@/hooks/factories';
 
-import {API_ROUTES, translations} from '@/lib';
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {Category} from '@/types';
 
 const t = translations.categories.responseMessages;

@@ -5,8 +5,9 @@ import {Image} from '@heroui/image';
 
 import Link from '@/components/ui/link/Link';
 
+import {translations} from '@/lib/translations';
+
 import {useFetchClubConfig} from '@/hooks';
-import {translations} from '@/lib';
 
 export default function HeroSection() {
   const {data: clubConfig} = useFetchClubConfig();

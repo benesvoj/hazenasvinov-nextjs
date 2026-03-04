@@ -4,13 +4,16 @@ import React, {Suspense, useEffect, useState} from 'react';
 
 import {useRouter, useSearchParams} from 'next/navigation';
 
-import {Button, Card, CardBody, CardHeader, Input} from '@heroui/react';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Input} from '@heroui/input';
 
 import {CheckCircleIcon, EyeIcon, EyeSlashIcon, LockClosedIcon} from '@heroicons/react/24/outline';
 
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {Heading} from '@/components';
 import {useSupabaseClient} from '@/hooks';
-import {APP_ROUTES} from '@/lib';
 
 function ResetPasswordContent() {
   const router = useRouter();

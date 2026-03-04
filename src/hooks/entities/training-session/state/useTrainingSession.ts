@@ -1,9 +1,10 @@
 'use client';
 
-import {translations} from '@/lib/translations/index';
+import {createCRUDHook} from '@/hooks/factories';
 
-import {createCRUDHook} from '@/hooks';
-import {API_ROUTES} from '@/lib';
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {DB_TABLE, ENTITY} from '@/queries/trainingSessions';
 import {BaseTrainingSession, TrainingSessionInsert} from '@/types';
 

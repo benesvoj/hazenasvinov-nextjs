@@ -4,7 +4,7 @@ import {useEffect} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {APP_ROUTES} from '@/lib';
+import {APP_ROUTES} from '@/lib/app-routes';
 
 export default function CoachesLoginRedirect() {
   const router = useRouter();

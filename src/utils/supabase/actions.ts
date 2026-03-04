@@ -3,9 +3,9 @@
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 
-import {supabaseServerClient} from '@/utils/supabase/server';
+import {APP_ROUTES} from '@/lib/app-routes';
 
-import {APP_ROUTES} from '@/lib';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function login(formData: FormData) {
   const supabase = await supabaseServerClient();

@@ -1,8 +1,9 @@
 'use client';
 import {useCallback, useEffect, useState} from 'react';
 
+import {API_ROUTES} from '@/lib/api-routes';
+
 import {showToast} from '@/components';
-import {API_ROUTES} from '@/lib';
 import {convertOnLoanMemberSchema, MemberOnLoan, MembersOnLoanSchema} from '@/types';
 
 export const useFetchMembersOnLoan = () => {

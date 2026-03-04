@@ -4,8 +4,9 @@ import React, {forwardRef, useEffect, useImperativeHandle} from 'react';
 
 import {Card} from '@heroui/react';
 
+import {translations} from '@/lib/translations';
+
 import {TeamTypes} from '@/enums';
-import {translations} from '@/lib';
 import {LineupManagerProps, LineupManagerRef} from '@/types';
 
 import {LineupErrorBoundary, LineupSkeleton, TeamSelector} from './lineupManager/components';

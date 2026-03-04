@@ -2,10 +2,11 @@
 
 import {useCallback, useEffect, useRef, useState} from 'react';
 
+import {API_ROUTES} from '@/lib/api-routes';
+
 import {showToast} from '@/components';
 import {Genders, MemberFunction} from '@/enums';
 import {useDebounce} from '@/hooks';
-import {API_ROUTES} from '@/lib';
 import {convertToInternalMemberWithPayment, MemberInternal, MembersInternalSchema} from '@/types';
 
 interface PaginationInfo {

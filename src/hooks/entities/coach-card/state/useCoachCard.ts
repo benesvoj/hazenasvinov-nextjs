@@ -1,10 +1,11 @@
 'use client';
 
-import {translations} from '@/lib/translations/index';
+import {createCRUDHook} from '@/hooks/factories';
 
-import {createCRUDHook} from '@/hooks';
-import {API_ROUTES} from '@/lib';
-import {DB_TABLE, ENTITY} from '@/queries/coachCards';
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
+import {ENTITY} from '@/queries/coachCards';
 import {CoachCard, CoachCardInsert} from '@/types';
 
 /**

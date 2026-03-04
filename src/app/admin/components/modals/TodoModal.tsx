@@ -1,8 +1,9 @@
 import {Button, Input, Select, SelectItem, Textarea} from '@heroui/react';
 
+import {translations} from '@/lib/translations';
+
 import {UnifiedModal} from '@/components';
 import {getTodoCategoriesOptions, getTodoPrioritiesOptions, ModalMode} from '@/enums';
-import {translations} from '@/lib';
 import {TodoItem, TodoModalProps} from '@/types';
 
 export const TodoModal = ({

@@ -4,9 +4,10 @@ import {Button, Input} from '@heroui/react';
 
 import {LogoUpload} from '@/components/ui/client';
 
+import {translations} from '@/lib/translations';
+
 import {UnifiedModal} from '@/components';
 import {ModalMode} from '@/enums';
-import {translations} from '@/lib';
 import {ClubFormData} from '@/types';
 
 interface ClubFormModalProps {

@@ -1,4 +1,5 @@
-import {APP_ROUTES} from '@/lib';
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {PageVisibility} from '@/types';
 
 export interface MenuItem {

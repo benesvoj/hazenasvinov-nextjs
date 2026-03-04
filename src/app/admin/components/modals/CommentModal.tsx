@@ -1,8 +1,9 @@
 import {Button, Select, SelectItem, Textarea} from '@heroui/react';
 
+import {translations} from '@/lib/translations';
+
 import {UnifiedModal} from '@/components';
 import {CommentTypes, getCommentTypesOptions, ModalMode} from '@/enums';
-import {translations} from '@/lib';
 import {CommentModalProps} from '@/types';
 
 export const CommentModal = ({

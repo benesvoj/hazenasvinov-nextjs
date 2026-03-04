@@ -2,7 +2,7 @@
 
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 
-import {API_ROUTES} from '@/lib';
+import {API_ROUTES} from '@/lib/api-routes';
 
 export interface AttendanceStatistics {
   summary: {

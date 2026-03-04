@@ -2,12 +2,13 @@
 
 import React, {useCallback, useState} from 'react';
 
+import {translations} from '@/lib/translations';
+
 import {generateSlug} from '@/utils/slugGenerator';
 
 import {showToast} from '@/components';
 import {BLOG_POST_STATUSES} from '@/enums';
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {Blog, BlogPostFormData, Match} from '@/types';
 
 const initialFormData: BlogPostFormData = {

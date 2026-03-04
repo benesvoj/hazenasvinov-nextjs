@@ -4,16 +4,16 @@ import React from 'react';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
 import {ActionTypes, ColumnAlignType, ModalMode} from '@/enums';
 import {useFetchMemberFunctions, useMemberFunctionForm, useMemberFunctions} from '@/hooks';
-import {translations} from '@/lib';
 import {MemberFunction} from '@/types';
 
 import FunctionFormModal from './components/FunctionFormModal';
 
 const tAction = translations.common.actions;
-const tCommon = translations.common;
 const tMemberFunctions = translations.memberFunctions;
 
 export default function MemberFunctionsAdminPage() {

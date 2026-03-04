@@ -1,6 +1,5 @@
-import {translations} from '@/lib/translations/index';
-
-import {APP_ROUTES} from '@/lib';
+import {APP_ROUTES} from '@/lib/app-routes';
+import {translations} from '@/lib/translations';
 
 export interface MenuItem {
   title: string;

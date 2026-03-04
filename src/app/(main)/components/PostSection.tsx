@@ -10,9 +10,9 @@ import {useFetchBlogPostsPublished} from '@/hooks/entities/blog/data/useFetchBlo
 import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
 import {Link} from '@/components/ui';
 
-import {translations} from '@/lib/translations/index';
+import {APP_ROUTES} from '@/lib/app-routes';
+import {translations} from '@/lib/translations';
 
-import {APP_ROUTES} from '@/lib';
 import {hasItems} from '@/utils';
 
 export default function PostSection() {

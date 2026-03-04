@@ -7,7 +7,7 @@ import {
   VideoCameraIcon,
 } from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 const COACH_ROOT = '/coaches';
 const ADMIN_ROOT = '/admin';

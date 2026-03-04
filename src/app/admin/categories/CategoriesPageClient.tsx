@@ -8,6 +8,8 @@ import {useQuery} from '@tanstack/react-query';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import {getAgeGroupLabel, getGenderLabel, getStatusClasses, getStatusLabel} from '@/helpers/ui';
 
 import CategoryFeesTab from '@/app/admin/categories/components/CategoryFeesTab';
@@ -15,7 +17,6 @@ import CategoryFeesTab from '@/app/admin/categories/components/CategoryFeesTab';
 import {AdminContainer, DeleteConfirmationModal, Search, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {useCategories, useCategoryFiltering, useCategoryForm} from '@/hooks';
-import {translations} from '@/lib';
 import {fetchCategories} from '@/queries/categories/queries';
 import {Category} from '@/types';
 

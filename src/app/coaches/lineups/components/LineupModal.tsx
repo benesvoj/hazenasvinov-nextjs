@@ -2,9 +2,10 @@ import React from 'react';
 
 import {Button, Input, Textarea} from '@heroui/react';
 
+import {translations} from '@/lib/translations';
+
 import {UnifiedModal} from '@/components';
 import {ModalMode} from '@/enums';
-import {translations} from '@/lib';
 import {CategoryLineupFormData} from '@/types';
 
 interface LineupModalProps {

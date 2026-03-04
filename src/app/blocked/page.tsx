@@ -8,7 +8,7 @@ import {Button, Card, CardBody, CardHeader} from '@heroui/react';
 
 import {ArrowLeftIcon, EnvelopeIcon, ShieldExclamationIcon} from '@heroicons/react/24/outline';
 
-import {APP_ROUTES} from '@/lib';
+import {APP_ROUTES} from '@/lib/app-routes';
 
 export const dynamic = 'force-dynamic';
 

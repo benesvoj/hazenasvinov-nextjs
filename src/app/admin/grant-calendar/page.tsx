@@ -3,11 +3,12 @@ import React from 'react';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import {AdminContainer, DeleteConfirmationModal, GrantModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {getMonthName} from '@/helpers';
 import {useFetchGrants, useGrantForm, useGrants} from '@/hooks';
-import {translations} from '@/lib';
 import {Grant} from '@/types';
 
 const t = translations.grantCalendar;

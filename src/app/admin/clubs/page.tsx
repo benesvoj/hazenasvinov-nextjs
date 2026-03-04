@@ -8,14 +8,14 @@ import {Image, Input} from '@heroui/react';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
-import {translations} from '@/lib/translations/index';
+import {APP_ROUTES} from '@/lib/app-routes';
+import {translations} from '@/lib/translations';
 
 import {ClubFormModal} from '@/app/admin/clubs/components/ClubFormModal';
 
 import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {useClubFiltering, useClubForm, useClubs, useFetchClubs} from '@/hooks';
-import {APP_ROUTES} from '@/lib';
 import {Club} from '@/types';
 
 export default function ClubsAdminPage() {

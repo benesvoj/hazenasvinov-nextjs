@@ -1,4 +1,4 @@
-import {translations} from '@/lib';
+import {translations} from '@/lib/translations';
 
 const monthTranslations = translations.common.enums.months;
 

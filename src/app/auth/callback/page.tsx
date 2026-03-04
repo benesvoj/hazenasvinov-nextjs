@@ -4,9 +4,10 @@ import {useEffect} from 'react';
 
 import {useRouter} from 'next/navigation';
 
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {LoadingSpinner} from '@/components';
 import {useSupabaseClient} from '@/hooks';
-import {APP_ROUTES} from '@/lib';
 
 export const dynamic = 'force-dynamic';
 

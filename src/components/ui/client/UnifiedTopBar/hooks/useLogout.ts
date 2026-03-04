@@ -4,11 +4,11 @@ import {useState} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {translations} from '@/lib/translations/index';
+import {APP_ROUTES} from '@/lib/app-routes';
+import {translations} from '@/lib/translations';
 
 import {showToast} from '@/components';
 import {useAuth} from '@/hooks';
-import {APP_ROUTES} from '@/lib';
 import {logLogout} from '@/utils';
 
 // Logout timing constants

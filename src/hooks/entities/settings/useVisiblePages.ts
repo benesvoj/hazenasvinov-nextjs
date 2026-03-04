@@ -1,7 +1,9 @@
 'use client';
+
 import {useState, useEffect} from 'react';
 
-import {API_ROUTES} from '@/lib';
+import {API_ROUTES} from '@/lib/api-routes';
+
 import {PageVisibility} from '@/types';
 
 export const useVisiblePages = () => {

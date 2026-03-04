@@ -9,9 +9,10 @@ import {Card, Button} from '@heroui/react';
 import {CategoryChip, DateChip} from '@/components/ui/chips';
 import Link from '@/components/ui/link/Link';
 
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {useAppDataSafe} from '@/contexts/AppDataContext';
 
-import {APP_ROUTES} from '@/lib';
 import {Blog, Category} from '@/types';
 
 interface BlogPostCardProps {

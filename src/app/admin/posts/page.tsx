@@ -8,6 +8,8 @@ import {PhotoIcon, TagIcon} from '@heroicons/react/24/outline';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import {uploadClubAsset} from '@/utils/supabase/storage';
 
 import {BlogPostModal} from '@/app/admin/posts/components/BlogPostModal';
@@ -25,7 +27,6 @@ import {
   useFetchCategories,
   useFetchUsers,
 } from '@/hooks';
-import {translations} from '@/lib';
 import {Blog} from '@/types';
 
 const t = translations.blogPosts;

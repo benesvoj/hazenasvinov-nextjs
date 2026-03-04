@@ -6,9 +6,10 @@ import {Input, Select, SelectItem, Textarea} from '@heroui/react';
 
 import UnifiedModal from '@/components/ui/modals/UnifiedModal';
 
+import {translations} from '@/lib/translations';
+
 import {ModalMode} from '@/enums';
 import {MONTH_OPTIONS} from '@/helpers';
-import {translations} from '@/lib';
 import {GrantFormData} from '@/types';
 
 interface GrantModalProps {

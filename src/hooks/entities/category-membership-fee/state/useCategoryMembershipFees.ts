@@ -2,8 +2,9 @@
 
 import {useCallback, useState} from 'react';
 
+import {translations} from '@/lib/translations';
+
 import {showToast} from '@/components';
-import {translations} from '@/lib';
 import {CategoryMembershipFee, CreateCategoryFeeData, UpdateCategoryFeeData} from '@/types';
 
 const t = translations.membershipFees;

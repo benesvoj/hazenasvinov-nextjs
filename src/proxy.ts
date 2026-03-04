@@ -1,8 +1,8 @@
 import {type NextRequest, NextResponse} from 'next/server';
 
-import {supabaseServerClient} from '@/utils/supabase/server';
+import {APP_ROUTES} from '@/lib/app-routes';
 
-import {APP_ROUTES} from '@/lib';
+import {supabaseServerClient} from '@/utils/supabase/server';
 
 export async function proxy(request: NextRequest) {
   try {

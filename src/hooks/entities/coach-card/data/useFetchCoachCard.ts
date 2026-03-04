@@ -2,10 +2,10 @@
 
 import {useCallback, useEffect, useState} from 'react';
 
-import {translations} from '@/lib/translations/index';
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
 
 import {showToast} from '@/components';
-import {API_ROUTES} from '@/lib';
 import {CoachCard} from '@/types';
 
 /**

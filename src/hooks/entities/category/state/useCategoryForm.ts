@@ -1,7 +1,8 @@
 'use client';
 
+import {translations} from '@/lib/translations';
+
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {Category, CategoryFormData} from '@/types';
 
 const t = translations.categories.responseMessages;

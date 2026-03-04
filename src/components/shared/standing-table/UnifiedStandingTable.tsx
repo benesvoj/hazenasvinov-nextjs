@@ -2,10 +2,11 @@ import Image from 'next/image';
 
 import {TrophyIcon} from '@heroicons/react/24/outline';
 
+import {translations} from '@/lib/translations';
+
 import {createClubTeamCountsMap, getTeamDisplayNameSafe} from '@/utils/teamDisplay';
 
 import {Heading, UnifiedTable} from '@/components';
-import {translations} from '@/lib';
 import {EnhancedStanding, UnifiedStandingsTable, ColumnType} from '@/types';
 
 const t = translations.components.unifiedStandingTable;

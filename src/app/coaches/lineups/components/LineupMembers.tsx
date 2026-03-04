@@ -8,13 +8,14 @@ import {UserPlusIcon} from '@heroicons/react/24/outline';
 
 import {useModal} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import AddMemberModal from '@/app/coaches/lineups/components/AddMemberModal';
 import {getPositionColor, getPositionText} from '@/app/coaches/lineups/helpers/helpers';
 
 import {Heading, UnifiedTable} from '@/components';
 import {ActionTypes, ColumnAlignType} from '@/enums';
 import {useCategoryLineupMember, useFetchCategories, useFetchCategoryLineupMembers} from '@/hooks';
-import {translations} from '@/lib';
 import {
   CategoryLineupMemberWithMember,
   ColumnType,

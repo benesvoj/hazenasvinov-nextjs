@@ -4,6 +4,7 @@ import {useCallback, useMemo} from 'react';
 
 import {Card, CardBody, CardHeader, Chip, Image, Spinner} from '@heroui/react';
 
+// TODO: replace lucide-react
 import {Calendar, MapPin} from 'lucide-react';
 
 import {
@@ -11,9 +12,10 @@ import {
   BettingOptionButtonProps,
 } from '@/components/features/betting/BettingOptionButton';
 
+import {translations} from '@/lib/translations';
+
 import {formatDateWithTime} from '@/helpers';
 import {useMatchOdds, useMatchTeamsForm} from '@/hooks';
-import {translations} from '@/lib';
 import {BetSelection, BetSlipItem, BetTypeId, MatchBettingData} from '@/types';
 
 interface MatchBettingCardProps {

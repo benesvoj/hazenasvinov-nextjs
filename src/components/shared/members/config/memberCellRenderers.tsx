@@ -10,10 +10,11 @@ import {
   PaymentStatus,
 } from '@/enums/membershipFeeStatus';
 
+import {translations} from '@/lib/translations';
+
 import {StatusCell} from '@/app/admin/members/components';
 
 import {getMemberFunctionOptions} from '@/enums';
-import {translations} from '@/lib';
 import {MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
 
 // Internal member cell renderer (includes payment status)

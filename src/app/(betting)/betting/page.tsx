@@ -19,6 +19,8 @@ import {
   Trophy,
 } from 'lucide-react';
 
+import {translations} from '@/lib/translations';
+
 import {
   BetHistory,
   BetSlip,
@@ -32,7 +34,6 @@ import {
 } from '@/components';
 import {useUser} from '@/contexts';
 import {useUpcomingBettingMatches} from '@/hooks';
-import {translations} from '@/lib';
 import {BetSlipItem} from '@/types';
 import {bettingLogout} from '@/utils';
 

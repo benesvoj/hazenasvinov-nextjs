@@ -1,8 +1,9 @@
 'use client';
 import {useState, useCallback, useEffect} from 'react';
 
+import {translations} from '@/lib/translations';
+
 import {showToast} from '@/components';
-import {translations} from '@/lib';
 import {
   MembershipFeePayment,
   CreateMembershipFeePayment,

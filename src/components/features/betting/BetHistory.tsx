@@ -2,20 +2,22 @@
 
 import {useState} from 'react';
 
-import {Card, CardBody, CardHeader, Chip, Tabs, Tab, Spinner, Image} from '@heroui/react';
+import {Card, CardBody, CardHeader, Chip, Spinner, Tab, Tabs} from '@heroui/react';
 
-import {Calendar, TrendingUp, TrendingDown, Trophy} from 'lucide-react';
+// TODO: replace lucide-react
+import {Calendar, TrendingDown, TrendingUp, Trophy} from 'lucide-react';
+
+import {translations} from '@/lib/translations';
 
 import {formatDateString, formatDateTimeFromString} from '@/helpers';
 import {useUserBets, useUserBetStats} from '@/hooks';
-import {translations} from '@/lib';
 import {formatOdds} from '@/services';
 import {
   BetStatus,
+  formatCurrency,
   getBetStatusColor,
   getBetStatusLabel,
   getBetTypeMetadata,
-  formatCurrency,
 } from '@/types';
 
 interface BetHistoryProps {

@@ -13,6 +13,8 @@ import {formatCurrency} from '@/types/features/betting/wallet';
 import {useCreateBet} from '@/hooks/features/betting/useBets';
 import {useWalletBalance} from '@/hooks/features/betting/useWallet';
 
+import {translations} from '@/lib/translations';
+
 import {
   calculateTotalOdds,
   calculateReturn,
@@ -21,7 +23,6 @@ import {
 } from '@/services/features/betting/oddsCalculator';
 
 import {showToast} from '@/components';
-import {translations} from '@/lib';
 
 interface BetSlipProps {
   userId: string;

@@ -1,7 +1,8 @@
 'use client';
 
+import {translations} from '@/lib/translations';
+
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {Grant, GrantFormData} from '@/types';
 
 const t = translations.grantCalendar.responseMessages;

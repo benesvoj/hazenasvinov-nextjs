@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import {APP_ROUTES} from '@/lib';
+import {APP_ROUTES} from '@/lib/app-routes';
 
 export default function NotFound() {
   return (

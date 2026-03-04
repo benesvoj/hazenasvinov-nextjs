@@ -8,7 +8,7 @@ import {Button, Card, CardBody} from '@heroui/react';
 
 import {ExclamationTriangleIcon, LockClosedIcon} from '@heroicons/react/24/outline';
 
-import {APP_ROUTES} from '@/lib';
+import {APP_ROUTES} from '@/lib/app-routes';
 
 function ErrorPageContent() {
   const searchParams = useSearchParams();

@@ -16,11 +16,12 @@ import {
 
 import {PasswordInput} from '@/components/ui/client/inputs/PasswordInput';
 
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {logFailedLogin, logSuccessfulLogin} from '@/utils/loginLogger';
 
 import {LoadingSpinner} from '@/components';
 import {useSupabaseClient} from '@/hooks';
-import {APP_ROUTES} from '@/lib';
 
 function LoginForm() {
   const supabase = useSupabaseClient();

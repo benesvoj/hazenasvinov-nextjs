@@ -1,7 +1,9 @@
 'use client';
+
+import {translations} from '@/lib/translations';
+
 import {CommentTypes} from '@/enums';
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {CommentFormData, BaseComment} from '@/types';
 
 const initialFormData: CommentFormData = {

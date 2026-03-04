@@ -2,11 +2,12 @@ import React from 'react';
 
 import {Checkbox, Input, Select, SelectItem, Tab, Tabs} from '@heroui/react';
 
+import {translations} from '@/lib/translations';
+
 import CategoryFeeQuickView from '@/app/admin/categories/components/CategoryFeeQuickView';
 
 import {UnifiedModal} from '@/components';
 import {AgeGroups, Genders, getAgeGroupsOptions, getGenderOptions, ModalMode} from '@/enums';
-import {translations} from '@/lib';
 import {Category, CategoryFormData} from '@/types';
 
 export interface CategoryModalProps {

@@ -2,9 +2,9 @@
 
 import {createDataFetchHook} from '@/hooks/factories';
 
-import {translations} from "@/lib/translations/index";
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
 
-import {API_ROUTES} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/videos';
 import {VideoSchema} from '@/types';
 
@@ -15,13 +15,11 @@ import {VideoSchema} from '@/types';
  * @return {Function} A function that, when invoked, initiates the data fetch and returns the fetched video data adhering to the `VideoSchema`.
  */
 export function useFetchVideos(categoryIds?: string[]) {
-	const params = categoryIds?.length
-		? `?category_ids=${categoryIds.join(',')}`
-		: '';
+  const params = categoryIds?.length ? `?category_ids=${categoryIds.join(',')}` : '';
 
-	return createDataFetchHook<VideoSchema>({
-		endpoint: API_ROUTES.entities.root(DB_TABLE) + params,
-		entityName: ENTITY.plural,
-		errorMessage: translations.matchRecordings.responseMessages.fetchFailed,
-	})();
+  return createDataFetchHook<VideoSchema>({
+    endpoint: API_ROUTES.entities.root(DB_TABLE) + params,
+    entityName: ENTITY.plural,
+    errorMessage: translations.matchRecordings.responseMessages.fetchFailed,
+  })();
 }
