@@ -36,12 +36,6 @@ interface UnifiedSidebarProps {
   };
 }
 
-interface CoachRouteItem {
-  name: string;
-  href: string;
-  icon: React.ComponentType<{className?: string}>;
-}
-
 export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) => {
   const pathname = usePathname();
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
@@ -193,7 +187,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               <div>
                 <h1
                   className={`text-lg font-bold ${
-                    variant === 'admin' ? 'text-white' : 'text-gray-900 dark:text-white'
+                    variant === PortalVariants.ADMIN
+                      ? 'text-white'
+                      : 'text-gray-900 dark:text-white'
                   }`}
                 >
                   {config.title}
@@ -201,7 +197,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                 {config.subtitle && (
                   <p
                     className={`text-xs ${
-                      variant === 'admin' ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'
+                      variant === PortalVariants.ADMIN
+                        ? 'text-gray-400'
+                        : 'text-gray-500 dark:text-gray-400'
                     }`}
                   >
                     {config.subtitle}
@@ -280,17 +278,17 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                         : 'max-h-96 opacity-100'
                     }`}
                   >
-                    {groupItems.map((item: NavMenuItem | CoachRouteItem) => {
+                    {groupItems.map((item: NavMenuItem) => {
                       const isActive =
                         variant === PortalVariants.ADMIN
                           ? pathname === (item as NavMenuItem).href
-                          : pathname === (item as CoachRouteItem).href;
+                          : pathname === (item as NavMenuItem).href;
                       const icon =
                         variant === PortalVariants.ADMIN
                           ? React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
                               className: 'w-5 h-5',
                             })
-                          : React.createElement((item as CoachRouteItem).icon, {
+                          : React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
                               className: 'w-5 h-5',
                             });
 
@@ -299,12 +297,12 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                           key={
                             variant === PortalVariants.ADMIN
                               ? (item as NavMenuItem).href
-                              : (item as CoachRouteItem).href
+                              : (item as NavMenuItem).href
                           }
                           href={
                             variant === PortalVariants.ADMIN
                               ? (item as NavMenuItem).href || APP_ROUTES.admin.root
-                              : (item as CoachRouteItem).href || APP_ROUTES.coaches.dashboard
+                              : (item as NavMenuItem).href || APP_ROUTES.coaches.dashboard
                           }
                           onClick={handleNavClick}
                           className={classes.navItem(isActive)}
@@ -312,7 +310,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                             isCollapsed
                               ? variant === PortalVariants.ADMIN
                                 ? (item as NavMenuItem).title
-                                : (item as CoachRouteItem).name
+                                : (item as NavMenuItem).title
                               : undefined
                           }
                         >
@@ -321,7 +319,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                             <span className="text-sm font-medium">
                               {variant === PortalVariants.ADMIN
                                 ? (item as NavMenuItem).title
-                                : (item as CoachRouteItem).name}
+                                : (item as NavMenuItem).title}
                             </span>
                           </div>
                         </Link>
@@ -471,17 +469,17 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                       : 'max-h-96 opacity-100'
                 }`}
               >
-                {groupItems.map((item: NavMenuItem | CoachRouteItem) => {
+                {groupItems.map((item: NavMenuItem) => {
                   const isActive =
                     variant === PortalVariants.ADMIN
                       ? pathname === (item as NavMenuItem).href
-                      : pathname === (item as CoachRouteItem).href;
+                      : pathname === (item as NavMenuItem).href;
                   const icon =
                     variant === PortalVariants.ADMIN
                       ? React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
                           className: 'w-5 h-5',
                         })
-                      : React.createElement((item as CoachRouteItem).icon, {
+                      : React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
                           className: 'w-5 h-5',
                         });
 
@@ -490,19 +488,19 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                       key={
                         variant === PortalVariants.ADMIN
                           ? (item as NavMenuItem).href
-                          : (item as CoachRouteItem).href
+                          : (item as NavMenuItem).href
                       }
                       href={
                         variant === PortalVariants.ADMIN
                           ? (item as NavMenuItem).href || APP_ROUTES.admin.root
-                          : (item as CoachRouteItem).href || APP_ROUTES.coaches.dashboard
+                          : (item as NavMenuItem).href || APP_ROUTES.coaches.dashboard
                       }
                       className={classes.navItem(isActive)}
                       title={
                         isCollapsed
                           ? variant === PortalVariants.ADMIN
                             ? (item as NavMenuItem).title
-                            : (item as CoachRouteItem).name
+                            : (item as NavMenuItem).title
                           : undefined
                       }
                     >
@@ -516,7 +514,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                           <span className="text-sm font-medium">
                             {variant === PortalVariants.ADMIN
                               ? (item as NavMenuItem).title
-                              : (item as CoachRouteItem).name}
+                              : (item as NavMenuItem).title}
                           </span>
                         )}
                       </div>

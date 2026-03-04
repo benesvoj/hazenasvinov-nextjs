@@ -1,4 +1,4 @@
-import React, {ComponentType} from 'react';
+import React from 'react';
 
 import {
   BuildingOfficeIcon,
@@ -44,49 +44,49 @@ export enum RouteGroups {
   OTHER = 'other',
 }
 
-export const coachesNavRoutes = [
+export const coachesNavRoutes: NavMenuItem[] = [
   {
-    name: translations.coachPortal.routes.dashboard,
+    title: translations.coachPortal.routes.dashboard,
     href: APP_ROUTES.coaches.dashboard,
     icon: HomeIcon,
   },
   {
-    name: translations.coachPortal.routes.matches,
+    title: translations.coachPortal.routes.matches,
     href: APP_ROUTES.coaches.matches,
     icon: ClipboardDocumentListIcon,
   },
   {
-    name: translations.coachPortal.routes.lineups,
+    title: translations.coachPortal.routes.lineups,
     href: APP_ROUTES.coaches.lineups,
     icon: UserGroupIcon,
   },
   {
-    name: translations.coachPortal.routes.attendance,
+    title: translations.coachPortal.routes.attendance,
     href: APP_ROUTES.coaches.attendance,
     icon: ClipboardDocumentListIcon,
   },
   {
-    name: translations.coachPortal.routes.members,
+    title: translations.coachPortal.routes.members,
     href: APP_ROUTES.coaches.members,
     icon: UsersIcon,
   },
   {
-    name: translations.coachPortal.routes.videos,
+    title: translations.coachPortal.routes.videos,
     href: APP_ROUTES.coaches.videos,
     icon: VideoCameraIcon,
   },
   {
-    name: translations.coachPortal.routes.statistics,
+    title: translations.coachPortal.routes.statistics,
     href: APP_ROUTES.coaches.statistics,
     icon: ChartBarIcon,
   },
   {
-    name: translations.coachPortal.routes.meetingMinutes,
+    title: translations.coachPortal.routes.meetingMinutes,
     href: APP_ROUTES.coaches.meetingMinutes,
     icon: ClipboardDocumentListIcon,
   },
   {
-    name: translations.coachPortal.routes.profile,
+    title: translations.coachPortal.routes.profile,
     href: APP_ROUTES.coaches.profile,
     icon: UsersIcon,
   },

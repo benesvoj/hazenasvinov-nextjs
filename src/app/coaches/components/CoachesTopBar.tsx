@@ -20,7 +20,7 @@ const getPageInfo = (pathname: string) => {
 
   if (route) {
     // Get the route key from the href (e.g., 'dashboard' from '/coaches/dashboard')
-    const routeKey = route.href.replace(
+    const routeKey = route.href?.replace(
       '/coaches/',
       ''
     ) as keyof typeof translations.coachPortal.routes;
