@@ -93,71 +93,7 @@ export const coachesNavRoutes: NavMenuItem[] = [
 ];
 
 export const allRoutes: NavMenuItem[] = [
-  {href: APP_ROUTES.public.home, title: translations.public.landingPage.title},
-  {
-    title: 'Kategorie',
-    children: [
-      {
-        title: 'Kuřátka',
-        href: APP_ROUTES.public.category('youngestKids'),
-        description: 'Nejmladší se zájmem o pohyb',
-      },
-      {
-        title: 'Přípravka',
-        href: APP_ROUTES.public.category('prepKids'),
-        description: 'Děti 5--10 let, turnajové kategorie',
-      },
-      {
-        title: 'Mladší žáci',
-        href: APP_ROUTES.public.category('youngerBoys'),
-        description: 'Kluci 9 - 12 let, SM oblast',
-      },
-      {
-        title: 'Mladší žáčky',
-        href: APP_ROUTES.public.category('youngerGirls'),
-        description: 'Devčata 9 - 12 let, SM oblast',
-      },
-      {
-        title: 'Starší žáci',
-        href: APP_ROUTES.public.category('olderBoys'),
-        description: 'Kluci 12 - 15 let, SM oblast',
-      },
-      {
-        title: 'Starší žáčky',
-        href: APP_ROUTES.public.category('olderGirls'),
-        description: 'Devčata 12 - 15 let, SM oblast',
-      },
-      {
-        title: 'Dorostenci',
-        href: APP_ROUTES.public.category('juniorBoys'),
-        description: 'Junioři 15 - 18 let, SM oblast',
-      },
-      {
-        title: 'Dorostenky',
-        href: APP_ROUTES.public.category('juniorGirls'),
-        description: 'Juniorky 15 - 18 let, SM oblast',
-      },
-      {
-        title: 'Muži',
-        href: APP_ROUTES.public.category('men'),
-        description: '1.liga mužů, SM oblast',
-      },
-      {
-        title: 'Ženy',
-        href: APP_ROUTES.public.category('women'),
-        description: 'Oblastní liga žen, SM oblast',
-      },
-    ],
-  },
-  {href: APP_ROUTES.public.blog, title: 'Novinky'},
-  {href: APP_ROUTES.public.matches, title: 'Zápasy'},
-  {href: APP_ROUTES.public.photoGallery, title: 'Fotogalerie'},
-  {href: APP_ROUTES.public.chronicle, title: 'Kronika'},
-  {href: APP_ROUTES.public.downloads, title: 'Dokumenty'},
-  {href: APP_ROUTES.public.contact, title: 'Kontakt'},
-  {href: APP_ROUTES.public.about, title: 'O oddílu'},
-  {href: APP_ROUTES.public.celebration, title: '100 let'},
-  {href: APP_ROUTES.auth.login, title: 'Admin'},
+  {href: APP_ROUTES.auth.login, title: translations.auth.login.title},
   {
     href: APP_ROUTES.admin.root,
     title: translations.admin.root.title,

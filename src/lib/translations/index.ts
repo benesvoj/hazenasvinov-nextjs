@@ -1,5 +1,6 @@
 import {adminTranslations} from './admin';
 import {attendanceTranslations} from './attendance';
+import {authTranslations} from './auth';
 import {bettingTranslations} from './betting';
 import {blogPostsTranslation} from './blogPosts';
 import {categoriesTranslations} from './categories';
@@ -36,6 +37,7 @@ import {usersTranslations} from './users';
 
 export const translations = {
   admin: adminTranslations,
+  auth: authTranslations,
   common: commonTranslations,
   matches: matchesTranslations,
   seasons: seasonsTranslations,
