@@ -1,10 +1,9 @@
 'use client';
 
-import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
-import {VideoFormData, VideoSchema} from '@/types';
+import {translations} from "@/lib/translations/index";
 
-const t = translations.admin.videos.responseMessages;
+import {createFormHook} from '@/hooks';
+import {VideoFormData, VideoSchema} from '@/types';
 
 const initialFormData: VideoFormData = {
   title: '',
@@ -21,9 +20,9 @@ export function useVideoForm() {
   return createFormHook<VideoSchema, VideoFormData>({
     initialFormData,
     validationRules: [
-      {field: 'youtube_url', message: t.mandatoryYoutubeURL},
-      {field: 'title', message: t.mandatoryTitle},
-      {field: 'category_id', message: t.mandatoryCategory},
+      {field: 'youtube_url', message: translations.videos.responseMessages.mandatoryYoutubeURL},
+      {field: 'title', message: translations.videos.responseMessages.mandatoryTitle},
+      {field: 'category_id', message: translations.videos.responseMessages.mandatoryCategory},
     ],
   })();
 }

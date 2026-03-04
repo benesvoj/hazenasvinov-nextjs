@@ -276,7 +276,7 @@ const createVideo = trpc.video.create.useMutation();
 
 ### Code Example
 ```typescript
-// actions/videos.ts
+// actions/matchRecordings.ts
 'use server';
 
 export async function createVideo(formData: FormData) {

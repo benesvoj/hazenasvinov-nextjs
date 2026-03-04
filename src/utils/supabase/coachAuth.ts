@@ -55,6 +55,30 @@ export async function isAdmin(supabase: SupabaseClient, userId: string): Promise
 }
 
 /**
+ * Check if user's assigned_categories include the requested categoryId.
+ * Admins always return true — call isAdmin() first if you need to short-circuit.
+ *
+ * @param supabase - Server supabase client (from withAuth / withAdminAuth)
+ * @param userId   - Authenticated user ID
+ * @param categoryId - Category ID being requested
+ */
+export async function hasCategoryAccess(
+    supabase: SupabaseClient,
+    userId: string,
+    categoryId: string
+): Promise<boolean> {
+  const {data: profile} = await supabase
+      .from('user_profiles')
+      .select('assigned_categories')
+      .eq('user_id', userId)
+      .single();
+
+  return Array.isArray(profile?.assigned_categories)
+      ? profile.assigned_categories.includes(categoryId)
+      : false;
+}
+
+/**
  * Check if user owns a specific coach card
  *
  * @param supabase - Supabase client

@@ -32,6 +32,7 @@ export interface EntityConfig {
   tableName: string;
   sortBy?: {column: string; ascending: boolean}[];
   requiresAdmin?: boolean;
+  coachWritable?: boolean;
   isPublic?: boolean; // If true, endpoint is accessible without authentication
 
   queryLayer?: EntityQueryLayer;
@@ -205,6 +206,7 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     tableName: videoQueries.DB_TABLE,
     sortBy: [{column: 'recording_date', ascending: false}],
     requiresAdmin: false,
+    coachWritable: true,
     queryLayer: {
       getAll: videoQueries.getAllVideos,
       getById: videoQueries.getVideoById,

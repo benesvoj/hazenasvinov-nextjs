@@ -1,11 +1,11 @@
 'use client';
 
+import {translations} from "@/lib/translations/index";
+
 import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {API_ROUTES} from '@/lib';
 import {DB_TABLE} from '@/queries/videos';
 import {VideoInsert, VideoSchema} from '@/types';
-
-const t = translations.admin.videos.responseMessages;
 
 export function useVideos() {
   const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<
@@ -16,12 +16,12 @@ export function useVideos() {
     byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
     entityName: DB_TABLE,
     messages: {
-      createSuccess: t.createSuccess,
-      updateSuccess: t.updateSuccess,
-      deleteSuccess: t.deleteSuccess,
-      createError: t.createError,
-      updateError: t.updateError,
-      deleteError: t.deleteError,
+      createSuccess: translations.videos.responseMessages.createSuccess,
+      updateSuccess: translations.videos.responseMessages.updateSuccess,
+      deleteSuccess: translations.videos.responseMessages.deleteSuccess,
+      createError: translations.videos.responseMessages.createError,
+      updateError: translations.videos.responseMessages.updateError,
+      deleteError: translations.videos.responseMessages.deleteError,
     },
   })();
 

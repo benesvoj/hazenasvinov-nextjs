@@ -10,6 +10,7 @@ import {commonTranslations} from './common';
 import {componentsTranslations} from './components';
 import {lineupsTranslations} from './lineups';
 import {matchesTranslations} from './matches';
+import {matchRecordingsTranslations} from "./matchRecordings";
 import {meetingMinutesTranslations} from './meetingMinutes';
 import {membersTranslations} from './members';
 import {publicTranslations} from './public';
@@ -38,4 +39,5 @@ export const translations = {
   public: publicTranslations,
   lineups: lineupsTranslations,
   todos: todosTranslations,
+  matchRecordings: matchRecordingsTranslations,
 } as const;

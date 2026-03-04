@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {errorResponse, successResponse, withAdminAuth, withAuth} from '@/utils/supabase/apiHelpers';
+import {errorResponse, successResponse, withAdminAuth, withAuth} from "@/utils/supabase/apiHelpers";
+import {hasCategoryAccess, hasCoachRole, isAdmin} from "@/utils/supabase/coachAuth";
 
 import {ENTITY_CONFIGS} from '../../config';
 
@@ -12,47 +13,47 @@ import {ENTITY_CONFIGS} from '../../config';
  * - GET /api/entities/categories/456
  */
 export async function GET(
-  request: NextRequest,
-  {params}: {params: Promise<{entity: string; id: string}>}
+	request: NextRequest,
+	{params}: { params: Promise<{ entity: string; id: string }> }
 ) {
-  const {entity, id} = await params;
-  const config = ENTITY_CONFIGS[entity];
+	const {entity, id} = await params;
+	const config = ENTITY_CONFIGS[entity];
 
-  if (!config) {
-    return errorResponse(`Entity '${entity}' not found`, 404);
-  }
+	if (!config) {
+		return errorResponse(`Entity '${entity}' not found`, 404);
+	}
 
-  return withAuth(async (user, supabase) => {
-    if (!config.queryLayer?.getById) {
-      return NextResponse.json({error: 'getById not supported for this entity'}, {status: 400});
-    }
+	return withAuth(async (user, supabase) => {
+		if (!config.queryLayer?.getById) {
+			return NextResponse.json({error: 'getById not supported for this entity'}, {status: 400});
+		}
 
-    if (config.queryLayer?.getOne) {
-      const result = await config.queryLayer.getOne({supabase});
-      if (result.error) throw new Error(result.error);
-      return successResponse(result.data);
-    }
+		if (config.queryLayer?.getOne) {
+			const result = await config.queryLayer.getOne({supabase});
+			if (result.error) throw new Error(result.error);
+			return successResponse(result.data);
+		}
 
-    if (config.queryLayer) {
-      const result = await config.queryLayer.getById({supabase}, id);
+		if (config.queryLayer) {
+			const result = await config.queryLayer.getById({supabase}, id);
 
-      if (result.error) {
-        throw new Error(result.error);
-      }
+			if (result.error) {
+				throw new Error(result.error);
+			}
 
-      return successResponse(result.data);
-    }
+			return successResponse(result.data);
+		}
 
-    // FALLBACK: Legacy direct query for entities without query layer
-    const {data, error} = await supabase.from(config.tableName).select('*').eq('id', id).single();
+		// FALLBACK: Legacy direct query for entities without query layer
+		const {data, error} = await supabase.from(config.tableName).select('*').eq('id', id).single();
 
-    if (error) throw error;
-    if (!data) {
-      return errorResponse(`${entity} not found`, 404);
-    }
+		if (error) throw error;
+		if (!data) {
+			return errorResponse(`${entity} not found`, 404);
+		}
 
-    return successResponse(data);
-  });
+		return successResponse(data);
+	});
 }
 
 /**
@@ -63,43 +64,78 @@ export async function GET(
  * - PUT /api/entities/categories/456
  */
 export async function PUT(
-  request: NextRequest,
-  {params}: {params: Promise<{entity: string; id: string}>}
+	request: NextRequest,
+	{params}: { params: Promise<{ entity: string; id: string }> }
 ) {
-  const {entity, id} = await params;
-  const config = ENTITY_CONFIGS[entity];
+	const {entity, id} = await params;
+	const config = ENTITY_CONFIGS[entity];
 
-  if (!config) {
-    return errorResponse(`Entity '${entity}' not found`, 404);
-  }
+	if (!config) {
+		return errorResponse(`Entity '${entity}' not found`, 404);
+	}
 
-  return withAdminAuth(async (user, supabase, admin) => {
-    const body = await request.json();
+	if (config.coachWritable) {
+		return withAuth(async (user, supabase) => {
+			const body = await request.json();
 
-    if (config.queryLayer?.update) {
-      const result = await config.queryLayer.update({supabase: admin}, id, body);
+			const [coachRole, adminRole] = await Promise.all([
+				hasCoachRole(supabase, user.id),
+				isAdmin(supabase, user.id),
+			]);
+			if (!coachRole && !adminRole) return errorResponse('Forbidden', 403);
 
-      if (result.error) {
-        throw new Error(result.error);
-      }
+			if (!adminRole) {
+				// Fetch existing record to get its current category_id
+				const {data: existing} = await supabase
+					.from(config.tableName)
+					.select('category_id')
+					.eq('id', id)
+					.single();
+				if (!existing) return errorResponse('Not found', 404);
 
-      return successResponse(result.data);
-    }
+				const allowed = await hasCategoryAccess(supabase, user.id, existing.category_id);
+				if (!allowed) return errorResponse('Forbidden', 403);
 
-    // FALLBACK: Legacy direct query for entities without query layer
-    const {data, error} = await admin
-      .from(config.tableName)
-      .update({...body, updated_at: new Date().toISOString()})
-      .eq('id', id)
-      .select()
-      .single();
+				// If body reassigns to a different category, also check access to the new one
+				if (body.category_id && body.category_id !== existing.category_id) {
+					const allowedNew = await hasCategoryAccess(supabase, user.id, body.category_id);
+					if (!allowedNew) return errorResponse('Forbidden', 403);
+				}
+			}
 
-    if (error) {
-      throw error;
-    }
+			const result = await config.queryLayer!.update!({supabase}, id, body);
+			if (result.error) throw new Error(result.error);
+			return successResponse(result.data);
+		});
+	}
 
-    return successResponse(data);
-  });
+	return withAdminAuth(async (user, supabase, admin) => {
+		const body = await request.json();
+
+		if (config.queryLayer?.update) {
+			const result = await config.queryLayer.update({supabase: admin}, id, body);
+
+			if (result.error) {
+				throw new Error(result.error);
+			}
+
+			return successResponse(result.data);
+		}
+
+		// FALLBACK: Legacy direct query for entities without query layer
+		const {data, error} = await admin
+			.from(config.tableName)
+			.update({...body, updated_at: new Date().toISOString()})
+			.eq('id', id)
+			.select()
+			.single();
+
+		if (error) {
+			throw error;
+		}
+
+		return successResponse(data);
+	});
 }
 
 /**
@@ -112,42 +148,77 @@ export async function PUT(
  * - PATCH /api/entities/categories/456
  */
 export async function PATCH(
-  request: NextRequest,
-  {params}: {params: Promise<{entity: string; id: string}>}
+	request: NextRequest,
+	{params}: { params: Promise<{ entity: string; id: string }> }
 ) {
-  const {entity, id} = await params;
-  const config = ENTITY_CONFIGS[entity];
+	const {entity, id} = await params;
+	const config = ENTITY_CONFIGS[entity];
 
-  if (!config) {
-    return errorResponse(`Entity '${entity}' not found`, 404);
-  }
+	if (!config) {
+		return errorResponse(`Entity '${entity}' not found`, 404);
+	}
 
-  return withAdminAuth(async (user, supabase, admin) => {
-    const body = await request.json();
+	if (config.coachWritable) {
+		return withAuth(async (user, supabase) => {
+			const body = await request.json();
 
-    if (config.queryLayer?.update) {
-      const result = await config.queryLayer.update({supabase: admin}, id, body);
-      if (result.error) {
-        throw new Error(result.error);
-      }
+			const [coachRole, adminRole] = await Promise.all([
+				hasCoachRole(supabase, user.id),
+				isAdmin(supabase, user.id),
+			]);
+			if (!coachRole && !adminRole) return errorResponse('Forbidden', 403);
 
-      return successResponse(result.data);
-    }
+			if (!adminRole) {
+				// Fetch existing record to get its current category_id
+				const {data: existing} = await supabase
+					.from(config.tableName)
+					.select('category_id')
+					.eq('id', id)
+					.single();
+				if (!existing) return errorResponse('Not found', 404);
 
-    // FALLBACK: Legacy direct query for entities without query layer
-    const {data, error} = await admin
-      .from(config.tableName)
-      .update({...body, updated_at: new Date().toISOString()})
-      .eq('id', id)
-      .select()
-      .single();
+				const allowed = await hasCategoryAccess(supabase, user.id, existing.category_id);
+				if (!allowed) return errorResponse('Forbidden', 403);
 
-    if (error) {
-      throw error;
-    }
+				// If body reassigns to a different category, also check access to the new one
+				if (body.category_id && body.category_id !== existing.category_id) {
+					const allowedNew = await hasCategoryAccess(supabase, user.id, body.category_id);
+					if (!allowedNew) return errorResponse('Forbidden', 403);
+				}
+			}
 
-    return successResponse(data);
-  });
+			const result = await config.queryLayer!.update!({supabase}, id, body);
+			if (result.error) throw new Error(result.error);
+			return successResponse(result.data);
+		});
+	}
+
+	return withAdminAuth(async (user, supabase, admin) => {
+		const body = await request.json();
+
+		if (config.queryLayer?.update) {
+			const result = await config.queryLayer.update({supabase: admin}, id, body);
+			if (result.error) {
+				throw new Error(result.error);
+			}
+
+			return successResponse(result.data);
+		}
+
+		// FALLBACK: Legacy direct query for entities without query layer
+		const {data, error} = await admin
+			.from(config.tableName)
+			.update({...body, updated_at: new Date().toISOString()})
+			.eq('id', id)
+			.select()
+			.single();
+
+		if (error) {
+			throw error;
+		}
+
+		return successResponse(data);
+	});
 }
 
 /**
@@ -158,34 +229,60 @@ export async function PATCH(
  * - DELETE /api/entities/categories/456
  */
 export async function DELETE(
-  request: NextRequest,
-  {params}: {params: Promise<{entity: string; id: string}>}
+	request: NextRequest,
+	{params}: { params: Promise<{ entity: string; id: string }> }
 ) {
-  const {entity, id} = await params;
-  const config = ENTITY_CONFIGS[entity];
+	const {entity, id} = await params;
+	const config = ENTITY_CONFIGS[entity];
 
-  if (!config) {
-    return errorResponse(`Entity '${entity}' not found`, 404);
-  }
+	if (!config) {
+		return errorResponse(`Entity '${entity}' not found`, 404);
+	}
 
-  return withAdminAuth(async (user, supabase, admin) => {
-    if (config.queryLayer?.delete) {
-      const result = await config.queryLayer.delete({supabase: admin}, id);
+	if (config.coachWritable) {
+		return withAuth(async (user, supabase) => {
+			const [coachRole, adminRole] = await Promise.all([
+				hasCoachRole(supabase, user.id),
+				isAdmin(supabase, user.id),
+			]);
+			if (!coachRole && !adminRole) return errorResponse('Forbidden', 403);
 
-      if (result.error) {
-        throw new Error(result.error);
-      }
+			if (!adminRole) {
+				const {data: existing} = await supabase
+					.from(config.tableName)
+					.select('category_id')
+					.eq('id', id)
+					.single();
+				if (!existing) return errorResponse('Not found', 404);
 
-      return successResponse({success: true});
-    }
+				const allowed = await hasCategoryAccess(supabase, user.id, existing.category_id);
+				if (!allowed) return errorResponse('Forbidden', 403);
+			}
 
-    // FALLBACK: Legacy direct query for entities without query layer
-    const {error} = await admin.from(config.tableName).delete().eq('id', id);
+			const result = await config.queryLayer!.delete!({supabase}, id);
+			if (result.error) throw new Error(result.error);
+			return successResponse({success: true});
+		});
+	}
 
-    if (error) {
-      throw error;
-    }
+	return withAdminAuth(async (user, supabase, admin) => {
+		if (config.queryLayer?.delete) {
+			const result = await config.queryLayer.delete({supabase: admin}, id);
 
-    return successResponse({success: true});
-  });
+			if (result.error) {
+				throw new Error(result.error);
+			}
+
+			return successResponse({success: true});
+		}
+
+		// FALLBACK: Legacy direct query for entities without query layer
+		const {error} = await admin.from(config.tableName).delete().eq('id', id);
+
+		if (error) {
+			throw error;
+		}
+
+		return successResponse({success: true});
+	});
 }

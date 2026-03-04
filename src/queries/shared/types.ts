@@ -41,8 +41,19 @@ export interface QueryContext {
   userId?: string;
 }
 
+/**
+ * Options for retrieving entities, allowing customization of pagination, sorting, and filtering.
+ *
+ * @interface GetEntitiesOptions
+ *
+ * @property {PaginationOptions} [pagination] - Specifies the pagination configuration, such as page number and page size.
+ * @property {SortOptions[]} [sorting] - Defines the sorting criteria, allowing multiple sorting rules.
+ * @property {FilterOptions} [filters] - Specifies the filter options to refine the results based on criteria.
+ * @property {Record<string, string[]>} [arrayFilters] - Allows applying advanced filtering for array-type fields, mapping field names to arrays of allowed values.
+ */
 export interface GetEntitiesOptions {
   pagination?: PaginationOptions;
   sorting?: SortOptions[];
   filters?: FilterOptions;
+  arrayFilters?: Record<string, string[]>;
 }

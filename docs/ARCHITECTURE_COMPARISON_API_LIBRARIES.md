@@ -647,7 +647,7 @@ const _useVideos = createCRUDHook<VideoSchema, VideoInsert>({
 
 ### After (React Query):
 ```typescript
-// queries/videos.ts
+// queries/matchRecordings.ts
 export function useFetchVideos() {
   return useQuery({
     queryKey: ['videos'],
@@ -669,7 +669,7 @@ export function useVideoMutations() {
   return {createVideo, updateVideo, deleteVideo};
 }
 
-// services/videos.ts (API layer)
+// services/matchRecordings.ts (API layer)
 async function fetchVideos() {
   const res = await fetch(API_ROUTES.entities.root('videos'));
   if (!res.ok) throw new Error('Failed');
