@@ -48,7 +48,7 @@ src/
 │   ├── WalletBalance.tsx   # Wallet display
 │   └── LeaderboardTable.tsx # Leaderboard display
 └── app/(betting)/betting/
-    └── page.tsx.backup            # Main betting page
+    └── error.tsx.backup            # Main betting page
 ```
 
 ### Database Schema

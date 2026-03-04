@@ -3,7 +3,7 @@
 ## Before & After Comparison
 
 ### BEFORE: Client Component (Current - 199 lines)
-**Location:** `src/app/admin/seasons/page.tsx.backup`
+**Location:** `src/app/admin/seasons/error.tsx.backup`
 
 ```typescript
 'use client';  // ❌ Everything runs in browser
@@ -55,7 +55,7 @@ export default function SeasonsAdminPage() {
 
 Split into 3 files with clear responsibilities:
 
-#### 1. `src/app/admin/seasons/page.tsx.backup` (Server Component - 15 lines)
+#### 1. `src/app/admin/seasons/error.tsx.backup` (Server Component - 15 lines)
 ```typescript
 // NO 'use client'!  ✅ Server Component by default
 
@@ -467,7 +467,7 @@ Bundle: -15KB
 ### New Structure:
 ```
 src/app/admin/seasons/
-├── page.tsx.backup                          (Server Component - 15 lines)
+├── error.tsx.backup                          (Server Component - 15 lines)
 ├── SeasonsPageClient.tsx             (Client Component - 120 lines)
 └── components/
     └── SeasonModal.tsx               (Existing, no changes needed)
@@ -484,7 +484,7 @@ src/hooks/entities/season/
 ## Migration Checklist
 
 ### Step 1: Create Server Component (5 min)
-- [ ] Remove `'use client'` from page.tsx.backup
+- [ ] Remove `'use client'` from error.tsx.backup
 - [ ] Make component async
 - [ ] Add Supabase fetch
 - [ ] Return client component with data

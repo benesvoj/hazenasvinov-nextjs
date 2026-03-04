@@ -48,14 +48,14 @@ export const getPaymentStatusColor = (
 export const getPaymentStatusLabel = (status: PaymentStatus): string => {
   switch (status) {
     case PaymentStatus.PAID:
-      return translations.membershipFees.paymentStatus.paid;
+      return translations.membershipFees.enums.paymentStatus.paid;
     case PaymentStatus.PARTIAL:
-      return translations.membershipFees.paymentStatus.partial;
+      return translations.membershipFees.enums.paymentStatus.partial;
     case PaymentStatus.UNPAID:
-      return translations.membershipFees.paymentStatus.unpaid;
+      return translations.membershipFees.enums.paymentStatus.unpaid;
     case PaymentStatus.NOT_REQUIRED:
-      return translations.membershipFees.paymentStatus.notRequired;
+      return translations.membershipFees.enums.paymentStatus.notRequired;
     default:
-      return translations.membershipFees.paymentStatus.unknown;
+      return translations.membershipFees.enums.paymentStatus.unknown;
   }
 };

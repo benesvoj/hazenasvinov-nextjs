@@ -202,13 +202,13 @@ const renderCell = (user: User, columnKey: string) => {
 
 Based on the codebase analysis, these files should be migrated:
 
-- `src/app/admin/committees/page.tsx.backup`
+- `src/app/admin/committees/error.tsx.backup`
 - `src/app/admin/members/components/MembersInternalTab.tsx`
-- `src/app/admin/clubs/page.tsx.backup`
-- `src/app/admin/posts/page.tsx.backup`
-- `src/app/admin/seasons/page.tsx.backup`
-- `src/app/admin/categories/page.tsx.backup`
-- `src/app/admin/member-functions/page.tsx.backup`
+- `src/app/admin/clubs/error.tsx.backup`
+- `src/app/admin/posts/error.tsx.backup`
+- `src/app/admin/seasons/error.tsx.backup`
+- `src/app/admin/categories/error.tsx.backup`
+- `src/app/admin/member-functions/error.tsx.backup`
 - `src/app/admin/users/components/UsersTab.tsx`
 
 ## Benefits After Migration

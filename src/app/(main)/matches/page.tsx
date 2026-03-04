@@ -6,14 +6,13 @@ import {Select, SelectItem, Card, CardBody, Button} from '@heroui/react';
 
 import {TrophyIcon, FunnelIcon} from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations';
-
 import ClubSelector from '@/app/(main)/matches/components/ClubSelector';
 import MatchCard from '@/app/(main)/matches/components/MatchCard';
 
 import {months as monthsConstants} from '@/constants';
 import {formatMonth} from '@/helpers';
 import {usePublicMatches, useFetchCategories} from '@/hooks';
+import {translations} from '@/lib';
 import {Match, Category} from '@/types';
 
 export default function MatchesPage() {

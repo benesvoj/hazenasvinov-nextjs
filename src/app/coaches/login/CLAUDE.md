@@ -9,7 +9,7 @@ Client-side redirect to the unified login page with the coach tab pre-selected. 
 | File | Responsibility |
 |---|---|
 | `layout.tsx` | Simple wrapper with light gray background, no sidebar/topbar |
-| `page.tsx` | Shows loading spinner with Czech message, then redirects to `/login?tab=coach` via `router.replace()` |
+| `error.tsx` | Shows loading spinner with Czech message, then redirects to `/login?tab=coach` via `router.replace()` |
 
 ## Behaviour
 

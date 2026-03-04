@@ -219,7 +219,7 @@ export const clubConfigTranslations = {
 
 **File:** `src/app/admin/club-config/components/ClubConfigCard.tsx`
 
-The component uses `useState`, `useEffect` and HeroUI components (which use `createContext` internally), but has no `'use client'` directive. This works today only because `page.tsx` already has `'use client'`, making the whole tree client-side. If `page.tsx` ever becomes a Server Component, this will silently break.
+The component uses `useState`, `useEffect` and HeroUI components (which use `createContext` internally), but has no `'use client'` directive. This works today only because `error.tsx` already has `'use client'`, making the whole tree client-side. If `error.tsx` ever becomes a Server Component, this will silently break.
 
 **Fix:** Add `'use client'` at the top of `ClubConfigCard.tsx`.
 

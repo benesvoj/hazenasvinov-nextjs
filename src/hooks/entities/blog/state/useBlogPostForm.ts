@@ -21,7 +21,7 @@ const initialFormData: BlogPostFormData = {
   author_id: '',
   published_at: '',
 };
-const t = translations.admin.blog.responseMessages;
+const t = translations.blogPosts.responseMessages;
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 

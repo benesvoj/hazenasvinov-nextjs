@@ -1,0 +1,46 @@
+export const memberFunctionsTranslations = {
+  title: 'Správa funkcí členů',
+  description: 'Správa funkcí členů, které jsou dostupné v systému.',
+  list: 'Seznam funkcí',
+  status: {
+    active: 'Aktivní',
+    inactive: 'Neaktivní',
+  },
+  table: {
+    header: {
+      name: 'Název',
+      displayName: 'Zobrazovaný název',
+      description: 'Popis',
+      sorting: 'Řazení',
+      status: 'Stav',
+      actions: 'Akce',
+    },
+    ariaLabel: 'Tabulka funkcí členů',
+  },
+  responseMessages: {
+    successInsert: 'Funkce byla úspěšně založena',
+    failedInsert: 'Chyba při zakládání záznamu',
+    successUpdate: 'Záznam úspěšně aktualizován',
+    failedUpdate: 'Nepodařilo se aktualizovat záznam',
+    successDelete: 'Záznam úspěšně smazán',
+    failedDelete: 'Nepodařilo se smazat záznam',
+    failedToFetchData: 'Failed to fetch data source ',
+  },
+  modal: {
+    deleteTitle: 'Smazat funkci',
+    deleteDescription: 'Opravdu chcete smazat funkci',
+    addTitle: 'Přidat novou funkci',
+    editTitle: 'Upravit funkci',
+    formFields: {
+      name: 'Název',
+      namePlaceholder: 'např. player, coach',
+      displayName: 'Zobrazovaný název',
+      displayNamePlaceholder: 'např. Hráč, Trenér',
+      description: 'Popis',
+      descriptionPlaceholder: 'Popis funkce (volitelné)',
+      order: 'Řazení',
+      orderPlaceholder: '0',
+      active: 'Aktivní',
+    },
+  },
+};

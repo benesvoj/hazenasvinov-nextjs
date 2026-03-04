@@ -24,7 +24,7 @@
   - 44 new lines added
 
 #### 3. Seasons Page Conversion
-- ✅ **`src/app/admin/seasons/page.tsx.backup`** (CONVERTED)
+- ✅ **`src/app/admin/seasons/error.tsx.backup`** (CONVERTED)
   - Was 199 lines → Now 16 lines!
   - Server Component (async)
   - Prefetches data on server
@@ -36,7 +36,7 @@
   - Uses hydrated data from server
   - 191 lines
 
-- ✅ **`src/app/admin/seasons/page.tsx.backup.backup`** (BACKUP)
+- ✅ **`src/app/admin/seasons/error.tsx.backup.backup`** (BACKUP)
   - Original file saved for reference
 
 ---
@@ -138,13 +138,13 @@ User loads page
 
 ### Before:
 ```
-page.tsx.backup: 199 lines (all client-side)
+error.tsx.backup: 199 lines (all client-side)
 Bundle impact: +15KB
 ```
 
 ### After:
 ```
-page.tsx.backup: 16 lines (server-side)
+error.tsx.backup: 16 lines (server-side)
 SeasonsPageClient.tsx: 191 lines (client-side)
 Total: 207 lines (+8 lines)
 Bundle impact: +0KB (same client code, just organized differently)
@@ -164,7 +164,7 @@ Bundle impact: +0KB (same client code, just organized differently)
 **Copy this for committees, grants, videos, etc.:**
 
 ```typescript
-// src/app/admin/[entity]/page.tsx.backup
+// src/app/admin/[entity]/error.tsx.backup
 import {HydrationBoundary} from '@tanstack/react-query';
 import {prefetchQuery} from '@/utils/prefetch';
 import {fetch[Entity]} from '@/queries/[entity]/queries';
@@ -228,7 +228,7 @@ const {data: seasons = [], isLoading, refetch} = useQuery({
    }
    ```
 
-2. **Convert page.tsx.backup** (copy-paste template, change entity names)
+2. **Convert error.tsx.backup** (copy-paste template, change entity names)
 
 3. **Move existing code** to `[Entity]PageClient.tsx`
 
@@ -317,7 +317,7 @@ If you want to revert:
 
 ```bash
 # Restore original
-cp src/app/admin/seasons/page.tsx.backup.backup src/app/admin/seasons/page.tsx.backup
+cp src/app/admin/seasons/error.tsx.backup.backup src/app/admin/seasons/error.tsx.backup
 
 # Delete new file
 rm src/app/admin/seasons/SeasonsPageClient.tsx

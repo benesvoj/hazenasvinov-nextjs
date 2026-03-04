@@ -1,0 +1,45 @@
+export const blogPostsTranslation = {
+  title: 'Správa článků',
+  description: 'Správa článků, které jsou dostupné v systému.',
+  addPost: 'Nový článek',
+  deletePost: 'Smazat článek',
+  deletePostMessage: 'Opravdu chcete smazat článek? Tato akce je nevratná.',
+  table: {
+    ariaLabel: 'Seznam blogových příspěvků',
+    image: 'Obrázek',
+    title: 'Název',
+    category: 'Kategorie',
+    author: 'Autor',
+    status: 'Stav',
+    createdAt: 'Vytvořeno',
+    actions: 'Akce',
+  },
+  actions: {
+    addPost: 'Přidat článek',
+    editPost: 'Upravit článek',
+    deletePost: 'Smazat článek',
+  },
+  filters: {
+    searchInputPlaceholder: 'Hledat podle názvu, kategorie nebo autora...',
+    byStatus: 'Filtr podle stavu',
+  },
+  enums: {
+    statuses: {
+      draft: 'Koncept',
+      published: 'Publikováno',
+      archived: 'Archivováno',
+      all: 'Všechny stavy',
+    },
+  },
+  responseMessages: {
+    createSuccess: 'Blog post created successfully',
+    updateSuccess: 'Blog post updated successfully',
+    deleteSuccess: 'Blog post deleted successfully',
+    createError: 'Failed to create blog post',
+    updateError: 'Failed to update blog post',
+    deleteError: 'Failed to delete blog post',
+    blogPostsFetchFailed: 'Failed to fetch blog posts',
+    mandatoryTitle: 'Title is mandatory',
+    mandatoryContent: 'Content is mandatory',
+  },
+};

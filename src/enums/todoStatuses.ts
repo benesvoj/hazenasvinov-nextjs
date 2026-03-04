@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.todoStatus;
+const t = translations.todos.enums.todoStatus;
 
 export enum TodoStatuses {
   TODO = 'todo',

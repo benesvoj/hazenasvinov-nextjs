@@ -11,7 +11,7 @@ import {translations} from '@/lib';
 import {Grant} from '@/types';
 
 const t = translations.grantCalendar;
-const tAction = translations.action;
+const tAction = translations.common.actions;
 
 export default function GrantCalendar() {
   const {data: grants, loading, refetch} = useFetchGrants();

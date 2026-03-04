@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.todoFilter;
+const t = translations.todos.enums.todoFilter;
 
 export enum TodoFilter {
   ALL = 'all',

@@ -62,4 +62,11 @@ export const clubConfigTranslations = {
   validation: {
     clubNameRequired: 'Název klubu je povinný',
   },
+  sections: {
+    title: 'Sekce',
+    description: 'Správa sekcí, které jsou dostupné v systému.',
+    clubHighlight: 'O našem oddílu',
+    sponsors: 'Naši partneři a sponzoři',
+    callToAction: 'Chcete se připojit k našemu týmu?',
+  },
 };

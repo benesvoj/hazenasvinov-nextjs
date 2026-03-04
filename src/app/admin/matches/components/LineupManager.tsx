@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect, forwardRef, useImperativeHandle} from 'react';
+import React, {forwardRef, useEffect, useImperativeHandle} from 'react';
 
 import {Card} from '@heroui/react';
 
@@ -8,8 +8,8 @@ import {TeamTypes} from '@/enums';
 import {translations} from '@/lib';
 import {LineupManagerProps, LineupManagerRef} from '@/types';
 
-import {TeamSelector, LineupErrorBoundary, LineupSkeleton} from './lineupManager/components';
-import {LineupHeader, LineupContent, LineupModals} from './lineupManager/components/utils';
+import {LineupErrorBoundary, LineupSkeleton, TeamSelector} from './lineupManager/components';
+import {LineupContent, LineupHeader, LineupModals} from './lineupManager/components/utils';
 import {useLineupDataManager} from './lineupManager/hooks/useLineupDataManager';
 import {useLineupErrorHandler} from './lineupManager/hooks/useLineupErrorHandler';
 import {useLineupModals} from './lineupManager/hooks/useLineupModals';
@@ -34,66 +34,35 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
 
     // Use the data manager hook
     const {
-      // Form data
       homeFormData,
       awayFormData,
       selectedTeam,
       setSelectedTeam,
-
-      // Current team data
-      currentTeamId,
       currentTeamName,
       currentFormData,
-      setCurrentFormData,
-
-      // Club information
       currentTeamClubId,
-      clubIdLoading,
-      clubIdError,
-
-      // Filtered members
-      filteredMembers,
       availableCoaches,
-
-      // Validation
-      validationError,
-      setValidationError,
-
-      // CRUD operations
       handleLoadLineup,
       handleSaveLineup,
       handleDeleteLineup,
-
-      // Player operations
       handleAddPlayer,
       handlePlayerSelected,
       handleEditPlayer,
       handlePlayerEditSave,
       handleDeletePlayer,
       confirmDeletePlayer,
-
-      // Coach operations
       handleAddCoach,
       handleCoachSelected,
       handleEditCoach,
       handleCoachEditSave,
       handleDeleteCoach,
-
-      // Utility functions
       getMemberName,
       calculateLocalSummary,
-
-      // Modal states
       editingPlayerIndex,
       setEditingPlayerIndex,
-      deletingPlayerIndex,
-      setDeletingPlayerIndex,
       editingCoachIndex,
       setEditingCoachIndex,
-
-      // Loading and error states
       loading,
-      error,
     } = useLineupDataManager({
       matchId,
       homeTeamId,

@@ -8,12 +8,12 @@ Video library for coaches to manage training and match videos. Supports full CRU
 
 | File | Responsibility |
 |---|---|
-| `page.tsx` | Full page — video CRUD, filtering, pagination, category access control |
+| `error.tsx` | Full page — video CRUD, filtering, pagination, category access control |
 
 ## Data Flow
 
 ```
-page.tsx
+error.tsx
 ├── useAuth() → current user
 ├── useUserRoles().getCurrentUserCategories() → assigned categories
 ├── useFetchVideos() → ALL videos (global fetch)

@@ -275,7 +275,7 @@ Let's trace a complete flow for displaying filtered videos:
 // → Browser navigates to /admin/videos
 
 // 2. PRESENTATION LAYER: Component renders
-// src/app/admin/videos/page.tsx.backup
+// src/app/admin/videos/error.tsx.backup
 export default function VideosPage() {
   const [currentPage, setCurrentPage] = useState(1);
 

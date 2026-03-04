@@ -15,7 +15,7 @@ export default function CommentsZone({
   onAddCommentOpen,
   deleteComment,
 }: CommentsZoneProps) {
-  const t = translations.common;
+  const t = translations.comments;
 
   const commentCardTitle = (
     <>

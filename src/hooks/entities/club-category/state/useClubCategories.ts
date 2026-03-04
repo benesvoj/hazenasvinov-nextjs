@@ -5,7 +5,7 @@ import {API_ROUTES, translations} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/clubCategories';
 import {ClubCategoryInsert, ClubCategorySchema} from '@/types';
 
-const t = translations.admin.clubCategories.responseMessages;
+const t = translations.clubCategories.responseMessages;
 /**
  * Wrapper to maintain backward compatibility with existing API
  * Maps factory hook methods to expected names

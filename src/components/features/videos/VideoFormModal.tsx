@@ -2,11 +2,13 @@
 
 import React from 'react';
 
-import {Input, Select, SelectItem, Switch, Textarea} from '@heroui/react';
+import {Input, Textarea} from '@heroui/input';
+import {Switch} from '@heroui/switch';
 
-import {UnifiedModal} from '@/components';
+import {translations} from '@/lib/translations/index';
+
+import {Choice, UnifiedModal} from '@/components';
 import {ModalMode} from '@/enums';
-import {translations} from '@/lib';
 import {Category, Club, Season, VideoFormData} from '@/types';
 import {isValidYouTubeUrl} from '@/utils';
 
@@ -35,7 +37,7 @@ export function VideoFormModal({
   mode,
   isLoading,
 }: VideoFormModalProps) {
-  const t = translations.admin.videos;
+  const t = translations.matchRecordings;
   const modalTitle = mode === ModalMode.ADD ? t.addVideo : t.editVideo;
 
   return (
@@ -66,7 +68,6 @@ export function VideoFormModal({
           maxRows={5}
         />
 
-        {/* YouTube URL */}
         <Input
           label="YouTube URL"
           placeholder="https://www.youtube.com/watch?v=..."
@@ -77,54 +78,23 @@ export function VideoFormModal({
         />
       </div>
 
-      {/* Two column layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Left column */}
         <div className="space-y-4">
-          {/* Category */}
-          <Select
-            label="Kategorie"
-            placeholder="Vyberte kategorii"
-            selectedKeys={formData.category_id ? [formData.category_id] : []}
-            onSelectionChange={(keys) => {
-              const selected = Array.from(keys)[0] as string;
-              setFormData({...formData, category_id: selected});
-            }}
+          <Choice
+            items={categories.map((c) => ({key: c.id, label: c.name}))}
+            value={formData.category_id}
+            onChange={(id) => setFormData({...formData, category_id: id ?? ''})}
+            label={translations.categories.labels.category}
+            placeholder={translations.categories.placeholders.category}
             isRequired
-          >
-            <>
-              {categories.length > 0 ? (
-                categories.map((category) => (
-                  <SelectItem key={category.id}>{category.name}</SelectItem>
-                ))
-              ) : (
-                <SelectItem key="no-categories" isDisabled>
-                  Žádné kategorie k dispozici
-                </SelectItem>
-              )}
-            </>
-          </Select>
-
-          {/* Club */}
-          <Select
-            label="Klub"
-            placeholder="Vyberte klub (volitelné)"
-            selectedKeys={formData.club_id ? [formData.club_id] : []}
-            onSelectionChange={(keys) => {
-              const selected = Array.from(keys)[0] as string;
-              setFormData({...formData, club_id: selected});
-            }}
-          >
-            <>
-              {clubs.length > 0 ? (
-                clubs.map((club) => <SelectItem key={club.id}>{club.name}</SelectItem>)
-              ) : (
-                <SelectItem key="no-clubs" isDisabled>
-                  Žádné kluby k dispozici
-                </SelectItem>
-              )}
-            </>
-          </Select>
+          />
+          <Choice
+            items={clubs.map((c) => ({key: c.id, label: c.name}))}
+            value={formData.club_id}
+            onChange={(id) => setFormData({...formData, club_id: id ?? ''})}
+            label={translations.clubs.labels.club}
+            placeholder={translations.clubs.placeholders.club}
+          />
         </div>
 
         <div className="space-y-4">
@@ -135,25 +105,13 @@ export function VideoFormModal({
             onChange={(e) => setFormData({...formData, recording_date: e.target.value})}
           />
 
-          <Select
-            label="Sezóna"
-            placeholder="Vyberte sezónu (volitelné)"
-            selectedKeys={formData.season_id ? [formData.season_id] : []}
-            onSelectionChange={(keys) => {
-              const selected = Array.from(keys)[0] as string;
-              setFormData({...formData, season_id: selected});
-            }}
-          >
-            <>
-              {seasons.length > 0 ? (
-                seasons.map((season) => <SelectItem key={season.id}>{season.name}</SelectItem>)
-              ) : (
-                <SelectItem key="no-seasons" isDisabled>
-                  Žádné sezóny k dispozici
-                </SelectItem>
-              )}
-            </>
-          </Select>
+          <Choice
+            items={seasons.map((c) => ({key: c.id, label: c.name}))}
+            value={formData.season_id}
+            onChange={(id) => setFormData({...formData, season_id: id ?? ''})}
+            label={translations.seasons.labels.season}
+            placeholder={translations.seasons.placeholders.season}
+          />
         </div>
       </div>
 

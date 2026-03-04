@@ -4,7 +4,7 @@ import {createFormHook} from '@/hooks';
 import {translations} from '@/lib';
 import {Grant, GrantFormData} from '@/types';
 
-const t = translations.admin.grants.responseMessages;
+const t = translations.grantCalendar.responseMessages;
 
 const initialFormData: GrantFormData = {
   name: '',

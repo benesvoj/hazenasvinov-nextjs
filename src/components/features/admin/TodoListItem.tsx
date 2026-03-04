@@ -21,8 +21,8 @@ export const TodoListItem = ({
   updateTodoStatus,
   deleteTodo,
 }: TodoListItemProps) => {
-  const t = translations;
-  const tAction = translations.action;
+  const t = translations.todos;
+  const tAction = translations.common.actions;
 
   const todoItemAfterDueDate = todo.due_date && new Date(todo.due_date) < new Date();
 
@@ -30,21 +30,21 @@ export const TodoListItem = ({
     <div className="flex items-center gap-2 mb-2">
       <div
         className="flex items-center gap-1"
-        title={`${t.common.todoList.item.priority}: ${getPriorityLabel(todo.priority)}`}
+        title={`${t.todoList.item.priority}: ${getPriorityLabel(todo.priority)}`}
       >
         {getPriorityIcon(todo.priority)}
         <span className="text-xs text-gray-500">{getPriorityLabel(todo.priority)}</span>
       </div>
       <div
         className="flex items-center gap-1"
-        title={`${t.common.todoList.item.status}: ${getStatusLabel(todo.status)}`}
+        title={`${t.todoList.item.status}: ${getStatusLabel(todo.status)}`}
       >
         {getStatusIcon(todo.status)}
         <span className="text-xs text-gray-500">{getStatusLabel(todo.status)}</span>
       </div>
       <div
         className="flex items-center gap-1"
-        title={`${t.common.todoList.item.category}: ${getCategoryLabel(todo.category)}`}
+        title={`${t.todoList.item.category}: ${getCategoryLabel(todo.category)}`}
       >
         {getCategoryIcon(todo.category)}
         <span className="text-xs text-gray-500">{getCategoryLabel(todo.category)}</span>
@@ -57,7 +57,7 @@ export const TodoListItem = ({
       {todo.due_date && (
         <div className="md:col-span-3 min-w-0">
           <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t.common.todoList.item.dueDate}
+            {t.todoList.item.dueDate}
           </div>
           <div className={`${todoItemAfterDueDate ? 'text-red-500' : ''} truncate`}>
             {todo.due_date}
@@ -67,13 +67,13 @@ export const TodoListItem = ({
       <div className="flex gap-4">
         <div className="flex flex-col min-w-0">
           <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t.common.createdBy}
+            {translations.common.createdBy}
           </div>
           <div className="truncate">{todo.user_email}</div>
         </div>
         <div className="flex flex-col min-w-0">
           <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t.common.createdAt}
+            {translations.common.createdAt}
           </div>
           <div className="truncate">
             {todo.created_at ? formatDateString(todo.created_at) : '-'}

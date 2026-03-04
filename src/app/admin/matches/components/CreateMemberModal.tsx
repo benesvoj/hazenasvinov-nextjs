@@ -29,7 +29,7 @@ export default function CreateMemberModal({
 }: CreateMemberModalProps) {
   const [formData, setFormData] = useState<MemberFormData>(DEFAULT_FORM_DATA);
 
-  const t = translations.createMemberModal;
+  const t = translations.members.modals.createMember;
   const {isLoading, errors, createMember, clearFieldError, reset} = useMembers();
 
   const handleSave = async () => {

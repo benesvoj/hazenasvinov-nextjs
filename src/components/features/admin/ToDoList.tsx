@@ -22,7 +22,7 @@ export default function ToDoList({
 }: ToDoListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const t = translations.common;
+  const t = translations.todos;
 
   // Sort todos first (todos are already filtered by parent component)
   const sortedTodos = useMemo(() => {
@@ -60,7 +60,9 @@ export default function ToDoList({
   );
 
   const todoCardTotalPages =
-    totalPages > 1 ? `(${t.page} ${currentPage} ${t.of} ${totalPages})` : '';
+    totalPages > 1
+      ? `(${translations.common.page} ${currentPage} ${translations.common.of} ${totalPages})`
+      : '';
 
   const todoCardFooter = !todosLoading && totalPages > 1 && (
     <div className="flex justify-center p-4 border-t">

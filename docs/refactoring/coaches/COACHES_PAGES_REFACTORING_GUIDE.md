@@ -1,7 +1,7 @@
 # Coaches Pages Refactoring Guide
 
 **Date:** 2025-11-05
-**Scope:** `src/app/coaches/lineups/page.tsx.backup` & `src/app/coaches/attendance/page.tsx.backup`
+**Scope:** `src/app/coaches/lineups/error.tsx.backup` & `src/app/coaches/attendance/error.tsx.backup`
 **Goal:** Align with codebase standards and improve maintainability
 
 ---
@@ -10,7 +10,7 @@
 
 ### Current State
 
-| Issue | lineups/page.tsx.backup | attendance/page.tsx.backup | Severity |
+| Issue | lineups/error.tsx.backup | attendance/error.tsx.backup | Severity |
 |-------|------------------|---------------------|----------|
 | Lines of code | 558 | 787 | 🔴 High |
 | Direct DB calls in component | ✅ None | ✅ None (but has inline Supabase) | 🟡 Medium |
@@ -25,7 +25,7 @@
 
 ## 🔴 Critical Issues
 
-### 1. **lineups/page.tsx.backup: Mixed Hook Architecture**
+### 1. **lineups/error.tsx.backup: Mixed Hook Architecture**
 
 **Location:** Lines 42, 60, 63-74
 
@@ -45,7 +45,7 @@ const {data: lineups, refetch} = useFetchCategoryLineups(selectedCategory, selec
 
 ---
 
-### 2. **attendance/page.tsx.backup: Inline Supabase Calls**
+### 2. **attendance/error.tsx.backup: Inline Supabase Calls**
 
 **Location:** Lines 238-274 in `handleSessionSubmit`
 
@@ -64,7 +64,7 @@ const {data: lineupData, error: lineupError} = await supabase
 
 ---
 
-### 3. **lineups/page.tsx.backup: useEffect Dependency Issues**
+### 3. **lineups/error.tsx.backup: useEffect Dependency Issues**
 
 **Location:** Lines 92-106
 
@@ -104,8 +104,8 @@ useEffect(() => {
 
 ### 4. **Both Pages: Large Monolithic Components**
 
-**lineups/page.tsx.backup:** 558 lines
-**attendance/page.tsx.backup:** 787 lines
+**lineups/error.tsx.backup:** 558 lines
+**attendance/error.tsx.backup:** 787 lines
 
 **Impact:** Hard to understand, test, and maintain
 
@@ -202,7 +202,7 @@ export function useLineupManagement(categoryId: string, seasonId: string) {
 ```
 
 **Migration:**
-- lineups/page.tsx.backup: Replace `useCategoryLineups` + `useFetchCategoryLineups` with `useLineupManagement`
+- lineups/error.tsx.backup: Replace `useCategoryLineups` + `useFetchCategoryLineups` with `useLineupManagement`
 
 ---
 
@@ -269,8 +269,8 @@ export function useCategorySelection(options: UseCategorySelectionOptions) {
 ```
 
 **Migration:**
-- lineups/page.tsx.backup: Lines 85-106 → Use `useCategorySelection`
-- attendance/page.tsx.backup: Lines 88-155 → Use `useCategorySelection`
+- lineups/error.tsx.backup: Lines 85-106 → Use `useCategorySelection`
+- attendance/error.tsx.backup: Lines 88-155 → Use `useCategorySelection`
 
 ---
 
@@ -314,14 +314,14 @@ export function useMemberFiltering(
 ```
 
 **Migration:**
-- lineups/page.tsx.backup: Lines 246-250 → Use `useMemberFiltering`
-- attendance/page.tsx.backup: Lines 187-214 → Use `useMemberFiltering`
+- lineups/error.tsx.backup: Lines 246-250 → Use `useMemberFiltering`
+- attendance/error.tsx.backup: Lines 187-214 → Use `useMemberFiltering`
 
 ---
 
 ### Phase 3: Component Extraction (Priority: 🟡 Medium)
 
-#### 3.1 lineups/page.tsx.backup Component Structure
+#### 3.1 lineups/error.tsx.backup Component Structure
 
 ```
 CoachesLineupsPage (Orchestrator)
@@ -353,7 +353,7 @@ src/app/coaches/lineups/components/
 
 ---
 
-#### 3.2 attendance/page.tsx.backup Component Structure
+#### 3.2 attendance/error.tsx.backup Component Structure
 
 ```
 CoachesAttendancePage (Orchestrator)
@@ -390,13 +390,13 @@ src/app/coaches/attendance/components/
 
 #### 4.1 Remove `any` Types
 
-**lineups/page.tsx.backup:**
+**lineups/error.tsx.backup:**
 - Line 52: `editingLineup: any` → `editingLineup: CategoryLineup | null`
 - Line 169: `handleEditLineup = (lineup: any)` → `handleEditLineup = (lineup: CategoryLineup)`
 - Line 216: `handleEditMember = (member: any)` → `handleEditMember = (member: CategoryLineupMember)`
 - Line 274: `{userCategories.map((categoryId) => { const category = categories.find(...` → Create proper type
 
-**attendance/page.tsx.backup:**
+**attendance/error.tsx.backup:**
 - Line 45: `editingSession: any` → `editingSession: TrainingSession | null`
 - Line 47: `sessionForStatusUpdate: any` → `sessionForStatusUpdate: TrainingSession | null`
 - Line 269: `(item: any)` → Use proper type
@@ -553,7 +553,7 @@ try {
 
 **Pattern:**
 ```typescript
-// ✅ Already good in attendance/page.tsx.backup (lines 112-127, 186-214)
+// ✅ Already good in attendance/error.tsx.backup (lines 112-127, 186-214)
 const availableCategories = useMemo(() => {
   // ... computation
 }, [dependencies]);
@@ -587,10 +587,10 @@ const CreateMemberModal = lazy(() => import('./components/CreateMemberModal'));
 ## 📝 Implementation Checklist
 
 ### Week 1: Critical Fixes
-- [ ] Fix useEffect dependencies in lineups/page.tsx.backup (lines 92-106)
+- [ ] Fix useEffect dependencies in lineups/error.tsx.backup (lines 92-106)
 - [ ] Fix useFetchCategoryLineups hook dependencies
 - [ ] Create useLineupManagement hook
-- [ ] Migrate lineups/page.tsx.backup to use new hook
+- [ ] Migrate lineups/error.tsx.backup to use new hook
 
 ### Week 2: Extract Common Logic
 - [ ] Create useCategorySelection hook
@@ -670,8 +670,8 @@ Use this checklist when creating new components/hooks:
 
 | Metric | Current | Target |
 |--------|---------|--------|
-| lineups/page.tsx.backup lines | 558 | < 250 |
-| attendance/page.tsx.backup lines | 787 | < 300 |
+| lineups/error.tsx.backup lines | 558 | < 250 |
+| attendance/error.tsx.backup lines | 787 | < 300 |
 | `any` types | 12 | 0 |
 | Direct DB calls | 0 | 0 |
 | useEffect issues | 3 | 0 |

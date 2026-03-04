@@ -4,8 +4,9 @@ import React from 'react';
 
 import {Button} from '@heroui/react';
 
+import {translations} from '@/lib/translations';
+
 import {UnifiedModal} from '@/components';
-import {translations} from '@/lib';
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -25,25 +26,24 @@ export default function DeleteConfirmationModal({
   isLoading = false,
 }: DeleteConfirmationModalProps) {
   const footer = () => {
-    const t = translations.DeleteConfirmationModal;
     return (
       <>
         <Button
           variant="light"
           onPress={onClose}
           disabled={isLoading}
-          aria-label={t.cancelButtonText}
+          aria-label={translations.common.actions.cancel}
         >
-          {t.cancelButtonText}
+          {translations.common.actions.cancel}
         </Button>
         <Button
           color="danger"
           onPress={onConfirm}
           isLoading={isLoading}
           disabled={isLoading}
-          aria-label={t.confirmButtonText}
+          aria-label={translations.common.actions.confirm}
         >
-          {t.confirmButtonText}
+          {translations.common.actions.confirm}
         </Button>
       </>
     );

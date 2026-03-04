@@ -6,7 +6,7 @@ import {API_ROUTES, translations} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/categoryLineupMembers';
 import {BaseCategoryLineupMember} from '@/types';
 
-const t = translations.coachPortal.lineupMembers.responseMessages;
+const t = translations.lineupMembers.responseMessages;
 
 export function useFetchCategoryLineupMembersFactory() {
   return createDataFetchHook<BaseCategoryLineupMember>({

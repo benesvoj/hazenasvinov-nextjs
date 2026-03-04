@@ -2,7 +2,8 @@
 
 import React from 'react';
 
-import {Button, Card, CardBody, CardFooter, CardHeader} from '@heroui/react';
+import {Card, CardBody, CardFooter, CardHeader} from '@heroui/card';
+import {Button} from '@heroui/react';
 
 import {LoadingSpinner, Heading, showToast} from '@/components';
 import {getDefaultActionIcon, getNextStatus, getStatusButtonInfo, getStatusLabel} from '@/helpers';

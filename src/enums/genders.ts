@@ -1,7 +1,5 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.gender;
-
 export enum Genders {
   MALE = 'male',
   FEMALE = 'female',
@@ -10,10 +8,10 @@ export enum Genders {
 }
 
 export const GENDER_LABELS: Record<Genders, string> = {
-  [Genders.MALE]: t.male,
-  [Genders.FEMALE]: t.female,
-  [Genders.EMPTY]: t.empty,
-  [Genders.MIXED]: t.mixed,
+  [Genders.MALE]: translations.common.enums.gender.male,
+  [Genders.FEMALE]: translations.common.enums.gender.female,
+  [Genders.EMPTY]: translations.common.enums.genderExtended.empty,
+  [Genders.MIXED]: translations.common.enums.genderExtended.mixed,
 };
 
 export const getGenderOptions = () =>

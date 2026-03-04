@@ -33,7 +33,11 @@ export default function CategoryModal({
   isLoading,
 }: CategoryModalProps) {
   const t = translations.categories;
-  const modalTitle = title || (mode === ModalMode.ADD ? t.addCategory : t.editCategory);
+  const modalTitle =
+    title ||
+    (mode === ModalMode.ADD
+      ? translations.categories.actions.add
+      : translations.categories.actions.edit);
 
   return (
     <UnifiedModal

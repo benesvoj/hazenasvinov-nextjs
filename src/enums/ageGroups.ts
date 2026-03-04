@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.ageGroups;
+const t = translations.common.enums.ageGroups;
 
 export enum AgeGroups {
   ADULTS = 'adults',

@@ -5,7 +5,7 @@ import {createDataFetchHook} from '@/hooks/factories';
 import {API_ROUTES, translations} from '@/lib';
 import {Category} from '@/types';
 
-const t = translations.admin.categories.responseMessages;
+const t = translations.categories.responseMessages;
 
 /**
  * Hook for fetching categories

@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.playerPosition;
+const t = translations.lineups.enums.playerPosition;
 
 export enum PlayerPosition {
   FIELD_PLAYER = 'field_player',

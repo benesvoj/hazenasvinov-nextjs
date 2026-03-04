@@ -103,9 +103,9 @@ return {
 
 ---
 
-### 2. Updated `page.tsx.backup`
+### 2. Updated `error.tsx.backup`
 
-**File:** `src/app/admin/members/page.tsx.backup`
+**File:** `src/app/admin/members/error.tsx.backup`
 
 #### Removed Separate `useDisclosure`
 ```typescript
@@ -209,7 +209,7 @@ Members list refreshes with updated payment status ✅
    - Added `closePayment` handler
    - Returned `paymentModal` in hook result
 
-2. **`src/app/admin/members/page.tsx.backup`**
+2. **`src/app/admin/members/error.tsx.backup`**
    - Removed separate `useDisclosure` for payment modal
    - Destructured `paymentModal` from `useMemberModals`
    - Updated `PaymentFormModal` rendering with proper props

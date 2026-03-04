@@ -27,8 +27,8 @@ interface LineupMembersProps {
   categoryId: string;
 }
 
-const t = translations.coachPortal.lineupMembers;
-const tAction = translations.action;
+const t = translations.lineupMembers;
+const tAction = translations.common.actions;
 
 export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
   const {

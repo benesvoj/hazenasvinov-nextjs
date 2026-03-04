@@ -1,0 +1,48 @@
+export const grantCalendarTranslations = {
+  title: 'Kalendář dotací',
+  description: 'Přehled a správa dotací pro váš klub.',
+  addGrant: 'Přidat dotaci',
+  editGrant: 'Upravit dotaci',
+  deleteGrant: 'Smazat dotaci',
+  table: {
+    noGrants: 'Žádné dotace nebyly nalezeny',
+    column: {
+      actions: 'Akce',
+      month: 'Měsíc',
+      name: 'Název',
+      description: 'Popis',
+    },
+  },
+  modal: {
+    addTitle: 'Přidat dotaci',
+    addSubtitle: 'Vytvořte novou dotaci pro kalendář',
+    editTitle: 'Upravit dotaci',
+    editSubtitle: 'Upravte existující dotaci',
+    deleteTitle: 'Smazat dotaci',
+    deleteMessage: 'Opravdu chcete smazat dotaci? Tuto akci nelze vrátit zpět.',
+  },
+  form: {
+    name: 'Název dotace',
+    namePlaceholder: 'Zadejte název dotace',
+    description: 'Popis',
+    descriptionPlaceholder: 'Zadejte popis dotace (volitelné)',
+    month: 'Měsíc',
+    monthPlaceholder: 'Vyberte měsíc',
+  },
+  validation: {
+    nameRequired: 'Název je povinný',
+    monthRequired: 'Měsíc je povinný',
+  },
+  responseMessages: {
+    grantsFetchFailed: 'Chyba při načítání dotací',
+    mandatoryName: 'Název je povinný',
+    mandatoryMonth: 'Měsíc je povinný',
+    mandatoryDescription: 'Popis je povinný',
+    createSuccess: 'Grant created successfully.',
+    updateSuccess: 'Grant updated successfully.',
+    deleteSuccess: 'Grant deleted successfully.',
+    createError: 'Error creating grant.',
+    updateError: 'Error updating grant.',
+    deleteError: 'Error deleting grant.',
+  },
+};

@@ -8,7 +8,7 @@ Manages training session attendance for coaches. Coaches create/generate trainin
 
 | File | Lines | Responsibility |
 |---|---|---|
-| `page.tsx` | ~382 | Master orchestrator — state, modals, data fetching |
+| `error.tsx` | ~382 | Master orchestrator — state, modals, data fetching |
 | `components/TrainingSessionList.tsx` | ~140 | Lists sessions with selection, status change, edit, delete actions |
 | `components/TrainingSessionModal.tsx` | ~195 | Create/edit session form (title, description, date, time, location) |
 | `components/TrainingSessionGenerator.tsx` | ~310 | Bulk session generation by date range + weekdays |
@@ -48,7 +48,7 @@ The page has been through three refactoring rounds and is now at ~382 lines (dow
 ## Data Flow
 
 ```
-page.tsx
+error.tsx
 ├── useCoachCategory() → selectedCategory, selectedSeason, availableCategories
 ├── useAppData() → seasons[], members[]
 ├── useFetchTrainingSessions({categoryId, seasonId})

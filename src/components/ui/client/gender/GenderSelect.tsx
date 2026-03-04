@@ -1,6 +1,6 @@
 'use client';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {Choice} from '@/components';
 import {Genders} from '@/enums';
@@ -14,8 +14,8 @@ interface GenderSelectProps {
 }
 
 const ITEMS = [
-  {key: Genders.MALE, label: translations.common.gender.male},
-  {key: Genders.FEMALE, label: translations.common.gender.female},
+  {key: Genders.MALE, label: translations.common.enums.gender.male},
+  {key: Genders.FEMALE, label: translations.common.enums.gender.female},
 ];
 
 export const GenderSelect = ({

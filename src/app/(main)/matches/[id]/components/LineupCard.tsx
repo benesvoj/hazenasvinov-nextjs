@@ -10,7 +10,7 @@ import {translations} from '@/lib';
 import {LineupPlayer, LineupCardProps} from '@/types';
 
 export default function LineupCard({match, lineup, lineupLoading, teamType}: LineupCardProps) {
-  const t = translations.components.matches.lineupCard;
+  const t = translations.matches.components.lineupCard;
 
   return (
     <Card>

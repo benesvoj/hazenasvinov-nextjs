@@ -2,7 +2,7 @@
 
 import React, {memo} from 'react';
 
-import {Skeleton} from '@heroui/react';
+import {Skeleton} from '@heroui/skeleton';
 
 import {VideoPagination} from '@/components';
 import {Category, Club, Season, VideoSchema} from '@/types';

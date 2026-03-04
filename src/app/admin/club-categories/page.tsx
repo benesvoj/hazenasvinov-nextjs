@@ -24,7 +24,7 @@ import {ClubCategorySchema, ClubCategoryWithRelations, Season} from '@/types';
 
 import {ClubCategoriesModal} from './components/ClubCategoriesModal';
 
-const t = translations.admin.clubCategories;
+const t = translations.clubCategories;
 
 export default function ClubCategoriesAdminPage() {
   const [searchTerm, setSearchTerm] = useState('');

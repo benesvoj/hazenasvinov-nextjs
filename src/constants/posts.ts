@@ -1,8 +1,11 @@
+// TODO: This file is a bit of a catch-all for post-related constants.
+// Duplicate with src/lib/translations/blogPosts.ts
+
 import {translations} from '@/lib/translations';
 
 import {BLOG_POST_STATUSES} from '@/enums';
 
-const t = translations.common.blogPostStatuses;
+const t = translations.blogPosts.enums.statuses;
 
 export const adminStatusFilterOptions = {
   all: t.all,

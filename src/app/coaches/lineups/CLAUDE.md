@@ -8,7 +8,7 @@ Manages team lineups per category and season. Coaches create lineups, add/remove
 
 | File | Responsibility |
 |---|---|
-| `page.tsx` | Master page — category/season selection via tabs, lineup CRUD orchestration |
+| `error.tsx` | Master page — category/season selection via tabs, lineup CRUD orchestration |
 | `components/LineupsList.tsx` | Lists lineups for selected category/season with add/edit/delete |
 | `components/LineupMembers.tsx` | Displays members in selected lineup with add/edit/delete |
 | `components/LineupModal.tsx` | Create/edit lineup form (name, description) |
@@ -22,7 +22,7 @@ Manages team lineups per category and season. Coaches create lineups, add/remove
 ## Data Flow
 
 ```
-page.tsx
+error.tsx
 ├── useFetchSeasons() → all seasons
 ├── useFetchCategories() → all categories
 ├── useUserRoles().getCurrentUserCategories() → assigned categories
@@ -90,7 +90,7 @@ page.tsx
 
 3. **Adopt `CoachCategoryContext`** (see `components/CLAUDE.md`) — Replace per-page category/season selection with `const { selectedCategory, selectedSeason } = useCoachCategory()`. This eliminates the duplicated tab rendering and auto-selection logic. The context also fixes the race condition issue (#3 above) since `selectedCategory` is stable in context rather than local state that can change mid-operation.
 
-4. **Refactor `page.tsx`** — After context adoption, extract remaining lineup-specific state (selectedLineup, modals) into `useLineupsPage()` hook.
+4. **Refactor `error.tsx`** — After context adoption, extract remaining lineup-specific state (selectedLineup, modals) into `useLineupsPage()` hook.
 
 ### Code Quality
 

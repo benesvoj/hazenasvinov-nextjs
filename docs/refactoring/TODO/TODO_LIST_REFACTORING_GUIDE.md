@@ -656,7 +656,7 @@ export interface TodoListItemProps {
 
 ### Step 6: Update Admin Page
 
-**File:** `src/app/admin/page.tsx.backup`
+**File:** `src/app/admin/error.tsx.backup`
 
 **Key Changes:**
 - Separate useTodos and useTodoForm hooks

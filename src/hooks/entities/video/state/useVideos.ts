@@ -1,6 +1,6 @@
 'use client';
 
-import {translations} from "@/lib/translations/index";
+import {translations} from '@/lib/translations/index';
 
 import {createCRUDHook} from '@/hooks';
 import {API_ROUTES} from '@/lib';
@@ -16,12 +16,12 @@ export function useVideos() {
     byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
     entityName: DB_TABLE,
     messages: {
-      createSuccess: translations.videos.responseMessages.createSuccess,
-      updateSuccess: translations.videos.responseMessages.updateSuccess,
-      deleteSuccess: translations.videos.responseMessages.deleteSuccess,
-      createError: translations.videos.responseMessages.createError,
-      updateError: translations.videos.responseMessages.updateError,
-      deleteError: translations.videos.responseMessages.deleteError,
+      createSuccess: translations.matchRecordings.responseMessages.createSuccess,
+      updateSuccess: translations.matchRecordings.responseMessages.updateSuccess,
+      deleteSuccess: translations.matchRecordings.responseMessages.deleteSuccess,
+      createError: translations.matchRecordings.responseMessages.createError,
+      updateError: translations.matchRecordings.responseMessages.updateError,
+      deleteError: translations.matchRecordings.responseMessages.deleteError,
     },
   })();
 

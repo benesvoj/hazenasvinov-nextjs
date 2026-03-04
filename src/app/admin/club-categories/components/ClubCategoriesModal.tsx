@@ -1,3 +1,6 @@
+// TODO: select replace by Choice component
+'use client';
+
 import {Select, SelectItem, Input} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
@@ -29,7 +32,7 @@ export const ClubCategoriesModal = ({
   categories,
   seasons,
 }: ClubCategoriesModalProps) => {
-  const t = translations.admin.clubCategories;
+  const t = translations.clubCategories;
 
   const isEditMode = mode === ModalMode.EDIT;
 

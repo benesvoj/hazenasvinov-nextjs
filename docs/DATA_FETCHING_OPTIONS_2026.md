@@ -66,7 +66,7 @@ export default async function VideosPage() {
 ### Hybrid Pattern (BEST OF BOTH WORLDS)
 
 ```typescript
-// Server Component (page.tsx.backup)
+// Server Component (error.tsx.backup)
 import {VideoList} from './VideoList';
 
 export default async function VideosPage() {

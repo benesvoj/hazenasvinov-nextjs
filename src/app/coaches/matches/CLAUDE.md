@@ -8,7 +8,7 @@ Central hub for coach match management. Displays upcoming matches, recent result
 
 | File | Responsibility |
 |---|---|
-| `page.tsx` | Master page — category/season selection, tab navigation, match selection |
+| `error.tsx` | Master page — category/season selection, tab navigation, match selection |
 | `components/UpcomingMatchesCard.tsx` | List of upcoming matches with "Record result" button |
 | `components/RecentResultsCard.tsx` | List of completed matches sorted by date |
 | `components/RecentMatchDetails.tsx` | Detailed match view — photos, notes, lineup, documents |
@@ -27,7 +27,7 @@ Central hub for coach match management. Displays upcoming matches, recent result
 ## Data Flow
 
 ```
-page.tsx
+error.tsx
 ├── useFetchSeasons() + useSeasonFiltering() → active season
 ├── useFetchCategories() → all categories
 ├── useUserRoles().getCurrentUserCategories() → assigned categories

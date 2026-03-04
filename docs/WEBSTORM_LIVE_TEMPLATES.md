@@ -85,7 +85,7 @@ $END$
 
 1. **Create a new file:**
    ```
-   src/app/admin/committees/page.tsx.backup
+   src/app/admin/committees/error.tsx.backup
    ```
 
 2. **Type the abbreviation:**
@@ -304,7 +304,7 @@ Save this as `NextJS_Server_Components.xml`:
 
 ### Creating Committees Page with WebStorm:
 
-1. **Create file:** `src/app/admin/committees/page.tsx.backup`
+1. **Create file:** `src/app/admin/committees/error.tsx.backup`
 
 2. **Type:** `nxpage` + Tab
 

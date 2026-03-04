@@ -5,7 +5,7 @@ import {API_ROUTES, translations} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/categories';
 import {Category, CategoryInsert} from '@/types';
 
-const t = translations.admin.categories.responseMessages;
+const t = translations.categories.responseMessages;
 
 /**
  * Wrapper to maintain backward compatibility with existing API

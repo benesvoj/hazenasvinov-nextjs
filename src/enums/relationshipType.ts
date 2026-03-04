@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.relationshipType;
+const t = translations.members.enums.relationshipType;
 
 export enum RelationshipType {
   PERMANENT = 'permanent',

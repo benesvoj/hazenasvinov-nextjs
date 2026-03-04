@@ -5,7 +5,7 @@ import {API_ROUTES, translations} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/comments';
 import {BaseComment, CommentInsert} from '@/types';
 
-const t = translations.admin.comments.responseMessages;
+const t = translations.comments.responseMessages;
 
 export function useComments() {
   const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<

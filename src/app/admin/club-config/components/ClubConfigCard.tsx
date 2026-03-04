@@ -1,3 +1,5 @@
+'use client';
+
 import {useEffect, useRef, useState} from 'react';
 
 import {Button, Input, Textarea} from '@heroui/react';

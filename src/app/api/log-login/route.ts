@@ -1,9 +1,9 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {supabaseServerClient} from '@/utils/supabase/server';
+import {withAuth} from '@/utils/supabase/apiHelpers';
 
 export async function POST(request: NextRequest) {
-  try {
+  return withAuth(async (user, supabase) => {
     const body = await request.json();
     const {email, status, reason, userAgent, action = 'login'} = body;
 
@@ -44,7 +44,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for recent duplicate login attempts (within 10 seconds)
-    const supabase = await supabaseServerClient();
     const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
 
     const {data: recentLogs} = await supabase
@@ -90,8 +89,5 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Login action logged successfully',
     });
-  } catch (error) {
-    console.error('Error in log-login API:', error);
-    return NextResponse.json({error: 'Internal server error'}, {status: 500});
-  }
+  });
 }

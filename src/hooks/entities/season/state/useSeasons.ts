@@ -7,7 +7,7 @@ import {API_ROUTES} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/seasons';
 import {Season, SeasonInsert} from '@/types';
 
-const t = translations.admin.seasons.responseMessages;
+const t = translations.seasons.responseMessages;
 
 /**
  * Wrapper to maintain backward compatibility with existing API

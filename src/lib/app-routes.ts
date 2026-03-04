@@ -36,6 +36,7 @@ export const APP_ROUTES = {
     resetPassword: '/reset-password' as const,
     error: '/error' as const,
     blocked: '/blocked' as const,
+    callback: '/auth/callback' as const,
   },
 
   // Admin portal

@@ -395,7 +395,7 @@ const {
 
 ---
 
-### 4.1 Dashboard (`/coaches/dashboard/page.tsx`)
+### 4.1 Dashboard (`/coaches/dashboard/error.tsx`)
 
 **Remove (~40 lines):**
 - `useState` for `selectedCategory`, `assignedCategoryIds`
@@ -432,7 +432,7 @@ const {availableCategories, selectedCategory, setSelectedCategory, isLoading} = 
 
 ---
 
-### 4.2 Attendance (`/coaches/attendance/page.tsx`)
+### 4.2 Attendance (`/coaches/attendance/error.tsx`)
 
 **Remove (~75 lines — largest reduction):**
 - `useState` for `selectedCategory`, `selectedSeason`, `adminSimulationCategories`
@@ -482,7 +482,7 @@ const {
 
 ---
 
-### 4.3 Matches (`/coaches/matches/page.tsx`)
+### 4.3 Matches (`/coaches/matches/error.tsx`)
 
 **Remove (~40 lines):**
 - `useState` for `selectedCategory`, `assignedCategoryIds`
@@ -513,7 +513,7 @@ const selectedCategoryData = availableCategories.find((c) => c.id === selectedCa
 
 ---
 
-### 4.4 Lineups (`/coaches/lineups/page.tsx`)
+### 4.4 Lineups (`/coaches/lineups/error.tsx`)
 
 **Remove (~50 lines):**
 - `useState` for `selectedCategory`, `selectedSeason`, `userCategories`
@@ -557,7 +557,7 @@ const {
 
 ---
 
-### 4.5 Videos (`/coaches/videos/page.tsx`)
+### 4.5 Videos (`/coaches/videos/error.tsx`)
 
 **Remove (~30 lines):**
 - `useState` for `assignedCategories`
@@ -581,7 +581,7 @@ const hasAssignedCategories = availableCategories.length > 0;
 
 ---
 
-### 4.6 Members (`/coaches/members/page.tsx`)
+### 4.6 Members (`/coaches/members/error.tsx`)
 
 **Currently:** No category filtering at all.
 
@@ -602,7 +602,7 @@ This page becomes the first to gain category filtering through context adoption.
 
 ---
 
-### 4.7 Meeting Minutes (`/coaches/meeting-minutes/page.tsx`)
+### 4.7 Meeting Minutes (`/coaches/meeting-minutes/error.tsx`)
 
 **Currently:** No category filtering. Uses shared `MeetingMinutesContainer` component.
 

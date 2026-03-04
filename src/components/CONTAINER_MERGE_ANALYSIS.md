@@ -56,12 +56,12 @@ The **only overlap** is the loading spinner. Both components show `<LoadingSpinn
 
 | Page | `isLoading` | `isError` | `isUnderConstruction` | Manual Tabs Inside |
 |---|---|---|---|---|
-| `dashboard/page.tsx` | ✓ Yes | ✗ No | ✗ No | ✓ Category tabs (conditional) |
-| `matches/page.tsx` | ✓ Yes | ✗ No | ✗ No | ✓ 4 content tabs |
-| `attendance/page.tsx` | ✓ Internal | ✗ No | ✗ No | ✓ 3 content tabs |
-| `lineups/page.tsx` | ✗ No | ✗ No | ✗ No | ✓ Category tabs |
-| `members/page.tsx` | ✗ No | ✗ No | ✗ No | ✗ No |
-| `videos/page.tsx` | ✗ No | ✗ No | ✗ No | ✗ No |
+| `dashboard/error.tsx` | ✓ Yes | ✗ No | ✗ No | ✓ Category tabs (conditional) |
+| `matches/error.tsx` | ✓ Yes | ✗ No | ✗ No | ✓ 4 content tabs |
+| `attendance/error.tsx` | ✓ Internal | ✗ No | ✗ No | ✓ 3 content tabs |
+| `lineups/error.tsx` | ✗ No | ✗ No | ✗ No | ✓ Category tabs |
+| `members/error.tsx` | ✗ No | ✗ No | ✗ No | ✗ No |
+| `videos/error.tsx` | ✗ No | ✗ No | ✗ No | ✗ No |
 
 Key observations:
 - No coach page currently passes `isError` or `isUnderConstruction`

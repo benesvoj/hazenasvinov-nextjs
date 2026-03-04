@@ -2,13 +2,12 @@ import React from 'react';
 
 import {Button, Input} from '@heroui/react';
 
-import {LogoUpload} from "@/components/ui/client";
+import {LogoUpload} from '@/components/ui/client';
 
 import {UnifiedModal} from '@/components';
 import {ModalMode} from '@/enums';
 import {translations} from '@/lib';
 import {ClubFormData} from '@/types';
-
 
 interface ClubFormModalProps {
   isOpen: boolean;
@@ -20,7 +19,7 @@ interface ClubFormModalProps {
   mode: ModalMode;
 }
 
-const tAction = translations.action;
+const tAction = translations.common.actions;
 
 export const ClubFormModal = ({
   isOpen,

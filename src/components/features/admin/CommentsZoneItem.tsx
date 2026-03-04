@@ -12,8 +12,8 @@ export const CommentsZoneItem = ({
   handleEditComment,
   deleteComment,
 }: CommentsZoneItemProps) => {
-  const tAction = translations.action;
-  const tCommon = translations.common;
+  const tAction = translations.common.actions;
+  const tCommon = translations.comments;
 
   const commentTitle = () => (
     <>

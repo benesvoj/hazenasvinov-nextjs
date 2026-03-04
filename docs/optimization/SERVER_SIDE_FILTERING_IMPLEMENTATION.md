@@ -150,7 +150,7 @@ export const MembersInternalTab = ({
 };
 ```
 
-#### Parent Page (page.tsx.backup)
+#### Parent Page (error.tsx.backup)
 Already has search and filter state:
 ```typescript
 const [searchTerm, setSearchTerm] = React.useState('');

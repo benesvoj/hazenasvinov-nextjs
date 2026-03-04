@@ -36,7 +36,7 @@ const convertToActionItems = (actions: ActionsProps[]): ActionItem[] => {
             const nextStatus = getNextStatus(currentStatus);
             if (nextStatus) {
               showToast.success(
-                `${translations.action.moveStatusFrom} ${getStatusLabel(currentStatus)} ${translations.action.moveStatusTo} ${getStatusLabel(nextStatus)}`
+                `${translations.common.actions.moveStatusFrom} ${getStatusLabel(currentStatus)} ${translations.common.actions.moveStatusTo} ${getStatusLabel(nextStatus)}`
               );
               onStatusChange(itemId, nextStatus);
             }
@@ -67,7 +67,7 @@ const separateActionsByPriority = (actions: ActionsProps[]) => {
 };
 
 export const AdminActions = ({actions}: AdminActionsProps) => {
-  const tAction = translations.action;
+  const tAction = translations.common.actions;
   const tCommon = translations.common;
   const {primaryActions, secondaryActions} = separateActionsByPriority(actions);
   const mobileActions = convertToActionItems(actions);

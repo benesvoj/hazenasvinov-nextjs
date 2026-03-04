@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 
-import {Button, Card, CardHeader, CardBody} from '@heroui/react';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Button} from '@heroui/react';
 
 import {ArrowRightIcon, CalendarIcon, TrophyIcon} from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations';
-
 import {LoadingSpinner, MatchRow} from '@/components';
+import {translations} from '@/lib';
 
 interface CategoryMatchesAndResultsProps {
   loading: boolean;
@@ -38,7 +38,9 @@ export default function CategoryMatchesAndResults({
         <CardHeader className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-blue-600" />
-            <h3 className="text-xl font-semibold">{translations.matchSchedule.upcomingMatches}</h3>
+            <h3 className="text-xl font-semibold">
+              {translations.matches.matchSchedule.upcomingMatches}
+            </h3>
           </div>
           {redirectionLinks && (
             <Button
@@ -53,7 +55,7 @@ export default function CategoryMatchesAndResults({
               color="primary"
               endContent={<ArrowRightIcon className="w-4 h-4" />}
             >
-              {translations.matchSchedule.allMatches}
+              {translations.matches.matchSchedule.allMatches}
             </Button>
           )}
         </CardHeader>
@@ -76,7 +78,7 @@ export default function CategoryMatchesAndResults({
                   <div className="mb-2">
                     {Array.isArray(allMatches) && allMatches.length === 0
                       ? translations.matches.noMatches
-                      : translations.matchSchedule.noUpcomingMatches}
+                      : translations.matches.matchSchedule.noUpcomingMatches}
                   </div>
                 </div>
               )}
@@ -90,7 +92,9 @@ export default function CategoryMatchesAndResults({
         <CardHeader className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrophyIcon className="w-5 h-5 text-green-600" />
-            <h3 className="text-xl font-semibold">{translations.matchSchedule.recentResults}</h3>
+            <h3 className="text-xl font-semibold">
+              {translations.matches.matchSchedule.recentResults}
+            </h3>
           </div>
           {redirectionLinks && (
             <Button
@@ -105,7 +109,7 @@ export default function CategoryMatchesAndResults({
               color="primary"
               endContent={<ArrowRightIcon className="w-4 h-4" />}
             >
-              {translations.matchSchedule.allMatches}
+              {translations.matches.matchSchedule.allMatches}
             </Button>
           )}
         </CardHeader>
@@ -122,7 +126,7 @@ export default function CategoryMatchesAndResults({
                   <div className="mb-2">
                     {Array.isArray(allMatches) && allMatches.length === 0
                       ? translations.matches.noMatches
-                      : translations.matchSchedule.noRecentResults}
+                      : translations.matches.matchSchedule.noRecentResults}
                   </div>
                 </div>
               )}

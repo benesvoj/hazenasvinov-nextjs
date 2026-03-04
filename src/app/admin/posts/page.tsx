@@ -28,7 +28,7 @@ import {
 import {translations} from '@/lib';
 import {Blog} from '@/types';
 
-const t = translations.admin.posts;
+const t = translations.blogPosts;
 
 export default function BlogPostsPage() {
   const [searchTerm, setSearchTerm] = useState('');

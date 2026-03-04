@@ -188,7 +188,7 @@ export default function MatchSchedule({
             {description && (
               <p className="text-lg text-gray-600 dark:text-gray-400">{description}</p>
             )}
-            <LoadingSpinner label={translations.loading} />
+            <LoadingSpinner label={translations.common.loading} />
           </div>
         </div>
       </section>

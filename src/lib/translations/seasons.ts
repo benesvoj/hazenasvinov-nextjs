@@ -42,6 +42,9 @@ export const seasonsTranslations = {
     createError: 'Chyba při vytváření sezóny.',
     updateError: 'Chyba při aktualizaci sezóny.',
     deleteError: 'Chyba při mazání sezóny.',
+    fetchFailed: 'Chyba při načítání sezón',
+    mandatoryName: 'Název je povinný',
+    mandatoryStartDate: 'Dátum začátku je povinný',
   },
   alerts: {
     warning: {

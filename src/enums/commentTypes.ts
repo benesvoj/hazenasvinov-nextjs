@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.commentTypes;
+const t = translations.comments.enums.types;
 
 export enum CommentTypes {
   GENERAL = 'general',

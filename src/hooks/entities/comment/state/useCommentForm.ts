@@ -11,7 +11,7 @@ const initialFormData: CommentFormData = {
   type: CommentTypes.GENERAL,
 };
 
-const t = translations.admin.comments.responseMessages;
+const t = translations.comments.responseMessages;
 
 export function useCommentForm() {
   return createFormHook<BaseComment, CommentFormData>({

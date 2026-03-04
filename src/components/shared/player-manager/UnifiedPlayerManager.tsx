@@ -195,6 +195,7 @@ export default function UnifiedPlayerManager({
     );
   };
 
+  // todo"
   const getPositionBadge = (position?: string) => {
     if (!position) return null;
 
@@ -204,8 +205,8 @@ export default function UnifiedPlayerManager({
     };
 
     const positionLabels = {
-      [PlayerPosition.GOALKEEPER]: translations.playerPosition.goalkeeper,
-      [PlayerPosition.FIELD_PLAYER]: translations.playerPosition.fieldPlayer,
+      [PlayerPosition.GOALKEEPER]: translations.lineups.enums.playerPosition.goalkeeper,
+      [PlayerPosition.FIELD_PLAYER]: translations.lineups.enums.playerPosition.fieldPlayer,
     };
 
     return (
@@ -220,7 +221,7 @@ export default function UnifiedPlayerManager({
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-sm text-gray-500">{translations.unifiedPlayerManager.loading}</div>
+        <div className="text-sm text-gray-500">{translations.common.loading}</div>
       </div>
     );
   }
@@ -229,7 +230,7 @@ export default function UnifiedPlayerManager({
     return (
       <div className="rounded bg-red-50 p-4">
         <div className="text-sm text-red-800">
-          {translations.unifiedPlayerManager.error}: {error}
+          {translations.lineupManager.unifiedPlayerManager.error}: {error}
         </div>
       </div>
     );
@@ -274,7 +275,7 @@ export default function UnifiedPlayerManager({
           startContent={<PlusIcon className="w-4 h-4" />}
           onPress={() => setShowCreateMemberModal(true)}
         >
-          {translations.unifiedPlayerManager.createMember}
+          {translations.common.actions.create}
         </Button>
       </div>
 

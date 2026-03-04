@@ -50,7 +50,7 @@ export default function AddResultModal({
     [resultData, onResultDataChange]
   );
 
-  const t = translations.match;
+  const t = translations.matches;
 
   return (
     <UnifiedModal

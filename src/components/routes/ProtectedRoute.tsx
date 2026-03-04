@@ -38,17 +38,17 @@ export default function ProtectedRoute({
       <div className="flex flex-col items-center justify-center min-h-[200px] p-6 text-center">
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md">
           <h3 className="text-lg font-medium text-yellow-800 mb-2">
-            {translations.authenticationRequired || 'Vyžadováno přihlášení'}
+            {translations.common.authenticationRequired || 'Vyžadováno přihlášení'}
           </h3>
           <p className="text-sm text-yellow-700 mb-4">
-            {translations.loginRequiredForAccess ||
+            {translations.common.loginRequiredForAccess ||
               'Pro přístup k této stránce se musíte přihlásit.'}
           </p>
           <a
             href={redirectTo}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-yellow-800 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
           >
-            {translations.login || 'Přihlásit se'}
+            {translations.common.login || 'Přihlásit se'}
           </a>
         </div>
       </div>

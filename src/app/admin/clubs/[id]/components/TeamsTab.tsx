@@ -69,7 +69,7 @@ export default function TeamsTab({teams, onDeleteTeam}: TeamsTabProps) {
                     startContent={<TrashIcon className="w-4 h-4" />}
                     onPress={() => onDeleteTeam(team)}
                   >
-                    {translations.action.delete}
+                    {translations.common.actions.delete}
                   </Button>
                 </div>
               </div>

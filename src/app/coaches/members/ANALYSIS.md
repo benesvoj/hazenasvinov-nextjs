@@ -1,7 +1,7 @@
 # Coaches Members Page — Analysis & Improvement Plan
 
 > Date: 2026-03-03
-> Files analysed: `page.tsx`, `MembersInternalSection.tsx`, `MemberTableTab.tsx`, `UnifiedTable.tsx`, `useFetchMembersInternal.ts`, `buildMembersViewQuery`, `route.ts`, `MembersInternalQuerySchema`, `MemberModal.tsx`, `MemberInfoForm.tsx`, `CoachCategoryContext.tsx`
+> Files analysed: `error.tsx`, `MembersInternalSection.tsx`, `MemberTableTab.tsx`, `UnifiedTable.tsx`, `useFetchMembersInternal.ts`, `buildMembersViewQuery`, `route.ts`, `MembersInternalQuerySchema`, `MemberModal.tsx`, `MemberInfoForm.tsx`, `CoachCategoryContext.tsx`
 
 ---
 
@@ -24,7 +24,7 @@
 ### Current implementation
 
 ```
-page.tsx → searchTerm state
+error.tsx → searchTerm state
     → MembersInternalSection (searchTerm prop)
         → useFetchMembersInternal({ search: searchTerm })
             → hook: debouncedSearch (300ms) → ?search=...
@@ -54,7 +54,7 @@ None critical. No improvements needed here beyond cosmetic (placeholder text, cl
 CoachCategoryContext → selectedCategory (auto-selected first assigned category)
                      → availableCategories (filtered to assigned)
 
-page.tsx:
+error.tsx:
   const { selectedCategory, availableCategories } = useCoachCategory();
   const [selectedCategoryId, setSelectedCategoryId] = useState(selectedCategory || '');
   // ↑ initialized ONCE on first render
@@ -123,7 +123,7 @@ The fix requires wiring through all three layers:
 ### Current implementation
 
 ```tsx
-// page.tsx
+// error.tsx
 const { categories: { data: categoriesData } } = useAppData();  // ALL categories
 
 <MemberModal
@@ -208,7 +208,7 @@ A secondary symptom: `UnifiedTable` in server-pagination mode renders all rows i
 
 The hook already supports it. The infrastructure is in place. The changes needed are:
 
-1. Add a `pageSize` state to the caller (`MembersInternalSection` or `page.tsx`)
+1. Add a `pageSize` state to the caller (`MembersInternalSection` or `error.tsx`)
 2. Pass `limit={pageSize}` to `useFetchMembersInternal`
 3. Pass `rowsPerPage={pageSize}` to `MemberTableTab` (so UI and API page size match)
 4. Render a HeroUI `Select` with size options (10, 25, 50) and call `changePageSize` on change
@@ -239,7 +239,7 @@ From static analysis, the most likely trigger is a Zod validation failure caused
 
 **Fix:** Make `MembersInternalSection` drive both values from the same source.
 
-- Add a `pageSize` state (default 25) to `MembersInternalSection` or expose it as a prop from `page.tsx`
+- Add a `pageSize` state (default 25) to `MembersInternalSection` or expose it as a prop from `error.tsx`
 - Pass `limit={pageSize}` into `useFetchMembersInternal`
 - Pass `rowsPerPage={pageSize}` into `MemberTableTab`
 - Wire `changePageSize` from the hook to a `<Select>` with options `[10, 25, 50]`
@@ -253,7 +253,7 @@ After this fix, what the API fetches and what the table displays are always alig
 **Problem:** Three-layer disconnect — no onChange, state not passed, hook doesn't support it.
 
 **Fix (3 sub-steps):**
-1. `page.tsx`: add `onValueChange={setIsActiveOnly}` to `<Checkbox>`
+1. `error.tsx`: add `onValueChange={setIsActiveOnly}` to `<Checkbox>`
 2. Add `activeOnly?: boolean` to `MembersInternalSectionProps` and pass `activeOnly={isActiveOnly}`
 3. In `MembersInternalSection`, pass `activeOnly` to `useFetchMembersInternal` via a new `activeOnly` option
 4. In `useFetchMembersInternal`, add `activeOnly` to `MembersInternalOptions`, debounce it, and send `?active_only=true` when set
@@ -304,7 +304,7 @@ categories={availableCategories}
 
 ### Step 5 — Add configurable page size UI (Medium)
 
-Once Step 1 is done (pageSize state unified), add a `<Select>` for page size in the toolbar `UnifiedCard` in `page.tsx`:
+Once Step 1 is done (pageSize state unified), add a `<Select>` for page size in the toolbar `UnifiedCard` in `error.tsx`:
 
 ```tsx
 <Select
@@ -319,7 +319,7 @@ Once Step 1 is done (pageSize state unified), add a `<Select>` for page size in 
 </Select>
 ```
 
-`pageSize` state lives in `page.tsx` and is passed as a prop to `MembersInternalSection`, which passes it as both `limit` to the hook and `rowsPerPage` to `MemberTableTab`.
+`pageSize` state lives in `error.tsx` and is passed as a prop to `MembersInternalSection`, which passes it as both `limit` to the hook and `rowsPerPage` to `MemberTableTab`.
 
 **Note:** Zod schema has `max(100)`. Values 10/25/50 are all within bounds.
 
@@ -356,7 +356,7 @@ This produces `{"error":"String must contain at least 1 character(s)"}` instead 
 ## 9. Component Responsibility After Fixes
 
 ```
-page.tsx (orchestrator)
+error.tsx (orchestrator)
 ├── State: pageSize, searchTerm, isActiveOnly
 ├── Category/Season from useCoachCategory() (no local duplicate)
 ├── Toolbar UnifiedCard:

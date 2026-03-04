@@ -12,19 +12,19 @@ import {translations} from '@/lib/translations';
 import {TodoFilter} from '@/enums';
 
 interface TodoFilteringProps {
-    todoFilter: TodoFilter;
-    setTodoFilter: (filter: TodoFilter) => void;
-    stats: {
-        total: number;
-        todo: number,
-        inProgress: number,
-        done: number,
-        highPriority: number,
-    }
+  todoFilter: TodoFilter;
+  setTodoFilter: (filter: TodoFilter) => void;
+  stats: {
+    total: number;
+    todo: number;
+    inProgress: number;
+    done: number;
+    highPriority: number;
+  };
 }
 
 export const TodoStatsCards = ({todoFilter, setTodoFilter, stats}: TodoFilteringProps) => {
-  const t = translations.common.todoFilter;
+  const t = translations.todos.enums.todoFilter;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -34,9 +34,7 @@ export const TodoStatsCards = ({todoFilter, setTodoFilter, stats}: TodoFiltering
         <CardBody
           className="text-center"
           onClick={() =>
-            setTodoFilter(
-              todoFilter === TodoFilter.TODO ? TodoFilter.ALL : TodoFilter.TODO
-            )
+            setTodoFilter(todoFilter === TodoFilter.TODO ? TodoFilter.ALL : TodoFilter.TODO)
           }
         >
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -70,9 +68,7 @@ export const TodoStatsCards = ({todoFilter, setTodoFilter, stats}: TodoFiltering
         <CardBody
           className="text-center"
           onClick={() =>
-            setTodoFilter(
-              todoFilter === TodoFilter.DONE ? TodoFilter.ALL : TodoFilter.DONE
-            )
+            setTodoFilter(todoFilter === TodoFilter.DONE ? TodoFilter.ALL : TodoFilter.DONE)
           }
         >
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -89,9 +85,7 @@ export const TodoStatsCards = ({todoFilter, setTodoFilter, stats}: TodoFiltering
           className="text-center"
           onClick={() =>
             setTodoFilter(
-              todoFilter === TodoFilter.HIGH_PRIORITY
-                ? TodoFilter.ALL
-                : TodoFilter.HIGH_PRIORITY
+              todoFilter === TodoFilter.HIGH_PRIORITY ? TodoFilter.ALL : TodoFilter.HIGH_PRIORITY
             )
           }
         >

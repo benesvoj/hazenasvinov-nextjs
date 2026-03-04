@@ -2,7 +2,9 @@
 
 import React, {memo} from 'react';
 
-import {Card, CardBody, CardHeader, Chip, Image} from '@heroui/react';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Chip} from '@heroui/chip';
+import {Image} from '@heroui/image';
 
 import {LinkIcon, PencilIcon, PlayIcon, TrashIcon} from '@heroicons/react/24/outline';
 
@@ -11,8 +13,9 @@ import {
   ButtonWithTooltipProps,
 } from '@/components/ui/server/buttons/ButtonWithTooltip';
 
+import {translations} from '@/lib/translations/index';
+
 import {formatDateString} from '@/helpers';
-import {translations} from '@/lib';
 import {Category, Club, Season, VideoSchema} from '@/types';
 import {copyUrl, playUrl} from '@/utils';
 
@@ -25,7 +28,7 @@ interface VideoCardProps {
   clubs?: Array<Club>;
 }
 
-const t = translations.components.videos.videoCard;
+const t = translations.matchRecordings.components.card;
 
 export const VideoCard = memo(function VideoCard({
   video,

@@ -32,7 +32,7 @@ export function MeetingMinutesCard({
   onDelete,
   onEditAttendees,
 }: MeetingMinutesCardProps) {
-  const t = translations.components.meetingMinutes;
+  const t = translations.meetingMinutes;
 
   const getStatusColor = (status: string) => {
     return status === 'present' ? 'success' : 'warning';

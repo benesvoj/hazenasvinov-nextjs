@@ -892,7 +892,7 @@ export async function getCategoryPageData(categorySlug: string, options = {}) {
 }
 ```
 
-### Update: `src/app/(main)/categories/[slug]/page.tsx`
+### Update: `src/app/(main)/categories/[slug]/error.tsx`
 
 ```typescript
 // This is a SERVER COMPONENT (no 'use client' directive)
@@ -1729,14 +1729,14 @@ src/
 │   ├── (main)/
 │   │   └── categories/
 │   │       ├── [slug]/
-│   │       │   └── page.tsx               # Server component (CategoryPage)
+│   │       │   └── error.tsx               # Server component (CategoryPage)
 │   │       └── components/
 │   │           ├── CoachContactsSection.tsx  # Server component
 │   │           └── CoachCardDisplay.tsx      # Server component
 │   │
 │   └── coaches/
 │       └── profile/
-│           ├── page.tsx                   # Coach profile page
+│           ├── error.tsx                   # Coach profile page
 │           └── components/
 │               └── CoachCardEditor.tsx    # Client component - card editor
 │

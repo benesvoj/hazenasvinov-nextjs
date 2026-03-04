@@ -1,6 +1,6 @@
 # Phase 5: Code Organization Refactoring Plan
 
-**Target File:** `src/app/admin/matches/page.tsx`
+**Target File:** `src/app/admin/matches/error.tsx`
 **Scope:** Extract handlers, validation, and typed query builders
 **Business Logic:** NO changes - pure structural refactoring
 
@@ -21,7 +21,7 @@
 
 ### Current State
 
-The `admin/matches/page.tsx` contains:
+The `admin/matches/error.tsx` contains:
 - 18 state variables
 - 6 direct Supabase write operations
 - 4 indirect write operations via utilities
@@ -50,7 +50,7 @@ src/
 └── app/
     └── admin/
         └── matches/
-            └── page.tsx                      ← SIMPLIFIED: Uses hooks
+            └── error.tsx                      ← SIMPLIFIED: Uses hooks
 ```
 
 ---
@@ -63,7 +63,7 @@ src/
 
 #### Functions to Extract
 
-| Function in page.tsx | Lines | New Method Name |
+| Function in error.tsx | Lines | New Method Name |
 |---------------------|-------|-----------------|
 | `handleAddMatch` | 317-394 | `createMatch` |
 | `handleUpdateResult` | 396-468 | `updateMatchResult` |
@@ -381,7 +381,7 @@ export function useMatchMutations(options: UseMatchMutationsOptions): UseMatchMu
 }
 ```
 
-#### Before/After in page.tsx
+#### Before/After in error.tsx
 
 **BEFORE (lines 317-394):**
 ```typescript
@@ -456,7 +456,7 @@ const handleAddMatch = async () => {
 
 #### Functions to Extract
 
-| Validation in page.tsx | Lines | New Function |
+| Validation in error.tsx | Lines | New Function |
 |-----------------------|-------|--------------|
 | Add match validation | 324-333 | `validateAddMatchForm` |
 | Edit match validation | 576-594 | `validateEditMatchForm` |
@@ -951,7 +951,7 @@ export type {
 
 **Total new code:** ~630 lines
 
-**Removed from page.tsx:** ~400 lines
+**Removed from error.tsx:** ~400 lines
 
 **Net reduction:** ~230 lines from main page + massive improvement in organization
 

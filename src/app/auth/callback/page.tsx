@@ -4,6 +4,7 @@ import {useEffect} from 'react';
 
 import {useRouter} from 'next/navigation';
 
+import {LoadingSpinner} from '@/components';
 import {useSupabaseClient} from '@/hooks';
 import {APP_ROUTES} from '@/lib';
 
@@ -20,10 +21,7 @@ export default function AuthCallbackPage() {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
-        const tokenType = hashParams.get('token_type');
         const type = hashParams.get('type');
-        const expiresIn = hashParams.get('expires_in');
-        const expiresAt = hashParams.get('expires_at');
 
         // Also check for error parameters
         const error = hashParams.get('error');
@@ -35,24 +33,6 @@ export default function AuthCallbackPage() {
         const pkceToken = searchParams.get('token');
         const pkceType = searchParams.get('type');
         const pkceCode = searchParams.get('code');
-
-        console.log('Auth callback received:', {
-          hasAccessToken: !!accessToken,
-          hasRefreshToken: !!refreshToken,
-          tokenType,
-          type,
-          expiresIn,
-          expiresAt,
-          error,
-          errorCode,
-          errorDescription,
-          hasPkceToken: !!pkceToken,
-          hasPkceCode: !!pkceCode,
-          pkceType,
-          fullUrl: window.location.href,
-          hash: window.location.hash,
-          search: window.location.search,
-        });
 
         // Handle error cases first
         if (error) {
@@ -69,26 +49,16 @@ export default function AuthCallbackPage() {
 
         // Handle PKCE tokens from query parameters
         if (pkceToken || pkceCode) {
-          console.log('Processing PKCE token/code:', {
-            hasToken: !!pkceToken,
-            hasCode: !!pkceCode,
-            type: pkceType,
-            tokenLength: pkceToken?.length,
-            codeLength: pkceCode?.length,
-          });
-
           try {
             let result;
             let error;
 
             if (pkceCode) {
               // Handle code parameter (newer PKCE format)
-              console.log('Exchanging PKCE code for session');
               result = await supabase.auth.exchangeCodeForSession(pkceCode);
               error = result.error;
             } else if (pkceToken) {
               // Handle token parameter (email template format)
-              console.log('Exchanging PKCE token for session');
               result = await supabase.auth.exchangeCodeForSession(pkceToken);
               error = result.error;
             }
@@ -104,11 +74,6 @@ export default function AuthCallbackPage() {
               return;
             }
 
-            console.log('PKCE exchange successful:', {
-              user: result.data?.user?.id,
-              session: !!result.data?.session,
-            });
-
             // Ensure user has a profile before proceeding
             if (result.data && result.data.user) {
               try {
@@ -120,8 +85,6 @@ export default function AuthCallbackPage() {
                 if (profileError) {
                   console.error('Error ensuring user profile:', profileError);
                   // Continue anyway, the trigger should have created the profile
-                } else {
-                  console.log('User profile ensured');
                 }
               } catch (err) {
                 console.error('Error in profile creation fallback:', err);
@@ -132,15 +95,12 @@ export default function AuthCallbackPage() {
             // Check if this is an invitation (signup) or password reset
             if (pkceType === 'invite' || pkceType === 'signup') {
               // Redirect to set-password page for new users
-              console.log('Redirecting to set-password page');
               router.push(APP_ROUTES.auth.setPassword);
             } else if (pkceType === 'recovery') {
               // Redirect to reset-password page for password reset
-              console.log('Redirecting to reset-password page');
               router.push(APP_ROUTES.auth.resetPassword);
             } else {
               // Default redirect to admin dashboard
-              console.log('Redirecting to admin dashboard (type:', pkceType, ')');
               router.push(APP_ROUTES.admin.root);
             }
             return;
@@ -169,8 +129,6 @@ export default function AuthCallbackPage() {
             return;
           }
 
-          console.log('Session set successfully:', data);
-
           // Ensure user has a profile before proceeding
           if (data && data.user) {
             try {
@@ -182,8 +140,6 @@ export default function AuthCallbackPage() {
               if (profileError) {
                 console.error('Error ensuring user profile:', profileError);
                 // Continue anyway, the trigger should have created the profile
-              } else {
-                console.log('User profile ensured');
               }
             } catch (err) {
               console.error('Error in profile creation fallback:', err);
@@ -198,27 +154,17 @@ export default function AuthCallbackPage() {
           // Check if this is an invitation (signup) or password reset
           if (type === 'invite' || type === 'signup') {
             // Redirect to set-password page for new users
-            console.log('Redirecting to set-password page');
             router.push(APP_ROUTES.auth.setPassword);
           } else if (type === 'recovery') {
             // Redirect to reset-password page for password reset
-            console.log('Redirecting to reset-password page');
             router.push(APP_ROUTES.auth.resetPassword);
           } else {
             // Default redirect to admin dashboard
-            console.log('Redirecting to admin dashboard (type:', type, ')');
             router.push(APP_ROUTES.admin.root);
           }
         } else {
           console.error('Missing required tokens in URL');
           // Check if we have any hash parameters at all
-          const hasAnyParams = hashParams.toString().length > 0;
-          if (hasAnyParams) {
-            console.log(
-              'Hash parameters found but no tokens:',
-              Object.fromEntries(hashParams.entries())
-            );
-          }
           router.push(APP_ROUTES.auth.error);
         }
       } catch (error) {
@@ -233,10 +179,7 @@ export default function AuthCallbackPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Dokončování přihlášení...
-        </h2>
+        <LoadingSpinner label={'Dokončování přihlášení...'} />
         <p className="text-gray-600 dark:text-gray-400">
           Prosím počkejte, dokud vás nepřesměrujeme.
         </p>

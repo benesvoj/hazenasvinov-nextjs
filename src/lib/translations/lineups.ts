@@ -17,4 +17,24 @@ export const lineupsTranslations = {
   deleteLineupMember: 'Smazat člena soupisky',
   deleteLineupMemberMessage:
     'Opravdu chcete smazat tohoto člena ze soupisky? Tato akce je nevratná.',
+  enums: {
+    errorType: {
+      validationError: 'Validace',
+      databaseError: 'Databáze',
+      networkError: 'Síť',
+      unknownError: 'Neznámá',
+      permissionError: 'Oprávnění',
+    },
+    lineupRole: {
+      captain: 'Kapitán',
+      member: 'Člen',
+    },
+    playerPosition: {
+      goalkeeper: 'Brankář',
+      fieldPlayer: 'Hráč v poli',
+    },
+    playerRoles: {
+      captain: 'Kapitán',
+    },
+  },
 };

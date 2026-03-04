@@ -12,7 +12,7 @@ import {MemberFunction} from '@/types';
 
 import FunctionFormModal from './components/FunctionFormModal';
 
-const tAction = translations.action;
+const tAction = translations.common.actions;
 const tCommon = translations.common;
 const tMemberFunctions = translations.memberFunctions;
 
@@ -85,7 +85,7 @@ export default function MemberFunctionsAdminPage() {
       resetForm();
     } catch (error) {
       console.error(error);
-      showToast.danger(tCommon.responseMessage.unknownError);
+      showToast.danger(translations.common.responseMessages.unknownError);
     }
   };
 
@@ -149,7 +149,7 @@ export default function MemberFunctionsAdminPage() {
           ariaLabel={translations.memberFunctions.table.ariaLabel}
           renderCell={renderFunctionCell}
           getKey={(functionItem: MemberFunction) => functionItem.id}
-          emptyContent={translations.table.emptyContent}
+          emptyContent={translations.common.table.emptyContent}
           isStriped
         />
       </AdminContainer>

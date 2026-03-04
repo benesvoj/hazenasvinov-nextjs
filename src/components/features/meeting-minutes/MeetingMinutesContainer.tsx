@@ -55,7 +55,7 @@ export const MeetingMinutesContainer = forwardRef<
   const {data: seasons, refetch: fetchAllSeasons} = useFetchSeasons();
 
   const [users, setUsers] = useState<any[]>([]);
-  const t = translations.components.meetingMinutes;
+  const t = translations.meetingMinutes;
 
   // Modal functions - declared before useImperativeHandle
   const openCreateModal = () => {

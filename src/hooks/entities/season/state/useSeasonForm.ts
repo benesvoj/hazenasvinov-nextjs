@@ -4,7 +4,7 @@ import {createFormHook} from '@/hooks';
 import {translations} from '@/lib';
 import {Season, SeasonFormData} from '@/types';
 
-const t = translations.admin.seasons.responseMessages;
+const t = translations.seasons.responseMessages;
 const initialFormData: SeasonFormData = {
   name: '',
   start_date: '',

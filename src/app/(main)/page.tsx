@@ -17,11 +17,9 @@ import {
 } from './components';
 import AuthHandler from './components/AuthHandler';
 
-// import OptimizedMatchSchedule from "@/components/match/OptimizedMatchSchedule";
-
 export default function Page() {
   const {sectionVisibility, loading} = useSectionVisibility();
-  const t = translations.matchSchedule;
+  const t = translations.matches.matchSchedule;
 
   return (
     <div className="space-y-4">

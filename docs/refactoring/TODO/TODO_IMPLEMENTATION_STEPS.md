@@ -314,7 +314,7 @@ export const useTodoFiltering = ({todos, todoFilter}: TodoFilteringProps) => {
 
 ## Step 3: Update AdminDashboard Page (45 min)
 
-**File:** `src/app/admin/page.tsx.backup`
+**File:** `src/app/admin/error.tsx.backup`
 
 This is the main change. The page needs to use the refactored hooks.
 
@@ -682,7 +682,7 @@ If something goes wrong, you can rollback:
 
 3. **Revert page changes:**
    ```bash
-   git checkout HEAD -- src/app/admin/page.tsx.backup
+   git checkout HEAD -- src/app/admin/error.tsx.backup
    ```
 
 ---

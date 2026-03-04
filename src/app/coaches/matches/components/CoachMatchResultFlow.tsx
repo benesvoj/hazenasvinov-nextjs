@@ -75,7 +75,7 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
   const queryClient = useQueryClient();
   const addMetadata = useAddMatchMetadata();
 
-  const t = translations.match;
+  const t = translations.matches;
   const totalSteps = 3;
 
   const supabase = useSupabaseClient();

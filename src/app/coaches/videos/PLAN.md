@@ -17,7 +17,7 @@
 | 6 | **Medium** | `VideoPageLayout` interface had dead props | ✅ Done |
 | 7 | **Medium** | `accessControlMessage` condition was inverted | ✅ Done |
 | 8 | **Low** | `categoryLoading` destructured but never used as guard | ✅ Done |
-| 9 | **Low** | Loading skeleton inlined in `page.tsx` | ✅ Done |
+| 9 | **Low** | Loading skeleton inlined in `error.tsx` | ✅ Done |
 | 10 | **High** | `formModal` declared and opened but never rendered — edit is silently broken | ⬜ Todo |
 | 11 | **High** | `paginatedVideos` not used — all videos passed to `VideoGrid`, pagination shows wrong items | ⬜ Todo |
 | 12 | **Low** | Duplicate skeleton — both `VideoPageLayout` and `VideoGrid` have the same guard | ⬜ Todo |
@@ -33,7 +33,7 @@
 | 3 | Removed: `assignedCategories` state, `useUserRoles()`, `useAuth()`, `fetchAssignedCategories`, `useEffect`. Now: `const {availableCategories} = useCoachCategory()` |
 | 4 | `formModal = useModalWithItem<Video>()` + `deleteModal = useModalWithItem<Video>()` replace 4 raw `useState` hooks |
 | 5 | `onPageChange={setCurrentPage}` passed to `<VideoPageLayout>`; `VideoPageLayout` already forwarded it to `VideoGrid` |
-| 6 | `VideoPageLayoutProps` interface stripped of `onAddVideo`, `error`, `onFiltersChange`, `onFormSubmit`, `isFormModalOpen`, `editingVideo`, `onCloseModals`; `VideoFilters` import removed; `page.tsx` call site cleaned accordingly |
+| 6 | `VideoPageLayoutProps` interface stripped of `onAddVideo`, `error`, `onFiltersChange`, `onFormSubmit`, `isFormModalOpen`, `editingVideo`, `onCloseModals`; `VideoFilters` import removed; `error.tsx` call site cleaned accordingly |
 | 7 | `accessControlMessage` condition corrected to `!hasAssignedCategories ? ... : null` |
 | 8 | `categoryLoading` no longer destructured; `VideoPageLayout` handles loading skeleton internally; `PageContainer isLoading={loading}` provides top-level indicator |
 | 9 | Skeleton moved into `VideoPageLayout` (early return at line 70 when `loading && isEmpty(videos)`) |
@@ -46,9 +46,9 @@
 
 ### ⬜ Fix 10 — Edit modal is silently broken (High)
 
-**File:** `src/app/coaches/videos/page.tsx`
+**File:** `src/app/coaches/videos/error.tsx`
 
-**Problem:** `formModal = useModalWithItem<Video>()` is declared (line 20) and `formModal.openWith(video)` is called in `openEditModal` (line 49–51), but `formModal.isOpen` and `formModal.selectedItem` are **never used** in the JSX. No `VideoFormModal` (or equivalent) is rendered anywhere in `page.tsx`. Clicking edit on a video updates hook state but nothing appears on screen.
+**Problem:** `formModal = useModalWithItem<Video>()` is declared (line 20) and `formModal.openWith(video)` is called in `openEditModal` (line 49–51), but `formModal.isOpen` and `formModal.selectedItem` are **never used** in the JSX. No `VideoFormModal` (or equivalent) is rendered anywhere in `error.tsx`. Clicking edit on a video updates hook state but nothing appears on screen.
 
 The `createVideo` / `updateVideo` calls and `handleCreateVideo` / `handleUpdateVideo` functions were removed from the page in the cleanup, along with the form modal rendering. This means create is also gone — there is no "Add video" button or form.
 
@@ -67,7 +67,7 @@ The `createVideo` / `updateVideo` calls and `handleCreateVideo` / `handleUpdateV
 />
 ```
 
-Also reinstate an "Add video" button — either via a prop passed to `VideoPageLayout` (if the button lives in the header) or rendered directly in `page.tsx` above `<PageContainer>`.
+Also reinstate an "Add video" button — either via a prop passed to `VideoPageLayout` (if the button lives in the header) or rendered directly in `error.tsx` above `<PageContainer>`.
 
 > Note: Confirm the exact component name for the form modal — search `src/components/features/videos/` for a form/modal component.
 
@@ -75,9 +75,9 @@ Also reinstate an "Add video" button — either via a prop passed to `VideoPageL
 
 ### ⬜ Fix 11 — Pagination shows wrong items (High)
 
-**File:** `src/app/coaches/videos/page.tsx`, line 34
+**File:** `src/app/coaches/videos/error.tsx`, line 34
 
-**Problem:** `useVideoFiltering` returns `paginatedVideos` (the sliced subset for the current page) but `page.tsx` destructures only `{filters, totalPages, totalCount}` and passes the raw `videos` (full array) to `VideoPageLayout`. `VideoGrid` renders every item in the array it receives, so all videos appear on every page regardless of `currentPage`.
+**Problem:** `useVideoFiltering` returns `paginatedVideos` (the sliced subset for the current page) but `error.tsx` destructures only `{filters, totalPages, totalCount}` and passes the raw `videos` (full array) to `VideoPageLayout`. `VideoGrid` renders every item in the array it receives, so all videos appear on every page regardless of `currentPage`.
 
 **Current:**
 ```typescript
@@ -127,8 +127,8 @@ const {filters, paginatedVideos, totalPages, totalCount} = useVideoFiltering({
 | `src/hooks/entities/video/data/useFetchVideos.ts` | Sends `?category_ids=`; accepts `categoryIds?` arg | ✅ |
 | `src/queries/videos/queries.ts` | Chains `.in()` for `arrayFilters` entries | ✅ |
 | `src/components/features/videos/VideoPageLayout.tsx` | Interface cleaned; skeleton added; dead imports removed | ✅ |
-| `src/app/coaches/videos/page.tsx` | `useModalWithItem`, `useCoachCategory`, `useFetchVideos(ids)`, `onPageChange`, skeleton removed, inverted condition fixed | ✅ |
-| `src/app/coaches/videos/page.tsx` | Reinstate form modal render + create/update handlers; use `paginatedVideos` | ⬜ |
+| `src/app/coaches/videos/error.tsx` | `useModalWithItem`, `useCoachCategory`, `useFetchVideos(ids)`, `onPageChange`, skeleton removed, inverted condition fixed | ✅ |
+| `src/app/coaches/videos/error.tsx` | Reinstate form modal render + create/update handlers; use `paginatedVideos` | ⬜ |
 | `src/components/features/videos/VideoPageLayout.tsx` | Remove duplicate skeleton (keep in `VideoGrid` only) | ⬜ |
 
 ---

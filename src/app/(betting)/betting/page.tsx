@@ -4,27 +4,31 @@ import {useState} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {Tabs, Tab, Button, Spinner, Chip, ButtonGroup} from '@heroui/react';
+import {Chip} from '@heroui/chip';
+import {Button} from '@heroui/react';
+import {Tab, Tabs} from '@heroui/tabs';
 
+// TODO: Replace with real icons
 import {
-  TrendingUp,
-  History,
-  Trophy,
-  LogOut,
   Calendar,
   ChevronLeft,
   ChevronRight,
+  History,
+  LogOut,
+  TrendingUp,
+  Trophy,
 } from 'lucide-react';
 
 import {
-  LeaderboardTable,
   BetHistory,
   BetSlip,
+  BetSlipModal,
+  BettingLogin,
+  FloatingBetSlipButton,
+  LeaderboardTable,
+  LoadingSpinner,
   MatchBettingCard,
   WalletBalance,
-  BettingLogin,
-  BetSlipModal,
-  FloatingBetSlipButton,
 } from '@/components';
 import {useUser} from '@/contexts';
 import {useUpcomingBettingMatches} from '@/hooks';
@@ -283,10 +287,9 @@ export default function BettingPage() {
                   </div>
                 )}
 
-                {/* Loading State */}
                 {matchesLoading && (
                   <div className="flex flex-col items-center justify-center py-12 gap-4">
-                    <Spinner size="lg" color="primary" title={t.tabs.matchesLoading} />
+                    <LoadingSpinner size="lg" color="primary" label={t.tabs.matchesLoading} />
                   </div>
                 )}
 

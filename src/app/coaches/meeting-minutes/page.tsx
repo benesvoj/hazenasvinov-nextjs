@@ -9,7 +9,7 @@ import {translations} from '@/lib/translations';
 import {MeetingMinutesContainer, PageContainer} from '@/components';
 
 export default function CoachMeetingMinutesPage() {
-  const t = translations.components.meetingMinutes;
+  const t = translations.meetingMinutes;
 
   return (
     <PageContainer>

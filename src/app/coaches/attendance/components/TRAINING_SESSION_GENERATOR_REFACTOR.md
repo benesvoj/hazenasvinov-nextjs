@@ -43,7 +43,7 @@ All 6 steps from the original plan are **complete**. The generator is now functi
 
 ### Step 5: Update page props — DONE
 
-**File:** `src/app/coaches/attendance/page.tsx`
+**File:** `src/app/coaches/attendance/error.tsx`
 - Passes `memberIds={resolveMemberIds()}` to `<TrainingSessionGenerator>`
 
 ### Step 6: Update barrels and API routes — DONE
@@ -105,7 +105,7 @@ The `error` state and `setError` exist but `setError` is never called in the cat
 | `src/app/api/training-sessions/bulk/route.ts` | Complete | 68 |
 | `src/hooks/entities/training-session/state/useBulkCreateTrainingSessions.ts` | Complete | 63 |
 | `src/app/coaches/attendance/components/TrainingSessionGenerator.tsx` | Complete | 310 |
-| `src/app/coaches/attendance/page.tsx` | Complete | 391 |
+| `src/app/coaches/attendance/error.tsx` | Complete | 391 |
 
 ## Verification
 

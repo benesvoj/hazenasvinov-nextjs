@@ -1,6 +1,7 @@
 'use client';
 import {useState, useEffect} from 'react';
 
+import {API_ROUTES} from '@/lib';
 import {PageVisibility} from '@/types';
 
 export const useVisiblePages = () => {
@@ -11,7 +12,7 @@ export const useVisiblePages = () => {
   const fetchVisiblePages = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/page-visibility');
+      const response = await fetch(API_ROUTES.pageVisibility);
       if (!response.ok) {
         throw new Error('Failed to fetch pages');
       }

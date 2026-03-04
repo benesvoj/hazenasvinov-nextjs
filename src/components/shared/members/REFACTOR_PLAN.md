@@ -8,24 +8,24 @@
 | 2 | `categoryMap` computation duplicated in 4 places | ✅ Fixed in admin | `MembersExternalTab`, `MembersOnLoanTab` still pending |
 | 3 | `useMemberModals` used `useDisclosure()` directly | ✅ Fixed | Hook + admin page caller clean |
 | 4 | Modal components lived in `/admin/members/components/` | ✅ Fixed | Moved to `shared/members/modals/` |
-| 5 | Admin page TypeScript errors | ✅ Fixed — zero errors | `admin/members/page.tsx` |
+| 5 | Admin page TypeScript errors | ✅ Fixed — zero errors | `admin/members/error.tsx` |
 | 6 | `MembersInternalSection` type errors | ✅ Fixed — no-op fallbacks in place | `MembersInternalSection.tsx` |
 | 7 | `MembersInternalSection` not wired in admin page | ✅ Fixed | `MembersInternalTab` now dead |
 | 8 | `useFetchMembersInternal` called twice in admin | ✅ Fixed — renamed to `allMembersForStats` | Stats fetch intent now clear |
 | 9 | `MemberTableTab` has unused action handler props | ✅ Fixed — props removed | `MemberTableTab.tsx` |
-| 10 | Coach portal broken — no modals, no category filter | ✅ Fixed | `coaches/members/page.tsx` fully rewritten |
+| 10 | Coach portal broken — no modals, no category filter | ✅ Fixed | `coaches/members/error.tsx` fully rewritten |
 | 11 | Hook constraint blocks `useMemberModals<MemberInternal>()` | ✅ Fixed — constraint loosened to `{id: string or null}` | `useMemberModals.ts` |
 | 12 | `onEdit` prop in `MembersInternalSection` is dead | ✅ Moot — prop is actively used by admin page | `MembersInternalSection.tsx` |
 | 13 | `deleteModal.onClose()` should be `closeAndClear()` | ✅ Fixed | `handleDeleteMember` calls `closeAndClear()` |
-| 14 | Dead `MemberFunction` import | ✅ Fixed | Removed from `admin/members/page.tsx` |
+| 14 | Dead `MemberFunction` import | ✅ Fixed | Removed from `admin/members/error.tsx` |
 | 15 | `MemberFormModal` and `MemberDetailModal` are duplicates | ✅ Fixed — replaced by `MemberModal` + `MemberInfoForm` | Both files deleted |
 | 16 | `MembersInternalTab.tsx` is now a dead file | ✅ Fixed — deleted | File and barrel export removed |
-| 17 | Coach page had dead `useFetchMembersInternal()` call | ✅ Fixed — removed | `coaches/members/page.tsx` |
-| 18 | `onSuccess={refreshKey}` passed number instead of callback | ✅ Fixed | `coaches/members/page.tsx` line 108 |
-| 19 | `MemberModal` missing `key` prop in coach portal | ✅ Fixed — `key={memberModal.selectedItem?.id ?? 'new'}` | `coaches/members/page.tsx` |
+| 17 | Coach page had dead `useFetchMembersInternal()` call | ✅ Fixed — removed | `coaches/members/error.tsx` |
+| 18 | `onSuccess={refreshKey}` passed number instead of callback | ✅ Fixed | `coaches/members/error.tsx` line 108 |
+| 19 | `MemberModal` missing `key` prop in coach portal | ✅ Fixed — `key={memberModal.selectedItem?.id ?? 'new'}` | `coaches/members/error.tsx` |
 | 20 | `handleMemberSuccess` duplicated between admin and coach portal | ✅ Fixed — extracted to `useMemberSave` | Coach portal uses hook; admin portal pending (#21) |
-| 21 | Admin page still has inline `handleMemberSuccess` — not using `useMemberSave` | ❌ Pending | `admin/members/page.tsx` |
-| 22 | `categories={categoriesData}` missing null fallback in coach portal | ❌ Pending | `coaches/members/page.tsx` line 65 |
+| 21 | Admin page still has inline `handleMemberSuccess` — not using `useMemberSave` | ❌ Pending | `admin/members/error.tsx` |
+| 22 | `categories={categoriesData}` missing null fallback in coach portal | ❌ Pending | `coaches/members/error.tsx` line 65 |
 
 ---
 
@@ -60,7 +60,7 @@ src/hooks/entities/member/business/
 
 ### Issue #21: Admin page not using `useMemberSave`
 
-**File:** `admin/members/page.tsx`
+**File:** `admin/members/error.tsx`
 
 `handleMemberSuccess` (lines 100–139) is still inline. It does the same create/update logic as `useMemberSave`, plus tab-aware refresh at the end.
 
@@ -80,7 +80,7 @@ After this, remove the `createMember` / `updateMember` imports from the admin pa
 
 ### Issue #22: `categories` null fallback missing in coach portal
 
-**File:** `coaches/members/page.tsx` line 65
+**File:** `coaches/members/error.tsx` line 65
 
 `MemberModal` declares `categories: Category[]` (not nullable). `MemberInfoForm` calls `.filter()` on it directly — passing `null` throws at runtime if `AppDataContext` hasn't loaded yet.
 

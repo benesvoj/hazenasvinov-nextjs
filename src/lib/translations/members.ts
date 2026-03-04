@@ -95,10 +95,36 @@ export const membersTranslations = {
       functions: 'Funkce',
       functionsHelper: 'Členové bez přiřazených funkcí budou označeni jako neaktivní v tabulce.',
     },
+    createMember: {
+      title: 'Vytvořit nového člena',
+      name: 'Jméno',
+      surname: 'Příjmení',
+      registrationNumber: 'Registrační číslo',
+      dateOfBirth: 'Datum narození',
+      sex: 'Pohlaví',
+      functions: 'Funkce',
+    },
   },
   validations: {
     mandatoryName: 'Jméno je povinné',
     mandatorySurname: 'Příjmení je povinné',
     mandatoryRegNumber: 'Registrační číslo je povinné',
+  },
+  enums: {
+    relationshipStatus: {
+      active: 'Aktivní',
+      inactive: 'Neaktivní',
+      expired: 'Vypršel',
+      terminated: 'Ukončen',
+    },
+    relationshipType: {
+      permanent: 'Permanentní',
+      loan: 'Půjčený',
+      temporary: 'Dočasný',
+      youthLoan: 'Mládežnická půjčená',
+    },
+  },
+  responseMessages: {
+    membersFetchFailed: 'Chyba při načítání členů',
   },
 };
