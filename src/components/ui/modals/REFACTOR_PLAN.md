@@ -137,8 +137,8 @@ For each modal, remove the custom `footer` prop/variable and use the built-in pa
 ```
 
 **Order of migration:**
-1. `CommentModal` — simplest (2 fields)
-2. `CommitteeModal` — simple (5 fields)
+1. [x] `CommentModal` — simplest (2 fields)
+2. [x] `CommitteeModal` — simple (5 fields)
 3. `SeasonModal` — simple (4 fields)
 4. `LineupModal` — simple (2 fields)
 5. `TodoModal` — medium (5 fields)

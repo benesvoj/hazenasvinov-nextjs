@@ -10,13 +10,7 @@ import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations/index';
 
-import {
-  AdminContainer,
-  DeleteConfirmationModal,
-  showToast,
-  UnifiedCard,
-  UnifiedTable,
-} from '@/components';
+import {AdminContainer, Dialog, showToast, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {formatDateString} from '@/helpers';
 import {useSeasonForm, useSeasons} from '@/hooks';
@@ -174,18 +168,16 @@ export function SeasonsPageClient() {
           },
         ]}
       >
-        <UnifiedCard>
-          <UnifiedTable
-            columns={columns}
-            data={seasons}
-            ariaLabel={translations.seasons.page.title}
-            renderCell={renderSeasonCell}
-            getKey={(season) => season.id}
-            isLoading={fetchLoading}
-            emptyContent={translations.seasons.noSeasons}
-            isStriped
-          />
-        </UnifiedCard>
+        <UnifiedTable
+          columns={columns}
+          data={seasons}
+          ariaLabel={translations.seasons.page.title}
+          renderCell={renderSeasonCell}
+          getKey={(season) => season.id}
+          isLoading={fetchLoading}
+          emptyContent={translations.seasons.noSeasons}
+          isStriped
+        />
       </AdminContainer>
 
       <SeasonModal
@@ -198,13 +190,17 @@ export function SeasonsPageClient() {
         loading={crudLoading}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.onClose}
-        onConfirm={handleDeleteConfirm}
+        onSubmit={handleDeleteConfirm}
+        dangerAction
+        size={'sm'}
+        submitButtonLabel={translations.common.actions.delete}
         title={translations.seasons.modal.deleteSeasonTitle}
-        message={translations.seasons.modal.deleteSeasonMessage}
-      />
+      >
+        {translations.seasons.modal.deleteSeasonMessage}
+      </Dialog>
     </>
   );
 }

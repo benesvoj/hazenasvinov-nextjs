@@ -14,7 +14,7 @@ import {getAgeGroupLabel, getGenderLabel, getStatusClasses, getStatusLabel} from
 
 import CategoryFeesTab from '@/app/admin/categories/components/CategoryFeesTab';
 
-import {AdminContainer, DeleteConfirmationModal, Search, UnifiedTable} from '@/components';
+import {AdminContainer, Dialog, Search, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {useCategories, useCategoryFiltering, useCategoryForm} from '@/hooks';
 import {fetchCategories} from '@/queries/categories/queries';
@@ -196,14 +196,18 @@ export function CategoriesPageClient() {
         isLoading={crudLoading}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
-        onConfirm={handleConfirmDelete}
+        onClose={deleteModal.closeAndClear}
         title={translations.categories.modal.delete.title}
-        message={translations.categories.modal.delete.message}
+        onSubmit={handleConfirmDelete}
+        submitButtonLabel={translations.common.actions.delete}
         isLoading={crudLoading}
-      />
+        dangerAction
+        size={'sm'}
+      >
+        {translations.categories.modal.delete.message}
+      </Dialog>
     </>
   );
 }
