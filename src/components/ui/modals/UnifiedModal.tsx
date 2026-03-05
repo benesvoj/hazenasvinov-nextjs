@@ -2,17 +2,10 @@
 
 import React from 'react';
 
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalProps,
-} from '@heroui/react';
+import {Button} from '@heroui/button';
+import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalProps} from '@heroui/modal';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {Heading, HeadingLevel} from '../heading/Heading';
 
