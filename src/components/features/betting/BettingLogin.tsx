@@ -2,10 +2,13 @@
 
 import {useState} from 'react';
 
-import {Alert, Button, Card, CardBody, CardHeader, Divider, Input} from '@heroui/react';
+import {Alert} from '@heroui/alert';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Divider} from '@heroui/divider';
+import {Input} from '@heroui/input';
 
-import {DollarSign, Lock, Mail, TrendingUp, Trophy} from 'lucide-react';
-
+import {DollarIcon, EnvelopeIcon, LockIcon, TrendingUpIcon, TrophyIcon} from '@/lib/icons';
 import {translations} from '@/lib/translations';
 
 import {bettingLogin} from '@/utils/supabase/bettingAuth';
@@ -79,7 +82,7 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
           <div className="space-y-4">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-green-500/20 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-green-400" />
+                <TrendingUpIcon className="w-6 h-6 text-green-400" />
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">{t.liveBetting}</h3>
@@ -89,7 +92,7 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
 
             <div className="flex items-start gap-4">
               <div className="p-3 bg-blue-500/20 rounded-lg">
-                <Trophy className="w-6 h-6 text-blue-400" />
+                <TrophyIcon className="w-6 h-6 text-blue-400" />
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">{t.leaderboard}</h3>
@@ -99,7 +102,7 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
 
             <div className="flex items-start gap-4">
               <div className="p-3 bg-yellow-500/20 rounded-lg">
-                <DollarSign className="w-6 h-6 text-yellow-400" />
+                <DollarIcon className="w-6 h-6 text-yellow-400" />
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">{t.virtualCurrency}</h3>
@@ -137,7 +140,7 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
                 onChange={(e) => {
                   setEmail(e.target.value);
                 }}
-                startContent={<Mail className="w-4 h-4 text-gray-400" />}
+                startContent={<EnvelopeIcon className="w-4 h-4 text-gray-400" />}
                 variant="bordered"
                 isRequired
                 isDisabled={isLoading}
@@ -151,7 +154,7 @@ export function BettingLogin({onLoginSuccess}: BettingLoginProps) {
                 onChange={(e) => {
                   setPassword(e.target.value);
                 }}
-                startContent={<Lock className="w-4 h-4 text-gray-400" />}
+                startContent={<LockIcon className="w-4 h-4 text-gray-400" />}
                 variant="bordered"
                 isRequired
                 isDisabled={isLoading}

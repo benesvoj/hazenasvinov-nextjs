@@ -43,4 +43,9 @@ export const committeesTranslations = {
     mandatoryCode: 'Kod je povinný',
     mandatoryName: 'Název je povinny',
   },
+  labels: {},
+  placeholders: {},
+  helpers: {
+    code: 'Kód komise nelze změnit po vytvoření',
+  },
 };

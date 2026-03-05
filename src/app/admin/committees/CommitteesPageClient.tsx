@@ -8,7 +8,7 @@ import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations/index';
 
-import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
+import {AdminContainer, DeleteConfirmationModal, Dialog, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {useCommitteeForm, useCommittees} from '@/hooks';
 import {fetchCommittees} from '@/queries/committees/queries';
@@ -185,14 +185,17 @@ export function CommitteesPageClient() {
         isLoading={crudLoading}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeAndClear}
-        onConfirm={handleConfirmDelete}
         title={translations.committees.deleteCommittee}
-        message={translations.committees.deleteCommitteeMessage}
+        onSubmit={handleConfirmDelete}
         isLoading={crudLoading}
-      />
+        dangerAction
+        submitButtonLabel={translations.common.actions.delete}
+      >
+        {translations.committees.deleteCommitteeMessage}
+      </Dialog>
     </>
   );
 }

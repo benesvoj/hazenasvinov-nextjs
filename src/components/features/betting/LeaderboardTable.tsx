@@ -2,34 +2,24 @@
 
 import {useState} from 'react';
 
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Chip,
-  Button,
-  Spinner,
-} from '@heroui/react';
-
-import {Trophy, TrendingUp, TrendingDown, Award} from 'lucide-react';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Chip} from '@heroui/chip';
+import {Spinner} from '@heroui/spinner';
+import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
 
 import {
+  formatPercentage,
+  formatRank,
+  getPeriodDisplayName,
   LeaderboardPeriod,
   LeaderboardSortBy,
-  getPeriodDisplayName,
-  formatRank,
-  formatPercentage,
-  getRankChangeIndicator,
 } from '@/types/features/betting/leaderboard';
 import {formatCurrency} from '@/types/features/betting/wallet';
 
 import {useLeaderboard, useUserRank} from '@/hooks/features/betting/useLeaderboard';
+
+import {AwardIcon, TrendingDownIcon, TrendingUpIcon, TrophyIcon} from '@/lib/icons';
 
 interface LeaderboardTableProps {
   userId?: string;
@@ -51,9 +41,9 @@ export default function LeaderboardTable({
   const periods: LeaderboardPeriod[] = ['DAILY', 'WEEKLY', 'MONTHLY', 'SEASON', 'ALL_TIME'];
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Trophy className="w-5 h-5 text-yellow-500" />;
-    if (rank === 2) return <Award className="w-5 h-5 text-gray-400" />;
-    if (rank === 3) return <Award className="w-5 h-5 text-orange-600" />;
+    if (rank === 1) return <TrophyIcon className="w-5 h-5 text-yellow-500" />;
+    if (rank === 2) return <AwardIcon className="w-5 h-5 text-gray-400" />;
+    if (rank === 3) return <AwardIcon className="w-5 h-5 text-orange-600" />;
     return null;
   };
 
@@ -63,7 +53,7 @@ export default function LeaderboardTable({
         <div className="flex flex-col gap-3 w-full">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-primary" />
+              <TrophyIcon className="w-5 h-5 text-primary" />
               Leaderboard
             </h3>
           </div>
@@ -186,9 +176,9 @@ export default function LeaderboardTable({
                       <TableCell>
                         <div className="flex items-center gap-1">
                           {entry.net_profit > 0 ? (
-                            <TrendingUp className="w-4 h-4 text-success" />
+                            <TrendingUpIcon className="w-4 h-4 text-success" />
                           ) : entry.net_profit < 0 ? (
-                            <TrendingDown className="w-4 h-4 text-danger" />
+                            <TrendingDownIcon className="w-4 h-4 text-danger" />
                           ) : null}
                           <span
                             className={`font-semibold ${

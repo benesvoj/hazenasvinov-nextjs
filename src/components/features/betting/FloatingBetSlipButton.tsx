@@ -1,8 +1,9 @@
 'use client';
 
-import {Badge, Button} from '@heroui/react';
+import {Badge} from '@heroui/badge';
+import {Button} from '@heroui/button';
 
-import {ShoppingCart} from 'lucide-react';
+import {ShoppingCartIcon} from '@/lib/icons';
 
 interface FloatingBetSlipButtonProps {
   itemCount: number;
@@ -26,7 +27,7 @@ export default function FloatingBetSlipButton({itemCount, onClick}: FloatingBetS
           onPress={onClick}
           aria-label="Open bet slip"
         >
-          <ShoppingCart className="w-6 h-6" />
+          <ShoppingCartIcon className="w-6 h-6" />
         </Button>
       </Badge>
     </div>

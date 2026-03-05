@@ -9,7 +9,6 @@ import {Bars3Icon, XMarkIcon} from '@heroicons/react/24/outline';
 import {useVisiblePages} from '@/hooks/entities/settings/useVisiblePages';
 
 import {ThemeSwitch} from '@/components/ui/client';
-import DropdownMenu from '@/components/ui/dropdown-menu/DropdownMenu';
 import Logo from '@/components/ui/layout/Logo';
 import Link from '@/components/ui/link/Link';
 
@@ -18,6 +17,7 @@ import {MenuItem} from '@/lib/navigation';
 
 import {texts} from '@/utils/texts'; // TODO: remove this, put it into db
 
+import {DropdownMenu} from '@/components';
 import {buildMenuFromPages} from '@/routes/dynamicRoutes';
 import {hasItems} from '@/utils';
 

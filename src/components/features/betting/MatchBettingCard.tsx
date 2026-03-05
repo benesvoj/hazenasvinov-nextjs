@@ -2,16 +2,17 @@
 
 import {useCallback, useMemo} from 'react';
 
-import {Card, CardBody, CardHeader, Chip, Image, Spinner} from '@heroui/react';
-
-// TODO: replace lucide-react
-import {Calendar, MapPin} from 'lucide-react';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Chip} from '@heroui/chip';
+import {Image} from '@heroui/image';
+import {Spinner} from '@heroui/spinner';
 
 import {
   BettingOptionButton,
   BettingOptionButtonProps,
 } from '@/components/features/betting/BettingOptionButton';
 
+import {CalendarIcon, MapPinIcon} from '@/lib/icons';
 import {translations} from '@/lib/translations';
 
 import {formatDateWithTime} from '@/helpers';
@@ -190,13 +191,13 @@ export default function MatchBettingCard({
             {match.category?.name}
             {match.category?.description && ` - ${match.category.description}`}
           </Chip>
-          <Chip size="sm" variant="flat" startContent={<Calendar className="w-3 h-3" />}>
+          <Chip size="sm" variant="flat" startContent={<CalendarIcon className="w-3 h-3" />}>
             {formatDateWithTime(match.date, match.time)}
           </Chip>
         </div>
         {match.venue && (
           <div className="flex items-center gap-1 text-xs text-gray-500">
-            <MapPin className="w-3 h-3" />
+            <MapPinIcon className="w-3 h-3" />
             {match.venue}
           </div>
         )}
