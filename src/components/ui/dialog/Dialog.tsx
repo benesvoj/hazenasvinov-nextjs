@@ -35,8 +35,9 @@ export const Dialog = (props: DialogProps) => {
       backdrop="blur"
       scrollBehavior={props.scrollBehavior || 'inside'}
       classNames={{
-        base: 'mx-2',
-        wrapper: 'items-center justify-center p-2 sm:p-4',
+        ...props.classNames,
+        base: `mx-2 ${props.classNames?.base ?? ''}`.trim(),
+        wrapper: `items-center justify-center p-2 sm:p-4 ${props.classNames?.wrapper ?? ''}`.trim(),
       }}
     >
       <ModalContent>

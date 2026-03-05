@@ -76,7 +76,7 @@ export interface MemberMetadaFormData {
   surname: string;
   registration_number: string;
   date_of_birth: string;
-  sex: Genders;
+  sex: Genders.MALE | Genders.FEMALE;
   functions: string;
 
   // Contact Information

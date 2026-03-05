@@ -6,7 +6,7 @@ import {translations} from '@/lib/translations';
 
 import {Choice, Dialog} from '@/components';
 import {AgeGroups, Genders, getAgeGroupsOptions, getGenderOptions, ModalMode} from '@/enums';
-import {Category, CategoryFormData} from '@/types';
+import {CategoryFormData} from '@/types';
 
 export interface CategoryModalProps {
   isOpen: boolean;
@@ -15,7 +15,6 @@ export interface CategoryModalProps {
   formData: CategoryFormData;
   setFormData: (data: CategoryFormData) => void;
   mode: ModalMode;
-  selectedCategory?: Category | null;
   isLoading?: boolean;
 }
 
@@ -26,7 +25,6 @@ export default function CategoryModal({
   formData,
   setFormData,
   mode,
-  selectedCategory,
   isLoading,
 }: CategoryModalProps) {
   const t = translations.categories;

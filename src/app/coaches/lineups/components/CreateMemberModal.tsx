@@ -2,10 +2,10 @@
 
 import React, {useState} from 'react';
 
-import {Card, CardBody, Input, Select, SelectItem, Textarea} from '@heroui/react';
+import {Card, CardBody, Input, Textarea} from '@heroui/react';
 
-import {UnifiedModal} from '@/components';
-import {Genders, getGenderOptions, MemberFunction} from '@/enums';
+import {GenderSelect, UnifiedModal} from '@/components';
+import {Genders, MemberFunction} from '@/enums';
 import {useFetchMembers, useMemberMetadata, useSupabaseClient} from '@/hooks';
 import {MemberMetadaFormData} from '@/types';
 
@@ -233,14 +233,14 @@ export default function CreateMemberModal({
             <h4 className="font-semibold mb-3 text-blue-700">Základní informace</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                label="Jméno *"
+                label="Jméno"
                 value={formData.name}
                 onValueChange={(value) => handleInputChange('name', value)}
                 placeholder="Zadejte jméno"
                 isRequired
               />
               <Input
-                label="Příjmení *"
+                label="Příjmení"
                 value={formData.surname}
                 onValueChange={(value) => handleInputChange('surname', value)}
                 placeholder="Zadejte příjmení"
@@ -254,24 +254,16 @@ export default function CreateMemberModal({
                 description="Pokud nevyplníte, bude vygenerováno automaticky"
               />
               <Input
-                label="Datum narození *"
+                label="Datum narození"
                 type="date"
                 value={formData.date_of_birth}
                 onValueChange={(value) => handleInputChange('date_of_birth', value)}
                 isRequired
               />
-              <Select
-                label="Pohlaví"
-                selectedKeys={[formData.sex]}
-                onSelectionChange={(keys) => {
-                  const sex = Array.from(keys)[0] as Genders;
-                  handleInputChange('sex', sex);
-                }}
-              >
-                {getGenderOptions().map(({value, label}) => (
-                  <SelectItem key={value}>{label}</SelectItem>
-                ))}
-              </Select>
+              <GenderSelect
+                value={formData.sex}
+                onChange={(value) => handleInputChange('sex', value)}
+              />
             </div>
           </CardBody>
         </Card>

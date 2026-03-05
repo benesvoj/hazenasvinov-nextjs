@@ -11,7 +11,6 @@ export {default as PageContainer} from './containers/PageContainer';
 export {Dialog} from './dialog/Dialog';
 export {default as DropdownMenu} from './dropdown-menu/DropdownMenu';
 export * from './feedback';
-export {default as FormField} from './forms/FormField';
 export {Heading} from './heading/Heading';
 export {Hide} from './hide/Hide';
 export {default as Logo} from './layout/Logo';

@@ -1,10 +1,10 @@
 'use client';
 
-import React, {useCallback, useState} from 'react';
+import React, {useState} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {Image, Input} from '@heroui/react';
+import {Image} from '@heroui/image';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
@@ -13,7 +13,7 @@ import {translations} from '@/lib/translations';
 
 import {ClubFormModal} from '@/app/admin/clubs/components/ClubFormModal';
 
-import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
+import {AdminContainer, Dialog, Search, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {useClubFiltering, useClubForm, useClubs, useFetchClubs} from '@/hooks';
 import {Club} from '@/types';
@@ -41,12 +41,6 @@ export default function ClubsAdminPage() {
     modalMode,
   } = useClubForm();
 
-  // Memoize search handler to prevent unnecessary re-renders
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  }, []);
-
-  // Modal states
   const modal = useModal();
   const deleteModal = useModalWithItem<Club>();
 
@@ -105,10 +99,10 @@ export default function ClubsAdminPage() {
   };
 
   const filters = (
-    <Input
+    <Search
       placeholder={translations.clubs.filters.placeholder}
       value={searchTerm}
-      onChange={handleSearchChange}
+      onChange={setSearchTerm}
       className="max-w-md"
     />
   );
@@ -168,7 +162,7 @@ export default function ClubsAdminPage() {
       <AdminContainer
         actions={[
           {
-            label: translations.clubs.addClub,
+            label: translations.clubs.actions.add,
             onClick: handleAddClick,
             variant: 'solid',
             buttonType: ActionTypes.CREATE,
@@ -199,14 +193,18 @@ export default function ClubsAdminPage() {
         mode={modalMode}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.onClose}
-        onConfirm={handleConfirmDelete}
-        title={translations.clubs.deleteClub}
-        message={translations.clubs.deleteClubMessage}
+        onSubmit={handleConfirmDelete}
+        title={translations.clubs.dialogs.delete.title}
         isLoading={crudLoading}
-      />
+        submitButtonLabel={translations.common.actions.delete}
+        dangerAction
+        size={'sm'}
+      >
+        {translations.clubs.dialogs.delete.message}
+      </Dialog>
     </>
   );
 }

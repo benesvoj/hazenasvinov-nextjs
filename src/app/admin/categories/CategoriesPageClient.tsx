@@ -147,7 +147,6 @@ export function CategoriesPageClient() {
         value={searchTerm}
         onChange={setSearchTerm}
         placeholder={translations.categories.placeholders.searchCategory}
-        label={translations.categories.labels.searchCategory}
         size="sm"
       />
     </div>
@@ -192,7 +191,6 @@ export function CategoriesPageClient() {
         formData={formData}
         setFormData={setFormData}
         mode={modalMode}
-        selectedCategory={selectedCategory}
         isLoading={crudLoading}
       />
 
