@@ -9,6 +9,8 @@ import {translations} from '@/lib/translations';
 
 import {Heading, HeadingLevel} from '../heading/Heading';
 
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
+
 interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
   isOpen: boolean;
   onClose: () => void;
@@ -16,7 +18,7 @@ interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> 
   subtitle?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
+  size?: ModalSize;
   showCloseButton?: boolean;
   scrollBehavior?: 'inside' | 'outside';
   hSize?: HeadingLevel;

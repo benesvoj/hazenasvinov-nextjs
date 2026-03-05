@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useMemo, useEffect} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
 import {Pagination} from '@heroui/react';
 
@@ -8,8 +8,8 @@ import {RectangleStackIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
-import {UnifiedCard, TodoListItem} from '@/components';
-import {ActionTypes, EmptyStateTypes, TodoFilter} from '@/enums';
+import {TodoListItem, UnifiedCard} from '@/components';
+import {ActionTypes, EmptyStateTypes} from '@/enums';
 import {ToDoListProps} from '@/types';
 
 export default function ToDoList({

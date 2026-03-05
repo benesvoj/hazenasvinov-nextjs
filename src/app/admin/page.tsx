@@ -6,12 +6,14 @@ import {redirect} from 'next/navigation';
 
 import {useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import {useUser} from '@/contexts/UserContext';
 
 import {
   AdminContainer,
   CommentsZone,
-  DeleteConfirmationModal,
+  Dialog,
   LoadingSpinner,
   showToast,
   ToDoList,
@@ -197,6 +199,11 @@ export default function AdminDashboard() {
     );
   }
 
+  const dialogTitle =
+    deleteModal.selectedItem?.type === 'todo'
+      ? translations.todos.todoModal.title
+      : translations.comments.commentModal.title;
+
   return (
     <>
       <AdminContainer>
@@ -242,14 +249,18 @@ export default function AdminDashboard() {
         isLoading={crudCommentLoading}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeAndClear}
-        onConfirm={handleDeleteConfirm}
-        title={`Delete ${deleteModal.selectedItem?.type === 'todo' ? 'Todo' : 'Comment'}`}
-        message={`Are you sure you want to delete "${deleteModal.selectedItem?.title}"? This action cannot be undone.`}
+        onSubmit={handleDeleteConfirm}
+        title={translations.common.dialog.delete.title(dialogTitle)}
         isLoading={crudTodoLoading || crudCommentLoading}
-      />
+        size={'md'}
+        dangerAction
+        submitButtonLabel={translations.common.actions.delete}
+      >
+        {translations.common.dialog.delete.message(deleteModal.selectedItem?.title || '')}
+      </Dialog>
     </>
   );
 }

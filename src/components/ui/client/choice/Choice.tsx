@@ -44,6 +44,9 @@ interface BaseChoiceProps {
 
   /** Optional description text rendered below the select. */
   description?: string;
+
+  /** When `true` the user can clear the selection. */
+  isClearable?: boolean;
 }
 
 /**
@@ -144,12 +147,13 @@ export const Choice = (props: ChoiceProps) => {
     ariaLabel,
     placeholder,
     className,
-    size,
+    size = 'sm',
     isDisabled,
     isLoading,
     isRequired,
     description,
     disallowEmptySelection,
+    isClearable,
   } = props;
 
   const handleSelectionChange = (keys: SharedSelection) => {
@@ -177,6 +181,7 @@ export const Choice = (props: ChoiceProps) => {
       disallowEmptySelection={disallowEmptySelection}
       selectedKeys={value ? [value] : []}
       onSelectionChange={handleSelectionChange}
+      isClearable={isClearable}
     >
       {items.map((item) => (
         <SelectItem key={item.key}>{item.label}</SelectItem>

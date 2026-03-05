@@ -220,4 +220,10 @@ export const commonTranslations = {
     admin: 'Administrace',
     coach: 'Trenérský portal',
   },
+  dialog: {
+    delete: {
+      title: (value: string) => `Smazat ${value}`,
+      message: (value: string) => `Opravdu chcete smazat "${value}"? Tuto akci nelze vrátit zpět.`,
+    },
+  },
 };

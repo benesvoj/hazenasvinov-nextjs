@@ -11,6 +11,7 @@ import {useAppData} from '@/contexts/AppDataContext';
 import {
   AdminContainer,
   DeleteConfirmationModal,
+  Dialog,
   VideoFilters as VideoFiltersComponent,
   VideoFormModal,
   VideoGrid,
@@ -143,7 +144,7 @@ export default function VideosPage() {
       <AdminContainer
         actions={[
           {
-            label: t.addVideo,
+            label: t.actions.add,
             onClick: openAddModal,
             variant: 'solid',
             buttonType: ActionTypes.CREATE,
@@ -180,14 +181,18 @@ export default function VideosPage() {
         isLoading={crudLoading}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeAndClear}
-        onConfirm={handleConfirmDelete}
+        onSubmit={handleConfirmDelete}
         title={t.deleteModal.title}
-        message={t.deleteModal.description}
+        dangerAction
+        submitButtonLabel={translations.common.actions.delete}
         isLoading={crudLoading}
-      />
+        size={'sm'}
+      >
+        {t.deleteModal.description}
+      </Dialog>
     </>
   );
 }

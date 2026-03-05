@@ -4,10 +4,10 @@ import React, {useCallback, useState} from 'react';
 
 import {translations} from '@/lib/translations';
 
-import {generateSlug} from '@/utils/slugGenerator';
+import {generateUniqueSlug} from '@/utils/slugGenerator';
 
 import {showToast} from '@/components';
-import {BLOG_POST_STATUSES} from '@/enums';
+import {BlogPostStatuses} from '@/enums';
 import {createFormHook} from '@/hooks';
 import {Blog, BlogPostFormData, Match} from '@/types';
 
@@ -15,7 +15,7 @@ const initialFormData: BlogPostFormData = {
   title: '',
   slug: '',
   content: '',
-  status: BLOG_POST_STATUSES.draft,
+  status: BlogPostStatuses.DRAFT,
   category_id: '',
   match_id: '',
   image_url: '',
@@ -56,7 +56,7 @@ export const useBlogPostForm = () => {
     (updates: Partial<BlogPostFormData>) => {
       const newData = {...updates};
       if (updates.title !== undefined) {
-        newData.slug = generateSlug(updates.title);
+        newData.slug = generateUniqueSlug(updates.title);
       }
       baseForm.updateFormData(newData);
     },

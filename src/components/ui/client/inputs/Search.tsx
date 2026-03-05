@@ -138,7 +138,7 @@ export const Search = ({
   label,
   ariaLabel,
   className,
-  size,
+  size = 'sm',
   isDisabled,
   debounceTime,
 }: SearchProps) => {

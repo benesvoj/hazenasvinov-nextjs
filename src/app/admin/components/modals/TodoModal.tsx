@@ -1,8 +1,8 @@
-import {Button, Input, Select, SelectItem, Textarea} from '@heroui/react';
+import {Input, Textarea} from '@heroui/input';
 
 import {translations} from '@/lib/translations';
 
-import {UnifiedModal} from '@/components';
+import {Choice, Dialog} from '@/components';
 import {getTodoCategoriesOptions, getTodoPrioritiesOptions, ModalMode} from '@/enums';
 import {TodoItem, TodoModalProps} from '@/types';
 
@@ -15,30 +15,28 @@ export const TodoModal = ({
   mode,
   isLoading,
 }: TodoModalProps) => {
-  const tAction = translations.common.actions;
   const tTodoModal = translations.todos.todoModal;
 
   const isEditMode = mode === ModalMode.EDIT;
   const modalTitle = isEditMode ? tTodoModal.titleEdit : tTodoModal.titleAdd;
+  const confirmButtonLabel = isEditMode
+    ? translations.common.actions.save
+    : translations.common.actions.add;
+
+  const prioritiesOptions = getTodoPrioritiesOptions().map((c) => ({key: c.value, label: c.label}));
+  const categoriesOptions = getTodoCategoriesOptions().map((c) => ({key: c.value, label: c.label}));
 
   return (
-    <UnifiedModal
-      title={modalTitle}
+    <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      size="2xl"
-      footer={
-        <div className="flex justify-end gap-2">
-          <Button variant="flat" onPress={onClose} disabled={isLoading}>
-            {tAction.cancel}
-          </Button>
-          <Button color="primary" onPress={onSubmit} isLoading={isLoading} disabled={isLoading}>
-            {isEditMode ? tAction.save : tAction.add}
-          </Button>
-        </div>
-      }
+      onSubmit={onSubmit}
+      title={modalTitle}
+      isLoading={isLoading}
+      submitButtonLabel={confirmButtonLabel}
     >
       <Input
+        size="sm"
         label={tTodoModal.title}
         aria-label={tTodoModal.title}
         value={todoFormData.title}
@@ -47,6 +45,7 @@ export const TodoModal = ({
         placeholder={tTodoModal.titlePlaceholder}
       />
       <Textarea
+        size="sm"
         label={tTodoModal.description}
         aria-label={tTodoModal.description}
         value={todoFormData.description || ''}
@@ -54,45 +53,28 @@ export const TodoModal = ({
         placeholder={tTodoModal.descriptionPlaceholder}
       />
       <div className="grid grid-cols-2 gap-4">
-        <Select
+        <Choice
           label={tTodoModal.priority}
           placeholder={tTodoModal.priorityPlaceholder}
           aria-label={tTodoModal.priority}
-          selectedKeys={todoFormData.priority ? [todoFormData.priority] : []}
-          onSelectionChange={(keys) => {
-            const selectedKey = Array.from(keys)[0] as TodoItem['priority'];
-            if (selectedKey) {
-              setTodoFormData({
-                ...todoFormData,
-                priority: selectedKey,
-              });
-            }
-          }}
-        >
-          {getTodoPrioritiesOptions().map(({value, label}) => (
-            <SelectItem key={value}>{label}</SelectItem>
-          ))}
-        </Select>
-        <Select
+          value={todoFormData.priority}
+          items={prioritiesOptions}
+          onChange={(id) =>
+            setTodoFormData({...todoFormData, priority: id as TodoItem['priority']})
+          }
+        />
+        <Choice
           label={tTodoModal.category}
           placeholder={tTodoModal.categoryPlaceholder}
           aria-label={tTodoModal.category}
-          selectedKeys={todoFormData.category ? [todoFormData.category] : []}
-          onSelectionChange={(keys) => {
-            const selectedKey = Array.from(keys)[0] as TodoItem['category'];
-            if (selectedKey) {
-              setTodoFormData({
-                ...todoFormData,
-                category: selectedKey,
-              });
-            }
-          }}
-        >
-          {getTodoCategoriesOptions().map(({value, label}) => (
-            <SelectItem key={value}>{label}</SelectItem>
-          ))}
-        </Select>
+          items={categoriesOptions}
+          value={todoFormData.category}
+          onChange={(id) =>
+            setTodoFormData({...todoFormData, category: id as TodoItem['category']})
+          }
+        />
         <Input
+          size="sm"
           label={tTodoModal.dueDate}
           aria-label={tTodoModal.dueDate}
           type="date"
@@ -101,6 +83,6 @@ export const TodoModal = ({
           onChange={(e) => setTodoFormData({...todoFormData, due_date: e.target.value})}
         />
       </div>
-    </UnifiedModal>
+    </Dialog>
   );
 };

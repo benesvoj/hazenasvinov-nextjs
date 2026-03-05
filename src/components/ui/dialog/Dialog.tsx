@@ -1,0 +1,76 @@
+'use client';
+
+import React, {ReactNode} from 'react';
+
+import {Button} from '@heroui/button';
+import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalProps} from '@heroui/modal';
+
+import {translations} from '@/lib/translations';
+
+import {Heading, Show} from '@/components';
+
+type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
+
+interface DialogProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit?: () => void;
+  children: ReactNode;
+  size?: DialogSize;
+  title: string;
+  subtitle?: string;
+  isLoading?: boolean;
+  isDisabled?: boolean;
+  submitButtonLabel?: string;
+  scrollBehaviour?: 'inside' | 'outside';
+  dangerAction?: boolean;
+}
+
+export const Dialog = (props: DialogProps) => {
+  return (
+    <Modal
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      size={props.size || '2xl'}
+      backdrop="blur"
+      scrollBehavior={props.scrollBehavior || 'inside'}
+      classNames={{
+        base: 'mx-2',
+        wrapper: 'items-center justify-center p-2 sm:p-4',
+      }}
+    >
+      <ModalContent>
+        <ModalHeader className={'flex flex-col gap-2'}>
+          <Heading size={2}>{props.title}</Heading>
+          <Show when={props.subtitle}>
+            <p className="text-sm font-light text-gray-500">{props.subtitle}</p>
+          </Show>
+        </ModalHeader>
+        <ModalBody>{props.children}</ModalBody>
+        <Show when={props.onSubmit}>
+          <ModalFooter className={'flex items-center justify-end gap-4'}>
+            <Button
+              variant="light"
+              color="danger"
+              onPress={props.onClose}
+              aria-label={translations.common.actions.cancel}
+              isDisabled={props.isLoading}
+            >
+              {translations.common.actions.cancel}
+            </Button>
+            <Button
+              color={!props.dangerAction ? 'primary' : 'danger'}
+              variant="solid"
+              onPress={props.onSubmit}
+              aria-label={props.submitButtonLabel ?? translations.common.actions.save}
+              isDisabled={props.isLoading || props.isDisabled}
+              isLoading={props.isLoading}
+            >
+              {props.submitButtonLabel ?? translations.common.actions.save}
+            </Button>
+          </ModalFooter>
+        </Show>
+      </ModalContent>
+    </Modal>
+  );
+};

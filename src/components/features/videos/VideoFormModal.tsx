@@ -5,12 +5,11 @@ import React from 'react';
 import {Input, Textarea} from '@heroui/input';
 import {Switch} from '@heroui/switch';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
-import {Choice, UnifiedModal} from '@/components';
+import {Choice, Dialog} from '@/components';
 import {ModalMode} from '@/enums';
 import {Category, Club, Season, VideoFormData} from '@/types';
-import {isValidYouTubeUrl} from '@/utils';
 
 interface VideoFormModalProps {
   isOpen: boolean;
@@ -38,45 +37,47 @@ export function VideoFormModal({
   isLoading,
 }: VideoFormModalProps) {
   const t = translations.matchRecordings;
-  const modalTitle = mode === ModalMode.ADD ? t.addVideo : t.editVideo;
+  const modalTitle = mode === ModalMode.ADD ? t.titles.add : t.titles.edit;
+  const submitButtonLabel =
+    mode === ModalMode.ADD ? translations.common.actions.create : translations.common.actions.save;
 
   return (
-    <UnifiedModal
+    <Dialog
       isOpen={isOpen}
       onClose={onClose}
       title={modalTitle}
+      submitButtonLabel={submitButtonLabel}
       size="2xl"
-      onPress={onSubmit}
-      isFooterWithActions
+      onSubmit={onSubmit}
       isLoading={isLoading}
     >
-      <div className="space-y-4">
-        <Input
-          label="Název videa"
-          placeholder="Zadejte název videa"
-          value={formData.title}
-          onChange={(e) => setFormData({...formData, title: e.target.value})}
-          isRequired
-        />
+      <Input
+        label={t.labels.title}
+        placeholder={t.placeholders.title}
+        value={formData.title}
+        onChange={(e) => setFormData({...formData, title: e.target.value})}
+        isRequired
+        size={'sm'}
+      />
 
-        <Textarea
-          label="Popis"
-          placeholder="Zadejte popis videa (volitelné)"
-          value={formData.description ?? ''}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
-          minRows={3}
-          maxRows={5}
-        />
+      <Textarea
+        label={t.labels.description}
+        placeholder={t.placeholders.description}
+        value={formData.description ?? ''}
+        onChange={(e) => setFormData({...formData, description: e.target.value})}
+        minRows={3}
+        maxRows={5}
+      />
 
-        <Input
-          label="YouTube URL"
-          placeholder="https://www.youtube.com/watch?v=..."
-          value={formData.youtube_url}
-          onChange={(e) => setFormData({...formData, youtube_url: e.target.value})}
-          isRequired
-          description="Zadejte plnou URL adresu YouTube videa"
-        />
-      </div>
+      <Input
+        label={t.labels.youtubeUrl}
+        placeholder={t.placeholders.youtubeUrl}
+        value={formData.youtube_url}
+        onChange={(e) => setFormData({...formData, youtube_url: e.target.value})}
+        isRequired
+        description={t.helpers.youtubeUrl}
+        size={'sm'}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-4">
@@ -99,10 +100,11 @@ export function VideoFormModal({
 
         <div className="space-y-4">
           <Input
-            label="Datum nahrání"
+            label={t.labels.recordingDate}
             type="date"
             value={formData.recording_date ?? ''}
             onChange={(e) => setFormData({...formData, recording_date: e.target.value})}
+            size={'sm'}
           />
 
           <Choice
@@ -117,38 +119,15 @@ export function VideoFormModal({
 
       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
         <div>
-          <h4 className="font-medium text-gray-900">Aktivní</h4>
-          <p className="text-sm text-gray-600">Video bude viditelné pro uživatele</p>
+          <h4 className="font-medium text-gray-900">{t.labels.active}</h4>
+          <p className="text-sm text-gray-600">{t.placeholders.active}</p>
         </div>
         <Switch
           isSelected={formData.is_active}
           onValueChange={(e) => setFormData({...formData, is_active: e})}
+          size={'sm'}
         />
       </div>
-
-      {/* Preview */}
-      {formData.youtube_url && isValidYouTubeUrl(formData.youtube_url) && (
-        <div className="mt-4">
-          <h4 className="font-medium text-gray-900 mb-2">Náhled</h4>
-          <div className="bg-gray-100 rounded-lg p-4">
-            <p className="text-sm text-gray-600">
-              YouTube ID: {extractYouTubeId(formData.youtube_url)}
-            </p>
-            <p className="text-sm text-gray-600">
-              Náhled: https://img.youtube.com/vi/
-              {extractYouTubeId(formData.youtube_url)}/maxresdefault.jpg
-            </p>
-          </div>
-        </div>
-      )}
-    </UnifiedModal>
+    </Dialog>
   );
-}
-
-// Helper function to extract YouTube ID
-function extractYouTubeId(url: string): string | null {
-  const regex =
-    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^&?\/\s]{11})/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
 }
