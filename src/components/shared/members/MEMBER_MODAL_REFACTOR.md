@@ -135,8 +135,7 @@ src/components/shared/members/
 ├── config/
 │   └── memberFormConfig.ts          ← NEW: section visibility config per use-case
 ├── hooks/
-│   ├── useCategoryMap.ts            ← keep
-│   └── useMemberForm.ts            ← NEW: form state + validation + submit logic
+│   └── useCategoryMap.ts            ← keep (UI-specific helper, correct location)
 ├── MemberTableTab.tsx               ← keep
 ├── MembersInternalSection.tsx       ← keep
 └── REFACTOR_PLAN.md                 ← keep (update status)
@@ -192,6 +191,8 @@ const FULL_EDIT: MemberFormSections = {
 
 ### useMemberForm Hook
 
+Location: `src/hooks/entities/member/state/useMemberForm.ts` (alongside `useMembers.ts` — entity state logic, not UI-specific).
+
 ```typescript
 function useMemberForm(member: Member | null) {
   // Returns:
@@ -211,13 +212,13 @@ function useMemberForm(member: Member | null) {
 
 ### Phase 1: Create new shared components (no breaking changes)
 
-| Step | Action | Files |
-|---|---|---|
-| 1.1 | Fix `MemberMetadaFormData` typo → `MemberMetadataFormData` | `types/entities/member/data/memberMetadata.ts` + all imports |
-| 1.2 | Create `useMemberForm` hook | `shared/members/hooks/useMemberForm.ts` |
-| 1.3 | Create form section components | `shared/members/modals/sections/*.tsx` |
-| 1.4 | Create `MemberFormModal` | `shared/members/modals/MemberFormModal.tsx` |
-| 1.5 | Add section presets to config | `shared/members/config/memberFormConfig.ts` |
+| Step | Action | Files | Status |
+|---|---|---|--------|
+| 1.1 | Fix `MemberMetadaFormData` typo → `MemberMetadataFormData` | `types/entities/member/data/memberMetadata.ts` + all imports | ✅      |
+| 1.2 | Create `useMemberForm` hook | `src/hooks/entities/member/state/useMemberForm.ts` |        |
+| 1.3 | Create form section components | `shared/members/modals/sections/*.tsx` | ✅      |
+| 1.4 | Create `MemberFormModal` | `shared/members/modals/MemberFormModal.tsx` |        |
+| 1.5 | Add section presets to config | `shared/members/config/memberFormConfig.ts` |        |
 | 1.6 | Run `/generate-barrels` | barrel files |
 
 ### Phase 2: Migrate consumers (one at a time)

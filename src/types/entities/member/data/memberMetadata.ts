@@ -67,10 +67,10 @@ export interface MemberWithMetadata {
 
 /**
  *  @description Form data structure for member metadata, including personal, contact, medical, and additional information. Old name MemberFormData conflicts with another interface.
- *  @interface MemberMetadaFormData
+ *  @interface MemberMetadataFormData
  *
  */
-export interface MemberMetadaFormData {
+export interface MemberMetadataFormData {
   // Basic Information
   name: string;
   surname: string;

@@ -22,4 +22,5 @@ export interface UnifiedCardProps {
   isPressable?: boolean;
   actions?: ActionsProps[];
   icon?: React.ReactNode;
+  titleClassName?: string;
 }

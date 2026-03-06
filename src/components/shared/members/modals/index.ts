@@ -6,3 +6,4 @@ export {default as MemberInfoForm} from './MemberInfoForm';
 export {default as MemberModal} from './MemberModal';
 export {default as MemberPaymentsTab} from './MemberPaymentsTab';
 export {default as PaymentFormModal} from './PaymentFormModal';
+export * from './sections';
