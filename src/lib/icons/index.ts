@@ -28,3 +28,4 @@ export {ChevronLeftIcon} from './ChevronLeftIcon';
 export {ChevronRightIcon} from './ChevronRightIcon';
 export {LogOutIcon} from './LogOutIcon';
 export {HistoryIcon} from './HistoryIcon';
+export {PlusIcon} from './PlusIcon';

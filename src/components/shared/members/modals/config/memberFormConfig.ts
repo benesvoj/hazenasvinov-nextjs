@@ -1,5 +1,4 @@
-// Quick creation (matches context) — just basic fields
-import {MemberFormSections} from "../types/memberFormModal";
+import {MemberFormSections} from "@/types";
 
 export const QUICK_CREATE: MemberFormSections = {
 	basic: true, contact: false, parent: false, medical: false, additional: false

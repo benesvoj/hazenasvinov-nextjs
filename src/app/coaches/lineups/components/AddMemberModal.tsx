@@ -10,6 +10,7 @@ import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow,} from '
 
 import {UserPlusIcon} from '@heroicons/react/24/outline';
 
+import {FULL_CREATE} from "@/components/shared/members/modals/config/memberFormConfig";
 import {MemberFormModal} from "@/components/shared/members/modals/MemberFormModal";
 
 import {Choice, Dialog, Search} from '@/components';
@@ -321,9 +322,8 @@ export default function AddMemberModal({
 			<MemberFormModal
 				isOpen={isMemberFormModalOpen}
 				onClose={() => setIsMemberFormModalOpen(false)}
-				onSubmit={handleMemberCreated}
-				title={"Member Form Modal (for testing)"}
-				selectedCategoryName={selectedCategoryName}
+				onSuccess={() => handleMemberCreated}
+				sections={FULL_CREATE}
 			/>
 		</>
 	);

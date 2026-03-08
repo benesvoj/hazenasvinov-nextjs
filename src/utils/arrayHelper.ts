@@ -21,7 +21,7 @@
  * hasItems(undefined)  // false
  * ```
  */
-export const hasItems = <T>(arr: T[] | null | undefined): boolean => !!arr && arr.length > 0;
+export const hasItems = <T>(arr: T[] | null | undefined): arr is T[] => !!arr && arr.length > 0;
 
 /**
  * Checks if an array is empty or doesn't exist

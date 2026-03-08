@@ -6,7 +6,7 @@ import {Input} from "@heroui/input";
 
 import {translations} from "@/lib/translations";
 
-import {UnifiedCard} from "@/components";
+import {ContentCard} from "@/components";
 import {MemberMetadataFormData} from "@/types";
 
 interface ParentSectionProps {
@@ -20,7 +20,7 @@ interface ParentSectionProps {
 
 export const ParentSection = ({handleInputChange, formData}: ParentSectionProps) => {
 	return (
-		<UnifiedCard
+		<ContentCard
 			padding={'none'}
 			titleSize={3}
 			titleClassName='text-purple-700'
@@ -51,6 +51,6 @@ export const ParentSection = ({handleInputChange, formData}: ParentSectionProps)
 					size='sm'
 				/>
 			</div>
-		</UnifiedCard>
+		</ContentCard>
 	)
 }

@@ -8,11 +8,11 @@ import {ChartBarIcon} from '@heroicons/react/24/outline';
 
 import UnifiedStandingTable from '@/components/shared/standing-table/UnifiedStandingTable';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
 
-import {Choice, LoadingSpinner, PageContainer, Show, UnifiedCard} from '@/components';
+import {Choice, ContentCard, LoadingSpinner, PageContainer, Show} from '@/components';
 import {
   useFetchSeasons,
   useOptimizedOwnClubMatches,
@@ -130,7 +130,7 @@ export default function CoachesMatchesPage() {
     <PageContainer isUnderConstruction>
       <div className="space-y-6">
         <Show when={hasMoreThanOne(availableCategories)}>
-          <UnifiedCard padding={'none'}>
+          <ContentCard padding={'none'}>
             <Choice
               value={selectedCategory}
               onChange={(id) => setSelectedCategory(id)}
@@ -141,7 +141,7 @@ export default function CoachesMatchesPage() {
               isLoading={isLoading}
               disallowEmptySelection={true}
             />
-          </UnifiedCard>
+          </ContentCard>
         </Show>
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
           {/* Left column - Matches and Standings */}

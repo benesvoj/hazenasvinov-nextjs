@@ -4,7 +4,7 @@ import {Input, Textarea} from "@heroui/input";
 
 import {translations} from "@/lib/translations";
 
-import {UnifiedCard} from "@/components";
+import {ContentCard} from "@/components";
 import {MemberMetadataFormData} from "@/types";
 
 interface AdditionalSectionProps {
@@ -22,7 +22,7 @@ export const AdditionalSection = ({
 									  formData
 								  }: AdditionalSectionProps) => {
 	return (
-		<UnifiedCard
+		<ContentCard
 			title={translations.members.labels.additionalSection.title}
 			padding={'none'}
 			titleSize={3}
@@ -60,6 +60,6 @@ export const AdditionalSection = ({
 					size='sm'
 				/>
 			</div>
-		</UnifiedCard>
+		</ContentCard>
 	)
 }

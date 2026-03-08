@@ -26,6 +26,8 @@ export const commentsTranslations = {
     addComment: 'Přidat komentář',
     deleteComment: 'Smazat komentář',
     deleteCommentMessage: 'Opravdu chcete smazat komentář? Tato akce je nevratná.',
+    noComments: 'Zatím nebyly přidány žádné komentáře.',
+    noCommentsDescription: 'Buďte první, kdo přidá komentář',
   },
   commentsZoneItem: {
     createdBy: 'Vytvořil',

@@ -3,12 +3,8 @@ import {EmptyStateTypes} from '@/enums';
 export interface EmptyStateProps {
   title: string;
   description: string;
+  type: EmptyStateTypes;
   icon?: React.ReactNode;
-  action?: {
-    label: string;
-    onClick: () => void;
-    variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'ghost';
-  };
+  action?: React.ReactNode;
   className?: string;
-  type?: EmptyStateTypes;
 }

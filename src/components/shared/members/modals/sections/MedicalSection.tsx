@@ -6,7 +6,7 @@ import {Input, Textarea} from "@heroui/input";
 
 import {translations} from "@/lib/translations";
 
-import {UnifiedCard} from "@/components";
+import {ContentCard} from "@/components";
 import {MemberMetadataFormData} from "@/types";
 
 interface MedicalSectionProps {
@@ -21,7 +21,7 @@ interface MedicalSectionProps {
 
 export const MedicalSection = ({handleInputChange, formData}: MedicalSectionProps) => {
 	return (
-		<UnifiedCard
+		<ContentCard
 			title={translations.members.labels.medicalSection.title}
 			padding={'none'}
 			titleSize={3}
@@ -63,6 +63,6 @@ export const MedicalSection = ({handleInputChange, formData}: MedicalSectionProp
 					size='sm'
 				/>
 			</div>
-		</UnifiedCard>
+		</ContentCard>
 	)
 }

@@ -2,18 +2,19 @@
 
 import {useState} from "react";
 
-import {AdditionalSection, BasicInfoSection, ContactSection, Dialog, MedicalSection, ParentSection} from "@/components";
+import {
+	AdditionalSection,
+	BasicInfoSection,
+	ContactSection,
+	Dialog,
+	MedicalSection,
+	ParentSection,
+	Show
+} from "@/components";
 import {Genders, MemberFunction} from "@/enums";
-import {MemberMetadataFormData} from "@/types";
+import {MemberFormModalProps, MemberMetadataFormData} from "@/types";
 
-interface MemberFormModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-	onSubmit: (data: any) => void; // Replace 'any' with your form data type
-	initialData?: any; // Replace 'any' with your form data type
-	title: string;
-	selectedCategoryName?: string;
-}
+import {QUICK_CREATE} from "./config/memberFormConfig";
 
 const INITIAL_FORM_DATA: MemberMetadataFormData = {
 	// Basic Information
@@ -50,10 +51,8 @@ const INITIAL_FORM_DATA: MemberMetadataFormData = {
 export const MemberFormModal = ({
 									isOpen,
 									onClose,
-									onSubmit,
-									initialData,
-									title,
-									selectedCategoryName
+									onSuccess,
+									sections = QUICK_CREATE
 								}: MemberFormModalProps) => {
 	const [formData, setFormData] = useState<MemberMetadataFormData>(INITIAL_FORM_DATA);
 
@@ -61,22 +60,31 @@ export const MemberFormModal = ({
 		setFormData((prev) => ({...prev, [field]: value}));
 	};
 
+	const title = 'Member Form Modal with sections (refactored)'
+
 	return (
 		<Dialog
 			isOpen={isOpen}
 			onClose={onClose}
-			onSubmit={onSubmit}
+			onSubmit={onSuccess as () => void} // Type assertion since onSuccess expects a Member, but Dialog expects void
 			title={title}
-			subtitle={`Kategorie: ${selectedCategoryName}`}
 			size="2xl"
 			scrollBehavior="inside"
 		>
 			<div className="space-y-4">
 				<BasicInfoSection handleInputChange={handleInputChange} formData={formData}/>
-				<ContactSection handleInputChange={handleInputChange} formData={formData}/>
-				<ParentSection handleInputChange={handleInputChange} formData={formData}/>
-				<MedicalSection handleInputChange={handleInputChange} formData={formData}/>
-				<AdditionalSection handleInputChange={handleInputChange} formData={formData}/>
+				<Show when={sections.contact}>
+					<ContactSection handleInputChange={handleInputChange} formData={formData}/>
+				</Show>
+				<Show when={sections.parent}>
+					<ParentSection handleInputChange={handleInputChange} formData={formData}/>
+				</Show>
+				<Show when={sections.medical}>
+					<MedicalSection handleInputChange={handleInputChange} formData={formData}/>
+				</Show>
+				<Show when={sections.additional}>
+					<AdditionalSection handleInputChange={handleInputChange} formData={formData}/>
+				</Show>
 			</div>
 		</Dialog>
 	)

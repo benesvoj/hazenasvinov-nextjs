@@ -100,6 +100,72 @@ SomeComponent/utils/.barrel-ignore
 
 Use these for utility/helper files that live inside a component folder but are **not** public API (e.g. `UnifiedTopBar/utils/`). The generator logs `⏭️  Skipping ...` for every excluded path so you can verify it worked.
 
+## Layout components
+
+Use these components instead of writing raw Tailwind flex/grid classes. They enforce consistent spacing and responsive breakpoints across the app.
+
+**Important:** Tailwind CSS does not support dynamic class construction (e.g. `` `flex-${direction}` ``). All layout components use static lookup maps to generate classes. Follow this pattern when creating new layout components.
+
+### Grid / GridItem — Responsive grid layouts
+
+```tsx
+import {Grid, GridItem} from '@/components';
+
+// Equal-width columns (responsive: 1 col mobile → N cols desktop)
+<Grid columns={3} gap="md">
+  <GridItem><Card>...</Card></GridItem>
+  <GridItem><Card>...</Card></GridItem>
+  <GridItem><Card>...</Card></GridItem>
+</Grid>
+
+// Unequal spanning — layout concern stays in the parent, not the child
+<Grid columns={3}>
+  <GridItem span={1}><Sidebar /></GridItem>
+  <GridItem span={2}><MainContent /></GridItem>
+</Grid>
+```
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `Grid.columns` | `1-6` | `3` | Number of columns at largest breakpoint |
+| `Grid.gap` | `'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Gap between items |
+| `GridItem.span` | `1-6` | `1` | Number of columns this item spans |
+
+Files: `src/components/ui/Grid/Grid.tsx`, `src/components/ui/Grid/components/GridItem.tsx`
+
+### HStack / VStack — Flex row/column layouts
+
+```tsx
+import {HStack, VStack} from '@/components';
+
+<HStack spacing={2} align="center">         {/* flex-row gap-2 items-center */}
+  <Icon /><span>Label</span>
+</HStack>
+
+<VStack spacing={4} align="start">           {/* flex-col gap-4 items-start */}
+  <Card>...</Card>
+  <Card>...</Card>
+</VStack>
+```
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `spacing` | `0-12` | `0` | Gap between items (maps to Tailwind `gap-N`) |
+| `align` | `'start' \| 'end' \| 'center' \| 'stretch' \| 'baseline'` | `'center'` | Cross-axis alignment |
+| `justify` | `'start' \| 'end' \| 'center' \| 'between' \| 'around'` | `'start'` | Main-axis alignment |
+| `wrap` | `boolean` | `false` | Allow wrapping |
+
+Files: `src/components/ui/HStack/HStack.tsx`, `src/components/ui/VStack/VStack.tsx`, `src/components/ui/Stack/Stack.tsx` (base)
+
+### When to use which
+
+| Need | Use | Not |
+|---|---|---|
+| Responsive multi-column grid | `<Grid columns={3}>` | Manual `grid grid-cols-...` classes |
+| Unequal column widths in grid | `<GridItem span={2}>` | `col-span-X` on child components |
+| Horizontal row of items | `<HStack spacing={2}>` | `<div className="flex gap-2">` |
+| Vertical stack of items | `<VStack spacing={4}>` | `<div className="flex flex-col gap-4">` or `space-y-X` |
+
 # Database Migrations
 
 Migration files live in `scripts/migrations/` with naming: `{YYYYMMDD}_{snake_case_description}.sql`.

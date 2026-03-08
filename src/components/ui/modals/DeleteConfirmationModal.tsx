@@ -17,6 +17,9 @@ interface DeleteConfirmationModalProps {
   isLoading?: boolean;
 }
 
+/**
+ *  @Deprecated - use DialogDelete component instead, this component will be removed in future versions
+ */
 export default function DeleteConfirmationModal({
   isOpen,
   onClose,

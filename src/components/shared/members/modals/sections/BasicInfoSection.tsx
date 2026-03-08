@@ -4,7 +4,7 @@ import {Input} from "@heroui/input";
 
 import {translations} from "@/lib/translations";
 
-import {GenderSelect, UnifiedCard} from "@/components";
+import {ContentCard, GenderSelect} from "@/components";
 import {Genders} from "@/enums";
 import {MemberMetadataFormData} from "@/types";
 
@@ -24,7 +24,7 @@ export const BasicInfoSection = ({
 									 formData
 								 }: BasicInfoSection) => {
 	return (
-		<UnifiedCard
+		<ContentCard
 			title={translations.members.labels.basicInfoSection.title}
 			padding={'none'}
 			titleSize={3}
@@ -67,6 +67,6 @@ export const BasicInfoSection = ({
 					onChange={(value) => handleInputChange('sex', value)}
 				/>
 			</div>
-		</UnifiedCard>
+		</ContentCard>
 	)
 }

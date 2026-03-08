@@ -1,6 +1,6 @@
 # Member Modal Unification — Analysis & Refactoring Plan
 
-## 1. Current State: Component Inventory
+## 1. Component Inventory (Before Refactor)
 
 There are **4 separate components** that create or edit members, each with different field sets, patterns, and quality levels.
 
@@ -25,7 +25,7 @@ There are **4 separate components** that create or edit members, each with diffe
 | **Operations** | Create only |
 | **Modal** | `UnifiedModal` |
 | **Fields** | **20+ fields** in 5 Card sections: basic, contact, parent/guardian, medical, additional |
-| **Form state** | `useState<MemberMetadaFormData>` (note: typo in type name) |
+| **Form state** | `useState<MemberMetadataFormData>` |
 | **Data ops** | **Direct Supabase `.insert()` call** + `useMemberMetadata().createMemberMetadata()` |
 | **Validation** | Manual `if (!formData.name)` checks |
 | **Quality** | Best UI/UX (card sections, comprehensive fields) but worst code quality (direct DB calls, duplicated reset logic, violates query pattern) |
@@ -86,167 +86,137 @@ There are **4 separate components** that create or edit members, each with diffe
 
 ---
 
-## 3. Type Inconsistencies
-
-| Type | Used by | Fields | Issues |
-|---|---|---|---|
-| `Member` | MemberModal | Full DB row + enums | Includes `id`, `created_at`, `updated_at` — wrong for creation forms |
-| `MemberFormData` | Matches CreateMemberModal | 5 basic fields | Clean, purpose-built for creation |
-| `MemberMetadaFormData` | Lineups CreateMemberModal | 20+ fields | Typo in name ("Metada"), `functions` is `string` not `MemberFunction[]` |
-| `UpdateMemberData` | useMembers hook | Partial member | Correct pattern for updates |
-
----
-
-## 4. Anti-Patterns Found
+## 3. Anti-Patterns Found (Pre-Refactor)
 
 ### Critical
-1. **Direct Supabase calls** in `coaches/lineups/CreateMemberModal.tsx` (lines 90-104) — bypasses API routes, has no auth validation, violates QueryContext pattern
-2. **Duplicated form reset logic** — same 20-field object written 3 times in the lineups component (initial state, submit reset, close reset)
+1. ~~**Direct Supabase calls** in `coaches/lineups/CreateMemberModal.tsx`~~ — will be replaced
+2. ~~**Duplicated form reset logic** — same 20-field object written 3 times~~ — centralized in `INITIAL_FORM_DATA`
 
 ### High
 3. **Inconsistent callback signatures** — `onSuccess(Member)` vs `onMemberCreated(string)` vs `onMemberCreated({id, name, ...})`
 4. **No validation in MemberModal** — relies entirely on parent, no field-level errors
-5. **`MemberMetadaFormData` typo** — propagated across types and code
+5. ~~**`MemberMetadaFormData` typo**~~ — **FIXED** (renamed to `MemberMetadataFormData`)
 
 ### Medium
-6. **Modal component mismatch** — some use `UnifiedModal`, newer code uses `Dialog` — project is migrating to `Dialog`
+6. ~~**Modal component mismatch**~~ — new `MemberFormModal` uses `Dialog`
 7. **Form state uses full `Member` type** in MemberModal — creates confusion between create (no id) and edit (has id) modes
-8. **No shared form sections** — the card-based UI in lineups CreateMemberModal is not reusable
+8. ~~**No shared form sections**~~ — **FIXED** (card-based sections extracted)
 
 ---
 
-## 5. Proposed Architecture
+## 4. Current Architecture
 
-### Target: Single `MemberFormModal` component
+### File Structure
 
 ```
 src/components/shared/members/
-├── modals/
-│   ├── MemberFormModal.tsx          ← NEW: replaces all 3 create/edit modals
-│   ├── sections/
-│   │   ├── BasicInfoSection.tsx     ← core member fields (name, surname, reg#, dob, gender, category, functions)
-│   │   ├── ContactSection.tsx       ← phone, email, address
-│   │   ├── ParentSection.tsx        ← parent/guardian info
-│   │   ├── MedicalSection.tsx       ← medical notes, allergies, emergency contact
-│   │   └── AdditionalSection.tsx    ← preferred position, jersey/shoe size, notes
-│   ├── MemberPaymentsTab.tsx        ← keep as-is (used in edit mode tab)
-│   ├── PaymentFormModal.tsx         ← keep as-is
-│   └── index.ts
-├── config/
-│   └── memberFormConfig.ts          ← NEW: section visibility config per use-case
-├── hooks/
-│   └── useCategoryMap.ts            ← keep (UI-specific helper, correct location)
-├── MemberTableTab.tsx               ← keep
-├── MembersInternalSection.tsx       ← keep
-└── REFACTOR_PLAN.md                 ← keep (update status)
+|-- modals/
+|   |-- MemberFormModal.tsx          <-- NEW (WIP): replaces all 3 create/edit modals
+|   |-- sections/
+|   |   |-- BasicInfoSection.tsx     <-- DONE: name, surname, reg#, dob, gender
+|   |   |-- ContactSection.tsx       <-- DONE: phone, email, address
+|   |   |-- ParentSection.tsx        <-- DONE: parent/guardian info
+|   |   |-- MedicalSection.tsx       <-- DONE: medical notes, allergies, emergency contact
+|   |   |-- AdditionalSection.tsx    <-- DONE: preferred position, jersey/shoe size, notes
+|   |   +-- index.ts                 <-- DONE: barrel exports
+|   |-- config/
+|   |   +-- memberFormConfig.ts      <-- DONE: QUICK_CREATE, FULL_CREATE, FULL_EDIT presets
+|   |-- types/
+|   |   +-- memberFormModal.ts       <-- DONE: MemberFormModalProps, MemberFormSections
+|   |-- MemberModal.tsx              <-- OLD: to be replaced by MemberFormModal
+|   |-- MemberInfoForm.tsx           <-- OLD: to be replaced by sections
+|   |-- MemberPaymentsTab.tsx        <-- KEEP: used in edit mode tab
+|   |-- PaymentFormModal.tsx         <-- KEEP: payment CRUD
+|   +-- index.ts
+|-- config/
+|   |-- memberTableColumns.ts
+|   +-- memberCellRenderers.tsx
+|-- hooks/
+|   +-- useCategoryMap.ts            <-- KEEP (UI-specific helper)
+|-- MemberTableTab.tsx               <-- KEEP
+|-- MembersInternalSection.tsx       <-- KEEP
++-- REFACTOR_PLAN.md                 <-- existing table refactor plan
+
+src/hooks/entities/member/state/
+|-- useMembers.ts                    <-- KEEP: CRUD operations
++-- useMemberForm.ts                 <-- NEW (WIP): form state + validation + submit
 ```
 
-### MemberFormModal — Props Design
+### Section Presets (`modals/config/memberFormConfig.ts`)
+
+```typescript
+QUICK_CREATE  = { basic: true,  contact: false, parent: false, medical: false, additional: false }
+FULL_CREATE   = { basic: true,  contact: true,  parent: true,  medical: true,  additional: true  }
+FULL_EDIT     = { basic: true,  contact: true,  parent: true,  medical: true,  additional: true  }
+```
+
+### Props Design (`modals/types/memberFormModal.ts`)
 
 ```typescript
 interface MemberFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** null = create mode, Member = edit mode */
-  member: Member | null;
-  /** Which form sections to show */
+  member: Member | null;              // null = create, Member = edit
   sections?: MemberFormSections;
-  /** Available categories (required when showing category picker) */
   categories?: Category[];
-  /** Pre-set category (e.g., when creating from lineup context) */
   defaultCategoryId?: string;
-  /** Called after successful create/update */
   onSuccess: (member: Member) => void;
-  /** Show payments tab in edit mode */
   showPaymentsTab?: boolean;
-}
-
-interface MemberFormSections {
-  basic: boolean;       // always true
-  contact: boolean;     // default: false
-  parent: boolean;      // default: false
-  medical: boolean;     // default: false
-  additional: boolean;  // default: false
-}
-```
-
-### Section Presets
-
-```typescript
-// Quick creation (matches context) — just basic fields
-const QUICK_CREATE: MemberFormSections = {
-  basic: true, contact: false, parent: false, medical: false, additional: false
-};
-
-// Full creation (lineups context) — all sections
-const FULL_CREATE: MemberFormSections = {
-  basic: true, contact: true, parent: true, medical: true, additional: true
-};
-
-// Full edit (admin context) — all sections + payments tab
-const FULL_EDIT: MemberFormSections = {
-  basic: true, contact: true, parent: true, medical: true, additional: true
-};
-```
-
-### useMemberForm Hook
-
-Location: `src/hooks/entities/member/state/useMemberForm.ts` (alongside `useMembers.ts` — entity state logic, not UI-specific).
-
-```typescript
-function useMemberForm(member: Member | null) {
-  // Returns:
-  // - formData (typed correctly for create vs edit)
-  // - updateField(field, value) with auto error clearing
-  // - errors (field-level validation)
-  // - isLoading
-  // - handleSubmit() — calls useMembers().createMember or updateMember
-  //                     + useMemberMetadata() for metadata fields
-  // - reset()
 }
 ```
 
 ---
 
-## 6. Migration Plan
+## 5. Migration Plan
 
 ### Phase 1: Create new shared components (no breaking changes)
 
 | Step | Action | Files | Status |
-|---|---|---|--------|
-| 1.1 | Fix `MemberMetadaFormData` typo → `MemberMetadataFormData` | `types/entities/member/data/memberMetadata.ts` + all imports | ✅      |
-| 1.2 | Create `useMemberForm` hook | `src/hooks/entities/member/state/useMemberForm.ts` |        |
-| 1.3 | Create form section components | `shared/members/modals/sections/*.tsx` | ✅      |
-| 1.4 | Create `MemberFormModal` | `shared/members/modals/MemberFormModal.tsx` |        |
-| 1.5 | Add section presets to config | `shared/members/config/memberFormConfig.ts` |        |
-| 1.6 | Run `/generate-barrels` | barrel files |
-
-### Phase 2: Migrate consumers (one at a time)
-
-| Step | Replace | With | Risk |
 |---|---|---|---|
-| 2.1 | `shared/members/modals/MemberModal.tsx` + `MemberInfoForm.tsx` | `MemberFormModal` with `FULL_EDIT` sections | Medium — used in admin + coach members pages |
-| 2.2 | `admin/matches/CreateMemberModal.tsx` | `MemberFormModal` with `QUICK_CREATE` sections | Low — isolated usage |
-| 2.3 | `coaches/lineups/CreateMemberModal.tsx` | `MemberFormModal` with `FULL_CREATE` sections | High — also used by AddMemberModal, has direct DB calls |
-| 2.4 | Update `coaches/lineups/AddMemberModal.tsx` | Point embedded create to new `MemberFormModal` | Low — callback adapter |
+| 1.1 | Fix `MemberMetadaFormData` typo -> `MemberMetadataFormData` | `types/entities/member/data/memberMetadata.ts` + all imports | DONE |
+| 1.2 | Create form section components | `shared/members/modals/sections/*.tsx` | DONE |
+| 1.3 | Add section presets to config | `shared/members/modals/config/memberFormConfig.ts` | DONE |
+| 1.4 | Add types for MemberFormModal | `shared/members/modals/types/memberFormModal.ts` | DONE |
+| 1.5 | Create `MemberFormModal` shell | `shared/members/modals/MemberFormModal.tsx` | WIP — renders sections, needs `useMemberForm` + section visibility + payments tab |
+| 1.6 | Implement `useMemberForm` hook | `src/hooks/entities/member/state/useMemberForm.ts` | WIP — stub only, needs full implementation |
+| 1.7 | Fix Heading `twMerge` for section colors | `src/components/ui/heading/Heading.tsx` | DONE |
+| 1.8 | Run `/generate-barrels` | barrel files | PENDING |
 
-### Phase 3: Cleanup
+### Phase 2: Complete MemberFormModal (before migrating consumers)
 
-| Step | Action |
-|---|---|
-| 3.1 | Delete old `MemberInfoForm.tsx` |
-| 3.2 | Delete old `MemberModal.tsx` |
-| 3.3 | Delete `coaches/lineups/CreateMemberModal.tsx` |
-| 3.4 | Delete `admin/matches/CreateMemberModal.tsx` |
-| 3.5 | Remove `MemberMetadaFormData` type (replace with `MemberFormModal` internal state) |
-| 3.6 | Run `/generate-barrels` |
-| 3.7 | Verify `npm run tsc && npm run lint` |
+| Step | Action | Status |
+|---|---|---|
+| 2.1 | Implement `useMemberForm` — form state, `updateField`, validation, `handleSubmit` (calls `useMembers` + `useMemberMetadata`), `reset` | PENDING |
+| 2.2 | Wire `useMemberForm` into `MemberFormModal` — replace inline `useState` + `handleInputChange` | PENDING |
+| 2.3 | Add section visibility — conditionally render sections based on `sections` prop (default: `QUICK_CREATE`) | PENDING |
+| 2.4 | Add payments tab — show `MemberPaymentsTab` in edit mode when `showPaymentsTab` is true | PENDING |
+| 2.5 | Fix `MemberFormModal` `onSubmit` type — `Dialog.onSubmit` is `() => void`, wire through `useMemberForm.handleSubmit` | PENDING |
+
+### Phase 3: Migrate consumers (one at a time)
+
+| Step | Replace | With | Risk | Status |
+|---|---|---|---|---|
+| 3.1 | `shared/members/modals/MemberModal.tsx` + `MemberInfoForm.tsx` | `MemberFormModal` with `FULL_EDIT` sections | Medium — used in admin + coach members pages | PENDING |
+| 3.2 | `admin/matches/CreateMemberModal.tsx` | `MemberFormModal` with `QUICK_CREATE` sections | Low — isolated usage | PENDING |
+| 3.3 | `coaches/lineups/CreateMemberModal.tsx` | `MemberFormModal` with `FULL_CREATE` sections | High — also used by AddMemberModal, has direct DB calls | PENDING |
+| 3.4 | Update `coaches/lineups/AddMemberModal.tsx` | Point embedded create to new `MemberFormModal` | Low — callback adapter | PENDING |
+
+### Phase 4: Cleanup
+
+| Step | Action | Status |
+|---|---|---|
+| 4.1 | Delete old `MemberInfoForm.tsx` | PENDING |
+| 4.2 | Delete old `MemberModal.tsx` | PENDING |
+| 4.3 | Delete `coaches/lineups/CreateMemberModal.tsx` | PENDING |
+| 4.4 | Delete `admin/matches/CreateMemberModal.tsx` | PENDING |
+| 4.5 | Run `/generate-barrels` | PENDING |
+| 4.6 | Verify `npm run tsc && npm run lint` | PENDING |
 
 ---
 
-## 7. Dialog vs UnifiedModal Decision
+## 6. Dialog vs UnifiedModal Decision
 
-The project is migrating from `UnifiedModal` to `Dialog`. Key differences:
+`MemberFormModal` uses `Dialog` (the target pattern). Key differences:
 
 | | UnifiedModal | Dialog |
 |---|---|---|
@@ -254,15 +224,11 @@ The project is migrating from `UnifiedModal` to `Dialog`. Key differences:
 | Danger | Not supported | `dangerAction` prop |
 | Custom footer | `footer` prop | Not supported |
 | Heading | Custom `Heading` + `hSize` | Uses `Heading size={2}` |
-| classNames | Hardcoded | Mergeable (recently fixed) |
-
-**Recommendation:** Build `MemberFormModal` on `Dialog` since it's the target pattern. The payments tab needs a tabbed layout inside the Dialog body — this works fine since Dialog accepts `children`.
+| classNames | Hardcoded | Mergeable (fixed with `twMerge`) |
 
 ---
 
-## 8. Risks & Mitigations
-
-### Risks
+## 7. Risks & Mitigations
 
 | Risk | Impact | Likelihood | Mitigation |
 |---|---|---|---|
@@ -272,16 +238,16 @@ The project is migrating from `UnifiedModal` to `Dialog`. Key differences:
 | AddMemberModal integration breaks | Medium | Medium | Test lineup flow end-to-end after migration |
 | Payments tab regression | Medium | Low | No changes to MemberPaymentsTab — just re-mount inside new modal |
 
-### Negatives / Trade-offs
+### Trade-offs
 
 1. **More abstraction** — Section-based form is more complex than individual components. However, the alternative (3 separate components that drift apart) is worse.
-2. **Larger single component** — `MemberFormModal` will be ~150-200 lines. Mitigated by extracting sections into sub-components.
+2. **Larger single component** — `MemberFormModal` will be ~80-100 lines (sections extracted). Acceptable.
 3. **Migration effort** — Touching 4+ pages that use member modals. Each migration should be a separate commit for easy rollback.
 4. **`useMemberForm` hook complexity** — Needs to handle both create (no metadata) and create+metadata flows. Keep it focused: form state + validation only, let the hook call `useMembers` and `useMemberMetadata` internally.
 
 ---
 
-## 9. What NOT to Change
+## 8. What NOT to Change
 
 - `BulkEditModal` — different purpose (bulk operations), keep separate
 - `MemberPaymentsTab` / `PaymentFormModal` — working well, just re-mount in new modal
@@ -291,13 +257,26 @@ The project is migrating from `UnifiedModal` to `Dialog`. Key differences:
 
 ---
 
+## 9. Bonus Fixes Done During Refactor
+
+| Fix | File | Details |
+|---|---|---|
+| `MemberMetadaFormData` typo | `types/entities/member/data/memberMetadata.ts` + 8 files | Renamed to `MemberMetadataFormData` |
+| Heading conflicting `font-bold` | `components/ui/heading/Heading.tsx` | Removed dead `alternative` prop that always added `font-bold` over size-specific weight |
+| Heading color override broken | `components/ui/heading/Heading.tsx` | Added `twMerge` — `className="text-green-700"` now properly overrides default `text-gray-900` |
+| Dialog `classNames` not mergeable | `components/ui/dialog/Dialog.tsx` | Spread `props.classNames` and merge `base`/`wrapper` with defaults |
+
+---
+
 ## 10. Success Criteria
 
 - [ ] Single `MemberFormModal` component handles all member create/edit flows
 - [ ] No direct Supabase calls in any modal component
-- [ ] Field-level validation via `useMembers` hook pattern
-- [ ] Card-based section UI preserved from lineups CreateMemberModal
+- [ ] Field-level validation via `useMemberForm` hook
+- [ ] Card-based section UI preserved (using `UnifiedCard` + `Heading` with colored titles)
+- [ ] Section visibility controlled by presets (`QUICK_CREATE`, `FULL_CREATE`, `FULL_EDIT`)
 - [ ] All current functionality preserved (lineups callback, matches callback, admin edit+payments)
 - [ ] `npm run tsc` and `npm run lint` pass
 - [ ] Existing tests still pass
-- [ ] `MemberMetadaFormData` typo fixed everywhere
+- [x] `MemberMetadaFormData` typo fixed everywhere
+- [x] `Heading` component uses `twMerge` for clean class resolution

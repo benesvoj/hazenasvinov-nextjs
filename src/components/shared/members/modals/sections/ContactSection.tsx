@@ -4,7 +4,7 @@ import {Input} from "@heroui/input";
 
 import {translations} from "@/lib/translations";
 
-import {UnifiedCard} from "@/components";
+import {ContentCard} from "@/components";
 import {MemberMetadataFormData} from "@/types";
 
 interface ContactSection {
@@ -18,7 +18,7 @@ interface ContactSection {
 
 export const ContactSection = ({handleInputChange, formData}: ContactSection) => {
 	return (
-		<UnifiedCard
+		<ContentCard
 			title={translations.members.labels.contactSection.title}
 			padding={'none'}
 			titleSize={3}
@@ -49,6 +49,6 @@ export const ContactSection = ({handleInputChange, formData}: ContactSection) =>
 					size='sm'
 				/>
 			</div>
-		</UnifiedCard>
+		</ContentCard>
 	)
 }

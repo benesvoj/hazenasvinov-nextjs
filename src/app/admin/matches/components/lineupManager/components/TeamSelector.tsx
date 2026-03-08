@@ -2,7 +2,7 @@ import React, {memo} from 'react';
 
 import {LINEUP_VALIDATION_RULES} from '@/app/constants/lineupValidationRules';
 
-import {UnifiedCard} from '@/components';
+import {ContentCard, Grid} from '@/components';
 import {TeamTypes} from '@/enums';
 import {LineupSummary} from '@/types';
 
@@ -63,8 +63,8 @@ const TeamSelector: React.FC<TeamSelectorProps> = memo(
     };
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <UnifiedCard
+      <Grid columns={2}>
+        <ContentCard
           onPress={() => onTeamSelect(TeamTypes.HOME)}
           title={t.homeTeam}
           titleSize={4}
@@ -72,8 +72,8 @@ const TeamSelector: React.FC<TeamSelectorProps> = memo(
           isPressable
         >
           {getLineupSummaryDisplay(calculateLocalSummary(homeFormData), homeTeamName)}
-        </UnifiedCard>
-        <UnifiedCard
+        </ContentCard>
+        <ContentCard
           onPress={() => onTeamSelect(TeamTypes.AWAY)}
           title={t.awayTeam}
           titleSize={4}
@@ -81,8 +81,8 @@ const TeamSelector: React.FC<TeamSelectorProps> = memo(
           isPressable
         >
           {getLineupSummaryDisplay(calculateLocalSummary(awayFormData), awayTeamName)}
-        </UnifiedCard>
-      </div>
+        </ContentCard>
+      </Grid>
     );
   }
 );
