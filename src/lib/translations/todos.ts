@@ -69,4 +69,8 @@ export const todosTranslations = {
       status: 'Stav',
     },
   },
+  emptyState: {
+    title: 'Žádné úkoly nenalezeny',
+    description: 'Vytvořte svůj první úkol kliknutím na tlačítko níže.',
+  },
 };

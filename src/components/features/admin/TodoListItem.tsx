@@ -4,7 +4,7 @@ import {Button} from "@heroui/react";
 
 import {translations} from '@/lib/translations';
 
-import {HStack, ContentCard} from '@/components';
+import {ContentCard, HStack} from '@/components';
 import {TodoStatuses} from '@/enums';
 import {
 	formatDateString,
@@ -19,7 +19,6 @@ import {
 } from '@/helpers';
 import {EditIcon, TrashIcon} from "@/lib";
 import {TodoListItemProps} from '@/types';
-
 
 export const TodoListItem = ({
 								 todo,

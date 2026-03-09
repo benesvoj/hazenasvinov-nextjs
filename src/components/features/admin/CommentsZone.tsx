@@ -7,10 +7,9 @@ import {ChatBubbleLeftRightIcon} from '@heroicons/react/24/outline';
 import {translations} from '@/lib/translations';
 
 import {CommentsZoneItem, ContentCard, EmptyState, HStack, VStack} from '@/components';
-import {EmptyStateTypes} from "@/enums";
 import {PlusIcon} from "@/lib";
 import {CommentsZoneProps} from '@/types';
-import {emptyStateTypeOptions, isEmpty} from "@/utils";
+import {isEmpty} from "@/utils";
 
 export default function CommentsZone({
 										 comments,
@@ -37,21 +36,21 @@ export default function CommentsZone({
 		>{t.commentList.addComment}</Button>
 	)
 
-	const emptyOptionTitle = emptyStateTypeOptions[EmptyStateTypes.COMMENTS];
+	const emptyState = (
+		<EmptyState
+			title={translations.comments.emptyState.title}
+			description={translations.comments.emptyState.description}
+			type={'comments'}
+			action={actions}
+		/>
+	)
 
 	return (
 		<ContentCard
 			title={commentCardTitle}
 			isLoading={commentsLoading}
 			actions={actions}
-			emptyState={isEmpty(comments)
-				? <EmptyState
-					type={EmptyStateTypes.COMMENTS}
-					title={emptyOptionTitle}
-					description={translations.comments.commentList.noCommentsDescription}
-					action={actions}
-				/>
-				: undefined}
+			emptyState={isEmpty(comments) && emptyState}
 		>
 			<VStack spacing={4}>
 				{comments.map((comment) => (

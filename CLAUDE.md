@@ -166,6 +166,50 @@ Files: `src/components/ui/HStack/HStack.tsx`, `src/components/ui/VStack/VStack.t
 | Horizontal row of items | `<HStack spacing={2}>` | `<div className="flex gap-2">` |
 | Vertical stack of items | `<VStack spacing={4}>` | `<div className="flex flex-col gap-4">` or `space-y-X` |
 
+## Feedback components
+
+### EmptyState — "No data" placeholder
+
+Use `EmptyState` whenever a list, card, or page section has no items to display. Pass it as `emptyState` prop to `ContentCard`, or render standalone.
+
+```tsx
+import {ContentCard, EmptyState} from '@/components';
+
+// Inside ContentCard — shown when data is empty, hidden when children render
+<ContentCard
+  title="Úkoly"
+  isLoading={loading}
+  emptyState={isEmpty(items) &&
+    <EmptyState
+      type="todos"
+      title={t.emptyTitle}
+      description={t.emptyDescription}
+      action={<Button onPress={onCreate}>{t.create}</Button>}
+    />
+  }
+>
+  {items.map(item => <Item key={item.id} {...item} />)}
+</ContentCard>
+```
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `title` | `string` | yes | Heading text (Czech) |
+| `description` | `string` | yes | Subtext below heading (Czech) |
+| `type` | `EmptyStateType` | yes | Key for default icon lookup (`'todos'`, `'posts'`, `'users'`, etc.) |
+| `icon` | `ReactNode` | no | Custom icon — overrides default from `type` |
+| `action` | `ReactNode` | no | CTA button below description — omit for read-only empty states |
+| `className` | `string` | no | Extra classes on root div |
+
+**Rules:**
+- All title/description strings come from `translations` — never hardcode Czech strings in the component call.
+- `action` is a `ReactNode` (composed JSX), not a config object. Pass a `<Button>` directly.
+- `type` selects a default icon from `ICON_MAP`. Override with `icon` prop only when the default doesn't fit.
+- Do **not** use `GenericEmptyState`, `renderEmptyState`, or `EMPTY_STATE_CONFIG` — these are removed. Compose `<EmptyState>` directly.
+
+File: `src/components/ui/feedback/EmptyState.tsx`
+Types: `src/types/components/emptyState.ts` (`EmptyStateType`, `EmptyStateProps`)
+
 # Database Migrations
 
 Migration files live in `scripts/migrations/` with naming: `{YYYYMMDD}_{snake_case_description}.sql`.

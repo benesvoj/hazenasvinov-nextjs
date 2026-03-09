@@ -64,7 +64,7 @@ export default function ContentCard({
 						</div>
 						{subtitle && <div className="text-sm text-gray-500">{subtitle}</div>}
 					</div>
-					<Show when={actions}>
+					<Show when={actions && !emptyState}>
 						{actions}
 					</Show>
 				</CardHeader>

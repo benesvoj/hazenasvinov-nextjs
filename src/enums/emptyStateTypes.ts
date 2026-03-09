@@ -25,7 +25,7 @@ export const EMPTY_STATE_TYPES_LABELS: Record<EmptyStateTypes, string> = {
   [EmptyStateTypes.COMMITTEES]: translations.common.emptyStateTypes.committees,
   [EmptyStateTypes.BIRTHDAYS]: translations.common.emptyStateTypes.birthdays,
   [EmptyStateTypes.TRAINING_SESSION]: translations.trainingSessions.noTrainingSession,
-    [EmptyStateTypes.COMMENTS]: translations.comments.commentList.noComments,
+    [EmptyStateTypes.COMMENTS]: translations.comments.emptyState.title,
 };
 
 export const getEmptyStateTypeOptions = () => {

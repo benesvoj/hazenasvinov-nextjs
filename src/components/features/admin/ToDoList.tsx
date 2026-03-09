@@ -10,9 +10,8 @@ import {PlusIcon} from "@/lib/icons/PlusIcon";
 import {translations} from '@/lib/translations';
 
 import {ContentCard, EmptyState, HStack, TodoListItem, VStack} from '@/components';
-import {EmptyStateTypes} from '@/enums';
 import {ToDoListProps} from '@/types';
-import {emptyStateTypeOptions, isEmpty} from "@/utils";
+import {isEmpty} from "@/utils";
 
 export default function ToDoList({
 									 todos,
@@ -86,7 +85,15 @@ export default function ToDoList({
 			</Button>
 		</>
 	)
-	const emptyOptionTitle = emptyStateTypeOptions[EmptyStateTypes.TODOS];
+
+	const emptyState = (
+		<EmptyState
+			type={'todos'}
+			title={translations.todos.emptyState.title}
+			description={translations.todos.emptyState.description}
+			action={actions}
+		/>
+	)
 
 	return (
 		<ContentCard
@@ -95,14 +102,7 @@ export default function ToDoList({
 			titleSize={2}
 			footer={todoCardFooter}
 			isLoading={todosLoading}
-			emptyState={isEmpty(todos)
-				? <EmptyState
-					type={EmptyStateTypes.TODOS}
-					title={emptyOptionTitle}
-					description={translations.comments.commentList.noCommentsDescription}
-					action={actions}
-				/>
-				: undefined}
+			emptyState={isEmpty(todos) && emptyState}
 			actions={actions}
 		>
 			<VStack spacing={4}>
