@@ -1,10 +1,10 @@
 import React from 'react';
 
-import {Button, Input, Textarea} from '@heroui/react';
+import {Input, Textarea} from '@heroui/input';
 
 import {translations} from '@/lib/translations';
 
-import {UnifiedModal} from '@/components';
+import {Dialog} from '@/components';
 import {ModalMode} from '@/enums';
 import {CategoryLineupFormData} from '@/types';
 
@@ -29,45 +29,38 @@ export const LineupModal = ({
 }: LineupModalProps) => {
   const tAction = translations.common.actions;
   const isEditMode = mode === ModalMode.EDIT;
-  const modalTitle = isEditMode ? 'Upravit soupisku' : 'Nová soupiska';
+  const modalTitle = isEditMode
+    ? translations.lineups.titles.update
+    : translations.lineups.titles.new;
+
+  const submitButtonLabel = isEditMode ? tAction.save : tAction.add;
 
   return (
-    <UnifiedModal
+    <Dialog
       isOpen={isOpen}
       onClose={onClose}
+      onSubmit={onSubmit}
       title={modalTitle}
-      footer={
-        <>
-          <Button variant="light" onPress={onClose} isDisabled={isLoading}>
-            {tAction.cancel}
-          </Button>
-          <Button
-            color="primary"
-            onPress={onSubmit}
-            isLoading={isLoading}
-            isDisabled={isLoading || !formData.name.trim()}
-          >
-            {isEditMode ? tAction.save : tAction.add}
-          </Button>
-        </>
-      }
+      isLoading={isLoading}
+      isDisabled={!formData.name.trim()}
+      submitButtonLabel={submitButtonLabel}
     >
-      <div className="space-y-4">
-        <Input
-          label="Název soupisky"
-          placeholder="Zadejte název soupisky"
-          value={formData.name}
-          onChange={(e) => setFormData({...formData, name: e.target.value})}
-          isRequired
-        />
+      <Input
+        label={translations.lineups.labels.name}
+        placeholder={translations.lineups.placeholders.name}
+        value={formData.name}
+        onChange={(e) => setFormData({...formData, name: e.target.value})}
+        isRequired
+        size={'sm'}
+      />
 
-        <Textarea
-          label="Popis"
-          placeholder="Zadejte popis soupisky"
-          value={formData?.description ?? ''}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
-        />
-      </div>
-    </UnifiedModal>
+      <Textarea
+        label={translations.lineups.labels.description}
+        placeholder={translations.lineups.placeholders.description}
+        value={formData?.description ?? ''}
+        onChange={(e) => setFormData({...formData, description: e.target.value})}
+        size={'sm'}
+      />
+    </Dialog>
   );
 };

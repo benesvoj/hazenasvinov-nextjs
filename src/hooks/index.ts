@@ -78,6 +78,7 @@ export * from './entities/member/data/useFetchMembersExternal';
 export * from './entities/member/data/useFetchMembersInternal';
 export * from './entities/member/data/useFetchMembersOnLoan';
 export * from './entities/member/data/useMembersWithPaymentStatus';
+export * from './entities/member/state/useMemberForm';
 export * from './entities/member/state/useMembers';
 export * from './entities/member-function/data/useFetchMemberFunctions';
 export * from './entities/member-function/state/useMemberFunctionForm';

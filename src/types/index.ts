@@ -9,6 +9,7 @@ export * from './components/contentCard';
 export * from './components/emptyState';
 export * from './components/flexbox';
 export * from './components/mobileActionsMenuProps';
+export * from './components/padding';
 export * from './components/spacing';
 export * from './components/toast';
 export * from './database/supabase';

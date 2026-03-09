@@ -166,6 +166,17 @@ Files: `src/components/ui/HStack/HStack.tsx`, `src/components/ui/VStack/VStack.t
 | Horizontal row of items | `<HStack spacing={2}>` | `<div className="flex gap-2">` |
 | Vertical stack of items | `<VStack spacing={4}>` | `<div className="flex flex-col gap-4">` or `space-y-X` |
 
+## Card components
+
+Two card components — use `ContentCard` by default, `Card` only for fully custom layouts.
+
+| Component | When to use | File |
+|---|---|---|
+| `ContentCard` | Standard card with title, actions, loading, empty state, footer | `src/components/ui/cards/ContentCard.tsx` |
+| `Card` | Escape hatch for fully custom card content (e.g. TodoStatsCard) | `src/components/ui/cards/Card.tsx` |
+
+**Full documentation:** [`src/components/ui/cards/CLAUDE.md`](src/components/ui/cards/CLAUDE.md) — props, usage patterns, behavior notes, rules.
+
 ## Feedback components
 
 ### EmptyState — "No data" placeholder

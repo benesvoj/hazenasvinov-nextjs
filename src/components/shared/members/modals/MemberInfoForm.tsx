@@ -17,6 +17,7 @@ interface MemberInfoFormProps {
   isEditMode?: boolean;
 }
 
+/** @deprecated Use MemberInfoFormWithHookForm instead, which uses react-hook-form and has better validation and performance */
 export default function MemberInfoForm({
   formData,
   setFormData,

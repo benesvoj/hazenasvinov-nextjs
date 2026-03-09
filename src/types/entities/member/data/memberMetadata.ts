@@ -78,6 +78,7 @@ export interface MemberMetadataFormData {
   date_of_birth: string;
   sex: Genders.MALE | Genders.FEMALE;
   functions: string;
+  category_id: string;
 
   // Contact Information
   phone: string;

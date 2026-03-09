@@ -26,6 +26,25 @@ interface DialogProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
   dangerAction?: boolean;
 }
 
+/**
+ * Modal dialog built on HeroUI `Modal`.
+ *
+ * Renders a centered, blur-backdrop modal with a header (title + optional subtitle),
+ * scrollable body, and an optional footer with Cancel / Submit buttons.
+ *
+ * @property isOpen - Controls modal visibility.
+ * @property onClose - Called when the user dismisses the dialog (backdrop click, Esc, or Cancel button).
+ * @property onSubmit - Submit handler. When provided, the footer with Cancel and Submit buttons is shown.
+ * @property title - Modal heading text.
+ * @property subtitle - Optional subtext rendered below the title.
+ * @property size - Modal width (`'sm'`–`'5xl'` | `'full'`). Default `'2xl'`.
+ * @property isLoading - Disables Cancel and shows a spinner on the Submit button.
+ * @property isDisabled - Disables the Submit button (Cancel stays enabled).
+ * @property submitButtonLabel - Custom label for the Submit button. Default `translations.common.actions.save`.
+ * @property scrollBehavior - Scroll strategy for overflowing content (`'inside'` | `'outside'`). Default `'inside'`.
+ * @property dangerAction - When `true`, the Submit button uses `color="danger"` instead of `"primary"`.
+ * @property children - Dialog body content.
+ */
 export const Dialog = (props: DialogProps) => {
   return (
     <Modal

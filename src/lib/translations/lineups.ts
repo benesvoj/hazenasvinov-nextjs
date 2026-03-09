@@ -9,11 +9,21 @@ export const lineupsTranslations = {
     updateError: 'Chyba při aktualizaci soupisky.',
     deleteError: 'Chyba při mazání soupisky.',
   },
-  title: 'Soupisky',
-  updateLineup: 'Upravit soupisku',
-  deleteLineup: 'Smazat soupisku',
+  titles: {
+    title: 'Soupisky',
+    new: 'Nová soupiska',
+    update: 'Upravit soupisku',
+    delete: 'Smazat soupisku',
+  },
+  actions: {
+    newLineup: 'Nová soupiska',
+  },
   deleteLineupMessage: 'Opravdu chcete smazat tuto soupisku? Tato akce je nevratná.',
-  noLineups: 'Žádné soupisky',
+  emptyState: {
+    title: 'Žádné soupisky',
+    description:
+      'Zatím nemáte žádné soupisky. Začněte vytvořením nové soupisky pro vaši kategorii.',
+  },
   deleteLineupMember: 'Smazat člena soupisky',
   deleteLineupMemberMessage:
     'Opravdu chcete smazat tohoto člena ze soupisky? Tato akce je nevratná.',
@@ -36,5 +46,13 @@ export const lineupsTranslations = {
     playerRoles: {
       captain: 'Kapitán',
     },
+  },
+  labels: {
+    name: 'Název soupisky',
+    description: 'Popis',
+  },
+  placeholders: {
+    name: 'Zadejte název soupisky',
+    description: 'Zadejte popis soupisky',
   },
 };

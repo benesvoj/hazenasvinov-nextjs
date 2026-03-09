@@ -5,7 +5,7 @@ export const lineupMembersTranslations = {
   title: 'Členové soupisky',
   noLineupMembers: 'Žádní členové soupisky',
   selectLineupPrompt: 'Vyberte soupisku pro zobrazení členů',
-  addMember: 'Přidat člena',
+  addMember: 'Přidat člena na soupisku',
   table: {
     ariaLabel: 'Seznam členů soupisky',
     columns: {

@@ -6,9 +6,9 @@ import {useModalWithItem} from '@/hooks/shared/useModals';
 
 import {useCategoryMap} from '@/components/shared/members/hooks/useCategoryMap';
 import {MembersInternalSection} from '@/components/shared/members/MembersInternalSection';
-import {MemberModal, PaymentFormModal} from '@/components/shared/members/modals';
+import {FULL_EDIT, MemberFormModal, PaymentFormModal} from '@/components/shared/members/modals';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
@@ -18,7 +18,7 @@ import MembersCsvImport from '@/app/admin/members/components/MembersCsvImport';
 import {MembersListFilters} from '@/app/admin/members/components/MembersListFilters';
 import MembersStatisticTab from '@/app/admin/members/components/MembersStatisticTab';
 
-import {AdminContainer, DeleteConfirmationModal} from '@/components';
+import {AdminContainer, DeleteDialog} from '@/components';
 import {ActionTypes, Genders, MemberFunction} from '@/enums';
 import {currentYear} from '@/helpers';
 import {
@@ -72,7 +72,7 @@ export default function MembersAdminPage() {
   } = useFetchMembersInternal({limit: 1000});
   const {refresh: refreshExternal, loading: membersExternalLoading} = useFetchMembersExternal();
   const {refresh: refreshOnLoan, loading: membersOnLoanLoading} = useFetchMembersOnLoan();
-  const {deleteMember} = useMembers();
+  const {deleteMember, isLoading: isDeleteLoading} = useMembers();
   const modals = useMemberModals<BaseMember>();
   const memberModal = useModalWithItem<Member>();
   const {bulkEditMembers} = useBulkEditMembers({
@@ -238,7 +238,7 @@ export default function MembersAdminPage() {
         />
       )}
 
-      <MemberModal
+      <MemberFormModal
         key={memberModal.selectedItem?.id ?? 'new'}
         isOpen={memberModal.isOpen}
         onClose={memberModal.closeAndClear}
@@ -246,14 +246,16 @@ export default function MembersAdminPage() {
         categories={categoriesData || []}
         onSuccess={handleSave}
         showPaymentsTab={activeTab === 'members-internal'}
+        sections={FULL_EDIT}
       />
 
-      <DeleteConfirmationModal
+      <DeleteDialog
         isOpen={modals.deleteModal.isOpen}
         onClose={modals.deleteModal.onClose}
-        onConfirm={handleDeleteMember}
-        title={t.modals.deleteMember}
+        onSubmit={handleDeleteMember}
+        title={t.modals.titles.deleteMember}
         message={t.modals.deleteMemberMessage}
+        isLoading={isDeleteLoading}
       />
 
       <BulkEditModal
