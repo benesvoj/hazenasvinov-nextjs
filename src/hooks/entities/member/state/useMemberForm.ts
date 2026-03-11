@@ -2,10 +2,12 @@
 
 import {useState} from 'react';
 
+import {createFormHook} from '@/hooks/factories';
+
 import {translations} from '@/lib/translations';
 
 import {Genders, MemberFunction, ModalMode} from '@/enums';
-import {createFormHook, useMemberMetadata, useMembers} from '@/hooks';
+import {useMemberMetadata, useMembers} from '@/hooks';
 import {Member, MemberMetadataFormData} from '@/types';
 
 const initialFormData: MemberMetadataFormData = {
@@ -41,19 +43,17 @@ const initialFormData: MemberMetadataFormData = {
   shoe_size: '',
 };
 
-const memberFormHook = createFormHook<Member, MemberMetadataFormData>({
-  initialFormData,
-  validationRules: [
-    {field: 'name', message: translations.members.validations.mandatoryName},
-    {field: 'surname', message: translations.members.validations.mandatorySurname},
-    {field: 'date_of_birth', message: translations.members.validations.mandatoryDateOfBirth},
-  ],
-});
-
 export function useMemberForm() {
-  const form = memberFormHook();
+  const form = createFormHook<Member, MemberMetadataFormData>({
+    initialFormData,
+    validationRules: [
+      {field: 'name', message: translations.members.validations.mandatoryName},
+      {field: 'surname', message: translations.members.validations.mandatorySurname},
+      {field: 'date_of_birth', message: translations.members.validations.mandatoryDateOfBirth},
+    ],
+  })();
   const {updateMember, createInternalMember} = useMembers();
-  const {createMemberMetadata, updateMemberMetadata} = useMemberMetadata();
+  const {updateMemberMetadata} = useMemberMetadata();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = async () => {

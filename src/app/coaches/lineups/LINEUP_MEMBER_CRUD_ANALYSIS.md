@@ -17,10 +17,12 @@ category_lineups (core table)
         ├── lineup_id → category_lineups
         ├── member_id → members
         ├── position, jersey_number, is_captain, is_vice_captain
-        ├── added_by, is_active
+        ├── created_by, is_active, created_at, updated_at, updated_by
 ```
 
 Both are straightforward tables. `category_lineups` already uses the generic entities API correctly. Only `category_lineup_members` was broken.
+
+**Note:** `category_lineup_members` does NOT have a `category_id` column — category ownership is resolved through the parent `category_lineups` row via `lineup_id`.
 
 ---
 
@@ -50,7 +52,7 @@ Direct supabase query with member JOIN (inline, not using query layer)
 
 ---
 
-## Target Architecture
+## Target Architecture ✅ IMPLEMENTED
 
 ```
 Component (LineupMembers.tsx / page.tsx)
@@ -58,14 +60,14 @@ Component (LineupMembers.tsx / page.tsx)
 useCategoryLineupMembers() — createCRUDHook factory (consistent with all entities)
   ↓
 Generic entities API: /api/entities/category_lineup_members
-  ↓
+  ↓ (uses supabaseAdmin for mutations — bypasses RLS)
 Query layer: src/queries/categoryLineupMembers/ (queries.ts + mutations.ts)
   ↓
 Supabase
 ```
 
 ```
-useFetchCategoryLineupMembers() — createDataFetchHook factory
+useFetchCategoryLineupMembers({lineupId}) — createDataFetchHook factory
   ↓
 Generic entities API: /api/entities/category_lineup_members?lineupId=xxx
   ↓
@@ -83,9 +85,9 @@ Both `clubCategories` and `memberAttendance` already solve the same problem — 
 
 The generic entities API serves these via the query layer config. `category_lineup_members` needs the same pattern.
 
-### How `added_by` is handled
+### How `created_by` is handled
 
-The `added_by` field (user who added the member) is set client-side using `useUser()` context which provides `user.id`. The component includes it in the create payload. This is consistent with how other entities handle user-associated fields.
+The `created_by` field (user who added the member) is set client-side using `useUser()` context which provides `user.id`. The component includes it in the create payload. This is consistent with how other entities handle user-associated fields.
 
 ---
 
@@ -106,13 +108,11 @@ const query = buildSelectQuery(ctx.supabase, DB_TABLE, {
 });
 ```
 
-**Verified:** Trailing comma in select string was removed (would have caused Supabase query error).
-
 ### Phase 2: Entity Config — Wire mutations + coachWritable ✅ DONE
 
 **File:** `src/app/api/entities/config.ts`
 
-Added `create`, `update`, `delete` to `category_lineup_members` query layer and set `coachWritable: true`:
+Added `create`, `update`, `delete` to `category_lineup_members` query layer, set `coachWritable: true`, and added `categoryResolver` for coach access checks:
 
 ```typescript
 category_lineup_members: {
@@ -120,21 +120,23 @@ category_lineup_members: {
   sortBy: [{column: 'jersey_number', ascending: true}],
   requiresAdmin: false,
   coachWritable: true,
+  categoryResolver: async (supabase, body) => {
+    if (!body.lineup_id) return null;
+    const {data} = await supabase
+      .from('category_lineups')
+      .select('category_id')
+      .eq('id', body.lineup_id)
+      .single();
+    return data?.category_id ?? null;
+  },
   filters: [
-    {paramName: 'categoryId', dbColumn: 'category_id'},
     {paramName: 'lineupId', dbColumn: 'lineup_id'},
   ],
-  queryLayer: {
-    getAll: categoryLineupMembersQueries.getAllCategoryLineupMembers,
-    getById: categoryLineupMembersQueries.getCategoryLineupMemberById,
-    create: categoryLineupMembersQueries.createCategoryLineupMember,
-    update: categoryLineupMembersQueries.updateCategoryLineupMember,
-    delete: categoryLineupMembersQueries.deleteCategoryLineupMember,
-  },
+  queryLayer: { /* all CRUD operations */ },
 },
 ```
 
-**Verified:** `coachWritable: true` was missing and added — without it, only admins could write.
+**Also added `coachWritable: true` to `category_lineups`** — was missing, causing 403 for coaches on lineup create/edit/delete.
 
 ### Phase 3: Translations — Add Czech CRUD messages ✅ DONE
 
@@ -155,43 +157,19 @@ errorMessage: 'Nastala chyba. Zkuste to prosím znovu.',
 
 **New file:** `src/hooks/entities/category-lineup-members/state/useCategoryLineupMembers.ts`
 
-Factory-based hook following `useCategoryLineups` pattern:
-
-```typescript
-export function useCategoryLineupMembers() {
-  const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<
-    BaseCategoryLineupMember,
-    CreateCategoryLineupMember
-  >({
-    baseEndpoint: API_ROUTES.entities.root(DB_TABLE),
-    byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
-    entityName: ENTITY.plural,
-    messages: { /* Czech translations */ },
-  })();
-
-  return {
-    loading, setLoading, error,
-    createCategoryLineupMember: create,
-    updateCategoryLineupMember: update,
-    deleteCategoryLineupMember: deleteItem,
-  };
-}
-```
+Factory-based hook following `useCategoryLineups` pattern.
 
 ### Phase 5: New Fetch Hook ✅ DONE
 
 **New file:** `src/hooks/entities/category-lineup-members/data/useFetchCategoryLineupMembers.ts`
 
-Parameterized factory hook that passes `categoryId` and `lineupId` as query params:
+Parameterized factory hook that passes `lineupId` as query param:
 
 ```typescript
-export function useFetchCategoryLineupMembers(params: { categoryId: string; lineupId: string }) {
-  return createDataFetchHook<CategoryLineupMemberWithMember, { categoryId: string, lineupId: string }>({
+export function useFetchCategoryLineupMembers(params: {lineupId: string}) {
+  return createDataFetchHook<CategoryLineupMemberWithMember, {lineupId: string}>({
     endpoint: (params) => {
-      const searchParams = new URLSearchParams({
-        categoryId: params.categoryId,
-        lineupId: params.lineupId,
-      });
+      const searchParams = new URLSearchParams({ lineupId: params.lineupId });
       return `${API_ROUTES.entities.root(DB_TABLE)}?${searchParams.toString()}`;
     },
     entityName: ENTITY.plural,
@@ -201,50 +179,65 @@ export function useFetchCategoryLineupMembers(params: { categoryId: string; line
 }
 ```
 
----
+**Note:** Only `lineupId` is passed — `categoryId` was removed since `category_lineup_members` has no `category_id` column. Filtering by `lineup_id` is sufficient (each lineup belongs to one category).
 
-### Phase 6: Update Consumers ⬜ TODO
+### Phase 6: Update Consumers ✅ DONE
 
 **File: `src/app/coaches/lineups/components/LineupMembers.tsx`**
 
-- Replace `useCategoryLineupMember()` → `useCategoryLineupMembers()`
-- Replace `useFetchCategoryLineupMembers(categoryId, lineupId)` → new factory hook with `{categoryId, lineupId}` params
-- In `handleAddMember`: include `lineup_id`, `added_by: user.id`, `is_active: true` in data payload
-- Remove `handleEditMember` and UPDATE action from columns (no edit modal exists)
-- Fix `functions` column to show both captain and vice-captain
+- Replaced old hooks with `useCategoryLineupMembers()` and `useFetchCategoryLineupMembers({lineupId})`
+- `handleAddMember` enriches modal data with `lineup_id`, `created_by: user.id`, `is_active: true`
+- Removed `handleEditMember` and UPDATE action from columns (no edit modal exists)
+- `functions` column now shows both captain and vice-captain chips
+- Added `useUser()` for `created_by` field
 
 **File: `src/app/coaches/lineups/page.tsx`**
 
-- Replace `useCategoryLineupMember()` → `useCategoryLineupMembers()`
-- Update `removeLineupMember` call: change from `(categoryId, lineupId, id)` to `deleteCategoryLineupMember(id)`
+- Removed `useCategoryLineupMember()` import entirely
+- Delete modal simplified to `useModalWithItem<string>()` — only handles lineup deletion
+- Member deletion is fully handled within `LineupMembers.tsx`
 
 ### Phase 7: Cleanup ⬜ TODO
 
 | Action | File |
 |--------|------|
 | Delete | `src/hooks/entities/category/state/useCategoryLineupMember.ts` (broken, replaced) |
-| Delete | `src/hooks/entities/category/data/useFetchCategoryLineupMembers.ts` (manual, replaced) |
+| Delete | `src/hooks/entities/category/data/useFetchCategoryLineupMembers.old.ts` (manual, replaced) |
 | Delete | `src/hooks/entities/category/data/useFetchCategoryLIneupMembersFactory.ts` (typo, incomplete) |
 | Deprecate (mark for future removal) | `src/app/api/categories/[id]/lineups/[lineupId]/members/route.ts` |
 | Deprecate (mark for future removal) | `src/app/api/categories/[id]/lineups/[lineupId]/members/[memberId]/route.ts` |
-| Regenerate | `src/hooks/index.ts` (barrel) |
 
 ---
 
-## Additional Issues (to fix in Phase 6)
+## Bugs Found & Fixed During Refactor
 
-### 1. `handleEditMember` in `LineupMembers.tsx` is non-functional
-- UPDATE action calls `handleEditMember(member)` which PATCHes member with its own current data (no-op)
-- No edit form/modal exists
-- **Action:** Remove UPDATE action for now, implement edit modal later
+### 1. Filter param name mismatch (fetch returned all members)
+The entity config mapped `paramName: 'categoryId'` → `dbColumn: 'category_id'`, but `category_lineup_members` has no `category_id` column. The `categoryId` filter was silently ignored. Additionally, the hook was sending `lineup_id` as URL param but the config expected `lineupId`.
+**Fix:** Removed `categoryId` filter from config. Hook now sends only `lineupId` matching the config's `paramName`.
 
-### 2. `functions` column only shows Captain
-`LineupMembers.tsx` renders only `is_captain` chip. Missing `is_vice_captain`.
+### 2. RLS silently blocked delete (success toast but no deletion)
+The `coachWritable` DELETE handler used the RLS-bound `supabase` client for the actual mutation. Supabase `.delete()` returns `{error: null}` even when RLS prevents deletion (0 rows affected).
+**Fix:** All `coachWritable` mutation paths (POST, PATCH/PUT, DELETE) now use `supabaseAdmin` for the database operation. Auth is validated above via role/category checks.
 
-### 3. Custom API routes become dead code
-After migration, these files will have no consumers:
-- `src/app/api/categories/[id]/lineups/[lineupId]/members/route.ts`
-- `src/app/api/categories/[id]/lineups/[lineupId]/members/[memberId]/route.ts`
+### 3. Coach access check hardcoded `body.category_id` (400 on create)
+The `coachWritable` POST handler required `body.category_id` for authorization. `category_lineup_members` doesn't have this column — category ownership is on the parent `category_lineups` row.
+**Fix:** Added `categoryResolver` to `EntityConfig` — an async function that resolves `category_id` from the request body via parent lookup. Applied to POST, PUT/PATCH, and DELETE routes.
+
+### 4. `category_lineups` missing `coachWritable: true` (403 on lineup edit)
+Coaches got 403 Forbidden when creating/editing/deleting lineups because the entity config fell through to the admin-only path.
+**Fix:** Added `coachWritable: true` to `category_lineups` config.
+
+### 5. `added_at`/`added_by` columns renamed (standardization)
+`category_lineup_members` used non-standard `added_at`/`added_by` columns. The `buildInsertQuery` factory adds `created_at` by default, causing "column not found" errors.
+**Fix:** Migration `20260311_rename_added_at_to_created_at.sql` renames columns and adds `updated_at`/`updated_by`. Schema types regenerated.
+
+### 6. `useMemberForm` circular dependency (build failure)
+`useMemberForm.ts` called `createFormHook()` at module level while importing from the `@/hooks` barrel, which re-exports `useMemberForm` — circular dependency. `createFormHook` was `undefined` during module initialization.
+**Fix:** Moved `createFormHook()` call inside the `useMemberForm()` function body. Import changed from `@/hooks` to `@/hooks/factories`.
+
+### 7. Schema generator missing `Json` type (TS2552)
+`split-db-types.js` copies field types from `supabase.ts` but doesn't import the `Json` type alias. Tables with `Json` columns (e.g. `role_definitions.permissions`) produced TS errors.
+**Fix:** Generator now detects `Json` usage in fields and injects a local `type Json = ...` alias at the top of the generated file.
 
 ---
 
@@ -253,11 +246,11 @@ After migration, these files will have no consumers:
 | Step | Phase | Status | Description |
 |------|-------|--------|-------------|
 | 1 | Phase 1 | ✅ DONE | Add member JOIN to query layer |
-| 2 | Phase 2 | ✅ DONE | Wire mutations + coachWritable into entity config |
+| 2 | Phase 2 | ✅ DONE | Wire mutations + coachWritable + categoryResolver into entity config |
 | 3 | Phase 3 | ✅ DONE | Add Czech translations |
 | 4 | Phase 4 | ✅ DONE | Create new CRUD hook (factory) |
-| 5 | Phase 5 | ✅ DONE | Create new fetch hook (factory) |
-| 6 | Phase 6 | ⬜ TODO | Update consumers (LineupMembers.tsx, page.tsx) |
+| 5 | Phase 5 | ✅ DONE | Create new fetch hook (factory, lineupId only) |
+| 6 | Phase 6 | ✅ DONE | Update consumers (LineupMembers.tsx, page.tsx) |
 | 7 | Phase 7 | ⬜ TODO | Delete old files, regenerate barrels |
 
 ---
@@ -266,11 +259,11 @@ After migration, these files will have no consumers:
 
 After refactor, verify:
 
-- [ ] Lineup members table loads with member names (GET via generic API with JOIN)
-- [ ] Add member to lineup works (POST via generic API, `added_by` from `useUser()`)
-- [ ] Remove member from lineup works (DELETE via generic API)
-- [ ] Toast messages are in Czech
-- [ ] No console errors
+- [x] Lineup members table loads with member names (GET via generic API with JOIN)
+- [x] Add member to lineup works (POST via generic API, `created_by` from `useUser()`)
+- [x] Remove member from lineup works (DELETE via generic API with `supabaseAdmin`)
+- [x] Toast messages are in Czech
+- [x] Works for both admin and coach roles
+- [x] `npm run tsc` passes
 - [ ] Old custom routes have no remaining imports
-- [ ] `npm run tsc` passes
 - [ ] `npm run lint` passes
