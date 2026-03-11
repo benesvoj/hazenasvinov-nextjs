@@ -23,5 +23,6 @@ export * from './todoCategories';
 export * from './todoFilter';
 export * from './todoPriorities';
 export * from './todoStatuses';
+export * from './tournamentStatuses';
 export * from './trainingSessionStatus';
 export * from './userRoles';
