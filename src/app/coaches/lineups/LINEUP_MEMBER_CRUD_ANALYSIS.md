@@ -197,15 +197,16 @@ export function useFetchCategoryLineupMembers(params: {lineupId: string}) {
 - Delete modal simplified to `useModalWithItem<string>()` — only handles lineup deletion
 - Member deletion is fully handled within `LineupMembers.tsx`
 
-### Phase 7: Cleanup ⬜ TODO
+### Phase 7: Cleanup ✅ DONE
 
-| Action | File |
-|--------|------|
-| Delete | `src/hooks/entities/category/state/useCategoryLineupMember.ts` (broken, replaced) |
-| Delete | `src/hooks/entities/category/data/useFetchCategoryLineupMembers.old.ts` (manual, replaced) |
-| Delete | `src/hooks/entities/category/data/useFetchCategoryLIneupMembersFactory.ts` (typo, incomplete) |
-| Deprecate (mark for future removal) | `src/app/api/categories/[id]/lineups/[lineupId]/members/route.ts` |
-| Deprecate (mark for future removal) | `src/app/api/categories/[id]/lineups/[lineupId]/members/[memberId]/route.ts` |
+| Action | File | Status |
+|--------|------|--------|
+| Deleted | `src/hooks/entities/category/state/useCategoryLineupMember.ts` | ✅ |
+| Deleted | `src/hooks/entities/category/data/useFetchCategoryLineupMembers.old.ts` | ✅ |
+| Deleted | `src/hooks/entities/category/data/useFetchCategoryLIneupMembersFactory.ts` | ✅ |
+| Barrel updated | `src/hooks/index.ts` — exports new `category-lineup-members/` paths only | ✅ |
+| Deprecate (mark for future removal) | `src/app/api/categories/[id]/lineups/[lineupId]/members/route.ts` | ⬜ |
+| Deprecate (mark for future removal) | `src/app/api/categories/[id]/lineups/[lineupId]/members/[memberId]/route.ts` | ⬜ |
 
 ---
 
@@ -251,7 +252,7 @@ Coaches got 403 Forbidden when creating/editing/deleting lineups because the ent
 | 4 | Phase 4 | ✅ DONE | Create new CRUD hook (factory) |
 | 5 | Phase 5 | ✅ DONE | Create new fetch hook (factory, lineupId only) |
 | 6 | Phase 6 | ✅ DONE | Update consumers (LineupMembers.tsx, page.tsx) |
-| 7 | Phase 7 | ⬜ TODO | Delete old files, regenerate barrels |
+| 7 | Phase 7 | ✅ DONE | Delete old files, regenerate barrels |
 
 ---
 
@@ -265,5 +266,5 @@ After refactor, verify:
 - [x] Toast messages are in Czech
 - [x] Works for both admin and coach roles
 - [x] `npm run tsc` passes
-- [ ] Old custom routes have no remaining imports
-- [ ] `npm run lint` passes
+- [x] Old custom routes have no remaining imports
+- [x] `npm run lint` passes

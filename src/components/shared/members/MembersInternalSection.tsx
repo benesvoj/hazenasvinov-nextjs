@@ -56,9 +56,9 @@ export const MembersInternalSection = ({
   const t = translations.members;
 
   const columns = getInternalMemberColumns(t, {
-    onPayment: onPayment ?? (() => {}),
-    onDelete: onDelete ?? (() => {}),
-    onEdit: onEdit ?? (() => {}),
+    onPayment,
+    onDelete,
+    onEdit,
   });
 
   const renderCell = (member: MemberInternal, columnKey: string) =>

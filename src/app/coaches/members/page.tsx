@@ -33,7 +33,7 @@ export default function CoachesMembersPage() {
   const {
     categories: {data: categoriesData},
   } = useAppData();
-  const {selectedCategory, setSelectedCategory, availableCategories} = useCoachCategory();
+  const {selectedCategory, setSelectedCategory, availableCategories, isAdmin} = useCoachCategory();
   const modals = useMemberModals<MemberInternal>();
   const memberModal = useModalWithItem<Member>();
   const {deleteMember, isLoading: isDeleteLoading} = useMembers();
@@ -104,7 +104,7 @@ export default function CoachesMembersPage() {
         ariaLabel={translations.members.table.ariaLabel}
         onEdit={(member) => memberModal.openWith(member as unknown as Member)}
         onPayment={openPaymentInternal}
-        onDelete={openDeleteInternal}
+        onDelete={isAdmin ? openDeleteInternal : undefined}
         searchTerm={searchTerm}
         pageSize={10}
         filters={{isActive: isActiveOnly}}

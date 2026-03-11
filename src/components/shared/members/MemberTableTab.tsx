@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {UnifiedTable} from '@/components';
 import {ColumnType} from '@/types';
