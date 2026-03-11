@@ -1,5 +1,7 @@
 'use client';
 
+import {useState} from 'react';
+
 import {Popover, PopoverContent, PopoverTrigger} from '@heroui/popover';
 
 import Link from '@/components/ui/link/Link';
@@ -16,13 +18,14 @@ interface Props {
 export default function DropdownMenu(props: Props) {
   const {item, className} = props;
   const menuItems = item?.children || [];
+  const [isOpen, setIsOpen] = useState(false);
 
   if (isEmpty(menuItems)) {
     return null;
   }
 
   return (
-    <Popover placement="bottom">
+    <Popover placement="bottom" isOpen={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger
         className={`inline-flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 ${className || ''} cursor-pointer`}
       >
@@ -35,6 +38,7 @@ export default function DropdownMenu(props: Props) {
               <Link
                 key={menuItem.title}
                 href={menuItem.href || '#'}
+                onClick={() => setIsOpen(false)}
                 className="flex gap-x-6 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 <div>
