@@ -1,3 +1,5 @@
+import {withClientQueryList} from '@/utils/supabase/queryHelpers';
+
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
 import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
 import {DB_TABLE, ENTITY} from '@/queries/tournaments';
@@ -144,3 +146,11 @@ async function fetchTournamentStandings(slug: string) {
   if (error) throw error;
   return data;
 }
+
+/**
+ * Client-side fetch function for React Query
+ * Use with useQuery in client components
+ */
+export const fetchTournaments = withClientQueryList<Tournament>((supabase) =>
+  supabase.from(DB_TABLE).select('*').order('created_at', {ascending: false})
+);

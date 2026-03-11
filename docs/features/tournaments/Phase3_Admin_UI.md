@@ -8,8 +8,8 @@
 
 ## Checklist
 
-- [ ] 3.1 Admin sidebar entry + routing
-- [ ] 3.2 Tournament list page (table + filters)
+- [x] 3.1 Admin sidebar entry + routing
+- [x] 3.2 Tournament list page (table + filters)
 - [ ] 3.3 Tournament detail page shell (tabbed AdminContainer)
 - [ ] 3.4 Tab 1 — Metadata form
 - [ ] 3.5 Tab 2 — Teams management

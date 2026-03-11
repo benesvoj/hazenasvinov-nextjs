@@ -8,17 +8,17 @@
 
 ## Checklist
 
-- [ ] 2.1 `src/queries/tournaments/` — constants, types, queries, mutations, barrel
-- [ ] 2.2 `src/queries/tournamentTeams/` — team management queries/mutations
-- [ ] 2.3 `src/hooks/entities/tournament/` — fetch + CRUD hooks
-- [ ] 2.4 Round-robin generator utility
-- [ ] 2.5 Tournament standings calculator
-- [ ] 2.6 Extend `useMatchMutations` for tournament context
-- [ ] 2.7 `fetchTournamentBySlug` public query
-- [ ] 2.8 Register in entity config + API routes
-- [ ] 2.9 Add query keys
-- [ ] 2.10 Run `/generate-barrels`
-- [ ] 2.11 Verify: `npm run tsc && npm run lint`
+- [x] 2.1 `src/queries/tournaments/` — constants, types, queries, mutations, barrel
+- [x] 2.2 `src/queries/tournamentTeams/` — team management queries/mutations
+- [x] 2.3 `src/hooks/entities/tournament/` — fetch + CRUD hooks
+- [x] 2.4 Round-robin generator utility
+- [x] 2.5 Tournament standings calculator
+- [x] 2.6 Extend `useMatchMutations` for tournament context
+- [x] 2.7 `fetchTournamentBySlug` public query
+- [x] 2.8 Register in entity config + API routes
+- [x] 2.9 Add query keys
+- [x] 2.10 Run `/generate-barrels`
+- [x] 2.11 Verify: `npm run tsc && npm run lint`
 
 ---
 
