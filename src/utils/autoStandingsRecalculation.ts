@@ -1,4 +1,5 @@
 import {supabaseBrowserClient} from '@/utils/supabase/client';
+import {calculateTournamentStandings} from '@/utils/tournamentStandingsCalculator';
 
 import {calculateStandings} from './standingsCalculator';
 
@@ -24,7 +25,7 @@ export async function autoRecalculateStandings(
     if (!finalCategoryId || !finalSeasonId) {
       const {data: match, error: matchError} = await supabase
         .from('matches')
-        .select('category_id, season_id')
+        .select('category_id, season_id, tournament_id')
         .eq('id', matchId)
         .single();
 
@@ -35,6 +36,16 @@ export async function autoRecalculateStandings(
 
       if (!match) {
         return {success: false, error: 'Zápas nebyl nalezen'};
+      }
+
+      if (match.tournament_id) {
+        const result = await calculateTournamentStandings(match.tournament_id);
+
+        return {
+          success: result.success,
+          recalculated: result.success,
+          error: result.error,
+        };
       }
 
       finalCategoryId = match.category_id;

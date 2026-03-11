@@ -107,6 +107,8 @@ export * from './entities/todo/business/useTodoFiltering';
 export * from './entities/todo/data/useFetchTodos';
 export * from './entities/todo/state/useTodoForm';
 export * from './entities/todo/state/useTodos';
+export * from './entities/tournament/data/useFetchTournaments';
+export * from './entities/tournament/state/useTournaments';
 export * from './entities/training-session/data/useFetchTrainingSessions';
 export * from './entities/training-session/state/useBulkCreateTrainingSessions';
 export * from './entities/training-session/state/useTrainingSession';

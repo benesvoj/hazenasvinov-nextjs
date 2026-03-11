@@ -4,7 +4,7 @@ import {useCallback, useState} from 'react';
 
 import {useQueryClient} from '@tanstack/react-query';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
 import {refreshMaterializedViewWithCallback} from '@/utils/refreshMaterializedView';
@@ -23,6 +23,7 @@ export interface UseMatchMutationsOptions {
   selectedCategory: string;
   selectedSeason: string;
   onStandingsRefresh?: () => Promise<void>;
+  tournamentId?: string;
 }
 
 export interface UseMatchMutationsResult {
@@ -38,7 +39,7 @@ export interface UseMatchMutationsResult {
 }
 
 export function useMatchMutations(options: UseMatchMutationsOptions): UseMatchMutationsResult {
-  const {selectedCategory, selectedSeason, onStandingsRefresh} = options;
+  const {selectedCategory, selectedSeason, onStandingsRefresh, tournamentId} = options;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +53,11 @@ export function useMatchMutations(options: UseMatchMutationsOptions): UseMatchMu
     await queryClient.invalidateQueries({
       queryKey: ['matches'],
     });
-  }, [queryClient, selectedCategory, selectedSeason]);
+    if (tournamentId) {
+      await queryClient.invalidateQueries({queryKey: ['tournament-matches', tournamentId]});
+      await queryClient.invalidateQueries({queryKey: ['tournament-standings', tournamentId]});
+    }
+  }, [queryClient, selectedCategory, selectedSeason, tournamentId]);
 
   const createMatch = useCallback(
     async (data: MatchInsertData): Promise<boolean> => {

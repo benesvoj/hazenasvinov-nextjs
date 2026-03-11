@@ -8,16 +8,16 @@
 
 ## Checklist
 
-- [ ] 1.1 Migration: `tournaments` table + RLS
-- [ ] 1.2 Migration: `tournament_teams` table + RLS
-- [ ] 1.3 Migration: `tournament_standings` table + RLS
-- [ ] 1.4 Migration: add `tournament_id`, `round` to `matches`
-- [ ] 1.5 Run `/db-sync`, generate schema types
-- [ ] 1.6 Entity type files (tournament, tournamentTeam)
-- [ ] 1.7 Tournament status enum
-- [ ] 1.8 Translations (`src/lib/translations/tournaments.ts`)
-- [ ] 1.9 Register translations in index
-- [ ] 1.10 Verify: `npm run tsc && npm run lint`
+- [x] 1.1 Migration: `tournaments` table + RLS
+- [x] 1.2 Migration: `tournament_teams` table + RLS
+- [x] 1.3 Migration: `tournament_standings` table + RLS
+- [x] 1.4 Migration: add `tournament_id`, `round` to `matches`
+- [x] 1.5 Run `/db-sync`, generate schema types
+- [x] 1.6 Entity type files (tournament, tournamentTeam)
+- [x] 1.7 Tournament status enum
+- [x] 1.8 Translations (`src/lib/translations/tournaments.ts`)
+- [x] 1.9 Register translations in index
+- [x] 1.10 Verify: `npm run tsc && npm run lint`
 
 ---
 

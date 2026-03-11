@@ -95,6 +95,18 @@ export const queryKeys = {
     details: () => [...queryKeys.clubs.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.clubs.details(), id] as const,
   },
+
+  tournaments: {
+    all: ['tournaments'] as const,
+    lists: () => [...queryKeys.tournaments.all, 'list'] as const,
+    detail: (id: string) => [...queryKeys.tournaments.all, 'detail', id] as const,
+    bySlug: (slug: string) => [...queryKeys.tournaments.all, 'slug', slug] as const,
+    teams: (tournamentId: string) => [...queryKeys.tournaments.all, 'teams', tournamentId] as const,
+    matches: (tournamentId: string) =>
+      [...queryKeys.tournaments.all, 'matches', tournamentId] as const,
+    standings: (tournamentId: string) =>
+      [...queryKeys.tournaments.all, 'standings', tournamentId] as const,
+  },
 } as const;
 
 /**

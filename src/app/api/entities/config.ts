@@ -15,6 +15,7 @@ import * as roleDefinitionsQueries from '@/queries/roleDefinitions';
 import * as seasonQueries from '@/queries/seasons';
 import {QueryContext, QueryResult} from '@/queries/shared/types';
 import * as todoQueries from '@/queries/todos';
+import * as tournamentsQueries from '@/queries/tournaments';
 import * as trainingSessionsQueries from '@/queries/trainingSessions';
 import * as userQueries from '@/queries/users';
 import * as videoQueries from '@/queries/videos';
@@ -303,5 +304,19 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     queryLayer: {
       getAll: userQueries.getAllUsers,
     },
+  },
+  tournaments: {
+    tableName: tournamentsQueries.DB_TABLE,
+    sortBy: [{column: 'start_date', ascending: false}],
+    requiresAdmin: false,
+    isPublic: true,
+    queryLayer: {
+      getAll: tournamentsQueries.getAllTournaments,
+      getById: tournamentsQueries.getTournamentById,
+      create: tournamentsQueries.createTournament,
+      update: tournamentsQueries.updateTournament,
+      delete: tournamentsQueries.deleteTournament,
+    },
+    pagination: {defaultLimit: 25, maxLimit: 100},
   },
 };
