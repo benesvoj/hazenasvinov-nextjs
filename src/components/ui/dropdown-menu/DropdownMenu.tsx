@@ -2,6 +2,8 @@
 
 import {Popover, PopoverContent, PopoverTrigger} from '@heroui/popover';
 
+import Link from '@/components/ui/link/Link';
+
 import {MenuItem} from '@/lib/navigation';
 
 import {isEmpty} from '@/utils';
@@ -30,20 +32,20 @@ export default function DropdownMenu(props: Props) {
         <div className="p-4">
           <div className="grid grid-cols-2 gap-4">
             {menuItems.map((menuItem) => (
-              <div
+              <Link
                 key={menuItem.title}
-                className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800  "
+                href={menuItem.href || '#'}
+                className="flex gap-x-6 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 <div>
-                  <a href={menuItem.href} className="font-semibold text-gray-900 dark:text-white">
+                  <div className="font-semibold text-gray-900 dark:text-white">
                     {menuItem.title}
-                    <span className="absolute inset-0" />
-                  </a>
+                  </div>
                   {menuItem.description && (
                     <p className="mt-1 text-gray-600 dark:text-gray-400">{menuItem.description}</p>
                   )}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

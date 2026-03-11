@@ -35,7 +35,7 @@ export const buildMenuFromPages = (pages: PageVisibility[]): MenuItem[] => {
   if (hasItems(groupedPages.categories)) {
     const categoryChildren = groupedPages.categories.map((page) => ({
       title: page.page_title,
-      route: page.page_route,
+      href: page.page_route,
       description: page.page_description,
     }));
 
