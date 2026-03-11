@@ -9,8 +9,10 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2026-02-23
+ * Last generated: 2026-03-11
  */
+
+type Json = string | number | boolean | null | {[key: string]: Json | undefined} | Json[];
 
 export interface RoleDefinitionSchema {
   created_at: string | null;
@@ -19,7 +21,7 @@ export interface RoleDefinitionSchema {
   id: string;
   is_active: boolean | null;
   name: string;
-  permissions: JSON | null;
+  permissions: Json | null;
 }
 
 /**

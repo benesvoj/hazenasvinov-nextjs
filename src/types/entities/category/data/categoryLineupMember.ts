@@ -16,5 +16,5 @@ export interface CategoryLineupMemberWithMember extends BaseCategoryLineupMember
 }
 
 export type CreateCategoryLineupMemberModal = Partial<
-  Omit<CategoryLineupMemberInsert, 'added_by' | 'lineup_id' | 'is_active'>
+  Omit<CategoryLineupMemberInsert, 'created_by' | 'lineup_id' | 'is_active'>
 >;

@@ -75,6 +75,7 @@ export const Dialog = (props: DialogProps) => {
               onPress={props.onClose}
               aria-label={translations.common.actions.cancel}
               isDisabled={props.isLoading}
+              size={'sm'}
             >
               {translations.common.actions.cancel}
             </Button>
@@ -85,6 +86,7 @@ export const Dialog = (props: DialogProps) => {
               aria-label={props.submitButtonLabel ?? translations.common.actions.save}
               isDisabled={props.isLoading || props.isDisabled}
               isLoading={props.isLoading}
+              size={'sm'}
             >
               {props.submitButtonLabel ?? translations.common.actions.save}
             </Button>

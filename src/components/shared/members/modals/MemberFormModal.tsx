@@ -21,7 +21,7 @@ import {
 } from '@/components';
 import {useMemberForm} from '@/hooks';
 import {MemberFormModalProps, MemberMetadataFormData} from '@/types';
-import {isNotNilOrEmpty} from '@/utils';
+import {hasItems, isNotNilOrEmpty} from '@/utils';
 
 export const MemberFormModal = ({
   isOpen,
@@ -45,6 +45,12 @@ export const MemberFormModal = ({
     }
   }, [member]);
 
+  useEffect(() => {
+    if (hasItems(categories) && !formData.category_id) {
+      updateFormData({category_id: categories[0].id});
+    }
+  }, [categories]);
+
   const handleInputChange = (field: keyof MemberMetadataFormData, value: string) => {
     updateFormData({[field]: value} as Partial<MemberMetadataFormData>);
   };
@@ -53,25 +59,32 @@ export const MemberFormModal = ({
     ? translations.members.modals.titles.editMember
     : translations.members.modals.titles.addMember;
 
+  const sizeOption = sections === QUICK_CREATE ? '2xl' : '4xl';
+
   return (
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={async () => {
-        const member = await handleSubmit();
-        if (member) {
-          onSuccess(member);
-          onClose();
+        try {
+          const member = await handleSubmit();
+          if (member) {
+            onSuccess(member);
+            onClose();
+          }
+        } catch {
+          // Error already handled by useMembers (toast shown)
+          // Keep modal open so user can fix the issue
         }
       }}
       title={title}
       isLoading={isLoading}
-      size="4xl"
+      size={sizeOption}
       scrollBehavior="inside"
     >
       <Tabs>
         <Tab key="basic_info" title={translations.members.modals.tabs.info}>
-          <Grid columns={2} gap={'sm'}>
+          <Grid columns={sections === QUICK_CREATE ? 1 : 2} gap={'sm'}>
             <GridItem>
               <BasicInfoSection
                 handleInputChange={handleInputChange}

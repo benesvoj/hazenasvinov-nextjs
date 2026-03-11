@@ -133,6 +133,7 @@ export const membersTranslations = {
   },
   responseMessages: {
     membersFetchFailed: 'Chyba při načítání členů',
+    memberWithSameRegNumberExists: 'Člen s tímto registračním číslem již existuje',
   },
   labels: {
     basicInfoSection: {

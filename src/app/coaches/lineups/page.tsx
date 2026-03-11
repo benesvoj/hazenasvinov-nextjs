@@ -3,7 +3,6 @@
 
 import React, {useEffect, useState} from 'react';
 
-import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
 import {useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
@@ -16,18 +15,12 @@ import {useUser} from '@/contexts';
 import {ModalMode} from '@/enums';
 import {
   useCategoryLineupForm,
-  useCategoryLineupMember,
   useCategoryLineups,
   useFetchCategoryLineups,
   useFetchSeasons,
 } from '@/hooks';
 import {CategoryLineup} from '@/types';
 import {hasMoreThanOne} from '@/utils';
-
-interface DeleteItem {
-  type: 'lineup' | 'member';
-  id: string;
-}
 
 const t = translations.lineups;
 
@@ -36,49 +29,32 @@ export default function CoachesLineupsPage() {
   const [selectedLineup, setSelectedLineup] = useState<CategoryLineup | null>(null);
 
   const {selectedCategory, setSelectedCategory, availableCategories} = useCoachCategory();
-
   const {
     data: lineups,
     loading: loadingLineups,
     refetch,
   } = useFetchCategoryLineups({categoryId: selectedCategory, seasonId: selectedSeason});
-
   const {loading: crudLoading, createLineup, updateLineup, deleteLineup} = useCategoryLineups();
-  const {removeLineupMember} = useCategoryLineupMember();
   const {
     formData,
     setFormData,
     selectedItem: selectedLineupId,
     modalMode,
     openAddMode,
+    openEditMode,
     validateForm,
   } = useCategoryLineupForm();
-
+  // or use AppData context to get seasons if they are stored there
   const {data: seasons, refetch: fetchAllSeasons} = useFetchSeasons();
-
-  const {getCurrentUserCategories} = useUserRoles();
   const {user} = useUser();
 
-  const [userCategories, setUserCategories] = useState<string[]>([]);
-
   const lineupModal = useModalWithItem<CategoryLineup>();
-  const deleteModal = useModalWithItem<DeleteItem>();
+  const deleteModal = useModalWithItem<string>();
 
   // Fetch initial data
   useEffect(() => {
-    fetchAllSeasons();
+    void fetchAllSeasons();
   }, [fetchAllSeasons]);
-
-  useEffect(() => {
-    const fetchUserCategories = async () => {
-      const categories = await getCurrentUserCategories();
-      setUserCategories(categories);
-      if (categories.length > 0 && !selectedCategory) {
-        setSelectedCategory(categories[0]);
-      }
-    };
-    fetchUserCategories();
-  }, [getCurrentUserCategories, selectedCategory]);
 
   // Get active season
   const activeSeason = seasons.find((season) => season.is_active);
@@ -96,7 +72,8 @@ export default function CoachesLineupsPage() {
   };
 
   const handleEditLineup = (lineup: CategoryLineup) => {
-    lineupModal.openWith(lineup);
+    openEditMode(lineup);
+    lineupModal.onOpen();
 
     setFormData({
       name: lineup.name,
@@ -109,24 +86,19 @@ export default function CoachesLineupsPage() {
   };
 
   const handleDeleteLineup = (lineupId: string) => {
-    deleteModal.openWith({type: 'lineup', id: lineupId});
+    deleteModal.openWith(lineupId);
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteModal.selectedItem) return;
 
-    const {type, id} = deleteModal.selectedItem;
-
     try {
-      if (type === 'lineup') {
-        await deleteLineup(id);
-      } else if (type === 'member' && selectedCategory && selectedLineup) {
-        await removeLineupMember(selectedCategory, selectedLineup.id, id);
-      }
+      await deleteLineup(deleteModal.selectedItem);
+
       await refetch();
       deleteModal.closeAndClear();
     } catch (err) {
-      console.error(`Error deleting ${type}:`, err);
+      console.error(`Error deleting lineup:`, err);
     }
   };
 
@@ -159,8 +131,8 @@ export default function CoachesLineupsPage() {
 
   return (
     <>
-      <PageContainer isLoading={loadingLineups}>
-        <Show when={hasMoreThanOne(userCategories)}>
+      <PageContainer>
+        <Show when={hasMoreThanOne(availableCategories)}>
           <ContentCard padding={'none'}>
             <Choice
               value={selectedCategory}
@@ -194,7 +166,6 @@ export default function CoachesLineupsPage() {
         </Grid>
       </PageContainer>
 
-      {/* Lineup Modal */}
       <LineupModal
         isOpen={lineupModal.isOpen}
         onClose={lineupModal.closeAndClear}
@@ -209,12 +180,8 @@ export default function CoachesLineupsPage() {
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeAndClear}
         onSubmit={handleConfirmDelete}
-        title={deleteModal.selectedItem?.type === 'lineup' ? t.titles.delete : t.deleteLineupMember}
-        message={
-          deleteModal.selectedItem?.type === 'lineup'
-            ? t.deleteLineupMessage
-            : t.deleteLineupMemberMessage
-        }
+        title={t.titles.delete}
+        message={t.deleteLineupMessage}
         isLoading={crudLoading}
       />
     </>

@@ -26,12 +26,7 @@ export const API_ROUTES = {
   },
   blogPostsPublished: '/api/blog-posts-published' as const,
   categories: {
-    feeById: (id: string | number, feeId: string | number) => `/api/categories/${id}/fees/${feeId}`,
     fees: (id: string | number) => `/api/categories/${id}/fees`,
-    lineupById: (id: string | number, lineupId: string | number) => `/api/categories/${id}/lineups/${lineupId}`,
-    lineupByIdMemberById: (id: string | number, lineupId: string | number, memberId: string | number) => `/api/categories/${id}/lineups/${lineupId}/members/${memberId}`,
-    lineupByIdMembers: (id: string | number, lineupId: string | number) => `/api/categories/${id}/lineups/${lineupId}/members`,
-    lineups: (id: string | number) => `/api/categories/${id}/lineups`,
   },
   categoryMembershipFees: '/api/category-membership-fees' as const,
   checkUser: '/api/check-user' as const,
@@ -55,11 +50,22 @@ export const API_ROUTES = {
   },
   logLogin: '/api/log-login' as const,
   matches: {
-    lineupById: (id: string | number, lineupId: string | number) => `/api/matches/${id}/lineups/${lineupId}`,
-    lineupByIdCoacheById: (id: string | number, lineupId: string | number, coachId: string | number) => `/api/matches/${id}/lineups/${lineupId}/coaches/${coachId}`,
-    lineupByIdCoaches: (id: string | number, lineupId: string | number) => `/api/matches/${id}/lineups/${lineupId}/coaches`,
-    lineupByIdPlayerById: (id: string | number, lineupId: string | number, playerId: string | number) => `/api/matches/${id}/lineups/${lineupId}/players/${playerId}`,
-    lineupByIdPlayers: (id: string | number, lineupId: string | number) => `/api/matches/${id}/lineups/${lineupId}/players`,
+    lineupById: (id: string | number, lineupId: string | number) =>
+      `/api/matches/${id}/lineups/${lineupId}`,
+    lineupByIdCoacheById: (
+      id: string | number,
+      lineupId: string | number,
+      coachId: string | number
+    ) => `/api/matches/${id}/lineups/${lineupId}/coaches/${coachId}`,
+    lineupByIdCoaches: (id: string | number, lineupId: string | number) =>
+      `/api/matches/${id}/lineups/${lineupId}/coaches`,
+    lineupByIdPlayerById: (
+      id: string | number,
+      lineupId: string | number,
+      playerId: string | number
+    ) => `/api/matches/${id}/lineups/${lineupId}/players/${playerId}`,
+    lineupByIdPlayers: (id: string | number, lineupId: string | number) =>
+      `/api/matches/${id}/lineups/${lineupId}/players`,
     lineups: (id: string | number) => `/api/matches/${id}/lineups`,
   },
   memberFunctions: {
@@ -98,7 +104,6 @@ export const API_ROUTES = {
     bulk: '/api/training-sessions/bulk' as const,
   },
   userProfiles: '/api/user-profiles' as const,
-  userRoles: '/api/user-roles' as const,
   users: '/api/users' as const,
 } as const;
 

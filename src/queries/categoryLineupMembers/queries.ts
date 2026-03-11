@@ -17,6 +17,7 @@ export async function getAllCategoryLineupMembers(
 ): Promise<QueryResult<BaseCategoryLineupMember[]>> {
   try {
     const query = buildSelectQuery(ctx.supabase, DB_TABLE, {
+      select: '*, members!inner(id, name, surname, registration_number, category_id)',
       sorting: options?.sorting,
       pagination: options?.pagination,
       filters: options?.filters,

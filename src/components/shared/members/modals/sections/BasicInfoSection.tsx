@@ -7,6 +7,7 @@ import {translations} from '@/lib/translations';
 import {Choice, ContentCard, GenderSelect} from '@/components';
 import {Genders} from '@/enums';
 import {Category, MemberMetadataFormData} from '@/types';
+import {getCount} from '@/utils';
 
 interface BasicInfoSection {
   handleInputChange: (field: keyof MemberMetadataFormData, value: string) => void;
@@ -72,6 +73,7 @@ export const BasicInfoSection = ({handleInputChange, formData, categories}: Basi
           items={categoriesOptions}
           value={formData.category_id}
           onChange={(value) => handleInputChange('category_id', value || '')}
+          isDisabled={getCount(categoriesOptions) < 2}
           isRequired
         />
       </div>

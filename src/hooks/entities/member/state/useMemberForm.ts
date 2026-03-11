@@ -52,7 +52,7 @@ const memberFormHook = createFormHook<Member, MemberMetadataFormData>({
 
 export function useMemberForm() {
   const form = memberFormHook();
-  const {createMember, updateMember} = useMembers();
+  const {updateMember, createInternalMember} = useMembers();
   const {createMemberMetadata, updateMemberMetadata} = useMemberMetadata();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -69,7 +69,7 @@ export function useMemberForm() {
 
       const member =
         form.modalMode === ModalMode.ADD
-          ? await createMember(
+          ? await createInternalMember(
               {
                 name: form.formData.name,
                 surname: form.formData.surname,
@@ -101,9 +101,7 @@ export function useMemberForm() {
         ...metadataFields
       } = form.formData;
 
-      form.modalMode === ModalMode.ADD
-        ? await createMemberMetadata(member.id, metadataFields)
-        : await updateMemberMetadata(member.id, metadataFields);
+      await updateMemberMetadata(member.id, metadataFields);
 
       return member;
     } finally {
