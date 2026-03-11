@@ -1,6 +1,8 @@
 'use client';
+
 import {useState, useCallback, useEffect} from 'react';
 
+import {API_ROUTES} from '@/lib/api-routes';
 import {translations} from '@/lib/translations';
 
 import {showToast} from '@/components';
@@ -25,8 +27,8 @@ export const useMemberPayments = (memberId: string, year?: number) => {
 
     try {
       const url = year
-        ? `/api/member-payments?member_id=${memberId}&year=${year}`
-        : `/api/member-payments?member_id=${memberId}`;
+        ? `${API_ROUTES.memberPayments}?member_id=${memberId}&year=${year}`
+        : `${API_ROUTES.memberPayments}?member_id=${memberId}`;
 
       const response = await fetch(url);
       const {data, error} = await response.json();
@@ -46,7 +48,7 @@ export const useMemberPayments = (memberId: string, year?: number) => {
   const createPayment = useCallback(
     async (paymentData: CreateMembershipFeePayment) => {
       try {
-        const response = await fetch('/api/member-payments', {
+        const response = await fetch(API_ROUTES.memberPayments, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(paymentData),
@@ -71,7 +73,7 @@ export const useMemberPayments = (memberId: string, year?: number) => {
   const updatePayment = useCallback(
     async (paymentData: UpdateMembershipFeePayment) => {
       try {
-        const response = await fetch('/api/member-payments', {
+        const response = await fetch(API_ROUTES.memberPayments, {
           method: 'PATCH',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(paymentData),
@@ -96,7 +98,7 @@ export const useMemberPayments = (memberId: string, year?: number) => {
   const deletePayment = useCallback(
     async (paymentId: string) => {
       try {
-        const response = await fetch(`/api/member-payments?id=${paymentId}`, {
+        const response = await fetch(`${API_ROUTES.memberPayments}?id=${paymentId}`, {
           method: 'DELETE',
         });
 
