@@ -1,12 +1,12 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {supabaseServerClient} from '@/utils/supabase/server';
+import {SupabaseClient} from '@supabase/supabase-js';
+
+import {withAuth, withPublicAccess} from '@/utils/supabase/apiHelpers';
 
 // GET - Fetch all main partners
 export async function GET() {
-  try {
-    const supabase = await supabaseServerClient();
-
+  return withPublicAccess(async (supabase: SupabaseClient) => {
     const {data, error} = await supabase
       .from('main_partners')
       .select('*')
@@ -18,16 +18,12 @@ export async function GET() {
     }
 
     return NextResponse.json({data: data || []});
-  } catch (error) {
-    console.error('Unexpected error:', error);
-    return NextResponse.json({error: 'Internal server error'}, {status: 500});
-  }
+  });
 }
 
 // POST - Create new main partner
 export async function POST(request: NextRequest) {
-  try {
-    const supabase = await supabaseServerClient();
+  return withAuth(async (user, supabase) => {
     const body = await request.json();
 
     const {data, error} = await supabase.from('main_partners').insert([body]).select().single();
@@ -38,8 +34,5 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({data}, {status: 201});
-  } catch (error) {
-    console.error('Unexpected error:', error);
-    return NextResponse.json({error: 'Internal server error'}, {status: 500});
-  }
+  });
 }

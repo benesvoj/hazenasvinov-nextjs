@@ -17,7 +17,7 @@ import PhotosTab from './components/PhotosTab';
 export default function PhotoGalleryAdminPage() {
   const [selectedTab, setSelectedTab] = useState('albums');
 
-  const t = translations.admin.photoGallery;
+  const t = translations.photoGallery;
 
   return (
     <AdminContainer>

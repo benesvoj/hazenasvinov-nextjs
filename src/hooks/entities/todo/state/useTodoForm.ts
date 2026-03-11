@@ -1,11 +1,10 @@
 'use client';
 
+import {translations} from '@/lib/translations/index';
+
 import {TodoCategories, TodoPriorities, TodoStatuses} from '@/enums';
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {TodoFormData, TodoItem} from '@/types';
-
-const t = translations.admin.todos.responseMessages;
 
 const initialFormData: TodoFormData = {
   title: '',
@@ -23,8 +22,8 @@ export function useTodoForm() {
   return createFormHook<TodoItem, TodoFormData>({
     initialFormData,
     validationRules: [
-      {field: 'title', message: t.mandatoryTitle},
-      {field: 'description', message: t.mandatoryDescription},
+      {field: 'title', message: translations.todos.responseMessages.mandatoryTitle},
+      {field: 'description', message: translations.todos.responseMessages.mandatoryDescription},
     ],
   })();
 }

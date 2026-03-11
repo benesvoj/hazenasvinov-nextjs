@@ -66,6 +66,7 @@ export default function VideoSelectionModal({
 
   // Use ref to store fetchVideos to avoid dependency issues
   const fetchVideosRef = useRef(fetchVideos);
+  // eslint-disable-next-line react-hooks/refs
   fetchVideosRef.current = fetchVideos;
 
   // Initialize selected video when modal opens

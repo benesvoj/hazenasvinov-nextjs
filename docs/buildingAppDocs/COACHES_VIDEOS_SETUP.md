@@ -78,11 +78,11 @@ WHERE role = 'coach' AND user_id = 'your-user-id-here';
 ```
 src/app/coaches/
 ├── videos/
-│   └── page.tsx.backup                 # Main coaches videos page
+│   └── error.tsx.backup                 # Main coaches videos page
 ├── dashboard/
-│   └── page.tsx.backup                 # Updated with videos link
+│   └── error.tsx.backup                 # Updated with videos link
 └── login/
-    └── page.tsx.backup                 # Coach login page
+    └── error.tsx.backup                 # Coach login page
 
 src/app/admin/videos/components/
 ├── VideoFormModal.tsx           # Updated to support availableCategories
@@ -100,7 +100,7 @@ docs/
 
 ### CoachesVideosPage
 
-- **Location**: `src/app/coaches/videos/page.tsx.backup`
+- **Location**: `src/app/coaches/videos/error.tsx.backup`
 - **Features**:
   - Fetches coach's assigned categories from `user_profiles.assigned_categories`
   - Filters videos by assigned categories only

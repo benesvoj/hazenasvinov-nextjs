@@ -1,5 +1,5 @@
 import {ActionTypes, ColumnAlignType} from '@/enums';
-import {ColumnType, MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
+import {ActionConfig, ColumnType, MemberExternal, MemberInternal, MemberOnLoan} from '@/types';
 
 // Common columns shared by all member types
 export const getCommonMemberColumns = (t: any) => {
@@ -18,25 +18,31 @@ export const getCommonMemberColumns = (t: any) => {
 export const getInternalMemberColumns = (
   t: any,
   actions: {
-    onPayment: (member: MemberInternal) => void;
-    onDelete: (member: MemberInternal) => void;
-    onEdit: (member: MemberInternal) => void;
+    onPayment?: (member: MemberInternal) => void;
+    onDelete?: (member: MemberInternal) => void;
+    onEdit?: (member: MemberInternal) => void;
   }
 ): ColumnType<MemberInternal>[] => {
+  const actionItems = [
+    actions.onPayment && {type: ActionTypes.PAYMENT, onPress: actions.onPayment},
+    actions.onEdit && {type: ActionTypes.UPDATE, onPress: actions.onEdit},
+    actions.onDelete && {type: ActionTypes.DELETE, onPress: actions.onDelete},
+  ].filter((a): a is ActionConfig<MemberInternal> => Boolean(a));
+
   return [
     ...getCommonMemberColumns(t),
     {key: 'membershipFee', label: t.table.columns.membershipFee}, // Payment column
-    {
-      key: 'actions',
-      label: t.table.columns.actions,
-      align: ColumnAlignType.CENTER,
-      isActionColumn: true,
-      actions: [
-        {type: ActionTypes.PAYMENT, onPress: actions.onPayment},
-        {type: ActionTypes.UPDATE, onPress: actions.onEdit},
-        {type: ActionTypes.DELETE, onPress: actions.onDelete},
-      ],
-    },
+    ...(actionItems.length > 0
+      ? [
+          {
+            key: 'actions',
+            label: t.table.columns.actions,
+            align: ColumnAlignType.CENTER,
+            isActionColumn: true,
+            actions: actionItems,
+          },
+        ]
+      : []),
   ];
 };
 

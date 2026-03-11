@@ -2,27 +2,28 @@
 
 import React, {useState} from 'react';
 
-import {Input, Tab, Tabs} from '@heroui/react';
+import {Tab, Tabs} from '@heroui/tabs';
 
 import {useQuery} from '@tanstack/react-query';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import {getAgeGroupLabel, getGenderLabel, getStatusClasses, getStatusLabel} from '@/helpers/ui';
 
 import CategoryFeesTab from '@/app/admin/categories/components/CategoryFeesTab';
 
-import {AdminContainer, DeleteConfirmationModal, UnifiedTable} from '@/components';
+import {AdminContainer, Dialog, Search, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {useCategories, useCategoryFiltering, useCategoryForm} from '@/hooks';
-import {translations} from '@/lib';
 import {fetchCategories} from '@/queries/categories/queries';
 import {Category} from '@/types';
 
 import CategoryModal from './components/CategoryModal';
 
 const t = translations.categories;
-const tAction = translations.action;
+const tAction = translations.common.actions;
 
 export function CategoriesPageClient() {
   const {
@@ -142,11 +143,10 @@ export function CategoriesPageClient() {
 
   const filters = (
     <div className="w-full max-w-md">
-      <Input
-        label={t.searchCategory}
-        placeholder={t.searchCategoryPlaceholder}
+      <Search
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={setSearchTerm}
+        placeholder={translations.categories.placeholders.searchCategory}
         size="sm"
       />
     </div>
@@ -159,7 +159,7 @@ export function CategoriesPageClient() {
         filters={filters}
         actions={[
           {
-            label: t.addCategory,
+            label: translations.categories.actions.add,
             onClick: handleAddCategory,
             variant: 'solid',
             buttonType: ActionTypes.CREATE,
@@ -167,11 +167,11 @@ export function CategoriesPageClient() {
         ]}
       >
         <Tabs aria-label="Categories admin tabs">
-          <Tab key="categories" title={t.title}>
+          <Tab key="categories" title={translations.categories.page.title}>
             <UnifiedTable
               columns={categoryColumns}
               data={categories}
-              ariaLabel={t.title}
+              ariaLabel={translations.categories.ariaLabels.table}
               renderCell={renderCategoryCell}
               getKey={(category: Category) => category.id}
               emptyContent={t.table.noCategories}
@@ -191,18 +191,21 @@ export function CategoriesPageClient() {
         formData={formData}
         setFormData={setFormData}
         mode={modalMode}
-        selectedCategory={selectedCategory}
         isLoading={crudLoading}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
-        onConfirm={handleConfirmDelete}
-        title={t.deleteCategory}
-        message={t.deleteCategoryMessage}
+        onClose={deleteModal.closeAndClear}
+        title={translations.categories.modal.delete.title}
+        onSubmit={handleConfirmDelete}
+        submitButtonLabel={translations.common.actions.delete}
         isLoading={crudLoading}
-      />
+        dangerAction
+        size={'sm'}
+      >
+        {translations.categories.modal.delete.message}
+      </Dialog>
     </>
   );
 }

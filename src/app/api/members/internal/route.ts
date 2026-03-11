@@ -1,74 +1,86 @@
-import {NextResponse} from 'next/server';
+import {NextRequest} from 'next/server';
 
-import {supabaseServerClient} from '@/utils/supabase/server';
+import {translations} from '@/lib/translations';
+import {MembersInternalQuerySchema} from '@/lib/validators/membersInternal';
 
-export async function GET(request: Request) {
-  const {searchParams} = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1');
-  const limit = parseInt(searchParams.get('limit') || '25');
-  const offset = (page - 1) * limit;
+import {errorResponse, successResponse, withAuth} from '@/utils/supabase/apiHelpers';
 
-  // Get filter parameters
-  const search = searchParams.get('search');
-  const sex = searchParams.get('sex');
-  const categoryId = searchParams.get('category_id');
-  const functionFilter = searchParams.get('function');
+import {getMembersInternal} from '@/queries/membersInternal';
+import {MemberInsert} from '@/types';
 
-  try {
-    const supabase = await supabaseServerClient();
+export async function GET(request: NextRequest) {
+  return withAuth(async (user, supabase) => {
+    const parsed = MembersInternalQuerySchema.safeParse(
+      Object.fromEntries(request.nextUrl.searchParams)
+    );
 
-    // Check authentication
-    const {
-      data: {user},
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({error: 'Unauthorized'}, {status: 401});
+    if (!parsed.success) {
+      return errorResponse(JSON.stringify(parsed.error.flatten().fieldErrors), 400);
     }
 
-    // Build query
-    let query = supabase
-      .from('members_internal')
-      .select('*', {count: 'exact'})
-      .order('surname', {ascending: true});
+    const result = await getMembersInternal(
+      {supabase},
+      {
+        ...parsed.data,
+        categoryId: parsed.data.category_id,
+        // memberFunctions: parsed.data.function -> this is currently not supported, different structure TODO
+      }
+    );
 
-    // Apply search filter
-    if (search) {
-      query = query.or(
-        `name.ilike.%${search}%,surname.ilike.%${search}%,registration_number.ilike.%${search}%`
-      );
+    if (result.error) {
+      return errorResponse(result.error, 500);
     }
 
-    // Apply sex filter
-    if (sex && sex !== '' && sex !== 'EMPTY') {
-      query = query.eq('sex', sex);
-    }
-
-    // Apply category filter
-    if (categoryId && categoryId !== '') {
-      query = query.eq('category_id', categoryId);
-    }
-
-    // Apply function filter (requires JSON contains check)
-    if (functionFilter && functionFilter !== '') {
-      query = query.contains('functions', [functionFilter]);
-    }
-
-    // Apply pagination
-    const {data, error, count} = await query.range(offset, offset + limit - 1);
-
-    if (error) {
-      console.error('Error fetching members internal:', error);
-      return NextResponse.json({error: error.message}, {status: 500});
-    }
-
-    return NextResponse.json({
-      data,
-      pagination: {page, limit, total: count},
-      error: null,
+    return successResponse({
+      items: result.data,
+      total: result.count,
     });
-  } catch (error: any) {
-    console.error('Unexpected error:', error);
-    return NextResponse.json({error: error.message || 'Internal server error'}, {status: 500});
-  }
+  });
+}
+
+export async function POST(request: NextRequest) {
+  return withAuth(async (user, supabase) => {
+    const body: MemberInsert = await request.json();
+
+    const {data: ownClub, error: clubError} = await supabase
+      .from('clubs')
+      .select('id')
+      .eq('is_own_club', true)
+      .single();
+
+    if (clubError || !ownClub) {
+      throw new Error('Own club not found');
+    }
+
+    const {data: member, error: memberError} = await supabase
+      .from('members')
+      .insert({...body})
+      .select()
+      .single();
+
+    if (memberError) {
+      if (memberError.code === '23505' && memberError.message?.includes('registration_number')) {
+        return errorResponse(
+          translations.members.responseMessages.memberWithSameRegNumberExists,
+          409
+        );
+      }
+      throw memberError;
+    }
+
+    const {error: relError} = await supabase.from('member_club_relationships').insert({
+      member_id: member.id,
+      club_id: ownClub.id,
+      relationship_type: 'permanent',
+      status: 'active',
+      valid_from: new Date().toISOString().split('T')[0],
+      valid_to: null,
+    });
+
+    if (relError) {
+      console.error('Error creating member-club relationship:', member.id, relError);
+    }
+
+    return successResponse(member, 201);
+  });
 }

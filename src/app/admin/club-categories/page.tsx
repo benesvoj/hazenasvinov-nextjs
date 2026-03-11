@@ -2,14 +2,11 @@
 
 import React, {useState} from 'react';
 
-import {Input} from '@heroui/input';
-import {Select, SelectItem} from '@heroui/react';
-
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
 
-import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
+import {AdminContainer, Choice, Dialog, Search, showToast, UnifiedTable} from '@/components';
 import {ActionTypes, ColumnAlignType, ModalMode} from '@/enums';
 import {
   useClubCategories,
@@ -20,11 +17,11 @@ import {
   useFetchClubs,
   useFetchSeasons,
 } from '@/hooks';
-import {ClubCategorySchema, ClubCategoryWithRelations, Season} from '@/types';
+import {ClubCategorySchema, ClubCategoryWithRelations} from '@/types';
 
 import {ClubCategoriesModal} from './components/ClubCategoriesModal';
 
-const t = translations.admin.clubCategories;
+const t = translations.clubCategories;
 
 export default function ClubCategoriesAdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,31 +92,26 @@ export default function ClubCategoriesAdminPage() {
     }
   };
 
+  const seasonOptions = seasons.map((season) => ({key: season.id, label: season.name}));
+
   const filters = () => {
     return (
-      <div className="grid grid-cols-2 gap-4 w-full">
-        <Input
+      <div className="flex justify-between gap-4 w-full items-center">
+        <Search
           label={t.filters.searchLabel}
           placeholder={t.filters.searchPlaceholder}
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          size="sm"
+          onChange={setSearchTerm}
+          className="max-w-md flex-1"
         />
-        <Select
-          size="sm"
+        <Choice
           label={t.filters.season}
           placeholder={t.filters.seasonPlaceholder}
-          selectedKeys={selectedSeason ? [selectedSeason] : []}
-          onSelectionChange={(keys) => {
-            const selectedKey = Array.from(keys)[0] as string;
-            setSelectedSeason(selectedKey || '');
-          }}
-          className="w-full"
-        >
-          {seasons.map((season: Season) => (
-            <SelectItem key={season.id}>{season.name}</SelectItem>
-          ))}
-        </Select>
+          items={seasonOptions}
+          value={selectedSeason}
+          onChange={(value) => setSelectedSeason(value || '')}
+          className={'w-1/3'}
+        />
       </div>
     );
   };
@@ -138,12 +130,12 @@ export default function ClubCategoriesAdminPage() {
         {
           type: ActionTypes.UPDATE,
           onPress: handleEditClick,
-          title: 'Upravit přiřazení',
+          title: translations.common.actions.edit,
         },
         {
           type: ActionTypes.DELETE,
           onPress: handleDeleteClick,
-          title: 'Smazat přiřazení',
+          title: translations.common.actions.delete,
         },
       ],
     },
@@ -179,7 +171,7 @@ export default function ClubCategoriesAdminPage() {
         <UnifiedTable
           columns={clubCategoryColumns}
           data={filteredClubCategories}
-          ariaLabel={t.title}
+          ariaLabel={t.page.title}
           renderCell={renderClubCategoryCell}
           getKey={(clubCategory: ClubCategorySchema) => clubCategory.id}
           emptyContent={t.table.noClubCategories}
@@ -191,22 +183,28 @@ export default function ClubCategoriesAdminPage() {
       <ClubCategoriesModal
         isOpen={modal.isOpen}
         onClose={modal.onClose}
-        onPress={handleSubmit}
+        onSubmit={handleSubmit}
         mode={modalMode}
         formData={formData}
         setFormData={setFormData}
         clubs={clubs}
         categories={categories}
         seasons={seasons}
+        isLoading={loading}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.onClose}
-        onConfirm={handleConfirmDelete}
+        onSubmit={handleConfirmDelete}
         title={t.deleteClubCategory}
-        message={t.deleteClubCategoryMessage}
-      />
+        isLoading={loading}
+        submitButtonLabel={translations.common.actions.delete}
+        dangerAction
+        size={'sm'}
+      >
+        {t.deleteClubCategoryMessage}
+      </Dialog>
     </>
   );
 }

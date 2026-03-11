@@ -98,13 +98,13 @@ SELECT code, id FROM categories;
 ### Step 3: Update Component Logic
 
 #### 3.1 Category Page Routing
-**File**: `src/app/(main)/categories/[slug]/page.tsx.backup`
+**File**: `src/app/(main)/categories/[slug]/error.tsx.backup`
 - Change from slug-based to ID-based routing
 - Update category lookup logic
 - Modify URL structure if needed
 
 #### 3.2 Matches Page Filtering
-**File**: `src/app/(main)/matches/page.tsx.backup`
+**File**: `src/app/(main)/matches/error.tsx.backup`
 - Update category selection logic
 - Change URL parameter handling
 - Modify filtering functions
@@ -164,13 +164,13 @@ SELECT code, id FROM categories;
 ### Step 7: Admin Interface Updates
 
 #### 7.1 Category Management
-**File**: `src/app/admin/categories/page.tsx.backup`
+**File**: `src/app/admin/categories/error.tsx.backup`
 - Update category display logic
 - Modify form handling
 - Update table columns
 
 #### 7.2 User Roles
-**File**: `src/app/admin/user-roles/page.tsx.backup`
+**File**: `src/app/admin/user-roles/error.tsx.backup`
 - Update category assignment logic
 - Modify display of category information
 

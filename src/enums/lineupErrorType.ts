@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.lineupErrorType;
+const t = translations.lineups.enums.errorType;
 /**
  * @file lineupErrorType.ts
  * @description Error types for robust error handling

@@ -1,5 +1,6 @@
 import {NextRequest} from 'next/server';
 
+import supabaseAdmin from '@/utils/supabase/admin';
 import {
   errorResponse,
   successResponse,
@@ -7,6 +8,9 @@ import {
   withAuth,
   withPublicAccess,
 } from '@/utils/supabase/apiHelpers';
+import {hasCategoryAccess, hasCoachRole, isAdmin} from '@/utils/supabase/coachAuth';
+
+import {hasItems} from '@/utils';
 
 import {ENTITY_CONFIGS} from '../config';
 
@@ -45,6 +49,12 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{enti
         });
       }
 
+      const categoryIdsParam = searchParams.get('category_ids');
+      const arrayFilters: Record<string, string[]> = {};
+      if (categoryIdsParam) {
+        arrayFilters['category_id'] = categoryIdsParam.split(',').filter(Boolean);
+      }
+
       const options = {
         sorting: config.sortBy,
         pagination:
@@ -57,6 +67,7 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{enti
               }
             : undefined,
         filters,
+        arrayFilters: hasItems(Object.keys(arrayFilters)) ? arrayFilters : undefined,
       };
 
       if (config.queryLayer?.getOne) {
@@ -118,6 +129,35 @@ export async function POST(request: NextRequest, {params}: {params: Promise<{ent
     return errorResponse(`Entity '${entity}' not found`, 404);
   }
 
+  // --- Coach-writable path (e.g. videos) ---
+  if (config.coachWritable) {
+    return withAuth(async (user, supabase) => {
+      const body = await request.json();
+
+      const [coachRole, adminRole] = await Promise.all([
+        hasCoachRole(supabase, user.id),
+        isAdmin(supabase, user.id),
+      ]);
+      if (!coachRole && !adminRole) return errorResponse('Forbidden', 403);
+
+      // Admins bypass category check; coaches must own the target category
+      if (!adminRole) {
+        const categoryId = config.categoryResolver
+          ? await config.categoryResolver(supabase, body)
+          : body.category_id;
+        if (!categoryId) return errorResponse('category_id is required', 400);
+        const allowed = await hasCategoryAccess(supabase, user.id, categoryId);
+        if (!allowed) return errorResponse('Forbidden', 403);
+      }
+
+      // Use admin client to bypass RLS — auth is already checked above
+      const result = await config.queryLayer!.create!({supabase: supabaseAdmin}, body);
+      if (result.error) throw new Error(result.error);
+      return successResponse(result.data, 201);
+    });
+  }
+
+  // --- Admin-only path (all other entities) ---
   return withAdminAuth(async (_user, _supabase, admin) => {
     const body = await request.json();
 

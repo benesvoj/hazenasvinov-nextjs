@@ -2,13 +2,13 @@
 
 import React from 'react';
 
-import {Chip, Input, Select, SelectItem} from '@heroui/react';
+import {Chip, Input} from '@heroui/react';
 
 import {translations} from '@/lib/translations/index';
 
+import {Choice, GenderSelect} from '@/components';
 import {Genders, getMemberFunctionOptions} from '@/enums';
 import {Category, Member} from '@/types';
-import {genderOptions} from '@/utils';
 
 interface MemberInfoFormProps {
   formData: Member;
@@ -17,6 +17,7 @@ interface MemberInfoFormProps {
   isEditMode?: boolean;
 }
 
+/** @deprecated Use MemberInfoFormWithHookForm instead, which uses react-hook-form and has better validation and performance */
 export default function MemberInfoForm({
   formData,
   setFormData,
@@ -25,92 +26,65 @@ export default function MemberInfoForm({
 }: MemberInfoFormProps) {
   const tMember = translations.members;
 
+  const categoryItems = categories.map((c) => ({key: c.id, label: c.name}));
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-2 md:space-y-4">
       <div className="w-full">
         <Input
-          label={
-            isEditMode
-              ? tMember.modals.memberForm.registrationNumber
-              : tMember.modals.memberForm.registrationNumberHelper
-          }
+          label={tMember.modals.memberForm.registrationNumber}
           placeholder={isEditMode ? '' : tMember.modals.memberForm.registrationNumberPlaceholder}
           value={formData.registration_number || ''}
           onChange={(e) => setFormData({...formData, registration_number: e.target.value})}
           isRequired={isEditMode}
+          size="sm"
+          description={!isEditMode ? tMember.modals.memberForm.registrationNumberHelper : undefined}
+          className={'md:w-1/2'}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-2 md:gap-4">
         <Input
           label={tMember.modals.memberForm.name}
           value={formData.name}
           onChange={(e) => setFormData({...formData, name: e.target.value})}
           isRequired
+          size="sm"
         />
         <Input
           label={tMember.modals.memberForm.surname}
           value={formData.surname}
           onChange={(e) => setFormData({...formData, surname: e.target.value})}
           isRequired
+          size="sm"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-2 md:gap-4">
         <Input
           label={tMember.modals.memberForm.dateOfBirth}
           type="date"
           value={formData.date_of_birth || ''}
           onChange={(e) => setFormData({...formData, date_of_birth: e.target.value || null})}
           placeholder={tMember.modals.memberForm.dateOfBirthPlaceholder}
+          size="sm"
         />
-        <Select
-          label={tMember.modals.memberForm.sex}
-          selectedKeys={[formData.sex || Genders.MALE]}
-          onSelectionChange={(keys) =>
-            setFormData({
-              ...formData,
-              sex: Array.from(keys)[0] as Genders,
-              category_id: '',
-            })
-          }
-          isRequired
-        >
-          {Object.entries(genderOptions).map(([key, value]) => (
-            <SelectItem key={key}>{value}</SelectItem>
-          ))}
-        </Select>
+        <GenderSelect
+          value={formData.sex || Genders.MALE}
+          onChange={(value) => setFormData({...formData, sex: value, category_id: ''})}
+        />
       </div>
 
-      <div className="w-full">
-        <Select
+      <div className="w-1/2">
+        <Choice
+          value={formData.category_id || null}
+          onChange={(value) => setFormData({...formData, category_id: value ?? ''})}
+          items={categoryItems}
           label={tMember.modals.memberForm.category}
-          selectedKeys={formData.category_id ? [formData.category_id] : []}
-          onSelectionChange={(keys) =>
-            setFormData({
-              ...formData,
-              category_id: Array.from(keys)[0] as string,
-            })
-          }
           isRequired
           isDisabled={!formData.sex}
-        >
-          {categories
-            .filter((category) => {
-              if (formData.sex === Genders.MALE) {
-                return category.gender === Genders.MALE || category.gender === Genders.MIXED;
-              } else if (formData.sex === Genders.FEMALE) {
-                return category.gender === Genders.FEMALE || category.gender === Genders.MIXED;
-              }
-              return false;
-            })
-            .map((category) => (
-              <SelectItem key={category.id}>{category.name}</SelectItem>
-            ))}
-        </Select>
-        {!formData.sex && (
-          <p className="text-sm text-gray-500 mt-1">{tMember.modals.memberForm.categoryHelper}</p>
-        )}
+          size="sm"
+        />
       </div>
 
       <div>

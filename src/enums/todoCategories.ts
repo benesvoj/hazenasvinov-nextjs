@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.todoCategory;
+const t = translations.todos.enums.todoCategory;
 
 export enum TodoCategories {
   FEATURE = 'feature',

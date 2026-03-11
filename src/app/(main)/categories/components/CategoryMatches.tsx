@@ -17,11 +17,12 @@ import {
   Image,
 } from '@heroui/react';
 
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {isEmpty} from '@/utils/arrayHelper';
 
 import {LoadingSpinner} from '@/components';
 import {formatDateString, formatTime} from '@/helpers';
-import {APP_ROUTES} from '@/lib';
 import {Match} from '@/types';
 
 import {CategoryMatchesFallback} from './CategoryMatchesFallback';

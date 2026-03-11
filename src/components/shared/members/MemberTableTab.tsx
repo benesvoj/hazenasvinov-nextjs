@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {UnifiedTable} from '@/components';
 import {ColumnType} from '@/types';
@@ -22,7 +22,7 @@ interface MemberTableTabProps<T> {
   // Optional features
   enableSelection?: boolean;
   selectedItems?: Set<string>;
-  onSelectionChange?: (keys: Selection) => void;
+  onSelectionChange?: (keys: Set<string>) => void;
 
   // Pagination (server-side)
   pagination?: {
@@ -30,12 +30,7 @@ interface MemberTableTabProps<T> {
     total: number | null;
   };
   onPageChange?: (page: number) => void;
-
-  // Actions (optional)
-  onPayment?: (item: T) => void;
-  openEdit?: (item: T) => void;
-  openDelete?: (item: T) => void;
-  openDetail?: (item: T) => void;
+  pageSize?: number;
 }
 
 export const MemberTableTab = <T,>({
@@ -49,14 +44,12 @@ export const MemberTableTab = <T,>({
   onSelectionChange,
   pagination,
   onPageChange,
+  pageSize = 25,
 }: MemberTableTabProps<T>) => {
   const t = translations.members;
 
-  // Calculate total pages from server pagination info
   const totalPages =
-    pagination?.total && pagination.total > 0
-      ? Math.ceil(pagination.total / 25) // Using default page size of 25
-      : 1;
+    pagination?.total && pagination.total > 0 ? Math.ceil(pagination.total / pageSize) : 1;
 
   return (
     <>
@@ -73,15 +66,16 @@ export const MemberTableTab = <T,>({
         onPageChange={onPageChange}
         selectionMode={enableSelection ? 'multiple' : 'none'}
         selectedKeys={selectedItems}
+        rowsPerPage={pageSize}
         onSelectionChange={
           onSelectionChange
             ? (keys) => {
                 if (keys === 'all') {
                   // Handle 'all' selection - convert to Set of all IDs
                   const allIds = new Set(data.map((item) => (item as any).id));
-                  onSelectionChange(allIds as any as Selection);
+                  onSelectionChange(allIds);
                 } else {
-                  onSelectionChange(keys as unknown as Selection);
+                  onSelectionChange(keys as Set<string>);
                 }
               }
             : undefined

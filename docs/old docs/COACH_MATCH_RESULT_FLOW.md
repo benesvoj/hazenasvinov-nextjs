@@ -49,7 +49,7 @@ src/app/coaches/matches/
 │   ├── CoachMatchResultFlow.tsx    # Main 3-step flow component
 │   ├── UpcomingMatchesCard.tsx     # Updated with result flow button
 │   └── index.ts                    # Updated exports
-├── page.tsx.backup                        # Updated to integrate flow
+├── error.tsx.backup                        # Updated to integrate flow
 ```
 
 ## Usage

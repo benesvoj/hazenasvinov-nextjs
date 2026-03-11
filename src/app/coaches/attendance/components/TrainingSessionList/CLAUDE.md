@@ -91,7 +91,7 @@ interface SessionTab {
 ## Data Flow
 
 ```
-page.tsx
+error.tsx
 ├── useFetchTrainingSessions({ categoryId, seasonId })
 │   └── GET /api/entities/training_sessions?categoryId=X&seasonId=Y
 │   └── Returns: BaseTrainingSession[] sorted by session_date DESC
@@ -99,7 +99,7 @@ page.tsx
     ├── segmentSessions() splits into upcoming/past/all
     ├── Dynamic tabs render each segment
     └── User clicks a session → onSelectedSession(sessionId)
-        └── page.tsx sets selectedSession state
+        └── error.tsx sets selectedSession state
         └── AttendanceRecordingTable loads attendance for that session
 ```
 
@@ -147,6 +147,6 @@ From `translations.trainingSessions`:
 
 | Priority | Item | File |
 |---|---|---|
-| Optional | Auto-select nearest upcoming session on page load | `page.tsx` — add `useEffect` |
+| Optional | Auto-select nearest upcoming session on page load | `error.tsx` — add `useEffect` |
 | Optional | Show global empty state (with CTA) when `sessions.length === 0` instead of empty tabs | `TrainingSessionList.tsx` |
 | Optional | Text search / date filter for large session lists | Future enhancement |

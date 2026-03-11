@@ -15,6 +15,8 @@
 
 import {useMemo} from 'react';
 
+import {twMerge} from 'tailwind-merge';
+
 import {Nullish} from '@/types';
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
@@ -22,12 +24,12 @@ export type HeadingAlign = 'start' | 'center' | 'end';
 
 export interface HeadingProps {
   isSingleLine?: boolean;
-  alternative?: true;
   size: HeadingLevel;
   children?: Nullish | string | React.ReactNode;
   overflowWrap?: 'anywhere';
   align?: HeadingAlign;
   isInline?: boolean;
+  className?: string;
 }
 
 export function Heading(props: HeadingProps) {
@@ -53,16 +55,16 @@ export function Heading(props: HeadingProps) {
   return (
     <HeadingComponent
       aria-level={props.size}
-      className={`
-        text-gray-900 dark:text-gray-100
-        flex items-center gap-2
-        ${headingClass}
-        ${props.isSingleLine ? 'whitespace-nowrap' : ''}
-        ${props.alternative ? 'font-semibold' : 'font-bold'}
-        ${props.overflowWrap ? 'overflow-wrap-' + props.overflowWrap : ''}
-        ${props.align ? 'text-' + props.align : ''}
-        ${props.isInline ? 'inline' : 'block'}
-        `}
+      className={twMerge(
+        'text-gray-900 dark:text-gray-100',
+        'flex items-center gap-2',
+        headingClass,
+        props.isSingleLine && 'whitespace-nowrap',
+        props.overflowWrap && `overflow-wrap-${props.overflowWrap}`,
+        props.align && `text-${props.align}`,
+        props.isInline ? 'inline' : 'block',
+        props.className,
+      )}
     >
       {props.children}
     </HeadingComponent>

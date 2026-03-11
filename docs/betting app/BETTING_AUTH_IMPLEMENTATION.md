@@ -52,7 +52,7 @@ Created dedicated authentication functions for the betting system:
 6. Demo button: Pre-fills credentials
 ```
 
-### 3. Betting Page Updates (`src/app/(betting)/betting/page.tsx.backup`)
+### 3. Betting Page Updates (`src/app/(betting)/betting/error.tsx.backup`)
 
 #### Features Added:
 - ✅ Real logout functionality
@@ -101,7 +101,7 @@ Borders: border-gray-700/50
 3. `src/components/features/betting/BettingLogin.tsx` - Login component
 
 ### Modified Files:
-1. `src/app/(betting)/betting/page.tsx.backup` - Added logout, router integration
+1. `src/app/(betting)/betting/error.tsx.backup` - Added logout, router integration
 2. `src/components/features/betting/index.ts` - Added BettingLogin export
 
 ## Security Features

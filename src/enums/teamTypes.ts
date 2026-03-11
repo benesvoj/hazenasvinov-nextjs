@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.teamTypes;
+const t = translations.teams.enums.teamTypes;
 
 export enum TeamTypes {
   HOME = 'home',

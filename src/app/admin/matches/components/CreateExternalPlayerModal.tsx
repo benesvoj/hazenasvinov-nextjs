@@ -94,6 +94,7 @@ export default function CreateExternalPlayerModal({
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         name: '',
         surname: '',

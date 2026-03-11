@@ -2,14 +2,15 @@
 
 import {useCallback} from 'react';
 
+import {createCRUDHook} from '@/hooks/factories';
+
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {showToast} from '@/components';
 import {TodoStatuses} from '@/enums';
-import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
 import {DB_TABLE} from '@/queries/todos';
-import {TodoInsert, TodoItem, UpdateTodo} from '@/types';
-
-const t = translations.admin.todos.responseMessages;
+import {TodoInsert, TodoItem} from '@/types';
 
 export function useTodos() {
   const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<
@@ -20,20 +21,19 @@ export function useTodos() {
     byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
     entityName: DB_TABLE,
     messages: {
-      createSuccess: t.createSuccess,
-      updateSuccess: t.updateSuccess,
-      deleteSuccess: t.deleteSuccess,
-      createError: t.createError,
-      updateError: t.updateError,
-      deleteError: t.deleteError,
+      createSuccess: translations.todos.responseMessages.createSuccess,
+      updateSuccess: translations.todos.responseMessages.updateSuccess,
+      deleteSuccess: translations.todos.responseMessages.deleteSuccess,
+      createError: translations.todos.responseMessages.createError,
+      updateError: translations.todos.responseMessages.updateError,
+      deleteError: translations.todos.responseMessages.deleteError,
     },
   })();
 
   const updateTodoStatus = useCallback(
     async (id: string, status: TodoStatuses): Promise<boolean> => {
+      setLoading(true);
       try {
-        setLoading(true);
-
         const res = await fetch(API_ROUTES.todos.byId(id), {
           method: 'PATCH',
           headers: {'Content-Type': 'application/json'},

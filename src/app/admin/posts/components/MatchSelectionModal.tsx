@@ -1,12 +1,17 @@
+// TODO: Choice and Dialog component implementation
 'use client';
 
 import React, {useMemo, useState} from 'react';
 
-import {Button, Chip, Input, Select, SelectItem} from '@heroui/react';
+import {Button} from '@heroui/button';
+import {Chip} from '@heroui/chip';
+import {Select, SelectItem} from '@heroui/select';
+
+import {translations} from '@/lib/translations';
 
 import {formatTime} from '@/helpers/formatTime';
 
-import {UnifiedModal, UnifiedTable} from '@/components';
+import {Search, UnifiedModal, UnifiedTable} from '@/components';
 import {matchStatuses} from '@/constants';
 import {formatDateString} from '@/helpers';
 import {useFetchMatches, useFetchSeasons, useSeasonFiltering} from '@/hooks';
@@ -47,7 +52,9 @@ export default function MatchSelectionModal({
   const allMatches = useMemo(() => {
     try {
       const all = [...(seasonalMatches?.autumn || []), ...(seasonalMatches?.spring || [])];
-      const sorted = all.sort((a, b) => {
+      // Debug logging removed - component now has proper error handling
+
+      return all.sort((a, b) => {
         try {
           return new Date(b.date).getTime() - new Date(a.date).getTime();
         } catch (dateError) {
@@ -55,10 +62,6 @@ export default function MatchSelectionModal({
           return 0;
         }
       });
-
-      // Debug logging removed - component now has proper error handling
-
-      return sorted;
     } catch (error) {
       console.error('Error processing matches:', error);
       return [];
@@ -201,10 +204,10 @@ export default function MatchSelectionModal({
       }
     >
       <div className="flex gap-4 mb-4">
-        <Input
-          placeholder="Hledat zápasy..."
+        <Search
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(value) => setSearchTerm(value)}
+          placeholder={translations.blogPosts.placeholders.searchMatch}
           className="flex-1"
         />
         <Select

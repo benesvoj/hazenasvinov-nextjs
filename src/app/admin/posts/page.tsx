@@ -2,18 +2,20 @@
 
 import React, {useState} from 'react';
 
-import {Image, Input, Select, SelectItem} from '@heroui/react';
+import {Image} from '@heroui/image';
 
-import {PhotoIcon, TagIcon} from '@heroicons/react/24/outline';
+import {PhotoIcon} from '@heroicons/react/24/outline';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
+
+import {translations} from '@/lib/translations';
 
 import {uploadClubAsset} from '@/utils/supabase/storage';
 
 import {BlogPostModal} from '@/app/admin/posts/components/BlogPostModal';
 import {getStatusBadge} from '@/app/admin/posts/components/StatusBadge';
 
-import {AdminContainer, DeleteConfirmationModal, showToast, UnifiedTable} from '@/components';
+import {AdminContainer, Choice, Dialog, Search, showToast, UnifiedTable} from '@/components';
 import {adminStatusFilterOptions} from '@/constants';
 import {ActionTypes, ModalMode} from '@/enums';
 import {formatDateString} from '@/helpers';
@@ -25,10 +27,9 @@ import {
   useFetchCategories,
   useFetchUsers,
 } from '@/hooks';
-import {translations} from '@/lib';
 import {Blog} from '@/types';
 
-const t = translations.admin.posts;
+const t = translations.blogPosts;
 
 export default function BlogPostsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,7 +37,7 @@ export default function BlogPostsPage() {
 
   const {users} = useFetchUsers();
 
-  const {data: categories, loading: categoriesLoading} = useFetchCategories();
+  const {data: categories} = useFetchCategories();
 
   const {data: blogPosts, loading: blogPostsLoading, refetch: refetchBlog} = useFetchBlog();
   const {createBlogPost, updateBlogPost, deleteBlogPost, loading: crudLoading} = useBlogPost();
@@ -205,27 +206,28 @@ export default function BlogPostsPage() {
     }
   };
 
+  const statusOptions = Object.entries(adminStatusFilterOptions).map((c) => ({
+    key: c[0],
+    label: c[1],
+  }));
+
   const filters = (
-    <div className="flex flex-col md:flex-row gap-4 w-full">
-      <Input
-        placeholder={t.filters.searchInputPlaceholder}
+    <div className="flex flex-col justify-between md:flex-row gap-4 w-full">
+      <Search
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="flex-1"
-        startContent={<TagIcon className="w-4 h-4 text-gray-400" />}
+        onChange={(value) => setSearchTerm(value)}
+        placeholder={t.filters.searchInputPlaceholder}
         aria-label={t.filters.searchInputPlaceholder}
+        className="w-full md:w-1/3"
       />
-      <Select
+      <Choice
         placeholder={t.filters.byStatus}
-        selectedKeys={[statusFilter]}
-        onSelectionChange={(keys) => setStatusFilter(Array.from(keys)[0] as string)}
-        className="w-full md:w-48"
         aria-label={t.filters.byStatus}
-      >
-        {Object.entries(adminStatusFilterOptions).map(([key, value]) => (
-          <SelectItem key={key}>{value}</SelectItem>
-        ))}
-      </Select>
+        className="w-full md:w-48"
+        items={statusOptions}
+        value={statusFilter}
+        onChange={(id) => setStatusFilter(id ?? 'all')}
+      />
     </div>
   );
 
@@ -257,23 +259,24 @@ export default function BlogPostsPage() {
         onSubmit={handleSubmitPost}
         mode={blogPostForm.modalMode}
         categories={categories || []}
-        categoriesLoading={categoriesLoading}
         blogPostForm={blogPostForm}
-        formData={blogPostForm.formData}
-        setFormData={blogPostForm.setFormData}
         users={users}
         matchModalControl={matchModal}
         isLoading={crudLoading}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeAndClear}
-        onConfirm={handleDeleteConfirm}
-        message={t.deletePostMessage}
+        onSubmit={handleDeleteConfirm}
         title={t.deletePost}
+        size={'md'}
         isLoading={crudLoading}
-      />
+        dangerAction
+        submitButtonLabel={translations.common.actions.delete}
+      >
+        {t.deletePostMessage}
+      </Dialog>
     </>
   );
 }

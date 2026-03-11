@@ -12,10 +12,13 @@ import {
   Checkbox,
 } from '@heroui/react';
 
+import {GenderFilter} from '@/components';
 import {getMemberFunctionOptions, Genders} from '@/enums';
 import {Category} from '@/types';
-interface BulkEditFormData {
-  sex: Genders;
+import {isEmpty} from '@/utils';
+
+export interface BulkEditFormData {
+  gender: Genders.MALE | Genders.FEMALE | null;
   category: string;
   functions: string[];
 }
@@ -53,27 +56,11 @@ export default function BulkEditModal({
 
             {/* Row 1: Sex and Category */}
             <div className="grid grid-cols-2 gap-4">
-              {/* Sex Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Pohlaví
-                </label>
-                <Select
-                  selectedKeys={formData.sex ? [formData.sex] : []}
-                  onSelectionChange={(keys) => {
-                    const newSex = Array.from(keys)[0] as Genders;
-                    setFormData((prev) => ({
-                      ...prev,
-                      sex: newSex,
-                      // Clear category when sex changes to ensure proper filtering
-                      category: newSex !== prev.sex ? '' : prev.category,
-                    }));
-                  }}
-                  placeholder="Ponechat beze změny"
-                >
-                  <SelectItem key="male">Muž</SelectItem>
-                  <SelectItem key="female">Žena</SelectItem>
-                </Select>
+                <GenderFilter
+                  value={formData.gender}
+                  onChange={(value) => setFormData({...formData, gender: value})}
+                />
               </div>
 
               {/* Category Selection */}
@@ -90,33 +77,11 @@ export default function BulkEditModal({
                     }))
                   }
                   placeholder="Ponechat beze změny"
-                  isDisabled={!formData.sex}
                 >
-                  {categories
-                    .filter((category) => {
-                      // Filter category based on sex using the gender field from database
-                      if (formData.sex === Genders.MALE) {
-                        // For male sex, show male and mixed category
-                        return (
-                          category.gender === Genders.MALE || category.gender === Genders.MIXED
-                        );
-                      } else if (formData.sex === Genders.FEMALE) {
-                        // For female sex, show female and mixed category
-                        return (
-                          category.gender === Genders.FEMALE || category.gender === Genders.MIXED
-                        );
-                      }
-                      return false;
-                    })
-                    .map((category) => (
-                      <SelectItem key={category.id}>{category.name}</SelectItem>
-                    ))}
+                  {categories.map((category) => (
+                    <SelectItem key={category.id}>{category.name}</SelectItem>
+                  ))}
                 </Select>
-                {!formData.sex && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    Vyberte nejprve pohlaví pro zobrazení dostupných kategorií
-                  </p>
-                )}
               </div>
             </div>
 
@@ -162,7 +127,7 @@ export default function BulkEditModal({
             color="primary"
             onPress={onSubmit}
             isLoading={isLoading}
-            isDisabled={!formData.sex && !formData.category && formData.functions.length === 0}
+            isDisabled={!formData.gender && !formData.category && isEmpty(formData.functions)}
           >
             Uložit změny
           </Button>

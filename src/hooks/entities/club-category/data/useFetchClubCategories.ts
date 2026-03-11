@@ -2,10 +2,12 @@
 
 import {createDataFetchHook} from '@/hooks/factories';
 
-import {API_ROUTES, translations} from '@/lib';
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {ClubCategoryWithRelations} from '@/types';
 
-const t = translations.admin.clubCategories.responseMessages;
+const t = translations.clubCategories.responseMessages;
 
 /**
  * Hook for fetching club categories

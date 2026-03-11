@@ -3,15 +3,16 @@ import React from 'react';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import {AdminContainer, DeleteConfirmationModal, GrantModal, UnifiedTable} from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {getMonthName} from '@/helpers';
 import {useFetchGrants, useGrantForm, useGrants} from '@/hooks';
-import {translations} from '@/lib';
 import {Grant} from '@/types';
 
 const t = translations.grantCalendar;
-const tAction = translations.action;
+const tAction = translations.common.actions;
 
 export default function GrantCalendar() {
   const {data: grants, loading, refetch} = useFetchGrants();
@@ -135,7 +136,7 @@ export default function GrantCalendar() {
           columns={grantTableColumns}
           renderCell={renderGrantTableData}
           data={grants}
-          ariaLabel={t.title}
+          ariaLabel={t.page.title}
           getKey={(grant: Grant) => grant.id}
           emptyContent={t.table.noGrants}
           isStriped

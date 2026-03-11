@@ -1,4 +1,8 @@
 export const membersTranslations = {
+  page: {
+    title: 'Členové',
+    description: 'Správa členů klubu - přidávání, úprava a mazání členů.',
+  },
   title: 'Členové',
   membersDescription: 'Správa členů, které jsou dostupné v systému.',
   table: {
@@ -7,8 +11,14 @@ export const membersTranslations = {
     membersExternalAriaLabel: 'Seznam externích členů',
     membersOnLoanAriaLabel: 'Seznam členů na hostování',
     filters: {
+      title: 'Vyhledávání',
       searchPlaceholder: 'Hledat podle jména, příjmení nebo registračního čísla...',
       clearAll: 'Vymazat filtry',
+      functions: {
+        title: 'Funkce',
+        placeholder: 'Všechny funkce',
+        ariaLabel: 'Filtrovat podle funkce',
+      },
     },
     noMembersFound: 'Žádní členové nebyli nalezeni',
     noFunctionsFound: 'Žádné funkce',
@@ -70,13 +80,16 @@ export const membersTranslations = {
       info: 'Informace',
       membershipFees: 'Členské příspěvky',
     },
-    addMember: 'Přidat člena',
-    editMember: 'Upravit člena',
-    deleteMember: 'Smazat člena',
+    titles: {
+      addMember: 'Přidat člena',
+      editMember: 'Upravit člena',
+      deleteMember: 'Smazat člena',
+    },
     deleteMemberMessage: 'Opravdu chcete smazat člena? Tato akce je nevratná.',
     memberForm: {
       registrationNumber: 'Registrační číslo',
-      registrationNumberHelper: 'Registrační číslo (volitelné - vygeneruje se automaticky)',
+      registrationNumberHelper:
+        'Vygeneruje se automaticky, pokud není zadáno. Musí být unikátní. Lze později změnit.',
       registrationNumberPlaceholder: 'např. REG-2024-0001',
       name: 'Jméno',
       surname: 'Příjmení',
@@ -88,10 +101,112 @@ export const membersTranslations = {
       functions: 'Funkce',
       functionsHelper: 'Členové bez přiřazených funkcí budou označeni jako neaktivní v tabulce.',
     },
+    createMember: {
+      title: 'Vytvořit nového člena',
+      name: 'Jméno',
+      surname: 'Příjmení',
+      registrationNumber: 'Registrační číslo',
+      dateOfBirth: 'Datum narození',
+      sex: 'Pohlaví',
+      functions: 'Funkce',
+    },
   },
   validations: {
     mandatoryName: 'Jméno je povinné',
     mandatorySurname: 'Příjmení je povinné',
     mandatoryRegNumber: 'Registrační číslo je povinné',
+    mandatoryDateOfBirth: 'Datum narození je povinné',
+  },
+  enums: {
+    relationshipStatus: {
+      active: 'Aktivní',
+      inactive: 'Neaktivní',
+      expired: 'Vypršel',
+      terminated: 'Ukončen',
+    },
+    relationshipType: {
+      permanent: 'Permanentní',
+      loan: 'Půjčený',
+      temporary: 'Dočasný',
+      youthLoan: 'Mládežnická půjčená',
+    },
+  },
+  responseMessages: {
+    membersFetchFailed: 'Chyba při načítání členů',
+    memberWithSameRegNumberExists: 'Člen s tímto registračním číslem již existuje',
+  },
+  labels: {
+    basicInfoSection: {
+      title: 'Základní informace',
+      name: 'Jméno',
+      surname: 'Příjmení',
+      registrationNumber: 'Registrační číslo',
+      dateOfBirth: 'Datum narození',
+      gender: 'Pohlaví',
+    },
+    contactSection: {
+      title: 'Kontaktní informace',
+      phone: 'Telefon',
+      email: 'Email',
+      address: 'Adresa',
+    },
+    additionalSection: {
+      title: 'Další informace',
+      preferredPosition: 'Preferovaná pozice',
+      jerseySize: 'Velikost dresu',
+      shoeSize: 'Velikost bot',
+      notes: 'Poznámky',
+    },
+    parentSection: {
+      title: 'Informace o zákonném zástupci',
+      parentName: 'Jméno zákonného zástupce',
+      parentPhone: 'Telefon zákonného zástupce',
+      parentEmail: 'Email zákonného zástupce',
+    },
+    medicalSection: {
+      title: 'Zdravotní informace',
+      medicalNotes: 'Zdravotní poznámky',
+      allergies: 'Alergie',
+      emergencyContactName: 'Kontaktní osoba - jméno',
+      emergencyContactPhone: 'Kontaktní osoba - telefon',
+    },
+  },
+  placeholders: {
+    basicInfoSection: {
+      name: 'Zadejte jméno',
+      surname: 'Zadejte příjmení',
+      registrationNumber: 'Nechte prázdné pro automatické vygenerování',
+    },
+    contactSection: {
+      phone: '+420 xxx xxx xxx',
+      email: 'example@email.com',
+      address: 'Ulice, město, PSČ',
+    },
+    additionalSection: {
+      preferredPosition: 'např. Brankář, Obránce, ...',
+      jerseySize: 'např. S, M, L, XL',
+      shoeSize: 'např. 40, 41, 42',
+      notes: 'Další poznámky o členovi',
+    },
+    parentSection: {
+      parentName: 'Jméno a příjmení',
+      parentPhone: '+420 xxx xxx xxx',
+      parentEmail: 'email@example.com',
+    },
+    medicalSection: {
+      medicalNotes: 'Zdravotní omezení, chronické nemoci, atd.',
+      allergies: 'Seznam alergií a jejich závažnost',
+      emergencyContactName: 'Jméno a příjmení',
+      emergencyContactPhone: '+420 xxx xxx xxx',
+    },
+  },
+  helpers: {
+    basicInfoSection: {
+      registrationNumber: 'Nechte prázdné pro automatické vygenerování',
+    },
+    medicalSection: {
+      emergencyContactName: 'Kontaktní osoba pro případ nouze',
+      emergencyContactPhone: 'Kontaktní telefon pro případ nouze',
+    },
   },
 };

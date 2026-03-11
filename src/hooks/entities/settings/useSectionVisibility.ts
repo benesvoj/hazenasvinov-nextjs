@@ -21,6 +21,7 @@ export const useSectionVisibility = () => {
       const sponsorsPage = pages.find((p) => p.page_key === 'sponsors_section');
       const callToActionPage = pages.find((p) => p.page_key === 'call_to_action_section');
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSectionVisibility({
         clubHighlight: clubHighlightPage?.is_visible ?? true,
         sponsors: sponsorsPage?.is_visible ?? true,

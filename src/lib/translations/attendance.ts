@@ -65,6 +65,7 @@ export const attendanceTranslations = {
     selectSessionToShowAttendance: 'Vyberte trénink pro zobrazení docházky',
     attendanceRecordsCreated: (count: number) =>
       `Vytvořeno ${count} záznamů docházky pro tento trénink`,
+    memberAttendanceFetchFailed: 'Chyba při načítání docházky členů',
   },
   table: {
     columns: {

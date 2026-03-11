@@ -1,12 +1,6 @@
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+'use client';
+
+import {createContext, type ReactNode, useCallback, useContext, useMemo, useState} from 'react';
 
 import {hasItems, isEmpty} from '@/utils/arrayHelper';
 

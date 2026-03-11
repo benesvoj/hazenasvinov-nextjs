@@ -476,7 +476,8 @@ export default function ClubDetailPage() {
         onClose={modal.Edit.onClose}
         title={'Upravit klub'}
         size={'lg'}
-        onSubmit={handleUpdateClub}
+        isFooterWithActions
+        onPress={handleUpdateClub}
       >
         <div className="space-y-4">
           <Input

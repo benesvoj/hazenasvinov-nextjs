@@ -51,4 +51,4 @@
 
 **Example prompt for Claude:**
 
-> Refactor `src/app/admin/matches/page.tsx` to use `UnifiedModal`, `UnifiedTable`, `useModals`, `HeroUi` components, and factory hooks for all data operations and forms. For each section, specify which unified component or hook to use, and provide before/after code snippets. Do not change business logic.
+> Refactor `src/app/admin/matches/error.tsx` to use `UnifiedModal`, `UnifiedTable`, `useModals`, `HeroUi` components, and factory hooks for all data operations and forms. For each section, specify which unified component or hook to use, and provide before/after code snippets. Do not change business logic.

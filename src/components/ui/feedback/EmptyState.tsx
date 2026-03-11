@@ -1,7 +1,6 @@
-import {Button} from '@heroui/button';
-
 import {
   CalendarIcon,
+  ChatBubbleLeftRightIcon,
   CheckCircleIcon,
   CogIcon,
   DocumentTextIcon,
@@ -10,40 +9,44 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations/index';
-
 import {Heading} from '@/components';
-import {EmptyStateTypes} from '@/enums';
-import {EmptyStateProps} from '@/types';
+import {EmptyStateProps, EmptyStateType} from '@/types';
 
-// Icon mapping for common empty states
-const getDefaultIcon = (type?: string) => {
-  switch (type) {
-    case 'posts':
-      return <DocumentTextIcon className="w-12 h-12" />;
-    case 'users':
-      return <UserGroupIcon className="w-12 h-12" />;
-    case 'matches':
-      return <CalendarIcon className="w-12 h-12" />;
-    case 'photos':
-      return <PhotoIcon className="w-12 h-12" />;
-    case 'categories':
-      return <TrophyIcon className="w-12 h-12" />;
-    case 'settings':
-      return <CogIcon className="w-12 h-12" />;
-    case 'todos':
-      return <CheckCircleIcon className="w-12 h-12" />;
-    case 'committees':
-      return <UserGroupIcon className="w-12 h-12" />;
-    case 'birthdays':
-      return <CalendarIcon className="w-12 h-12" />;
-    case 'trainingSession':
-      return <CalendarIcon className="w-12 h-12" />;
-    default:
-      return <DocumentTextIcon className="w-12 h-12" />;
-  }
+const ICON_MAP: Record<EmptyStateType, React.ComponentType<{className?: string}>> = {
+  posts: DocumentTextIcon,
+  users: UserGroupIcon,
+  matches: CalendarIcon,
+  photos: PhotoIcon,
+  categories: TrophyIcon,
+  settings: CogIcon,
+  todos: CheckCircleIcon,
+  committees: UserGroupIcon,
+  birthdays: CalendarIcon,
+  trainingSession: CalendarIcon,
+  comments: ChatBubbleLeftRightIcon,
 };
 
+/**
+ * Placeholder displayed when a list or section has no items.
+ * Renders a centered icon, heading, description, and an optional action button.
+ *
+ * Use as the `emptyState` prop of `ContentCard`, or render standalone.
+ *
+ * @example
+ * <EmptyState
+ *   type="todos"
+ *   title={t.emptyTitle}
+ *   description={t.emptyDescription}
+ *   action={<Button onPress={onCreate}>{t.create}</Button>}
+ * />
+ *
+ * @param title - Heading text (Czech, from translations)
+ * @param description - Subtext below the heading (Czech, from translations)
+ * @param type - Selects a default icon from `ICON_MAP`. See {@link EmptyStateType}.
+ * @param icon - Custom icon ReactNode — overrides the default resolved from `type`.
+ * @param action - Optional CTA (e.g. `<Button>`) rendered below the description.
+ * @param className - Extra CSS classes on the root container.
+ */
 export default function EmptyState({
   title,
   description,
@@ -51,123 +54,26 @@ export default function EmptyState({
   action,
   className = '',
   type,
-}: EmptyStateProps & {type?: string}) {
-  const defaultIcon = getDefaultIcon(type);
+}: EmptyStateProps) {
+  const DEFAULT_ICON = DocumentTextIcon;
+
+  const IconComponent = (type && ICON_MAP[type]) || DEFAULT_ICON;
 
   return (
     <div
+      role="status"
+      aria-live={'polite'}
       className={` flex flex-col items-center justify-center text-center py-12 px-4 ${className}`}
     >
       <div className="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-gray-100 dark:bg-gray-800 mb-6">
-        {icon || defaultIcon}
+        {icon || <IconComponent className={'w-12 h-12'} />}
       </div>
 
       <Heading size={3}>{title}</Heading>
 
       <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6">{description}</p>
 
-      {action && (
-        <Button onPress={action.onClick} variant={action.variant || 'solid'} color="primary">
-          {action.label}
-        </Button>
-      )}
+      {action}
     </div>
   );
 }
-
-// Generic empty state configuration
-const EMPTY_STATE_CONFIG = {
-  [EmptyStateTypes.TODOS]: {
-    title: 'Žádné úkoly',
-    description: 'Zatím nebyly vytvořeny žádné úkoly. Vytvořte první úkol.',
-    actionLabel: 'Vytvořit úkol',
-  },
-  [EmptyStateTypes.POSTS]: {
-    title: 'Žádné články',
-    description: 'Zatím nebyly vytvořeny žádné články. Vytvořte první článek pro váš klub.',
-    actionLabel: 'Vytvořit článek',
-  },
-  [EmptyStateTypes.MATCHES]: {
-    title: 'Žádné zápasy',
-    description: 'Zatím nebyly naplánovány žádné zápasy. Přidejte první zápas do kalendáře.',
-    actionLabel: 'Přidat zápas',
-  },
-  [EmptyStateTypes.USERS]: {
-    title: 'Žádní členové',
-    description: 'Zatím nebyli přidáni žádní členové klubu. Přidejte první členy.',
-    actionLabel: 'Přidat člena',
-  },
-  [EmptyStateTypes.PHOTOS]: {
-    title: 'Žádné fotky',
-    description: 'Zatím nebyly nahrány žádné fotky. Nahrajte první fotky.',
-    actionLabel: 'Nahrát fotky',
-  },
-  [EmptyStateTypes.CATEGORIES]: {
-    title: 'Žádné kategorie',
-    description: 'Zatím nebyly vytvořeny žádné kategorie. Vytvořte první kategorii.',
-    actionLabel: 'Vytvořit kategorii',
-  },
-  [EmptyStateTypes.SETTINGS]: {
-    title: 'Žádná nastavení',
-    description: 'Zatím nejsou k dispozici žádná nastavení.',
-    actionLabel: 'Konfigurovat',
-  },
-  [EmptyStateTypes.COMMITTEES]: {
-    title: 'Žádné komise',
-    description: 'Zatím nebyly vytvořeny žádné komise. Vytvořte první komisi.',
-    actionLabel: 'Vytvořit komisi',
-  },
-  [EmptyStateTypes.BIRTHDAYS]: {
-    title: translations.coachPortal.birthdayCard.emptyStateTitle,
-    description: translations.coachPortal.birthdayCard.noBirthdays,
-    actionLabel: 'Přidat člena',
-  },
-  [EmptyStateTypes.TRAINING_SESSION]: {
-    title: translations.trainingSessions.noTrainingSession,
-    description: translations.trainingSessions.noTrainingSessionDescription,
-    actionLabel: translations.common.actions.create,
-  },
-};
-
-// Generic empty state component
-export function GenericEmptyState({
-  emptyStateType,
-  onCreate,
-  className = '',
-}: {
-  emptyStateType: EmptyStateTypes;
-  onCreate: () => void;
-  className?: string;
-}) {
-  const config = EMPTY_STATE_CONFIG[emptyStateType];
-
-  if (!config) {
-    return (
-      <EmptyState
-        type={emptyStateType}
-        title="No data"
-        description="No items to display"
-        className={className}
-      />
-    );
-  }
-
-  return (
-    <EmptyState
-      type={emptyStateType}
-      title={config.title}
-      description={config.description}
-      action={{
-        label: config.actionLabel,
-        onClick: onCreate,
-      }}
-      className={className}
-    />
-  );
-}
-
-export const renderEmptyState = (emptyStateType: EmptyStateTypes, onCreate: () => void) => {
-  if (!emptyStateType) return null;
-
-  return <GenericEmptyState emptyStateType={emptyStateType} onCreate={onCreate} />;
-};

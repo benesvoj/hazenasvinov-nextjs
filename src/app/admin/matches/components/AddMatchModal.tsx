@@ -2,9 +2,9 @@ import React from 'react';
 
 import {Button, Input, Select, SelectItem} from '@heroui/react';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
-import {UnifiedModal} from '@/components';
+import {Choice, UnifiedModal} from '@/components';
 import {AddMatchFormData} from '@/types';
 import {isEmpty} from '@/utils';
 
@@ -80,44 +80,24 @@ export default function AddMatchModal({
           onChange={(e) => setFormData({...formData, time: e.target.value})}
         />
         <div>
-          <Select
+          <Choice
+            items={filteredTeams.map((c) => ({key: c.id, label: c.name}))}
+            value={formData.home_team_id}
+            onChange={(id) => setFormData({...formData, home_team_id: id ?? ''})}
             label={translations.matches.homeTeam}
             placeholder={translations.matches.homeTeamPlaceholder}
-            selectedKeys={formData.home_team_id ? [formData.home_team_id] : []}
-            onSelectionChange={(keys) => {
-              const selectedTeamId = Array.from(keys)[0] as string;
-              const selectedTeam = filteredTeams.find((team) => team.id === selectedTeamId);
-              setFormData({
-                ...formData,
-                home_team_id: selectedTeamId || '',
-                venue: formData.venue,
-              });
-            }}
-            className="w-full"
             isRequired
-          >
-            {filteredTeams.map((team) => (
-              <SelectItem key={team.id}>{team.display_name || team.name}</SelectItem>
-            ))}
-          </Select>
+          />
           {isEmpty(filteredTeams) && selectedCategory && selectedSeason && <NoTeamsAvailable />}
         </div>
         <div>
-          <Select
+          <Choice
+            items={filteredTeams.map((c) => ({key: c.id, label: c.name}))}
+            value={formData.away_team_id}
+            onChange={(id) => setFormData({...formData, away_team_id: id ?? ''})}
             label={translations.matches.awayTeam}
             placeholder={translations.matches.awayTeamPlaceholder}
-            selectedKeys={formData.away_team_id ? [formData.away_team_id] : []}
-            onSelectionChange={(keys) => {
-              const selectedTeamId = Array.from(keys)[0] as string;
-              setFormData({...formData, away_team_id: selectedTeamId || ''});
-            }}
-            className="w-full"
-            isRequired
-          >
-            {filteredTeams.map((team) => (
-              <SelectItem key={team.id}>{team.display_name || team.name}</SelectItem>
-            ))}
-          </Select>
+          />
           {isEmpty(filteredTeams) && selectedCategory && selectedSeason && <NoTeamsAvailable />}
         </div>
         <Input

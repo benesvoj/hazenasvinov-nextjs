@@ -1,9 +1,42 @@
 export const clubsTranslations = {
-  title: 'Správa klubů',
-  description: 'Správa klubů, které jsou dostupné v systému.',
-  addClub: 'Přidat klub',
-  deleteClub: 'Smazat klub',
-  deleteClubMessage: 'Opravdu chcete smazat klub? Tato akce je nevratná.',
+  page: {
+    title: 'Správa klubů',
+    description: 'Správa klubů a jejich týmů.',
+  },
+  labels: {
+    club: 'Klub',
+    name: 'Název klubu',
+    shortName: 'Krátký název',
+    city: 'Město',
+    foundedYear: 'Rok založení',
+    venue: 'Místo',
+    logo: 'Logo klubu',
+    web: 'Webové stránky',
+    email: 'Email',
+    phone: 'Telefon',
+    address: 'Adresa',
+    description: 'Popis',
+    contactPerson: 'Kontakt',
+    isOwnClub: 'Tento klub je náš domácí klub (pro filtrování zápasů a tabulek)',
+  },
+  placeholders: {
+    club: 'Vyberte klub',
+    name: 'např. Hazena Svinov',
+    shortName: 'např. Svinov',
+    city: 'např. Ostrava',
+    foundedYear: 'např. 1920',
+    venue: 'např. Sportovní hala Švínov',
+    web: 'https://example.com',
+    email: 'email@example.com',
+    logo: 'Nahrajte logo klubu (max 5MB, JPG/PNG',
+    phone: '+420 123 456 789',
+    address: 'ulice, město, PSČ',
+    description: 'Krátký popis klubu...',
+    contactPerson: 'Jméno a příjmení kontaktní osoby',
+  },
+  actions: {
+    add: 'Přidat klub',
+  },
   noClubs: 'Žádné kluby nebyly nalezeny',
   filters: {
     placeholder: 'Hledat kluby...',
@@ -28,5 +61,17 @@ export const clubsTranslations = {
     deleteSuccess: 'Oddíl byl úspěšně smazán.',
     deleteError: 'Chyba při mazání oddílu.',
     mandatoryName: 'Název je povinný',
+  },
+  dialogs: {
+    delete: {
+      title: 'Smazat klub',
+      message: 'Opravdu chcete smazat klub? Tato akce je nevratná.',
+    },
+    add: {
+      title: 'Vytvořit nový klub',
+    },
+    edit: {
+      title: 'Upravit klub',
+    },
   },
 };

@@ -27,7 +27,7 @@ Coaches have full control over what is visible publicly. The coach card is **not
 
 ## Files
 
-- `page.tsx` — Route entry point, renders `CoachCardEditor` inside `PageContainer`
+- `error.tsx` — Route entry point, renders `CoachCardEditor` inside `PageContainer`
 - `components/CoachCardEditor.tsx` — Full form: photo upload, name/contact fields, category visibility checkboxes
 - `src/hooks/entities/coach-card/data/useFetchCoachCard.ts` — Fetches the coach's own card; wraps the list factory to extract a single item
 - `src/hooks/entities/coach-card/state/useCoachCard.ts` — CREATE / UPDATE / DELETE mutations via `createCRUDHook` factory

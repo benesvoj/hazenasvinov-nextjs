@@ -431,7 +431,7 @@ return (
 ### Step 5: Update Page Usage
 
 ```typescript
-// In page.tsx.backup
+// In error.tsx.backup
 
 // Add mode
 const openAddWithModal = () => {

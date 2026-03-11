@@ -36,6 +36,7 @@ interface MemberModalProps {
   showPaymentsTab?: boolean;
 }
 
+/** @deprecated Use MemberFormModal instead, which uses react-hook-form and has better validation and performance */
 export default function MemberModal({
   isOpen,
   onClose,
@@ -50,7 +51,7 @@ export default function MemberModal({
 
   const title = isEditMode
     ? `${member.registration_number} - ${member.name} ${member.surname}`
-    : t.addMember;
+    : t.titles.addMember;
 
   return (
     <UnifiedModal

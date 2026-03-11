@@ -2,26 +2,27 @@
 
 import React, {useCallback, useState} from 'react';
 
-import {generateSlug} from '@/utils/slugGenerator';
+import {translations} from '@/lib/translations';
+
+import {generateUniqueSlug} from '@/utils/slugGenerator';
 
 import {showToast} from '@/components';
-import {BLOG_POST_STATUSES} from '@/enums';
+import {BlogPostStatuses} from '@/enums';
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {Blog, BlogPostFormData, Match} from '@/types';
 
 const initialFormData: BlogPostFormData = {
   title: '',
   slug: '',
   content: '',
-  status: BLOG_POST_STATUSES.draft,
+  status: BlogPostStatuses.DRAFT,
   category_id: '',
   match_id: '',
   image_url: '',
   author_id: '',
   published_at: '',
 };
-const t = translations.admin.blog.responseMessages;
+const t = translations.blogPosts.responseMessages;
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -55,7 +56,7 @@ export const useBlogPostForm = () => {
     (updates: Partial<BlogPostFormData>) => {
       const newData = {...updates};
       if (updates.title !== undefined) {
-        newData.slug = generateSlug(updates.title);
+        newData.slug = generateUniqueSlug(updates.title);
       }
       baseForm.updateFormData(newData);
     },

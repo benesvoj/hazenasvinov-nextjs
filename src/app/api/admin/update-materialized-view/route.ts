@@ -1,12 +1,9 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {supabaseServerClient} from '@/utils/supabase/server';
+import {withAuth} from '@/utils/supabase/apiHelpers';
 
 export async function POST(request: NextRequest) {
-  try {
-    const supabase = await supabaseServerClient();
-
-    // Check if user is authenticated and has admin privileges
+  return withAuth(async (_user, supabase) => {
     const {
       data: {user},
       error: authError,
@@ -113,14 +110,5 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Materialized view updated successfully',
     });
-  } catch (error) {
-    console.error('❌ Error in update-materialized-view API:', error);
-    return NextResponse.json(
-      {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      {status: 500}
-    );
-  }
+  });
 }

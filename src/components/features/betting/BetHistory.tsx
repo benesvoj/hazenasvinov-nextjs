@@ -2,20 +2,23 @@
 
 import {useState} from 'react';
 
-import {Card, CardBody, CardHeader, Chip, Tabs, Tab, Spinner, Image} from '@heroui/react';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Chip} from '@heroui/chip';
+import {Spinner} from '@heroui/spinner';
+import {Tab, Tabs} from '@heroui/tabs';
 
-import {Calendar, TrendingUp, TrendingDown, Trophy} from 'lucide-react';
+import {CalendarIcon, TrendingDownIcon, TrendingUpIcon, TrophyIcon} from '@/lib/icons';
+import {translations} from '@/lib/translations';
 
 import {formatDateString, formatDateTimeFromString} from '@/helpers';
 import {useUserBets, useUserBetStats} from '@/hooks';
-import {translations} from '@/lib';
 import {formatOdds} from '@/services';
 import {
   BetStatus,
+  formatCurrency,
   getBetStatusColor,
   getBetStatusLabel,
   getBetTypeMetadata,
-  formatCurrency,
 } from '@/types';
 
 interface BetHistoryProps {
@@ -98,7 +101,7 @@ export default function BetHistory({userId}: BetHistoryProps) {
                   {/* Bet Header */}
                   <div className="flex justify-between items-start mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex gap-2 items-center">
-                      <Trophy className="w-4 h-4 text-primary" />
+                      <TrophyIcon className="w-4 h-4 text-primary" />
                       <Chip size="sm" variant="flat" color="default">
                         {bet.structure}
                       </Chip>
@@ -108,7 +111,7 @@ export default function BetHistory({userId}: BetHistoryProps) {
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-500 flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
+                        <CalendarIcon className="w-3 h-3" />
                         {formatDateString(bet.placed_at)}
                       </p>
                     </div>
@@ -141,7 +144,7 @@ export default function BetHistory({userId}: BetHistoryProps) {
                           <div className="flex flex-col items-end">
                             {leg.match_date && (
                               <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
-                                <Calendar className="w-3 h-3" />
+                                <CalendarIcon className="w-3 h-3" />
                                 {formatDateTimeFromString(leg.match_date)}
                               </div>
                             )}
@@ -198,9 +201,9 @@ export default function BetHistory({userId}: BetHistoryProps) {
                           </p>
                           <div className="flex items-center gap-1">
                             {bet.status === 'WON' ? (
-                              <TrendingUp className="w-4 h-4 text-success" />
+                              <TrendingUpIcon className="w-4 h-4 text-success" />
                             ) : bet.status === 'LOST' ? (
-                              <TrendingDown className="w-4 h-4 text-danger" />
+                              <TrendingDownIcon className="w-4 h-4 text-danger" />
                             ) : null}
                             <p
                               className={`text-sm font-bold ${

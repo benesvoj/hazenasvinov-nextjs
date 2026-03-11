@@ -8,7 +8,7 @@ Overview page for coaches showing quick stats and upcoming information: birthday
 
 | File | Responsibility |
 |---|---|
-| `page.tsx` | Master page — category selection tabs, error boundary, layout grid |
+| `error.tsx` | Master page — category selection tabs, error boundary, layout grid |
 | `components/BirthdayCard.tsx` | Upcoming birthdays for selected category (next 3) |
 | `components/TopScorersCard.tsx` | Top 5 goal scorers via `usePlayerStats(categoryId)` |
 | `components/YellowCardsCard.tsx` | Top 5 yellow card recipients via `usePlayerStats(categoryId)` |
@@ -18,7 +18,7 @@ Overview page for coaches showing quick stats and upcoming information: birthday
 ## Data Flow
 
 ```
-page.tsx
+error.tsx
 ├── useUser() → user context, error boundary
 ├── useFetchCategories() → all categories
 ├── useUserRoles().getCurrentUserCategories() → assigned categories

@@ -1,0 +1,62 @@
+export const blogPostsTranslation = {
+  page: {
+    title: 'Správa článků',
+    description: 'Správa článků, které jsou dostupné v systému.',
+  },
+  addPost: 'Nový článek',
+  deletePost: 'Smazat článek',
+  deletePostMessage: 'Opravdu chcete smazat článek? Tato akce je nevratná.',
+  labels: {
+    author: 'Autor článku',
+    status: 'Stav článku',
+    title: 'Název článku',
+    slug: 'Slug (URL)',
+    content: 'Obsah článku',
+  },
+  placeholders: {
+    author: 'Vyberte autora článku',
+    status: 'Vyberte stav článku',
+    title: 'Zadejte název článku',
+    slug: 'automaticky generováno',
+    content: 'Zde napište obsah článku...',
+    searchMatch: 'Hledat zápas pro tento článek...',
+  },
+  table: {
+    ariaLabel: 'Seznam blogových příspěvků',
+    image: 'Obrázek',
+    title: 'Název',
+    category: 'Kategorie',
+    author: 'Autor',
+    status: 'Stav',
+    createdAt: 'Vytvořeno',
+    actions: 'Akce',
+  },
+  actions: {
+    addPost: 'Přidat článek',
+    editPost: 'Upravit článek',
+    deletePost: 'Smazat článek',
+  },
+  filters: {
+    searchInputPlaceholder: 'Hledat podle názvu, kategorie nebo autora...',
+    byStatus: 'Filtr podle stavu',
+  },
+  enums: {
+    statuses: {
+      draft: 'Koncept',
+      published: 'Publikováno',
+      archived: 'Archivováno',
+      all: 'Všechny stavy',
+    },
+  },
+  responseMessages: {
+    createSuccess: 'Článek úspěšně vytvořen',
+    updateSuccess: 'Článek úspěšně aktualizován',
+    deleteSuccess: 'Článek úspěšně smazán',
+    createError: 'Chyba při vytváření článku',
+    updateError: 'Chyba při aktualizaci článku',
+    deleteError: 'Chyba při mazání článku',
+    blogPostsFetchFailed: 'Chyba při načítání článků',
+    mandatoryTitle: 'Název je povinný',
+    mandatoryContent: 'Obsah je povinný',
+  },
+};

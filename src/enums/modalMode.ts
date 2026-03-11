@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.modalMode;
+const t = translations.components.enums.modalMode;
 
 export enum ModalMode {
   ADD = 'add',

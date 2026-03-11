@@ -1,14 +1,16 @@
 'use client';
 
-import {Card, CardBody, CardHeader, Button, Spinner} from '@heroui/react';
-
-import {Wallet, TrendingUp, TrendingDown} from 'lucide-react';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Spinner} from '@heroui/spinner';
 
 import {formatCurrency} from '@/types/features/betting/wallet';
 
 import {useWalletBalance, useWalletSummary} from '@/hooks/features/betting/useWallet';
 
-import {translations} from '@/lib';
+import {translations} from '@/lib/translations';
+
+import {TrendingDownIcon, TrendingUpIcon, WalletIcon} from '@/lib';
 
 interface WalletBalanceProps {
   userId: string;
@@ -44,7 +46,7 @@ export default function WalletBalance({
     <Card className="w-full">
       <CardHeader className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <Wallet className="w-5 h-5 text-primary" />
+          <WalletIcon className="w-5 h-5 text-primary" />
           <h3 className="text-lg font-semibold">{t.title}</h3>
         </div>
         {onAddFunds && (
@@ -84,9 +86,9 @@ export default function WalletBalance({
                 </p>
                 <div className="flex items-center gap-2">
                   {isProfitable ? (
-                    <TrendingUp className="w-4 h-4 text-success" />
+                    <TrendingUpIcon className="w-4 h-4 text-success" />
                   ) : (
-                    <TrendingDown className="w-4 h-4 text-danger" />
+                    <TrendingDownIcon className="w-4 h-4 text-danger" />
                   )}
                   <p
                     className={`text-lg font-bold ${

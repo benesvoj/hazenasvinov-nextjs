@@ -1,0 +1,65 @@
+export const matchRecordingsTranslations = {
+  page: {
+    title: 'Záznamy zápasů',
+    description: 'Správa záznamů zápasů pro jednotlivé kategorie',
+  },
+  titles: {
+    add: 'Nové video',
+    edit: 'Upravit video',
+  },
+  actions: {
+    add: 'Přidat video',
+  },
+  labels: {
+    title: 'Název videa',
+    youtubeUrl: 'YouTube URL',
+    category: 'Kategorie',
+    recordingDate: 'Datum záznamu',
+    description: 'Popis videa',
+    active: 'Aktivní',
+    activeOnly: 'Pouze aktivní',
+  },
+  placeholders: {
+    title: 'Zadejte název videa',
+    youtubeUrl: 'https://www.youtube.com/watch?v=...',
+    category: 'Vyberte kategorii',
+    recordingDate: 'Vyberte datum záznamu',
+    description: 'Zadejte popis videa (volitelné)',
+    active: 'Video bude viditelné pro uživatele',
+    search: 'Hledat videa..',
+    allClubs: 'Všechny kluby',
+    allCategories: 'Všechny kategorie',
+    allSeasons: 'Všechny sezóny',
+  },
+  helpers: {
+    youtubeUrl: 'Zadejte plnou URL adresu YouTube videa',
+  },
+  deleteModal: {
+    title: 'Smazat video',
+    description: 'Opravdu chcete smazat video? Tato akce je nevratná.',
+  },
+  responseMessages: {
+    fetchFailed: 'Chyba při načítání videí',
+    createSuccess: 'Video úspěšně vytvořeno.',
+    updateSuccess: 'Video úspěšně aktualizováno.',
+    deleteSuccess: 'Video úspěšně smazáno.',
+    createError: 'Chyba při vytváření videa.',
+    updateError: 'Chyba při aktualizaci videa.',
+    deleteError: 'Chyba při mazání videa.',
+    mandatoryYoutubeURL: 'YouTube URL je povinná',
+    invalidYoutubeURL: 'YouTube URL je neplatná',
+    mandatoryTitle: 'Název je povinný',
+    mandatoryCategory: 'Kategorie je povinná',
+  },
+  components: {
+    card: {
+      recordingDate: 'Odehráno:',
+      createdAt: 'Vytvořeno:',
+      updatedAt: 'Aktualizováno:',
+      play: 'Přehrát video',
+      copyUrl: 'Kopírovat URL',
+      edit: 'Upravit video',
+      delete: 'Smazat video',
+    },
+  },
+};

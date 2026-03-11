@@ -32,6 +32,7 @@ export interface EntityConfig {
   tableName: string;
   sortBy?: {column: string; ascending: boolean}[];
   requiresAdmin?: boolean;
+  coachWritable?: boolean;
   isPublic?: boolean; // If true, endpoint is accessible without authentication
 
   queryLayer?: EntityQueryLayer;
@@ -45,6 +46,10 @@ export interface EntityConfig {
     dbColumn?: string;
     transform?: (value: string) => any;
   }[];
+
+  /** Resolve category_id for coach access check. Default: body.category_id.
+   *  Use for relation tables where category_id is on a parent row. */
+  categoryResolver?: (supabase: SupabaseClient, body: any) => Promise<string | null>;
 
   validateCreate?: (body: any) => {valid: boolean; errors?: string[]};
   validateUpdate?: (body: any) => {valid: boolean; errors?: string[]};
@@ -205,6 +210,7 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     tableName: videoQueries.DB_TABLE,
     sortBy: [{column: 'recording_date', ascending: false}],
     requiresAdmin: false,
+    coachWritable: true,
     queryLayer: {
       getAll: videoQueries.getAllVideos,
       getById: videoQueries.getVideoById,
@@ -245,6 +251,7 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     tableName: categoryLineupQueries.DB_TABLE,
     sortBy: [{column: 'name', ascending: true}],
     requiresAdmin: false,
+    coachWritable: true,
     filters: [
       {paramName: 'categoryId', dbColumn: 'category_id'},
       {paramName: 'seasonId', dbColumn: 'season_id'},
@@ -261,13 +268,23 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     tableName: categoryLineupMembersQueries.DB_TABLE,
     sortBy: [{column: 'jersey_number', ascending: true}],
     requiresAdmin: false,
-    filters: [
-      {paramName: 'categoryId', dbColumn: 'category_id'},
-      {paramName: 'lineupId', dbColumn: 'lineup_id'},
-    ],
+    coachWritable: true,
+    categoryResolver: async (supabase, body) => {
+      if (!body.lineup_id) return null;
+      const {data} = await supabase
+        .from('category_lineups')
+        .select('category_id')
+        .eq('id', body.lineup_id)
+        .single();
+      return data?.category_id ?? null;
+    },
+    filters: [{paramName: 'lineupId', dbColumn: 'lineup_id'}],
     queryLayer: {
       getAll: categoryLineupMembersQueries.getAllCategoryLineupMembers,
       getById: categoryLineupMembersQueries.getCategoryLineupMemberById,
+      create: categoryLineupMembersQueries.createCategoryLineupMember,
+      update: categoryLineupMembersQueries.updateCategoryLineupMember,
+      delete: categoryLineupMembersQueries.deleteCategoryLineupMember,
     },
   },
   role_definitions: {

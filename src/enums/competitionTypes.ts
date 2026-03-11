@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.competitionTypes;
+const t = translations.matches.enums.competitionTypes;
 
 export enum CompetitionTypes {
   LEAGUE = 'league',

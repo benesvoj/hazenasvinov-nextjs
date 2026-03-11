@@ -6,7 +6,7 @@ import {ArrowLeftIcon} from '@heroicons/react/24/outline';
 
 import {Link} from '@/components/ui';
 
-import {APP_ROUTES} from '@/lib';
+import {APP_ROUTES} from '@/lib/app-routes';
 
 interface BackButtonProps {
   label: string;

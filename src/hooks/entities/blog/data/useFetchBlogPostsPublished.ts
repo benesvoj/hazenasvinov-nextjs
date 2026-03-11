@@ -2,7 +2,8 @@
 
 import {useCallback, useEffect, useState} from 'react';
 
-import {API_HELPERS} from '@/lib';
+import {API_HELPERS} from '@/lib/api-routes-helpers';
+
 import {Blog} from '@/types';
 import {transformBlogPostForPublic} from '@/utils';
 

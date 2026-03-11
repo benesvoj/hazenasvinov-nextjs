@@ -9,7 +9,7 @@ import {useCategoryMap} from './hooks/useCategoryMap';
 
 interface MembersInternalSectionProps {
   // Data context
-  categoryId?: string; // filter by category (coach portal)
+  categoryId?: string | null; // filter by category (coach portal)
   categoriesData: Category[] | null;
 
   // Search & filter (optional — coach portal may not expose all)
@@ -24,10 +24,12 @@ interface MembersInternalSectionProps {
   // Selection (admin-only feature)
   enableSelection?: boolean;
   selectedItems?: Set<string>;
-  onSelectionChange?: (keys: Selection) => void;
+  onSelectionChange?: (keys: Set<string>) => void;
 
   // Aria
   ariaLabel: string;
+
+  pageSize?: number;
 }
 
 export const MembersInternalSection = ({
@@ -42,19 +44,21 @@ export const MembersInternalSection = ({
   selectedItems,
   onSelectionChange,
   ariaLabel,
+  pageSize,
 }: MembersInternalSectionProps) => {
   const {data, loading, pagination, goToPage} = useFetchMembersInternal({
     search: searchTerm,
     filters: {...filters, category_id: categoryId ?? filters?.category_id},
+    limit: pageSize,
   });
 
   const categories = useCategoryMap(categoriesData);
   const t = translations.members;
 
   const columns = getInternalMemberColumns(t, {
-    onPayment: onPayment ?? (() => {}),
-    onDelete: onDelete ?? (() => {}),
-    onEdit: onEdit ?? (() => {}),
+    onPayment,
+    onDelete,
+    onEdit,
   });
 
   const renderCell = (member: MemberInternal, columnKey: string) =>
@@ -72,6 +76,7 @@ export const MembersInternalSection = ({
       pagination={pagination}
       onPageChange={goToPage}
       ariaLabel={ariaLabel}
+      pageSize={pageSize}
     />
   );
 };

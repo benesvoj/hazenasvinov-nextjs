@@ -6,6 +6,7 @@ import {Tab, Tabs} from '@heroui/react';
 
 import {LoadingSpinner} from '@/components';
 import {AdminContainerProps, TabConfig} from '@/types';
+import {hasItems} from "@/utils";
 
 import {AdminActions, AdminContent, AdminFilters, AdminHeader} from './';
 
@@ -78,7 +79,7 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
           )}
 
           <AdminContent>
-            {tabs && tabs.length > 0 ? (
+            {hasItems(tabs) ? (
               <Tabs
                 selectedKey={effectiveActiveTab}
                 onSelectionChange={(key) => onTabChange?.(key as T[number]['key'])}

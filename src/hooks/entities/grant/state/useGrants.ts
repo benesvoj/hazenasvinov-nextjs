@@ -1,11 +1,14 @@
 'use client';
 
-import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {createCRUDHook} from '@/hooks/factories';
+
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {DB_TABLE, ENTITY} from '@/queries/grants';
 import {CreateGrant, Grant} from '@/types';
 
-const t = translations.admin.grants.responseMessages;
+const t = translations.grantCalendar.responseMessages;
 
 export function useGrants() {
   const {loading, error, create, update, deleteItem, setLoading} = createCRUDHook<

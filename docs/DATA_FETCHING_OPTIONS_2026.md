@@ -66,7 +66,7 @@ export default async function VideosPage() {
 ### Hybrid Pattern (BEST OF BOTH WORLDS)
 
 ```typescript
-// Server Component (page.tsx.backup)
+// Server Component (error.tsx.backup)
 import {VideoList} from './VideoList';
 
 export default async function VideosPage() {
@@ -276,7 +276,7 @@ const createVideo = trpc.video.create.useMutation();
 
 ### Code Example
 ```typescript
-// actions/videos.ts
+// actions/matchRecordings.ts
 'use server';
 
 export async function createVideo(formData: FormData) {

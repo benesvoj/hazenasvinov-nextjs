@@ -1,13 +1,13 @@
 // Category-based lineup types for team management
 // This is different from match lineups - these represent the actual team composition for each category
 
-import {CategoryLineupInsert, CategoryLineupSchema, CategoryLineupUpdate, Committee} from "@/types";
+import {CategoryLineupInsert, CategoryLineupSchema, CategoryLineupUpdate, Committee} from '@/types';
 
-export interface CategoryLineup extends CategoryLineupSchema{}
+export interface CategoryLineup extends CategoryLineupSchema {}
 
-export interface CreateCategoryLineup extends CategoryLineupInsert{}
+export interface CreateCategoryLineup extends CategoryLineupInsert {}
 
-export interface UpdateCategoryLineup extends CategoryLineupUpdate{}
+export interface UpdateCategoryLineup extends CategoryLineupUpdate {}
 
 export type CategoryLineupFormData = Omit<CategoryLineup, 'id' | 'created_at' | 'updated_at'>;
 
@@ -21,8 +21,8 @@ export interface RawCategoryLineupMember {
   is_captain: boolean;
   is_vice_captain: boolean;
   is_active: boolean;
-  added_at: string;
-  added_by: string;
+  created_at: string;
+  created_by: string;
   members: {
     id: string;
     name: string;
@@ -41,8 +41,8 @@ export interface CategoryLineupMemberOld {
   is_captain: boolean;
   is_vice_captain: boolean;
   is_active: boolean;
-  added_at: string;
-  added_by: string;
+  created_at: string;
+  created_by: string;
   member?: {
     id: string;
     name: string;

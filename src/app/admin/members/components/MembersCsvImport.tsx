@@ -1,3 +1,5 @@
+'use client';
+
 // TODO: direct supabase imports to /supabase instead of /utils/supabase/client
 import React, {useCallback, useState} from 'react';
 

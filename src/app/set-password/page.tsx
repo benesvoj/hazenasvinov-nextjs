@@ -14,8 +14,9 @@ import {
   UserPlusIcon,
 } from '@heroicons/react/24/outline';
 
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {useSupabaseClient} from '@/hooks';
-import {APP_ROUTES} from '@/lib';
 
 function SetPasswordContent() {
   const router = useRouter();

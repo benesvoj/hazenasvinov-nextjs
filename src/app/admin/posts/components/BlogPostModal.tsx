@@ -2,28 +2,27 @@ import React from 'react';
 
 import Image from 'next/image';
 
-import {Button, Input, Select, SelectItem, Textarea} from '@heroui/react';
+import {Button, Input, Textarea} from '@heroui/react';
 
 import {MagnifyingGlassIcon, PhotoIcon, XMarkIcon} from '@heroicons/react/24/outline';
 
 import {useModal} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import MatchSelectionModal from '@/app/admin/posts/components/MatchSelectionModal';
 
-import {UnifiedModal} from '@/components';
-import {getBlogPostStatusOptions, ModalMode} from '@/enums';
+import {Choice, Dialog} from '@/components';
+import {BlogPostStatuses, getBlogPostStatusOptions, ModalMode} from '@/enums';
 import {formatDateString} from '@/helpers';
 import {useBlogPostForm} from '@/hooks';
-import {BlogPostFormData, Category, SupabaseUser} from '@/types';
+import {Category, SupabaseUser} from '@/types';
 
 interface BlogPostModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
   categories: Category[];
-  categoriesLoading: boolean;
-  formData: BlogPostFormData;
-  setFormData: (data: BlogPostFormData) => void;
   blogPostForm: ReturnType<typeof useBlogPostForm>;
   mode: ModalMode;
   users: SupabaseUser[];
@@ -36,10 +35,7 @@ export const BlogPostModal = ({
   onClose,
   onSubmit,
   categories,
-  categoriesLoading,
   blogPostForm,
-  formData,
-  setFormData,
   mode,
   users,
   matchModalControl,
@@ -47,101 +43,85 @@ export const BlogPostModal = ({
 }: BlogPostModalProps) => {
   const isEditMode = mode === ModalMode.EDIT;
   const modalTitle = isEditMode ? 'Upravit článek' : 'Vytvořit nový článek';
+  const submitButtonLabel = isEditMode
+    ? translations.common.actions.save
+    : translations.common.actions.create;
 
-  const footerButtons = (
-    <>
-      <Button variant="light" onPress={onClose} isDisabled={isLoading}>
-        Zrušit
-      </Button>
-      <Button color="primary" onPress={onSubmit} isLoading={isLoading} disabled={isLoading}>
-        {isEditMode ? 'Uložit změny' : 'Vytvořit článek'}
-      </Button>
-    </>
-  );
+  const authorOptions = users.map((user) => ({key: user.id, label: user.email}));
+  const statusOptions = getBlogPostStatusOptions().map((status) => ({
+    key: status.value,
+    label: status.label,
+  }));
+  const categoriesOptions = categories.map((category) => ({
+    key: category.id,
+    label: category.name,
+  }));
 
   return (
     <>
-      <UnifiedModal
+      <Dialog
         isOpen={isOpen}
         onClose={onClose}
         title={modalTitle}
-        footer={footerButtons}
-        size="4xl"
+        onSubmit={onSubmit}
+        isLoading={isLoading}
+        submitButtonLabel={submitButtonLabel}
+        size={'3xl'}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
+        <div className={'grid grid-cols-1 md:grid-cols-2 gap-2 lg:gap-4'}>
+          <div className="space-y-2 md:space-y-4">
             <Input
-              label="Název článku"
-              placeholder="Zadejte název článku"
-              value={formData.title}
-              onChange={(e) => setFormData({...formData, title: e.target.value})}
+              label={translations.blogPosts.labels.title}
+              placeholder={translations.blogPosts.placeholders.title}
+              value={blogPostForm.formData.title}
+              onChange={(e) =>
+                blogPostForm.updateFormData({...blogPostForm.formData, title: e.target.value})
+              }
               isRequired
+              size="sm"
             />
             <Input
-              label="Slug (URL)"
-              placeholder="automaticky generováno"
-              value={formData.slug}
-              onChange={(e) => setFormData({...formData, slug: e.target.value})}
+              label={translations.blogPosts.labels.slug}
+              placeholder={translations.blogPosts.placeholders.slug}
+              value={blogPostForm.formData.slug}
+              onChange={(e) =>
+                blogPostForm.setFormData({...blogPostForm.formData, slug: e.target.value})
+              }
               isRequired
               isDisabled
+              size="sm"
             />
-            <Select
-              label="Autor"
-              placeholder="Vyberte autora"
-              selectedKeys={formData.author_id ? [formData.author_id] : []}
-              onSelectionChange={(keys) =>
-                setFormData({
-                  ...formData,
-                  author_id: Array.from(keys)[0] as string,
+            <Choice
+              items={authorOptions}
+              value={blogPostForm.formData.author_id}
+              onChange={(id) => blogPostForm.setFormData({...blogPostForm.formData, author_id: id})}
+              label={translations.blogPosts.labels.author}
+              placeholder={translations.blogPosts.placeholders.author}
+              isRequired
+            />
+            <Choice
+              items={statusOptions}
+              value={blogPostForm.formData.status}
+              onChange={(value) =>
+                blogPostForm.setFormData({
+                  ...blogPostForm.formData,
+                  status: value ?? BlogPostStatuses.DRAFT,
                 })
               }
+              label={translations.blogPosts.labels.status}
+              placeholder={translations.blogPosts.placeholders.status}
               isRequired
-            >
-              {users.map((user) => (
-                <SelectItem key={user.id}>{user.email}</SelectItem>
-              ))}
-            </Select>
-            <Select
-              label="Stav"
-              placeholder="Vyberte stav"
-              selectedKeys={[formData.status]}
-              onSelectionChange={(keys) =>
-                setFormData({
-                  ...formData,
-                  status: Array.from(keys)[0] as string,
-                })
-              }
-              isRequired
-            >
-              {getBlogPostStatusOptions().map(({value, label}) => (
-                <SelectItem key={value}>{label}</SelectItem>
-              ))}
-            </Select>
+            />
 
-            {/* Category Selection */}
-            <Select
-              label="Kategorie"
-              placeholder="Vyberte kategorii"
-              selectedKeys={formData.category_id ? [formData.category_id] : []}
-              onSelectionChange={(keys) =>
-                setFormData({
-                  ...formData,
-                  category_id: Array.from(keys)[0] as string,
-                })
+            <Choice
+              items={categoriesOptions}
+              value={blogPostForm.formData.category_id}
+              onChange={(id) =>
+                blogPostForm.setFormData({...blogPostForm.formData, category_id: id})
               }
-              isDisabled={categoriesLoading}
-              isRequired
-            >
-              {categories.length > 0 ? (
-                categories.map((category) => (
-                  <SelectItem key={category.id}>{category.name}</SelectItem>
-                ))
-              ) : (
-                <SelectItem key="no-categories" isDisabled>
-                  {categoriesLoading ? 'Načítání kategorií...' : 'Žádné kategorie'}
-                </SelectItem>
-              )}
-            </Select>
+              label={translations.categories.labels.category}
+              placeholder={translations.categories.placeholders.category}
+            />
 
             {/* Match Selection (Optional) */}
             <div>
@@ -250,27 +230,22 @@ export const BlogPostModal = ({
             </div>
           </div>
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Obsah článku <span className="text-red-500">*</span>
-              </label>
-              <Textarea
-                placeholder="Zde napište obsah článku..."
-                value={blogPostForm.formData.content}
-                onChange={(e) =>
-                  blogPostForm.setFormData({
-                    ...blogPostForm.formData,
-                    content: e.target.value,
-                  })
-                }
-                rows={12}
-                required
-                className="w-full"
-              />
-            </div>
+            <Textarea
+              label={translations.blogPosts.labels.content}
+              placeholder={translations.blogPosts.placeholders.content}
+              value={blogPostForm.formData.content}
+              onChange={(e) =>
+                blogPostForm.setFormData({
+                  ...blogPostForm.formData,
+                  content: e.target.value,
+                })
+              }
+              minRows={40}
+              isRequired
+            />
           </div>
         </div>
-      </UnifiedModal>
+      </Dialog>
 
       <MatchSelectionModal
         isOpen={matchModalControl.isOpen}

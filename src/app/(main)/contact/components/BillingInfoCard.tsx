@@ -1,8 +1,8 @@
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {CardAttribute} from '@/app/(main)/contact/components/CardAttribute';
 
-import {UnifiedCard} from '@/components';
+import {ContentCard} from '@/components';
 import {ClubConfig} from '@/types';
 
 interface BillingInfoCardProps {
@@ -11,7 +11,7 @@ interface BillingInfoCardProps {
 
 export const BillingInfoCard = ({data}: BillingInfoCardProps) => {
   return (
-    <UnifiedCard title={translations.common.labels.billingInformation}>
+    <ContentCard title={translations.common.labels.billingInformation}>
       <div className="space-y-4">
         <CardAttribute label={translations.common.labels.address} value={data?.address} multiline />
         <CardAttribute
@@ -28,6 +28,6 @@ export const BillingInfoCard = ({data}: BillingInfoCardProps) => {
           />
         </div>
       </div>
-    </UnifiedCard>
+    </ContentCard>
   );
 };

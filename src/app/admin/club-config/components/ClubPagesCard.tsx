@@ -340,7 +340,8 @@ export default function ClubPagesCard() {
             <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex-1">
                 <h5 className="font-medium text-gray-900">
-                  {translations.sections.title} &ldquo;{translations.sections.clubHighlight}&rdquo;
+                  {translations.clubConfig.sections.title} &ldquo;
+                  {translations.clubConfig.sections.clubHighlight}&rdquo;
                 </h5>
                 <p className="text-sm text-gray-600 mt-1">
                   Zobrazuje informace o klubu a jeho historii
@@ -370,7 +371,8 @@ export default function ClubPagesCard() {
             <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
               <div className="flex-1">
                 <h5 className="font-medium text-gray-900">
-                  {translations.sections.title} &ldquo;{translations.sections.sponsors}&rdquo;
+                  {translations.clubConfig.sections.title} &ldquo;
+                  {translations.clubConfig.sections.sponsors}&rdquo;
                 </h5>
                 <p className="text-sm text-gray-600 mt-1">
                   Zobrazuje seznam partnerů a sponzorů klubu
@@ -400,7 +402,8 @@ export default function ClubPagesCard() {
             <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
               <div className="flex-1">
                 <h5 className="font-medium text-gray-900">
-                  {translations.sections.title} &ldquo;{translations.sections.callToAction}&rdquo;
+                  {translations.clubConfig.sections.title} &ldquo;
+                  {translations.clubConfig.sections.callToAction}&rdquo;
                 </h5>
                 <p className="text-sm text-gray-600 mt-1">
                   Zobrazuje výzvu k připojení se ke klubu

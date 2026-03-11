@@ -33,6 +33,7 @@ export default function MatchesPage() {
       const urlParams = new URLSearchParams(window.location.search);
       const categoryParam = urlParams.get('category');
       if (categoryParam && categoryParam !== 'all') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedCategory(categoryParam);
       }
     }
@@ -45,6 +46,7 @@ export default function MatchesPage() {
 
   // Reset club selection and filter type when category changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedClub(undefined);
     // Reset filter type to "all" when category changes to avoid invalid filter states
     if (filterType === 'home' || filterType === 'away') {

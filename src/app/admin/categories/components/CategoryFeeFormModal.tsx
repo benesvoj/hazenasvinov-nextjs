@@ -50,6 +50,7 @@ export default function CategoryFeeFormModal({
 
   useEffect(() => {
     if (fee) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         category_id: fee.category_id,
         calendar_year: fee.calendar_year,

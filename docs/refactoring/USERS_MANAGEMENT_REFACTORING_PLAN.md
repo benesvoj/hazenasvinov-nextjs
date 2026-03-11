@@ -45,7 +45,7 @@
 
 ```
 src/app/admin/users/
-├── page.tsx                    # UsersPage - main page component
+├── error.tsx                    # UsersPage - main page component
 └── components/
     ├── UsersTab.tsx            # Table + API logic + Modals (460+ lines)
     ├── UserFormModal.tsx       # Form modal with role management
@@ -92,7 +92,7 @@ UsersPage
 
 | # | Problem | Location | Impact |
 |---|---------|----------|--------|
-| 1 | Empty onClick handler | `page.tsx:67-68` | "Add User" button does nothing |
+| 1 | Empty onClick handler | `error.tsx:67-68` | "Add User" button does nothing |
 | 2 | API logic in UI component | `UsersTab.tsx:57-185` | Untestable, not reusable |
 | 3 | Duplicate "Add User" buttons | Parent action + Child CardHeader | Confusing UX |
 | 4 | Wrong API endpoint | `UsersTab.tsx:161` | `/api/reset-password` returns 404 |
@@ -118,7 +118,7 @@ UsersPage
 
 ```
 src/app/admin/users/
-├── page.tsx                    # UsersPage - orchestrates everything
+├── error.tsx                    # UsersPage - orchestrates everything
 └── components/
     ├── UsersTab.tsx            # Pure display component (~150 lines)
     ├── UserFormModal.tsx       # Form modal (unchanged internally)
@@ -257,7 +257,7 @@ interface OperationResult {
 
 ### Phase 2: Refactor UsersPage
 
-**File**: `src/app/admin/users/page.tsx`
+**File**: `src/app/admin/users/error.tsx`
 
 #### 2.1 Add New State and Hooks
 
@@ -555,7 +555,7 @@ const resetPassword = async (email: string): Promise<OperationResult> => {
 
 | File | Changes |
 |------|---------|
-| `src/app/admin/users/page.tsx` | Add hook usage, modal state, handlers, render modals |
+| `src/app/admin/users/error.tsx` | Add hook usage, modal state, handlers, render modals |
 | `src/app/admin/users/components/UsersTab.tsx` | Remove API logic, modals; add callback props |
 | `src/hooks/index.ts` | Export new hook |
 

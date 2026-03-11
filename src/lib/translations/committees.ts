@@ -1,4 +1,8 @@
 export const committeesTranslations = {
+  page: {
+    title: 'Komise',
+    description: 'Správa oblastních soutěžních komisí',
+  },
   title: 'Správa komisí',
   description: 'Správa komisí, které jsou dostupné v systému.',
   addCommittee: 'Přidat komisi',
@@ -38,5 +42,10 @@ export const committeesTranslations = {
     committeesUpdateSuccess: 'Komise byla úspěšně aktualizována',
     mandatoryCode: 'Kod je povinný',
     mandatoryName: 'Název je povinny',
+  },
+  labels: {},
+  placeholders: {},
+  helpers: {
+    code: 'Kód komise nelze změnit po vytvoření',
   },
 };

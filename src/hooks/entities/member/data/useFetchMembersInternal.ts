@@ -1,9 +1,12 @@
 'use client';
 
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
+
+import {API_ROUTES} from '@/lib/api-routes';
 
 import {showToast} from '@/components';
-import {API_ROUTES} from '@/lib';
+import {Genders, MemberFunction} from '@/enums';
+import {useDebounce} from '@/hooks';
 import {convertToInternalMemberWithPayment, MemberInternal, MembersInternalSchema} from '@/types';
 
 interface PaginationInfo {
@@ -12,29 +15,34 @@ interface PaginationInfo {
   total: number | null;
 }
 
-interface UseFetchMembersInternalOptions {
+interface MembersInternalOptions {
   page?: number;
   limit?: number;
-  enabled?: boolean; // Allow disabling auto-fetch
+  enabled?: boolean;
   search?: string;
   filters?: {
-    sex?: string;
+    sex?: Genders;
     category_id?: string;
-    function?: string;
+    function?: MemberFunction;
+    isActive?: boolean;
   };
 }
 
-export const useFetchMembersInternal = (options: UseFetchMembersInternalOptions = {}) => {
+/**
+ * Custom hook to fetch internal members with pagination, search, and filters.
+ * @param options
+ */
+export const useFetchMembersInternal = (options: MembersInternalOptions = {}) => {
   const {
     page: initialPage = 1,
     limit: initialLimit = 25,
     enabled = true,
-    search: initialSearch = '',
-    filters: initialFilters = {},
+    search = '',
+    filters = {},
   } = options;
 
   const [data, setData] = useState<MemberInternal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: initialPage,
@@ -42,102 +50,76 @@ export const useFetchMembersInternal = (options: UseFetchMembersInternalOptions 
     total: null,
   });
 
-  // Use ref to track if this is the initial mount
-  const isInitialMount = useRef(true);
-  const searchRef = useRef(initialSearch);
-  const filtersRef = useRef(initialFilters);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Update refs when props change
-  searchRef.current = initialSearch;
-  filtersRef.current = initialFilters;
+  const debouncedSearch = useDebounce(search, 300);
+  const debouncedSex = useDebounce(filters?.sex, 300);
+  const debouncedCatId = useDebounce(filters?.category_id, 300);
+  const debouncedFn = useDebounce(filters?.function, 300);
 
-  const fetchData = useCallback(async (page: number, limit: number) => {
-    setLoading(true);
-    setError(null);
+  const fetchData = useCallback(
+    async (page: number, limit: number) => {
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = new AbortController();
+      setLoading(true);
+      setError(null);
 
-    try {
-      const url = new URL(API_ROUTES.members.internal, window.location.origin);
-      url.searchParams.set('page', page.toString());
-      url.searchParams.set('limit', limit.toString());
+      try {
+        const url = new URL(API_ROUTES.members.internal, window.location.origin);
+        url.searchParams.set('page', page.toString());
+        url.searchParams.set('limit', limit.toString());
+        if (debouncedSearch) url.searchParams.set('search', debouncedSearch);
+        if (debouncedSex) url.searchParams.set('sex', debouncedSex);
+        if (debouncedCatId) url.searchParams.set('category_id', debouncedCatId);
+        if (debouncedFn) url.searchParams.set('function', debouncedFn);
+        if (filters?.isActive) url.searchParams.set('isActive', 'true');
 
-      // Add search parameter
-      if (searchRef.current) {
-        url.searchParams.set('search', searchRef.current);
+        const response = await fetch(url.toString(), {
+          signal: abortControllerRef.current.signal,
+        });
+        const result = await response.json();
+
+        if (!response.ok) throw new Error(result.error || 'Failed to load members');
+
+        setData(
+          (result.data.items as MembersInternalSchema[]).map(convertToInternalMemberWithPayment)
+        );
+        setPagination({page, limit, total: result.data.total ?? null});
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load members';
+        setError(errorMessage);
+        showToast.danger(errorMessage);
+      } finally {
+        setLoading(false);
       }
-
-      // Add filter parameters
-      if (filtersRef.current.sex) {
-        url.searchParams.set('sex', filtersRef.current.sex);
-      }
-      if (filtersRef.current.category_id) {
-        url.searchParams.set('category_id', filtersRef.current.category_id);
-      }
-      if (filtersRef.current.function) {
-        url.searchParams.set('function', filtersRef.current.function);
-      }
-
-      const response = await fetch(url.toString());
-      const result = await response.json();
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      setData(
-        result.data.map((schema: MembersInternalSchema) =>
-          convertToInternalMemberWithPayment(schema)
-        ) || []
-      );
-      setPagination(result.pagination || {page, limit, total: null});
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load members';
-      setError(errorMessage);
-      showToast.danger(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, []); // No dependencies - uses refs instead
-
-  // Initial fetch on mount only
-  useEffect(() => {
-    if (enabled && isInitialMount.current) {
-      isInitialMount.current = false;
-      fetchData(initialPage, initialLimit);
-    }
-  }, [enabled, initialPage, initialLimit, fetchData]);
-
-  // Create stable filter string for dependency tracking
-  const filterString = useMemo(
-    () => JSON.stringify(initialFilters),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [initialFilters.sex, initialFilters.category_id, initialFilters.function]
+    },
+    [debouncedSearch, debouncedSex, debouncedCatId, debouncedFn, filters?.isActive]
   );
 
-  // Re-fetch when search/filters change (debounced)
   useEffect(() => {
-    if (!enabled || isInitialMount.current) return;
+    if (!enabled) return;
+    void fetchData(1, pagination.limit);
+  }, [enabled, fetchData, pagination.limit]);
 
-    const timer = setTimeout(() => {
-      fetchData(1, pagination.limit); // Reset to page 1 on search/filter change
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [enabled, initialSearch, filterString, pagination.limit, fetchData]);
+  useEffect(() => {
+    return () => abortControllerRef.current?.abort();
+  }, []);
 
   const refresh = useCallback(() => {
-    fetchData(pagination.page, pagination.limit);
+    void fetchData(pagination.page, pagination.limit);
   }, [fetchData, pagination.page, pagination.limit]);
 
   const goToPage = useCallback(
     (newPage: number) => {
-      fetchData(newPage, pagination.limit);
+      void fetchData(newPage, pagination.limit);
     },
     [fetchData, pagination.limit]
   );
 
   const changePageSize = useCallback(
     (newLimit: number) => {
-      fetchData(1, newLimit); // Reset to page 1 when changing page size
+      void fetchData(1, newLimit);
     },
     [fetchData]
   );

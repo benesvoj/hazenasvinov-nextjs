@@ -5,9 +5,10 @@ import {useState} from 'react';
 import {showToast} from '@/components';
 import {Genders} from '@/enums';
 import {useSupabaseClient} from '@/hooks';
+import {isEmpty} from '@/utils';
 
 interface BulkEditFormData {
-  sex: Genders;
+  gender: Genders.MALE | Genders.FEMALE | null;
   category: string;
   functions: string[];
 }
@@ -29,7 +30,7 @@ export function useBulkEditMembers({onSuccess}: UseBulkEditMembersProps) {
       return false;
     }
 
-    if (!formData.sex && !formData.category && formData.functions.length === 0) {
+    if (!formData.gender && !formData.category && isEmpty(formData.functions)) {
       showToast.danger('Vyberte alespoň jedno pole pro úpravu');
       return false;
     }
@@ -38,7 +39,7 @@ export function useBulkEditMembers({onSuccess}: UseBulkEditMembersProps) {
 
     try {
       const updateData: any = {};
-      if (formData.sex) updateData.sex = formData.sex;
+      if (formData.gender) updateData.sex = formData.gender;
       if (formData.category) updateData.category_id = formData.category;
       if (formData.functions.length > 0) updateData.functions = formData.functions;
 

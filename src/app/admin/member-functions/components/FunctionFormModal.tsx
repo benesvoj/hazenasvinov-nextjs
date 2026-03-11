@@ -2,9 +2,10 @@ import React from 'react';
 
 import {Checkbox, Input, Textarea} from '@heroui/react';
 
+import {translations} from '@/lib/translations';
+
 import {UnifiedModal} from '@/components';
 import {ModalMode} from '@/enums';
-import {translations} from "@/lib";
 import {MemberFunctionFormData} from '@/types';
 
 interface FunctionFormModalProps {
@@ -28,7 +29,8 @@ export default function FunctionFormModal({
   formData,
   setFormData,
 }: FunctionFormModalProps) {
-  const modalTitle = mode === ModalMode.EDIT ? tMemberFunctions.modal.editTitle : tMemberFunctions.modal.addTitle;
+  const modalTitle =
+    mode === ModalMode.EDIT ? tMemberFunctions.modal.editTitle : tMemberFunctions.modal.addTitle;
 
   return (
     <UnifiedModal

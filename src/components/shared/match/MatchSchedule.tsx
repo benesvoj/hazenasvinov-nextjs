@@ -4,6 +4,8 @@ import React, {useEffect, useMemo, useRef, useState} from 'react';
 
 import {Alert, Skeleton, Tab, Tabs} from '@heroui/react';
 
+import {translations} from '@/lib/translations';
+
 import {hasItems, isEmpty} from '@/utils/arrayHelper';
 
 import CategoryMatchesAndResults from '@/app/(main)/components/CategoryMatchesAndResults';
@@ -17,7 +19,6 @@ import {
   useStandings,
   useUserRoles,
 } from '@/hooks';
-import {translations} from '@/lib';
 
 interface MatchScheduleProps {
   title?: string;
@@ -188,7 +189,7 @@ export default function MatchSchedule({
             {description && (
               <p className="text-lg text-gray-600 dark:text-gray-400">{description}</p>
             )}
-            <LoadingSpinner label={translations.loading} />
+            <LoadingSpinner label={translations.common.loading} />
           </div>
         </div>
       </section>

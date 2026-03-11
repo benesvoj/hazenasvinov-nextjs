@@ -4,24 +4,23 @@ import React from 'react';
 
 import {usePathname} from 'next/navigation';
 
-import {translations} from '@/lib/translations/index';
+import {coachesNavRoutes} from '@/lib/navigation';
+import {translations} from '@/lib/translations';
 
 import {useUser} from '@/contexts/UserContext';
 
 import {UnifiedTopBar} from '@/components';
 import {UserRoles} from '@/enums';
 
-import {coachesRoutes} from '../routes/routes';
-
 import {useCoachesSidebar} from './CoachesSidebarContext';
 
 const getPageInfo = (pathname: string) => {
   // Find the route that matches the current pathname
-  const route = coachesRoutes.find((route) => route.href === pathname);
+  const route = coachesNavRoutes.find((route) => route.href === pathname);
 
   if (route) {
     // Get the route key from the href (e.g., 'dashboard' from '/coaches/dashboard')
-    const routeKey = route.href.replace(
+    const routeKey = route.href?.replace(
       '/coaches/',
       ''
     ) as keyof typeof translations.coachPortal.routes;

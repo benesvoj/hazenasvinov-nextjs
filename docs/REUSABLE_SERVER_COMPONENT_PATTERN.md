@@ -16,7 +16,7 @@ This is the **standard pattern** for all pages in your app. Use this template fo
 
 ### File 1: Server Component Page (4-10 lines)
 
-**Location:** `src/app/[path]/page.tsx`
+**Location:** `src/app/[path]/error.tsx`
 
 **Template:**
 ```typescript
@@ -195,7 +195,7 @@ export function ClientButton({label, onClick}: ClientButtonProps) {
 
 ```
 src/app/(main)/blog/[slug]/
-├── page.tsx                    (10 lines - Server Component)
+├── error.tsx                    (10 lines - Server Component)
 ├── BlogPostClient.tsx          (140 lines - Client logic)
 └── components/
     ├── BackButton.tsx          (15 lines - Client wrapper)
@@ -219,7 +219,7 @@ src/queries/blogPosts/
 ### ❌ OLD (What you had before):
 
 ```
-src/app/(main)/blog/[slug]/page.tsx (180 lines)
+src/app/(main)/blog/[slug]/error.tsx (180 lines)
 ├── 'use client'
 ├── useFetchBlogPostBySlug(slug)  // Client fetch
 ├── useFetchCategories()           // Client fetch
@@ -238,7 +238,7 @@ Problems:
 
 ```
 src/app/(main)/blog/[slug]/
-├── page.tsx (10 lines)             // Server Component
+├── error.tsx (10 lines)             // Server Component
 │   ├── prefetchQuery()              // Server prefetch
 │   └── <HydrationBoundary>          // Pass to client
 │
@@ -273,7 +273,7 @@ Use this checklist for every new page:
 - [ ] Test query functions independently
 
 ### ✅ Step 2: Server Component Page
-- [ ] Create `src/app/[path]/page.tsx`
+- [ ] Create `src/app/[path]/error.tsx`
 - [ ] NO `'use client'` directive
 - [ ] Make function `async`
 - [ ] Use `prefetchQuery` helper
@@ -304,7 +304,7 @@ Use this checklist for every new page:
 
 ## Template Files (Copy-Paste Ready)
 
-### Template 1: Server Page (page.tsx)
+### Template 1: Server Page (error.tsx)
 ```typescript
 import {HydrationBoundary} from '@tanstack/react-query';
 import {prefetchQuery} from '@/utils/prefetch';
@@ -378,7 +378,7 @@ export function ClientButton({label, onClick}: ClientButtonProps) {
 ### 1. Separation of Concerns
 ```
 Data Layer:     src/queries/[entity]/queries.ts
-Server Layer:   src/app/[path]/page.tsx (10 lines)
+Server Layer:   src/app/[path]/error.tsx (10 lines)
 Client Layer:   src/app/[path]/[Entity]Client.tsx
 UI Components:  src/app/[path]/components/*
 ```
@@ -439,7 +439,7 @@ useQuery({queryKey: ['entity', id], queryFn: () => fetchEntity(id)})
 
 ### Blog Post Detail:
 ```
-page.tsx:              10 lines  (Server Component)
+error.tsx:              10 lines  (Server Component)
 BlogPostClient.tsx:   140 lines  (Client Component)
 components/*:          50 lines  (Client wrappers)
 queries.ts:            80 lines  (Query functions)
@@ -449,7 +449,7 @@ Total:                280 lines  (Clean, organized!)
 
 ### Seasons Admin:
 ```
-page.tsx:              17 lines  (Server Component)
+error.tsx:              17 lines  (Server Component)
 SeasonsPageClient.tsx: 191 lines  (Client Component)
 queries.ts:            76 lines  (Query functions)
 ---
@@ -480,13 +480,13 @@ Total:                284 lines  (Almost identical!)
 **Established pattern:**
 ```
 /admin/seasons/
-├── page.tsx                    // Server Component
+├── error.tsx                    // Server Component
 ├── SeasonsPageClient.tsx       // Client Component (PascalCase + Client suffix)
 └── components/
     └── SeasonModal.tsx         // Feature-specific component
 
 /blog/[slug]/
-├── page.tsx                    // Server Component
+├── error.tsx                    // Server Component
 ├── BlogPostClient.tsx          // Client Component (PascalCase + Client suffix)
 └── components/
     ├── BackButton.tsx          // Client wrapper
@@ -494,7 +494,7 @@ Total:                284 lines  (Almost identical!)
 ```
 
 **Pattern:**
-- Server page: `page.tsx`
+- Server page: `error.tsx`
 - Client page: `[Feature]Client.tsx` or `[Feature]PageClient.tsx`
 - Wrappers: `components/[ComponentName].tsx`
 
@@ -505,7 +505,7 @@ Total:                284 lines  (Almost identical!)
 ### 1. Copy Template Files
 ```bash
 # Copy server page template
-cp src/app/admin/seasons/page.tsx src/app/[new-path]/page.tsx
+cp src/app/admin/seasons/error.tsx src/app/[new-path]/error.tsx
 
 # Copy client component template
 cp src/app/admin/seasons/SeasonsPageClient.tsx src/app/[new-path]/[Entity]Client.tsx

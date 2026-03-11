@@ -3,6 +3,7 @@
 import React from 'react';
 
 import {UnifiedSidebar} from '@/components';
+import {PortalVariants} from '@/enums';
 
 import {useAdminSidebar} from './AdminSidebarContext';
 
@@ -11,7 +12,7 @@ export const AdminSidebar = () => {
 
   return (
     <UnifiedSidebar
-      variant="admin"
+      variant={PortalVariants.ADMIN}
       sidebarContext={{
         isCollapsed: sidebarContext.isCollapsed,
         isMobileOpen: sidebarContext.isMobileOpen,

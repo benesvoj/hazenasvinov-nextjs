@@ -26,18 +26,7 @@ export const API_ROUTES = {
   },
   blogPostsPublished: '/api/blog-posts-published' as const,
   categories: {
-    feeById: (id: string | number, feeId: string | number) => `/api/categories/${id}/fees/${feeId}`,
     fees: (id: string | number) => `/api/categories/${id}/fees`,
-    lineupById: (id: string | number, lineupId: string | number) =>
-      `/api/categories/${id}/lineups/${lineupId}`,
-    lineupByIdMemberById: (
-      id: string | number,
-      lineupId: string | number,
-      memberId: string | number
-    ) => `/api/categories/${id}/lineups/${lineupId}/members/${memberId}`,
-    lineupByIdMembers: (id: string | number, lineupId: string | number) =>
-      `/api/categories/${id}/lineups/${lineupId}/members`,
-    lineups: (id: string | number) => `/api/categories/${id}/lineups`,
   },
   categoryMembershipFees: '/api/category-membership-fees' as const,
   checkUser: '/api/check-user' as const,
@@ -55,19 +44,11 @@ export const API_ROUTES = {
     public: '/api/coach-cards/public' as const,
     byId: (id: string | number) => `/api/coach-cards/${id}`,
   },
-  dev: {
-    extractSchema: '/api/dev/extract-schema' as const,
-    testBlogPosts: '/api/dev/test-blog-posts' as const,
-    testLoginLog: '/api/dev/test-login-log' as const,
-    testMaterializedView: '/api/dev/test-materialized-view' as const,
-    testPageVisibility: '/api/dev/test-page-visibility' as const,
-  },
   entities: {
     byId: (entity: string | number, id: string | number) => `/api/entities/${entity}/${id}`,
     root: (entity: string | number) => `/api/entities/${entity}`,
   },
   logLogin: '/api/log-login' as const,
-  manageUsers: '/api/manage-users' as const,
   matches: {
     lineupById: (id: string | number, lineupId: string | number) =>
       `/api/matches/${id}/lineups/${lineupId}`,
@@ -123,7 +104,6 @@ export const API_ROUTES = {
     bulk: '/api/training-sessions/bulk' as const,
   },
   userProfiles: '/api/user-profiles' as const,
-  userRoles: '/api/user-roles' as const,
   users: '/api/users' as const,
 } as const;
 

@@ -11,7 +11,7 @@ import {ActionTypes} from '@/enums';
 import {MeetingMinutesContainerRef} from '@/types';
 
 export default function MeetingMinutesPage() {
-  const t = translations.components.meetingMinutes;
+  const t = translations.meetingMinutes;
   const containerRef = useRef<MeetingMinutesContainerRef>(null);
 
   return (

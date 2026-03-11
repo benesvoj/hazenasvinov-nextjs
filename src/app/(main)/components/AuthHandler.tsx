@@ -4,8 +4,9 @@ import {useEffect} from 'react';
 
 import {useRouter} from 'next/navigation';
 
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {useSupabaseClient} from '@/hooks';
-import {APP_ROUTES} from '@/lib';
 
 export default function AuthHandler() {
   const router = useRouter();

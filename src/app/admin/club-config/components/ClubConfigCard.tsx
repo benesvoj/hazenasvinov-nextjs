@@ -1,3 +1,5 @@
+'use client';
+
 import {useEffect, useRef, useState} from 'react';
 
 import {Button, Input, Textarea} from '@heroui/react';
@@ -13,11 +15,11 @@ import {
 
 import Logo from '@/components/ui/layout/Logo';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {deleteClubAsset, uploadClubAsset} from '@/utils/supabase/storage';
 
-import {Heading, showToast, UnifiedCard} from '@/components';
+import {ContentCard, Heading, showToast} from '@/components';
 import {ACTION_TYPE_LABELS, ActionTypes} from '@/enums';
 import {useClubConfig, useFetchClubConfig} from '@/hooks';
 
@@ -135,7 +137,7 @@ export default function ClubConfigCard() {
   );
 
   return (
-    <UnifiedCard isLoading={loading} footer={footer}>
+    <ContentCard isLoading={loading} footer={footer}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-4">
           <Heading size={3}>
@@ -304,6 +306,6 @@ export default function ClubConfigCard() {
           />
         </div>
       </div>
-    </UnifiedCard>
+    </ContentCard>
   );
 }

@@ -7,7 +7,8 @@ import {TagIcon, ArrowRightIcon} from '@heroicons/react/24/outline';
 import {BlogPostCard, BlogPostCardSkeleton} from '@/components/features';
 import Link from '@/components/ui/link/Link';
 
-import {APP_ROUTES} from '@/lib';
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {Blog} from '@/types';
 import {hasItems} from '@/utils';
 

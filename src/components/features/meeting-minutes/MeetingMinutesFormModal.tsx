@@ -20,11 +20,11 @@ import {
 
 import {TrashIcon, UserIcon} from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations/index';
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
 
 import {showToast} from '@/components';
 import {useAuth, useFetchMembers, useFetchSeasons, useSeasonFiltering} from '@/hooks';
-import {API_ROUTES} from '@/lib';
 import {MeetingMinutes, MeetingMinutesFormData} from '@/types';
 
 import {AttendeesModal} from './AttendeesModal';

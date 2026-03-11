@@ -238,7 +238,7 @@ export * from './state/useNewEntities';
 
 #### 8. Create Admin Page (Optional)
 ```typescript
-// src/app/admin/new-entities/page.tsx.backup
+// src/app/admin/new-entities/error.tsx.backup
 'use client';
 
 import {useCallback, useState} from 'react';

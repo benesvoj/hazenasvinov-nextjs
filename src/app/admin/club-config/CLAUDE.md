@@ -31,7 +31,7 @@ Only one club config record ever exists (`is_active = true`). There is no create
 
 ## Files
 
-- `page.tsx` — Tab container (Club Config / Club Pages tabs)
+- `error.tsx` — Tab container (Club Config / Club Pages tabs)
 - `components/ClubConfigCard.tsx` — Edit/view form for club identity, hero, contact, social
 - `components/ClubPagesCard.tsx` — Page visibility and section toggles
 - `src/hooks/entities/club-config/data/useFetchClubConfig.ts` — Singleton data fetch hook

@@ -4,22 +4,24 @@ import React, {useCallback, useMemo, useState} from 'react';
 
 import {useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {
   AdminContainer,
   DeleteConfirmationModal,
+  Dialog,
   VideoFilters as VideoFiltersComponent,
   VideoFormModal,
   VideoGrid,
 } from '@/components';
 import {ActionTypes, ModalMode} from '@/enums';
 import {useFetchVideos, useVideoFiltering, useVideoForm, useVideos} from '@/hooks';
-import {translations} from '@/lib';
 import {VideoSchema} from '@/types';
 import {transformToVideoInsert} from '@/utils';
 
-const t = translations.admin.videos;
+const t = translations.matchRecordings;
 
 export default function VideosPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -142,7 +144,7 @@ export default function VideosPage() {
       <AdminContainer
         actions={[
           {
-            label: t.addVideo,
+            label: t.actions.add,
             onClick: openAddModal,
             variant: 'solid',
             buttonType: ActionTypes.CREATE,
@@ -179,14 +181,18 @@ export default function VideosPage() {
         isLoading={crudLoading}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeAndClear}
-        onConfirm={handleConfirmDelete}
+        onSubmit={handleConfirmDelete}
         title={t.deleteModal.title}
-        message={t.deleteModal.description}
+        dangerAction
+        submitButtonLabel={translations.common.actions.delete}
         isLoading={crudLoading}
-      />
+        size={'sm'}
+      >
+        {t.deleteModal.description}
+      </Dialog>
     </>
   );
 }

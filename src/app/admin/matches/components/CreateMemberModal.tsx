@@ -1,15 +1,24 @@
 'use client';
 
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 
-import {Input, Select, SelectItem} from '@heroui/react';
+import {Input} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
-import {UnifiedModal} from '@/components';
+import {GenderSelect, UnifiedModal} from '@/components';
 import {Genders, MemberFunction} from '@/enums';
 import {useMembers} from '@/hooks';
 import {CreateMemberModalProps, MemberFormData} from '@/types';
+
+const DEFAULT_FORM_DATA: MemberFormData = {
+  name: '',
+  surname: '',
+  registration_number: '',
+  date_of_birth: '',
+  gender: Genders.MALE,
+  functions: [MemberFunction.PLAYER],
+};
 
 export default function CreateMemberModal({
   isOpen,
@@ -18,16 +27,9 @@ export default function CreateMemberModal({
   categoryId,
   clubId,
 }: CreateMemberModalProps) {
-  const [formData, setFormData] = useState<MemberFormData>({
-    name: '',
-    surname: '',
-    registration_number: '',
-    date_of_birth: '',
-    sex: Genders.MALE,
-    functions: [MemberFunction.PLAYER],
-  });
+  const [formData, setFormData] = useState<MemberFormData>(DEFAULT_FORM_DATA);
 
-  const t = translations.createMemberModal;
+  const t = translations.members.modals.createMember;
   const {isLoading, errors, createMember, clearFieldError, reset} = useMembers();
 
   const handleSave = async () => {
@@ -50,14 +52,9 @@ export default function CreateMemberModal({
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        name: '',
-        surname: '',
-        registration_number: '',
-        date_of_birth: '',
-        sex: Genders.MALE,
-        functions: [MemberFunction.PLAYER],
-      });
+      // TODO
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData(DEFAULT_FORM_DATA);
       reset();
     }
   }, [isOpen, reset]);
@@ -116,21 +113,10 @@ export default function CreateMemberModal({
             isInvalid={!!errors.date_of_birth}
             errorMessage={errors.date_of_birth}
           />
-          <Select
-            label={t.sex}
-            value={formData.sex}
-            onSelectionChange={(keys) => {
-              const selectedKey = Array.from(keys)[0] as Genders;
-              updateField('sex', selectedKey);
-            }}
-          >
-            <SelectItem key={Genders.MALE} textValue="Muž">
-              Muž
-            </SelectItem>
-            <SelectItem key={Genders.FEMALE} textValue="Žena">
-              Žena
-            </SelectItem>
-          </Select>
+          <GenderSelect
+            value={formData.gender}
+            onChange={(value) => updateField('gender', value)}
+          />
         </div>
       </div>
     </UnifiedModal>

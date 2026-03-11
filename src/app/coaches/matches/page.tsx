@@ -8,17 +8,19 @@ import {ChartBarIcon} from '@heroicons/react/24/outline';
 
 import UnifiedStandingTable from '@/components/shared/standing-table/UnifiedStandingTable';
 
-import {LoadingSpinner, PageContainer} from '@/components';
+import {translations} from '@/lib/translations';
+
+import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
+
+import {Choice, ContentCard, LoadingSpinner, PageContainer, Show} from '@/components';
 import {
-  useFetchCategories,
   useFetchSeasons,
   useOptimizedOwnClubMatches,
   useSeasonFiltering,
   useStandings,
-  useUserRoles,
 } from '@/hooks';
-import {translations} from '@/lib';
 import {Match} from '@/types';
+import {hasMoreThanOne} from '@/utils';
 
 import {
   MatchStatisticsZone,
@@ -31,39 +33,20 @@ import CoachMatchResultFlow from './components/CoachMatchResultFlow';
 
 export default function CoachesMatchesPage() {
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
-  const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [resultFlowMatch, setResultFlowMatch] = useState<any>(null);
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('upcoming');
 
+  const {availableCategories, selectedCategory, setSelectedCategory, isLoading} =
+    useCoachCategory();
   const {data: seasons, refetch: fetchActiveSeason} = useFetchSeasons();
   const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
 
-  const {data: categories, refetch: fetchCategories} = useFetchCategories();
   const {standings, loading: standingsLoading, fetchStandings} = useStandings();
 
-  const t = translations.coaches.matches.tabs;
+  const t = translations.matches.tabs;
 
-  // Try to get user roles, but handle case where UserProvider is not available
-  let getCurrentUserCategories: (() => Promise<string[]>) | null = null;
-  try {
-    const userRoles = useUserRoles();
-    getCurrentUserCategories = userRoles.getCurrentUserCategories;
-  } catch (error) {
-    // UserProvider not available
-  }
-
-  // Filter category based on assigned category
-  const availableCategories = categories.filter((cat) => assignedCategoryIds.includes(cat.id));
-
-  // Auto-select first category if none selected and only one available
-  useEffect(() => {
-    if (availableCategories.length > 0 && !selectedCategory) {
-      setSelectedCategory(availableCategories[0].id);
-    }
-  }, [availableCategories, selectedCategory]);
-
+  //TODO probably for removing - we should be able to rely solely on CoachCategoryContext for categories data
   const selectedCategoryData = availableCategories.find((cat) => cat.id === selectedCategory);
 
   // Get matches for the selected category
@@ -79,15 +62,7 @@ export default function CoachesMatchesPage() {
   // Fetch data on mount
   useEffect(() => {
     fetchActiveSeason();
-    fetchCategories();
-  }, [fetchActiveSeason, fetchCategories]);
-
-  // Fetch assigned category if available
-  useEffect(() => {
-    if (getCurrentUserCategories) {
-      getCurrentUserCategories().then(setAssignedCategoryIds);
-    }
-  }, [getCurrentUserCategories]);
+  }, [fetchActiveSeason]);
 
   // Fetch standings when category or season changes
   useEffect(() => {
@@ -110,6 +85,7 @@ export default function CoachesMatchesPage() {
   }, [allMatches]);
 
   // Filter standings by selected category
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const categoryStandings = useMemo(() => {
     if (!selectedCategoryData?.id) return [];
     return standings.filter((standing) => standing.category_id === selectedCategoryData.id);
@@ -153,25 +129,20 @@ export default function CoachesMatchesPage() {
   return (
     <PageContainer isUnderConstruction>
       <div className="space-y-6">
-        {/* Category Selection */}
-        {availableCategories.length > 1 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div className="overflow-x-auto">
-              <Tabs
-                selectedKey={selectedCategory}
-                onSelectionChange={(key) => {
-                  setSelectedCategory(key as string);
-                  setSelectedMatch(null); // Clear selected match when switching category
-                }}
-                className="w-full min-w-max"
-              >
-                {availableCategories.map((category) => (
-                  <Tab key={category.id} title={category.name} />
-                ))}
-              </Tabs>
-            </div>
-          </div>
-        )}
+        <Show when={hasMoreThanOne(availableCategories)}>
+          <ContentCard padding={'none'}>
+            <Choice
+              value={selectedCategory}
+              onChange={(id) => setSelectedCategory(id)}
+              items={availableCategories.map((c) => ({key: c.id, label: c.name}))}
+              label={translations.members.table.columns.category}
+              size="sm"
+              className={'md:w-1/4'}
+              isLoading={isLoading}
+              disallowEmptySelection={true}
+            />
+          </ContentCard>
+        </Show>
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
           {/* Left column - Matches and Standings */}
           <div className="xl:col-span-2 order-2 xl:order-1">

@@ -5,8 +5,9 @@ import {Image} from '@heroui/image';
 
 import Link from '@/components/ui/link/Link';
 
-import {useFetchClubConfig} from "@/hooks";
-import {translations} from '@/lib';
+import {translations} from '@/lib/translations';
+
+import {useFetchClubConfig} from '@/hooks';
 
 export default function HeroSection() {
   const {data: clubConfig} = useFetchClubConfig();
@@ -19,7 +20,7 @@ export default function HeroSection() {
           <div className="space-y-6 animate-fade-in-up">
             <div className="space-y-4">
               <p className="text-lg lg:text-xl text-blue-100 leading-relaxed max-w-2xl animate-slide-in-left animation-delay-200">
-                {clubConfig?.hero_subtitle || translations.heroSection.fallbackSubtitle}
+                {clubConfig?.hero_subtitle || translations.common.heroSection.fallbackSubtitle}
               </p>
             </div>
 

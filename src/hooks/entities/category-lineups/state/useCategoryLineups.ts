@@ -1,16 +1,18 @@
-/**
- * Hook to manage CRUD operations for category lineups
- */
-
 'use client';
 
-import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {createCRUDHook} from '@/hooks/factories';
+
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {DB_TABLE, ENTITY} from '@/queries/categoryLineups';
 import {CategoryLineup, CreateCategoryLineup} from '@/types';
 
-const t = translations.coachPortal.lineupList.responseMessages;
+const t = translations.lineups.responseMessages;
 
+/**
+ * Hook to manage CRUD operations for category lineups
+ */
 export function useCategoryLineups() {
   const {loading, setLoading, error, create, update, deleteItem} = createCRUDHook<
     CategoryLineup,

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import {Pagination} from '@heroui/react';
+import {Pagination} from '@heroui/pagination';
 
 interface VideoPaginationProps {
   currentPage: number;

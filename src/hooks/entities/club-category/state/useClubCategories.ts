@@ -1,11 +1,14 @@
 'use client';
 
-import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {createCRUDHook} from '@/hooks/factories';
+
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {DB_TABLE, ENTITY} from '@/queries/clubCategories';
 import {ClubCategoryInsert, ClubCategorySchema} from '@/types';
 
-const t = translations.admin.clubCategories.responseMessages;
+const t = translations.clubCategories.responseMessages;
 /**
  * Wrapper to maintain backward compatibility with existing API
  * Maps factory hook methods to expected names

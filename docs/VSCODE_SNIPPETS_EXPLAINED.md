@@ -129,7 +129,7 @@ export default async function SeasonsAdminPage() {
 
 ### Example: Create Committees Page
 
-1. Create file: `src/app/admin/committees/page.tsx.backup`
+1. Create file: `src/app/admin/committees/error.tsx.backup`
 
 2. Type: `nxpage` + Tab
 

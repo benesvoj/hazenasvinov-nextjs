@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = await supabaseServerClient();
 
+    // TODO: the url should be here
     // Get the origin from the request headers or use environment variable
     // In production, we should always use the production URL
     const origin =
@@ -23,12 +24,6 @@ export async function POST(request: NextRequest) {
           process.env.NEXT_PUBLIC_BASE_URL ||
           'http://localhost:3000';
     const redirectUrl = `${origin}/api/auth/confirm`;
-
-    console.log('Sending password reset email to:', email);
-    console.log('Origin detected:', origin);
-    console.log('Redirect URL:', redirectUrl);
-    console.log('Supabase URL:', process.env.SUPABASE_URL);
-    console.log('Environment:', process.env.NODE_ENV);
 
     // Try to force OTP flow by using a different approach
     const {error} = await supabase.auth.resetPasswordForEmail(email, {

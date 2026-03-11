@@ -29,7 +29,7 @@ Before you start:
 
 ### Current State Analysis
 
-**File:** `src/app/(main)/blog/[slug]/page.tsx`
+**File:** `src/app/(main)/blog/[slug]/error.tsx`
 
 **What it does:**
 - Fetches blog post by slug (client-side)
@@ -48,20 +48,20 @@ Before you start:
 ### Step 1: Backup Current File (2 min)
 
 ```bash
-cp src/app/\(main\)/blog/\[slug\]/page.tsx src/app/\(main\)/blog/\[slug\]/page.tsx.backup
+cp src/app/\(main\)/blog/\[slug\]/error.tsx src/app/\(main\)/blog/\[slug\]/error.tsx.backup
 ```
 
 **Verify:**
 ```bash
 ls -la src/app/\(main\)/blog/\[slug\]/
-# Should see: page.tsx and page.tsx.backup
+# Should see: error.tsx and error.tsx.backup
 ```
 
 ---
 
 ### Step 2: Analyze Current Data Fetching (5 min)
 
-**Open:** `page.tsx.backup` and identify what data is fetched:
+**Open:** `error.tsx.backup` and identify what data is fetched:
 
 ```typescript
 // Line 28: Blog post by slug
@@ -80,7 +80,7 @@ const {match: relatedMatch} = useFetchPostMatch(post?.id || null);
 
 ### Step 3: Create Server Component (15 min)
 
-**File:** `src/app/(main)/blog/[slug]/page.tsx`
+**File:** `src/app/(main)/blog/[slug]/error.tsx`
 
 **Replace entire file with:**
 
@@ -313,7 +313,7 @@ export const revalidate = 3600;  // Revalidate every hour
 
 ### Current State Analysis
 
-**File:** `src/app/(main)/blog/page.tsx`
+**File:** `src/app/(main)/blog/error.tsx`
 
 **What it does:**
 - Fetches all blog posts (client-side)
@@ -328,14 +328,14 @@ export const revalidate = 3600;  // Revalidate every hour
 ### Step 1: Backup Current File (2 min)
 
 ```bash
-cp src/app/\(main\)/blog/page.tsx src/app/\(main\)/blog/page.tsx.backup
+cp src/app/\(main\)/blog/error.tsx src/app/\(main\)/blog/error.tsx.backup
 ```
 
 ---
 
 ### Step 2: Create Server Component (10 min)
 
-**File:** `src/app/(main)/blog/page.tsx`
+**File:** `src/app/(main)/blog/error.tsx`
 
 ```typescript
 import {createClient} from '@/utils/supabase/server';
@@ -701,10 +701,10 @@ If something goes wrong:
 
 ```bash
 # Restore blog detail page
-cp src/app/\(main\)/blog/\[slug\]/page.tsx.backup src/app/\(main\)/blog/\[slug\]/page.tsx
+cp src/app/\(main\)/blog/\[slug\]/error.tsx.backup src/app/\(main\)/blog/\[slug\]/error.tsx
 
 # Restore blog listing page
-cp src/app/\(main\)/blog/page.tsx.backup src/app/\(main\)/blog/page.tsx
+cp src/app/\(main\)/blog/error.tsx.backup src/app/\(main\)/blog/error.tsx
 
 # Delete client component if created
 rm src/app/\(main\)/blog/BlogListingClient.tsx

@@ -41,6 +41,7 @@ export default function LineupPlayerEditModal({
 
   useEffect(() => {
     if (player) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         ...player,
         goals: player.goals || 0,
@@ -100,7 +101,7 @@ export default function LineupPlayerEditModal({
         {/* Position */}
         <div className="flex items-center gap-4">
           <Checkbox
-            aria-label={t.playerPosition.goalkeeper}
+            aria-label={translations.lineups.enums.playerPosition.goalkeeper}
             isSelected={formData.position === PlayerPosition.GOALKEEPER}
             onValueChange={(isSelected) =>
               updateField(
@@ -109,14 +110,14 @@ export default function LineupPlayerEditModal({
               )
             }
           >
-            {t.playerPosition.goalkeeper}
+            {translations.lineups.enums.playerPosition.goalkeeper}
           </Checkbox>
           <Checkbox
-            aria-label={t.playerRoles.captain}
+            aria-label={translations.lineups.enums.playerRoles.captain}
             isSelected={formData.is_captain}
             onValueChange={(isSelected) => updateField('is_captain', isSelected)}
           >
-            {t.playerRoles.captain}
+            {translations.lineups.enums.playerRoles.captain}
           </Checkbox>
         </div>
 

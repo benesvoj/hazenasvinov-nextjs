@@ -1,25 +1,28 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 
-import {Button, Card, CardBody, CardHeader, Chip, useDisclosure} from '@heroui/react';
+import {Button, Chip} from '@heroui/react';
 
 import {UserPlusIcon} from '@heroicons/react/24/outline';
 
-import {useModal} from '@/hooks/shared/useModals';
+import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
-import AddMemberModal from '@/app/coaches/lineups/components/AddMemberModal';
+import {translations} from '@/lib/translations';
+
+import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
+import LineupMemberAssignDialog from '@/app/coaches/lineups/components/LineupMemberAssignDialog';
 import {getPositionColor, getPositionText} from '@/app/coaches/lineups/helpers/helpers';
 
-import {Heading, UnifiedTable} from '@/components';
+import {ContentCard, DeleteDialog, EmptyState, UnifiedTable} from '@/components';
+import {useUser} from '@/contexts';
 import {ActionTypes, ColumnAlignType} from '@/enums';
-import {useCategoryLineupMember, useFetchCategories, useFetchCategoryLineupMembers} from '@/hooks';
-import {translations} from '@/lib';
+import {useCategoryLineupMembers, useFetchCategoryLineupMembers} from '@/hooks';
 import {
   CategoryLineupMemberWithMember,
   ColumnType,
+  CreateCategoryLineupMember,
   CreateCategoryLineupMemberModal,
-  UpdateCategoryLineupMember,
 } from '@/types';
 
 interface LineupMembersProps {
@@ -27,30 +30,25 @@ interface LineupMembersProps {
   categoryId: string;
 }
 
-const t = translations.coachPortal.lineupMembers;
-const tAction = translations.action;
+const t = translations.lineupMembers;
 
 export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
+  const {availableCategories} = useCoachCategory();
+  const {user} = useUser();
   const {
     data: lineupMembers,
     loading: loadingLineupMembers,
     refetch: fetchLineupMembers,
-  } = useFetchCategoryLineupMembers(categoryId, lineupId);
+  } = useFetchCategoryLineupMembers({lineupId});
 
-  const {createLineupMember, updateLineupMember} = useCategoryLineupMember();
-  const {data: categories} = useFetchCategories();
+  const {
+    createCategoryLineupMember,
+    removeCategoryLineupMember,
+    loading: CRUDLoading,
+  } = useCategoryLineupMembers();
 
   const modal = useModal();
-
-  const [deleteOption, setDeleteOption] = useState<string>('');
-  const [memberToDelete, setMemberToDelete] = useState<any>(null);
-
-  // TODO: Implement delete functionality
-  const {
-    isOpen: isDeleteModalOpen,
-    onOpen: onDeleteModalOpen,
-    onClose: onDeleteModalClose,
-  } = useDisclosure();
+  const deleteModal = useModalWithItem<CategoryLineupMemberWithMember>();
 
   const handleAddMemberToLineup = () => {
     modal.onOpen();
@@ -59,7 +57,7 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
   // Fetch lineup members when lineup changes
   useEffect(() => {
     if (lineupId) {
-      fetchLineupMembers();
+      void fetchLineupMembers();
     }
   }, [lineupId, fetchLineupMembers]);
 
@@ -73,40 +71,32 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
     }
 
     try {
-      await createLineupMember(categoryId, lineupId, memberData);
+      await createCategoryLineupMember({
+        ...memberData,
+        lineup_id: lineupId,
+        created_by: user?.id || '',
+        is_active: true,
+      } as CreateCategoryLineupMember);
+      await fetchLineupMembers();
     } catch (err) {
       console.error('Error adding member:', err);
-      throw err; // Re-throw to show error in modal
+      throw err;
     }
   };
 
-  const handleEditMember = async (memberData: UpdateCategoryLineupMember) => {
-    if (!categoryId) {
-      throw new Error('Není vybrána žádná kategorie.');
-    }
-
-    if (!lineupId) {
-      throw new Error('Není vybrána žádná soupiska. Prosím vyberte soupisku před přidáním člena.');
-    }
-
-    try {
-      await updateLineupMember(categoryId, lineupId, memberData.id, memberData);
-    } catch (err) {
-      console.error('Error updating member:', err);
-      throw err; // Re-throw to show error in modal
-    }
-  };
-
-  // Get existing member IDs and jersey numbers for the modal
   const existingMemberIds = lineupMembers.map((member) => member.member_id);
   const existingJerseyNumbers = lineupMembers
     .map((member) => member.jersey_number)
     .filter((num) => num !== null && num !== undefined) as number[];
 
-  const handleDeleteLineupMember = (memberId: string) => {
-    setDeleteOption('member');
-    setMemberToDelete(memberId);
-    onDeleteModalOpen();
+  const handleRemoveMemberFromLineup = async () => {
+    const selectedItemId = deleteModal.selectedItem?.id;
+
+    if (!selectedItemId) return;
+
+    await removeCategoryLineupMember(selectedItemId);
+    deleteModal.closeAndClear();
+    await fetchLineupMembers();
   };
 
   const columns: ColumnType<CategoryLineupMemberWithMember>[] = [
@@ -125,14 +115,9 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
       align: 'center' as ColumnAlignType,
       actions: [
         {
-          type: ActionTypes.UPDATE,
-          onPress: (member) => handleEditMember(member),
-          title: tAction.edit,
-        },
-        {
           type: ActionTypes.DELETE,
-          onPress: (member) => handleDeleteLineupMember(member.id),
-          title: tAction.delete,
+          onPress: (member) => deleteModal.openWith(member),
+          title: translations.lineupMembers.buttons.removeMember,
         },
       ],
     },
@@ -170,7 +155,12 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
           <div className="flex gap-1">
             {member.is_captain && (
               <Chip size="sm" color="warning">
-                Kapitán
+                {translations.lineupMembers.lineupMemberSetupCard.functionSection.captain}
+              </Chip>
+            )}
+            {member.is_vice_captain && (
+              <Chip size={'sm'} color={'secondary'}>
+                {translations.lineupMembers.lineupMemberSetupCard.functionSection.viceCaptain}
               </Chip>
             )}
           </div>
@@ -178,54 +168,60 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
     }
   };
 
+  const title = (
+    <>
+      {t.title} {lineupId ? `(${lineupMembers.length})` : ''}
+    </>
+  );
+
+  const actions = (
+    <Button
+      size="sm"
+      color="primary"
+      startContent={<UserPlusIcon className="w-4 h-4" />}
+      onPress={handleAddMemberToLineup}
+    >
+      {t.addMember}
+    </Button>
+  );
+
   return (
     <>
-      <div className="lg:col-span-2">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between w-full">
-              <Heading size={3}>
-                {t.title} {lineupId ? `(${lineupMembers.length})` : ''}
-              </Heading>
-              {lineupId && (
-                <Button
-                  size="sm"
-                  color="primary"
-                  startContent={<UserPlusIcon className="w-4 h-4" />}
-                  onPress={handleAddMemberToLineup}
-                >
-                  {t.addMember}
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardBody>
-            {!lineupId ? (
-              <p className="text-gray-500 text-center py-8">{t.selectLineupPrompt}</p>
-            ) : (
-              <UnifiedTable
-                columns={columns}
-                renderCell={renderCells}
-                data={lineupMembers}
-                getKey={(member: CategoryLineupMemberWithMember) => member.id}
-                ariaLabel={t.table.ariaLabel}
-                isLoading={loadingLineupMembers}
-                emptyContent={t.noLineupMembers}
-                isStriped
-              />
-            )}
-          </CardBody>
-        </Card>
-      </div>
+      <ContentCard
+        title={title}
+        actions={lineupId && actions}
+        padding={'none'}
+        isLoading={loadingLineupMembers}
+      >
+        <UnifiedTable
+          columns={columns}
+          renderCell={renderCells}
+          data={lineupMembers}
+          getKey={(member: CategoryLineupMemberWithMember) => member.id}
+          ariaLabel={t.table.ariaLabel}
+          isLoading={loadingLineupMembers}
+          emptyContent={t.noLineupMembers}
+          isStriped
+        />
+      </ContentCard>
 
-      <AddMemberModal
+      <LineupMemberAssignDialog
         isOpen={modal.isOpen}
         onClose={modal.onClose}
         onAddMember={handleAddMember}
-        selectedCategoryName={categories.find((c) => c.id === categoryId)?.name || ''}
         selectedCategoryId={categoryId}
         existingMembers={existingMemberIds}
         existingJerseyNumbers={existingJerseyNumbers}
+        categories={availableCategories}
+      />
+
+      <DeleteDialog
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeAndClear}
+        onSubmit={handleRemoveMemberFromLineup}
+        title={translations.lineupMembers.deleteLineupMemberDialog.title}
+        message={translations.lineupMembers.deleteLineupMemberDialog.message}
+        isLoading={CRUDLoading}
       />
     </>
   );

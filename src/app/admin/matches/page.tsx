@@ -734,7 +734,7 @@ export default function MatchesAdminPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2">
               <Select
-                label={translations.seasons.title}
+                label={translations.seasons.page.title}
                 placeholder={translations.seasons.selectSeason}
                 selectedKeys={selectedSeasonId ? [selectedSeasonId] : []}
                 onSelectionChange={(keys) => {

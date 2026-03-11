@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.todoPriority;
+const t = translations.todos.enums.todoPriority;
 
 export enum TodoPriorities {
   LOW = 'low',

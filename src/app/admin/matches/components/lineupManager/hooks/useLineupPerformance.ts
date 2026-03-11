@@ -71,7 +71,9 @@ export function useLineupPerformance({
     return {...metricsRef.current};
   }, []);
 
+  // eslint-disable-next-line react-hooks/refs
   return {
+    // eslint-disable-next-line react-hooks/refs
     metrics: metricsRef.current,
     resetMetrics,
     getMetrics,

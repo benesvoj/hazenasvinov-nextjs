@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.common.blogPostStatuses;
+const t = translations.blogPosts.enums.statuses;
 
 export enum BlogPostStatuses {
   DRAFT = 'draft',

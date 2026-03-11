@@ -7,9 +7,10 @@ import {useRouter} from 'next/navigation';
 import {CoachPortalCategoryDialog, ReleaseNotesModal} from '@/components/features';
 import {UserProfileModal} from '@/components/ui/modals';
 
+import {APP_ROUTES} from '@/lib/app-routes';
+
 import {UserRoles} from '@/enums';
 import {useAuth, usePortalAccess} from '@/hooks';
-import {APP_ROUTES} from '@/lib';
 import {getReleaseNotes} from '@/utils';
 
 import {LogoutOverlay, TopBarActions, TopBarPageInfo, TopBarUserDropdown} from './components';

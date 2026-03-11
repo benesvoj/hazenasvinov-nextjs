@@ -1,10 +1,12 @@
 import {createDataFetchHook} from '@/hooks/factories';
 
-import {API_ROUTES, translations} from '@/lib';
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {DB_TABLE, ENTITY} from '@/queries/grants';
 import {Grant} from '@/types';
 
-const t = translations.admin.grants.responseMessages;
+const t = translations.grantCalendar.responseMessages;
 
 export function useFetchGrants() {
   return createDataFetchHook<Grant>({

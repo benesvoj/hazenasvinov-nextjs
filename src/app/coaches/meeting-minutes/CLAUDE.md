@@ -8,14 +8,14 @@ Manages meeting minutes records with attendee tracking. Coaches can create, edit
 
 | File | Responsibility |
 |---|---|
-| `page.tsx` | Route entry point — renders `MeetingMinutesContainer` inside `PageContainer` |
+| `error.tsx` | Route entry point — renders `MeetingMinutesContainer` inside `PageContainer` |
 
 Note: The actual implementation lives in `src/components/features/meeting-minutes/MeetingMinutesContainer.tsx` — this is a shared component, not coach-specific.
 
 ## Data Flow
 
 ```
-page.tsx
+error.tsx
 └── MeetingMinutesContainer
     ├── useMeetingMinutes() → CRUD operations
     ├── fetchUsers() → GET /api/users (all users for "wrote by" dropdown)
@@ -51,7 +51,7 @@ This may be intentional (meeting minutes are cross-category), but should be expl
 
 ### Low
 
-5. **Minimal page.tsx** — The page file is just a wrapper. All logic is in the shared container component.
+5. **Minimal error.tsx** — The page file is just a wrapper. All logic is in the shared container component.
 
 ## Improvement Proposals
 

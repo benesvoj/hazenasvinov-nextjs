@@ -1,13 +1,14 @@
 'use client';
 
+import {createCRUDHook} from '@/hooks/factories';
+
+import {API_ROUTES} from '@/lib/api-routes';
 import {translations} from '@/lib/translations';
 
-import {createCRUDHook} from '@/hooks';
-import {API_ROUTES} from '@/lib';
 import {DB_TABLE, ENTITY} from '@/queries/seasons';
 import {Season, SeasonInsert} from '@/types';
 
-const t = translations.admin.seasons.responseMessages;
+const t = translations.seasons.responseMessages;
 
 /**
  * Wrapper to maintain backward compatibility with existing API

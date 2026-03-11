@@ -78,11 +78,11 @@ export const CategoryMatchRow = ({
             <div className="text-lg font-semibold text-gray-800 mb-2">
               {match.home_team?.display_name ||
                 match.home_team?.name ||
-                translations.team.unknownTeam}{' '}
+                translations.matches.unknownTeam}{' '}
               vs{' '}
               {match.away_team?.display_name ||
                 match.away_team?.name ||
-                translations.team.unknownTeam}
+                translations.matches.unknownTeam}
             </div>
             <div className="flex items-start space-x-2 text-sm text-gray-600">
               <MapPinIcon className="w-4 h-4 text-gray-400" />

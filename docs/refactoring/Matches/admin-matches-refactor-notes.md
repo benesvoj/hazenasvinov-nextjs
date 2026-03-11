@@ -1,6 +1,6 @@
 # Admin Matches Page - Refactoring Analysis
 
-**File:** `src/app/admin/matches/page.tsx`
+**File:** `src/app/admin/matches/error.tsx`
 **Analysis Date:** 2026-01-22
 **Lines of Code:** ~1175
 

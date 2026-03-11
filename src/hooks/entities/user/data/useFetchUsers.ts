@@ -2,7 +2,8 @@
 
 import {useEffect, useState, useCallback} from 'react';
 
-import {API_ROUTES} from '@/lib';
+import {API_ROUTES} from '@/lib/api-routes';
+
 import {SupabaseUser} from '@/types';
 
 export interface LoginLog {

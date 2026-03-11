@@ -1,8 +1,6 @@
 'use client';
 
-import {Modal, ModalContent, ModalBody, ModalHeader, Button} from '@heroui/react';
-
-import {X} from 'lucide-react';
+import {Modal, ModalBody, ModalContent, ModalHeader} from '@heroui/modal';
 
 import {BetSlip} from '@/components';
 import {BetSlipItem} from '@/types';

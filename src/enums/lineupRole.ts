@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.lineupRole;
+const t = translations.lineups.enums.lineupRole;
 
 export enum LineupRole {
   CAPTAIN = 'captain',

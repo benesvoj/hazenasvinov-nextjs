@@ -6,7 +6,7 @@ import {Button, Select, SelectItem, Tab, Tabs} from '@heroui/react';
 
 import {CalendarIcon, PlusIcon} from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {hasItems, hasMoreThanOne} from '@/utils/arrayHelper';
 
@@ -14,7 +14,7 @@ import {useAppData} from '@/contexts/AppDataContext';
 
 import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
 
-import {DeleteConfirmationModal, PageContainer, showToast, UnifiedCard} from '@/components';
+import {ContentCard, DeleteDialog, Grid, GridItem, PageContainer, showToast} from '@/components';
 import {
   ATTENDANCE_TABS_LABELS,
   AttendanceStatuses,
@@ -112,11 +112,9 @@ export default function CoachesAttendancePage() {
     return lineups?.find((lineup) => lineup.is_active) ?? null;
   }, [lineups]);
 
+  const lineupId = activeLineup?.category_id === selectedCategory ? activeLineup.id : '';
   // Fetch lineup members using the correct lineup ID (not session ID!)
-  const {data: lineupMembers} = useFetchCategoryLineupMembers(
-    selectedCategory,
-    activeLineup?.category_id === selectedCategory ? activeLineup.id : ''
-  );
+  const {data: lineupMembers} = useFetchCategoryLineupMembers({lineupId});
 
   const resolveMemberIds = useCallback((): string[] => {
     const fromLineup = lineupMembers
@@ -254,7 +252,7 @@ export default function CoachesAttendancePage() {
   return (
     <>
       <PageContainer isLoading={isAllLoadings}>
-        <UnifiedCard padding={'none'}>
+        <ContentCard padding={'none'}>
           <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
             <div className="flex flex-col md:flex-row items-stretch sm:items-end gap-2 flex-1 lg:w-auto">
               {hasMoreThanOne(availableCategories) ? (
@@ -311,7 +309,7 @@ export default function CoachesAttendancePage() {
               </Button>
             </div>
           </div>
-        </UnifiedCard>
+        </ContentCard>
 
         <Tabs
           selectedKey={activeTab}
@@ -322,26 +320,30 @@ export default function CoachesAttendancePage() {
             key={AttendanceTabs.ATTENDANCE}
             title={ATTENDANCE_TABS_LABELS[AttendanceTabs.ATTENDANCE]}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <TrainingSessionList
-                sessions={sessions}
-                selectedSession={selectedSession}
-                onSelectedSession={setSelectedSession}
-                onStatusChange={statusDialog.openWith}
-                onEditSession={sessionModal.openWith}
-                onDeleteSession={deleteModal.openWith}
-                loading={trainingSessionsLoading}
-              />
+            <Grid columns={3}>
+              <GridItem span={1}>
+                <TrainingSessionList
+                  sessions={sessions}
+                  selectedSession={selectedSession}
+                  onSelectedSession={setSelectedSession}
+                  onStatusChange={statusDialog.openWith}
+                  onEditSession={sessionModal.openWith}
+                  onDeleteSession={deleteModal.openWith}
+                  loading={trainingSessionsLoading}
+                />
+              </GridItem>
 
-              <AttendanceRecordingTable
-                attendanceRecords={attendanceRecords}
-                selectedSession={selectedSession}
-                handleRecordAttendance={handleRecordAttendance}
-                handleCreateAttendanceForSession={handleCreateAttendanceForSession}
-                loading={attendanceLoading}
-                selectedSessionData={selectedSessionData}
-              />
-            </div>
+              <GridItem span={2}>
+                <AttendanceRecordingTable
+                  attendanceRecords={attendanceRecords}
+                  selectedSession={selectedSession}
+                  handleRecordAttendance={handleRecordAttendance}
+                  handleCreateAttendanceForSession={handleCreateAttendanceForSession}
+                  loading={attendanceLoading}
+                  selectedSessionData={selectedSessionData}
+                />
+              </GridItem>
+            </Grid>
           </Tab>
           <Tab
             key={AttendanceTabs.STATISTICS}
@@ -351,11 +353,11 @@ export default function CoachesAttendancePage() {
               <AttendanceStatisticsLazy categoryId={selectedCategory} seasonId={selectedSeason} />
             )}
             {activeTab === AttendanceTabs.STATISTICS && (!selectedCategory || !selectedSeason) && (
-              <UnifiedCard>
+              <ContentCard>
                 <p className="text-center text-gray-500">
                   {translations.attendance.responseMessages.selectSeasonAndCategory}
                 </p>
-              </UnifiedCard>
+              </ContentCard>
             )}
           </Tab>
         </Tabs>
@@ -381,10 +383,10 @@ export default function CoachesAttendancePage() {
         }}
       />
 
-      <DeleteConfirmationModal
+      <DeleteDialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeAndClear}
-        onConfirm={confirmDeleteSession}
+        onSubmit={confirmDeleteSession}
         title={translations.attendance.modal.title.deleteSession}
         message={translations.attendance.modal.description.deleteSession}
         isLoading={loadingCrudOperations}

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import {UnifiedCard} from '@/components';
+import {ContentCard, HStack} from '@/components';
 
 interface AdminFiltersProps {
   children: React.ReactNode;
@@ -10,8 +10,8 @@ interface AdminFiltersProps {
 
 export const AdminFilters = ({children}: AdminFiltersProps) => {
   return (
-    <UnifiedCard fullWidth variant="filters" contentAlignment="left" padding="sm">
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4">{children}</div>
-    </UnifiedCard>
+    <ContentCard fullWidth padding="sm">
+        <HStack spacing={2} wrap>{children}</HStack>
+    </ContentCard>
   );
 };

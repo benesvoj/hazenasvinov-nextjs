@@ -8,12 +8,12 @@ Displays a table of all internal club members that coaches can view and manage. 
 
 | File | Responsibility |
 |---|---|
-| `page.tsx` | Single-file page — member table with modal state wiring |
+| `error.tsx` | Single-file page — member table with modal state wiring |
 
 ## Data Flow
 
 ```
-page.tsx
+error.tsx
 ├── useFetchMembersInternal() → paginated members (no category/search filter passed)
 ├── useAppData().categories.data → all categories (for name display)
 ├── useMemberModals<BaseMember>() → modal state management

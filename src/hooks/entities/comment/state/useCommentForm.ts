@@ -1,7 +1,9 @@
 'use client';
+
+import {translations} from '@/lib/translations';
+
 import {CommentTypes} from '@/enums';
 import {createFormHook} from '@/hooks';
-import {translations} from '@/lib';
 import {CommentFormData, BaseComment} from '@/types';
 
 const initialFormData: CommentFormData = {
@@ -11,7 +13,7 @@ const initialFormData: CommentFormData = {
   type: CommentTypes.GENERAL,
 };
 
-const t = translations.admin.comments.responseMessages;
+const t = translations.comments.responseMessages;
 
 export function useCommentForm() {
   return createFormHook<BaseComment, CommentFormData>({

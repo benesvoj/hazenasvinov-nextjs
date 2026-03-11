@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-const t = translations.relationshipStatus;
+const t = translations.members.enums.relationshipStatus;
 
 export enum RelationshipStatus {
   ACTIVE = 'active',

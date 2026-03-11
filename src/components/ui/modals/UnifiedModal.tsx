@@ -2,19 +2,14 @@
 
 import React from 'react';
 
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalProps,
-} from '@heroui/react';
+import {Button} from '@heroui/button';
+import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalProps} from '@heroui/modal';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {Heading, HeadingLevel} from '../heading/Heading';
+
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
 
 interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> {
   isOpen: boolean;
@@ -23,7 +18,7 @@ interface UnifiedModalProps extends Omit<ModalProps, 'isOpen' | 'onOpenChange'> 
   subtitle?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
+  size?: ModalSize;
   showCloseButton?: boolean;
   scrollBehavior?: 'inside' | 'outside';
   hSize?: HeadingLevel;

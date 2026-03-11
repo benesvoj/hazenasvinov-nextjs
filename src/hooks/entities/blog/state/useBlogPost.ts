@@ -1,11 +1,12 @@
 'use client';
 
-import {createCRUDHook} from '@/hooks';
-import {API_ROUTES, translations} from '@/lib';
+import {createCRUDHook} from '@/hooks/factories';
+
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {DB_TABLE, ENTITY} from '@/queries/blogPosts';
 import {Blog, BlogPostInsert} from '@/types';
-
-const t = translations.admin.blog.responseMessages;
 
 /**
  * Wrapper to maintain backward compatibility with existing API
@@ -20,12 +21,12 @@ export function useBlogPost() {
     byIdEndpoint: (id) => API_ROUTES.entities.byId(DB_TABLE, id),
     entityName: ENTITY.plural,
     messages: {
-      createSuccess: t.createSuccess,
-      updateSuccess: t.updateSuccess,
-      deleteSuccess: t.deleteSuccess,
-      createError: t.createError,
-      updateError: t.updateError,
-      deleteError: t.deleteError,
+      createSuccess: translations.blogPosts.responseMessages.createSuccess,
+      updateSuccess: translations.blogPosts.responseMessages.updateSuccess,
+      deleteSuccess: translations.blogPosts.responseMessages.deleteSuccess,
+      createError: translations.blogPosts.responseMessages.createError,
+      updateError: translations.blogPosts.responseMessages.updateError,
+      deleteError: translations.blogPosts.responseMessages.deleteError,
     },
   })();
 

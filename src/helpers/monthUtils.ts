@@ -1,11 +1,6 @@
-import {translations} from '@/lib';
+import {translations} from '@/lib/translations';
 
-export interface MonthOption {
-  value: number;
-  label: string;
-}
-
-const monthTranslations = translations.common.months;
+const monthTranslations = translations.common.enums.months;
 
 /**
  * Use in Select dropdowns

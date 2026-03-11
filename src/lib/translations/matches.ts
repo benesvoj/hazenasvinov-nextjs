@@ -1,4 +1,8 @@
 export const matchesTranslations = {
+  page: {
+    title: 'Zápasy',
+    description: 'Správa zápasů, výsledků a tabulek pro všechny kategorie',
+  },
   title: 'Zápasy',
   description: 'Správa zápasů, které se konají v rámci systému.',
   matchNumber: 'Číslo zápasu',
@@ -111,5 +115,45 @@ export const matchesTranslations = {
   statuses: {
     upcoming: 'Nadcházející',
     completed: 'Dokončený',
+  },
+  tabs: {
+    upcoming: 'Nadcházející',
+    recent: 'Nedávno odehrané',
+    standings: 'Tabulky',
+    statistics: 'Statistiky',
+  },
+  matchSchedule: {
+    title: 'Výsledky & program zápasů',
+    description: 'Sledujte aktuální výsledky a program zápasů našeho klubu',
+    noMatches: 'Žádné odehrané zápasy',
+    noMatchesDescription: 'První články se objeví, jakmile budou publikovány v administraci.',
+    noUpcomingMatches: 'Žádné nadcházející zápasy',
+    noUpcomingMatchesDescription:
+      'První články se objeví, jakmile budou publikovány v administraci.',
+    noRecentResults: 'Žádné nedávno odehrané zápasy',
+    noRecentResultsDescription: 'První články se objeví, jakmile budou publikovány v administraci.',
+    allMatches: 'Všechny zápasy',
+    allMatchesDescription: 'Sledujte všechny zápasy našeho klubu',
+    upcomingMatches: 'Nadcházející zápasy',
+    upcomingMatchesDescription: 'Sledujte nadcházející zápasy našeho klubu',
+    recentResults: 'Nedávno odehrané zápasy',
+    recentResultsDescription: 'Sledujte nedávno odehrané zápasy našeho klubu',
+  },
+  components: {
+    lineupCard: {
+      title: 'Sestava',
+      players: 'Hráči',
+      coaches: 'Trenéři',
+      noLineup: 'Sestava zatím nebyla vytvořena',
+      unknownCoach: 'Neznámý trenér',
+      unknownPlayer: 'Neznámý hráč',
+    },
+  },
+  enums: {
+    competitionTypes: {
+      league: 'Liga',
+      league_playoff: 'Liga s playoff',
+      tournament: 'Turnaj',
+    },
   },
 };

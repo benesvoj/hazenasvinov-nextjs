@@ -9,7 +9,7 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2026-02-23
+ * Last generated: 2026-03-11
  */
 
 export interface BlogPostSchema {

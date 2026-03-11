@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {translations} from '@/lib';
+import {translations} from '@/lib/translations';
 
 interface StatusCellProps {
   isActive: boolean;

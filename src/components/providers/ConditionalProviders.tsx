@@ -35,7 +35,19 @@ const NO_APP_DATA_PAGES = [
 ];
 
 // Public pages that don't need user context
-const PUBLIC_PAGES = ['/category', '/blog', '/matches', '/about', '/contact'];
+const PUBLIC_PAGES = [
+  '/category',
+  '/categories',
+  '/blog',
+  '/matches',
+  '/about',
+  '/contact',
+  '/photo-gallery',
+  '/chronicle',
+  '/downloads',
+  '/celebration',
+  '/100',
+];
 
 interface ConditionalProvidersProps {
   children: React.ReactNode;

@@ -2,10 +2,10 @@
 
 import {createDataFetchHook} from '@/hooks/factories';
 
-import {API_ROUTES, translations} from '@/lib';
-import {Blog} from '@/types';
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
 
-const t = translations.admin.blog.responseMessages;
+import {Blog} from '@/types';
 
 /**
  * Hook for fetching blog posts
@@ -15,6 +15,6 @@ export function useFetchBlog() {
   return createDataFetchHook<Blog>({
     endpoint: API_ROUTES.entities.root('blog_posts'),
     entityName: 'blogPosts',
-    errorMessage: t.blogPostsFetchFailed,
+    errorMessage: translations.blogPosts.responseMessages.blogPostsFetchFailed,
   })();
 }

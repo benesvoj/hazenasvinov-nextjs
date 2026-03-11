@@ -79,7 +79,7 @@ const handleSubmit = async () => {
 
 ### 4. Passed refreshInternal Callback from Page
 
-**File:** `src/app/admin/members/page.tsx.backup`
+**File:** `src/app/admin/members/error.tsx.backup`
 
 ```typescript
 {selectedMember && (
@@ -314,11 +314,11 @@ onSuccess?.(updatedMember); // Pass updated data
 ### Changes Made
 1. ✅ Added `onSuccess?: () => void` to PaymentFormModal props
 2. ✅ Called `onSuccess?.()` after successful payment save
-3. ✅ Passed `refreshInternal` from page.tsx.backup
+3. ✅ Passed `refreshInternal` from error.tsx.backup
 
 ### Files Modified
 - `src/app/admin/members/components/PaymentFormModal.tsx`
-- `src/app/admin/members/page.tsx.backup`
+- `src/app/admin/members/error.tsx.backup`
 - `docs/features/PAYMENT_MODAL_INTEGRATION.md` (updated)
 
 ### Lines of Code

@@ -1,0 +1,51 @@
+export const commentsTranslations = {
+	enums: {
+		types: {
+			general: 'Obecný',
+			bug: 'Chyba',
+			feature: 'Funkce',
+			improvement: 'Vylepšení',
+		},
+	},
+	commentModal: {
+		titleAdd: 'Přidat komentář',
+		titleEdit: 'Upravit komentář',
+		title: 'Komentář',
+		titlePlaceholder: 'Vložte komentář',
+		content: 'Obsah komentáře',
+		contentPlaceholder: 'Vložte obsah komentáře',
+		commentType: 'Typ komentáře',
+		commentTypePlaceholder: 'Vyberte typ komentáře',
+		commentContent: 'Obsah komentáře',
+		commentContentPlaceholder: 'Vložte obsah komentáře',
+	},
+	commentList: {
+		title: 'Komentáře',
+		comments: 'komentářů',
+		description: 'Komentáře, které jsou dostupné v systému.',
+		addComment: 'Přidat komentář',
+		deleteComment: 'Smazat komentář',
+		deleteCommentMessage: 'Opravdu chcete smazat komentář? Tato akce je nevratná.',
+	},
+	emptyState: {
+		title: 'Zatím nebyly přidány žádné komentáře.',
+		description: 'Buďte první, kdo přidá komentář',
+	},
+	commentsZoneItem: {
+		createdBy: 'Vytvořil',
+		createdAt: 'Vytvořeno',
+	},
+	responseMessages: {
+		unknownError: 'Unknown error occur',
+		failedToFetchData: 'Failed to fetch data source ',
+		commentsFetchFailed: 'Chyba při načítání komentářů',
+		createSuccess: 'Comment created successfully!',
+		updateSuccess: 'Comment updated successfully!',
+		deleteSuccess: 'Comment deleted successfully!',
+		createError: 'Failed to create comment.',
+		updateError: 'Failed to update comment.',
+		deleteError: 'Failed to delete comment.',
+		mandatoryType: 'Type is mandatory',
+		mandatoryContent: 'Content is mandatory',
+	},
+};

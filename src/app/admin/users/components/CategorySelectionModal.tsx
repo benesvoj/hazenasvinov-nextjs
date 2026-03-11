@@ -4,7 +4,7 @@ import React, {useState} from 'react';
 
 import {Alert, CheckboxGroup} from '@heroui/react';
 
-import {CustomCheckbox} from '@/components/ui/checkbox/CustomCheckbox';
+import {CustomCheckbox} from '@/components/ui/client/checkbox/CustomCheckbox';
 
 import {translations} from '@/lib/translations/index';
 

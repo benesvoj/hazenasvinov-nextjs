@@ -2,11 +2,13 @@
 
 import {useCallback, useEffect, useState} from 'react';
 
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {showToast} from '@/components';
-import {API_ROUTES, translations} from '@/lib';
 import {Member} from '@/types';
 
-const t = translations.admin.members.responseMessages;
+const t = translations.members.responseMessages;
 
 export function useFetchMembers() {
   const [data, setData] = useState<Member[]>([]);

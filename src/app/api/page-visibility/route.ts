@@ -1,11 +1,11 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {supabaseServerClient} from '@/utils/supabase/server';
+import {SupabaseClient} from '@supabase/supabase-js';
+
+import {withAdminAuth, withPublicAccess} from '@/utils/supabase/apiHelpers';
 
 export async function GET() {
-  try {
-    const supabase = await supabaseServerClient();
-
+  return withPublicAccess(async (supabase: SupabaseClient) => {
     const {data, error} = await supabase
       .from('page_visibility')
       .select('*')
@@ -18,15 +18,11 @@ export async function GET() {
     }
 
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('Error in GET /api/page-visibility:', error);
-    return NextResponse.json({error: 'Internal server error'}, {status: 500});
-  }
+  });
 }
 
 export async function PUT(request: NextRequest) {
-  try {
-    const supabase = await supabaseServerClient();
+  return withAdminAuth(async (user, supabase, admin) => {
     const {id, is_visible, sort_order, page_route, page_title} = await request.json();
 
     // Build update object with only provided fields
@@ -36,7 +32,7 @@ export async function PUT(request: NextRequest) {
     if (page_route !== undefined) updateData.page_route = page_route;
     if (page_title !== undefined) updateData.page_title = page_title;
 
-    const {data, error} = await supabase
+    const {data, error} = await admin
       .from('page_visibility')
       .update(updateData)
       .eq('id', id)
@@ -49,8 +45,5 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('Error in PUT /api/page-visibility:', error);
-    return NextResponse.json({error: 'Internal server error'}, {status: 500});
-  }
+  });
 }

@@ -57,7 +57,7 @@ Committees is an ideal candidate for this refactoring because:
 
 ```
 /src/app/admin/committees/
-└── page.tsx.backup (199 lines)
+└── error.tsx.backup (199 lines)
 
 /src/hooks/entities/committee/
 ├── data/
@@ -380,7 +380,7 @@ Instead of writing a separate hook for each entity, we create **factory function
     └── useCommitteeForm.ts      [UNCHANGED] - Form-specific logic
 
 /src/app/admin/committees/
-└── page.tsx.backup                     [UNCHANGED] - Same API
+└── error.tsx.backup                     [UNCHANGED] - Same API
 ```
 
 ---

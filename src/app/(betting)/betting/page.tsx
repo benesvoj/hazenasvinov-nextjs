@@ -4,31 +4,34 @@ import {useState} from 'react';
 
 import {useRouter} from 'next/navigation';
 
-import {Tabs, Tab, Button, Spinner, Chip, ButtonGroup} from '@heroui/react';
+import {Chip} from '@heroui/chip';
+import {Button} from '@heroui/react';
+import {Tab, Tabs} from '@heroui/tabs';
 
 import {
-  TrendingUp,
-  History,
-  Trophy,
-  LogOut,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  HistoryIcon,
+  LogOutIcon,
+  TrendingUpIcon,
+  TrophyIcon,
+} from '@/lib/icons';
+import {translations} from '@/lib/translations';
 
 import {
-  LeaderboardTable,
   BetHistory,
   BetSlip,
+  BetSlipModal,
+  BettingLogin,
+  FloatingBetSlipButton,
+  LeaderboardTable,
+  LoadingSpinner,
   MatchBettingCard,
   WalletBalance,
-  BettingLogin,
-  BetSlipModal,
-  FloatingBetSlipButton,
 } from '@/components';
 import {useUser} from '@/contexts';
 import {useUpcomingBettingMatches} from '@/hooks';
-import {translations} from '@/lib';
 import {BetSlipItem} from '@/types';
 import {bettingLogout} from '@/utils';
 
@@ -179,7 +182,7 @@ export default function BettingPage() {
         <Button
           color="secondary"
           variant="solid"
-          startContent={<LogOut className="w-4 h-4" />}
+          startContent={<LogOutIcon className="w-4 h-4" />}
           onPress={handleLogout}
           isLoading={isLoggingOut}
           isDisabled={isLoggingOut}
@@ -208,7 +211,7 @@ export default function BettingPage() {
               key="matches"
               title={
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
+                  <TrendingUpIcon className="w-4 h-4" />
                   <span>{t.tabs.matches}</span>
                 </div>
               }
@@ -219,7 +222,7 @@ export default function BettingPage() {
                   <Button
                     size="sm"
                     variant="flat"
-                    startContent={<ChevronLeft className="w-4 h-4" />}
+                    startContent={<ChevronLeftIcon className="w-4 h-4" />}
                     onPress={() => setWeekOffset(Math.max(0, weekOffset - 1))}
                     isDisabled={weekOffset === 0}
                   >
@@ -248,7 +251,7 @@ export default function BettingPage() {
                   <Button
                     size="sm"
                     variant="flat"
-                    endContent={<ChevronRight className="w-4 h-4" />}
+                    endContent={<ChevronRightIcon className="w-4 h-4" />}
                     onPress={() => setWeekOffset(weekOffset + 1)}
                   >
                     Next Week
@@ -283,10 +286,9 @@ export default function BettingPage() {
                   </div>
                 )}
 
-                {/* Loading State */}
                 {matchesLoading && (
                   <div className="flex flex-col items-center justify-center py-12 gap-4">
-                    <Spinner size="lg" color="primary" title={t.tabs.matchesLoading} />
+                    <LoadingSpinner size="lg" color="primary" label={t.tabs.matchesLoading} />
                   </div>
                 )}
 
@@ -303,7 +305,7 @@ export default function BettingPage() {
                 {/* No Matches */}
                 {!matchesLoading && !matchesError && matches.length === 0 && (
                   <div className="text-center py-12 text-gray-400">
-                    <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <CalendarIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
                     <p className="text-lg font-semibold mb-2">No Matches This Week</p>
                     <p className="text-sm">
                       {selectedCategory !== 'all'
@@ -331,7 +333,7 @@ export default function BettingPage() {
               key="history"
               title={
                 <div className="flex items-center gap-2">
-                  <History className="w-4 h-4" />
+                  <HistoryIcon className="w-4 h-4" />
                   <span>{t.tabs.myBets}</span>
                 </div>
               }
@@ -345,7 +347,7 @@ export default function BettingPage() {
               key="leaderboard"
               title={
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4" />
+                  <TrophyIcon className="w-4 h-4" />
                   <span>{t.tabs.leaderboard}</span>
                 </div>
               }

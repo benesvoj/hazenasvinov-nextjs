@@ -2,7 +2,8 @@
 
 import {useCallback, useEffect, useState} from 'react';
 
-import {API_ROUTES} from '@/lib';
+import {API_ROUTES} from '@/lib/api-routes';
+
 import {CategoryMembershipFee} from '@/types';
 
 export interface UseFilters {

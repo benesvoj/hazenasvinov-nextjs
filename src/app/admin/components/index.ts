@@ -1,3 +1,3 @@
 export * from './modals/TodoModal';
-export * from './dashboard/TodoStatsCards';
+export * from './dashboard/TodoStatsList';
 export * from './modals/CommentModal';

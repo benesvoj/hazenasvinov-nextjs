@@ -541,8 +541,8 @@ export type Database = {
       };
       category_lineup_members: {
         Row: {
-          added_at: string | null;
-          added_by: string;
+          created_at: string | null;
+          created_by: string;
           id: string;
           is_active: boolean | null;
           is_captain: boolean | null;
@@ -551,10 +551,12 @@ export type Database = {
           lineup_id: string;
           member_id: string;
           position: string;
+          updated_at: string | null;
+          updated_by: string | null;
         };
         Insert: {
-          added_at?: string | null;
-          added_by: string;
+          created_at?: string | null;
+          created_by: string;
           id?: string;
           is_active?: boolean | null;
           is_captain?: boolean | null;
@@ -563,10 +565,12 @@ export type Database = {
           lineup_id: string;
           member_id: string;
           position: string;
+          updated_at?: string | null;
+          updated_by?: string | null;
         };
         Update: {
-          added_at?: string | null;
-          added_by?: string;
+          created_at?: string | null;
+          created_by?: string;
           id?: string;
           is_active?: boolean | null;
           is_captain?: boolean | null;
@@ -575,11 +579,13 @@ export type Database = {
           lineup_id?: string;
           member_id?: string;
           position?: string;
+          updated_at?: string | null;
+          updated_by?: string | null;
         };
         Relationships: [
           {
             foreignKeyName: 'category_lineup_members_added_by_fkey';
-            columns: ['added_by'];
+            columns: ['created_by'];
             isOneToOne: false;
             referencedRelation: 'betting_leaderboard';
             referencedColumns: ['user_id'];
@@ -639,6 +645,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'category_lineup_members_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
           },
         ];
       };

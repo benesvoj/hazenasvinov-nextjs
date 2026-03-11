@@ -25,7 +25,7 @@
 
 #### Worst Offenders:
 
-**1. `src/app/admin/matches/page.tsx` (1,237 lines!)**
+**1. `src/app/admin/matches/error.tsx` (1,237 lines!)**
 ```typescript
 // Currently contains:
 - 11+ useState declarations
@@ -48,7 +48,7 @@
 ```typescript
 // Split into:
 src/app/admin/matches/
-├── page.tsx (50 lines - orchestration only)
+├── error.tsx (50 lines - orchestration only)
 ├── components/
 │   ├── MatchFilters.tsx
 │   ├── MatchTable.tsx
@@ -260,7 +260,7 @@ const matches = await new MatchQueryBuilder(supabase)
 // src/app/coaches/attendance/components/TrainingSessionGenerator.tsx
 // TODO: Implement proper training session generation logic
 
-// src/app/admin/matches/page.tsx
+// src/app/admin/matches/error.tsx
 // TODO: Move translations to admin scope
 
 // src/hooks/entities/blog/useFetchPostMatch.ts
@@ -285,7 +285,7 @@ const matches = await new MatchQueryBuilder(supabase)
 
 **Example:**
 ```typescript
-// src/app/admin/matches/page.tsx
+// src/app/admin/matches/error.tsx
 export default function MatchesPage() {
   // ❌ Business logic directly in component:
   const calculateStandings = () => {

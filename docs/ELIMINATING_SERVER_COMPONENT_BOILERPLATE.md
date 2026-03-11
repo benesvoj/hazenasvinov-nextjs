@@ -5,7 +5,7 @@
 **You're right!** If we do Server Components naively, we get repetitive code:
 
 ```typescript
-// seasons/page.tsx.backup
+// seasons/error.tsx.backup
 export default async function SeasonsPage() {
   const supabase = await createClient();
   const {data: seasons, error} = await supabase.from('seasons').select('*');
@@ -13,7 +13,7 @@ export default async function SeasonsPage() {
   return <SeasonsPageClient initialSeasons={seasons || []} />;
 }
 
-// committees/page.tsx.backup  (DUPLICATE CODE!)
+// committees/error.tsx.backup  (DUPLICATE CODE!)
 export default async function CommitteesPage() {
   const supabase = await createClient();
   const {data: committees, error} = await supabase.from('committees').select('*');
@@ -99,7 +99,7 @@ export async function fetchEntityById<T>(
 ### Now Your Pages Are 3 Lines!
 
 ```typescript
-// seasons/page.tsx.backup
+// seasons/error.tsx.backup
 import {fetchEntity} from '@/utils/supabase/serverQueries';
 import {Season} from '@/types';
 import {SeasonsPageClient} from './SeasonsPageClient';
@@ -109,7 +109,7 @@ export default async function SeasonsPage() {
   return <SeasonsPageClient initialSeasons={seasons} />;
 }
 
-// committees/page.tsx.backup
+// committees/error.tsx.backup
 import {fetchEntity} from '@/utils/supabase/serverQueries';
 import {Committee} from '@/types';
 import {CommitteesPageClient} from './CommitteesPageClient';
@@ -119,7 +119,7 @@ export default async function CommitteesPage() {
   return <CommitteesPageClient initialCommittees={committees} />;
 }
 
-// grants/page.tsx.backup (with ordering)
+// grants/error.tsx.backup (with ordering)
 export default async function GrantsPage() {
   const grants = await fetchEntity<Grant>('grants', {
     orderBy: {column: 'created_at', ascending: false},
@@ -139,7 +139,7 @@ export default async function GrantsPage() {
 This is what **Supabase officially recommends** for Next.js 16:
 
 ```typescript
-// src/app/admin/seasons/page.tsx.backup (Server Component - 8 lines!)
+// src/app/admin/seasons/error.tsx.backup (Server Component - 8 lines!)
 import {HydrationBoundary, dehydrate} from '@tanstack/react-query';
 import {getQueryClient} from '@/lib/queryClient';
 import {fetchSeasons} from '@/queries/seasons';
@@ -418,7 +418,7 @@ export async function prefetchQuery<T>(
 ### Template for Every Page (4 lines):
 
 ```typescript
-// page.tsx.backup (Server Component)
+// error.tsx.backup (Server Component)
 import {HydrationBoundary} from '@tanstack/react-query';
 import {prefetchQuery} from '@/utils/prefetch';
 import {fetchSeasons} from '@/queries/seasons';
@@ -642,7 +642,7 @@ Plus:
 
 ### Migration (Per Entity ~30 min):
 1. Create `queries/[entity]/queries.ts` (10 min)
-2. Update page.tsx.backup to Server Component (5 min)
+2. Update error.tsx.backup to Server Component (5 min)
 3. Rename current page to `PageClient.tsx` (2 min)
 4. Update client to use useQuery (5 min)
 5. Test (8 min)

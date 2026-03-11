@@ -1,8 +1,11 @@
 'use client';
+
 import {useCallback, useState} from 'react';
 
+import {API_ROUTES} from '@/lib/api-routes';
+import {translations} from '@/lib/translations';
+
 import {showToast} from '@/components';
-import {API_ROUTES, translations} from '@/lib';
 import {convertSchemaToMember, Member, MemberFormData, UpdateMemberData} from '@/types';
 
 export interface ValidationErrors {
@@ -64,7 +67,7 @@ export function useMembers() {
             surname: formData.surname.trim(),
             registration_number: formData.registration_number.trim(),
             date_of_birth: formData.date_of_birth ?? null,
-            sex: formData.sex,
+            sex: formData.gender,
             functions: formData.functions,
             category_id: categoryId || null,
           }),
@@ -174,6 +177,48 @@ export function useMembers() {
     }
   }, []);
 
+  const createInternalMember = useCallback(
+    async (formData: MemberFormData, categoryId?: string | null): Promise<Member> => {
+      if (!validateForm(formData)) {
+        throw new Error(tMembers.toasts.formContainsError);
+      }
+
+      setIsLoading(true);
+      setErrors({});
+
+      try {
+        const response = await fetch(API_ROUTES.members.internal, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            surname: formData.surname.trim(),
+            registration_number: formData.registration_number.trim(),
+            date_of_birth: formData.date_of_birth ?? null,
+            sex: formData.gender,
+            functions: formData.functions,
+            category_id: categoryId || null,
+          }),
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          showToast.danger(result.error || tMembers.toasts.failedToCreateMember);
+          throw new Error(result.error);
+        }
+        const convertedMember = convertSchemaToMember(result.data);
+        showToast.success(tMembers.toasts.memberCreatedSuccessfully);
+        return convertedMember;
+      } catch (error) {
+        console.error('Error creating  internal member:', error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [validateForm]
+  );
+
   /**
    * Clear validation errors for a specific field
    */
@@ -210,6 +255,7 @@ export function useMembers() {
     createMember,
     updateMember,
     deleteMember,
+    createInternalMember,
 
     // Validation
     clearFieldError,

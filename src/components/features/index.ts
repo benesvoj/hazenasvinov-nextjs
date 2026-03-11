@@ -8,5 +8,5 @@ export * from './blog';
 export * from './coaches';
 export * from './loaning';
 export * from './meeting-minutes';
-export {ReleaseNotesModal} from './release-notes/ReleaseNotesModal';
+export { ReleaseNotesModal } from './release-notes/ReleaseNotesModal';
 export * from './videos';

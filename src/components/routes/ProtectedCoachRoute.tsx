@@ -8,9 +8,9 @@ import {Button, Card, CardBody} from '@heroui/react';
 
 import {AcademicCapIcon} from '@heroicons/react/24/outline';
 
-import {useUser} from '@/contexts/UserContext';
+import {APP_ROUTES} from '@/lib/app-routes';
 
-import {APP_ROUTES} from '@/lib';
+import {useUser} from '@/contexts/UserContext';
 
 interface ProtectedCoachRouteProps {
   children: React.ReactNode;

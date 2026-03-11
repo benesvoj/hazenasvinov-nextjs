@@ -3,84 +3,58 @@
 
 import React, {useEffect, useState} from 'react';
 
-import {Card, CardBody, Spinner, Tab, Tabs} from '@heroui/react';
-
-import {useUserRoles} from '@/hooks/entities/user/useUserRoles';
 import {useModalWithItem} from '@/hooks/shared/useModals';
 
+import {translations} from '@/lib/translations';
+
+import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
 import {LineupMembers, LineupModal, LineupsList} from '@/app/coaches/lineups/components';
 
-import {DeleteConfirmationModal, PageContainer} from '@/components';
+import {Choice, ContentCard, DeleteDialog, Grid, GridItem, PageContainer, Show} from '@/components';
 import {useUser} from '@/contexts';
 import {ModalMode} from '@/enums';
 import {
   useCategoryLineupForm,
-  useCategoryLineupMember,
   useCategoryLineups,
-  useFetchCategories,
   useFetchCategoryLineups,
   useFetchSeasons,
 } from '@/hooks';
-import {translations} from '@/lib';
 import {CategoryLineup} from '@/types';
+import {hasMoreThanOne} from '@/utils';
 
-interface DeleteItem {
-  type: 'lineup' | 'member';
-  id: string;
-}
-
-const t = translations.coachPortal.lineupList;
+const t = translations.lineups;
 
 export default function CoachesLineupsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSeason, setSelectedSeason] = useState<string>('');
   const [selectedLineup, setSelectedLineup] = useState<CategoryLineup | null>(null);
 
+  const {selectedCategory, setSelectedCategory, availableCategories} = useCoachCategory();
   const {
     data: lineups,
     loading: loadingLineups,
     refetch,
   } = useFetchCategoryLineups({categoryId: selectedCategory, seasonId: selectedSeason});
-
   const {loading: crudLoading, createLineup, updateLineup, deleteLineup} = useCategoryLineups();
-  const {removeLineupMember} = useCategoryLineupMember();
-  const {data: categories} = useFetchCategories();
   const {
     formData,
     setFormData,
     selectedItem: selectedLineupId,
     modalMode,
     openAddMode,
+    openEditMode,
     validateForm,
-    resetForm,
   } = useCategoryLineupForm();
-
+  // or use AppData context to get seasons if they are stored there
   const {data: seasons, refetch: fetchAllSeasons} = useFetchSeasons();
-
-  const {getCurrentUserCategories} = useUserRoles();
   const {user} = useUser();
 
-  // Get user's assigned category
-  const [userCategories, setUserCategories] = useState<string[]>([]);
-
   const lineupModal = useModalWithItem<CategoryLineup>();
-  const deleteModal = useModalWithItem<DeleteItem>();
+  const deleteModal = useModalWithItem<string>();
 
   // Fetch initial data
   useEffect(() => {
-    fetchAllSeasons();
+    void fetchAllSeasons();
   }, [fetchAllSeasons]);
-
-  useEffect(() => {
-    const fetchUserCategories = async () => {
-      const categories = await getCurrentUserCategories();
-      setUserCategories(categories);
-      if (categories.length > 0 && !selectedCategory) {
-        setSelectedCategory(categories[0]);
-      }
-    };
-    fetchUserCategories();
-  }, [getCurrentUserCategories, selectedCategory]);
 
   // Get active season
   const activeSeason = seasons.find((season) => season.is_active);
@@ -98,7 +72,8 @@ export default function CoachesLineupsPage() {
   };
 
   const handleEditLineup = (lineup: CategoryLineup) => {
-    lineupModal.openWith(lineup);
+    openEditMode(lineup);
+    lineupModal.onOpen();
 
     setFormData({
       name: lineup.name,
@@ -111,36 +86,21 @@ export default function CoachesLineupsPage() {
   };
 
   const handleDeleteLineup = (lineupId: string) => {
-    deleteModal.openWith({type: 'lineup', id: lineupId});
+    deleteModal.openWith(lineupId);
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteModal.selectedItem) return;
 
-    const {type, id} = deleteModal.selectedItem;
-
     try {
-      if (type === 'lineup') {
-        await deleteLineup(id);
-      } else if (type === 'member' && selectedCategory && selectedLineup) {
-        await removeLineupMember(selectedCategory, selectedLineup.id, id);
-      }
+      await deleteLineup(deleteModal.selectedItem);
+
       await refetch();
       deleteModal.closeAndClear();
     } catch (err) {
-      console.error(`Error deleting ${type}:`, err);
+      console.error(`Error deleting lineup:`, err);
     }
   };
-
-  if (loadingLineups && !lineups.length) {
-    return (
-      <div className="p-6">
-        <div className="flex items-center justify-center h-64">
-          <Spinner size="lg" />
-        </div>
-      </div>
-    );
-  }
 
   const handleSubmitLineup = async () => {
     const {valid, errors} = validateForm();
@@ -172,44 +132,40 @@ export default function CoachesLineupsPage() {
   return (
     <>
       <PageContainer>
-        {/* Category Tabs */}
-        {userCategories.length > 1 && (
-          <Card className="mb-6">
-            <CardBody>
-              <div className="overflow-x-auto">
-                <Tabs
-                  selectedKey={selectedCategory}
-                  onSelectionChange={(key) => setSelectedCategory(key as string)}
-                  className="w-full min-w-max"
-                >
-                  {userCategories.map((categoryId) => {
-                    const category = categories.find((c) => c.id === categoryId);
-                    return <Tab key={categoryId} title={category?.name || categoryId} />;
-                  })}
-                </Tabs>
-              </div>
-            </CardBody>
-          </Card>
-        )}
+        <Show when={hasMoreThanOne(availableCategories)}>
+          <ContentCard padding={'none'}>
+            <Choice
+              value={selectedCategory}
+              onChange={(id) => setSelectedCategory(id)}
+              items={availableCategories.map((c) => ({key: c.id, label: c.name}))}
+              label={translations.members.table.columns.category}
+              size="sm"
+              className={'md:w-1/4'}
+              disallowEmptySelection={true}
+            />
+          </ContentCard>
+        </Show>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <LineupsList
-            selectedCategory={selectedCategory}
-            selectedSeason={selectedSeason}
-            selectedLineupId={selectedLineup?.id ? selectedLineup.id : ''}
-            setSelectedLineup={setSelectedLineup}
-            loading={loadingLineups}
-            lineupsList={lineups}
-            onAddLineup={handleAddLineup}
-            onEditLineup={handleEditLineup}
-            onDeleteLineup={handleDeleteLineup}
-          />
-
-          <LineupMembers lineupId={selectedLineup?.id || ''} categoryId={selectedCategory} />
-        </div>
+        <Grid columns={3}>
+          <GridItem span={1}>
+            <LineupsList
+              selectedCategory={selectedCategory}
+              selectedSeason={selectedSeason}
+              selectedLineupId={selectedLineup?.id ? selectedLineup.id : ''}
+              setSelectedLineup={setSelectedLineup}
+              loading={loadingLineups}
+              lineupsList={lineups}
+              onAddLineup={handleAddLineup}
+              onEditLineup={handleEditLineup}
+              onDeleteLineup={handleDeleteLineup}
+            />
+          </GridItem>
+          <GridItem span={2}>
+            <LineupMembers lineupId={selectedLineup?.id || ''} categoryId={selectedCategory} />
+          </GridItem>
+        </Grid>
       </PageContainer>
 
-      {/* Lineup Modal */}
       <LineupModal
         isOpen={lineupModal.isOpen}
         onClose={lineupModal.closeAndClear}
@@ -220,16 +176,13 @@ export default function CoachesLineupsPage() {
         isLoading={crudLoading}
       />
 
-      <DeleteConfirmationModal
+      <DeleteDialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeAndClear}
-        onConfirm={handleConfirmDelete}
-        title={deleteModal.selectedItem?.type === 'lineup' ? t.deleteLineup : t.deleteLineupMember}
-        message={
-          deleteModal.selectedItem?.type === 'lineup'
-            ? t.deleteLineupMessage
-            : t.deleteLineupMemberMessage
-        }
+        onSubmit={handleConfirmDelete}
+        title={t.titles.delete}
+        message={t.deleteLineupMessage}
+        isLoading={crudLoading}
       />
     </>
   );

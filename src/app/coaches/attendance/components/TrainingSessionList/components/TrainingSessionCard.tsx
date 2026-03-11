@@ -38,7 +38,7 @@ export const TrainingSessionCard = ({
 
   return (
     <div
-      className={`p-3 rounded-lg border-2 transition-all ${
+      className={`p-3 rounded-lg border-2 transition-all w-full ${
         isSelected
           ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
           : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'

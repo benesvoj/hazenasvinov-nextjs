@@ -2,26 +2,30 @@
 
 import {useState} from 'react';
 
-import {Card, CardBody, CardHeader, Button, Input, Chip, Divider} from '@heroui/react';
-
-import {X, Trash2, Check} from 'lucide-react';
+import {Button} from '@heroui/button';
+import {Card, CardBody, CardHeader} from '@heroui/card';
+import {Chip} from '@heroui/chip';
+import {Divider} from '@heroui/divider';
+import {Input} from '@heroui/input';
 
 import {BetSlipItem, BetStructure} from '@/types/features/betting/bet';
-import {getSelectionDisplayName, getBetTypeMetadata} from '@/types/features/betting/betType';
+import {getBetTypeMetadata, getSelectionDisplayName} from '@/types/features/betting/betType';
 import {formatCurrency} from '@/types/features/betting/wallet';
 
 import {useCreateBet} from '@/hooks/features/betting/useBets';
 import {useWalletBalance} from '@/hooks/features/betting/useWallet';
 
+import {CheckIcon, TrashIcon, XMarkIcon} from '@/lib/icons';
+import {translations} from '@/lib/translations';
+
 import {
-  calculateTotalOdds,
-  calculateReturn,
   calculateProfit,
+  calculateReturn,
+  calculateTotalOdds,
   formatOdds,
 } from '@/services/features/betting/oddsCalculator';
 
 import {showToast} from '@/components';
-import {translations} from '@/lib';
 
 interface BetSlipProps {
   userId: string;
@@ -123,7 +127,7 @@ export default function BetSlip({
           {t.title} <Chip size="sm">{items.length}</Chip>
         </h3>
         <Button size="sm" variant="light" color="danger" onPress={onClearAll} isIconOnly>
-          <Trash2 className="w-4 h-4" />
+          <TrashIcon className="w-4 h-4" />
         </Button>
       </CardHeader>
 
@@ -163,7 +167,7 @@ export default function BetSlip({
                     isIconOnly
                     onPress={() => onRemoveItem(index)}
                   >
-                    <X className="w-4 h-4" />
+                    <XMarkIcon className="w-4 h-4" />
                   </Button>
                 </div>
               </CardBody>
@@ -221,7 +225,7 @@ export default function BetSlip({
           onPress={handlePlaceBet}
           isDisabled={!canPlaceBet}
           isLoading={createBet.isPending}
-          startContent={!createBet.isPending && <Check className="w-5 h-5" />}
+          startContent={!createBet.isPending && <CheckIcon className="w-5 h-5" />}
         >
           {createBet.isPending ? t.placeBetLoading : t.placeBet}
         </Button>

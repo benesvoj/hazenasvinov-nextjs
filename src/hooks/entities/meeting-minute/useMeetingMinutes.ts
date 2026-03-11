@@ -1,8 +1,9 @@
 'use client';
 import {useCallback, useState} from 'react';
 
+import {API_ROUTES} from '@/lib/api-routes';
+
 import {useSupabaseClient} from '@/hooks';
-import {API_ROUTES} from '@/lib';
 import {MeetingAttendee, MeetingMinutes, MeetingMinutesFilters} from '@/types';
 
 export function useMeetingMinutes() {
