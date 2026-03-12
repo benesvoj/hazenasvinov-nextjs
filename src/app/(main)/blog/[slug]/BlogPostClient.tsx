@@ -7,15 +7,16 @@ import {CalendarIcon, UserIcon} from '@heroicons/react/24/outline';
 import {useQuery} from '@tanstack/react-query';
 
 import {BlogContent, BlogPostCard} from '@/components/features';
-import {MatchInfo} from '@/components/shared';
+import {MatchInfo, TournamentEmbed} from '@/components/shared';
 import {Heading} from '@/components/ui';
 import {CategoryChip} from '@/components/ui/chips';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
 
 import {formatDateString} from '@/helpers';
+import {useSupabaseClient} from '@/hooks';
 import {fetchBlogPostBySlug, fetchBlogPostMatch} from '@/queries/blogPosts/queries';
 
 import {BackButton, ContentDivider, ShareButtons} from './components';
@@ -26,6 +27,7 @@ interface BlogPostClientProps {
 
 export function BlogPostClient({slug}: BlogPostClientProps) {
   const t = translations.public.landingPage.posts;
+  const supabase = useSupabaseClient();
 
   // Data is already prefetched on server and hydrated here
   const {data, isLoading, error} = useQuery({
@@ -39,6 +41,13 @@ export function BlogPostClient({slug}: BlogPostClientProps) {
     queryFn: () => fetchBlogPostMatch(data!.post.match_id!),
     enabled: !!data?.post?.match_id,
   });
+
+  const {data: linkedTournament} = supabase
+    .from('tournaments')
+    .select('id')
+    .eq('post_id', data?.post?.id)
+    .eq('status', 'published')
+    .single();
 
   // Handle loading state (should rarely show due to server prefetch)
   if (isLoading || !data) {
@@ -118,6 +127,8 @@ export function BlogPostClient({slug}: BlogPostClientProps) {
             <MatchInfo match={matchData} />
           </>
         )}
+
+        {linkedTournament && <TournamentEmbed tournamentId={linkedTournament.id} />}
 
         <SponsorsTemp />
 

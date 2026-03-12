@@ -17,8 +17,49 @@ interface GenerateRoundRobinResult {
 const BYE_TEAM_ID = 'BYE';
 
 /**
- * Generate a round-robin schedule using the circle method.
- * Fixes team[0] and rotates the remaining teams each round.
+ * Predefined match keys per team count.
+ * Each entry is [home_seed, away_seed] grouped by round.
+ * Seeds are 1-based and map to teams sorted by seed_order.
+ */
+const MATCH_KEYS: Record<number, [number, number][][]> = {
+  6: [
+    // Round 1
+    [
+      [3, 6],
+      [5, 1],
+      [2, 4],
+    ],
+    // Round 2
+    [
+      [6, 1],
+      [2, 3],
+      [4, 5],
+    ],
+    // Round 3
+    [
+      [6, 2],
+      [1, 4],
+      [3, 5],
+    ],
+    // Round 4
+    [
+      [4, 6],
+      [2, 5],
+      [1, 3],
+    ],
+    // Round 5
+    [
+      [5, 6],
+      [3, 4],
+      [1, 2],
+    ],
+  ],
+};
+
+/**
+ * Generate a round-robin schedule.
+ * Uses a predefined match key when available (currently 6 teams),
+ * otherwise falls back to the circle method.
  *
  * @throws Error if fewer than 3 teams are provided
  */
@@ -30,22 +71,56 @@ export function generateRoundRobin(options: GenerateRoundRobinOptions): Generate
     throw new Error('Round-robin vyžaduje alespoň 3 týmy');
   }
 
-  const hasByes = numTeams % 2 !== 0;
-
   // Sort by seed_order to respect seeding
   const sorted = [...teams].sort((a, b) => a.seed_order - b.seed_order);
   const teamIds = sorted.map((team) => team.team_id);
 
-  // If odd number of teams, add a BYE so pairing works evenly
+  const key = MATCH_KEYS[numTeams];
+  if (key) {
+    return generateFromKey(teamIds, key);
+  }
+
+  return generateCircleMethod(teamIds);
+}
+
+/**
+ * Generate matches from a predefined match key.
+ * Seeds in the key are 1-based indices into the sorted teamIds array.
+ */
+function generateFromKey(teamIds: string[], key: [number, number][][]): GenerateRoundRobinResult {
+  const matches: RoundRobinMatch[] = [];
+
+  for (let round = 0; round < key.length; round++) {
+    for (const [homeSeed, awaySeed] of key[round]) {
+      matches.push({
+        home_team_id: teamIds[homeSeed - 1],
+        away_team_id: teamIds[awaySeed - 1],
+        round: round + 1,
+      });
+    }
+  }
+
+  return {
+    matches,
+    rounds: key.length,
+    hasByes: false,
+  };
+}
+
+/**
+ * Fallback: circle method for team counts without a predefined key.
+ */
+function generateCircleMethod(teamIds: string[]): GenerateRoundRobinResult {
+  const hasByes = teamIds.length % 2 !== 0;
+
   if (hasByes) {
-    teamIds.push(BYE_TEAM_ID);
+    teamIds = [...teamIds, BYE_TEAM_ID];
   }
 
   const totalSlots = teamIds.length;
   const rounds = totalSlots - 1;
   const matches: RoundRobinMatch[] = [];
 
-  // Circle method: fix first team, rotate the rest
   const fixed = teamIds[0];
   const rotating = teamIds.slice(1);
 
@@ -56,7 +131,6 @@ export function generateRoundRobin(options: GenerateRoundRobinOptions): Generate
       const homeTeamId = current[i];
       const awayTeamId = current[totalSlots - 1 - i];
 
-      // Skip matches involving the BYE team
       if (homeTeamId !== BYE_TEAM_ID && awayTeamId !== BYE_TEAM_ID) {
         matches.push({
           home_team_id: homeTeamId,
@@ -66,7 +140,6 @@ export function generateRoundRobin(options: GenerateRoundRobinOptions): Generate
       }
     }
 
-    // Rotate: move last element to front of rotating array
     rotating.unshift(rotating.pop()!);
   }
 

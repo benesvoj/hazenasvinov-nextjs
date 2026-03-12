@@ -2,11 +2,11 @@
 
 import {useMemo} from 'react';
 
-import {Tab, Tabs} from '@heroui/react';
+import {Tab, Tabs} from '@heroui/tabs';
 
 import {LoadingSpinner} from '@/components';
 import {AdminContainerProps, TabConfig} from '@/types';
-import {hasItems} from "@/utils";
+import {hasItems} from '@/utils';
 
 import {AdminActions, AdminContent, AdminFilters, AdminHeader} from './';
 

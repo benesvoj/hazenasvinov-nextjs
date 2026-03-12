@@ -30,8 +30,7 @@ export const TournamentFormModal = ({
   seasons,
   categories,
 }: TournamentFormModalProps) => {
-  const {formData, updateFormData, handleSubmit, isLoading, openAddMode, openEditMode} =
-    useTournamentForm();
+  const {formData, updateFormData, handleSubmit, openAddMode, openEditMode} = useTournamentForm();
 
   const title = isNotNilOrEmpty(tournament) ? t.modal.editTitle : t.modal.addTitle;
   const seasonOptions = seasons?.map((season) => ({label: season.name, key: season.id})) || [];

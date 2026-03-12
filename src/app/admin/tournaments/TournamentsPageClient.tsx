@@ -2,6 +2,8 @@
 
 import {useRouter} from 'next/navigation';
 
+import {Button} from '@heroui/button';
+
 import {APP_ROUTES} from '@/lib/app-routes';
 import {translations} from '@/lib/translations';
 
@@ -14,7 +16,7 @@ import {
   useModalWithItem,
   useTournaments,
 } from '@/hooks';
-import {TrophyIcon} from '@/lib';
+import {EyeIcon, TrophyIcon} from '@/lib';
 import {Tournament} from '@/types';
 
 import {TournamentFormModal} from './components';
@@ -57,9 +59,16 @@ export default function TournamentsPageClient() {
       case 'actions':
         return (
           <div>
-            <button onClick={() => router.push(APP_ROUTES.admin.tournamentDetail(tournament.id))}>
-              {translations.common.actions.read}
-            </button>
+            <Button
+              isIconOnly
+              variant={'light'}
+              onPress={() => router.push(APP_ROUTES.admin.tournamentDetail(tournament.id))}
+              aria-label={translations.common.actions.read}
+              title={translations.common.actions.read}
+              size={'sm'}
+            >
+              <EyeIcon />
+            </Button>
           </div>
         );
       default:

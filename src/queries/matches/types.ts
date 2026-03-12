@@ -17,6 +17,8 @@ export interface MatchInsertData {
   matchweek: number | null;
   match_number: number | null;
   video_ids?: string[];
+  tournament_id?: string | null;
+  round?: number | null;
 }
 
 /**

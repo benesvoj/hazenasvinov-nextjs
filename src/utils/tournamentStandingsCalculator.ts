@@ -145,18 +145,40 @@ export async function calculateTournamentStandings(
 
 export async function generateInitialTournamentStandings(
   tournamentId: string
-): Promise<{success: boolean; error?: string; standings?: any[]}> {
-  // Placeholder implementation - replace with actual logic
+): Promise<{success: boolean; error?: string; standings?: TournamentStanding[]}> {
+  const supabase = supabaseBrowserClient();
+
   try {
-    // Simulate some processing time
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const {data: teams, error: teamsError} = await supabase
+      .from('tournament_teams')
+      .select('team_id')
+      .eq('tournament_id', tournamentId);
 
-    // Here you would fetch the tournament data, generate initial standings based on the tournament format,
-    // and update the database with the new standings.
+    if (teamsError) throw teamsError;
+    if (!teams || teams.length === 0) {
+      return {success: false, error: 'Turnaj nemá žádné týmy'};
+    }
 
-    const initialStandings: TournamentStanding[] = []; // Replace with actual generated standings
+    const rows = teams.map((t: {team_id: string}, index: number) => ({
+      tournament_id: tournamentId,
+      team_id: t.team_id,
+      position: index + 1,
+      matches: 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+      goals_for: 0,
+      goals_against: 0,
+      points: 0,
+    }));
 
-    return {success: true, standings: initialStandings};
+    const {error: upsertError} = await supabase
+      .from('tournament_standings')
+      .upsert(rows, {onConflict: 'tournament_id, team_id'});
+
+    if (upsertError) throw upsertError;
+
+    return {success: true};
   } catch (error: any) {
     console.error(`Error generating initial standings for tournament ${tournamentId}:`, error);
     return {success: false, error: error.message || 'Unknown error'};

@@ -24,6 +24,11 @@ export const tournamentsTranslations = {
     publication: 'Publikace',
     blogPost: 'Článek',
     publicLink: 'Veřejný odkaz',
+    team: 'Tým',
+    matchResult: 'Výsledek zápasu',
+    halftimeScore: 'Poločas',
+    homeScore: 'Domácí',
+    awayScore: 'Hosté',
   },
   placeholders: {
     name: 'Zadejte název turnaje',
@@ -32,6 +37,14 @@ export const tournamentsTranslations = {
     category: 'Vyberte kategorii',
     season: 'Vyberte sezónu',
     venue: 'Místo konání turnaje',
+    team: 'Vyberte tým',
+  },
+  descriptions: {
+    team: 'Přidejte týmy, které se zúčastní turnaje. Počet týmů ovlivní formát turnaje a rozpis zápasů.',
+    pickableTeams:
+      'Výběr zobrazuje pouze týmy, které nejsou aktuálně přihlášené do turnaje. Pokud nenajdete požadovaný tým, ujistěte se, že splňuje kritéria pro přihlášení (např. správná kategorie, sezóna) a není již zapsán v turnaji.',
+    scheduleEmpty:
+      'Nejsou vygenerovány žádné zápasy. Přidejte alespoň 3 týmy a vygenerujte rozpis.',
   },
   table: {
     ariaLabel: 'Seznam turnajů',
@@ -52,6 +65,7 @@ export const tournamentsTranslations = {
   },
   actions: {
     addTeam: 'Přidat tým',
+    editTeam: 'Upravit tým',
     removeTeam: 'Odebrat tým',
     generateSchedule: 'Generovat rozpis',
     regenerateSchedule: 'Přegenerovat rozpis',
@@ -73,6 +87,7 @@ export const tournamentsTranslations = {
     removeTeamMessage: 'Opravdu chcete odebrat tým z turnaje?',
     regenerateTitle: 'Přegenerovat rozpis',
     regenerateMessage: 'Přegenerování smaže všechny stávající zápasy a výsledky. Pokračovat?',
+    resultTitle: 'Zadat výsledek',
   },
   validation: {
     nameRequired: 'Název je povinný',
@@ -99,13 +114,19 @@ export const tournamentsTranslations = {
     deleteError: 'Chyba při mazání turnaje.',
     fetchFailed: 'Chyba při načítání turnajů.',
     teamAdded: 'Tým byl přidán do turnaje.',
+    teamUpdated: 'Tým byl aktualizován.',
     teamRemoved: 'Tým byl odebrán z turnaje.',
+    teamAddError: 'Chyba při přidávání týmu do turnaje.',
+    teamUpdateError: 'Chyba při aktualizaci týmu v turnaji.',
+    teamRemoveError: 'Chyba při odstraňování týmu z turnaje.',
     scheduleGenerated: 'Rozpis zápasů byl vygenerován.',
+    scheduleGenerateError: 'Chyba při generování rozpisu.',
     scheduleRegenerateWarning: 'Stávající zápasy a výsledky budou smazány.',
     standingsGenerated: 'Tabulka byla vygenerována.',
     standingsRecalculated: 'Tabulka byla přepočítána.',
     published: 'Turnaj byl publikován.',
     unpublished: 'Publikace turnaje byla zrušena.',
+    failedToFetchTeams: 'Chyba při načítání týmů turnaje.',
   },
   public: {
     schedule: 'Rozpis zápasů',

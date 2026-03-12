@@ -9,3 +9,4 @@ export {default as CategoryStandingsTable} from './CategoryStandingsTable';
 export {default as MatchRow} from '../../../components/shared/match/MatchRow';
 export {default as MatchSchedule} from '../../../components/shared/match/MatchSchedule';
 export {default as MatchResultCard} from './MatchResultCard';
+export {TournamentTeaser} from './TournamentTeaser';

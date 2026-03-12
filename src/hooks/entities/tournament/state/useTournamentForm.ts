@@ -4,6 +4,8 @@ import {useState} from 'react';
 
 import {createFormHook} from '@/hooks/factories';
 
+import {translations} from '@/lib/translations';
+
 import {ModalMode, TournamentStatuses} from '@/enums';
 import {useTournaments} from '@/hooks';
 import {Tournament, TournamentFormData} from '@/types';
@@ -28,11 +30,10 @@ export const useTournamentForm = () => {
   const form = createFormHook<Tournament, TournamentFormData>({
     initialFormData: InitialState,
     validationRules: [
-      {field: 'name', message: 'Name is required'},
-      {field: 'category_id', message: 'Category is required'},
-      {field: 'season_id', message: 'Season is required'},
-      {field: 'start_date', message: 'Start date is required'},
-      {field: 'end_date', message: 'End date is required'},
+      {field: 'name', message: translations.tournaments.validation.nameRequired},
+      {field: 'category_id', message: translations.tournaments.validation.categoryRequired},
+      {field: 'season_id', message: translations.tournaments.validation.seasonRequired},
+      {field: 'start_date', message: translations.tournaments.validation.startDateRequired},
     ],
   })();
 
@@ -47,14 +48,12 @@ export const useTournamentForm = () => {
     setIsLoading(true);
 
     try {
-      const tournamentData =
-        form.modalMode === ModalMode.ADD
-          ? await createTournament(form.formData)
-          : await updateTournament(form.selectedItem!.id, {
-              id: form.selectedItem!.id,
-              ...form.formData,
-            });
-      return tournamentData;
+      return form.modalMode === ModalMode.ADD
+        ? await createTournament(form.formData)
+        : await updateTournament(form.selectedItem!.id, {
+            id: form.selectedItem!.id,
+            ...form.formData,
+          });
     } finally {
       setIsLoading(false);
     }
