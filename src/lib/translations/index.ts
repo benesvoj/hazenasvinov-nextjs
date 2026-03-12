@@ -31,6 +31,7 @@ import {sponsorshipTranslations} from './sponsorship';
 import {teamsTranslations} from './teams';
 import {todosTranslations} from './todos';
 import {topBarTranslations} from './topBar';
+import {tournamentsTranslations} from './tournaments';
 import {trainingSessionsTranslations} from './trainingSession';
 import {userRolesTranslations} from './userRoles';
 import {usersTranslations} from './users';
@@ -72,4 +73,5 @@ export const translations = {
   users: usersTranslations,
   photoGallery: photoGalleryTranslations,
   userRoles: userRolesTranslations,
+  tournaments: tournamentsTranslations,
 } as const;

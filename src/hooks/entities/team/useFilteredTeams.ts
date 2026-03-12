@@ -4,7 +4,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {useSupabaseClient} from '@/hooks';
 
-interface FilteredTeam {
+export interface FilteredTeam {
   id: string;
   name: string;
   short_name?: string;

@@ -100,6 +100,13 @@ export const API_ROUTES = {
     root: '/api/todos' as const,
     byId: (id: string | number) => `/api/todos/${id}`,
   },
+  tournaments: {
+    matches: (id: string | number) => `/api/tournaments/${id}/matches`,
+    scheduleGenerate: (id: string | number) => `/api/tournaments/${id}/schedule/generate`,
+    teamById: (id: string | number, teamId: string | number) =>
+      `/api/tournaments/${id}/teams/${teamId}`,
+    teams: (id: string | number) => `/api/tournaments/${id}/teams`,
+  },
   trainingSessions: {
     bulk: '/api/training-sessions/bulk' as const,
   },

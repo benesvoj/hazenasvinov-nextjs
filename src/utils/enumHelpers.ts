@@ -24,6 +24,7 @@ import {
   getTodoFilterOptions,
   getTodoPrioritiesOptions,
   getTodoStatusesOptions,
+  getTournamentStatusOptions,
   getTrainingSessionStatusOptions,
   getUserRolesOptions,
 } from '@/enums';
@@ -69,5 +70,6 @@ export const todoCategoriesOptions = createOptionsRecord(getTodoCategoriesOption
 export const todoFilterOptions = createOptionsRecord(getTodoFilterOptions());
 export const todoPrioritiesOptions = createOptionsRecord(getTodoPrioritiesOptions());
 export const todoStatusesOptions = createOptionsRecord(getTodoStatusesOptions());
+export const tournamentStatusOptions = createOptionsRecord(getTournamentStatusOptions());
 export const trainingSessionStatusOptions = createOptionsRecord(getTrainingSessionStatusOptions());
 export const userRolesOptions = createOptionsRecord(getUserRolesOptions());

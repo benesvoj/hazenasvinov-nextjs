@@ -2168,9 +2168,11 @@ export type Database = {
           match_number: string | null;
           matchweek: number | null;
           post_id: string | null;
+          round: number | null;
           season_id: string | null;
           status: string | null;
           time: string;
+          tournament_id: string | null;
           updated_at: string | null;
           venue: string;
         };
@@ -2191,9 +2193,11 @@ export type Database = {
           match_number?: string | null;
           matchweek?: number | null;
           post_id?: string | null;
+          round?: number | null;
           season_id?: string | null;
           status?: string | null;
           time: string;
+          tournament_id?: string | null;
           updated_at?: string | null;
           venue: string;
         };
@@ -2214,9 +2218,11 @@ export type Database = {
           match_number?: string | null;
           matchweek?: number | null;
           post_id?: string | null;
+          round?: number | null;
           season_id?: string | null;
           status?: string | null;
           time?: string;
+          tournament_id?: string | null;
           updated_at?: string | null;
           venue?: string;
         };
@@ -2388,6 +2394,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'teams_with_details';
             referencedColumns: ['season_id'];
+          },
+          {
+            foreignKeyName: 'matches_tournament_id_fkey';
+            columns: ['tournament_id'];
+            isOneToOne: false;
+            referencedRelation: 'tournaments';
+            referencedColumns: ['id'];
           },
         ];
       };
@@ -3872,6 +3885,377 @@ export type Database = {
           {
             foreignKeyName: 'todos_created_by_fkey';
             columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      tournament_standings: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          draws: number;
+          goals_against: number;
+          goals_for: number;
+          id: string;
+          losses: number;
+          matches: number;
+          points: number;
+          position: number;
+          team_id: string | null;
+          tournament_id: string;
+          updated_at: string;
+          updated_by: string | null;
+          wins: number;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          draws?: number;
+          goals_against?: number;
+          goals_for?: number;
+          id?: string;
+          losses?: number;
+          matches?: number;
+          points?: number;
+          position?: number;
+          team_id?: string | null;
+          tournament_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          wins?: number;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          draws?: number;
+          goals_against?: number;
+          goals_for?: number;
+          id?: string;
+          losses?: number;
+          matches?: number;
+          points?: number;
+          position?: number;
+          team_id?: string | null;
+          tournament_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          wins?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'tournament_standings_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'tournament_standings_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_teams';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournament_standings_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches_with_teams_optimized';
+            referencedColumns: ['away_team_club_category_id'];
+          },
+          {
+            foreignKeyName: 'tournament_standings_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches_with_teams_optimized';
+            referencedColumns: ['home_team_club_category_id'];
+          },
+          {
+            foreignKeyName: 'tournament_standings_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'team_details';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'tournament_standings_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'team_suffix_helper';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'tournament_standings_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournament_standings_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'tournament_standings_tournament_id_fkey';
+            columns: ['tournament_id'];
+            isOneToOne: false;
+            referencedRelation: 'tournaments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournament_standings_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      tournament_teams: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          seed_order: number;
+          team_id: string;
+          tournament_id: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          seed_order?: number;
+          team_id: string;
+          tournament_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          seed_order?: number;
+          team_id?: string;
+          tournament_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'tournament_teams_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_teams';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches_with_teams_optimized';
+            referencedColumns: ['away_team_club_category_id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches_with_teams_optimized';
+            referencedColumns: ['home_team_club_category_id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'team_details';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'team_suffix_helper';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_tournament_id_fkey';
+            columns: ['tournament_id'];
+            isOneToOne: false;
+            referencedRelation: 'tournaments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      tournaments: {
+        Row: {
+          category_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          description: string | null;
+          end_date: string | null;
+          id: string;
+          image_url: string | null;
+          name: string;
+          post_id: string | null;
+          season_id: string | null;
+          slug: string;
+          start_date: string;
+          status: string;
+          updated_at: string;
+          updated_by: string | null;
+          venue: string | null;
+        };
+        Insert: {
+          category_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          end_date?: string | null;
+          id?: string;
+          image_url?: string | null;
+          name: string;
+          post_id?: string | null;
+          season_id?: string | null;
+          slug: string;
+          start_date: string;
+          status?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          venue?: string | null;
+        };
+        Update: {
+          category_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          end_date?: string | null;
+          id?: string;
+          image_url?: string | null;
+          name?: string;
+          post_id?: string | null;
+          season_id?: string | null;
+          slug?: string;
+          start_date?: string;
+          status?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          venue?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'tournaments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournaments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'tournaments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['category_id_full'];
+          },
+          {
+            foreignKeyName: 'tournaments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'tournaments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'tournaments_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'betting_leaderboard';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'tournaments_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'blog_posts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournaments_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['season_id_full'];
+          },
+          {
+            foreignKeyName: 'tournaments_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'seasons';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournaments_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['season_id'];
+          },
+          {
+            foreignKeyName: 'tournaments_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['season_id'];
+          },
+          {
+            foreignKeyName: 'tournaments_updated_by_fkey';
+            columns: ['updated_by'];
             isOneToOne: false;
             referencedRelation: 'betting_leaderboard';
             referencedColumns: ['user_id'];

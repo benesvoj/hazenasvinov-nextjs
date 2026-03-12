@@ -29,9 +29,11 @@ export interface MatchSchema {
   match_number: string | null;
   matchweek: number | null;
   post_id: string | null;
+  round: number | null;
   season_id: string | null;
   status: string | null;
   time: string;
+  tournament_id: string | null;
   updated_at: string | null;
   venue: string;
 }

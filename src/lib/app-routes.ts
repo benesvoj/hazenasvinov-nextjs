@@ -50,6 +50,8 @@ export const APP_ROUTES = {
     userRoles: `${ADMIN_ROOT}/user-roles` as const,
     meetingMinutes: `${ADMIN_ROOT}/meeting-minutes` as const,
     grantCalendar: `${ADMIN_ROOT}/grant-calendar` as const,
+    tournaments: '/admin/tournaments',
+    tournamentDetail: (id: string) => `/admin/tournaments/${id}`,
   },
 
   // Coach portal

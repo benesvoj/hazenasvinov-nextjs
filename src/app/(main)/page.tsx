@@ -9,11 +9,11 @@ import {translations} from '@/lib/translations';
 import {SponsorsTemp} from '@/app/(main)/components/SponsorsTemp';
 
 import {
-  CallTheActionSection,
   ClubHighlightSection,
   LatestResultsSection,
   PostSection,
   SponsorsSection,
+  TournamentTeaser,
 } from './components';
 import AuthHandler from './components/AuthHandler';
 
@@ -25,12 +25,11 @@ export default function Page() {
     <div className="space-y-4">
       <AuthHandler />
       <LatestResultsSection />
+      {!loading && sectionVisibility.callToAction && <TournamentTeaser />}
       <PostSection />
       <MatchSchedule title={t.title} description={t.description} />
-      {/* <OptimizedMatchSchedule /> */}
       {!loading && sectionVisibility.clubHighlight && <ClubHighlightSection />}
       {!loading && sectionVisibility.sponsors && <SponsorsSection />}
-      {!loading && sectionVisibility.callToAction && <CallTheActionSection />}
 
       <SponsorsTemp />
     </div>

@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@heroui/react';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {isEmpty} from '@/utils/arrayHelper';
 

@@ -26,3 +26,7 @@ export * from './validation/matchValidation';
 
 /** User roles and profiles utilities **/
 export * from './userRoles';
+
+/** Tournament utilities **/
+export * from './roundRobinGenerator';
+export * from './tournamentStandingsCalculator';

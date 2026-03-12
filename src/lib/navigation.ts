@@ -118,6 +118,14 @@ export const allRoutes: NavMenuItem[] = [
     icon: TrophyIcon,
   },
   {
+    href: APP_ROUTES.admin.tournaments,
+    title: translations.tournaments.page.title,
+    isPrivate: true,
+    description: translations.tournaments.page.description,
+    group: RouteGroups.TEAM,
+    icon: TrophyIcon,
+  },
+  {
     href: APP_ROUTES.admin.members,
     title: translations.members.page.title,
     isPrivate: true,
