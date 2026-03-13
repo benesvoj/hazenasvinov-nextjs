@@ -47,7 +47,7 @@ export const tournamentsTranslations = {
     scheduleEmpty:
       'Nejsou vygenerovány žádné zápasy. Přidejte alespoň 3 týmy a vygenerujte rozpis.',
     matchTime:
-      'Zadejte datum a čas zápasu. Tento čas bude zobrazen ve veřejném rozpisu a použije se pro výpočty v tabulce.',
+      'Zadejte čas zápasu. Tento čas bude zobrazen ve veřejném rozpisu a použije se pro výpočty v tabulce.',
   },
   table: {
     ariaLabel: 'Seznam turnajů',

@@ -30,7 +30,7 @@ export const MatchTimePickerModal = ({
 }: MatchTimePickerModalProps) => {
   const initialValues = useMemo<TimeFormData>(
     () => ({
-      time: match?.time ?? '',
+      time: normalizeTimeToMinutes(match?.time ?? ''),
     }),
     [match]
   );
@@ -42,7 +42,7 @@ export const MatchTimePickerModal = ({
     setPrevMatch(match);
     if (match) {
       setSelectedTime({
-        time: match?.time ?? '',
+        time: normalizeTimeToMinutes(match.time ?? ''),
       });
     }
   }
@@ -55,9 +55,12 @@ export const MatchTimePickerModal = ({
     if (!match) return;
 
     if (selectedTime) {
-      await onSave(match?.id, {time: selectedTime.time});
+      const success = await onSave(match.id, {time: normalizeTimeToMinutes(selectedTime.time)});
+
+      if (success) {
+        onClose();
+      }
     }
-    onClose();
   };
 
   return (
@@ -78,4 +81,14 @@ export const MatchTimePickerModal = ({
       />
     </Dialog>
   );
+};
+
+const normalizeTimeToMinutes = (time: string): string => {
+  if (!time) return '';
+  const parts = time.split(':');
+  if (parts.length < 2) {
+    return time;
+  }
+  const [hours, minutes] = parts;
+  return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
 };

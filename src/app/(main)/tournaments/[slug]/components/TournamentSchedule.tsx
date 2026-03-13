@@ -54,8 +54,8 @@ export function TournamentSchedule({matches}: TournamentScheduleProps) {
             <VStack spacing={2} align="stretch">
               {roundMatches
                 .sort((a, b) => {
-                  a.time = a.time || '00:00:00';
-                  b.time = b.time || '00:00:00';
+                  a.time = a.time ?? '00:00:00';
+                  b.time = b.time ?? '00:00:00';
                   return a.time.localeCompare(b.time);
                 })
                 .map((match) => {
