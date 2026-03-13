@@ -355,7 +355,7 @@ describe('useMatchMutations', () => {
       expect(success!).toBe(true);
       expect(mockUpdate).toHaveBeenCalledWith({time: '18:00'});
       expect(mockEq).toHaveBeenCalledWith('id', 'match-1');
-      expect(mockRefreshMaterializedView).toHaveBeenCalledWith('admin result update');
+      expect(mockRefreshMaterializedView).toHaveBeenCalledWith('admin match time update');
     });
 
     it('should return false on error', async () => {
