@@ -29,6 +29,7 @@ export const tournamentsTranslations = {
     halftimeScore: 'Poločas',
     homeScore: 'Domácí',
     awayScore: 'Hosté',
+    matchTime: 'Čas zápasu',
   },
   placeholders: {
     name: 'Zadejte název turnaje',
@@ -45,6 +46,8 @@ export const tournamentsTranslations = {
       'Výběr zobrazuje pouze týmy, které nejsou aktuálně přihlášené do turnaje. Pokud nenajdete požadovaný tým, ujistěte se, že splňuje kritéria pro přihlášení (např. správná kategorie, sezóna) a není již zapsán v turnaji.',
     scheduleEmpty:
       'Nejsou vygenerovány žádné zápasy. Přidejte alespoň 3 týmy a vygenerujte rozpis.',
+    matchTime:
+      'Zadejte čas zápasu. Tento čas bude zobrazen ve veřejném rozpisu a použije se pro výpočty v tabulce.',
   },
   table: {
     ariaLabel: 'Seznam turnajů',
@@ -88,6 +91,8 @@ export const tournamentsTranslations = {
     regenerateTitle: 'Přegenerovat rozpis',
     regenerateMessage: 'Přegenerování smaže všechny stávající zápasy a výsledky. Pokračovat?',
     resultTitle: 'Zadat výsledek',
+    scheduleTitle: 'Vložit čas',
+    matchTimeTitle: 'Upravit čas zápasu',
   },
   validation: {
     nameRequired: 'Název je povinný',

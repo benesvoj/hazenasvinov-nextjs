@@ -13,10 +13,10 @@ interface TeamPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   teams: FilteredTeam[];
-  onSelect: (teamId: string) => void;
+  onSave: (teamId: string) => void;
 }
 
-export const TeamPickerModal = ({isOpen, onClose, teams, onSelect}: TeamPickerModalProps) => {
+export const TeamPickerModal = ({isOpen, onClose, teams, onSave}: TeamPickerModalProps) => {
   const [selectedTeam, setSelectedTeam] = React.useState<string | null>(null);
 
   const teamOptions = teams.map((team) => ({
@@ -26,7 +26,7 @@ export const TeamPickerModal = ({isOpen, onClose, teams, onSelect}: TeamPickerMo
 
   const handleSubmit = () => {
     if (selectedTeam) {
-      onSelect(selectedTeam);
+      onSave(selectedTeam);
     }
     onClose();
   };

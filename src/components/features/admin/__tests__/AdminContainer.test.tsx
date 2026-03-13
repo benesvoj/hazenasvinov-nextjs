@@ -44,7 +44,7 @@ vi.mock('@/components', () => ({
 }));
 
 // Mock HeroUI Tabs
-vi.mock('@heroui/react', () => ({
+vi.mock('@heroui/tabs', () => ({
   Tabs: ({children, selectedKey, onSelectionChange, 'aria-label': ariaLabel}: any) => (
     <div data-testid="tabs" aria-label={ariaLabel} data-selected-key={selectedKey}>
       <div data-testid="tabs-list">
