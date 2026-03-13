@@ -165,19 +165,19 @@ export const ScheduleTab = ({tournamentId, tournament}: ScheduleTabProps) => {
                       <HStack spacing={2}>
                         <HStack>
                           {isNotNilOrEmpty(match.time) && match.time !== '00:00:00' && (
-                            <span className="text-sm min-w-25 text-right">
+                            <span className="text-sm min-w-[100px] text-right">
                               {formatTime(match.time)}
                             </span>
                           )}
                         </HStack>
                         <HStack spacing={3} align="center">
-                          <span className="text-sm min-w-30 text-right">
+                          <span className="text-sm min-w-[120px] text-right">
                             {getTeamName(match.home_team)}
                           </span>
-                          <span className="text-sm font-bold min-w-15 text-center">
+                          <span className="text-sm font-bold min-w-[60px] text-center">
                             {formatScore(match)}
                           </span>
-                          <span className="text-sm min-w-30">{getTeamName(match.away_team)}</span>
+                          <span className="text-sm min-w-[120px]">{getTeamName(match.away_team)}</span>
                           {halftime && <span className="text-xs text-default-400">{halftime}</span>}
                         </HStack>
                       </HStack>
