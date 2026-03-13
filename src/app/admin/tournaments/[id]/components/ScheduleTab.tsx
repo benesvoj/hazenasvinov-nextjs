@@ -4,11 +4,12 @@ import {useMemo} from 'react';
 
 import {Button} from '@heroui/button';
 
+import {ClockIcon} from '@heroicons/react/24/outline';
+
 import {translations} from '@/lib/translations';
 
-import {MatchResultModal} from '@/app/admin/tournaments/[id]/components/MatchResultModal';
-
 import {ContentCard, DeleteDialog, EmptyState, HStack, VStack} from '@/components';
+import {formatTime} from '@/helpers';
 import {
   useFetchTournamentMatches,
   useFetchTournamentTeams,
@@ -19,6 +20,9 @@ import {
 } from '@/hooks';
 import {EditIcon} from '@/lib';
 import {Tournament, TournamentMatch} from '@/types';
+import {isNotNilOrEmpty} from '@/utils';
+
+import {MatchResultModal, MatchTimePickerModal} from './';
 
 const t = translations.tournaments;
 
@@ -46,13 +50,18 @@ export const ScheduleTab = ({tournamentId, tournament}: ScheduleTabProps) => {
   const {data: matches, loading, refetch} = useFetchTournamentMatches(tournamentId);
   const {data: teams} = useFetchTournamentTeams(tournamentId);
   const {generateSchedule, loading: generatingSchedule} = useScheduleGeneration();
-  const {updateMatchResult, loading: savingResult} = useMatchMutations({
+  const {
+    updateMatchResult,
+    updateMatchTime,
+    loading: savingUpdate,
+  } = useMatchMutations({
     selectedCategory: tournament.category_id || '',
     selectedSeason: tournament.season_id || '',
     tournamentId,
   });
 
   const matchModal = useModalWithItem<TournamentMatch>();
+  const matchTimeModal = useModalWithItem<TournamentMatch>();
   const regenerateDialog = useModal();
 
   const hasEnoughTeams = teams.length >= 3;
@@ -77,6 +86,17 @@ export const ScheduleTab = ({tournamentId, tournament}: ScheduleTabProps) => {
     const success = await generateSchedule(tournamentId);
     if (success) await refetch();
     regenerateDialog.onClose();
+  };
+
+  const handleSaveMatchTime = async (
+    matchId: string,
+    data: {
+      time: string;
+    }
+  ) => {
+    const success = await updateMatchTime(matchId, data);
+    if (success) await refetch();
+    return success;
   };
 
   const handleSaveResult = async (
@@ -137,32 +157,51 @@ export const ScheduleTab = ({tournamentId, tournament}: ScheduleTabProps) => {
                 {roundMatches.map((match) => {
                   const halftime = formatHalftime(match);
                   return (
-                    <div
+                    <HStack
                       key={match.id}
-                      className="flex items-center justify-between rounded-lg border border-default-200 px-4 py-2"
+                      className="rounded-lg border border-default-200 px-4 py-2"
+                      justify={'between'}
                     >
-                      <HStack spacing={3} align="center">
-                        <span className="text-sm min-w-[120px] text-right">
-                          {getTeamName(match.home_team)}
-                        </span>
-                        <span className="text-sm font-bold min-w-[60px] text-center">
-                          {formatScore(match)}
-                        </span>
-                        <span className="text-sm min-w-[120px]">
-                          {getTeamName(match.away_team)}
-                        </span>
-                        {halftime && <span className="text-xs text-default-400">{halftime}</span>}
+                      <HStack spacing={2}>
+                        <HStack>
+                          {isNotNilOrEmpty(match.time) && match.time !== '00:00:00' && (
+                            <span className="text-sm min-w-25 text-right">
+                              {formatTime(match.time)}
+                            </span>
+                          )}
+                        </HStack>
+                        <HStack spacing={3} align="center">
+                          <span className="text-sm min-w-30 text-right">
+                            {getTeamName(match.home_team)}
+                          </span>
+                          <span className="text-sm font-bold min-w-15 text-center">
+                            {formatScore(match)}
+                          </span>
+                          <span className="text-sm min-w-30">{getTeamName(match.away_team)}</span>
+                          {halftime && <span className="text-xs text-default-400">{halftime}</span>}
+                        </HStack>
                       </HStack>
-                      <Button
-                        isIconOnly
-                        size="sm"
-                        variant="light"
-                        aria-label={t.modal.resultTitle}
-                        onPress={() => matchModal.openWith(match)}
-                      >
-                        <EditIcon className="w-4 h-4" />
-                      </Button>
-                    </div>
+                      <HStack justify={'end'}>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          aria-label={t.modal.scheduleTitle}
+                          onPress={() => matchTimeModal.openWith(match)}
+                        >
+                          <ClockIcon className={'w-4 h-4'} />
+                        </Button>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          aria-label={t.modal.resultTitle}
+                          onPress={() => matchModal.openWith(match)}
+                        >
+                          <EditIcon className="w-4 h-4" />
+                        </Button>
+                      </HStack>
+                    </HStack>
                   );
                 })}
               </VStack>
@@ -176,7 +215,15 @@ export const ScheduleTab = ({tournamentId, tournament}: ScheduleTabProps) => {
         onClose={matchModal.closeAndClear}
         match={matchModal.selectedItem}
         onSave={handleSaveResult}
-        isLoading={savingResult}
+        isLoading={savingUpdate}
+      />
+
+      <MatchTimePickerModal
+        isOpen={matchTimeModal.isOpen}
+        onClose={matchTimeModal.closeAndClear}
+        match={matchTimeModal.selectedItem}
+        onSave={handleSaveMatchTime}
+        isLoading={savingUpdate}
       />
 
       <DeleteDialog

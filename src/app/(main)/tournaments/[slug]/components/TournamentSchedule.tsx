@@ -5,7 +5,9 @@ import {useMemo} from 'react';
 import {translations} from '@/lib/translations';
 
 import {ContentCard, EmptyState, Heading, HStack, VStack} from '@/components';
+import {formatTime} from '@/helpers';
 import {TournamentMatch} from '@/types';
+import {isNotNilOrEmpty} from '@/utils';
 
 const t = translations.tournaments;
 
@@ -50,26 +52,39 @@ export function TournamentSchedule({matches}: TournamentScheduleProps) {
           <div key={round}>
             <Heading size={3}>{`${t.labels.round} ${round}`}</Heading>
             <VStack spacing={2} align="stretch">
-              {roundMatches.map((match) => {
-                const halftime = formatHalftime(match);
-                return (
-                  <div
-                    key={match.id}
-                    className="flex items-center justify-between rounded-lg border border-default-200 px-4 py-2"
-                  >
-                    <HStack spacing={3} align="center">
-                      <span className="text-sm min-w-[100px] text-right">
-                        {getTeamName(match.home_team)}
-                      </span>
-                      <span className="text-sm font-bold min-w-[50px] text-center">
-                        {formatScore(match)}
-                      </span>
-                      <span className="text-sm min-w-[100px]">{getTeamName(match.away_team)}</span>
-                      {halftime && <span className="text-xs text-default-400">{halftime}</span>}
-                    </HStack>
-                  </div>
-                );
-              })}
+              {roundMatches
+                .sort((a, b) => {
+                  a.time = a.time || '00:00:00';
+                  b.time = b.time || '00:00:00';
+                  return a.time.localeCompare(b.time);
+                })
+                .map((match) => {
+                  const halftime = formatHalftime(match);
+                  return (
+                    <div
+                      key={match.id}
+                      className="flex items-center justify-between rounded-lg border border-default-200 px-4 py-2"
+                    >
+                      <HStack spacing={3} align="center">
+                        {isNotNilOrEmpty(match.time) && match.time !== '00:00:00' && (
+                          <span className="text-sm min-w-[100px] text-right">
+                            {formatTime(match.time)}
+                          </span>
+                        )}
+                        <span className="text-sm min-w-[100px] text-right">
+                          {getTeamName(match.home_team)}
+                        </span>
+                        <span className="text-sm font-bold min-w-[50px] text-center">
+                          {formatScore(match)}
+                        </span>
+                        <span className="text-sm min-w-[100px]">
+                          {getTeamName(match.away_team)}
+                        </span>
+                        {halftime && <span className="text-xs text-default-400">{halftime}</span>}
+                      </HStack>
+                    </div>
+                  );
+                })}
             </VStack>
           </div>
         ))}

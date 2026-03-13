@@ -5,3 +5,4 @@ export * from './ScheduleTab';
 export * from './StandingsTab';
 export * from './TeamsTab';
 export * from './TeamPickerModal';
+export * from './MatchTimePickerModal';

@@ -130,7 +130,7 @@ export const TeamsTab = ({tournamentId, tournament}: TeamsTabProps) => {
         isOpen={modal.isOpen}
         onClose={modal.onClose}
         teams={pickableTeams}
-        onSelect={handleAddTeam}
+        onSave={handleAddTeam}
       />
 
       <DeleteDialog

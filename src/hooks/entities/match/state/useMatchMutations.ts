@@ -32,6 +32,7 @@ export interface UseMatchMutationsResult {
   createMatch: (data: MatchInsertData) => Promise<boolean>;
   updateMatch: (matchId: string, data: MatchUpdateData, originalMatch: Match) => Promise<boolean>;
   updateMatchResult: (matchId: string, data: MatchResultData) => Promise<boolean>;
+  updateMatchTime: (matchId: string, data: {time: string}) => Promise<boolean>;
   deleteMatch: (matchId: string) => Promise<boolean>;
   deleteAllMatchesBySeason: (seasonId: string) => Promise<boolean>;
   bulkUpdateMatchweek: (data: BulkMatchweekUpdateData, matches: Match[]) => Promise<boolean>;
@@ -131,6 +132,33 @@ export function useMatchMutations(options: UseMatchMutationsOptions): UseMatchMu
     [supabase, invalidateMatchQueries, onStandingsRefresh]
   );
 
+  const updateMatchTime = useCallback(
+    async (matchId: string, data: {time: string}): Promise<boolean> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const {error: updateError} = await supabase
+          .from('matches')
+          .update({time: data.time})
+          .eq('id', matchId);
+
+        if (updateError) throw updateError;
+
+        await refreshMaterializedViewWithCallback('admin result update');
+
+        await invalidateMatchQueries();
+        return true;
+      } catch (err: any) {
+        setError(err.message || 'Chyba při aktualizaci času zápasu');
+        console.error('Error updating match time:', err);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [supabase, invalidateMatchQueries]
+  );
   const updateMatchResult = useCallback(
     async (matchId: string, data: MatchResultData): Promise<boolean> => {
       setLoading(true);
@@ -299,6 +327,7 @@ export function useMatchMutations(options: UseMatchMutationsOptions): UseMatchMu
     createMatch,
     updateMatch,
     updateMatchResult,
+    updateMatchTime,
     deleteMatch,
     deleteAllMatchesBySeason,
     bulkUpdateMatchweek,
