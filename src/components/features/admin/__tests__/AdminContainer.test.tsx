@@ -44,7 +44,7 @@ vi.mock('@/components', () => ({
 }));
 
 // Mock HeroUI Tabs
-vi.mock('@heroui/react', () => ({
+vi.mock('@heroui/tabs', () => ({
   Tabs: ({children, selectedKey, onSelectionChange, 'aria-label': ariaLabel}: any) => (
     <div data-testid="tabs" aria-label={ariaLabel} data-selected-key={selectedKey}>
       <div data-testid="tabs-list">
@@ -407,9 +407,9 @@ describe('AdminContainer', () => {
       render(<AdminContainer tabs={tabs} activeTab="invalid-key" />);
 
       // With invalid key, the mock returns no content (tabs-content is empty)
-      // The tabs component should not be rendered
-      // expect(screen.getByTestId('tabs')).toBeInTheDocument();
-      // expect(screen.getByTestId('tab-tab1')).toBeInTheDocument();
+      // But the tabs structure should still render
+      expect(screen.getByTestId('tabs')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-tab1')).toBeInTheDocument();
     });
 
     it('should handle tab without content', () => {
