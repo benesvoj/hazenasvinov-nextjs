@@ -145,7 +145,7 @@ export function useMatchMutations(options: UseMatchMutationsOptions): UseMatchMu
 
         if (updateError) throw updateError;
 
-        await refreshMaterializedViewWithCallback('admin result update');
+        await refreshMaterializedViewWithCallback('admin match time update');
 
         await invalidateMatchQueries();
         return true;
