@@ -108,6 +108,9 @@ export async function DELETE(request: Request, {params}: {params: Promise<{id: s
       return NextResponse.json({error: 'Unauthorized'}, {status: 401});
     }
 
+    await supabaseAdmin.from('member_club_relationships').delete().eq('member_id', id);
+    await supabaseAdmin.from('member_metadata').delete().eq('member_id', id);
+
     const {error} = await supabaseAdmin.from('members').delete().eq('id', id);
 
     if (error) {

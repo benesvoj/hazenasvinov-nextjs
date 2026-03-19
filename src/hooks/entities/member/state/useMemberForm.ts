@@ -67,6 +67,10 @@ export function useMemberForm() {
         throw new Error('No member selected for edit');
       }
 
+      const functionsArray = Array.isArray(form.formData.functions)
+        ? (form.formData.functions as unknown as MemberFunction[])
+        : [form.formData.functions as MemberFunction];
+
       const member =
         form.modalMode === ModalMode.ADD
           ? await createInternalMember(
@@ -76,7 +80,7 @@ export function useMemberForm() {
                 registration_number: form.formData.registration_number,
                 date_of_birth: form.formData.date_of_birth,
                 gender: form.formData.sex,
-                functions: [form.formData.functions as MemberFunction],
+                functions: functionsArray,
               },
               form.formData.category_id
             )
@@ -86,22 +90,43 @@ export function useMemberForm() {
               surname: form.formData.surname,
               registration_number: form.formData.registration_number,
               date_of_birth: form.formData.date_of_birth,
-              gender: form.formData.sex,
-              functions: [form.formData.functions as MemberFunction],
+              sex: form.formData.sex,
+              functions: functionsArray,
             });
 
       const {
-        name,
-        surname,
-        registration_number,
-        date_of_birth,
-        sex,
-        functions,
-        category_id,
-        ...metadataFields
+        phone,
+        email,
+        address,
+        parent_name,
+        parent_phone,
+        parent_email,
+        medical_notes,
+        allergies,
+        emergency_contact_name,
+        emergency_contact_phone,
+        notes,
+        preferred_position,
+        jersey_size,
+        shoe_size,
       } = form.formData;
 
-      await updateMemberMetadata(member.id, metadataFields);
+      await updateMemberMetadata(member.id, {
+        phone,
+        email,
+        address,
+        parent_name,
+        parent_phone,
+        parent_email,
+        medical_notes,
+        allergies,
+        emergency_contact_name,
+        emergency_contact_phone,
+        notes,
+        preferred_position,
+        jersey_size,
+        shoe_size,
+      });
 
       return member;
     } finally {

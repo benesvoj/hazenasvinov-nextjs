@@ -39,7 +39,7 @@ export interface UpdateMemberData {
   surname?: string;
   registration_number?: string;
   date_of_birth?: string | null;
-  gender?: Genders.MALE | Genders.FEMALE;
+  sex?: Genders.MALE | Genders.FEMALE;
   functions?: MemberFunction[];
   category_id?: string;
   is_active?: boolean;

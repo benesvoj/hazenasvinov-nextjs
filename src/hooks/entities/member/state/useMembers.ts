@@ -124,7 +124,7 @@ export function useMembers() {
       const response = await fetch(API_ROUTES.members.byId(memberData.id), {
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({memberData}),
+        body: JSON.stringify(memberData),
       });
 
       const result = await response.json();
@@ -179,10 +179,6 @@ export function useMembers() {
 
   const createInternalMember = useCallback(
     async (formData: MemberFormData, categoryId?: string | null): Promise<Member> => {
-      if (!validateForm(formData)) {
-        throw new Error(tMembers.toasts.formContainsError);
-      }
-
       setIsLoading(true);
       setErrors({});
 

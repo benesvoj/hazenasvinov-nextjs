@@ -17,7 +17,7 @@ import {MemberFunction} from '@/enums/memberFunction';
  */
 export const MembersInternalQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(25),
+  limit: z.coerce.number().int().min(1).max(1000).default(25),
   /** Empty string is rejected (min 1) so absent search ≠ empty-string search. */
   search: z.string().min(1).optional(),
   /** Unknown enum values are rejected to prevent silent no-ops. */

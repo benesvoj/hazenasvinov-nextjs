@@ -117,7 +117,7 @@ export default function CoachesMembersPage() {
         member={memberModal.selectedItem}
         categories={availableCategories || []}
         showPaymentsTab
-        onSuccess={handleSave}
+        onSuccess={() => setRefreshKey((k) => k + 1)}
         sections={FULL_EDIT}
       />
 

@@ -244,7 +244,11 @@ export default function MembersAdminPage() {
         onClose={memberModal.closeAndClear}
         member={memberModal.selectedItem}
         categories={categoriesData || []}
-        onSuccess={handleSave}
+        onSuccess={() => {
+          if (activeTab === 'members-internal') refreshInternal();
+          else if (activeTab === 'members-external') refreshExternal();
+          else if (activeTab === 'members-on-loan') refreshOnLoan();
+        }}
         showPaymentsTab={activeTab === 'members-internal'}
         sections={FULL_EDIT}
       />

@@ -52,9 +52,13 @@ export async function POST(request: NextRequest) {
       throw new Error('Own club not found');
     }
 
+    const registration_number =
+      body.registration_number?.trim() ||
+      `TMP-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
     const {data: member, error: memberError} = await supabase
       .from('members')
-      .insert({...body})
+      .insert({...body, registration_number})
       .select()
       .single();
 
