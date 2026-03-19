@@ -38,6 +38,7 @@ export const MatchTimePickerModal = ({
   const [selectedTime, setSelectedTime] = useState<TimeFormData>(initialValues);
 
   const [prevMatch, setPrevMatch] = useState<TournamentMatch | null>(null);
+
   if (match !== prevMatch) {
     setPrevMatch(match);
     if (match) {

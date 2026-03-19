@@ -7,6 +7,8 @@ import {Chip} from '@heroui/chip';
 import {Spinner} from '@heroui/spinner';
 import {Tab, Tabs} from '@heroui/tabs';
 
+import {sharedTabsProps} from '@/components/ui/tabsStyles';
+
 import {CalendarIcon, TrendingDownIcon, TrendingUpIcon, TrophyIcon} from '@/lib/icons';
 import {translations} from '@/lib/translations';
 
@@ -75,6 +77,7 @@ export default function BetHistory({userId}: BetHistoryProps) {
       <CardBody>
         {/* Tabs */}
         <Tabs
+          {...sharedTabsProps}
           selectedKey={selectedTab}
           onSelectionChange={(key) => setSelectedTab(key as any)}
           className="mb-4"

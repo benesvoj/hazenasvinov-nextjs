@@ -74,7 +74,7 @@ export default function ContentCard({
         </Show>
         <Hide when={isLoading}>{errorState || emptyState || children}</Hide>
       </CardBody>
-      <Show when={footer}>
+      <Show when={!isLoading && footer}>
         <CardFooter justify={'center'}>{footer}</CardFooter>
       </Show>
     </HeroCard>

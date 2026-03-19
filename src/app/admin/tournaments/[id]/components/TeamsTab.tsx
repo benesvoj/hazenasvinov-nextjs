@@ -75,7 +75,7 @@ export const TeamsTab = ({tournamentId, tournament}: TeamsTabProps) => {
             aria-label={translations.tournaments.actions.removeTeam}
             onPress={() => deleteDialog.openWith({teamId: team.team_id})}
           >
-            <TrashIcon className="w-6 h-6" />
+            <TrashIcon className="w-4 h-4" />
           </Button>
         </HStack>
       );
@@ -109,7 +109,7 @@ export const TeamsTab = ({tournamentId, tournament}: TeamsTabProps) => {
     <>
       <ContentCard
         title={translations.tournaments.labels.teams}
-        actions={actions}
+        actions={!loading && actions}
         isLoading={loading}
       >
         <VStack spacing={4}>
@@ -118,7 +118,6 @@ export const TeamsTab = ({tournamentId, tournament}: TeamsTabProps) => {
             data={enrolledTeams}
             renderCell={renderTeamCell}
             ariaLabel={translations.tournaments.table.ariaLabel}
-            isLoading={loading}
           />
           {getCount(enrolledTeams) < 3 && (
             <Alert color={'warning'}>{translations.tournaments.validation.minTeams}</Alert>
