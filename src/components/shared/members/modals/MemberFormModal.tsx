@@ -38,12 +38,16 @@ export const MemberFormModal = ({
   const isEditMode = isNotNilOrEmpty(member);
 
   useEffect(() => {
+    if (!isOpen) return;
     if (member) {
       openEditMode(member);
     } else {
       openAddMode();
+      if (hasItems(categories)) {
+        updateFormData({category_id: categories[0].id});
+      }
     }
-  }, [member]);
+  }, [isOpen, member]);
 
   useEffect(() => {
     if (hasItems(categories) && !formData.category_id) {

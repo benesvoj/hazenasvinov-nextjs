@@ -37,11 +37,15 @@ export function parseGenderFromDb(sex: string | null): Genders.MALE | Genders.FE
  *  @param functions - Database functions value (string array[])
  *  @returns MemberFunction enum array
  */
-export function parseFunctionsFromDb(functions: string[] | null): MemberFunction[] {
+export function parseFunctionsFromDb(functions: unknown[] | null): MemberFunction[] {
   if (!functions || !functions.length) return [];
 
-  return functions
+  return (functions.flat() as unknown[])
     .map((f) => {
+      if (typeof f !== 'string') {
+        console.warn(`Unexpected non-string function value from DB: ${JSON.stringify(f)}`);
+        return null;
+      }
       const normalized = f.toLowerCase().trim();
       const enumValue = Object.values(MemberFunction).find((v) => v == normalized);
 
