@@ -4,7 +4,9 @@ import {useMemo} from 'react';
 
 import {Tab, Tabs} from '@heroui/tabs';
 
-import {LoadingSpinner} from '@/components';
+import {sharedTabsProps} from '@/components/ui/tabsStyles';
+
+import {LoadingSpinner, VStack} from '@/components';
 import {AdminContainerProps, TabConfig} from '@/types';
 import {hasItems} from '@/utils';
 
@@ -81,10 +83,10 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
           <AdminContent>
             {hasItems(tabs) ? (
               <Tabs
+                {...sharedTabsProps}
                 selectedKey={effectiveActiveTab}
                 onSelectionChange={(key) => onTabChange?.(key as T[number]['key'])}
                 aria-label={tabsAriaLabel}
-                className="w-full"
               >
                 {tabs.map((tab) => {
                   const tabActions = getTabActions(tab);
@@ -93,9 +95,7 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
                   return (
                     <Tab key={tab.key} title={tab.title}>
                       <div className="flex flex-col gap-4">
-                        {tabActions && tabActions.length > 0 && (
-                          <AdminActions actions={tabActions} />
-                        )}
+                        {hasItems(tabActions) && <AdminActions actions={tabActions} />}
                         {tabFilters && <AdminFilters>{tabFilters}</AdminFilters>}
                         {tab.content}
                       </div>

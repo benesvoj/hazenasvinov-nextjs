@@ -2,7 +2,11 @@
 
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 
-import {Alert, Skeleton, Tab, Tabs} from '@heroui/react';
+import {Alert} from '@heroui/alert';
+import {Skeleton} from '@heroui/skeleton';
+import {Tab, Tabs} from '@heroui/tabs';
+
+import {sharedTabsProps} from '@/components/ui/tabsStyles';
 
 import {translations} from '@/lib/translations';
 
@@ -223,6 +227,7 @@ export default function MatchSchedule({
         {/* Category Tabs - only show if no external category is provided */}
         {!selectedCategoryId && hasItems(availableCategories) ? (
           <Tabs
+            {...sharedTabsProps}
             selectedKey={selectedCategory}
             onSelectionChange={(key) => setSelectedCategory(key as string)}
             className="w-full mb-2 md:mb-4"

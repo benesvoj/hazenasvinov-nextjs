@@ -4,6 +4,8 @@ import {useEffect} from 'react';
 
 import {Tab, Tabs} from '@heroui/tabs';
 
+import {sharedTabsProps} from '@/components/ui/tabsStyles';
+
 import {translations} from '@/lib/translations';
 
 import {
@@ -82,7 +84,7 @@ export const MemberFormModal = ({
       size={sizeOption}
       scrollBehavior="inside"
     >
-      <Tabs>
+      <Tabs {...sharedTabsProps}>
         <Tab key="basic_info" title={translations.members.modals.tabs.info}>
           <Grid columns={sections === QUICK_CREATE ? 1 : 2} gap={'sm'}>
             <GridItem>
