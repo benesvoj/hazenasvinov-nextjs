@@ -4,8 +4,10 @@ import {useState, useEffect} from 'react';
 
 import {Select, SelectItem} from '@heroui/react';
 
+import {getLineupCoachRoleOptions} from '@/enums/getLineupCoachRoleOptions';
+
 import {UnifiedModal} from '@/components';
-import {getLineupCoachRoleOptions, LineupCoachRole} from '@/enums';
+import {LineupCoachRole} from '@/enums';
 import {LineupCoachFormData} from '@/types';
 interface LineupCoachEditModalProps {
   isOpen: boolean;

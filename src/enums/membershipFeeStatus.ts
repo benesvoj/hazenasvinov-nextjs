@@ -1,5 +1,3 @@
-import {translations} from '@/lib/translations';
-
 export enum PaymentStatus {
   PAID = 'paid',
   PARTIAL = 'partial',
@@ -27,35 +25,3 @@ export enum FeePeriod {
   QUARTERLY = 'quarterly',
   MONTHLY = 'monthly',
 }
-
-export const getPaymentStatusColor = (
-  status: PaymentStatus
-): 'success' | 'warning' | 'danger' | 'default' => {
-  switch (status) {
-    case PaymentStatus.PAID:
-      return 'success';
-    case PaymentStatus.PARTIAL:
-      return 'warning';
-    case PaymentStatus.UNPAID:
-      return 'danger';
-    case PaymentStatus.NOT_REQUIRED:
-      return 'default';
-    default:
-      return 'default';
-  }
-};
-
-export const getPaymentStatusLabel = (status: PaymentStatus): string => {
-  switch (status) {
-    case PaymentStatus.PAID:
-      return translations.membershipFees.enums.paymentStatus.paid;
-    case PaymentStatus.PARTIAL:
-      return translations.membershipFees.enums.paymentStatus.partial;
-    case PaymentStatus.UNPAID:
-      return translations.membershipFees.enums.paymentStatus.unpaid;
-    case PaymentStatus.NOT_REQUIRED:
-      return translations.membershipFees.enums.paymentStatus.notRequired;
-    default:
-      return translations.membershipFees.enums.paymentStatus.unknown;
-  }
-};

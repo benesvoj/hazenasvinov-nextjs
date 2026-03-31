@@ -20,7 +20,6 @@ import {translations} from '@/lib/translations';
 import {deleteClubAsset, uploadClubAsset} from '@/utils/supabase/storage';
 
 import {ContentCard, Heading, showToast} from '@/components';
-import {ACTION_TYPE_LABELS, ActionTypes} from '@/enums';
 import {useClubConfig, useFetchClubConfig} from '@/hooks';
 
 const INITIAL_STATE = {
@@ -126,12 +125,12 @@ export default function ClubConfigCard() {
     <div className={'w-full flex justify-end'}>
       <Button
         color={'primary'}
-        aria-label={ACTION_TYPE_LABELS[ActionTypes.SAVE]}
+        aria-label={translations.common.actions.save}
         type={'submit'}
         onPress={() => handleSubmitChanges(clubConfig!.id)}
         isLoading={updateLoading}
       >
-        {ACTION_TYPE_LABELS[ActionTypes.SAVE]}
+        {translations.common.actions.save}
       </Button>
     </div>
   );

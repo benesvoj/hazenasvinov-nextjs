@@ -12,8 +12,10 @@ import {
   Checkbox,
 } from '@heroui/react';
 
+import {getMemberFunctionOptions} from '@/enums/getMemberFunctionOptions';
+
 import {GenderFilter} from '@/components';
-import {getMemberFunctionOptions, Genders} from '@/enums';
+import {Genders} from '@/enums';
 import {Category} from '@/types';
 import {isEmpty} from '@/utils';
 

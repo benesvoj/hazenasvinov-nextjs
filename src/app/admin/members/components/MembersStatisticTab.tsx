@@ -4,7 +4,9 @@ import {Badge} from '@heroui/badge';
 import {Card, CardBody, CardHeader} from '@heroui/card';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@heroui/table';
 
-import {Genders, getMemberFunctionOptions} from '@/enums';
+import {getMemberFunctionOptions} from '@/enums/getMemberFunctionOptions';
+
+import {Genders} from '@/enums';
 import {MembersStatisticTabProps} from '@/types';
 
 export default function MembersStatisticTab({members, categoriesData}: MembersStatisticTabProps) {

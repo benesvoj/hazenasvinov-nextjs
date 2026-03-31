@@ -4,10 +4,12 @@ import React from 'react';
 
 import {Chip, Input} from '@heroui/react';
 
-import {translations} from '@/lib/translations/index';
+import {getMemberFunctionOptions} from '@/enums/getMemberFunctionOptions';
+
+import {translations} from '@/lib/translations';
 
 import {Choice, GenderSelect} from '@/components';
-import {Genders, getMemberFunctionOptions} from '@/enums';
+import {Genders} from '@/enums';
 import {Category, Member} from '@/types';
 
 interface MemberInfoFormProps {

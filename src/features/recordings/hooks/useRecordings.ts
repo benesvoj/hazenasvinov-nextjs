@@ -1,10 +1,8 @@
-import {createFeatureQuery} from '@/shared/lib/createFeatureQuery';
+import {RecordingSchema, recordingsConfig} from '@/features/recordings';
+import {createFeatureQuery} from '@/shared/lib';
 
-import {recordingsConfig} from '../config';
-import type {RecordingSchema} from '../types';
-
-function useRecordingsBase() {
-  return createFeatureQuery<RecordingSchema, {categoryIds?: string[]}>(
+export function useRecordings(options?: {categoryIds?: string[]; page?: number; limit?: number}) {
+  const query = createFeatureQuery<RecordingSchema, {categoryIds?: string[]}>(
     {
       table: recordingsConfig.table,
       entityName: recordingsConfig.entity.plural,
@@ -20,10 +18,6 @@ function useRecordingsBase() {
       return result;
     }
   );
-}
-
-export function useRecordings(options?: {categoryIds?: string[]; page?: number; limit?: number}) {
-  const query = useRecordingsBase();
 
   return query({
     filters: {
