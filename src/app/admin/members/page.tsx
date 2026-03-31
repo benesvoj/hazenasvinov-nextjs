@@ -134,7 +134,7 @@ export default function MembersAdminPage() {
   return (
     <>
       <AdminContainer
-        loading={anyLoading}
+        isLoading={anyLoading}
         tabs={[
           {
             key: 'members-internal',

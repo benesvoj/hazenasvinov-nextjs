@@ -22,7 +22,7 @@ export interface AdminContainerProps<T extends readonly TabConfig[] = TabConfig[
    */
   children?: React.ReactNode;
   /** Show loading spinner instead of content */
-  loading?: boolean;
+  isLoading?: boolean;
   /**
    * Global actions shown when no tabs are used.
    * When tabs exist, each tab can:

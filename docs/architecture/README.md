@@ -57,26 +57,26 @@ Strict TypeScript types at every layer:
 ### Workflow 1: Display Entity List
 ```typescript
 // 1. Fetch data (Data Access Layer)
-const {data: videos, loading} = useFetchVideos();
+const {data: videos, loading} = useRecordings();
 
 // 2. Apply business logic (Business Layer)
-const {paginatedVideos} = useVideoFiltering({
+const {paginatedVideos} = useRecordingFilter({
   videos,
   itemsPerPage: 20,
   currentPage: 1
 });
 
 // 3. Render (Presentation Layer)
-return <VideoGrid videos={paginatedVideos} loading={loading} />;
+return <RecordingGrid videos={paginatedVideos} loading={loading} />;
 ```
 
 ### Workflow 2: Create Entity
 ```typescript
 // 1. Form state (State Layer)
-const {formData, setFormData, validateForm} = useVideoForm();
+const {formData, setFormData, validateForm} = useRecordingForm();
 
 // 2. CRUD operations (State Layer)
-const {createVideo} = useVideos();
+const {createVideo} = useRecordingsCrud();
 
 // 3. Submit handler
 const handleSubmit = async () => {
@@ -90,10 +90,10 @@ const handleSubmit = async () => {
 ### Workflow 3: Filter and Search
 ```typescript
 // 1. Fetch all data
-const {data: allVideos} = useFetchVideos();
+const {data: allVideos} = useRecordings();
 
 // 2. Apply filters
-const {filters, setFilters, paginatedVideos} = useVideoFiltering({
+const {filters, setFilters, paginatedVideos} = useRecordingFilter({
   videos: allVideos,
   itemsPerPage: 20,
   currentPage: 1
@@ -103,7 +103,7 @@ const {filters, setFilters, paginatedVideos} = useVideoFiltering({
 return (
   <>
     <SearchFilters filters={filters} onChange={setFilters} />
-    <VideoGrid videos={paginatedVideos} />
+    <RecordingGrid videos={paginatedVideos} />
   </>
 );
 ```

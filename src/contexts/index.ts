@@ -1,3 +1,3 @@
 export * from './AppDataContext';
-export * from './AdminCategorySimulationContext';
+export * from '../features/admin/providers/CategorySimulationProvider';
 export * from './UserContext';

@@ -1,5 +1,7 @@
 import {SupabaseClient} from '@supabase/supabase-js';
 
+import {isEmpty} from '@/utils';
+
 import {SortOptions, PaginationOptions} from './types';
 
 /**
@@ -50,9 +52,20 @@ export function applyFilters<T>(query: any, filters?: Record<string, any>) {
   let filteredQuery = query;
 
   for (const [key, value] of Object.entries(filters)) {
-    if (value !== undefined && value !== null) {
-      filteredQuery = filteredQuery.eq(key, value);
+    if (value === undefined || value === null) continue;
+
+    if (Array.isArray(value)) {
+      if (isEmpty(value)) continue;
+      filteredQuery = filteredQuery.in(key, value);
+      continue;
     }
+
+    if (typeof value === 'string' && value.includes('%')) {
+      filteredQuery = filteredQuery.ilike(key, value);
+      continue;
+    }
+
+    filteredQuery = filteredQuery.eq(key, value);
   }
 
   return filteredQuery;

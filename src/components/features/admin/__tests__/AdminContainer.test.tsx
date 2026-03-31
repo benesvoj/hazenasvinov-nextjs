@@ -91,7 +91,7 @@ describe('AdminContainer', () => {
     });
 
     it('should render loading spinner when loading is true', () => {
-      render(<AdminContainer loading={true}>Content</AdminContainer>);
+      render(<AdminContainer isLoading={true}>Content</AdminContainer>);
 
       expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
       expect(screen.queryByText('Content')).not.toBeInTheDocument();

@@ -95,6 +95,8 @@ export interface DataFetchHookResult<T> {
  * - Uses useCallback for stable refetch reference
  * - Memoizes fetch function with proper dependencies
  */
+
+/** @deprecated do not use it, instead of it use createFeatureQuery with direct access to db **/
 export function createDataFetchHook<T, TParams = void>(
   config: DataFetchHookConfig<TParams>
 ): TParams extends void

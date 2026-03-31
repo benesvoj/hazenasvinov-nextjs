@@ -10,9 +10,8 @@ import UnifiedStandingTable from '@/components/shared/standing-table/UnifiedStan
 
 import {translations} from '@/lib/translations';
 
-import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
-
 import {Choice, ContentCard, LoadingSpinner, PageContainer, Show} from '@/components';
+import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {
   useFetchSeasons,
   useOptimizedOwnClubMatches,

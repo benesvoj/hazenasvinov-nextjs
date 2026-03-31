@@ -12,8 +12,6 @@ import {hasItems, hasMoreThanOne} from '@/utils/arrayHelper';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
-import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
-
 import {ContentCard, DeleteDialog, Grid, GridItem, PageContainer, showToast} from '@/components';
 import {
   ATTENDANCE_TABS_LABELS,
@@ -21,6 +19,7 @@ import {
   AttendanceTabs,
   TrainingSessionStatusEnum,
 } from '@/enums';
+import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {
   useAttendance,
   useFetchCategoryLineupMembers,

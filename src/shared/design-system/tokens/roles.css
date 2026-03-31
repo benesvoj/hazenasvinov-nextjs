@@ -1,0 +1,13 @@
+/* ADMIN */
+[data-variant="admin"] {
+    --color-primary: #1E3A5F;
+    --color-primary-hover: #1A334F;
+    --color-primary-active: #162B42;
+}
+
+/* COACH */
+[data-variant="coach"] {
+    --color-primary: #16A34A;
+    --color-primary-hover: #15803D;
+    --color-primary-active: #166534;
+}

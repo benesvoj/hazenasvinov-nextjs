@@ -4,52 +4,41 @@ import React from 'react';
 
 import {usePathname} from 'next/navigation';
 
-import ProtectedCoachRoute from '@/components/routes/ProtectedCoachRoute';
+import {APP_ROUTES} from '@/lib/app-routes';
+import {PortalVariant} from '@/lib/portal';
 
 import {
-  CoachesSidebar,
-  CoachesSidebarProvider,
-  CoachesTopBar,
+  CoachCategoryProvider,
+  Sidebar,
+  CoachSidebarProvider,
+  TopBar,
   useCoachesSidebar,
-} from '@/app/coaches/components';
-import {CoachCategoryProvider} from '@/app/coaches/components/CoachCategoryContext';
+} from '@/features/coach';
+import {ProtectedRoute} from '@/shared/auth';
+import {PortalLayout} from '@/shared/components';
 
-function CoachesLayoutContent({children}: {children: React.ReactNode}) {
-  const sidebarContext = useCoachesSidebar();
-  const isCollapsed = sidebarContext?.isCollapsed || false;
-
-  return (
-    <div className="flex min-h-screen bg-gray-50">
-      <CoachesSidebar />
-      <div
-        className={`flex-1 transition-all duration-300 ease-in-out w-full ${
-          isCollapsed ? 'lg:ml-16' : 'lg:ml-56'
-        }`}
-      >
-        <CoachesTopBar />
-        <main className="pt-16 p-2 sm:p-3">
-          <div className="w-full">{children}</div>
-        </main>
-      </div>
-    </div>
-  );
-}
-
-export default function CoachesLayout({children}: {children: React.ReactNode}) {
+export default function CoachLayout({children}: {children: React.ReactNode}) {
   const pathname = usePathname();
 
   // Don't show sidebar and top bar on login page
-  if (pathname === '/coaches/login') {
+  if (pathname === APP_ROUTES.coaches.login) {
     return <>{children}</>;
   }
 
   return (
-    <ProtectedCoachRoute>
-      <CoachesSidebarProvider>
+    <ProtectedRoute variant={PortalVariant.COACH}>
+      <CoachSidebarProvider>
         <CoachCategoryProvider>
-          <CoachesLayoutContent>{children}</CoachesLayoutContent>
+          <PortalLayout
+            sidebar={<Sidebar />}
+            topbar={<TopBar />}
+            variant={PortalVariant.COACH}
+            useSidebar={useCoachesSidebar}
+          >
+            {children}
+          </PortalLayout>
         </CoachCategoryProvider>
-      </CoachesSidebarProvider>
-    </ProtectedCoachRoute>
+      </CoachSidebarProvider>
+    </ProtectedRoute>
   );
 }

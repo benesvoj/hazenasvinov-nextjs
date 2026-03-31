@@ -16,7 +16,6 @@ import {
   getMemberFunctionOptions,
   getModalModeOptions,
   getPlayerPositionOptions,
-  getPortalVariantsOptions,
   getRelationshipStatusOptions,
   getRelationshipTypeOptions,
   getTeamTypesOptions,
@@ -26,7 +25,6 @@ import {
   getTodoStatusesOptions,
   getTournamentStatusOptions,
   getTrainingSessionStatusOptions,
-  getUserRolesOptions,
 } from '@/enums';
 
 /**
@@ -62,7 +60,6 @@ export const matchStatusOptions = createOptionsRecord(getMatchStatusOptions());
 export const memberFunctionOptions = createOptionsRecord(getMemberFunctionOptions());
 export const modalModeOptions = createOptionsRecord(getModalModeOptions());
 export const playerPositionOptions = createOptionsRecord(getPlayerPositionOptions());
-export const portalVariantsOptions = createOptionsRecord(getPortalVariantsOptions());
 export const relationshipStatusOptions = createOptionsRecord(getRelationshipStatusOptions());
 export const relationshipTypeOptions = createOptionsRecord(getRelationshipTypeOptions());
 export const teamTypesOptions = createOptionsRecord(getTeamTypesOptions());
@@ -72,4 +69,3 @@ export const todoPrioritiesOptions = createOptionsRecord(getTodoPrioritiesOption
 export const todoStatusesOptions = createOptionsRecord(getTodoStatusesOptions());
 export const tournamentStatusOptions = createOptionsRecord(getTournamentStatusOptions());
 export const trainingSessionStatusOptions = createOptionsRecord(getTrainingSessionStatusOptions());
-export const userRolesOptions = createOptionsRecord(getUserRolesOptions());

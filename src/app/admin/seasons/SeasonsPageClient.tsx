@@ -158,7 +158,7 @@ export function SeasonsPageClient() {
   return (
     <>
       <AdminContainer
-        loading={fetchLoading}
+        isLoading={fetchLoading}
         actions={[
           {
             label: translations.seasons.labels.addSeason,

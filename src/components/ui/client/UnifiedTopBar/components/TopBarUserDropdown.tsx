@@ -14,15 +14,14 @@ import {
 
 import {User} from '@supabase/supabase-js';
 
+import {isAdminPortal, isCoachPortal, PortalVariant} from '@/lib/portal';
 import {translations} from '@/lib/translations/index';
-
-import {UserRoles} from '@/enums';
 
 import {userProfileType} from '../UnifiedTopBar';
 import {getDisplayName, getRoleDisplay, getUserInitials} from '../utils';
 
 interface TopBarUserDropdownProps {
-  variant: UserRoles;
+  variant: PortalVariant;
   userProfile: userProfileType | undefined;
   isLoggingOut?: boolean;
   user: User | null;
@@ -47,36 +46,39 @@ export const TopBarUserDropdown = ({
   handleSwitchToAdminPortal,
   handleLogout,
 }: TopBarUserDropdownProps) => {
+  const isAdmin = isAdminPortal(variant);
+  const isCoach = isCoachPortal(variant);
+
   return (
     <Dropdown placement="bottom-end">
       <DropdownTrigger>
         <Button
           variant="light"
           className={`flex items-center space-x-1 sm:space-x-2 md:space-x-3 px-1 sm:px-2 md:px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
-            variant === UserRoles.COACH ? 'p-1 sm:p-2' : ''
+            isCoach ? 'p-1 sm:p-2' : ''
           } ${isLoggingOut ? 'opacity-70' : ''}`}
           isDisabled={isLoggingOut}
         >
           <Avatar
             name={getUserInitials(user)}
             className={`${
-              variant === UserRoles.COACH
+              isCoach
                 ? 'bg-green-100 text-green-700'
                 : 'w-8 h-8 bg-linear-to-br from-blue-500 to-blue-600 text-white text-sm font-medium'
             }`}
-            size={variant === UserRoles.COACH ? 'sm' : undefined}
+            size={isCoach ? 'sm' : undefined}
           />
           {/* User info - visible from sm breakpoint, merged small/medium behavior */}
           <div className="hidden sm:block text-left min-w-0">
             <p
               className={`text-sm font-medium text-gray-900 dark:text-white truncate ${USER_INFO_MAX_WIDTH} ${USER_INFO_MAX_WIDTH_XL}`}
             >
-              {variant === UserRoles.COACH ? user?.email : getDisplayName(user)}
+              {isCoach ? user?.email : getDisplayName(user)}
             </p>
             <p
               className={`text-xs text-gray-500 dark:text-gray-400 truncate ${USER_INFO_MAX_WIDTH} ${USER_INFO_MAX_WIDTH_XL}`}
             >
-              {variant === UserRoles.COACH
+              {isCoach
                 ? getRoleDisplay(variant, userProfile)
                 : user?.email || translations.common.loading}
             </p>
@@ -84,7 +86,7 @@ export const TopBarUserDropdown = ({
         </Button>
       </DropdownTrigger>
       <DropdownMenu aria-label="User actions">
-        {variant === UserRoles.ADMIN ? (
+        {isAdmin ? (
           <>
             <DropdownItem
               key="profile-header"
@@ -127,29 +129,27 @@ export const TopBarUserDropdown = ({
           <DropdownItem
             key="switch-portal"
             startContent={
-              variant === UserRoles.ADMIN ? (
+              isAdmin ? (
                 <AcademicCapIcon className="w-4 h-4" />
               ) : (
                 <ShieldCheckIcon className="w-4 h-4" />
               )
             }
-            onPress={
-              variant === UserRoles.ADMIN ? handleSwitchToCoachPortal : handleSwitchToAdminPortal
-            }
+            onPress={isAdmin ? handleSwitchToCoachPortal : handleSwitchToAdminPortal}
             aria-label={
-              variant === UserRoles.ADMIN
+              isAdmin
                 ? translations.topBar.labels.switchToCoachPortal
                 : translations.topBar.labels.switchToAdminPortal
             }
           >
             <span>
-              {variant === UserRoles.ADMIN
+              {isAdmin
                 ? translations.topBar.labels.switchToCoachPortal
                 : translations.topBar.labels.switchToAdminPortal}
             </span>
           </DropdownItem>
         ) : null}
-        {variant === UserRoles.ADMIN ? (
+        {isAdmin ? (
           <DropdownItem
             key="settings"
             startContent={<Cog6ToothIcon className="w-4 h-4" />}
@@ -164,7 +164,7 @@ export const TopBarUserDropdown = ({
           startContent={<ArrowRightEndOnRectangleIcon className="w-4 h-4" />}
           onPress={handleLogout}
           aria-label={translations.common.actions.logout}
-          className={variant === UserRoles.COACH ? 'text-danger' : ''}
+          className={isCoach ? 'text-danger' : ''}
         >
           <span>{translations.common.actions.logout}</span>
         </DropdownItem>

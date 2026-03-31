@@ -1,10 +1,12 @@
 import {User} from '@supabase/supabase-js';
 
+import {PortalVariant} from '@/lib/portal';
 import {translations} from '@/lib/translations/index';
 
-import {USER_ROLES_LABELS, UserRoles} from '@/enums';
+import {UserRoles} from '@/shared/auth';
+import {USER_ROLES_LABELS} from '@/shared/components/ui/userRoleLabels';
 
-import {userProfileType, variantType} from '../UnifiedTopBar';
+import {userProfileType} from '../UnifiedTopBar';
 
 const DEFAULT_USER_INITIALS = 'U';
 const EMAIL_SEPARATOR = '@';
@@ -41,13 +43,11 @@ export const getDisplayName = (user: User | null): string => {
 };
 
 export const getRoleDisplay = (
-  variant: variantType,
+  variant: PortalVariant,
   userProfile: userProfileType | undefined
 ): string => {
-  if (variant === UserRoles.COACH) {
-    return userProfile?.role === UserRoles.HEAD_COACH
-      ? USER_ROLES_LABELS[UserRoles.HEAD_COACH]
-      : USER_ROLES_LABELS[UserRoles.COACH];
+  if (variant === PortalVariant.COACH) {
+    return USER_ROLES_LABELS[UserRoles.COACH];
   }
   return USER_ROLES_LABELS[UserRoles.ADMIN];
 };

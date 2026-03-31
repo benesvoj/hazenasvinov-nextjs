@@ -574,8 +574,8 @@ const hasAssignedCategories = availableCategories.length > 0;
 ```
 
 **Keep:**
-- `useFetchVideos()` (still fetches all — server-side filtering is Layer 3)
-- `useVideoFiltering()` (client-side filter)
+- `useRecordings()` (still fetches all — server-side filtering is Layer 3)
+- `useRecordingFilter()` (client-side filter)
 - All video CRUD modals, form state, pagination
 - Category dropdown in filter bar (binds to `availableCategories`)
 
