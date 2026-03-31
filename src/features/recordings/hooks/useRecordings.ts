@@ -3,25 +3,29 @@ import {createFeatureQuery} from '@/shared/lib/createFeatureQuery';
 import {recordingsConfig} from '../config';
 import type {RecordingSchema} from '../types';
 
-const useRecordingsBase = createFeatureQuery<RecordingSchema, {categoryIds?: string[]}>(
-  {
-    table: recordingsConfig.table,
-    entityName: recordingsConfig.entity.plural,
-    errorMessage: recordingsConfig.messages.fetchFailed,
-  },
-  (filters) => {
-    const result: Record<string, any> = {};
+function useRecordingsBase() {
+  return createFeatureQuery<RecordingSchema, {categoryIds?: string[]}>(
+    {
+      table: recordingsConfig.table,
+      entityName: recordingsConfig.entity.plural,
+      errorMessage: recordingsConfig.messages.fetchFailed,
+    },
+    (filters) => {
+      const result: Record<string, any> = {};
 
-    if (filters?.categoryIds?.length) {
-      result.category_id = filters.categoryIds;
+      if (filters?.categoryIds?.length) {
+        result.category_id = filters.categoryIds;
+      }
+
+      return result;
     }
-
-    return result;
-  }
-);
+  );
+}
 
 export function useRecordings(options?: {categoryIds?: string[]; page?: number; limit?: number}) {
-  return useRecordingsBase({
+  const query = useRecordingsBase();
+
+  return query({
     filters: {
       categoryIds: options?.categoryIds,
     },
