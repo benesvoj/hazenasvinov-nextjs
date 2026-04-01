@@ -13,7 +13,8 @@ import {translations} from '@/lib/translations';
 import MatchSelectionModal from '@/app/admin/posts/components/MatchSelectionModal';
 
 import {Choice, Dialog} from '@/components';
-import {BlogPostStatuses, getBlogPostStatusOptions, ModalMode} from '@/enums';
+import {BlogPostStatuses, ModalMode} from '@/enums';
+import {blogPostStatusHelpers} from '@/features/blogPosts';
 import {formatDateString} from '@/helpers';
 import {useBlogPostForm} from '@/hooks';
 import {Category, SupabaseUser} from '@/types';
@@ -48,10 +49,12 @@ export const BlogPostModal = ({
     : translations.common.actions.create;
 
   const authorOptions = users.map((user) => ({key: user.id, label: user.email}));
-  const statusOptions = getBlogPostStatusOptions().map((status) => ({
-    key: status.value,
-    label: status.label,
-  }));
+  const statusOptions = blogPostStatusHelpers
+    .getOptions()
+    .map((status: {value: any; label: any}) => ({
+      key: status.value,
+      label: status.label,
+    }));
   const categoriesOptions = categories.map((category) => ({
     key: category.id,
     label: category.name,

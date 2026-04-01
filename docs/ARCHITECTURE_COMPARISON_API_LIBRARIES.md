@@ -292,7 +292,7 @@ Total: ~140 hooks
 ### Phase 3: Business Logic Hooks
 
 **These are FINE as-is:**
-- `useVideoFiltering` ✅
+- `useRecordingFilter` ✅
 - `useBlogPostFiltering` ✅
 - `useMemberMetadata` ✅
 - `useStrategyPreparation` ✅
@@ -305,21 +305,21 @@ Total: ~140 hooks
 
 ### Before (Your Factory):
 ```typescript
-// src/hooks/entities/video/data/useFetchVideos.ts
-export const useFetchVideos = createDataFetchHook<VideoSchema>({
+// src/hooks/entities/video/data/useRecordings.ts
+export const useRecordings = createDataFetchHook<VideoSchema>({
   endpoint: API_ROUTES.entities.root('videos'),
   entityName: 'videos',
   errorMessage: 'Failed to fetch videos',
 });
 
 // Component
-const {data: videos, loading, error, refetch} = useFetchVideos();
+const {data: videos, loading, error, refetch} = useRecordings();
 ```
 
 ### After (React Query):
 ```typescript
-// src/hooks/entities/video/data/useFetchVideos.ts
-export function useFetchVideos() {
+// src/hooks/entities/video/data/useRecordings.ts
+export function useRecordings() {
   return useQuery({
     queryKey: ['videos'],
     queryFn: async () => {
@@ -337,7 +337,7 @@ export function useFetchVideos() {
 }
 
 // Component (almost same!)
-const {data: videos, isLoading, error, refetch} = useFetchVideos();
+const {data: videos, isLoading, error, refetch} = useRecordings();
 //                        ↑ only change
 ```
 
@@ -350,13 +350,13 @@ const {data: videos, isLoading, error, refetch} = useFetchVideos();
 ### 1. Automatic Caching
 ```typescript
 // First render
-const {data} = useFetchVideos(); // Fetches from API
+const {data} = useRecordings(); // Fetches from API
 
 // Second render (different component)
-const {data} = useFetchVideos(); // Uses cache! No network call
+const {data} = useRecordings(); // Uses cache! No network call
 
 // After 5 minutes
-const {data} = useFetchVideos(); // Refetches automatically
+const {data} = useRecordings(); // Refetches automatically
 ```
 
 ### 2. Background Sync
@@ -391,7 +391,7 @@ const {mutate} = useMutation({
 ### 4. Request Deduplication
 ```typescript
 // 5 components call this simultaneously
-const {data} = useFetchVideos();
+const {data} = useRecordings();
 
 // Only 1 network request made!
 // All 5 components share the same data
@@ -415,8 +415,8 @@ const {data} = useFetchVideos();
 ```typescript
 // Week 1: Migrate one entity (Videos)
 src/hooks/entities/video/
-  data/useFetchVideos.ts    // createDataFetchHook → useQuery
-  state/useVideos.ts         // createCRUDHook → useMutation
+  data/useRecordings.ts    // createDataFetchHook → useQuery
+  state/useRecordingsCrud.ts         // createCRUDHook → useMutation
 
 // Week 2: Migrate another (Members)
 src/hooks/entities/member/
@@ -629,14 +629,14 @@ Accept the build failure and:
 
 ### Before (Factory):
 ```typescript
-// useFetchVideos.ts (factory)
-export const useFetchVideos = createDataFetchHook<VideoSchema>({
+// useRecordings.ts (factory)
+export const useRecordings = createDataFetchHook<VideoSchema>({
   endpoint: API_ROUTES.entities.root('videos'),
   entityName: 'videos',
   errorMessage: 'Failed to fetch videos',
 });
 
-// useVideos.ts (CRUD)
+// useRecordingsCrud.ts (CRUD)
 const _useVideos = createCRUDHook<VideoSchema, VideoInsert>({
   baseEndpoint: API_ROUTES.entities.root('videos'),
   byIdEndpoint: (id) => API_ROUTES.entities.byId('videos', id),
@@ -648,7 +648,7 @@ const _useVideos = createCRUDHook<VideoSchema, VideoInsert>({
 ### After (React Query):
 ```typescript
 // queries/matchRecordings.ts
-export function useFetchVideos() {
+export function useRecordings() {
   return useQuery({
     queryKey: ['videos'],
     queryFn: () => fetchVideos(),

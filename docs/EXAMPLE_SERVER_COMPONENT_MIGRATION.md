@@ -697,7 +697,7 @@ useFetchSeasons ❌
 useFetchCommittees ❌
 useFetchGrants ❌
 useFetchCategories ❌
-useFetchVideos ❌
+useRecordings ❌
 useFetchClubs ❌
 # ... 25+ more
 

@@ -2,7 +2,7 @@
 
 import {useCallback, useState} from 'react';
 
-import {showToast} from '@/components';
+import showToast from '@/components/ui/feedback/Toast';
 
 export interface CRUDHookConfig {
   /** Base API endpoint (e.g., '/api/committees') */

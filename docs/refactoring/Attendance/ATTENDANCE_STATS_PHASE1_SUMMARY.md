@@ -390,7 +390,7 @@ Existing Files (Already Complete):
 ├── src/app/coaches/attendance/
 │   ├── error.tsx.backup                                         (Tab navigation)
 │   └── components/AttendanceStatisticsLazy.tsx         (Lazy loader)
-└── src/helpers/attendance/helpers.ts                   (Insights/recommendations)
+└── src/helpers/attendance/recordingMutations.ts                   (Insights/recommendations)
 ```
 
 ---

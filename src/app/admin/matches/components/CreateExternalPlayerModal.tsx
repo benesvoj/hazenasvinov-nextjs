@@ -4,8 +4,10 @@ import {useState, useEffect} from 'react';
 
 import {Input, Select, SelectItem, Checkbox} from '@heroui/react';
 
+import {getGenderOptions} from '@/enums/getGenderOptions';
+
 import {UnifiedModal} from '@/components';
-import {Genders, getGenderOptions, PlayerPosition} from '@/enums';
+import {Genders, PlayerPosition} from '@/enums';
 import {useExternalPlayerCreation} from '@/hooks';
 import {CreateExternalPlayerModalProps, ExternalPlayerFormData} from '@/types';
 

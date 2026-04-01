@@ -72,7 +72,7 @@ export const coachesNavRoutes: NavMenuItem[] = [
   },
   {
     title: translations.coachPortal.routes.videos,
-    href: APP_ROUTES.coaches.videos,
+    href: APP_ROUTES.coaches.recordings,
     icon: VideoCameraIcon,
   },
   {
@@ -212,7 +212,7 @@ export const allRoutes: NavMenuItem[] = [
     icon: BuildingOfficeIcon,
   },
   {
-    href: APP_ROUTES.admin.videos,
+    href: APP_ROUTES.admin.recordings,
     title: translations.matchRecordings.page.title,
     isPrivate: true,
     description: translations.matchRecordings.page.description,

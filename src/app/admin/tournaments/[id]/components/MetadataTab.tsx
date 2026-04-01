@@ -5,10 +5,12 @@ import {useEffect} from 'react';
 import {Button} from '@heroui/button';
 import {Input, Textarea} from '@heroui/input';
 
+import {getTournamentStatusOptions} from '@/enums/getTournamentStatusOptions';
+
 import {translations} from '@/lib/translations';
 
 import {Choice, ContentCard, Grid, GridItem, HStack} from '@/components';
-import {getTournamentStatusOptions, TournamentStatuses} from '@/enums';
+import {TournamentStatuses} from '@/enums';
 import {useFetchCategories, useFetchSeasons, useTournamentForm, useTournaments} from '@/hooks';
 import {Tournament} from '@/types';
 

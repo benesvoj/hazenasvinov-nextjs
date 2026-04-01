@@ -7,12 +7,12 @@ import {useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
 
-import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
 import {LineupMembers, LineupModal, LineupsList} from '@/app/coaches/lineups/components';
 
 import {Choice, ContentCard, DeleteDialog, Grid, GridItem, PageContainer, Show} from '@/components';
 import {useUser} from '@/contexts';
 import {ModalMode} from '@/enums';
+import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {
   useCategoryLineupForm,
   useCategoryLineups,

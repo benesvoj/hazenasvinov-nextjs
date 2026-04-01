@@ -31,8 +31,8 @@ hooks/entities/{entity}/
 
 **Example**:
 ```typescript
-// data/useFetchVideos.ts
-export const useFetchVideos = createDataFetchHook<VideoSchema>({
+// data/useRecordings.ts
+export const useRecordings = createDataFetchHook<VideoSchema>({
   endpoint: API_ROUTES.entities.root('videos'),
   entityName: 'videos',
   errorMessage: 'Failed to fetch videos',
@@ -58,14 +58,14 @@ export const useFetchVideos = createDataFetchHook<VideoSchema>({
 
 **Example**:
 ```typescript
-// state/useVideoForm.ts
-export const useVideoForm = createFormHook<VideoSchema, VideoFormData>({
+// state/useRecordingForm.ts
+export const useRecordingForm = createFormHook<VideoSchema, VideoFormData>({
   initialFormData: { /* ... */ },
   validationRules: [ /* ... */ ],
 });
 
-// state/useVideos.ts
-export function useVideos() {
+// state/useRecordingsCrud.ts
+export function useRecordingsCrud() {
   const {create, update, deleteItem} = createCRUDHook<VideoSchema, VideoInsert>({
     baseEndpoint: API_ROUTES.entities.root('videos'),
     entityName: 'videos',
@@ -90,15 +90,15 @@ export function useVideos() {
 ### Business Layer (`business/`)
 **Purpose**: Implement business logic, filtering, calculations
 
-**Naming**: `use{Entity}{Purpose}` (e.g., `useVideoFiltering`, `useVideoAnalytics`)
+**Naming**: `use{Entity}{Purpose}` (e.g., `useRecordingFilter`, `useVideoAnalytics`)
 
 **Factory**: Usually custom implementation
 
 **Example**:
 ```typescript
-// business/useVideoFiltering.ts
-export const useVideoFiltering = ({videos, itemsPerPage, currentPage}) => {
-  const [filters, setFilters] = useState<VideoFilters>({});
+// business/useRecordingFilter.ts
+export const useRecordingFilter = ({videos, itemsPerPage, currentPage}) => {
+  const [filters, setFilters] = useState<RecordingFilters>({});
 
   const {paginatedVideos, totalPages} = useMemo(() => {
     // Apply filtering logic

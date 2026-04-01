@@ -39,7 +39,7 @@ Component files should use PascalCase (first letter of each word capitalized).
 
 ```bash
 ✅ Good:
-- VideoCard.tsx
+- RecordingCard.tsx
 - MeetingMinutesContainer.tsx
 - AdminSidebar.tsx
 - LineupManager.tsx
@@ -163,8 +163,8 @@ src/components/
 │   │   ├── AdminSidebar.tsx
 │   │   └── index.ts
 │   ├── videos/
-│   │   ├── VideoCard.tsx
-│   │   ├── VideoFilters.tsx
+│   │   ├── RecordingCard.tsx
+│   │   ├── RecordingFilters.tsx
 │   │   └── index.ts
 │   ├── meeting-minutes/         # kebab-case
 │   │   ├── MeetingMinutesCard.tsx
@@ -222,7 +222,7 @@ src/types/
 
 ### **2. Feature Components**
 - **Prefix**: Feature name
-- **Examples**: `VideoCard`, `MeetingMinutesContainer`, `AdminSidebar`
+- **Examples**: `RecordingCard`, `MeetingMinutesContainer`, `AdminSidebar`
 
 ### **3. Shared Business Components**
 - **Prefix**: Domain name
@@ -241,7 +241,7 @@ src/types/
 | Type | Convention | Example | When to Use |
 |------|------------|---------|-------------|
 | **Folders** | kebab-case | `meeting-minutes/` | All folders |
-| **Component Files** | PascalCase | `VideoCard.tsx` | React components |
+| **Component Files** | PascalCase | `RecordingCard.tsx` | React components |
 | **Hook Files** | camelCase | `useAuth.ts` | React hooks |
 | **Utility Files** | camelCase | `apiClient.ts` | Utility functions |
 | **Type Files** | camelCase | `userTypes.ts` | TypeScript types |

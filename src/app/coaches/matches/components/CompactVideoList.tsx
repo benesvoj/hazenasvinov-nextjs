@@ -9,9 +9,10 @@ import {Card, CardHeader, CardBody, Button} from '@heroui/react';
 import {VideoCameraIcon, PlayIcon, LinkIcon, CheckIcon} from '@heroicons/react/24/outline';
 
 import {LoadingSpinner} from '@/components';
+import {useCopyRecordingUrl} from '@/features/recordings';
 import {formatDateString} from '@/helpers';
+import {openInNewTab} from '@/shared/browser';
 import {VideoWithMatch} from '@/types';
-import {copyUrl, playUrl} from '@/utils';
 
 interface CompactVideoListProps {
   videos: VideoWithMatch[];
@@ -27,6 +28,8 @@ export default function CompactVideoList({
   emptyMessage = 'Žádná videa k dispozici',
 }: CompactVideoListProps) {
   const [copiedVideoId, setCopiedVideoId] = useState<string | null>(null);
+
+  const copyUrl = useCopyRecordingUrl();
 
   return (
     <Card className="h-full mx-1 sm:mx-2">
@@ -52,7 +55,7 @@ export default function CompactVideoList({
                   <div
                     key={video.id}
                     className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                    onClick={() => playUrl(video.youtube_url)}
+                    onClick={() => openInNewTab(video.youtube_url)}
                   >
                     {/* Thumbnail */}
                     <div className="relative w-12 h-9 sm:w-16 sm:h-12 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden flex-shrink-0">
@@ -134,7 +137,7 @@ export default function CompactVideoList({
                         size="sm"
                         variant="light"
                         color={copiedVideoId === video.id ? 'success' : 'default'}
-                        className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+                        className="shrink-0 w-8 h-8 sm:w-10 sm:h-10"
                         onPress={() => copyUrl(video.youtube_url)}
                         title={copiedVideoId === video.id ? 'Link zkopírován!' : 'Zkopírovat odkaz'}
                       >
@@ -150,7 +153,7 @@ export default function CompactVideoList({
                         isIconOnly
                         size="sm"
                         variant="light"
-                        className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+                        className="shrink-0 w-8 h-8 sm:w-10 sm:h-10"
                         title="Přehrát video"
                       >
                         <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4" />

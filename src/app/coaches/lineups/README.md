@@ -37,7 +37,7 @@ src/app/coaches/lineups/
 │   ├── LineupModal.tsx               # Modal for creating/editing lineups
 │   └── index.ts                      # Component exports
 ├── helpers/
-│   └── helpers.ts                    # Position color/text helpers
+│   └── recordingMutations.ts                    # Position color/text helpers
 ├── REFACTORING_ANALYSIS.md           # Detailed refactoring plan
 └── README.md                         # This file
 ```

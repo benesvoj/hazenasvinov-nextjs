@@ -2,10 +2,13 @@ import React from 'react';
 
 import {Checkbox, Input, Tab, Tabs} from '@heroui/react';
 
+import {getAgeGroupsOptions} from '@/enums/getAgeGroupsOptions';
+import {getGenderOptions} from '@/enums/getGenderOptions';
+
 import {translations} from '@/lib/translations';
 
 import {Choice, Dialog} from '@/components';
-import {AgeGroups, Genders, getAgeGroupsOptions, getGenderOptions, ModalMode} from '@/enums';
+import {AgeGroups, Genders, ModalMode} from '@/enums';
 import {CategoryFormData} from '@/types';
 
 export interface CategoryModalProps {

@@ -155,7 +155,7 @@ export function CategoriesPageClient() {
   return (
     <>
       <AdminContainer
-        loading={loading}
+        isLoading={loading}
         filters={filters}
         actions={[
           {

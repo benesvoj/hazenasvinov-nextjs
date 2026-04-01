@@ -10,7 +10,7 @@
 ### CRUD Hooks (3 examples):
 1. ✅ `useClubs` - CRUD wrapper pattern
 2. ✅ `useCommittees` - CRUD wrapper pattern
-3. ✅ `useVideos` - CRUD wrapper pattern
+3. ✅ `useRecordingsCrud` - CRUD wrapper pattern
 
 ---
 
@@ -208,7 +208,7 @@ npm run build
 ### CRUD Hooks:
 - ✅ useClubs (moved factory into function)
 - ✅ useCommittees (moved factory into function)
-- ✅ useVideos (moved factory into function)
+- ✅ useRecordingsCrud (moved factory into function)
 
 ---
 

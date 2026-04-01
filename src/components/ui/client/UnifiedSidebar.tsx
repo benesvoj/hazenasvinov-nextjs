@@ -20,12 +20,11 @@ import {
 
 import {APP_ROUTES} from '@/lib/app-routes';
 import {allRoutes, coachesNavRoutes, NavMenuItem, RouteGroups} from '@/lib/navigation';
+import {isAdminPortal, isCoachPortal, PortalVariant} from '@/lib/portal';
 import {translations} from '@/lib/translations';
 
-import {PortalVariants} from '@/enums';
-
 interface UnifiedSidebarProps {
-  variant: PortalVariants;
+  variant: PortalVariant;
   sidebarContext?: {
     isCollapsed?: boolean;
     setIsCollapsed?: (collapsed: boolean) => void;
@@ -39,6 +38,8 @@ interface UnifiedSidebarProps {
 export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) => {
   const pathname = usePathname();
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const isAdmin = isAdminPortal(variant);
+  const isCoach = isCoachPortal(variant);
 
   // Toggle group collapse/expand (admin only)
   const toggleGroup = (groupKey: string) => {
@@ -61,7 +62,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
 
   // Get sidebar configuration based on variant
   const getSidebarConfig = () => {
-    if (variant === PortalVariants.ADMIN) {
+    if (isAdmin) {
       const items = allRoutes.filter((item) => item.isPrivate === true && !item.hidden);
 
       // Group items by group property
@@ -118,7 +119,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
 
   // Get styling classes based on variant
   const getSidebarClasses = () => {
-    if (variant === PortalVariants.ADMIN) {
+    if (isAdmin) {
       return {
         container: `fixed left-0 top-0 h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white transition-all duration-300 ease-in-out z-50 shadow-xl flex flex-col ${
           isCollapsed ? 'w-16' : 'w-56'
@@ -187,9 +188,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               <div>
                 <h1
                   className={`text-lg font-bold ${
-                    variant === PortalVariants.ADMIN
-                      ? 'text-white'
-                      : 'text-gray-900 dark:text-white'
+                    isAdmin ? 'text-white' : 'text-gray-900 dark:text-white'
                   }`}
                 >
                   {config.title}
@@ -197,9 +196,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                 {config.subtitle && (
                   <p
                     className={`text-xs ${
-                      variant === PortalVariants.ADMIN
-                        ? 'text-gray-400'
-                        : 'text-gray-500 dark:text-gray-400'
+                      isAdmin ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'
                     }`}
                   >
                     {config.subtitle}
@@ -215,9 +212,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               startContent={
                 <XMarkIcon
                   className={`w-6 h-6 ${
-                    variant === PortalVariants.ADMIN
-                      ? 'text-white'
-                      : 'text-gray-600 dark:text-gray-300'
+                    isAdmin ? 'text-white' : 'text-gray-600 dark:text-gray-300'
                   }`}
                 />
               }
@@ -235,14 +230,14 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
             {/* Scroll gradient indicators */}
             <div
               className={`absolute top-0 left-0 right-0 h-4 pointer-events-none z-10 ${
-                variant === PortalVariants.ADMIN
+                isAdmin
                   ? 'bg-linear-to-b from-gray-900 via-gray-900/50 to-transparent'
                   : 'bg-gradient-to-b from-white dark:from-gray-800 via-white/50 dark:via-gray-800/50 to-transparent'
               }`}
             />
             <div
               className={`absolute bottom-0 left-0 right-0 h-4 pointer-events-none z-10 ${
-                variant === PortalVariants.ADMIN
+                isAdmin
                   ? 'bg-linear-to-t from-gray-900 via-gray-900/50 to-transparent'
                   : 'bg-linear-to-t from-white dark:from-gray-800 via-white/50 dark:via-gray-800/50 to-transparent'
               }`}
@@ -252,7 +247,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               {Object.entries(config.groupedItems).map(([groupKey, groupItems], groupIndex) => (
                 <div key={groupKey} className="space-y-2">
                   {/* Group Header - Admin only */}
-                  {variant === PortalVariants.ADMIN && groupKey !== RouteGroups.OTHER && (
+                  {isAdmin && groupKey !== RouteGroups.OTHER && (
                     <button onClick={() => toggleGroup(groupKey)} className={classes.groupHeader}>
                       <h3 className={classes.groupLabel}>
                         {config.groupLabels[groupKey as keyof typeof config.groupLabels]}
@@ -266,9 +261,9 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                   )}
 
                   {/* Group Divider - Admin only */}
-                  {variant === PortalVariants.ADMIN &&
-                    groupIndex > 0 &&
-                    groupKey !== RouteGroups.OTHER && <div className={classes.divider}></div>}
+                  {isAdmin && groupIndex > 0 && groupKey !== RouteGroups.OTHER && (
+                    <div className={classes.divider}></div>
+                  )}
 
                   {/* Group Items */}
                   <div
@@ -279,28 +274,22 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                     }`}
                   >
                     {groupItems.map((item: NavMenuItem) => {
-                      const isActive =
-                        variant === PortalVariants.ADMIN
-                          ? pathname === (item as NavMenuItem).href
-                          : pathname === (item as NavMenuItem).href;
-                      const icon =
-                        variant === PortalVariants.ADMIN
-                          ? React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
-                              className: 'w-5 h-5',
-                            })
-                          : React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
-                              className: 'w-5 h-5',
-                            });
+                      const isActive = isAdmin
+                        ? pathname === (item as NavMenuItem).href
+                        : pathname === (item as NavMenuItem).href;
+                      const icon = isAdmin
+                        ? React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
+                            className: 'w-5 h-5',
+                          })
+                        : React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
+                            className: 'w-5 h-5',
+                          });
 
                       return (
                         <Link
-                          key={
-                            variant === PortalVariants.ADMIN
-                              ? (item as NavMenuItem).href
-                              : (item as NavMenuItem).href
-                          }
+                          key={isAdmin ? (item as NavMenuItem).href : (item as NavMenuItem).href}
                           href={
-                            variant === PortalVariants.ADMIN
+                            isAdmin
                               ? (item as NavMenuItem).href || APP_ROUTES.admin.root
                               : (item as NavMenuItem).href || APP_ROUTES.coaches.dashboard
                           }
@@ -308,7 +297,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                           className={classes.navItem(isActive)}
                           title={
                             isCollapsed
-                              ? variant === PortalVariants.ADMIN
+                              ? isAdmin
                                 ? (item as NavMenuItem).title
                                 : (item as NavMenuItem).title
                               : undefined
@@ -317,9 +306,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                           <div className={`flex items-center relative z-10 space-x-3`}>
                             <div className={classes.navItemIcon(isActive)}>{icon}</div>
                             <span className="text-sm font-medium">
-                              {variant === PortalVariants.ADMIN
-                                ? (item as NavMenuItem).title
-                                : (item as NavMenuItem).title}
+                              {isAdmin ? (item as NavMenuItem).title : (item as NavMenuItem).title}
                             </span>
                           </div>
                         </Link>
@@ -336,9 +323,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
             <div className="text-center">
               <div
                 className={`text-xs mb-1 ${
-                  variant === PortalVariants.ADMIN
-                    ? 'text-gray-400'
-                    : 'text-gray-500 dark:text-gray-400'
+                  isAdmin ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'
                 }`}
               >
                 {config.footer.title}
@@ -346,9 +331,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               {config.footer.subtitle && (
                 <div
                   className={`text-xs ${
-                    variant === PortalVariants.ADMIN
-                      ? 'text-gray-500'
-                      : 'text-gray-400 dark:text-gray-500'
+                    isAdmin ? 'text-gray-500' : 'text-gray-400 dark:text-gray-500'
                   }`}
                 >
                   {config.footer.subtitle}
@@ -365,7 +348,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
   return (
     <aside
       className={`${classes.container} ${
-        variant === PortalVariants.COACH ? 'hidden lg:block lg:translate-x-0' : 'hidden lg:block'
+        isCoach ? 'hidden lg:block lg:translate-x-0' : 'hidden lg:block'
       }`}
     >
       {/* Header */}
@@ -380,7 +363,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
             <div>
               <h1
                 className={`text-lg font-bold ${
-                  variant === PortalVariants.ADMIN ? 'text-white' : 'text-gray-900 dark:text-white'
+                  isAdmin ? 'text-white' : 'text-gray-900 dark:text-white'
                 }`}
               >
                 {config.title}
@@ -388,9 +371,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
               {config.subtitle && (
                 <p
                   className={`text-xs ${
-                    variant === PortalVariants.ADMIN
-                      ? 'text-gray-400'
-                      : 'text-gray-500 dark:text-gray-400'
+                    isAdmin ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'
                   }`}
                 >
                   {config.subtitle}
@@ -404,23 +385,17 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
             sidebarContext?.toggleSidebar?.() || sidebarContext?.setIsCollapsed?.(!isCollapsed)
           }
           className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-            variant === PortalVariants.ADMIN
-              ? 'hover:bg-gray-700/50'
-              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+            isAdmin ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
           title={isCollapsed ? 'Rozbalit menu' : 'Sbalit menu'}
         >
           {isCollapsed ? (
             <ChevronDoubleRightIcon
-              className={`w-5 h-5 ${
-                variant === PortalVariants.ADMIN ? 'text-white' : 'text-gray-600 dark:text-gray-300'
-              }`}
+              className={`w-5 h-5 ${isAdmin ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}
             />
           ) : (
             <ChevronDoubleLeftIcon
-              className={`w-5 h-5 ${
-                variant === PortalVariants.ADMIN ? 'text-white' : 'text-gray-600 dark:text-gray-300'
-              }`}
+              className={`w-5 h-5 ${isAdmin ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}
             />
           )}
         </button>
@@ -438,67 +413,58 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
           {Object.entries(config.groupedItems).map(([groupKey, groupItems], groupIndex) => (
             <div key={groupKey} className="space-y-2">
               {/* Group Header - Admin only */}
-              {variant === PortalVariants.ADMIN &&
-                groupKey !== RouteGroups.OTHER &&
-                !isCollapsed && (
-                  <button onClick={() => toggleGroup(groupKey)} className={classes.groupHeader}>
-                    <h3 className={classes.groupLabel}>
-                      {config.groupLabels[groupKey as keyof typeof config.groupLabels]}
-                    </h3>
-                    {collapsedGroups.has(groupKey) ? (
-                      <ChevronRightIcon className="w-4 h-4 text-gray-400" />
-                    ) : (
-                      <ChevronDownIcon className="w-4 h-4 text-gray-400" />
-                    )}
-                  </button>
-                )}
+              {isAdmin && groupKey !== RouteGroups.OTHER && !isCollapsed && (
+                <button onClick={() => toggleGroup(groupKey)} className={classes.groupHeader}>
+                  <h3 className={classes.groupLabel}>
+                    {config.groupLabels[groupKey as keyof typeof config.groupLabels]}
+                  </h3>
+                  {collapsedGroups.has(groupKey) ? (
+                    <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+                  )}
+                </button>
+              )}
 
               {/* Group Divider - Admin only */}
-              {variant === PortalVariants.ADMIN &&
-                groupIndex > 0 &&
-                groupKey !== RouteGroups.OTHER &&
-                !isCollapsed && <div className={classes.divider}></div>}
+              {isAdmin && groupIndex > 0 && groupKey !== RouteGroups.OTHER && !isCollapsed && (
+                <div className={classes.divider}></div>
+              )}
 
               {/* Group Items */}
               <div
                 className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                  variant === PortalVariants.ADMIN && collapsedGroups.has(groupKey)
+                  isAdmin && collapsedGroups.has(groupKey)
                     ? 'max-h-0 opacity-0'
-                    : variant === PortalVariants.COACH
+                    : isCoach
                       ? 'max-h-150 opacity-100'
                       : 'max-h-96 opacity-100'
                 }`}
               >
                 {groupItems.map((item: NavMenuItem) => {
-                  const isActive =
-                    variant === PortalVariants.ADMIN
-                      ? pathname === (item as NavMenuItem).href
-                      : pathname === (item as NavMenuItem).href;
-                  const icon =
-                    variant === PortalVariants.ADMIN
-                      ? React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
-                          className: 'w-5 h-5',
-                        })
-                      : React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
-                          className: 'w-5 h-5',
-                        });
+                  const isActive = isAdmin
+                    ? pathname === (item as NavMenuItem).href
+                    : pathname === (item as NavMenuItem).href;
+                  const icon = isAdmin
+                    ? React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
+                        className: 'w-5 h-5',
+                      })
+                    : React.createElement((item as NavMenuItem).icon || Cog6ToothIcon, {
+                        className: 'w-5 h-5',
+                      });
 
                   return (
                     <Link
-                      key={
-                        variant === PortalVariants.ADMIN
-                          ? (item as NavMenuItem).href
-                          : (item as NavMenuItem).href
-                      }
+                      key={isAdmin ? (item as NavMenuItem).href : (item as NavMenuItem).href}
                       href={
-                        variant === PortalVariants.ADMIN
+                        isAdmin
                           ? (item as NavMenuItem).href || APP_ROUTES.admin.root
                           : (item as NavMenuItem).href || APP_ROUTES.coaches.dashboard
                       }
                       className={classes.navItem(isActive)}
                       title={
                         isCollapsed
-                          ? variant === PortalVariants.ADMIN
+                          ? isAdmin
                             ? (item as NavMenuItem).title
                             : (item as NavMenuItem).title
                           : undefined
@@ -512,9 +478,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
                         <div className={classes.navItemIcon(isActive)}>{icon}</div>
                         {!isCollapsed && (
                           <span className="text-sm font-medium">
-                            {variant === PortalVariants.ADMIN
-                              ? (item as NavMenuItem).title
-                              : (item as NavMenuItem).title}
+                            {isAdmin ? (item as NavMenuItem).title : (item as NavMenuItem).title}
                           </span>
                         )}
                       </div>
@@ -532,9 +496,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
         <div className="text-center">
           <div
             className={`text-xs mb-1 ${
-              variant === PortalVariants.ADMIN
-                ? 'text-gray-400'
-                : 'text-gray-500 dark:text-gray-400'
+              isAdmin ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'
             }`}
           >
             {config.footer.title}
@@ -542,9 +504,7 @@ export const UnifiedSidebar = ({variant, sidebarContext}: UnifiedSidebarProps) =
           {config.footer.subtitle && (
             <div
               className={`text-xs ${
-                variant === PortalVariants.ADMIN
-                  ? 'text-gray-500'
-                  : 'text-gray-400 dark:text-gray-500'
+                isAdmin ? 'text-gray-500' : 'text-gray-400 dark:text-gray-500'
               }`}
             >
               {config.footer.subtitle}

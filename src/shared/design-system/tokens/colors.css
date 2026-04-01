@@ -1,0 +1,6 @@
+:root {
+    /* fallback */
+    --color-primary: #000;
+    --color-primary-hover: #111;
+    --color-primary-active: #222;
+}
