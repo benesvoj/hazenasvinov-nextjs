@@ -1,10 +1,11 @@
 import React from 'react';
 
+import {render} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 
 import {ActionTypes} from '@/enums';
-import {render, screen} from '@/test/utils';
+import {screen} from '@/test/utils';
 import {ActionsProps, TabConfig} from '@/types';
 
 import {AdminContainer} from '..';
