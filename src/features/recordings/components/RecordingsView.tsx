@@ -2,7 +2,7 @@
 
 import type {Category, Club, Season} from '@/types';
 
-import {RecordingGrid} from '../components';
+import {RecordingGrid} from '../components/RecordingGrid';
 import type {RecordingSchema} from '../types';
 
 interface RecordingsViewProps {

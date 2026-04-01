@@ -1,6 +1,5 @@
-import {emptyToNull} from '@/shared/lib';
+import {emptyToNull, extractYoutubeId} from '@/shared/lib';
 import {VideoFormData, VideoInsert} from '@/types';
-import {extractYoutubeId} from '@/utils';
 
 /**
  * Transforms VideoFormData into VideoInsert format by extracting the YouTube ID

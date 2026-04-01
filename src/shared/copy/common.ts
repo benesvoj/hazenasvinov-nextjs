@@ -52,5 +52,8 @@ export const commonCopy = {
       'Tato stránka je v testovacím provozu. Některé funkce mohou být nedostupné nebo nefunkční',
     errorLoadingPage: 'Při načítání stránky došlo k chybě. Zkuste to prosím znovu později.',
   },
-  messages: {},
+  messages: {
+    copyToClipboard: 'Zkopirováno do schránky',
+    copyToClipboardFailed: 'Nepodařilo se zkopírovat do schránky',
+  },
 };

@@ -1,7 +1,6 @@
 import {API_ROUTES} from '@/lib/api-routes';
-import {translations} from '@/lib/translations';
 
-export const rmatchesConfig = {
+export const matchesConfig = {
   table: 'matches',
 
   entity: {

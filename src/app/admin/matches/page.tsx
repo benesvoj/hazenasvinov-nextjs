@@ -109,7 +109,6 @@ export default function MatchesAdminPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
-  console.log('ActionTypes:', ActionTypes);
   // Use existing hooks instead of custom state and fetch functions
   const {
     data: categories,

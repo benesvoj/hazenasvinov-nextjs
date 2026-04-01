@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {ActionsProps} from '@/types';
+import {ActionsProps} from './actionsProps';
 
 /**
  * Props for AdminContainer component.

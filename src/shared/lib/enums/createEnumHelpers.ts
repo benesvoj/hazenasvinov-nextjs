@@ -7,9 +7,9 @@ export function createEnumHelpers<T extends EnumLike>(
   const getOptions = () => {
     const labels = getLabels();
 
-    return Object.entries(labels).map(([value, label]) => ({
-      value: value as T[keyof T],
-      label,
+    return (Object.values(enumObject) as T[keyof T][]).map((value) => ({
+      value,
+      label: labels[value],
     }));
   };
 

@@ -25,26 +25,24 @@ export function useAdminRecordingsPageLogic() {
     currentPage,
   });
 
-  const modals = {
-    form: useModalWithItem<RecordingSchema>(),
-    delete: useModalWithItem<RecordingSchema>(),
-  };
+  const formModal = useModalWithItem<RecordingSchema>();
+  const deleteModal = useModalWithItem<RecordingSchema>();
 
   const handleAdd = () => {
     form.openAddMode();
-    modals.form.onOpen();
+    formModal.onOpen();
   };
 
   const handleEdit = (item: RecordingSchema) => {
     form.openEditMode(item);
-    modals.form.onOpen();
+    formModal.onOpen();
   };
 
   const handleDeleteClick = (item: RecordingSchema) => {
-    modals.delete.openWith(item);
+    deleteModal.openWith(item);
   };
 
-  const handleFormSubmit = useCallback(async () => {
+  const handleFormSubmit = async () => {
     const {valid} = form.validateForm();
     if (!valid) return;
 
@@ -59,22 +57,22 @@ export function useAdminRecordingsPageLogic() {
       }
 
       await refetch();
-      modals.form.closeAndClear();
+      formModal.closeAndClear();
       form.resetForm();
     } finally {
       setCrudLoading(false);
     }
-  }, [form.formData, form.modalMode, form.selectedItem]);
+  };
 
-  const handleDelete = useCallback(async () => {
-    if (!modals.delete.selectedItem) return;
+  const handleDelete = async () => {
+    if (!deleteModal.selectedItem) return;
 
     setCrudLoading(true);
-    await deleteItem(modals.delete.selectedItem.id);
+    await deleteItem(deleteModal.selectedItem.id);
     await refetch();
-    modals.delete.closeAndClear();
+    deleteModal.closeAndClear();
     setCrudLoading(false);
-  }, [modals.delete]);
+  };
 
   const handleFiltersChange = (newFilters: FiltersType) => {
     filters.setFilters(newFilters);
@@ -89,7 +87,8 @@ export function useAdminRecordingsPageLogic() {
     setCurrentPage,
     form,
     filters,
-    modals,
+    formModal,
+    deleteModal,
     refetch,
     create,
     update,

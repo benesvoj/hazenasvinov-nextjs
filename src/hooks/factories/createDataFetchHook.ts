@@ -2,7 +2,7 @@
 
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {showToast} from '@/components';
+import showToast from '@/components/ui/feedback/Toast';
 
 export interface DataFetchHookConfig<TParams = void> {
   /** API endpoint to fetch from */

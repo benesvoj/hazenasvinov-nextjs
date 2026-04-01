@@ -62,8 +62,8 @@ export function AdminRecordingsContainer() {
       </AppPageLayout>
 
       <RecordingFormModal
-        isOpen={state.modals.form.isOpen}
-        onClose={state.modals.form.closeAndClear}
+        isOpen={state.formModal.isOpen}
+        onClose={state.formModal.closeAndClear}
         onSubmit={state.handleFormSubmit}
         formData={state.form.formData}
         setFormData={state.form.setFormData}
@@ -74,8 +74,8 @@ export function AdminRecordingsContainer() {
         isLoading={state.crudLoading}
       />
       <Dialog
-        isOpen={state.modals.delete.isOpen}
-        onClose={state.modals.delete.closeAndClear}
+        isOpen={state.deleteModal.isOpen}
+        onClose={state.deleteModal.closeAndClear}
         title={translations.matchRecordings.deleteModal.title}
         dangerAction
         submitButtonLabel={commonCopy.actions.delete}

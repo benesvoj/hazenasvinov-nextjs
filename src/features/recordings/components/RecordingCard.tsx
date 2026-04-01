@@ -13,9 +13,10 @@ import {ButtonWithTooltip} from '@/components/ui/server/buttons/ButtonWithToolti
 import {translations} from '@/lib/translations';
 
 import {HStack} from '@/components';
+import {useCopyRecordingUrl} from '@/features/recordings';
 import {formatDateString} from '@/helpers';
+import {openInNewTab} from '@/shared/browser';
 import {Category, Club, Season} from '@/types';
-import {copyUrl, playUrl} from '@/utils';
 
 import type {RecordingSchema} from '../types';
 
@@ -28,9 +29,7 @@ interface RecordingCardProps {
   clubs?: Array<Club>;
 }
 
-const t = translations.matchRecordings.components.card;
-
-export const RecordingCard = memo(function VideoCard({
+export const RecordingCard = memo(function RecordingCard({
   recording,
   onEdit,
   onDelete,
@@ -38,7 +37,9 @@ export const RecordingCard = memo(function VideoCard({
   seasons,
   clubs,
 }: RecordingCardProps) {
-  const handlePlay = () => playUrl(recording.youtube_url);
+  const t = translations.matchRecordings.components.card;
+  const copyUrl = useCopyRecordingUrl();
+  const handlePlay = () => openInNewTab(recording.youtube_url);
 
   const handleCopyUrl = () => copyUrl(recording.youtube_url);
 
@@ -113,7 +114,7 @@ export const RecordingCard = memo(function VideoCard({
             ariaLabel={t.copyUrl}
             isIconOnly
           >
-            <LinkIcon className="w-4 h-4" />,
+            <LinkIcon className="w-4 h-4" />
           </ButtonWithTooltip>
           {onEdit && (
             <ButtonWithTooltip

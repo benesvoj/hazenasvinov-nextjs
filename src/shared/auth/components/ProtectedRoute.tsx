@@ -13,7 +13,6 @@ import {translations} from '@/lib/translations';
 
 import {Heading, LoadingSpinner} from '@/components';
 import {useAuthorization} from '@/shared/auth/hooks';
-import {UserRoles} from '@/shared/auth/model';
 import {commonCopy} from '@/shared/copy';
 
 interface ProtectedRouteProps {
@@ -60,7 +59,7 @@ export default function ProtectedRoute({
                 <Button
                   color="primary"
                   className="w-full"
-                  onPress={() => router.push(APP_ROUTES.coaches.login)}
+                  onPress={() => router.push(APP_ROUTES.auth.login)}
                 >
                   {commonCopy.actions.login}
                 </Button>

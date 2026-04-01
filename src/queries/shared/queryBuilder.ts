@@ -1,6 +1,6 @@
 import {SupabaseClient} from '@supabase/supabase-js';
 
-import {isEmpty} from '@/utils';
+import {isEmpty} from '@/utils/arrayHelper';
 
 import {SortOptions, PaginationOptions} from './types';
 
