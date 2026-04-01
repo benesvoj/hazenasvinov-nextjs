@@ -10,6 +10,7 @@ import {hasItems} from '@/utils';
 
 import {AdminActions, AdminContent, AdminFilters, AdminHeader} from './';
 
+/** @deprecated use AppPageLayout instead of AdminContainer **/
 export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
   children,
   title,
