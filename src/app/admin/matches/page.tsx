@@ -8,13 +8,10 @@ import {useQueryClient} from '@tanstack/react-query';
 import {isNilOrEmpty} from 'ramda-adjunct';
 import {match} from 'ts-pattern';
 
-import {ActionTypes} from '@/enums/actionTypes';
-import {MatchStatus} from '@/enums/matchStatus';
-
 import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
 import {useModals, useModalWithItem} from '@/hooks/shared/useModals';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {hasItems, isEmpty} from '@/utils/arrayHelper';
 import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';
@@ -28,6 +25,7 @@ import {
   showToast,
   UnifiedStandingTable,
 } from '@/components';
+import {ActionTypes, MatchStatus} from '@/enums';
 import {
   useExcelImport,
   useFetchCategories,
@@ -111,6 +109,7 @@ export default function MatchesAdminPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
+  console.log('ActionTypes:', ActionTypes);
   // Use existing hooks instead of custom state and fetch functions
   const {
     data: categories,

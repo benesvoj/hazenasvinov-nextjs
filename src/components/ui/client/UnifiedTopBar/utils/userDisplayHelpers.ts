@@ -3,7 +3,7 @@ import {User} from '@supabase/supabase-js';
 import {PortalVariant} from '@/lib/portal';
 import {translations} from '@/lib/translations/index';
 
-import {UserRoles} from '@/shared/auth';
+import {UserRoles} from '@/shared/auth/model';
 import {USER_ROLES_LABELS} from '@/shared/components/ui/userRoleLabels';
 
 import {userProfileType} from '../UnifiedTopBar';

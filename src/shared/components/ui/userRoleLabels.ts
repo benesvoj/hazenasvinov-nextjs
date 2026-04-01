@@ -1,6 +1,6 @@
 import {translations} from '@/lib/translations';
 
-import {UserRoles} from '@/shared/auth';
+import {UserRoles} from '@/shared/auth/model';
 
 export const USER_ROLES_LABELS: Record<UserRoles, string> = {
   [UserRoles.ADMIN]: translations.common.userRoles.admin,

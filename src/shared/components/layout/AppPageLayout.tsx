@@ -5,7 +5,8 @@ import {ReactNode} from 'react';
 import {Alert} from '@heroui/react';
 
 import {LoadingSpinner, VStack} from '@/components';
-import {commonCopy} from '@/shared/copy';
+
+import {commonCopy} from '../../copy';
 
 export interface AppPageLayoutProps {
   header?: ReactNode;

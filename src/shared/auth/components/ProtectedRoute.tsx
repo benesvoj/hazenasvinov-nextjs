@@ -12,7 +12,8 @@ import {PortalVariant} from '@/lib/portal';
 import {translations} from '@/lib/translations';
 
 import {Heading, LoadingSpinner} from '@/components';
-import {useAuthorization, UserRoles} from '@/shared/auth';
+import {useAuthorization} from '@/shared/auth/hooks';
+import {UserRoles} from '@/shared/auth/model';
 import {commonCopy} from '@/shared/copy';
 
 interface ProtectedRouteProps {
