@@ -278,9 +278,9 @@ export default function NewEntitiesPage() {
 
 #### 1. Create Business Hook
 ```typescript
-// src/hooks/entities/video/business/useVideoFiltering.ts
+// src/hooks/entities/video/business/useRecordingFilter.ts
 import {useMemo, useState} from 'react';
-import {VideoSchema, VideoFilters} from '@/types';
+import {VideoSchema, RecordingFilters} from '@/types';
 
 export interface VideoFilteringProps {
   videos: VideoSchema[];
@@ -288,8 +288,8 @@ export interface VideoFilteringProps {
   currentPage: number;
 }
 
-export const useVideoFiltering = ({videos, itemsPerPage, currentPage}: VideoFilteringProps) => {
-  const [filters, setFilters] = useState<VideoFilters>({});
+export const useRecordingFilter = ({videos, itemsPerPage, currentPage}: VideoFilteringProps) => {
+  const [filters, setFilters] = useState<RecordingFilters>({});
 
   const {paginatedVideos, totalPages, totalCount} = useMemo(() => {
     // Apply filters
@@ -320,9 +320,9 @@ export const useVideoFiltering = ({videos, itemsPerPage, currentPage}: VideoFilt
 ```typescript
 export default function VideosPage() {
   const [currentPage, setCurrentPage] = useState(1);
-  const {data: videos, loading} = useFetchVideos();
+  const {data: videos, loading} = useRecordings();
 
-  const {filters, setFilters, paginatedVideos, totalPages} = useVideoFiltering({
+  const {filters, setFilters, paginatedVideos, totalPages} = useRecordingFilter({
     videos,
     itemsPerPage: 20,
     currentPage,
@@ -331,7 +331,7 @@ export default function VideosPage() {
   return (
     <>
       <Filters filters={filters} onChange={setFilters} />
-      <VideoGrid videos={paginatedVideos} loading={loading} />
+      <RecordingGrid videos={paginatedVideos} loading={loading} />
       <Pagination currentPage={currentPage} totalPages={totalPages} onChange={setCurrentPage} />
     </>
   );
@@ -390,12 +390,12 @@ const {paginatedEntities} = useEntityFiltering({
 ### 1. Memoize Components
 ```typescript
 // Before
-export function VideoCard({video}) {
+export function RecordingCard({video}) {
   return <Card>{video.title}</Card>;
 }
 
 // After
-export const VideoCard = memo(function VideoCard({video}) {
+export const RecordingCard = memo(function RecordingCard({video}) {
   return <Card>{video.title}</Card>;
 });
 ```
@@ -429,15 +429,15 @@ const filtered = useMemo(() => {
 ### 4. Add Pagination
 ```typescript
 // Before - rendering all 1000 videos
-<VideoGrid videos={allVideos} />
+<RecordingGrid videos={allVideos} />
 
 // After - rendering only 20 videos per page
-const {paginatedVideos} = useVideoFiltering({
+const {paginatedVideos} = useRecordingFilter({
   videos: allVideos,
   itemsPerPage: 20,
   currentPage,
 });
-<VideoGrid videos={paginatedVideos} />
+<RecordingGrid videos={paginatedVideos} />
 ```
 
 ---
@@ -531,7 +531,7 @@ videos: VideoWithMatch[]
 **Solution**: Add memoization
 ```typescript
 // Wrap expensive components in memo
-export const VideoCard = memo(/* ... */);
+export const RecordingCard = memo(/* ... */);
 
 // Memoize callbacks
 const handleClick = useCallback(/* ... */, [deps]);

@@ -2,28 +2,21 @@
 
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 
-import {
-  Button,
-  Image,
-  Input,
-  Pagination,
-  Select,
-  SelectItem,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-} from '@heroui/react';
+import {Button} from '@heroui/button';
+import {Image} from '@heroui/image';
+import {Input} from '@heroui/input';
+import {Pagination} from '@heroui/pagination';
+import {Select, SelectItem} from '@heroui/select';
+import {Spinner} from '@heroui/spinner';
+import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
 
 import {MinusIcon, PlusIcon} from '@heroicons/react/24/outline';
 
 import {UnifiedModal} from '@/components';
+import {useRecordingFilter, useRecordings} from '@/features/recordings';
 import {formatDateString} from '@/helpers';
-import {useFetchVideos, useVideoFiltering} from '@/hooks';
 import {Video} from '@/types';
+import {isEmpty} from '@/utils';
 
 interface VideoSelectionModalProps {
   isOpen: boolean;
@@ -56,10 +49,10 @@ export default function VideoSelectionModal({
     {key: 'all', label: 'Všechny'},
   ];
 
-  const {data: videos, loading, error, refetch: fetchVideos} = useFetchVideos();
+  const {data: videos, loading, error, refetch: fetchVideos} = useRecordings();
 
-  const {filters, setFilters, paginatedVideos, totalPages, totalCount} = useVideoFiltering({
-    videos,
+  const {filters, setFilters, paginatedRecordings, totalPages, totalCount} = useRecordingFilter({
+    recordings: videos,
     itemsPerPage,
     currentPage,
   });
@@ -210,7 +203,7 @@ export default function VideoSelectionModal({
         </div>
       ) : error ? (
         <div className="text-center py-8 text-red-500">{error || 'Chyba při načítání videí'}</div>
-      ) : paginatedVideos.length === 0 ? (
+      ) : isEmpty(paginatedRecordings) ? (
         <div className="text-center py-8 text-gray-500">Žádná videa nenalezena</div>
       ) : (
         <Table aria-label="Videos table">
@@ -221,7 +214,7 @@ export default function VideoSelectionModal({
             <TableColumn>Akce</TableColumn>
           </TableHeader>
           <TableBody>
-            {paginatedVideos
+            {paginatedRecordings
               .filter((video) => video && video.id) // Filter out invalid video
               .map((video) => (
                 <TableRow key={video.id}>

@@ -170,7 +170,7 @@ export interface VideoFormData {
 /**
  * Filter criteria for videos
  */
-export interface VideoFilters {
+export interface RecordingFilters {
   category_id?: string;
   club_id?: string;
   season_id?: string;
@@ -194,7 +194,7 @@ export interface VideoFilters {
 | With Relations | `{Entity}` | `Video` | Standard relations |
 | Context-Specific | `{Entity}With{Context}` | `VideoWithMatch` | Specific context |
 | Form Data | `{Entity}FormData` | `VideoFormData` | Form input |
-| Filters | `{Entity}Filters` | `VideoFilters` | Filter criteria |
+| Filters | `{Entity}Filters` | `RecordingFilters` | Filter criteria |
 | Metadata | `{Entity}Metadata` | `VideoMetadata` | Additional data |
 
 ## When to Create New Types

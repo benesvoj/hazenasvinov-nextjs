@@ -29,3 +29,4 @@ export {ChevronRightIcon} from './ChevronRightIcon';
 export {LogOutIcon} from './LogOutIcon';
 export {HistoryIcon} from './HistoryIcon';
 export {PlusIcon} from './PlusIcon';
+export {MenuIcon} from './MenuIcon';

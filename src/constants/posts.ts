@@ -3,13 +3,15 @@
 
 import {translations} from '@/lib/translations';
 
-import {BLOG_POST_STATUSES} from '@/enums';
+import {blogPostStatusHelpers} from '@/features/blogPosts';
 
 const t = translations.blogPosts.enums.statuses;
 
+const labels = blogPostStatusHelpers.getLabels();
+
 export const adminStatusFilterOptions = {
   all: t.all,
-  ...BLOG_POST_STATUSES,
+  ...labels,
 } as const;
 
 // Mapping from filter keys to database values

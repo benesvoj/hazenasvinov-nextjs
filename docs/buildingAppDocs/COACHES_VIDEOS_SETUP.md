@@ -85,8 +85,8 @@ src/app/coaches/
     └── error.tsx.backup                 # Coach login page
 
 src/app/admin/videos/components/
-├── VideoFormModal.tsx           # Updated to support availableCategories
-└── VideoCard.tsx                # Reused for coaches
+├── RecordingFormModal.tsx           # Updated to support availableCategories
+└── RecordingCard.tsx                # Reused for coaches
 
 scripts/
 ├── add_assigned_categories_to_user_profiles.sql
@@ -108,7 +108,7 @@ docs/
   - Uses green theme for coaches portal
   - Protected by `ProtectedCoachRoute`
 
-### VideoFormModal Updates
+### RecordingFormModal Updates
 
 - **New Prop**: `availableCategories?: Category[]`
 - **Behavior**: 

@@ -12,7 +12,7 @@
 
 import {API_ROUTES} from '@/lib/api-routes';
 
-import {buildUrl} from '@/utils';
+import {buildUrl} from '@/shared/lib';
 
 /**
  * API route helpers with query parameters

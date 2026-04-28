@@ -6,21 +6,17 @@ import {Button, Select, SelectItem, Tab, Tabs} from '@heroui/react';
 
 import {CalendarIcon, PlusIcon} from '@heroicons/react/24/outline';
 
+import {attendanceTabsLabels} from '@/enums/getAttendanceTabOptions';
+
 import {translations} from '@/lib/translations';
 
 import {hasItems, hasMoreThanOne} from '@/utils/arrayHelper';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
-import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
-
 import {ContentCard, DeleteDialog, Grid, GridItem, PageContainer, showToast} from '@/components';
-import {
-  ATTENDANCE_TABS_LABELS,
-  AttendanceStatuses,
-  AttendanceTabs,
-  TrainingSessionStatusEnum,
-} from '@/enums';
+import {AttendanceStatuses, AttendanceTabs, TrainingSessionStatusEnum} from '@/enums';
+import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {
   useAttendance,
   useFetchCategoryLineupMembers,
@@ -318,7 +314,7 @@ export default function CoachesAttendancePage() {
         >
           <Tab
             key={AttendanceTabs.ATTENDANCE}
-            title={ATTENDANCE_TABS_LABELS[AttendanceTabs.ATTENDANCE]}
+            title={attendanceTabsLabels()[AttendanceTabs.ATTENDANCE]}
           >
             <Grid columns={3}>
               <GridItem span={1}>
@@ -347,7 +343,7 @@ export default function CoachesAttendancePage() {
           </Tab>
           <Tab
             key={AttendanceTabs.STATISTICS}
-            title={ATTENDANCE_TABS_LABELS[AttendanceTabs.STATISTICS]}
+            title={attendanceTabsLabels()[AttendanceTabs.STATISTICS]}
           >
             {activeTab === AttendanceTabs.STATISTICS && selectedCategory && selectedSeason && (
               <AttendanceStatisticsLazy categoryId={selectedCategory} seasonId={selectedSeason} />

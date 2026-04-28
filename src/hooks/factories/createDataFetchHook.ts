@@ -2,7 +2,7 @@
 
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {showToast} from '@/components';
+import showToast from '@/components/ui/feedback/Toast';
 
 export interface DataFetchHookConfig<TParams = void> {
   /** API endpoint to fetch from */
@@ -95,6 +95,8 @@ export interface DataFetchHookResult<T> {
  * - Uses useCallback for stable refetch reference
  * - Memoizes fetch function with proper dependencies
  */
+
+/** @deprecated do not use it, instead of it use createFeatureQuery with direct access to db **/
 export function createDataFetchHook<T, TParams = void>(
   config: DataFetchHookConfig<TParams>
 ): TParams extends void

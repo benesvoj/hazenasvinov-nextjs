@@ -1,10 +1,11 @@
 import React from 'react';
 
+import {render} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 
 import {ActionTypes} from '@/enums';
-import {render, screen} from '@/test/utils';
+import {screen} from '@/test/utils';
 import {ActionsProps, TabConfig} from '@/types';
 
 import {AdminContainer} from '..';
@@ -91,7 +92,7 @@ describe('AdminContainer', () => {
     });
 
     it('should render loading spinner when loading is true', () => {
-      render(<AdminContainer loading={true}>Content</AdminContainer>);
+      render(<AdminContainer isLoading={true}>Content</AdminContainer>);
 
       expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
       expect(screen.queryByText('Content')).not.toBeInTheDocument();

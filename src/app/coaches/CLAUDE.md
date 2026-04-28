@@ -234,10 +234,10 @@ Detailed analysis and improvement proposals for each section:
 - [`lineups/CLAUDE.md`](./lineups/CLAUDE.md) — Lineup management
 - [`dashboard/CLAUDE.md`](./dashboard/CLAUDE.md) — Dashboard overview
 - [`members/CLAUDE.md`](./members/CLAUDE.md) — Member list
-- [`videos/CLAUDE.md`](./videos/CLAUDE.md) — Video library
+- [`videos/CLAUDE.md`](recordings/CLAUDE.md) — Video library
 - [`meeting-minutes/CLAUDE.md`](./meeting-minutes/CLAUDE.md) — Meeting minutes
 - [`profile/CLAUDE.md`](./profile/CLAUDE.md) — Coach card editor (existing)
-- [`components/CLAUDE.md`](./components/CLAUDE.md) — Shared layout components
+- [`components/CLAUDE.md`](../../features/coach/_docs/CLAUDE.md) — Shared layout components
 - [`login/CLAUDE.md`](./login/CLAUDE.md) — Login redirect
 
 ## Admin Category Simulation

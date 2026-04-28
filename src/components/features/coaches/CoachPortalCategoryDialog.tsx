@@ -17,8 +17,7 @@ import {
 
 import {AcademicCapIcon} from '@heroicons/react/24/outline';
 
-import {useAdminCategorySimulation} from '@/contexts/AdminCategorySimulationContext';
-
+import {useAdminCategorySimulation} from '@/features/admin/providers/CategorySimulationProvider';
 import {useSupabaseClient} from '@/hooks';
 import {Category} from '@/types';
 

@@ -2,10 +2,12 @@ import React, {useMemo} from 'react';
 
 import {Checkbox, CheckboxGroup} from '@heroui/checkbox';
 
+import {getPlayerPositionOptions, playerPositionLabels} from '@/enums/getPlayerPositionOptions';
+
 import {translations} from '@/lib/translations';
 
 import {Choice, ContentCard, Grid, GridItem, Heading} from '@/components';
-import {getPlayerPositionOptions, PLAYER_POSITION_LABELS, PlayerPosition} from '@/enums';
+import {PlayerPosition} from '@/enums';
 import {MemberInternal} from '@/types';
 
 export interface LineupMemberSetupData {
@@ -118,8 +120,8 @@ export const LineupMemberSetupCard = ({
             <div>
               <strong>{t.labels.position}:</strong>{' '}
               {value.position === PlayerPosition.GOALKEEPER
-                ? PLAYER_POSITION_LABELS.goalkeeper
-                : PLAYER_POSITION_LABELS.field_player}
+                ? playerPositionLabels().goalkeeper
+                : playerPositionLabels().field_player}
             </div>
           </GridItem>
           <GridItem span={1}>
