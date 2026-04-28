@@ -21,8 +21,9 @@ import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
-import {DeleteConfirmationModal} from '@/components';
+import {Dialog, HStack, VStack} from '@/components';
 import {useCategoryMembershipFees, useFetchCategoryMembershipFees} from '@/hooks';
+import {commonCopy} from "@/shared/copy";
 import {CategoryMembershipFee} from '@/types';
 
 import CategoryFeeFormModal from './CategoryFeeFormModal';
@@ -62,9 +63,8 @@ export default function CategoryFeesTab() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header with Year Selector and Add Button */}
-      <div className="flex justify-between items-center">
+    <VStack spacing={4} align='stretch'  className={'w-full'}>
+      <HStack justify={'between'}>
         <Select
           label="Kalendářní rok"
           selectedKeys={[selectedYear.toString()]}
@@ -88,10 +88,10 @@ export default function CategoryFeesTab() {
         >
           Přidat poplatek
         </Button>
-      </div>
+      </HStack>
 
       {/* Fees Table */}
-      <Table aria-label="Členské poplatky">
+      <Table aria-label="Členské poplatky"  >
         <TableHeader>
           <TableColumn>KATEGORIE</TableColumn>
           <TableColumn>ČÁSTKA</TableColumn>
@@ -154,13 +154,14 @@ export default function CategoryFeesTab() {
         defaultYear={selectedYear}
       />
 
-      <DeleteConfirmationModal
+      <Dialog
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.onClose}
-        onConfirm={handleDelete}
+        onSubmit={handleDelete}
         title="Smazat členský poplatek"
-        message="Opravdu chcete smazat tento členský poplatek?"
-      />
-    </div>
+        dangerAction
+        submitButtonLabel={commonCopy.actions.delete}
+      >Opravdu chcete smazat tento členský poplatek?</Dialog>
+    </VStack>
   );
 }
