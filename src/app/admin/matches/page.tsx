@@ -11,7 +11,7 @@ import {match} from 'ts-pattern';
 import {useMatchesSeasonal} from '@/hooks/shared/queries/useMatchQueries';
 import {useModals, useModalWithItem} from '@/hooks/shared/useModals';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {hasItems, isEmpty} from '@/utils/arrayHelper';
 import {testMaterializedViewRefresh} from '@/utils/testMaterializedView';

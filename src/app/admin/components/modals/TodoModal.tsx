@@ -1,9 +1,12 @@
 import {Input, Textarea} from '@heroui/input';
 
+import {getTodoCategoriesOptions} from '@/enums/getTodoCategoriesOptions';
+import {getTodoPrioritiesOptions} from '@/enums/getTodoPrioritiesOptions';
+
 import {translations} from '@/lib/translations';
 
 import {Choice, Dialog} from '@/components';
-import {getTodoCategoriesOptions, getTodoPrioritiesOptions, ModalMode} from '@/enums';
+import {ModalMode} from '@/enums';
 import {TodoItem, TodoModalProps} from '@/types';
 
 export const TodoModal = ({

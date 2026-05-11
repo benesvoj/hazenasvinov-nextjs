@@ -4,8 +4,10 @@ import {Button, ButtonGroup} from '@heroui/react';
 
 import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
+import {getLineupCoachRoleOptions} from '@/enums/getLineupCoachRoleOptions';
+
 import {UnifiedTable} from '@/components';
-import {ColumnAlignType, getLineupCoachRoleOptions} from '@/enums';
+import {ColumnAlignType} from '@/enums';
 import {LineupCoachFormData} from '@/types';
 
 interface CoachesTableProps {

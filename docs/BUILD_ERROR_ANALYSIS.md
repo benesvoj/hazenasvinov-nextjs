@@ -16,7 +16,7 @@ The API route `/api/attendance/statistics/route.ts` imports from `@/helpers`, wh
   - todoIcons.tsx (JSX ❌ client-only)
   - commentIcons.tsx (JSX ❌ client-only)
   - ui/action/actionIcons.tsx (JSX ❌ client-only)
-  - attendance/helpers.ts (pure functions ✅ server-safe)
+  - attendance/recordingMutations.ts (pure functions ✅ server-safe)
 ```
 
 Even though the API route only needs `generateInsights` and `generateRecommendations` (pure functions), webpack bundles the entire `@/helpers` module including JSX components.
@@ -141,4 +141,4 @@ To prevent this in the future:
 - `src/helpers/todoIcons.tsx` - JSX component
 - `src/helpers/commentIcons.tsx` - JSX component
 - `src/helpers/ui/action/actionIcons.tsx` - JSX component
-- `src/helpers/attendance/helpers.ts` - Pure functions (safe)
+- `src/helpers/attendance/recordingMutations.ts` - Pure functions (safe)

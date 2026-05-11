@@ -20,8 +20,8 @@ Failed to collect page data for /chronicle, /about, /betting, etc.
 
 **Your current factory pattern:**
 ```typescript
-// src/hooks/entities/video/data/useFetchVideos.ts
-export const useFetchVideos = createDataFetchHook({...});  // ← Executes when imported!
+// src/hooks/entities/video/data/useRecordings.ts
+export const useRecordings = createDataFetchHook({...});  // ← Executes when imported!
 ```
 
 **What happens during build:**
@@ -90,7 +90,7 @@ export * from './admin/useExcelImport';
 #### Before (Module-Level):
 ```typescript
 // Executes when file is imported
-export const useFetchVideos = createDataFetchHook({
+export const useRecordings = createDataFetchHook({
   endpoint: '/api/videos',
   entityName: 'videos',
   errorMessage: 'Failed',
@@ -100,7 +100,7 @@ export const useFetchVideos = createDataFetchHook({
 #### After (Lazy Execution):
 ```typescript
 // Only executes when called
-export function useFetchVideos() {
+export function useRecordings() {
   return createDataFetchHook({
     endpoint: '/api/videos',
     entityName: 'videos',
@@ -144,10 +144,10 @@ grep -r "= createDataFetchHook\|= createCRUDHook" src/hooks/entities --include="
 **Template for each conversion:**
 ```typescript
 // FROM:
-export const useFetchVideos = createDataFetchHook({...});
+export const useRecordings = createDataFetchHook({...});
 
 // TO:
-export function useFetchVideos() {
+export function useRecordings() {
   return createDataFetchHook({...})();
 }
 ```

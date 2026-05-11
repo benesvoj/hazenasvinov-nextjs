@@ -6,10 +6,12 @@ import {Button, Select, SelectItem} from '@heroui/react';
 
 import {TrashIcon} from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations/index';
+import {getMemberFunctionOptions} from '@/enums/getMemberFunctionOptions';
+
+import {translations} from '@/lib/translations';
 
 import {GenderFilter, Search} from '@/components';
-import {Genders, getMemberFunctionOptions} from '@/enums';
+import {Genders} from '@/enums';
 import {Category, MemberTableFilters} from '@/types';
 
 interface MembersListFiltersProps {

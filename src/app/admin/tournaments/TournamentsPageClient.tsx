@@ -83,7 +83,11 @@ export default function TournamentsPageClient() {
   };
 
   return (
-    <AdminContainer actions={actions} icon={<TrophyIcon className={'w-6 h-6'} />} loading={loading}>
+    <AdminContainer
+      actions={actions}
+      icon={<TrophyIcon className={'w-6 h-6'} />}
+      isLoading={loading}
+    >
       <UnifiedTable
         columns={columns}
         renderCell={renderCell}

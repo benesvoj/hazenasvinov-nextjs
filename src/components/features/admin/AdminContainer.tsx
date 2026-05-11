@@ -10,6 +10,7 @@ import {hasItems} from '@/utils';
 
 import {AdminActions, AdminContent, AdminFilters, AdminHeader} from './';
 
+/** @deprecated use AppPageLayout instead of AdminContainer **/
 export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
   children,
   title,
@@ -17,7 +18,7 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
   icon,
   actions,
   filters,
-  loading,
+  isLoading,
   tabs,
   activeTab,
   onTabChange,
@@ -70,7 +71,7 @@ export function AdminContainer<T extends readonly TabConfig[] = TabConfig[]>({
 
   return (
     <>
-      {loading ? (
+      {isLoading ? (
         <LoadingSpinner />
       ) : (
         <div className="w-full space-y-4">

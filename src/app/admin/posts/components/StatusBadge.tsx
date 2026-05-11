@@ -1,30 +1,16 @@
 import React from 'react';
 
-import {Chip} from '@heroui/react';
-
-import {adminStatusFilterOptions} from '@/constants';
 import {BlogPostStatuses} from '@/enums';
+import {StatusBadge} from '@/features/blogPosts';
 
 export const getStatusBadge = (status: string) => {
   switch (status) {
     case BlogPostStatuses.PUBLISHED:
-      return (
-        <Chip color="success" variant="flat">
-          {adminStatusFilterOptions.published}
-        </Chip>
-      );
+      return <StatusBadge status={BlogPostStatuses.PUBLISHED} />;
     case BlogPostStatuses.DRAFT:
-      return (
-        <Chip color="warning" variant="flat">
-          {adminStatusFilterOptions.draft}
-        </Chip>
-      );
+      return <StatusBadge status={BlogPostStatuses.DRAFT} />;
     case BlogPostStatuses.ARCHIVED:
-      return (
-        <Chip color="secondary" variant="flat">
-          {adminStatusFilterOptions.archived}
-        </Chip>
-      );
+      return <StatusBadge status={BlogPostStatuses.ARCHIVED} />;
     default:
       return null;
   }

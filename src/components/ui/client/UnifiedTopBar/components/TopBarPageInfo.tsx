@@ -6,14 +6,13 @@ import {Button} from '@heroui/react';
 
 import {Bars3Icon} from '@heroicons/react/24/outline';
 
-import {translations} from '@/lib/translations/index';
-
-import {UserRoles} from '@/enums';
+import {isAdminPortal, PortalVariant} from '@/lib/portal';
+import {translations} from '@/lib/translations';
 
 import {sidebarContextType} from '../UnifiedTopBar';
 
 interface TopBarPageInfoProps {
-  variant: UserRoles;
+  variant: PortalVariant;
   pageTitle?: string;
   pageDescription?: string;
   sidebarContext?: sidebarContextType;
@@ -25,6 +24,8 @@ export const TopBarPageInfo = ({
   pageDescription,
   sidebarContext,
 }: TopBarPageInfoProps) => {
+  const isAdmin = isAdminPortal(variant);
+
   const getSidebarButton = () => {
     if (!sidebarContext) return null;
 
@@ -55,7 +56,7 @@ export const TopBarPageInfo = ({
       <div className="min-w-0 flex-1">
         <h1 className="text-base sm:text-lg xl:text-xl font-semibold text-gray-900 dark:text-white truncate">
           {pageTitle ||
-            (variant === UserRoles.ADMIN
+            (isAdmin
               ? translations.topBar.labels.dashboard
               : translations.topBar.labels.coachPortal)}
         </h1>

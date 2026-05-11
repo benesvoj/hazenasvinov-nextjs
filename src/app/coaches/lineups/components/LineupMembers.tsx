@@ -10,13 +10,13 @@ import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
 
-import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
 import LineupMemberAssignDialog from '@/app/coaches/lineups/components/LineupMemberAssignDialog';
 import {getPositionColor, getPositionText} from '@/app/coaches/lineups/helpers/helpers';
 
 import {ContentCard, DeleteDialog, EmptyState, UnifiedTable} from '@/components';
 import {useUser} from '@/contexts';
 import {ActionTypes, ColumnAlignType} from '@/enums';
+import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {useCategoryLineupMembers, useFetchCategoryLineupMembers} from '@/hooks';
 import {
   CategoryLineupMemberWithMember,

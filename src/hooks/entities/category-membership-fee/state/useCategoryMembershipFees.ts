@@ -7,9 +7,8 @@ import {translations} from '@/lib/translations';
 import {showToast} from '@/components';
 import {CategoryMembershipFee, CreateCategoryFeeData, UpdateCategoryFeeData} from '@/types';
 
-const t = translations.membershipFees;
-
 export const useCategoryMembershipFees = (year?: number) => {
+  const t = translations.membershipFees;
   const [fees, setFees] = useState<CategoryMembershipFee[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -15,7 +15,7 @@ Manages team lineups per category and season. Coaches create lineups, add/remove
 | `components/AddMemberModal.tsx` | Add member to lineup with duplicate prevention |
 | `components/CreateMemberModal.tsx` | Create new member directly from lineup context |
 | `components/index.ts` | Barrel exports |
-| `helpers/helpers.ts` | Shared utility functions |
+| `helpers/recordingMutations.ts` | Shared utility functions |
 | `README.md` | Existing documentation |
 | `REFACTORING_ANALYSIS.md` | Existing refactoring notes |
 

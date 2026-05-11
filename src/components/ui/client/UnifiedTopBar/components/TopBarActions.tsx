@@ -6,21 +6,22 @@ import {Badge, Button} from '@heroui/react';
 
 import {DocumentTextIcon} from '@heroicons/react/24/outline';
 
+import {isAdminPortal, PortalVariant} from '@/lib/portal';
 import {translations} from '@/lib/translations/index';
 
 import {hasItems} from '@/utils/arrayHelper';
 
 import {ThemeSwitch} from '@/components';
-import {UserRoles} from '@/enums';
 import {ReleaseNote} from '@/types';
 
 interface TopBarActionsProps {
   releaseNotes: ReleaseNote[];
-  variant: UserRoles;
+  variant: PortalVariant;
   handleReleaseNotes: () => void;
 }
 
 export const TopBarActions = ({releaseNotes, variant, handleReleaseNotes}: TopBarActionsProps) => {
+  const isAdmin = isAdminPortal(variant);
   return (
     <>
       <ThemeSwitch />
@@ -34,11 +35,7 @@ export const TopBarActions = ({releaseNotes, variant, handleReleaseNotes}: TopBa
       >
         <DocumentTextIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         {hasItems(releaseNotes) && (
-          <Badge
-            color="primary"
-            size="sm"
-            className={variant === UserRoles.ADMIN ? '' : 'absolute -top-1 -right-1'}
-          >
+          <Badge color="primary" size="sm" className={isAdmin ? '' : 'absolute -top-1 -right-1'}>
             {releaseNotes.length}
           </Badge>
         )}

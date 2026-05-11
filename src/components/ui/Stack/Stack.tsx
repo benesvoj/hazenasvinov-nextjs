@@ -11,6 +11,7 @@ import {
   paddingClasses,
   Spacing,
 } from '@/types';
+import {cn} from "@/shared/lib/cn";
 
 export interface StackProps {
   role?: AriaRole;
@@ -53,7 +54,7 @@ export function Stack(props: StackProps) {
   return (
     <div
       role={props.role}
-      className={twMerge(
+      className={cn(
         'flex',
         directionClasses[props.direction ?? 'row'],
         justifyClasses[props.justify ?? 'start'],
@@ -68,3 +69,5 @@ export function Stack(props: StackProps) {
     </div>
   );
 }
+
+Stack.displayName = 'Stack';

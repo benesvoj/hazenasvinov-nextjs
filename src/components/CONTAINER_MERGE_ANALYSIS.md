@@ -18,7 +18,7 @@ Feature-rich container used by **18 admin pages**.
 
 Sub-components: `AdminActions`, `AdminFilters`, `AdminHeader`, `AdminContent`
 
-### PageContainer (`src/components/ui/containers/PageContainer.tsx`)
+### PageContainer (`src/components/ui/containers/CoachPageContainer.tsx`)
 
 Thin wrapper used by **8+ coach portal pages**.
 
@@ -93,7 +93,7 @@ The `mt-4 sm:mt-20` top margin belongs in the **coach portal layout** (`src/app/
 2. Add the two alert renders to `AdminContainer.tsx`
 3. Move `mt-4 sm:mt-20` from `PageContainer` into the coach portal layout
 4. Replace all `<PageContainer>` usages with `<AdminContainer>`, mapping props
-5. Delete `PageContainer.tsx` and its barrel export
+5. Delete `CoachPageContainer.tsx` and its barrel export
 
 ### Opportunity: coach pages that manage tabs manually
 

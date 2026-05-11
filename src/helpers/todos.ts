@@ -1,9 +1,8 @@
-import {
-  getTodoPrioritiesOptions,
-  getTodoStatusesOptions,
-  getTodoCategoriesOptions,
-  TodoStatuses,
-} from '@/enums';
+import {getTodoCategoriesOptions} from '@/enums/getTodoCategoriesOptions';
+import {getTodoPrioritiesOptions} from '@/enums/getTodoPrioritiesOptions';
+import {getTodoStatusesOptions} from '@/enums/getTodoStatusesOptions';
+
+import {TodoStatuses} from '@/enums';
 import {TodoItem} from '@/types';
 
 import {getStatusIcon} from './todoIcons';

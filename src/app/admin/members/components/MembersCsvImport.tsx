@@ -22,9 +22,12 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
+import {getGenderOptions} from '@/enums/getGenderOptions';
+import {getMemberFunctionOptions} from '@/enums/getMemberFunctionOptions';
+
 import {useModal} from '@/hooks/shared/useModals';
 
-import {Genders, getGenderOptions, getMemberFunctionOptions, MemberFunction} from '@/enums';
+import {Genders, MemberFunction} from '@/enums';
 import {useSupabaseClient} from '@/hooks';
 
 interface CsvMember {

@@ -7,8 +7,6 @@ import {Button} from '@heroui/react';
 import {PlusIcon} from '@/lib/icons/PlusIcon';
 import {translations} from '@/lib/translations';
 
-import {useCoachCategory} from '@/app/coaches/components/CoachCategoryContext';
-
 import {
   Checkbox,
   Choice,
@@ -23,6 +21,7 @@ import {
   Show,
 } from '@/components';
 import {useAppData} from '@/contexts';
+import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {currentYear} from '@/helpers';
 import {useMemberModals, useMembers, useMemberSave, useModalWithItem} from '@/hooks';
 import {BaseMember, Member, MemberInternal} from '@/types';

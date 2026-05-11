@@ -445,7 +445,7 @@ src/app/coaches/lineups/
 │   ├── LineupModal.tsx (existing)
 │   └── ConfirmDeleteModal.tsx (new)
 └── helpers/
-    └── helpers.ts (existing)
+    └── recordingMutations.ts (existing)
 ```
 
 **Deliverable:** Clean, maintainable component structure
