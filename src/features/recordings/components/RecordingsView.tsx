@@ -2,7 +2,7 @@
 
 import type {Category, Club, Season} from '@/types';
 
-import {RecordingGrid} from '../components/RecordingGrid';
+import {RecordingTable} from '../components/RecordingTable';
 import type {RecordingSchema} from '../types';
 
 interface RecordingsViewProps {
@@ -31,14 +31,12 @@ export function RecordingsView({
   seasons,
   currentPage,
   totalPages,
-  totalCount,
-  itemsPerPage,
   onEdit,
   onDelete,
   onPageChange,
 }: RecordingsViewProps) {
   return (
-    <RecordingGrid
+    <RecordingTable
       recordings={recordings}
       loading={loading}
       categories={categories}
@@ -48,8 +46,6 @@ export function RecordingsView({
       onDelete={onDelete}
       currentPage={currentPage}
       totalPages={totalPages}
-      totalCount={totalCount}
-      itemsPerPage={itemsPerPage}
       onPageChange={onPageChange}
     />
   );
