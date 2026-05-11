@@ -1,7 +1,5 @@
 'use client';
 
-import {useState} from 'react';
-
 import {
   Button,
   Chip,
@@ -15,60 +13,42 @@ import {
   TableRow,
 } from '@heroui/react';
 
-import {PencilIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
-
-import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
+import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
-import {Dialog, HStack, VStack} from '@/components';
-import {useCategoryMembershipFees, useFetchCategoryMembershipFees} from '@/hooks';
-import {commonCopy} from "@/shared/copy";
+import {HStack, VStack} from '@/components';
+import {useFetchCategoryMembershipFees} from '@/hooks';
 import {CategoryMembershipFee} from '@/types';
-
-import CategoryFeeFormModal from './CategoryFeeFormModal';
 
 const YEAR_RANGE_BEFORE = 5;
 const YEAR_RANGE_AFTER = 5;
 const YEAR_OPTIONS_LENGTH = YEAR_RANGE_BEFORE + YEAR_RANGE_AFTER;
 
-export default function CategoryFeesTab() {
+interface Props {
+  selectedYear: number;
+  onYearChange: (year: number) => void;
+  onEdit: (fee: CategoryMembershipFee) => void;
+  onDelete: (fee: CategoryMembershipFee) => void;
+}
+
+export default function CategoryFeesTab({selectedYear, onYearChange, onEdit, onDelete}: Props) {
   const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState(currentYear);
 
   const {data, loading: fetchLoading, refetch} = useFetchCategoryMembershipFees({selectedYear});
   const {
     categories: {data: categories},
   } = useAppData();
-  const {fees, loading, deleteFee} = useCategoryMembershipFees(selectedYear);
 
-  const modal = useModal();
-  const deleteModal = useModalWithItem<CategoryMembershipFee>();
-
-  const [selectedFee, setSelectedFee] = useState<CategoryMembershipFee | null>(null);
-
-  // Generate year options (current year ± 5 years)
   const yearOptions = Array.from({length: YEAR_OPTIONS_LENGTH}, (_, i) => currentYear - 5 + i);
 
-  const handleEdit = (fee: CategoryMembershipFee) => {
-    setSelectedFee(fee);
-    modal.onOpen();
-  };
-
-  const handleDelete = async () => {
-    if (selectedFee) {
-      await deleteFee(selectedFee.id);
-      deleteModal.onClose();
-    }
-  };
-
   return (
-    <VStack spacing={4} align='stretch'  className={'w-full'}>
+    <VStack spacing={4} align="stretch" className={'w-full'}>
       <HStack justify={'between'}>
         <Select
           label="Kalendářní rok"
           selectedKeys={[selectedYear.toString()]}
-          onSelectionChange={(keys) => setSelectedYear(parseInt(Array.from(keys)[0] as string))}
+          onSelectionChange={(keys) => onYearChange(parseInt(Array.from(keys)[0] as string))}
           className="max-w-xs"
         >
           {yearOptions.map((year) => (
@@ -77,21 +57,10 @@ export default function CategoryFeesTab() {
             </SelectItem>
           ))}
         </Select>
-
-        <Button
-          color="primary"
-          startContent={<PlusIcon className="w-5 h-5" />}
-          onPress={() => {
-            setSelectedFee(null);
-            modal.onOpen();
-          }}
-        >
-          Přidat poplatek
-        </Button>
       </HStack>
 
       {/* Fees Table */}
-      <Table aria-label="Členské poplatky"  >
+      <Table aria-label="Členské poplatky">
         <TableHeader>
           <TableColumn>KATEGORIE</TableColumn>
           <TableColumn>ČÁSTKA</TableColumn>
@@ -122,7 +91,7 @@ export default function CategoryFeesTab() {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
-                    <Button isIconOnly size="sm" variant="light" onPress={() => handleEdit(fee)}>
+                    <Button isIconOnly size="sm" variant="light" onPress={() => onEdit(fee)}>
                       <PencilIcon className="w-4 h-4" />
                     </Button>
                     <Button
@@ -130,10 +99,7 @@ export default function CategoryFeesTab() {
                       size="sm"
                       variant="light"
                       color="danger"
-                      onPress={() => {
-                        setSelectedFee(fee);
-                        deleteModal.onOpen();
-                      }}
+                      onPress={() => onDelete(fee)}
                     >
                       <TrashIcon className="w-4 h-4" />
                     </Button>
@@ -144,24 +110,6 @@ export default function CategoryFeesTab() {
           }}
         </TableBody>
       </Table>
-
-      {/* Modals */}
-      <CategoryFeeFormModal
-        isOpen={modal.isOpen}
-        onClose={modal.onClose}
-        fee={selectedFee}
-        categories={categories || []}
-        defaultYear={selectedYear}
-      />
-
-      <Dialog
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
-        onSubmit={handleDelete}
-        title="Smazat členský poplatek"
-        dangerAction
-        submitButtonLabel={commonCopy.actions.delete}
-      >Opravdu chcete smazat tento členský poplatek?</Dialog>
     </VStack>
   );
 }
