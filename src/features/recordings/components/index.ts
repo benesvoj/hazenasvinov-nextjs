@@ -4,6 +4,7 @@ export * from './RecordingFormModal';
 export * from './RecordingGrid';
 export * from './RecordingPageLayout';
 export * from './RecordingPagination';
+export * from './RecordingTable';
 export * from './AdminRecordingsContainer';
 export * from './RecordingsView';
 export * from './CoachRecordingsContainer';

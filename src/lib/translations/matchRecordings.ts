@@ -61,5 +61,24 @@ export const matchRecordingsTranslations = {
       edit: 'Upravit video',
       delete: 'Smazat video',
     },
+    table: {
+      ariaLabel: 'Tabulka záznamů zápasů',
+      noRecordings: 'Žádné záznamy k zobrazení',
+      columns: {
+        title: 'Název',
+        category: 'Kategorie',
+        club: 'Klub',
+        season: 'Sezóna',
+        recordingDate: 'Datum záznamu',
+        status: 'Stav',
+        actions: 'Akce',
+      },
+      actions: {
+        play: 'Přehrát video',
+        copyUrl: 'Kopírovat URL',
+        edit: 'Upravit video',
+        delete: 'Smazat video',
+      },
+    },
   },
 };
