@@ -120,10 +120,15 @@ export default function CompactVideoList({
                           Poznámka: {video.description}
                         </p>
                       )}
-                      <div className="flex items-center gap-1 sm:gap-2 mt-1">
+                      <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
                         {video.recording_date && (
                           <span className="text-xs text-gray-500">
-                            Datum nahrání: {formatDateString(video.recording_date)}
+                            {formatDateString(video.recording_date)}
+                          </span>
+                        )}
+                        {video.seasons?.name && (
+                          <span className="text-xs text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 px-1.5 py-0.5 rounded">
+                            {video.seasons.name}
                           </span>
                         )}
                       </div>

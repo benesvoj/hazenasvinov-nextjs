@@ -11,6 +11,7 @@ import UnifiedStandingTable from '@/components/shared/standing-table/UnifiedStan
 import {translations} from '@/lib/translations';
 
 import {Choice, ContentCard, LoadingSpinner, PageContainer, Show} from '@/components';
+import {StrategyPreparationZone} from '@/features/coach';
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {
   useFetchSeasons,
@@ -25,7 +26,6 @@ import {
   MatchStatisticsZone,
   RecentMatchDetails,
   RecentResultsCard,
-  StrategyPreparationZone,
   UpcomingMatchesCard,
 } from './components';
 import CoachMatchResultFlow from './components/CoachMatchResultFlow';
