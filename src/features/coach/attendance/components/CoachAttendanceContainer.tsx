@@ -1,6 +1,6 @@
 'use client';
 
-import {Button, Select, SelectItem} from '@heroui/react';
+import {Select, SelectItem} from '@heroui/react';
 
 import {CalendarIcon, PlusIcon} from '@heroicons/react/24/outline';
 
@@ -14,13 +14,14 @@ import {useAppData} from '@/contexts/AppDataContext';
 
 import {ContentCard, DeleteDialog, Grid, GridItem} from '@/components';
 import {AttendanceTabs, TrainingSessionStatusEnum} from '@/enums';
-import {AppPageLayout} from '@/shared/components';
+import {AppPageLayout, FloatingActions} from '@/shared/components';
 
 import {useCoachAttendancePageLogic} from '../hooks/useCoachAttendancePageLogic';
 
 import {
-  AttendanceRecordingTable,
+  AttendanceRecordingPanel,
   AttendanceStatisticsLazy,
+  AttendanceStatsCards,
   TrainingSessionGenerator,
   TrainingSessionList,
   TrainingSessionModal,
@@ -75,62 +76,66 @@ export default function CoachAttendanceContainer() {
                   ))}
                 </Select>
               </div>
-
-              <div className="flex items-stretch sm:items-end gap-2">
-                <Button
-                  color="primary"
-                  startContent={<PlusIcon className="w-4 h-4" />}
-                  onPress={state.sessionModal.openEmpty}
-                  isDisabled={!state.selectedCategory || !state.selectedSeason}
-                  className="w-full sm:w-auto"
-                >
-                  <span className="hidden sm:inline">
-                    {translations.attendance.labels.newSession}
-                  </span>
-                </Button>
-                <Button
-                  color="primary"
-                  variant="bordered"
-                  onPress={state.generatorModal.onOpen}
-                  isDisabled={!state.selectedCategory || !state.selectedSeason}
-                  isIconOnly
-                  aria-label={translations.attendance.ariaLabels.sessionGeneration}
-                  className="w-full sm:w-auto"
-                >
-                  <CalendarIcon className="w-4 h-4" />
-                </Button>
-              </div>
             </div>
           </ContentCard>
+        }
+        floatingActions={
+          <FloatingActions
+            actions={[
+              {
+                label: translations.attendance.labels.newSession,
+                icon: <PlusIcon className="w-5 h-5" />,
+                onClick: state.sessionModal.openEmpty,
+              },
+              {
+                label: translations.attendance.ariaLabels.sessionGeneration,
+                icon: <CalendarIcon className="w-5 h-5" />,
+                onClick: state.generatorModal.onOpen,
+              },
+            ]}
+          />
         }
         tabs={[
           {
             key: AttendanceTabs.ATTENDANCE,
             title: tabLabels[AttendanceTabs.ATTENDANCE],
             content: (
-              <Grid columns={3}>
-                <GridItem span={1}>
-                  <TrainingSessionList
-                    sessions={state.sessions}
-                    selectedSession={state.selectedSession}
-                    onSelectedSession={state.setSelectedSession}
-                    onStatusChange={state.statusDialog.openWith}
-                    onEditSession={state.sessionModal.openWith}
-                    onDeleteSession={state.deleteModal.openWith}
-                    loading={state.trainingSessionsLoading}
-                  />
-                </GridItem>
-                <GridItem span={2}>
-                  <AttendanceRecordingTable
-                    attendanceRecords={state.attendanceRecords}
-                    selectedSession={state.selectedSession}
-                    handleRecordAttendance={state.handleRecordAttendance}
-                    handleCreateAttendanceForSession={state.handleCreateAttendanceForSession}
-                    loading={state.attendanceLoading}
-                    selectedSessionData={state.selectedSessionData}
-                  />
-                </GridItem>
-              </Grid>
+              <div className="flex flex-col gap-4">
+                {/* Stats row */}
+                <AttendanceStatsCards
+                  sessions={state.sessions}
+                  statistics={state.attendanceStatistics}
+                  isLoading={state.statsLoading}
+                />
+
+                {/* Two-column layout */}
+                <Grid columns={3}>
+                  <GridItem span={1}>
+                    <TrainingSessionList
+                      sessions={state.sessions}
+                      selectedSession={state.selectedSession}
+                      onSelectedSession={state.setSelectedSession}
+                      onStatusChange={state.statusDialog.openWith}
+                      onEditSession={state.sessionModal.openWith}
+                      onDeleteSession={state.deleteModal.openWith}
+                      loading={state.trainingSessionsLoading}
+                    />
+                  </GridItem>
+                  <GridItem span={2}>
+                    <AttendanceRecordingPanel
+                      attendanceRecords={state.attendanceRecords}
+                      selectedSession={state.selectedSession}
+                      selectedSessionData={state.selectedSessionData}
+                      loading={state.attendanceLoading}
+                      memberHistory={state.memberHistory}
+                      onRecordAttendance={state.handleRecordAttendance}
+                      onBulkUpdate={state.handleBulkUpdate}
+                      onEditSession={state.sessionModal.openWith}
+                      onDeleteSession={state.deleteModal.openWith}
+                    />
+                  </GridItem>
+                </Grid>
+              </div>
             ),
           },
           {

@@ -5,5 +5,7 @@ export {default as TrainingSessionStatusBadge} from './TrainingSessionList/compo
 export {default as TrainingSessionStatusDialog} from './TrainingSessionStatusDialog';
 export {default as AttendanceStatisticsLazy} from './AttendanceStatisticsLazy';
 export {AttendanceRecordingTable} from './AttendanceRecordingTable';
+export {AttendanceRecordingPanel} from './AttendanceRecordingPanel';
+export {AttendanceStatsCards} from './AttendanceStatsCards';
 export {TrainingSessionList} from './TrainingSessionList/TrainingSessionList';
 export {RecommendationsPanel} from './RecommendationsPanel';

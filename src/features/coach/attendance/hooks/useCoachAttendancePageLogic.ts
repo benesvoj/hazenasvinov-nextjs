@@ -4,6 +4,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {attendanceTabsLabels} from '@/enums/getAttendanceTabOptions';
 
+import {API_ROUTES} from '@/lib/api-routes';
 import {translations} from '@/lib/translations';
 
 import {hasItems} from '@/utils/arrayHelper';
@@ -15,8 +16,10 @@ import {AttendanceStatuses, AttendanceTabs, TrainingSessionStatusEnum} from '@/e
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {
   useAttendance,
+  useFetchAttendanceStatistics,
   useFetchCategoryLineupMembers,
   useFetchCategoryLineups,
+  useFetchMemberAttendanceHistory,
   useFetchMembersAttendance,
   useFetchTrainingSessions,
   useModal,
@@ -65,6 +68,18 @@ export function useCoachAttendancePageLogic() {
   } = useFetchTrainingSessions({
     categoryId: selectedCategory,
     seasonId: selectedSeason,
+  });
+
+  const {
+    data: attendanceStatistics,
+    isLoading: statsLoading,
+    invalidateStatistics,
+  } = useFetchAttendanceStatistics(selectedCategory ?? '', selectedSeason ?? '');
+
+  const {data: memberHistory = []} = useFetchMemberAttendanceHistory({
+    categoryId: selectedCategory,
+    seasonId: selectedSeason,
+    limit: 5,
   });
 
   const selectedSessionData = useMemo(
@@ -179,15 +194,44 @@ export function useCoachAttendancePageLogic() {
     }
   };
 
-  const handleRecordAttendance = async (memberId: string, status: AttendanceStatuses) => {
+  const handleRecordAttendance = async (
+    memberId: string,
+    status: AttendanceStatuses,
+    notes?: string
+  ) => {
     if (!selectedSession) return;
 
     try {
-      await recordAttendance(memberId, selectedSession, status);
+      await recordAttendance(memberId, selectedSession, status, notes);
       await fetchAttendanceRecords();
+      invalidateStatistics();
     } catch (err) {
       showToast.danger(
         `${translations.attendance.responseMessages.attendanceCreationFailed} ${err instanceof Error ? err.message : ''}`
+      );
+    }
+  };
+
+  const handleBulkUpdate = async (memberIds: string[], status: AttendanceStatuses) => {
+    if (!selectedSession) return;
+
+    try {
+      const response = await fetch(API_ROUTES.attendance.bulk(selectedSession), {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({memberIds, status}),
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      await fetchAttendanceRecords();
+      invalidateStatistics();
+      showToast.success(translations.attendance.labels.bulkUpdateSuccess(memberIds.length));
+    } catch (err) {
+      showToast.danger(
+        `${translations.attendance.labels.bulkUpdateFailed} ${err instanceof Error ? err.message : ''}`
       );
     }
   };
@@ -216,7 +260,8 @@ export function useCoachAttendancePageLogic() {
     }
   };
 
-  const isAllLoadings = loading || appDataLoading || trainingSessionsLoading || isLoading;
+  const isAllLoadings =
+    loading || appDataLoading || trainingSessionsLoading || isLoading || statsLoading;
 
   const tabLabels = attendanceTabsLabels();
 
@@ -246,6 +291,9 @@ export function useCoachAttendancePageLogic() {
     attendanceLoading,
     appDataLoading,
     isAllLoadings,
+    attendanceStatistics,
+    memberHistory,
+    statsLoading,
 
     // Modals
     sessionModal,
@@ -260,6 +308,7 @@ export function useCoachAttendancePageLogic() {
     handleStatusUpdate,
     handleRecordAttendance,
     handleCreateAttendanceForSession,
+    handleBulkUpdate,
     resolveMemberIds,
     refetchSessions,
   };

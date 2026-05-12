@@ -13,6 +13,8 @@ export const API_ROUTES = {
   },
   attendance: {
     statistics: '/api/attendance/statistics' as const,
+    memberHistory: '/api/attendance/member-history' as const,
+    bulk: (trainingId: string) => `/api/attendance/${trainingId}/bulk`,
   },
   auth: {
     confirm: '/api/auth/confirm' as const,

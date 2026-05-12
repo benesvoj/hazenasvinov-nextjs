@@ -27,6 +27,32 @@ export const attendanceTranslations = {
     generatedAt: 'Generováno dne',
     queries: 'Dotazy',
     insights: 'Postřehy',
+    // Stats cards
+    totalTrainings: 'Tréninky sezóny',
+    averageAttendance: 'Průměrná docházka',
+    excusedAbsences: 'Omluvené absence',
+    unexcusedAbsences: 'Neomluvené absence',
+    totalTrainingsSubtitle: 'v aktuální sezóně',
+    attendanceTrendVsLastMonth: (diff: number) =>
+      diff >= 0 ? `+${diff}% oproti minulému měsíci` : `${diff}% oproti minulému měsíci`,
+    // Panel toolbar
+    searchPlaceholder: 'Hledat člena…',
+    filterAll: 'Vše',
+    markAllPresent: 'Označit vše přítomno',
+    markAllPresentConfirm: 'Opravdu chcete označit všechny členy jako přítomné?',
+    // Bulk actions
+    selectedCount: (n: number) => `${n} vybráno`,
+    // Note column
+    notePlaceholder: 'Poznámka…',
+    // History column
+    historyLabel: 'Posl. 5 tréninků',
+    // Summary bar
+    summaryTotal: (n: number) => `Celkem: ${n} členů`,
+    // Session detail
+    selectSessionPrompt: 'Vyberte trénink ze seznamu vlevo',
+    bulkUpdateFailed: 'Nepodařilo se hromadně aktualizovat docházku',
+    bulkUpdateSuccess: (n: number) => `Aktualizováno ${n} záznamů`,
+    markAllPresentSuccess: 'Všichni členové označeni jako přítomni',
   },
   ariaLabels: {
     sessionGeneration: 'Generovat tréninky',

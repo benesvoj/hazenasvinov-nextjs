@@ -4,13 +4,13 @@ import React, {memo} from 'react';
 
 import {Skeleton} from '@heroui/skeleton';
 
-import {RecordingPagination} from '@/components';
 import {Category, Club, Season} from '@/types';
 import {isEmpty} from '@/utils';
 
 import type {RecordingSchema} from '../types';
 
 import {RecordingCard} from './RecordingCard';
+import {RecordingPagination} from './RecordingPagination';
 
 interface RecordingGridProps {
   recordings: RecordingSchema[];
