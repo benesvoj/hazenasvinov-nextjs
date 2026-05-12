@@ -8,6 +8,7 @@ interface TabWithVideosProps {
   videosLoading: boolean;
   filteredOpponentVideos: VideoWithMatch[];
   opponentTeam: Team | null;
+  opponentClubIdMissing: boolean;
   onEdit?: (video: RecordingSchema) => void;
 }
 export default function StrategyTabWithVideos({
@@ -15,6 +16,7 @@ export default function StrategyTabWithVideos({
   videosLoading,
   filteredOpponentVideos,
   opponentTeam,
+  opponentClubIdMissing,
   onEdit,
 }: TabWithVideosProps) {
   return (
@@ -26,13 +28,21 @@ export default function StrategyTabWithVideos({
           </p>
         </div>
       )}
-      <CompactVideoList
-        videos={filteredOpponentVideos}
-        loading={videosLoading}
-        title={`Videa týmu ${opponentTeam?.name || 'soupeře'}`}
-        emptyMessage={`Žádná videa týmu ${opponentTeam?.name || 'soupeře'} nejsou k dispozici`}
-        onEdit={onEdit}
-      />
+      {opponentClubIdMissing ? (
+        <div className="p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+          <p className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300">
+            Nepodařilo se identifikovat klub soupeře – videa nelze zobrazit.
+          </p>
+        </div>
+      ) : (
+        <CompactVideoList
+          videos={filteredOpponentVideos}
+          loading={videosLoading}
+          title={`Videa týmu ${opponentTeam?.name || 'soupeře'}`}
+          emptyMessage={`Žádná videa týmu ${opponentTeam?.name || 'soupeře'} nejsou k dispozici`}
+          onEdit={onEdit}
+        />
+      )}
     </div>
   );
 }

@@ -1,13 +1,12 @@
 'use client';
 
-import CoachCardEditor from '@/app/coaches/profile/components/CoachCardEditor';
-
-import {PageContainer} from '@/components';
+import {CoachCardEditor} from '@/features/coach/profile';
+import {AppPageLayout} from '@/shared/components';
 
 export default function CoachesProfilePage() {
   return (
-    <PageContainer>
+    <AppPageLayout>
       <CoachCardEditor />
-    </PageContainer>
+    </AppPageLayout>
   );
 }

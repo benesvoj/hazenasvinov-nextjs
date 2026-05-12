@@ -499,6 +499,7 @@ export async function getOwnClubMatchesOptimized(
             short_name: homeShortName,
             is_own_club: match.home_is_own_club,
             logo_url: match.home_club_logo_url,
+            club_id: match.home_club_id,
           },
           // Away team information
           away_team: {
@@ -507,6 +508,7 @@ export async function getOwnClubMatchesOptimized(
             short_name: awayShortName,
             is_own_club: match.away_is_own_club,
             logo_url: match.away_club_logo_url,
+            club_id: match.away_club_id,
           },
           home_team_is_own_club: match.home_is_own_club,
           away_team_is_own_club: match.away_is_own_club,

@@ -45,11 +45,13 @@ interface MatchStats {
 interface OpponentMatchStatisticsProps {
   matches: Match[];
   opponentTeamName: string;
+  opponentTeamId: string;
 }
 
 export default function OpponentMatchStatistics({
   matches,
   opponentTeamName,
+  opponentTeamId,
 }: OpponentMatchStatisticsProps) {
   // Calculate statistics from matches
   const calculateStats = (matches: Match[]): MatchStats => {
@@ -99,9 +101,7 @@ export default function OpponentMatchStatistics({
         return;
       }
 
-      const isHomeTeam =
-        match.home_team_id === matches[0]?.home_team_id ||
-        match.home_team_id === matches[0]?.away_team_id;
+      const isHomeTeam = match.home_team_id === opponentTeamId;
       const opponentScore = isHomeTeam ? match.home_score : match.away_score;
       const opponentConceded = isHomeTeam ? match.away_score : match.home_score;
 
@@ -289,6 +289,14 @@ export default function OpponentMatchStatistics({
       </CardHeader>
       <CardBody>
         <div className="space-y-6">
+          {/* Recent Form */}
+          <div>
+            <h4 className="text-md font-semibold mb-3 text-gray-900 dark:text-white">Forma</h4>
+            <div className="flex items-center justify-center gap-3">
+              <FormIndicator form={stats.recentForm} />
+            </div>
+          </div>
+
           {/* Overall Record */}
           <div>
             <h4 className="text-md font-semibold mb-3 text-gray-900 dark:text-white">
@@ -417,16 +425,6 @@ export default function OpponentMatchStatistics({
                 color="green"
                 tooltip="Procentuální úspěšnost v udržení poločasového vedení až do konce zápasu"
               />
-            </div>
-          </div>
-
-          {/* Recent Form */}
-          <div>
-            <h4 className="text-md font-semibold mb-3 text-gray-900 dark:text-white">
-              Poslední zápasy
-            </h4>
-            <div className="flex items-center justify-center gap-3">
-              <FormIndicator form={stats.recentForm} />
             </div>
           </div>
 

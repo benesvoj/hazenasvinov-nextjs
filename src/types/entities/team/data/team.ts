@@ -7,6 +7,7 @@ export interface Team {
   season_name?: string;
   is_active?: boolean;
   club_category_id?: string;
+  club_id?: string;
   logo_url?: string;
   short_name?: string;
   display_name?: string;
