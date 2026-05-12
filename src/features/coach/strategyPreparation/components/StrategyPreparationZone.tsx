@@ -6,9 +6,9 @@ import {Card, CardHeader, CardBody, Button, Tabs, Tab} from '@heroui/react';
 
 import {ClipboardDocumentListIcon, XMarkIcon} from '@heroicons/react/24/outline';
 
-import {useStrategyPreparation} from '@/hooks/coach/useStrategyPreparation';
-
 import {Match, Nullish} from '@/types';
+
+import {useStrategyPreparation} from '../hooks/useStrategyPreparation';
 
 import {TabWithHeadToHead, TabWithStrategy, TabWithVideos, TabWithPreviousMatches} from './';
 
@@ -23,7 +23,6 @@ export default function StrategyPreparationZone({
 }: StrategyPreparationZoneProps) {
   const [activeTab, setActiveTab] = useState('strategy');
 
-  // Use the custom hook for all business logic
   const {
     previousMatches,
     previousMatchesLoading,

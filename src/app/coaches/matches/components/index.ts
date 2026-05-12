@@ -1,13 +1,5 @@
 export {default as UpcomingMatchesCard} from './UpcomingMatchesCard';
 export {default as RecentResultsCard} from './RecentResultsCard';
-export {default as StrategyPreparationZone} from './StrategyPreparationZone';
 export {default as RecentMatchDetails} from './RecentMatchDetails';
-export {default as CompactVideoList} from './CompactVideoList';
 export {default as CoachMatchResultFlow} from './CoachMatchResultFlow';
-export {default as TabWithVideos} from './StrategyTabWithVideos';
-export {default as TabWithStrategy} from './StrategyTabWithInfo';
-export {default as OpponentMatchStatistics} from './OpponentMatchStatistics';
-export {default as HeadToHeadStatistics} from './HeadToHeadStatistics';
-export {default as TabWithHeadToHead} from './StrategyTabWithHeadToHead';
-export {default as TabWithPreviousMatches} from './StrategyTabWithPreviousMatches';
 export {default as MatchStatisticsZone} from './MatchStatisticsZone';

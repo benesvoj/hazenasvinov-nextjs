@@ -44,6 +44,10 @@ export interface VideoFilters {
  * Used when displaying videos in match preparation contexts
  */
 export interface VideoWithMatch extends VideoSchema {
+  seasons?: {
+    id: string;
+    name: string;
+  };
   match?: {
     id: string;
     date: string;

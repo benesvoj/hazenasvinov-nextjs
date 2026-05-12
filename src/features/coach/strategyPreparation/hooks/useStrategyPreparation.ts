@@ -166,6 +166,7 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
           *,
           categories(id, name),
           clubs(id, name, short_name),
+          seasons(id, name),
           match_videos(
             match_id,
             match:matches(
@@ -228,7 +229,7 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     }
   }, []);
 
-  // Process video to include match information
+  // Process video to include match and season information
   const processedVideos = useMemo(() => {
     return opponentVideos.map((video) => {
       const matchVideo = video.match_videos?.[0];
@@ -236,6 +237,7 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
 
       return {
         ...video,
+        seasons: video.seasons ? {id: video.seasons.id, name: video.seasons.name} : undefined,
         match: match
           ? {
               id: match.id,
@@ -267,24 +269,31 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     });
   }, [opponentVideos]);
 
-  // Filter video by opponent team name if no club ID is available
+  // Filter video by opponent team name if no club ID is available, then sort by recording_date desc
   const filteredOpponentVideos = useMemo(() => {
+    let videos = processedVideos;
+
     if (!opponentTeam?.name || opponentClubId) {
-      return processedVideos;
+      videos = processedVideos;
+    } else {
+      const teamName = opponentTeam.name.toLowerCase();
+      videos = processedVideos.filter((video) => {
+        const title = video.title?.toLowerCase() || '';
+        const description = video.description?.toLowerCase() || '';
+        const clubName = video.clubs?.name?.toLowerCase() || '';
+
+        return (
+          title.includes(teamName) || description.includes(teamName) || clubName.includes(teamName)
+        );
+      });
     }
 
-    const teamName = opponentTeam.name.toLowerCase();
-    const filtered = processedVideos.filter((video) => {
-      const title = video.title?.toLowerCase() || '';
-      const description = video.description?.toLowerCase() || '';
-      const clubName = video.clubs?.name?.toLowerCase() || '';
-
-      return (
-        title.includes(teamName) || description.includes(teamName) || clubName.includes(teamName)
-      );
+    return [...videos].sort((a, b) => {
+      if (!a.recording_date && !b.recording_date) return 0;
+      if (!a.recording_date) return 1;
+      if (!b.recording_date) return -1;
+      return new Date(b.recording_date).getTime() - new Date(a.recording_date).getTime();
     });
-
-    return filtered;
   }, [processedVideos, opponentTeam?.name, opponentClubId]);
 
   // Fetch video when match is selected and club ID is available

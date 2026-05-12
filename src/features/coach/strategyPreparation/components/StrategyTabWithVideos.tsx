@@ -1,11 +1,11 @@
-import {Team, VideoSchema} from '@/types';
+import {Team, VideoWithMatch} from '@/types';
 
 import {CompactVideoList} from '.';
 
 interface TabWithVideosProps {
   videosError: string | null;
   videosLoading: boolean;
-  filteredOpponentVideos: VideoSchema[];
+  filteredOpponentVideos: VideoWithMatch[];
   opponentTeam: Team | null;
 }
 export default function StrategyTabWithVideos({
