@@ -321,6 +321,23 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     fetchOpponentVideos,
   ]);
 
+  const refetchVideos = useCallback(() => {
+    if (selectedMatch?.category_id && !clubIdLoading) {
+      if (opponentClubId) {
+        fetchOpponentVideos({
+          club_id: opponentClubId,
+          category_id: selectedMatch.category_id,
+          is_active: true,
+        });
+      } else {
+        fetchOpponentVideos({
+          category_id: selectedMatch.category_id,
+          is_active: true,
+        });
+      }
+    }
+  }, [selectedMatch?.category_id, opponentClubId, clubIdLoading, fetchOpponentVideos]);
+
   return {
     // Previous matches
     previousMatches,
@@ -337,6 +354,7 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     filteredOpponentVideos,
     videosLoading,
     videosError,
+    refetchVideos,
 
     // Opponent info
     opponentTeam,
