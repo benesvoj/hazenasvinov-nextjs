@@ -1,0 +1,162 @@
+<style>
+.mv-header{display:flex;align-items:center;gap:10px;padding:0 0 1.25rem;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.25rem}
+.mv-title{font-size:18px;font-weight:500;color:var(--color-text-primary);margin:0}
+.mv-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem}
+.mv-chip{font-size:12px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;white-space:nowrap}
+.mv-chip.active{background:var(--color-background-info);color:var(--color-text-info);border-color:transparent}
+.mv-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px;display:grid;grid-template-columns:56px 1fr auto;gap:0 16px;align-items:center}
+.mv-card:hover{border-color:var(--color-border-secondary)}
+.mv-thumb{width:56px;height:40px;background:var(--color-background-tertiary);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+.mv-thumb i{font-size:18px;color:var(--color-text-secondary)}
+.mv-thumb:hover i{color:var(--color-text-primary)}
+.mv-body{min-width:0}
+.mv-teams{font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mv-score-main{font-size:20px;font-weight:500;color:var(--color-text-primary);margin-right:6px}
+.mv-score-ht{font-size:13px;color:var(--color-text-secondary)}
+.mv-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px}
+.mv-badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:400}
+.mv-badge.season{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.mv-badge.half{background:var(--color-background-info);color:var(--color-text-info)}
+.mv-badge.full{background:var(--color-background-success);color:var(--color-text-success)}
+.mv-date{font-size:12px;color:var(--color-text-tertiary)}
+.mv-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.mv-btn{width:32px;height:32px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-secondary)}
+.mv-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.mv-play-btn{border-color:var(--color-border-info);color:var(--color-text-info)}
+.mv-play-btn:hover{background:var(--color-background-info)}
+.mv-group-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin:1.5rem 0 .5rem}
+.mv-pair{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:10px}
+.mv-pair .mv-card{border:none;border-radius:0;margin:0}
+.mv-pair .mv-card+.mv-card{border-top:0.5px solid var(--color-border-tertiary)}
+.mv-pair-tag{font-size:11px;color:var(--color-text-tertiary);padding:5px 1.25rem;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;gap:12px;align-items:center}
+.mv-pair-tag strong{color:var(--color-text-secondary);font-weight:500}
+</style>
+
+<h2 class="sr-only">Videa zápasů TJ Sokol Ostopovice — redesign návrhu</h2>
+
+<div style="padding:1rem 0">
+  <div class="mv-header">
+    <i class="ti ti-video" style="font-size:20px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+    <h2 class="mv-title" style="margin:0">Videa týmu TJ Sokol Ostopovice</h2>
+    <span style="margin-left:auto;font-size:13px;color:var(--color-text-tertiary)">5 videí</span>
+  </div>
+
+  <div class="mv-filters">
+    <button class="mv-chip active">Vše</button>
+    <button class="mv-chip">2025/2026</button>
+    <button class="mv-chip">2017/2018</button>
+    <button class="mv-chip">2016/2017</button>
+    <button class="mv-chip">1. poločas</button>
+    <button class="mv-chip">2. poločas</button>
+    <button class="mv-chip">Celé utkání</button>
+  </div>
+
+  <p class="mv-group-label">Říjen 2025</p>
+
+  <div class="mv-pair">
+    <div class="mv-pair-tag">
+      <i class="ti ti-calendar" style="font-size:13px" aria-hidden="true"></i>
+      <strong>Ostopovice vs Svinov</strong>
+      <span>12. 10. 2025</span>
+      <span style="margin-left:auto;font-size:12px;font-weight:500;color:var(--color-text-secondary)">17:17 <span style="font-weight:400;color:var(--color-text-tertiary)">(10:8)</span></span>
+    </div>
+    <div class="mv-card">
+      <div class="mv-thumb"><i class="ti ti-player-play" aria-hidden="true"></i></div>
+      <div class="mv-body">
+        <p class="mv-teams">TJ Sokol Ostopovice — TJ Sokol Svinov</p>
+        <div class="mv-meta">
+          <span class="mv-badge season">2025/2026</span>
+          <span class="mv-badge half">1. poločas</span>
+          <span class="mv-date">Ziegler M.</span>
+        </div>
+      </div>
+      <div class="mv-actions">
+        <button class="mv-btn" title="Kopírovat odkaz"><i class="ti ti-link" aria-hidden="true"></i></button>
+        <button class="mv-btn mv-play-btn" title="Přehrát"><i class="ti ti-player-play" aria-hidden="true"></i></button>
+        <button class="mv-btn" title="Upravit"><i class="ti ti-edit" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div class="mv-card">
+      <div class="mv-thumb"><i class="ti ti-player-play" aria-hidden="true"></i></div>
+      <div class="mv-body">
+        <p class="mv-teams">TJ Sokol Ostopovice — TJ Sokol Svinov</p>
+        <div class="mv-meta">
+          <span class="mv-badge season">2025/2026</span>
+          <span class="mv-badge half">2. poločas</span>
+          <span class="mv-date">Ziegler M.</span>
+        </div>
+      </div>
+      <div class="mv-actions">
+        <button class="mv-btn" title="Kopírovat odkaz"><i class="ti ti-link" aria-hidden="true"></i></button>
+        <button class="mv-btn mv-play-btn" title="Přehrát"><i class="ti ti-player-play" aria-hidden="true"></i></button>
+        <button class="mv-btn" title="Upravit"><i class="ti ti-edit" aria-hidden="true"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <p class="mv-group-label">Červen 2018</p>
+
+  <div class="mv-pair">
+    <div class="mv-pair-tag">
+      <i class="ti ti-calendar" style="font-size:13px" aria-hidden="true"></i>
+      <strong>Ostopovice vs Svinov</strong>
+      <span>2. 6. 2018</span>
+      <span style="margin-left:auto;font-size:12px;font-weight:500;color:var(--color-text-secondary)">20:13 <span style="font-weight:400;color:var(--color-text-tertiary)">(11:5)</span></span>
+    </div>
+    <div class="mv-card">
+      <div class="mv-thumb"><i class="ti ti-player-play" aria-hidden="true"></i></div>
+      <div class="mv-body">
+        <p class="mv-teams">TJ Sokol Ostopovice — TJ Sokol Svinov</p>
+        <div class="mv-meta">
+          <span class="mv-badge season">2017/2018</span>
+          <span class="mv-badge half">1. poločas</span>
+          <span class="mv-date">Kotlář</span>
+        </div>
+      </div>
+      <div class="mv-actions">
+        <button class="mv-btn" title="Kopírovat odkaz"><i class="ti ti-link" aria-hidden="true"></i></button>
+        <button class="mv-btn mv-play-btn" title="Přehrát"><i class="ti ti-player-play" aria-hidden="true"></i></button>
+        <button class="mv-btn" title="Upravit"><i class="ti ti-edit" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div class="mv-card">
+      <div class="mv-thumb"><i class="ti ti-player-play" aria-hidden="true"></i></div>
+      <div class="mv-body">
+        <p class="mv-teams">TJ Sokol Ostopovice — TJ Sokol Svinov</p>
+        <div class="mv-meta">
+          <span class="mv-badge season">2017/2018</span>
+          <span class="mv-badge half">2. poločas</span>
+          <span class="mv-date">Kotlář</span>
+        </div>
+      </div>
+      <div class="mv-actions">
+        <button class="mv-btn" title="Kopírovat odkaz"><i class="ti ti-link" aria-hidden="true"></i></button>
+        <button class="mv-btn mv-play-btn" title="Přehrát"><i class="ti ti-player-play" aria-hidden="true"></i></button>
+        <button class="mv-btn" title="Upravit"><i class="ti ti-edit" aria-hidden="true"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <p class="mv-group-label">Září 2016</p>
+
+  <div class="mv-card" style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg)">
+    <div class="mv-thumb"><i class="ti ti-player-play" aria-hidden="true"></i></div>
+    <div class="mv-body">
+      <p class="mv-teams">TJ Sokol Svinov — TJ Sokol Ostopovice</p>
+      <div style="display:flex;align-items:baseline;gap:6px;margin:2px 0 4px">
+        <span style="font-size:18px;font-weight:500;color:var(--color-text-primary)">22:18</span>
+        <span style="font-size:12px;color:var(--color-text-tertiary)">(13:10)</span>
+      </div>
+      <div class="mv-meta">
+        <span class="mv-badge season">2016/2017</span>
+        <span class="mv-badge full">Celé utkání</span>
+        <span class="mv-date">11. 9. 2016 · Paško</span>
+      </div>
+    </div>
+    <div class="mv-actions">
+      <button class="mv-btn" title="Kopírovat odkaz"><i class="ti ti-link" aria-hidden="true"></i></button>
+      <button class="mv-btn mv-play-btn" title="Přehrát"><i class="ti ti-player-play" aria-hidden="true"></i></button>
+      <button class="mv-btn" title="Upravit"><i class="ti ti-edit" aria-hidden="true"></i></button>
+    </div>
+  </div>
+</div>

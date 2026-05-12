@@ -2,14 +2,14 @@
 
 import React, {useState} from 'react';
 
-import {Card, CardHeader, CardBody, Button, Tabs, Tab} from '@heroui/react';
+import {Button, Card, CardBody, CardHeader, Tab, Tabs} from '@heroui/react';
 
 import {ClipboardDocumentListIcon, XMarkIcon} from '@heroicons/react/24/outline';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
-import {useRecordingForm, useRecordingsCrud, type RecordingSchema} from '@/features/recordings';
+import {type RecordingSchema, useRecordingForm, useRecordingsCrud} from '@/features/recordings';
 import {RecordingFormModal} from '@/features/recordings/components/RecordingFormModal';
 import {transformToRecordingInsert} from '@/features/recordings/utils';
 import {useModalWithItem} from '@/hooks';
@@ -17,7 +17,12 @@ import {Match, Nullish} from '@/types';
 
 import {useStrategyPreparation} from '../hooks/useStrategyPreparation';
 
-import {TabWithHeadToHead, TabWithStrategy, TabWithVideos, TabWithPreviousMatches} from './';
+import {
+  TabWithHeadToHead,
+  TabWithPreviousMatches,
+  TabWithStrategy,
+  TabWithVideosTimeline,
+} from './';
 
 interface StrategyPreparationZoneProps {
   selectedMatch: Match | Nullish;
@@ -42,6 +47,7 @@ export default function StrategyPreparationZone({
     filteredOpponentVideos,
     videosLoading,
     videosError,
+    opponentClubIdMissing,
     refetchVideos,
     opponentTeam,
   } = useStrategyPreparation(selectedMatch);
@@ -131,12 +137,13 @@ export default function StrategyPreparationZone({
               <TabWithStrategy />
             </Tab>
 
-            <Tab key="videos" title="Videa soupeře">
-              <TabWithVideos
+            <Tab key="videos-timeline" title="Přehled videí">
+              <TabWithVideosTimeline
+                videos={filteredOpponentVideos}
+                loading={videosLoading}
                 videosError={videosError}
-                videosLoading={videosLoading}
-                filteredOpponentVideos={filteredOpponentVideos}
                 opponentTeam={opponentTeam}
+                opponentClubIdMissing={opponentClubIdMissing}
                 onEdit={handleEdit}
               />
             </Tab>

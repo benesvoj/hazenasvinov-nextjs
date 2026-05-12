@@ -93,76 +93,25 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     return Array.from(teamIds);
   }, [headToHeadMatches]);
 
-  // Opponent club ID for video filtering
-  const [opponentClubId, setOpponentClubId] = useState<string | null>(null);
-  const [clubIdLoading, setClubIdLoading] = useState(false);
-
-  // Fetch club ID from club_category_id
-  useEffect(() => {
-    const fetchClubId = async () => {
-      if (
-        !opponentTeam?.club_category_id ||
-        opponentTeam.club_category_id === 'undefined' ||
-        opponentTeam.club_category_id === 'null'
-      ) {
-        setOpponentClubId(null);
-        return;
-      }
-
-      try {
-        setClubIdLoading(true);
-
-        const {data: clubCategory, error} = await supabase
-          .from('club_categories')
-          .select('club_id')
-          .eq('id', opponentTeam.club_category_id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching club ID:', error);
-          setOpponentClubId(null);
-        } else {
-          setOpponentClubId(clubCategory?.club_id || null);
-        }
-      } catch (error) {
-        console.error('Error fetching club ID:', error);
-        setOpponentClubId(null);
-      } finally {
-        setClubIdLoading(false);
-      }
-    };
-
-    fetchClubId();
-  }, [opponentTeam?.club_category_id]);
+  // club_id is populated directly from the match join — no async lookup needed
+  const opponentClubId = opponentTeam?.club_id ?? null;
+  const opponentClubIdMissing = !!opponentTeam && opponentClubId === null;
 
   // Videos state and fetching
   const [opponentVideos, setOpponentVideos] = useState<any[]>([]);
   const [videosLoading, setVideosLoading] = useState(false);
   const [videosError, setVideosError] = useState<string | null>(null);
 
-  // Fetch video for opponent club
-  const fetchOpponentVideos = useCallback(async (filters: any) => {
-    try {
-      setVideosLoading(true);
-      setVideosError(null);
+  const fetchOpponentVideos = useCallback(
+    async (clubId: string, categoryId: string) => {
+      try {
+        setVideosLoading(true);
+        setVideosError(null);
 
-      if (filters.club_id && (filters.club_id === 'undefined' || filters.club_id === 'null')) {
-        setOpponentVideos([]);
-        return;
-      }
-
-      if (
-        filters.category_id &&
-        (filters.category_id === 'undefined' || filters.category_id === 'null')
-      ) {
-        setOpponentVideos([]);
-        return;
-      }
-
-      let query = supabase
-        .from('videos')
-        .select(
-          `
+        const {data: videos, error} = await supabase
+          .from('videos')
+          .select(
+            `
           *,
           categories(id, name),
           clubs(id, name, short_name),
@@ -202,34 +151,26 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
             )
           )
         `
-        )
-        .eq('is_active', true);
+          )
+          .eq('is_active', true)
+          .eq('club_id', clubId)
+          .eq('category_id', categoryId);
 
-      if (filters.club_id) {
-        query = query.eq('club_id', filters.club_id);
+        if (error) throw error;
+
+        setOpponentVideos(videos || []);
+      } catch (error) {
+        console.error('Error fetching opponent videos:', error);
+        setVideosError(error instanceof Error ? error.message : 'Failed to fetch videos');
+        setOpponentVideos([]);
+      } finally {
+        setVideosLoading(false);
       }
+    },
+    [supabase]
+  );
 
-      if (filters.category_id) {
-        query = query.eq('category_id', filters.category_id);
-      }
-
-      const {data: videos, error} = await query;
-
-      if (error) {
-        throw error;
-      }
-
-      setOpponentVideos(videos || []);
-    } catch (error) {
-      console.error('Error fetching opponent video:', error);
-      setVideosError(error instanceof Error ? error.message : 'Failed to fetch video');
-      setOpponentVideos([]);
-    } finally {
-      setVideosLoading(false);
-    }
-  }, []);
-
-  // Process video to include match and season information
+  // Process videos to include match and season information
   const processedVideos = useMemo(() => {
     return opponentVideos.map((video) => {
       const matchVideo = video.match_videos?.[0];
@@ -245,16 +186,16 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
                 id: match.home_team.id,
                 name: match.home_team.club_category?.club?.name || 'Unknown Team',
                 short_name:
-                  match.home_team.team_suffix ||
                   match.home_team.club_category?.club?.short_name ||
+                  match.home_team.team_suffix ||
                   'Unknown',
               },
               away_team: {
                 id: match.away_team.id,
                 name: match.away_team.club_category?.club?.name || 'Unknown Team',
                 short_name:
-                  match.away_team.team_suffix ||
                   match.away_team.club_category?.club?.short_name ||
+                  match.away_team.team_suffix ||
                   'Unknown',
               },
               home_score: match.home_score,
@@ -269,74 +210,28 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     });
   }, [opponentVideos]);
 
-  // Filter video by opponent team name if no club ID is available, then sort by recording_date desc
-  const filteredOpponentVideos = useMemo(() => {
-    let videos = processedVideos;
+  const filteredOpponentVideos = useMemo(
+    () =>
+      [...processedVideos].sort((a, b) => {
+        if (!a.recording_date && !b.recording_date) return 0;
+        if (!a.recording_date) return 1;
+        if (!b.recording_date) return -1;
+        return new Date(b.recording_date).getTime() - new Date(a.recording_date).getTime();
+      }),
+    [processedVideos]
+  );
 
-    if (!opponentTeam?.name || opponentClubId) {
-      videos = processedVideos;
-    } else {
-      const teamName = opponentTeam.name.toLowerCase();
-      videos = processedVideos.filter((video) => {
-        const title = video.title?.toLowerCase() || '';
-        const description = video.description?.toLowerCase() || '';
-        const clubName = video.clubs?.name?.toLowerCase() || '';
-
-        return (
-          title.includes(teamName) || description.includes(teamName) || clubName.includes(teamName)
-        );
-      });
-    }
-
-    return [...videos].sort((a, b) => {
-      if (!a.recording_date && !b.recording_date) return 0;
-      if (!a.recording_date) return 1;
-      if (!b.recording_date) return -1;
-      return new Date(b.recording_date).getTime() - new Date(a.recording_date).getTime();
-    });
-  }, [processedVideos, opponentTeam?.name, opponentClubId]);
-
-  // Fetch video when match is selected and club ID is available
   useEffect(() => {
-    if (selectedMatch?.category_id && selectedMatch?.id && !clubIdLoading) {
-      if (opponentClubId) {
-        fetchOpponentVideos({
-          club_id: opponentClubId,
-          category_id: selectedMatch.category_id,
-          is_active: true,
-        });
-      } else {
-        fetchOpponentVideos({
-          category_id: selectedMatch.category_id,
-          is_active: true,
-        });
-      }
+    if (selectedMatch?.category_id && selectedMatch?.id && opponentClubId) {
+      fetchOpponentVideos(opponentClubId, selectedMatch.category_id);
     }
-  }, [
-    selectedMatch?.category_id,
-    selectedMatch?.id,
-    opponentClubId,
-    opponentTeam?.name,
-    clubIdLoading,
-    fetchOpponentVideos,
-  ]);
+  }, [selectedMatch?.category_id, selectedMatch?.id, opponentClubId, fetchOpponentVideos]);
 
   const refetchVideos = useCallback(() => {
-    if (selectedMatch?.category_id && !clubIdLoading) {
-      if (opponentClubId) {
-        fetchOpponentVideos({
-          club_id: opponentClubId,
-          category_id: selectedMatch.category_id,
-          is_active: true,
-        });
-      } else {
-        fetchOpponentVideos({
-          category_id: selectedMatch.category_id,
-          is_active: true,
-        });
-      }
+    if (selectedMatch?.category_id && opponentClubId) {
+      fetchOpponentVideos(opponentClubId, selectedMatch.category_id);
     }
-  }, [selectedMatch?.category_id, opponentClubId, clubIdLoading, fetchOpponentVideos]);
+  }, [selectedMatch?.category_id, opponentClubId, fetchOpponentVideos]);
 
   return {
     // Previous matches
@@ -354,6 +249,7 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
     filteredOpponentVideos,
     videosLoading,
     videosError,
+    opponentClubIdMissing,
     refetchVideos,
 
     // Opponent info

@@ -245,6 +245,7 @@ export function transformMatchWithTeamNames(
         short_name: homeShortName,
         is_own_club: homeIsOwnClub,
         logo_url: homeTeamDetails?.club_category?.club?.logo_url,
+        club_id: homeTeamDetails?.club_category?.club?.id,
       },
       away_team: {
         id: match.away_team_id,
@@ -252,6 +253,7 @@ export function transformMatchWithTeamNames(
         short_name: awayShortName,
         is_own_club: awayIsOwnClub,
         logo_url: awayTeamDetails?.club_category?.club?.logo_url,
+        club_id: awayTeamDetails?.club_category?.club?.id,
       },
       // Add top-level properties for filtering
       home_team_is_own_club: homeIsOwnClub,
@@ -267,6 +269,7 @@ export function transformMatchWithTeamNames(
         short_name: homeShortName,
         is_own_club: homeIsOwnClub,
         logo_url: match.home_team?.club_category?.club?.logo_url,
+        club_id: match.home_team?.club_category?.club?.id,
       },
       away_team: {
         id: match.away_team?.id,
@@ -274,6 +277,7 @@ export function transformMatchWithTeamNames(
         short_name: awayShortName,
         is_own_club: awayIsOwnClub,
         logo_url: match.away_team?.club_category?.club?.logo_url,
+        club_id: match.away_team?.club_category?.club?.id,
       },
       // Add top-level properties for filtering
       home_team_is_own_club: homeIsOwnClub,
