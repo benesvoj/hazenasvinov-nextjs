@@ -7,6 +7,7 @@ import {AppPageLayout} from '@/shared/components';
 
 import {useCoachRecordingsPageLogic} from '../hooks';
 
+import {RecordingFormModal} from './RecordingFormModal';
 import {RecordingsView} from './RecordingsView';
 
 export function CoachRecordingsContainer() {
@@ -18,33 +19,49 @@ export function CoachRecordingsContainer() {
   } = useAppData();
 
   return (
-    <AppPageLayout
-      isLoading={state.loading}
-      filters={
-        <RecordingFilters
-          filters={state.filters}
+    <>
+      <AppPageLayout
+        isLoading={state.loading}
+        filters={
+          <RecordingFilters
+            filters={state.filters}
+            categories={state.availableCategories}
+            clubs={clubs}
+            seasons={seasons}
+            onFiltersChange={(f) => {
+              state.setFilters(f);
+              state.setCurrentPage(1);
+            }}
+          />
+        }
+      >
+        <RecordingsView
+          recordings={state.recordings}
           categories={state.availableCategories}
+          loading={state.loading}
           clubs={clubs}
           seasons={seasons}
-          onFiltersChange={(f) => {
-            state.setFilters(f);
-            state.setCurrentPage(1);
-          }}
+          currentPage={state.currentPage}
+          totalPages={state.totalPages}
+          totalCount={state.totalCount}
+          itemsPerPage={20}
+          onEdit={state.handleEdit}
+          onPageChange={state.setCurrentPage}
         />
-      }
-    >
-      <RecordingsView
-        recordings={state.recordings}
-        categories={state.availableCategories}
-        loading={state.loading}
+      </AppPageLayout>
+
+      <RecordingFormModal
+        isOpen={state.formModal.isOpen}
+        onClose={state.formModal.closeAndClear}
+        onSubmit={state.handleFormSubmit}
+        formData={state.form.formData}
+        setFormData={state.form.setFormData}
+        mode={state.form.modalMode}
         clubs={clubs}
         seasons={seasons}
-        currentPage={state.currentPage}
-        totalPages={state.totalPages}
-        totalCount={state.totalCount}
-        itemsPerPage={20}
-        onPageChange={state.setCurrentPage}
+        categories={state.availableCategories}
+        isLoading={state.crudLoading}
       />
-    </AppPageLayout>
+    </>
   );
 }
