@@ -37,6 +37,7 @@ export default function StrategyTabWithPreviousMatches({
           <OpponentMatchStatistics
             matches={previousMatches}
             opponentTeamName={opponentTeam?.name || 'Soupeř'}
+            opponentTeamId={opponentTeam?.id || ''}
           />
 
           {/* Match List */}
