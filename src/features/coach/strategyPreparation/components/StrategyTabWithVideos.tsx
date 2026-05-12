@@ -1,3 +1,4 @@
+import {RecordingSchema} from '@/features/recordings';
 import {Team, VideoWithMatch} from '@/types';
 
 import {CompactVideoList} from '.';
@@ -7,12 +8,14 @@ interface TabWithVideosProps {
   videosLoading: boolean;
   filteredOpponentVideos: VideoWithMatch[];
   opponentTeam: Team | null;
+  onEdit?: (video: RecordingSchema) => void;
 }
 export default function StrategyTabWithVideos({
   videosError,
   videosLoading,
   filteredOpponentVideos,
   opponentTeam,
+  onEdit,
 }: TabWithVideosProps) {
   return (
     <div className="p-4">
@@ -28,6 +31,7 @@ export default function StrategyTabWithVideos({
         loading={videosLoading}
         title={`Videa týmu ${opponentTeam?.name || 'soupeře'}`}
         emptyMessage={`Žádná videa týmu ${opponentTeam?.name || 'soupeře'} nejsou k dispozici`}
+        onEdit={onEdit}
       />
     </div>
   );

@@ -6,10 +6,17 @@ import Image from 'next/image';
 
 import {Card, CardHeader, CardBody, Button} from '@heroui/react';
 
-import {VideoCameraIcon, PlayIcon, LinkIcon, CheckIcon} from '@heroicons/react/24/outline';
+import {
+  VideoCameraIcon,
+  PlayIcon,
+  LinkIcon,
+  CheckIcon,
+  PencilSquareIcon,
+} from '@heroicons/react/24/outline';
 
 import {LoadingSpinner} from '@/components';
 import {useCopyRecordingUrl} from '@/features/recordings';
+import type {RecordingSchema} from '@/features/recordings';
 import {formatDateString} from '@/helpers';
 import {openInNewTab} from '@/shared/browser';
 import {VideoWithMatch} from '@/types';
@@ -19,6 +26,7 @@ interface CompactVideoListProps {
   loading: boolean;
   title: string;
   emptyMessage?: string;
+  onEdit?: (video: RecordingSchema) => void;
 }
 
 export default function CompactVideoList({
@@ -26,6 +34,7 @@ export default function CompactVideoList({
   loading,
   title,
   emptyMessage = 'Žádná videa k dispozici',
+  onEdit,
 }: CompactVideoListProps) {
   const [copiedVideoId, setCopiedVideoId] = useState<string | null>(null);
 
@@ -160,9 +169,25 @@ export default function CompactVideoList({
                         variant="light"
                         className="shrink-0 w-8 h-8 sm:w-10 sm:h-10"
                         title="Přehrát video"
+                        onPress={() => openInNewTab(video.youtube_url)}
                       >
                         <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                       </Button>
+
+                      {/* Edit button */}
+                      {onEdit && (
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          color="primary"
+                          className="shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+                          title="Upravit video"
+                          onPress={() => onEdit(video as unknown as RecordingSchema)}
+                        >
+                          <PencilSquareIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))
