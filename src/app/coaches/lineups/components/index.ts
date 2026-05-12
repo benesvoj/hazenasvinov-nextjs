@@ -1,3 +1,4 @@
+export {default as CoachLineupsContainer} from './CoachLineupsContainer';
 export {default as AddMemberModal} from './LineupMemberAssignDialog';
 export {default as CreateMemberModal} from './CreateMemberModal';
 export * from './LineupModal';
