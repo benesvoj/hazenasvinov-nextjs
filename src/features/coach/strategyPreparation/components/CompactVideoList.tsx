@@ -17,6 +17,7 @@ import {
 import {LoadingSpinner} from '@/components';
 import {useCopyRecordingUrl} from '@/features/recordings';
 import type {RecordingSchema} from '@/features/recordings';
+import {getMatchPartLabel} from '@/features/recordings/utils/matchPartLabel';
 import {formatDateString} from '@/helpers';
 import {openInNewTab} from '@/shared/browser';
 import {VideoWithMatch} from '@/types';
@@ -138,6 +139,11 @@ export default function CompactVideoList({
                         {video.seasons?.name && (
                           <span className="text-xs text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 px-1.5 py-0.5 rounded">
                             {video.seasons.name}
+                          </span>
+                        )}
+                        {video.match_part && (
+                          <span className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded font-medium">
+                            {getMatchPartLabel(video.match_part)}
                           </span>
                         )}
                       </div>

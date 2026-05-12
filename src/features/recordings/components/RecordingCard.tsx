@@ -14,6 +14,7 @@ import {translations} from '@/lib/translations';
 
 import {HStack} from '@/components';
 import {useCopyRecordingUrl} from '@/features/recordings';
+import {getMatchPartLabel} from '@/features/recordings/utils/matchPartLabel';
 import {formatDateString} from '@/helpers';
 import {openInNewTab} from '@/shared/browser';
 import {Category, Club, Season} from '@/types';
@@ -70,6 +71,11 @@ export const RecordingCard = memo(function RecordingCard({
                   (recording.season_id
                     ? `Sezóna ${recording.season_id.slice(0, 8)}...`
                     : 'Neznámá sezóna')}
+              </Chip>
+            )}
+            {recording.match_part && (
+              <Chip size="sm" variant="solid" color="warning" className="shadow-md">
+                {getMatchPartLabel(recording.match_part)}
               </Chip>
             )}
           </div>

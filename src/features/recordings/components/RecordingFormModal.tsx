@@ -116,6 +116,19 @@ export function RecordingFormModal({
             label={translations.seasons.labels.season}
             placeholder={translations.seasons.placeholders.season}
           />
+
+          <Choice
+            items={Object.entries(t.matchPartOptions).map(([key, label]) => ({key, label}))}
+            value={formData.match_part ?? ''}
+            onChange={(key) =>
+              setFormData({
+                ...formData,
+                match_part: (key as RecordingFormData['match_part']) ?? null,
+              })
+            }
+            label={t.labels.matchPart}
+            placeholder={t.placeholders.matchPart}
+          />
         </div>
       </div>
 

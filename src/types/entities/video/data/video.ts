@@ -1,5 +1,7 @@
 import {VideoInsert, VideoSchema} from '@/types';
 
+export type VideoMatchPart = 'first_half' | 'second_half' | 'overtime';
+
 export interface Video extends VideoSchema {
   category?: {
     id: string;
@@ -29,6 +31,7 @@ export interface VideoFormData {
   recording_date: string | null;
   season_id: string | null;
   is_active: boolean;
+  match_part: VideoMatchPart | null;
 }
 
 export interface VideoFilters {
