@@ -169,6 +169,7 @@ export default function CompactVideoList({
                         variant="light"
                         className="shrink-0 w-8 h-8 sm:w-10 sm:h-10"
                         title="Přehrát video"
+                        onPress={() => openInNewTab(video.youtube_url)}
                       >
                         <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                       </Button>
