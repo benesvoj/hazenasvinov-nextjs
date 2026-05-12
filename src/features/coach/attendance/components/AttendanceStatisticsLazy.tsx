@@ -10,7 +10,7 @@ import {match} from 'ts-pattern';
 
 import {translations} from '@/lib/translations/index';
 
-import {Heading, LoadingSpinner} from '@/components';
+import {Grid, Heading, LoadingSpinner} from '@/components';
 import {useFetchAttendanceStatistics} from '@/hooks';
 import {hasItems} from '@/utils';
 
@@ -96,7 +96,7 @@ export default function AttendanceStatisticsLazy({categoryId, seasonId}: Props) 
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <Grid columns={4} gap="md">
         <SummarySessionCard
           title={translations.attendance.completedSessions}
           value={summary.completed_sessions}
@@ -113,7 +113,7 @@ export default function AttendanceStatisticsLazy({categoryId, seasonId}: Props) 
           title={translations.attendance.cancelledSessions}
           value={summary.cancelled_sessions}
         />
-      </div>
+      </Grid>
 
       {/* Insights - only show if there are insights */}
       {hasItems(insights) && (

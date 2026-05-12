@@ -1,3 +1,5 @@
+import {useEffect, useRef} from 'react';
+
 import {translations} from '@/lib/translations/index';
 
 import {MemberTableTab, renderInternalMemberCell} from '@/components';
@@ -11,6 +13,9 @@ interface MembersInternalSectionProps {
   // Data context
   categoryId?: string | null; // filter by category (coach portal)
   categoriesData: Category[] | null;
+
+  /** Increment to trigger a data refresh without remounting. */
+  refreshTrigger?: number;
 
   // Search & filter (optional — coach portal may not expose all)
   searchTerm?: string;
@@ -35,6 +40,7 @@ interface MembersInternalSectionProps {
 export const MembersInternalSection = ({
   categoryId,
   categoriesData,
+  refreshTrigger,
   searchTerm,
   filters,
   onPayment,
@@ -46,11 +52,19 @@ export const MembersInternalSection = ({
   ariaLabel,
   pageSize,
 }: MembersInternalSectionProps) => {
-  const {data, loading, pagination, goToPage} = useFetchMembersInternal({
+  const {data, loading, pagination, goToPage, refresh} = useFetchMembersInternal({
     search: searchTerm,
     filters: {...filters, category_id: categoryId ?? filters?.category_id},
     limit: pageSize,
   });
+
+  const refreshRef = useRef(refresh);
+  useEffect(() => {
+    refreshRef.current = refresh;
+  }, [refresh]);
+  useEffect(() => {
+    if (refreshTrigger) refreshRef.current();
+  }, [refreshTrigger]);
 
   const categories = useCategoryMap(categoriesData);
   const t = translations.members;

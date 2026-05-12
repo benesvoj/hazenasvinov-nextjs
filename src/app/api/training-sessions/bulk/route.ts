@@ -1,6 +1,7 @@
 import {NextRequest} from 'next/server';
 
 import {errorResponse, successResponse, withAuth} from '@/utils/supabase/apiHelpers';
+import {hasCategoryAccess, isAdmin} from '@/utils/supabase/coachAuth';
 
 import {AttendanceStatuses} from '@/enums';
 import {DB_TABLE as memberAttendanceTable} from '@/queries/memberAttendance';
@@ -16,6 +17,15 @@ export async function POST(request: NextRequest) {
 
     if (isEmpty(sessions)) {
       return errorResponse('No training sessions provided', 400);
+    }
+
+    const adminUser = await isAdmin(supabase, user.id);
+    if (!adminUser) {
+      const categoryIds = [...new Set(sessions.map((s) => s.category_id).filter(Boolean))];
+      for (const catId of categoryIds) {
+        const allowed = await hasCategoryAccess(supabase, user.id, catId as string);
+        if (!allowed) return errorResponse('Forbidden', 403);
+      }
     }
 
     const timestamp = new Date().toISOString();

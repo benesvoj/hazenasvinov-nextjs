@@ -75,7 +75,7 @@ export default function CoachMembersContainer() {
         }
       >
         <MembersInternalSection
-          key={state.refreshKey}
+          refreshTrigger={state.refreshKey}
           categoriesData={categoriesData}
           categoryId={state.selectedCategory}
           ariaLabel={translations.members.table.ariaLabel}

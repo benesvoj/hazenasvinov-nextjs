@@ -2,6 +2,9 @@
 
 import {useState} from 'react';
 
+import {translations} from '@/lib/translations';
+
+import {showToast} from '@/components';
 import {useUser} from '@/contexts';
 import {ModalMode} from '@/enums';
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
@@ -9,9 +12,12 @@ import {
   useCategoryLineupForm,
   useCategoryLineups,
   useFetchCategoryLineups,
+  useModal,
   useModalWithItem,
 } from '@/hooks';
 import {CategoryLineup} from '@/types';
+
+const t = translations.lineups.responseMessages;
 
 export function useCoachLineupsPageLogic() {
   const [selectedLineup, setSelectedLineup] = useState<CategoryLineup | null>(null);
@@ -38,7 +44,8 @@ export function useCoachLineupsPageLogic() {
     validateForm,
   } = useCategoryLineupForm();
 
-  const lineupModal = useModalWithItem<CategoryLineup>();
+  const lineupModalState = useModal();
+  const lineupModal = {...lineupModalState, closeAndClear: lineupModalState.onClose};
   const deleteModal = useModalWithItem<string>();
 
   const handleAddLineup = () => {
@@ -69,17 +76,15 @@ export function useCoachLineupsPageLogic() {
       await deleteLineup(deleteModal.selectedItem);
       await refetch();
       deleteModal.closeAndClear();
-    } catch (err) {
-      console.error('Error deleting lineup:', err);
+    } catch {
+      showToast.danger(t.deleteError);
     }
   };
 
   const handleSubmitLineup = async () => {
-    const {valid, errors} = validateForm();
-    if (!valid) {
-      console.error('Validation errors:', errors);
-      return;
-    }
+    const {valid} = validateForm();
+    if (!valid) return;
+
     try {
       if (modalMode === ModalMode.EDIT && selectedLineupId) {
         await updateLineup(selectedLineupId.id, formData);
@@ -93,8 +98,8 @@ export function useCoachLineupsPageLogic() {
       }
       await refetch();
       lineupModal.closeAndClear();
-    } catch (error) {
-      console.error(error);
+    } catch {
+      showToast.danger(modalMode === ModalMode.EDIT ? t.updateError : t.createError);
     }
   };
 

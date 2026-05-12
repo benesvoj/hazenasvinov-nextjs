@@ -1,6 +1,7 @@
 import {NextRequest} from 'next/server';
 
 import {errorResponse, successResponse, withAuth} from '@/utils/supabase/apiHelpers';
+import {hasCategoryAccess, isAdmin} from '@/utils/supabase/coachAuth';
 
 import {generateInsights, generateRecommendations} from '@/helpers/attendance/helpers';
 
@@ -15,6 +16,11 @@ export async function GET(request: NextRequest) {
   }
 
   return withAuth(async (user, supabase) => {
+    const adminUser = await isAdmin(supabase, user.id);
+    if (!adminUser) {
+      const allowed = await hasCategoryAccess(supabase, user.id, categoryId);
+      if (!allowed) return errorResponse('Forbidden', 403);
+    }
     const [summaryResult, memberStatsResult, trendsResult] = await Promise.all([
       supabase
         .from('attendance_statistics_summary')

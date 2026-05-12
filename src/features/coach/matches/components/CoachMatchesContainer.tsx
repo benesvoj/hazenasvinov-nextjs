@@ -28,7 +28,6 @@ export default function CoachMatchesContainer() {
     <>
       <AppPageLayout
         isLoading={!state.isReady}
-        isUnderConstruction
         header={
           <Show when={hasMoreThanOne(state.availableCategories)}>
             <ContentCard padding="none">
