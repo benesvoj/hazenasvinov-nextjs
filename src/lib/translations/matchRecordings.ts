@@ -37,6 +37,7 @@ export const matchRecordingsTranslations = {
     first_half: '1. poločas',
     second_half: '2. poločas',
     overtime: 'Nastavení',
+    full_match: 'Celé utkání',
   },
   helpers: {
     youtubeUrl: 'Zadejte plnou URL adresu YouTube videa',

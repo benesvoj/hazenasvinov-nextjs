@@ -1,6 +1,6 @@
 import {VideoInsert, VideoSchema} from '@/types';
 
-export type VideoMatchPart = 'first_half' | 'second_half' | 'overtime';
+export type VideoMatchPart = 'first_half' | 'second_half' | 'overtime' | 'full_match';
 
 export interface Video extends VideoSchema {
   category?: {
