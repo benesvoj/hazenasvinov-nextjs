@@ -9,7 +9,7 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2026-03-11
+ * Last generated: 2026-05-12
  */
 
 export interface VideoSchema {
@@ -21,6 +21,7 @@ export interface VideoSchema {
   duration: string | null;
   id: string;
   is_active: boolean | null;
+  match_part: string | null;
   recording_date: string | null;
   season_id: string | null;
   thumbnail_url: string | null;

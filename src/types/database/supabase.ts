@@ -4502,6 +4502,7 @@ export type Database = {
           duration: string | null;
           id: string;
           is_active: boolean | null;
+          match_part: string | null;
           recording_date: string | null;
           season_id: string | null;
           thumbnail_url: string | null;
@@ -4520,6 +4521,7 @@ export type Database = {
           duration?: string | null;
           id?: string;
           is_active?: boolean | null;
+          match_part?: string | null;
           recording_date?: string | null;
           season_id?: string | null;
           thumbnail_url?: string | null;
@@ -4538,6 +4540,7 @@ export type Database = {
           duration?: string | null;
           id?: string;
           is_active?: boolean | null;
+          match_part?: string | null;
           recording_date?: string | null;
           season_id?: string | null;
           thumbnail_url?: string | null;

@@ -16,6 +16,7 @@ import {Category, Club, ColumnType, Season} from '@/types';
 
 import {useCopyRecordingUrl} from '../hooks';
 import type {RecordingSchema} from '../types';
+import {getMatchPartLabel} from '../utils/matchPartLabel';
 
 interface RecordingTableProps {
   recordings: RecordingSchema[];
@@ -98,6 +99,7 @@ export const RecordingTable = memo(function RecordingTable({
 
     return [
       {key: 'title', label: t.columns.title},
+      {key: 'match_part', label: t.columns.matchPart},
       {key: 'category_id', label: t.columns.category},
       {key: 'club_id', label: t.columns.club},
       {key: 'season_id', label: t.columns.season},
@@ -136,6 +138,8 @@ export const RecordingTable = memo(function RecordingTable({
               {recording.recording_date ? formatDateString(recording.recording_date) : '-'}
             </span>
           );
+        case 'match_part':
+          return <span>{getMatchPartLabel(recording.match_part)}</span>;
         case 'is_active':
           return (
             <span className={getStatusClasses(recording.is_active ?? false)}>

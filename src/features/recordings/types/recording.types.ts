@@ -1,3 +1,5 @@
+import type {VideoMatchPart} from '@/types';
+
 import type {RecordingSchema} from './recording.schema';
 
 export interface Recording extends RecordingSchema {
@@ -29,6 +31,7 @@ export interface RecordingFormData {
   recording_date: string | null;
   season_id: string | null;
   is_active: boolean;
+  match_part: VideoMatchPart | null;
 }
 
 export interface RecordingFilters {

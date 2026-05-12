@@ -19,6 +19,7 @@ export function transformToRecordingInsert(formData: VideoFormData): VideoInsert
     club_id: formData.club_id,
     season_id: formData.season_id,
     is_active: formData.is_active ?? true,
+    match_part: formData.match_part ?? null,
     duration: null,
     thumbnail_url: null,
     created_by: null,

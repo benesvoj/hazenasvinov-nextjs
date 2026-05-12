@@ -14,6 +14,7 @@ const initialFormData: RecordingFormData = {
   recording_date: '',
   season_id: '',
   is_active: true,
+  match_part: null,
 };
 
 export function useRecordingForm() {
