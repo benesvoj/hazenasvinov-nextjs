@@ -1,3 +1,4 @@
+export {default as CoachAttendanceContainer} from './CoachAttendanceContainer';
 export {default as TrainingSessionModal} from './TrainingSessionModal';
 export {default as TrainingSessionGenerator} from './TrainingSessionGenerator';
 export {default as TrainingSessionStatusBadge} from './TrainingSessionList/components/TrainingSessionStatusBadge';
