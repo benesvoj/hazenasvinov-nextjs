@@ -10,10 +10,10 @@ import {useUpcomingBirthdays} from '@/hooks/coach/useUpcomingBirthdays';
 
 import {translations} from '@/lib/translations';
 
-import {BirthdayCardItem} from '@/app/coaches/dashboard/components/BirthdayCardItem';
-
 import {ContentCard, HStack, VStack} from '@/components';
 import {getCount} from '@/utils';
+
+import {BirthdayCardItem} from './BirthdayCardItem';
 
 interface BirthdayCardProps {
   categoryId?: string;

@@ -10,10 +10,10 @@ import {usePlayerStats} from '@/hooks/entities/player/usePlayerStats';
 
 import {translations} from '@/lib/translations';
 
-import {YellowCardsCardItem} from '@/app/coaches/dashboard/components/YellowCardsCardItem';
-
 import {ContentCard, EmptyState, HStack, VStack} from '@/components';
 import {getCount, isEmpty} from '@/utils';
+
+import {YellowCardsCardItem} from './YellowCardsCardItem';
 
 interface YellowCardsCardProps {
   categoryId?: string;

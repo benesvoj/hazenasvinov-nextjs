@@ -4,10 +4,10 @@ import {Chip} from '@heroui/chip';
 
 import {CalendarIcon} from '@heroicons/react/24/outline';
 
-import {getAgeText, getDaysUntilColor, getDaysUntilText} from '@/app/coaches/dashboard/utils';
-
 import {HStack, VStack} from '@/components';
 import {formatDateString} from '@/helpers';
+
+import {getAgeText, getDaysUntilColor, getDaysUntilText} from '../utils';
 
 interface BirthdayCardItemProps {
   name: string;

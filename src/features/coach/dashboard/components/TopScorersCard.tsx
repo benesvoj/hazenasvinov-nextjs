@@ -10,10 +10,10 @@ import {usePlayerStats} from '@/hooks/entities/player/usePlayerStats';
 
 import {translations} from '@/lib/translations';
 
-import {TopScorersCardItem} from '@/app/coaches/dashboard/components/TopScorersCardItem';
-
 import {ContentCard, EmptyState, HStack, VStack} from '@/components';
 import {getCount, isEmpty} from '@/utils';
+
+import {TopScorersCardItem} from './TopScorersCardItem';
 
 interface TopScorersCardProps {
   categoryId?: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import {CoachLineupsContainer} from './components';
+import {CoachLineupsContainer} from '@/features/coach/lineups';
 
 export default function CoachesLineupsPage() {
   return <CoachLineupsContainer />;

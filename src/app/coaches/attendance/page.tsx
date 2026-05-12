@@ -1,6 +1,6 @@
 'use client';
 
-import {CoachAttendanceContainer} from './components';
+import {CoachAttendanceContainer} from '@/features/coach/attendance';
 
 export const dynamic = 'force-dynamic';
 

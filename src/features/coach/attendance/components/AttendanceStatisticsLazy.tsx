@@ -10,14 +10,14 @@ import {match} from 'ts-pattern';
 
 import {translations} from '@/lib/translations/index';
 
-import {AttendanceTrendsChart} from '@/app/coaches/attendance/components/AttendanceTrendsChart';
-import {MemberPerformanceTable} from '@/app/coaches/attendance/components/MemberPerformanceTable';
-import {RecommendationsPanel} from '@/app/coaches/attendance/components/RecommendationsPanel';
-import {SummarySessionCard} from '@/app/coaches/attendance/components/SummarySessionCard';
-
 import {Heading, LoadingSpinner} from '@/components';
 import {useFetchAttendanceStatistics} from '@/hooks';
 import {hasItems} from '@/utils';
+
+import {AttendanceTrendsChart} from './AttendanceTrendsChart';
+import {MemberPerformanceTable} from './MemberPerformanceTable';
+import {RecommendationsPanel} from './RecommendationsPanel';
+import {SummarySessionCard} from './SummarySessionCard';
 
 interface Props {
   categoryId: string;

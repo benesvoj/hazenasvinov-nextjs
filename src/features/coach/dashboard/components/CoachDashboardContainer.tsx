@@ -5,10 +5,10 @@ import MatchSchedule from '@/components/shared/match/MatchSchedule';
 import {translations} from '@/lib/translations';
 
 import {Choice, Grid, GridItem, Show} from '@/components';
+import {CoachMatchResultFlow} from '@/features/coach/matches';
 import {AppPageLayout} from '@/shared/components';
 import {hasMoreThanOne} from '@/utils';
 
-import CoachMatchResultFlow from '../../matches/components/CoachMatchResultFlow';
 import {useCoachDashboardPageLogic} from '../hooks/useCoachDashboardPageLogic';
 
 import {BirthdayCard, RedCardsCard, TopScorersCard, YellowCardsCard} from '.';

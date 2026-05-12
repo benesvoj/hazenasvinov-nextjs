@@ -8,11 +8,11 @@ import {XCircleIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
-import {RedCardsCardItem} from '@/app/coaches/dashboard/components/RedCardsCardItem';
-
 import {ContentCard, EmptyState, HStack, VStack} from '@/components';
 import {usePlayerStats} from '@/hooks';
 import {isEmpty} from '@/utils';
+
+import {RedCardsCardItem} from './RedCardsCardItem';
 
 interface RedCardsCardProps {
   categoryId?: string;
