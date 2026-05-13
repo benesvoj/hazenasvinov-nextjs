@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {Button, Checkbox, Input, Progress, Tooltip} from '@heroui/react';
 
@@ -16,7 +16,6 @@ import {translations} from '@/lib/translations';
 
 import {ContentCard, HStack} from '@/components';
 import {AttendanceStatuses} from '@/enums';
-import {MemberHistoryEntry} from '@/hooks';
 import {BaseTrainingSession, MemberAttendanceWithMember, MemberSchema} from '@/types';
 
 import {getStatusColor} from '../helpers';
@@ -24,6 +23,15 @@ import {getStatusColor} from '../helpers';
 const t = translations.attendance;
 
 type FilterType = 'all' | AttendanceStatuses;
+
+export interface MemberHistoryEntry {
+  memberId: string;
+  sessions: Array<{
+    sessionId: string;
+    sessionDate: string;
+    status: 'present' | 'absent' | 'late' | 'excused' | null;
+  }>;
+}
 
 /** Narrows the MemberAttendanceWithMember type to have a guaranteed member. */
 interface AttendanceWithMember extends MemberAttendanceWithMember {
@@ -33,7 +41,7 @@ interface AttendanceWithMember extends MemberAttendanceWithMember {
 interface StatusButtonConfig {
   status: AttendanceStatuses;
   label: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   activeClass: string;
   filterActiveClass: string;
 }
@@ -41,7 +49,7 @@ interface StatusButtonConfig {
 const STATUS_BUTTONS: StatusButtonConfig[] = [
   {
     status: AttendanceStatuses.PRESENT,
-    label: t.enums.statuses.present,
+    label: translations.attendance.enums.statuses.present,
     icon: <CheckIcon className="w-3.5 h-3.5" />,
     activeClass:
       'bg-success-100 text-success-700 border-success-400 dark:bg-success-900/30 dark:text-success-400',
@@ -49,7 +57,7 @@ const STATUS_BUTTONS: StatusButtonConfig[] = [
   },
   {
     status: AttendanceStatuses.ABSENT,
-    label: t.enums.statuses.absent,
+    label: translations.attendance.enums.statuses.absent,
     icon: <XMarkIcon className="w-3.5 h-3.5" />,
     activeClass:
       'bg-danger-100 text-danger-700 border-danger-400 dark:bg-danger-900/30 dark:text-danger-400',
@@ -57,7 +65,7 @@ const STATUS_BUTTONS: StatusButtonConfig[] = [
   },
   {
     status: AttendanceStatuses.EXCUSED,
-    label: t.enums.statuses.excused,
+    label: translations.attendance.enums.statuses.excused,
     icon: <EnvelopeIcon className="w-3.5 h-3.5" />,
     activeClass:
       'bg-primary-100 text-primary-700 border-primary-400 dark:bg-primary-900/30 dark:text-primary-400',
@@ -65,7 +73,7 @@ const STATUS_BUTTONS: StatusButtonConfig[] = [
   },
   {
     status: AttendanceStatuses.LATE,
-    label: t.enums.statuses.late,
+    label: translations.attendance.enums.statuses.late,
     icon: <ClockIcon className="w-3.5 h-3.5" />,
     activeClass:
       'bg-warning-100 text-warning-700 border-warning-400 dark:bg-warning-900/30 dark:text-warning-400',
@@ -133,6 +141,11 @@ export function AttendanceRecordingPanel({
     setSelectedMembers(new Set());
     setActiveFilter('all');
     setSearchTerm('');
+
+    return () => {
+      Object.values(noteDebounceTimers.current).forEach(clearTimeout);
+      noteDebounceTimers.current = {};
+    };
   }, [selectedSession]);
 
   useEffect(() => {

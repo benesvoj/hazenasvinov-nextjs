@@ -10,10 +10,9 @@ import {
   ModalHeader,
   Select,
   SelectItem,
-  Tooltip,
 } from '@heroui/react';
 
-import {CalendarIcon, PencilIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {CalendarIcon, PlusIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
@@ -21,7 +20,7 @@ import {hasMoreThanOne} from '@/utils/arrayHelper';
 
 import {useAppData} from '@/contexts/AppDataContext';
 
-import {ContentCard, DeleteDialog, HStack} from '@/components';
+import {ContentCard, DeleteDialog} from '@/components';
 import {TrainingSessionStatusEnum} from '@/enums';
 import {formatDateString, formatTime} from '@/helpers';
 import {AppPageLayout, FloatingActions} from '@/shared/components';

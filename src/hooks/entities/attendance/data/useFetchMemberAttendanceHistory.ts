@@ -4,7 +4,7 @@ import {useQuery} from '@tanstack/react-query';
 
 import {API_ROUTES} from '@/lib/api-routes';
 
-import {MemberHistoryEntry} from '@/app/api/attendance/member-history/route';
+import type {MemberHistoryEntry} from '@/app/api/attendance/member-history/route';
 
 export type {MemberHistoryEntry};
 
