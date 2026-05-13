@@ -5,12 +5,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {translations} from '@/lib/translations';
 
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
-import {
-  useFetchSeasons,
-  useOptimizedOwnClubMatches,
-  useSeasonFiltering,
-  useStandings,
-} from '@/hooks';
+import {useOptimizedOwnClubMatches, useStandings} from '@/hooks';
 import {Match} from '@/types';
 
 export function useCoachMatchesPageLogic() {
@@ -19,10 +14,8 @@ export function useCoachMatchesPageLogic() {
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('upcoming');
 
-  const {availableCategories, selectedCategory, setSelectedCategory, isLoading} =
+  const {availableCategories, selectedCategory, setSelectedCategory, isLoading, activeSeason} =
     useCoachCategory();
-  const {data: seasons, refetch: fetchActiveSeason} = useFetchSeasons();
-  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
   const {standings, loading: standingsLoading, fetchStandings} = useStandings();
 
   const t = translations.matches.tabs;
@@ -37,10 +30,6 @@ export function useCoachMatchesPageLogic() {
     selectedCategoryData?.id || undefined,
     activeSeason?.id || undefined
   );
-
-  useEffect(() => {
-    fetchActiveSeason();
-  }, [fetchActiveSeason]);
 
   useEffect(() => {
     if (selectedCategoryData?.id && activeSeason?.id) {

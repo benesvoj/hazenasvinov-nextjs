@@ -35,7 +35,7 @@ export const BaseLayout = ({
         {topbar}
 
         <main className="pt-24 px-3 sm:px-4 lg:px-6 pb-6">
-          <div className="w-full pr-24">{children}</div>
+          <div className="w-full lg:pr-24">{children}</div>
         </main>
       </div>
     </div>

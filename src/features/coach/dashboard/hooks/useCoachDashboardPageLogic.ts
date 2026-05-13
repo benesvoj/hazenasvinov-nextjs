@@ -3,15 +3,16 @@
 import {useState} from 'react';
 
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
+import {Match} from '@/types';
 
 export function useCoachDashboardPageLogic() {
-  const [resultFlowMatch, setResultFlowMatch] = useState<any>(null);
+  const [resultFlowMatch, setResultFlowMatch] = useState<Match | null>(null);
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
 
   const {availableCategories, selectedCategory, setSelectedCategory, isLoading} =
     useCoachCategory();
 
-  const handleStartResultFlow = (match: any) => {
+  const handleStartResultFlow = (match: Match) => {
     setResultFlowMatch(match);
     setIsResultFlowOpen(true);
   };

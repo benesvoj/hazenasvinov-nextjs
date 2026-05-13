@@ -76,7 +76,8 @@ export function useFetchAttendanceStatistics(
         throw new Error('Failed to fetch statistics');
       }
 
-      return response.json();
+      const json = await response.json();
+      return json.data ?? json;
     },
     enabled: !!categoryId && !!seasonId,
     staleTime: 5 * 60 * 1000, // 5 minutes

@@ -14,9 +14,10 @@ interface Action {
 
 interface Props {
   actions: Action[];
+  className?: string;
 }
 
-export function FloatingActions({actions}: Props) {
+export function FloatingActions({actions, className}: Props) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -40,11 +41,12 @@ export function FloatingActions({actions}: Props) {
       />
 
       <div
-        className="
-          fixed z-50 flex flex-col items-end gap-3
-          right-6
-          bottom-[calc(1.5rem+env(safe-area-inset-bottom))]
-        "
+        className={cn(
+          'fixed z-50 flex flex-col items-end gap-3',
+          'right-6',
+          'bottom-[calc(1.5rem+env(safe-area-inset-bottom))]',
+          className
+        )}
       >
         {actions.map((action, index) => (
           <div

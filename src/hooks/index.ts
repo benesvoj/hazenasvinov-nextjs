@@ -4,6 +4,7 @@ export * from './auth/useAuth';
 export {useAuth as useAuthNew} from './auth/useAuthNew';
 export * from './coach/useUpcomingBirthdays';
 export * from './entities/attendance/data/useFetchAttendanceStatistics';
+export * from './entities/attendance/data/useFetchMemberAttendanceHistory';
 export * from './entities/attendance/data/useFetchMembersAttendance';
 export * from './entities/attendance/useAttendance';
 export * from './entities/blog/business/useBlogPostFiltering';

@@ -8,7 +8,7 @@ import {translations} from '@/lib/translations/index';
 
 import {useUser} from '@/contexts/UserContext';
 
-import {UnifiedModal} from '@/components';
+import {Grid, UnifiedModal} from '@/components';
 import {TrainingSessionStatusEnum} from '@/enums';
 import {BaseTrainingSession, TrainingSessionFormData} from '@/types';
 
@@ -147,7 +147,7 @@ export default function TrainingSessionModal({
           }
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <Grid columns={2} gap="md">
           <Input
             label={translations.trainingSessions.labels.date}
             type="date"
@@ -172,7 +172,7 @@ export default function TrainingSessionModal({
               }))
             }
           />
-        </div>
+        </Grid>
 
         <Input
           label={translations.trainingSessions.labels.location}
