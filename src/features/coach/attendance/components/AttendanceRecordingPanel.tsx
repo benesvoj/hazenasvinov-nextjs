@@ -9,8 +9,6 @@ import {
   ClockIcon,
   EnvelopeIcon,
   MagnifyingGlassIcon,
-  PencilIcon,
-  TrashIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
@@ -18,7 +16,6 @@ import {translations} from '@/lib/translations';
 
 import {ContentCard, HStack} from '@/components';
 import {AttendanceStatuses} from '@/enums';
-import {formatDateString, formatTime} from '@/helpers';
 import {MemberHistoryEntry} from '@/hooks';
 import {BaseTrainingSession, MemberAttendanceWithMember, MemberSchema} from '@/types';
 
@@ -114,8 +111,6 @@ interface AttendanceRecordingPanelProps {
     notes?: string
   ) => Promise<void>;
   onBulkUpdate: (memberIds: string[], status: AttendanceStatuses) => Promise<void>;
-  onEditSession?: (session: BaseTrainingSession) => void;
-  onDeleteSession?: (sessionId: string) => void;
 }
 
 export function AttendanceRecordingPanel({
@@ -126,8 +121,6 @@ export function AttendanceRecordingPanel({
   memberHistory,
   onRecordAttendance,
   onBulkUpdate,
-  onEditSession,
-  onDeleteSession,
 }: AttendanceRecordingPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -268,58 +261,10 @@ export function AttendanceRecordingPanel({
     );
   }
 
-  const sessionDate = formatDateString(selectedSessionData.session_date);
-  const sessionTime = selectedSessionData.session_time
-    ? formatTime(selectedSessionData.session_time)
-    : '';
   const memberCount = validRecords.length;
 
   return (
-    <div className="flex flex-col h-full gap-3">
-      {/* Panel Header */}
-      <ContentCard padding="none">
-        <div className="p-4 flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <h2 className="text-base font-semibold truncate">{selectedSessionData.title}</h2>
-            <p className="text-sm text-foreground-500 mt-0.5">
-              {sessionDate}
-              {sessionTime && ` · ${sessionTime}`}
-              {' · '}
-              {t.labels.attendanceList(memberCount)}
-            </p>
-          </div>
-          <HStack spacing={1}>
-            {onEditSession && (
-              <Tooltip content="Upravit trénink">
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  onPress={() => onEditSession(selectedSessionData)}
-                  aria-label="Upravit trénink"
-                >
-                  <PencilIcon className="w-4 h-4" />
-                </Button>
-              </Tooltip>
-            )}
-            {onDeleteSession && (
-              <Tooltip content="Smazat trénink">
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  color="danger"
-                  onPress={() => onDeleteSession(selectedSessionData.id)}
-                  aria-label="Smazat trénink"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </Button>
-              </Tooltip>
-            )}
-          </HStack>
-        </div>
-      </ContentCard>
-
+    <div className="flex flex-col gap-3">
       {/* Toolbar + Table */}
       <ContentCard padding="none" isLoading={loading}>
         <div className="p-3 flex flex-col gap-3">
