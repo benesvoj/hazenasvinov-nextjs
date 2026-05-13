@@ -55,6 +55,7 @@ export interface MatchQueryBuilderOptions {
   withoutScores?: boolean;
   hasMatchweek?: boolean;
   withoutMatchweek?: boolean;
+  leagueOnly?: boolean; // Exclude tournament matches (tournament_id IS NULL)
 }
 
 export interface MatchQueryBuilderResult {
@@ -380,6 +381,10 @@ export class MatchQueryBuilder {
 
     if (this.options.withoutMatchweek) {
       query = query.is('matchweek', null);
+    }
+
+    if (this.options.leagueOnly) {
+      query = query.is('tournament_id', null);
     }
 
     return query;

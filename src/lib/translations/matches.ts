@@ -62,6 +62,7 @@ export const matchesTranslations = {
     generateStandingsDescription: 'Vytvořit nové tabulky pro všechny kategorie',
     recalculateStandings: 'Přepočítat tabulky',
     recalculateStandingsDescription: 'Aktualizovat existující tabulky',
+    resetAndRecalculateStandings: 'Smazat a přepočítat tabulku',
     import: 'Import dat',
     importDescription: 'Importovat zápasy z Excel souboru',
     deleteAllMatches: 'Smazat všechny zápasy',

@@ -302,7 +302,8 @@ export async function getMatchesSeasonalOptimized(
         .from('matches')
         .select(OPTIMIZED_MATCH_WITH_TEAMS_SELECT)
         .eq('category_id', categoryId)
-        .eq('season_id', seasonId);
+        .eq('season_id', seasonId)
+        .is('tournament_id', null);
 
       // Apply additional filters
       if (options.status) query = query.eq('status', options.status);
@@ -383,7 +384,8 @@ export async function getOwnClubMatchesOptimized(
         .from('own_club_matches')
         .select('*')
         .eq('category_id', categoryId)
-        .eq('season_id', seasonId);
+        .eq('season_id', seasonId)
+        .is('tournament_id', null);
 
       // Apply additional filters
       if (options.status) query = query.eq('status', options.status);

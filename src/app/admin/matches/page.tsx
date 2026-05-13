@@ -47,6 +47,7 @@ import {
   generateInitialStandings,
   isNilOrZero,
   refreshMaterializedViewWithCallback,
+  resetAndRecalculateStandings,
   validateAddMatchForm,
   validateEditMatchForm,
   validateResultData,
@@ -188,6 +189,7 @@ export default function MatchesAdminPage() {
     includeTeamDetails: true,
     includeCategory: true,
     includeSeason: true,
+    leagueOnly: true,
   });
 
   // Extract matches from the data structure
@@ -271,6 +273,26 @@ export default function MatchesAdminPage() {
       setError('');
     } else {
       setError(result.error || 'Chyba při výpočtu tabulky');
+    }
+  };
+
+  const handleResetAndRecalculateStandings = async () => {
+    if (!selectedCategory || !selectedSeasonId) {
+      setError('Vyberte kategorii a sezónu');
+      return;
+    }
+
+    const result = await resetAndRecalculateStandings(
+      selectedCategory,
+      selectedSeasonId,
+      isSeasonClosed
+    );
+
+    if (result.success) {
+      await fetchStandings(selectedCategory, selectedSeasonId);
+      setError('');
+    } else {
+      setError(result.error || 'Chyba při resetování tabulky');
     }
   };
 
@@ -699,6 +721,14 @@ export default function MatchesAdminPage() {
           color: 'secondary',
           isDisabled: isSeasonClosed,
           priority: 'secondary', // Less important - hidden under 3 dots menu
+        },
+        {
+          label: translations.matches.actions.resetAndRecalculateStandings,
+          onClick: handleResetAndRecalculateStandings,
+          buttonType: ActionTypes.DELETE,
+          color: 'warning',
+          isDisabled: isSeasonClosed,
+          priority: 'secondary',
         },
         {
           label: translations.matches.actions.import,
