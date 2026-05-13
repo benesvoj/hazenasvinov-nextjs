@@ -1,6 +1,8 @@
+'use client';
+
 import {useEffect, useRef} from 'react';
 
-import {translations} from '@/lib/translations/index';
+import {translations} from '@/lib/translations';
 
 import {MemberTableTab, renderInternalMemberCell} from '@/components';
 import {useFetchMembersInternal} from '@/hooks';
