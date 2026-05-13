@@ -260,8 +260,7 @@ export function useCoachAttendancePageLogic() {
     }
   };
 
-  const isAllLoadings =
-    loading || appDataLoading || trainingSessionsLoading || isLoading || statsLoading;
+  const isAllLoadings = loading || appDataLoading || trainingSessionsLoading || isLoading;
 
   const tabLabels = attendanceTabsLabels();
 

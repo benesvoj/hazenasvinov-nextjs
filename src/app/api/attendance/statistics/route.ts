@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         .select('*')
         .eq('category_id', categoryId)
         .eq('season_id', seasonId)
-        .single(),
+        .maybeSingle(),
       supabase.rpc('get_member_attendance_stats', {
         p_category_id: categoryId,
         p_season_id: seasonId,
