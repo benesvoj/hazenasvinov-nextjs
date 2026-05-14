@@ -2,12 +2,10 @@ import React from 'react';
 
 import {DeleteConfirmationModal} from '@/components';
 
-import {
-  LineupPlayerSelectionModal,
-  LineupPlayerEditModal,
-  LineupCoachSelectionModal,
-  LineupCoachEditModal,
-} from '../../../';
+import LineupCoachEditModal from '../../LineupCoachEditModal';
+import LineupCoachSelectionModal from '../../LineupCoachSelectionModal';
+import LineupPlayerEditModal from '../../LineupPlayerEditModal';
+import LineupPlayerSelectionModal from '../../LineupPlayerSelectionModal';
 
 interface LineupModalsProps {
   // Player modals

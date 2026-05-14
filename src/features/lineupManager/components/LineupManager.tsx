@@ -9,12 +9,13 @@ import {translations} from '@/lib/translations';
 import {TeamTypes} from '@/enums';
 import {LineupManagerProps, LineupManagerRef} from '@/types';
 
-import {LineupErrorBoundary, LineupSkeleton, TeamSelector} from './lineupManager/components';
-import {LineupContent, LineupHeader, LineupModals} from './lineupManager/components/utils';
-import {useLineupDataManager} from './lineupManager/hooks/useLineupDataManager';
-import {useLineupErrorHandler} from './lineupManager/hooks/useLineupErrorHandler';
-import {useLineupModals} from './lineupManager/hooks/useLineupModals';
-import {useLineupPerformance} from './lineupManager/hooks/useLineupPerformance';
+import {useLineupDataManager} from '../hooks/useLineupDataManager';
+import {useLineupErrorHandler} from '../hooks/useLineupErrorHandler';
+import {useLineupModals} from '../hooks/useLineupModals';
+import {useLineupPerformance} from '../hooks/useLineupPerformance';
+
+import {LineupErrorBoundary, LineupSkeleton, TeamSelector} from './subcomponents';
+import {LineupContent, LineupHeader, LineupModals} from './subcomponents/utils';
 
 const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
   (
