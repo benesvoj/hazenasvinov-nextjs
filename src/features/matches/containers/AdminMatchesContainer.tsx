@@ -20,9 +20,6 @@ import {
 import {ActionTypes} from '@/enums';
 import {LineupManagerModal} from '@/features/lineupManager';
 
-import {getMatchweekOptions} from '../helpers';
-import {useMatchesPageLogic} from '../hooks';
-
 import {
   AddMatchModal,
   AddResultModal,
@@ -32,7 +29,9 @@ import {
   ExcelImportModal,
   MatchActionsModal,
   MatchProcessWizardModal,
-} from './index';
+} from '../components';
+import {getMatchweekOptions} from '../helpers';
+import {useMatchesPageLogic} from '../hooks';
 
 export function AdminMatchesContainer() {
   const {
