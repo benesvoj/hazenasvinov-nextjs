@@ -43,6 +43,7 @@ export function useMatchesSeasonal(filters: {
   includeTeamDetails?: boolean;
   includeCategory?: boolean;
   includeSeason?: boolean;
+  leagueOnly?: boolean;
 }) {
   const queryKey = queryKeys.matches.seasonal(filters.categoryId, filters.seasonId);
 
