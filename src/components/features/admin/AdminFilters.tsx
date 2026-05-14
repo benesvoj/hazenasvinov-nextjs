@@ -10,8 +10,10 @@ interface AdminFiltersProps {
 
 export const AdminFilters = ({children}: AdminFiltersProps) => {
   return (
-    <ContentCard fullWidth padding="sm">
-        <HStack spacing={2} wrap>{children}</HStack>
+    <ContentCard fullWidth>
+      <HStack spacing={2} wrap>
+        {children}
+      </HStack>
     </ContentCard>
   );
 };
