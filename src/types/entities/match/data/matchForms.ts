@@ -11,6 +11,8 @@ export interface AddMatchFormData {
   matchweek?: number;
   match_number?: number;
   video_ids?: string[];
+  referee_id_1?: string | null;
+  referee_id_2?: string | null;
 }
 
 export interface EditMatchFormData {
@@ -28,4 +30,6 @@ export interface EditMatchFormData {
   match_number: number;
   category_id: string;
   video_ids?: string[];
+  referee_id_1?: string | null;
+  referee_id_2?: string | null;
 }

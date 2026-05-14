@@ -2,10 +2,10 @@
 
 import {useCallback, useState} from 'react';
 
-import {isEmpty} from '@/utils/arrayHelper';
+import {API_ROUTES} from '@/lib/api-routes';
 
 import {MatchStatus} from '@/enums';
-import {useFilteredTeams} from '@/hooks';
+import {useMatchFormTeams} from '@/hooks';
 import {AddMatchFormData, Category, EditMatchFormData, Match} from '@/types';
 import {
   buildMatchInsertData,
@@ -28,6 +28,8 @@ const INITIAL_FORM_DATA: AddMatchFormData = {
   matchweek: undefined,
   match_number: undefined,
   video_ids: [],
+  referee_id_1: null,
+  referee_id_2: null,
 };
 
 const INITIAL_EDIT_DATA: EditMatchFormData = {
@@ -45,6 +47,8 @@ const INITIAL_EDIT_DATA: EditMatchFormData = {
   match_number: 0,
   category_id: '',
   video_ids: [],
+  referee_id_1: null,
+  referee_id_2: null,
 };
 
 const INITIAL_RESULT_DATA = {
@@ -75,6 +79,18 @@ interface UseMatchesCrudActionsProps {
   deleteMatchFn: (id: string) => Promise<boolean>;
 }
 
+const saveMatchReferees = async (
+  matchId: string,
+  refereeId1: string | null | undefined,
+  refereeId2: string | null | undefined
+) => {
+  await fetch(API_ROUTES.matches.referees(matchId), {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({referee_id_1: refereeId1 ?? null, referee_id_2: refereeId2 ?? null}),
+  });
+};
+
 export function useMatchesCrudActions({
   isSeasonClosed,
   selectedCategory,
@@ -93,7 +109,10 @@ export function useMatchesCrudActions({
   const [editData, setEditData] = useState<EditMatchFormData>(INITIAL_EDIT_DATA);
   const [resultData, setResultData] = useState(INITIAL_RESULT_DATA);
 
-  const {filteredTeams, fetchFilteredTeams} = useFilteredTeams(selectedCategory, selectedSeasonId);
+  const {teams: filteredTeams} = useMatchFormTeams(
+    selectedCategory || undefined,
+    selectedSeasonId || undefined
+  );
 
   const handleAddMatch = useCallback(async () => {
     const seasonValidation = validateSeasonNotClosed(isSeasonClosed, 'přidat zápas');
@@ -156,9 +175,25 @@ export function useMatchesCrudActions({
   }, [isSeasonClosed, selectedMatch, resultData, updateMatchResult, modal, setError]);
 
   const handleEditMatch = useCallback(
-    (match: Match) => {
+    async (match: Match) => {
       if (!match) return;
       setSelectedMatch(match);
+
+      let referee_id_1: string | null = null;
+      let referee_id_2: string | null = null;
+
+      try {
+        const res = await fetch(API_ROUTES.matches.referees(match.id));
+        if (res.ok) {
+          const json = await res.json();
+          const refs: Array<{referee_id: string; order: number}> = json.data ?? [];
+          referee_id_1 = refs.find((r) => r.order === 1)?.referee_id ?? null;
+          referee_id_2 = refs.find((r) => r.order === 2)?.referee_id ?? null;
+        }
+      } catch {
+        // Ignore fetch errors — referees are optional
+      }
+
       setEditData({
         date: match.date,
         time: match.time,
@@ -173,13 +208,12 @@ export function useMatchesCrudActions({
         matchweek: isNilOrZero(match.matchweek) ? 0 : match.matchweek,
         match_number: match.match_number ? match.match_number : 0,
         category_id: match.category_id,
+        referee_id_1,
+        referee_id_2,
       });
-      if (match.category_id && selectedSeasonId && isEmpty(filteredTeams)) {
-        fetchFilteredTeams(match.category_id, selectedSeasonId);
-      }
       modal.editMatch.onOpen();
     },
-    [selectedSeasonId, filteredTeams, fetchFilteredTeams, modal]
+    [modal]
   );
 
   const handleUpdateMatch = useCallback(async () => {
@@ -199,6 +233,7 @@ export function useMatchesCrudActions({
     const updateData = buildMatchUpdateData(editData);
     const success = await updateMatch(selectedMatch.id, updateData, selectedMatch);
     if (success) {
+      await saveMatchReferees(selectedMatch.id, editData.referee_id_1, editData.referee_id_2);
       modal.editMatch.onClose();
       setEditData(INITIAL_EDIT_DATA);
       setSelectedMatch(null);

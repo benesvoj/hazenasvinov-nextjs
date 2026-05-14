@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       {
         ...parsed.data,
         categoryId: parsed.data.category_id,
-        // memberFunctions: parsed.data.function -> this is currently not supported, different structure TODO
+        memberFunctions: parsed.data.function,
       }
     );
 

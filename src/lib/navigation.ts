@@ -11,6 +11,7 @@ import {
   HeartIcon,
   HomeIcon,
   PhotoIcon,
+  ScaleIcon,
   ShieldCheckIcon,
   TagIcon,
   TrophyIcon,
@@ -116,6 +117,14 @@ export const allRoutes: NavMenuItem[] = [
     description: translations.matches.page.description,
     group: RouteGroups.TEAM,
     icon: TrophyIcon,
+  },
+  {
+    href: APP_ROUTES.admin.referees,
+    title: translations.referees.page.title,
+    isPrivate: true,
+    description: translations.referees.page.description,
+    group: RouteGroups.TEAM,
+    icon: ScaleIcon,
   },
   {
     href: APP_ROUTES.admin.tournaments,

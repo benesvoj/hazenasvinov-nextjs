@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 
 import {Input, NumberInput, Select, SelectItem, Button} from '@heroui/react';
 
@@ -8,9 +8,9 @@ import {MagnifyingGlassIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
-import {UnifiedModal, Heading, showToast} from '@/components';
+import {UnifiedModal, Heading, showToast, Choice} from '@/components';
 import {matchStatuses} from '@/constants';
-import {useTeamClub, useMatchVideos} from '@/hooks';
+import {useTeamClub, useMatchVideos, useFetchReferees} from '@/hooks';
 import {Match, Video, EditMatchFormData} from '@/types';
 
 import VideoSelectionModal from './VideoSelectionModal';
@@ -46,7 +46,10 @@ export default function EditMatchModal({
   isSeasonClosed,
 }: EditMatchModalProps) {
   const t = translations.matches;
+  const tReferees = translations.referees;
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  const {data: referees} = useFetchReferees();
 
   // Get club info for both teams
   const {clubId: homeTeamClubId, isOwnClub: isHomeTeamOwnClub} = useTeamClub(editData.home_team_id);
@@ -136,7 +139,12 @@ export default function EditMatchModal({
 
     onEditDataChange({
       ...editData,
-      [field]: selectedValue || '',
+      [field]:
+        field === 'matchweek'
+          ? selectedValue
+            ? parseInt(selectedValue, 10)
+            : 0
+          : selectedValue || '',
     });
   };
 
@@ -186,7 +194,7 @@ export default function EditMatchModal({
                     <Select
                       label="Kolo"
                       placeholder="Vyberte kolo"
-                      selectedKeys={editData.matchweek ? [editData.matchweek] : []}
+                      selectedKeys={editData.matchweek ? [editData.matchweek.toString()] : []}
                       onSelectionChange={(keys) => handleSelectChange('matchweek', keys)}
                       className="w-full"
                       isDisabled={isSeasonClosed}
@@ -290,6 +298,29 @@ export default function EditMatchModal({
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Referee Section */}
+              <div className="col-span-1 lg:col-span-2 mt-2">
+                <Heading size={4}>{tReferees.matchForm.sectionTitle}</Heading>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-2">
+                  <Choice
+                    items={referees.map((r) => ({key: r.id, label: `${r.surname} ${r.name}`}))}
+                    value={editData.referee_id_1 ?? null}
+                    onChange={(id) => onEditDataChange({...editData, referee_id_1: id})}
+                    label={tReferees.matchForm.referee1Label}
+                    placeholder={tReferees.matchForm.referee1Placeholder}
+                    isDisabled={isSeasonClosed}
+                  />
+                  <Choice
+                    items={referees.map((r) => ({key: r.id, label: `${r.surname} ${r.name}`}))}
+                    value={editData.referee_id_2 ?? null}
+                    onChange={(id) => onEditDataChange({...editData, referee_id_2: id})}
+                    label={tReferees.matchForm.referee2Label}
+                    placeholder={tReferees.matchForm.referee2Placeholder}
+                    isDisabled={isSeasonClosed}
+                  />
                 </div>
               </div>
 
