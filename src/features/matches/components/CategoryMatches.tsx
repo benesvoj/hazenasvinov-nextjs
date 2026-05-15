@@ -20,6 +20,7 @@ interface CategoryMatchesProps {
   onDeleteClick: (match: Match) => void;
   onMatchActionsOpen: (match: Match) => void;
   isSeasonClosed: boolean;
+  refereesByMatchId?: Map<string, {order: number; name: string; surname: string}[]>;
 }
 
 export default function CategoryMatches({
@@ -34,6 +35,7 @@ export default function CategoryMatches({
   onDeleteClick,
   onMatchActionsOpen,
   isSeasonClosed,
+  refereesByMatchId,
 }: CategoryMatchesProps) {
   // Memoize the grouped matches calculation to avoid unnecessary re-computations
   const {groupedMatches, sortedMatchweeks} = useMemo(() => {
@@ -181,6 +183,7 @@ export default function CategoryMatches({
                         onDeleteClick={onDeleteClick}
                         onMatchActionsOpen={onMatchActionsOpen}
                         isSeasonClosed={isSeasonClosed}
+                        referees={refereesByMatchId?.get(match.id)}
                       />
                     ))}
                   </div>

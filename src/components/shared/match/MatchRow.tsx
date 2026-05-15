@@ -6,13 +6,20 @@ import Image from 'next/image';
 
 import {Button, Divider} from '@heroui/react';
 
-import {TrophyIcon} from '@heroicons/react/24/outline';
+import {TrophyIcon, UserIcon} from '@heroicons/react/24/outline';
 
 import Link from '@/components/ui/link/Link';
 
-import {MatchScore} from '@/components';
+import {HStack, MatchScore} from '@/components';
 import {formatDateToDayAndMonth, formatDateToWeekday, formatTime} from '@/helpers';
 import {Match} from '@/types';
+import {hasItems} from '@/utils';
+
+interface MatchRefereeInfo {
+  order: number;
+  name: string;
+  surname: string;
+}
 
 interface MatchRowProps {
   match: Match;
@@ -21,6 +28,7 @@ interface MatchRowProps {
   onStartResultFlow?: (match: Match) => void;
   showResultButton?: boolean;
   showSeason?: boolean;
+  referees?: MatchRefereeInfo[];
 }
 
 const MatchRow: React.FC<MatchRowProps> = ({
@@ -30,6 +38,7 @@ const MatchRow: React.FC<MatchRowProps> = ({
   onStartResultFlow,
   showResultButton = false,
   showSeason = false,
+  referees,
 }) => {
   const handleResultButtonClick = () => {
     onStartResultFlow?.(match);
@@ -42,7 +51,7 @@ const MatchRow: React.FC<MatchRowProps> = ({
           {/* Date and Time - Left Side */}
           <div
             className={`flex flex-col items-start ${
-              compact ? 'min-w-[40px] lg:min-w-[40px]' : 'min-w-[100px] lg:min-w-[120px]'
+              compact ? 'min-w-10 lg:min-w-10' : 'min-w-25 lg:min-w-30'
             }`}
           >
             <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400">
@@ -118,7 +127,7 @@ const MatchRow: React.FC<MatchRowProps> = ({
             </div>
 
             {/* Venue and League Info */}
-            <div className="flex h-5 items-center space-x-4 text-xs text-gray-600 dark:text-gray-400">
+            <HStack spacing={2} className="text-xs text-gray-600 dark:text-gray-400">
               {/* Mobile: Shorter text, Desktop: Full text */}
               <div className="lg:hidden flex flex-col items-start">
                 <div>{match.category?.name}</div>
@@ -139,13 +148,24 @@ const MatchRow: React.FC<MatchRowProps> = ({
                   <div>Ročník: {match.season?.name}</div>
                 </>
               )}
-            </div>
+
+              {/* Referees */}
+              {hasItems(referees) && (
+                <>
+                  <Divider orientation="vertical" />
+                  <HStack spacing={1} className="text-xs text-gray-500 dark:text-gray-400">
+                    <UserIcon className="w-3 h-3 shrink-0" />
+                    <span>{referees.map((r) => `${r.name} ${r.surname}`).join(', ')}</span>
+                  </HStack>
+                </>
+              )}
+            </HStack>
           </div>
 
           {/* Score - Right Side */}
           <div
             className={`flex flex-col items-end ${
-              compact ? 'min-w-[40px] lg:min-w-[60px]' : 'min-w-[60px] lg:min-w-[80px]'
+              compact ? 'min-w-10 lg:min-w-15' : 'min-w-15 lg:min-w-20'
             }`}
           >
             <MatchScore match={match} />

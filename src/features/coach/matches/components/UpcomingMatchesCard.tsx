@@ -14,6 +14,7 @@ interface UpcomingMatchesCardProps {
   onMatchSelect?: (match: any) => void;
   selectedMatchId?: string;
   onStartResultFlow?: (match: any) => void;
+  refereesByMatchId?: Map<string, {order: number; name: string; surname: string}[]>;
 }
 
 export default function UpcomingMatchesCard({
@@ -22,6 +23,7 @@ export default function UpcomingMatchesCard({
   onMatchSelect,
   selectedMatchId,
   onStartResultFlow,
+  refereesByMatchId,
 }: UpcomingMatchesCardProps) {
   return (
     <Card className="h-full">
@@ -47,7 +49,11 @@ export default function UpcomingMatchesCard({
                   }`}
                 >
                   <div className="cursor-pointer" onClick={() => onMatchSelect?.(match)}>
-                    <MatchRow match={match} redirectionLinks={false} />
+                    <MatchRow
+                      match={match}
+                      redirectionLinks={false}
+                      referees={refereesByMatchId?.get(match.id)}
+                    />
                   </div>
                   <div className="mt-3 flex justify-end">
                     <Button

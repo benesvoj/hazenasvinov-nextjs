@@ -1,8 +1,10 @@
 'use client';
 
-import {useEffect} from 'react';
+import {useEffect, useMemo} from 'react';
 
-import {useMatchMutations, useTeamDisplayLogic} from '@/hooks';
+import {useQuery} from '@tanstack/react-query';
+
+import {useMatchMutations, useSupabaseClient, useTeamDisplayLogic} from '@/hooks';
 
 import {isSeasonClosedHelper} from '../helpers/isSeasonClosedHelper';
 
@@ -103,6 +105,47 @@ export function useMatchesPageLogic() {
     deleteAllMatchesBySeasonFn: deleteAllMatchesBySeason,
   });
 
+  const supabase = useSupabaseClient();
+
+  const allMatchIds = useMemo(
+    () => matches.map((m) => m.id),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [matches.map((m) => m.id).join(',')]
+  );
+
+  const {
+    data: refereesByMatchId = new Map<string, {order: number; name: string; surname: string}[]>(),
+  } = useQuery({
+    queryKey: ['match-referees', allMatchIds],
+    queryFn: async () => {
+      if (!allMatchIds.length)
+        return new Map<string, {order: number; name: string; surname: string}[]>();
+
+      const {data, error} = await supabase
+        .from('match_referees')
+        .select('match_id, order, referee:referees(name, surname)')
+        .in('match_id', allMatchIds)
+        .order('order');
+
+      if (error || !data)
+        return new Map<string, {order: number; name: string; surname: string}[]>();
+
+      const map = new Map<string, {order: number; name: string; surname: string}[]>();
+      data.forEach((row: any) => {
+        const entry = map.get(row.match_id) ?? [];
+        entry.push({
+          order: row.order,
+          name: row.referee?.name ?? '',
+          surname: row.referee?.surname ?? '',
+        });
+        map.set(row.match_id, entry);
+      });
+      return map;
+    },
+    enabled: allMatchIds.length > 0,
+    staleTime: 2 * 60 * 1000,
+  });
+
   const loading =
     filters.categoriesLoading ||
     filters.seasonsLoading ||
@@ -153,6 +196,8 @@ export function useMatchesPageLogic() {
     matchesError,
 
     standingsApi,
+
+    refereesByMatchId,
 
     toggleMatchweek,
     isMatchweekExpanded,

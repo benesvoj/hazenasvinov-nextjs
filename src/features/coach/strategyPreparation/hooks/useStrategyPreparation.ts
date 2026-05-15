@@ -147,6 +147,10 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
                     short_name
                   )
                 )
+              ),
+              match_referees(
+                order,
+                referee:referees(name, surname)
               )
             )
           )
@@ -204,6 +208,13 @@ export function useStrategyPreparation(selectedMatch: Match | Nullish) {
               away_score_halftime: match.away_score_halftime,
               status: match.status,
               date: match.date,
+              referees: (match.match_referees ?? [])
+                .sort((a: any, b: any) => a.order - b.order)
+                .map((mr: any) => ({
+                  order: mr.order,
+                  name: mr.referee?.name ?? '',
+                  surname: mr.referee?.surname ?? '',
+                })),
             }
           : undefined,
       };

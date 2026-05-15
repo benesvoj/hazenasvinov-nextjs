@@ -69,5 +69,10 @@ export interface VideoWithMatch extends VideoSchema {
     away_score?: number | null;
     home_score_halftime?: number | null;
     away_score_halftime?: number | null;
+    referees?: Array<{
+      order: number;
+      name: string;
+      surname: string;
+    }>;
   };
 }

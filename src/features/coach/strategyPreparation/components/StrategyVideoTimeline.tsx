@@ -10,14 +10,16 @@ import {
   LinkIcon,
   PencilSquareIcon,
   PlayIcon,
+  UserIcon,
   VideoCameraIcon,
 } from '@heroicons/react/24/outline';
 
-import {LoadingSpinner} from '@/components';
-import {useCopyRecordingUrl, type RecordingSchema} from '@/features/recordings';
+import {HStack, LoadingSpinner} from '@/components';
+import {type RecordingSchema, useCopyRecordingUrl} from '@/features/recordings';
 import {getMatchPartLabel} from '@/features/recordings/utils/matchPartLabel';
 import {openInNewTab} from '@/shared/browser';
 import {Team, VideoMatchPart, VideoWithMatch} from '@/types';
+import {hasItems} from '@/utils';
 
 const MATCH_PART_FILTERS: {value: VideoMatchPart; label: string}[] = [
   {value: 'first_half', label: '1. poločas'},
@@ -62,6 +64,7 @@ interface MatchGroup {
   awayScore: number | null;
   homeHalftime: number | null;
   awayHalftime: number | null;
+  referees: Array<{order: number; name: string; surname: string}>;
   videos: VideoWithMatch[];
 }
 
@@ -127,6 +130,7 @@ export default function StrategyVideoTimeline({
           awayScore: match?.away_score ?? null,
           homeHalftime: match?.home_score_halftime ?? null,
           awayHalftime: match?.away_score_halftime ?? null,
+          referees: match?.referees ?? [],
           videos: vids,
         };
       })
@@ -167,7 +171,7 @@ export default function StrategyVideoTimeline({
   return (
     <div className="p-3 space-y-3">
       <div className="flex items-center gap-2">
-        <VideoCameraIcon className="w-4 h-4 text-purple-600 flex-shrink-0" />
+        <VideoCameraIcon className="w-4 h-4 text-purple-600 shrink-0" />
         <h3 className="text-sm font-semibold">Videa týmu {opponentTeam?.name || 'soupeře'}</h3>
         {!loading && videos.length > 0 && (
           <span className="text-xs text-gray-400 dark:text-gray-500">({videos.length})</span>
@@ -245,43 +249,56 @@ export default function StrategyVideoTimeline({
                         className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
                       >
                         {/* Match header */}
-                        <div className="flex items-center justify-between gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800/60 border-b border-gray-200 dark:border-gray-700">
-                          <div className="flex items-center gap-2 min-w-0">
-                            {group.hasMatch ? (
-                              <CalendarDaysIcon className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                            ) : (
-                              <ExclamationTriangleIcon
-                                className="w-3.5 h-3.5 text-amber-400 flex-shrink-0"
-                                title="Video není propojeno se zápasem"
-                              />
-                            )}
-                            {group.hasMatch ? (
-                              <span className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
-                                {group.homeShort} vs {group.awayShort}
-                              </span>
-                            ) : (
-                              <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                                Bez vazby na zápas
-                              </span>
-                            )}
-                            {group.date && (
-                              <span className="text-xs text-gray-400 flex-shrink-0">
-                                {new Date(group.date).toLocaleDateString('cs-CZ')}
-                              </span>
-                            )}
-                          </div>
-                          {group.hasMatch &&
-                            group.homeScore !== null &&
-                            group.awayScore !== null && (
-                              <span className="text-xs font-semibold text-gray-800 dark:text-gray-200 flex-shrink-0">
-                                {group.homeScore}:{group.awayScore}
-                                {group.homeHalftime !== null && group.awayHalftime !== null && (
-                                  <span className="font-normal text-gray-400 ml-1">
-                                    ({group.homeHalftime}:{group.awayHalftime})
+                        <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800/60 border-b border-gray-200 dark:border-gray-700 space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <HStack spacing={2} className="min-w-0">
+                              {group.hasMatch ? (
+                                <CalendarDaysIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                              ) : (
+                                <ExclamationTriangleIcon
+                                  className="w-3.5 h-3.5 text-amber-400 shrink-0"
+                                  title="Video není propojeno se zápasem"
+                                />
+                              )}
+                              {group.date && (
+                                <span className="text-xs text-gray-400 shrink-0">
+                                  {new Date(group.date).toLocaleDateString('cs-CZ')}
+                                </span>
+                              )}
+                              {group.hasMatch ? (
+                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
+                                  {group.homeShort} vs {group.awayShort}
+                                </span>
+                              ) : (
+                                <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                                  Bez vazby na zápas
+                                </span>
+                              )}
+                            </HStack>
+                            <HStack spacing={2} className="min-w-0">
+                              {group.hasMatch && hasItems(group.referees) && (
+                                <HStack spacing={1}>
+                                  <UserIcon className="w-3 h-3 text-gray-400 shrink-0" />
+                                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                                    {group.referees.map((r) => `${r.name} ${r.surname}`).join(', ')}
+                                  </span>
+                                </HStack>
+                              )}
+
+                              {group.hasMatch &&
+                                group.homeScore !== null &&
+                                group.awayScore !== null && (
+                                  <span className="text-xs font-semibold text-gray-800 dark:text-gray-200 shrink-0">
+                                    {group.homeScore}:{group.awayScore}
+                                    {group.homeHalftime !== null && group.awayHalftime !== null && (
+                                      <span className="font-normal text-gray-400 ml-1">
+                                        ({group.homeHalftime}:{group.awayHalftime})
+                                      </span>
+                                    )}
                                   </span>
                                 )}
-                              </span>
-                            )}
+                            </HStack>
+                          </div>
                         </div>
 
                         {/* Video rows */}
@@ -297,7 +314,7 @@ export default function StrategyVideoTimeline({
                             {/* Play thumb */}
                             <button
                               onClick={() => openInNewTab(video.youtube_url)}
-                              className="w-9 h-8 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                              className="w-9 h-8 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                             >
                               <PlayIcon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
                             </button>
@@ -329,7 +346,7 @@ export default function StrategyVideoTimeline({
                             </div>
 
                             {/* Actions */}
-                            <div className="flex items-center gap-1 flex-shrink-0">
+                            <div className="flex items-center gap-1 shrink-0">
                               <Button
                                 isIconOnly
                                 size="sm"

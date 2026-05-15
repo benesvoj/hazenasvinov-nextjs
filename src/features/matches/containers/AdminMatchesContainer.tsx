@@ -60,6 +60,7 @@ export function AdminMatchesContainer() {
     selectedCategoryId,
     matchesError,
     standingsApi,
+    refereesByMatchId,
     toggleMatchweek,
     isMatchweekExpanded,
     expandedMatchweeks,
@@ -245,6 +246,7 @@ export function AdminMatchesContainer() {
                             matchActions.openWith(match);
                           }}
                           isSeasonClosed={isSeasonClosed}
+                          refereesByMatchId={refereesByMatchId}
                         />
                       )}
 
