@@ -60,6 +60,7 @@ export default function CoachMatchesContainer() {
                   onMatchSelect={state.handleMatchSelect}
                   selectedMatchId={state.selectedMatch?.id}
                   onStartResultFlow={state.handleStartResultFlow}
+                  refereesByMatchId={state.refereesByMatchId}
                 />
               </Tab>
               <Tab key="recent" title={state.t.recent}>
@@ -68,6 +69,7 @@ export default function CoachMatchesContainer() {
                   loading={state.loading}
                   onMatchSelect={state.handleMatchSelect}
                   selectedMatchId={state.selectedMatch?.id}
+                  refereesByMatchId={state.refereesByMatchId}
                 />
               </Tab>
               <Tab key="standings" title={state.t.standings}>

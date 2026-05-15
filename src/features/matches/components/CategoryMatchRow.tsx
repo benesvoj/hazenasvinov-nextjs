@@ -1,19 +1,28 @@
 import {Button} from '@heroui/button';
 
 import {
-  MapPinIcon,
   EyeIcon,
+  MapPinIcon,
   PencilIcon,
-  UserGroupIcon,
   TrashIcon,
+  UserGroupIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
 import {formatTime} from '@/helpers/formatTime';
 
+import {HStack} from '@/components';
 import {formatDateString} from '@/helpers';
 import {Match} from '@/types';
+import {hasItems} from '@/utils';
+
+interface MatchRefereeInfo {
+  order: number;
+  name: string;
+  surname: string;
+}
 
 interface CategoryMatchRowProps {
   match: Match;
@@ -23,6 +32,7 @@ interface CategoryMatchRowProps {
   onDeleteClick: (match: Match) => void;
   onMatchActionsOpen: (match: Match) => void;
   isSeasonClosed: boolean;
+  referees?: MatchRefereeInfo[];
 }
 
 export const CategoryMatchRow = ({
@@ -33,6 +43,7 @@ export const CategoryMatchRow = ({
   onDeleteClick,
   onMatchActionsOpen,
   isSeasonClosed,
+  referees,
 }: CategoryMatchRowProps) => {
   return (
     <div
@@ -84,10 +95,20 @@ export const CategoryMatchRow = ({
                 match.away_team?.name ||
                 translations.matches.unknownTeam}
             </div>
-            <div className="flex items-start space-x-2 text-sm text-gray-600">
-              <MapPinIcon className="w-4 h-4 text-gray-400" />
-              <span>{match.venue}</span>
-            </div>
+            <HStack spacing={2}>
+              {match.venue && (
+                <HStack spacing={2} className="text-sm text-gray-600">
+                  <MapPinIcon className="w-4 h-4 text-gray-400" />
+                  <span>{match.venue}</span>
+                </HStack>
+              )}
+              {hasItems(referees) && (
+                <HStack spacing={2} className="text-sm text-gray-500">
+                  <UserIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span>{referees.map((r) => `${r.name} ${r.surname}`).join(', ')}</span>
+                </HStack>
+              )}
+            </HStack>
           </div>
         </div>
 
@@ -156,6 +177,19 @@ export const CategoryMatchRow = ({
             <span>{match.venue}</span>
           </div>
         </div>
+
+        {/* Referees */}
+        {referees && referees.length > 0 && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-gray-600">Rozhodčí:</span>
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <UserIcon className="w-4 h-4 text-gray-400 shrink-0" />
+              <span className="text-right">
+                {referees.map((r) => `${r.name} ${r.surname}`).join(', ')}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Score */}
         <div className="flex justify-between items-center">

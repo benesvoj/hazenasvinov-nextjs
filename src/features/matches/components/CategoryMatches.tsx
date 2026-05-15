@@ -1,4 +1,6 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useState} from 'react';
+
+import {Button} from '@heroui/react';
 
 import {ChevronDownIcon, ChevronUpIcon} from '@heroicons/react/24/outline';
 
@@ -18,6 +20,7 @@ interface CategoryMatchesProps {
   onDeleteClick: (match: Match) => void;
   onMatchActionsOpen: (match: Match) => void;
   isSeasonClosed: boolean;
+  refereesByMatchId?: Map<string, {order: number; name: string; surname: string}[]>;
 }
 
 export default function CategoryMatches({
@@ -32,6 +35,7 @@ export default function CategoryMatches({
   onDeleteClick,
   onMatchActionsOpen,
   isSeasonClosed,
+  refereesByMatchId,
 }: CategoryMatchesProps) {
   // Memoize the grouped matches calculation to avoid unnecessary re-computations
   const {groupedMatches, sortedMatchweeks} = useMemo(() => {
@@ -71,6 +75,25 @@ export default function CategoryMatches({
     return stats;
   }, [sortedMatchweeks, groupedMatches]);
 
+  const [showIncompleteOnly, setShowIncompleteOnly] = useState(false);
+
+  const visibleMatchweeks = useMemo(() => {
+    if (!showIncompleteOnly) return sortedMatchweeks;
+    return sortedMatchweeks.filter((mw) => {
+      const {total, completed} = matchWeekStats.get(mw)!;
+      return completed < total;
+    });
+  }, [showIncompleteOnly, sortedMatchweeks, matchWeekStats]);
+
+  const incompleteCount = useMemo(
+    () =>
+      sortedMatchweeks.filter((mw) => {
+        const {total, completed} = matchWeekStats.get(mw)!;
+        return completed < total;
+      }).length,
+    [sortedMatchweeks, matchWeekStats]
+  );
+
   // Sort matches within each matchweek by match_number
   sortedMatchweeks.forEach((matchweek) => {
     const weekMatches = groupedMatches.get(matchweek)!;
@@ -90,69 +113,86 @@ export default function CategoryMatches({
   });
 
   return (
-    <div className="space-y-6">
-      {sortedMatchweeks.map((matchweek) => {
-        const weekMatches = groupedMatches.get(matchweek)!;
-        const weekTitle = matchweek === 0 ? 'Bez kola' : `${matchweek}. kolo`;
-        const {total: totalMatches, completed: completedMatches} = matchWeekStats.get(matchweek)!;
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Button
+          size="sm"
+          variant={showIncompleteOnly ? 'solid' : 'bordered'}
+          color={showIncompleteOnly ? 'warning' : 'default'}
+          onPress={() => setShowIncompleteOnly((v) => !v)}
+        >
+          Neúplná kola {incompleteCount > 0 ? `(${incompleteCount})` : ''}
+        </Button>
+        {showIncompleteOnly && incompleteCount === 0 && (
+          <span className="text-sm text-gray-500">Všechna kola mají vyplněné výsledky</span>
+        )}
+      </div>
 
-        return (
-          <div key={matchweek} className="border rounded-lg p-4 bg-gray-50">
-            <div
-              className="flex items-center justify-between mb-4 border-b pb-2 cursor-pointer hover:bg-gray-100 transition-colors rounded p-2"
-              onClick={() => toggleMatchweek(category.id, matchweek)}
-            >
-              <h4 className="text-lg font-semibold text-gray-800">
-                {weekTitle} ({completedMatches} / {totalMatches} zápas
-                {totalMatches !== 1 ? 'ů' : ''})
-              </h4>
-              <div className="text-gray-600">
-                {isMatchweekExpanded(category.id, matchweek) ? (
-                  <ChevronDownIcon className="w-4 h-4" />
-                ) : (
-                  <ChevronUpIcon className="w-4 h-4" />
-                )}
+      <div className="space-y-6">
+        {visibleMatchweeks.map((matchweek) => {
+          const weekMatches = groupedMatches.get(matchweek)!;
+          const weekTitle = matchweek === 0 ? 'Bez kola' : `${matchweek}. kolo`;
+          const {total: totalMatches, completed: completedMatches} = matchWeekStats.get(matchweek)!;
+
+          return (
+            <div key={matchweek} className="border rounded-lg p-4 bg-gray-50">
+              <div
+                className="flex items-center justify-between mb-4 border-b pb-2 cursor-pointer hover:bg-gray-100 transition-colors rounded p-2"
+                onClick={() => toggleMatchweek(category.id, matchweek)}
+              >
+                <h4 className="text-lg font-semibold text-gray-800">
+                  {weekTitle} ({completedMatches} / {totalMatches} zápas
+                  {totalMatches !== 1 ? 'ů' : ''})
+                </h4>
+                <div className="text-gray-600">
+                  {isMatchweekExpanded(category.id, matchweek) ? (
+                    <ChevronDownIcon className="w-4 h-4" />
+                  ) : (
+                    <ChevronUpIcon className="w-4 h-4" />
+                  )}
+                </div>
               </div>
+
+              {/* Collapsible Content */}
+              {isMatchweekExpanded(category.id, matchweek) && (
+                <>
+                  {/* Column Headers - Desktop only */}
+                  <div className="hidden lg:grid grid-cols-11 gap-4 mb-3 px-2 items-center">
+                    <div className="col-span-1 text-center text-sm font-medium text-gray-600">
+                      Číslo zápasu
+                    </div>
+                    <div className="col-span-2 text-start text-sm font-medium text-gray-600">
+                      Datum a čas
+                    </div>
+                    <div className="col-span-6 text-start text-sm font-medium text-gray-600">
+                      Místo
+                    </div>
+                    <div className="col-span-2 text-center text-sm font-medium text-gray-600">
+                      Skóre
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {weekMatches.map((match) => (
+                      <CategoryMatchRow
+                        key={match.id}
+                        match={match}
+                        onAddResult={onAddResult}
+                        onEditMatch={onEditMatch}
+                        onLineupModalOpen={onLineupModalOpen}
+                        onDeleteClick={onDeleteClick}
+                        onMatchActionsOpen={onMatchActionsOpen}
+                        isSeasonClosed={isSeasonClosed}
+                        referees={refereesByMatchId?.get(match.id)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
-
-            {/* Collapsible Content */}
-            {isMatchweekExpanded(category.id, matchweek) && (
-              <>
-                {/* Column Headers - Desktop only */}
-                <div className="hidden lg:grid grid-cols-11 gap-4 mb-3 px-2 items-center">
-                  <div className="col-span-1 text-center text-sm font-medium text-gray-600">
-                    Číslo zápasu
-                  </div>
-                  <div className="col-span-2 text-start text-sm font-medium text-gray-600">
-                    Datum a čas
-                  </div>
-                  <div className="col-span-6 text-start text-sm font-medium text-gray-600">
-                    Místo
-                  </div>
-                  <div className="col-span-2 text-center text-sm font-medium text-gray-600">
-                    Skóre
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {weekMatches.map((match) => (
-                    <CategoryMatchRow
-                      key={match.id}
-                      match={match}
-                      onAddResult={onAddResult}
-                      onEditMatch={onEditMatch}
-                      onLineupModalOpen={onLineupModalOpen}
-                      onDeleteClick={onDeleteClick}
-                      onMatchActionsOpen={onMatchActionsOpen}
-                      isSeasonClosed={isSeasonClosed}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

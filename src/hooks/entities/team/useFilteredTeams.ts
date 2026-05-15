@@ -54,18 +54,20 @@ export function useFilteredTeams(
           id,
           team_suffix,
           is_active,
-          club_category:club_categories!inner(
+          club_categories!inner(
             club_id,
-            club:clubs!inner(
+            category_id,
+            season_id,
+            clubs!inner(
               id,
               name,
               short_name
             ),
-            category:categories!inner(
+            categories!inner(
               id,
               name
             ),
-            season:seasons!inner(
+            seasons!inner(
               id,
               name
             )
@@ -74,13 +76,13 @@ export function useFilteredTeams(
 
       // Apply filters
       if (options.categoryId) {
-        query = query.eq('club_category.category_id', options.categoryId);
+        query = query.eq('club_categories.category_id', options.categoryId);
       }
       if (options.seasonId) {
-        query = query.eq('club_category.season_id', options.seasonId);
+        query = query.eq('club_categories.season_id', options.seasonId);
       }
       if (options.clubId) {
-        query = query.eq('club_category.club_id', options.clubId);
+        query = query.eq('club_categories.club_id', options.clubId);
       }
       if (options.isActive !== undefined) {
         query = query.eq('is_active', options.isActive);
@@ -92,18 +94,18 @@ export function useFilteredTeams(
 
       const transformedTeams: FilteredTeam[] = (data || []).map((item: any) => ({
         id: item.id,
-        name: `${item.club_category.club.name} ${item.team_suffix}`,
-        short_name: item.club_category.club.short_name
-          ? `${item.club_category.club.short_name} ${item.team_suffix}`
-          : `${item.club_category.club.name} ${item.team_suffix}`,
-        club_id: item.club_category.club_id,
-        club_name: item.club_category.club.name,
-        club_short_name: item.club_category.club.short_name,
+        name: `${item.club_categories.clubs.name} ${item.team_suffix}`,
+        short_name: item.club_categories.clubs.short_name
+          ? `${item.club_categories.clubs.short_name} ${item.team_suffix}`
+          : `${item.club_categories.clubs.name} ${item.team_suffix}`,
+        club_id: item.club_categories.club_id,
+        club_name: item.club_categories.clubs.name,
+        club_short_name: item.club_categories.clubs.short_name,
         team_suffix: item.team_suffix,
-        category_id: item.club_category.category.id,
-        category_name: item.club_category.category.name,
-        season_id: item.club_category.season.id,
-        season_name: item.club_category.season.name,
+        category_id: item.club_categories.categories.id,
+        category_name: item.club_categories.categories.name,
+        season_id: item.club_categories.seasons.id,
+        season_name: item.club_categories.seasons.name,
         is_active: item.is_active,
       }));
 

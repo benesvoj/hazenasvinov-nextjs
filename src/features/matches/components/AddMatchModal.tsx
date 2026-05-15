@@ -40,7 +40,7 @@ export default function AddMatchModal({
 }: AddMatchModalProps) {
   const footer = (
     <>
-      <Button color="danger" variant="flat" onPress={onClose}>
+      <Button variant="ghost" onPress={onClose}>
         {translations.common.actions.cancel}
       </Button>
       <Button color="primary" onPress={onAddMatch}>

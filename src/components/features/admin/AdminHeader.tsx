@@ -1,11 +1,11 @@
-'use client';
+import {ReactNode} from 'react';
 
 import {Heading} from '@/components';
 
 interface AdminHeaderProps {
   title?: string;
   description?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 }
 
 export const AdminHeader = ({title, description, icon}: AdminHeaderProps) => {
@@ -15,7 +15,7 @@ export const AdminHeader = ({title, description, icon}: AdminHeaderProps) => {
         {title && (
           <div className="flex items-center gap-3">
             <Heading size={1}>
-              {icon && <span className="flex-shrink-0 mr-3">{icon}</span>}
+              {icon && <span className="shrink-0 mr-3">{icon}</span>}
               {title}
             </Heading>
           </div>

@@ -1,4 +1,3 @@
-export {AdminMatchesContainer} from './AdminMatchesContainer';
 export {default as AddMatchModal} from './AddMatchModal';
 export {default as AddResultModal} from './AddResultModal';
 export {default as BulkUpdateMatchweekModal} from './BulkUpdateMatchweekModal';

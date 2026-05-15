@@ -9,7 +9,7 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2026-05-12
+ * Last generated: 2026-05-14
  */
 
 export interface ClubCategorySchema {

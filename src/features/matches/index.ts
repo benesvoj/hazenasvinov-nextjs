@@ -1,3 +1,1 @@
-export * from './hooks';
-export * from './components';
-export * from './helpers';
+export {AdminMatchesContainer} from './containers/AdminMatchesContainer';

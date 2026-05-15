@@ -13,6 +13,7 @@ interface RecentResultsCardProps {
   loading: boolean;
   onMatchSelect?: (match: any) => void;
   selectedMatchId?: string;
+  refereesByMatchId?: Map<string, {order: number; name: string; surname: string}[]>;
 }
 
 export default function RecentResultsCard({
@@ -20,6 +21,7 @@ export default function RecentResultsCard({
   loading,
   onMatchSelect,
   selectedMatchId,
+  refereesByMatchId,
 }: RecentResultsCardProps) {
   return (
     <Card className="h-full">
@@ -45,7 +47,11 @@ export default function RecentResultsCard({
                   }`}
                   onClick={() => onMatchSelect?.(match)}
                 >
-                  <MatchRow match={match} redirectionLinks={false} />
+                  <MatchRow
+                    match={match}
+                    redirectionLinks={false}
+                    referees={refereesByMatchId?.get(match.id)}
+                  />
                 </div>
               ))}
               {recentResults.length === 0 && (

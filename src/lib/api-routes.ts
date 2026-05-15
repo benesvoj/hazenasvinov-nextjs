@@ -52,6 +52,7 @@ export const API_ROUTES = {
   },
   logLogin: '/api/log-login' as const,
   matches: {
+    referees: (id: string | number) => `/api/matches/${id}/referees`,
     lineupById: (id: string | number, lineupId: string | number) =>
       `/api/matches/${id}/lineups/${lineupId}`,
     lineupByIdCoacheById: (
@@ -86,6 +87,10 @@ export const API_ROUTES = {
     relationships: (id: string | number) => `/api/members/${id}/relationships`,
   },
   pageVisibility: '/api/page-visibility' as const,
+  referees: {
+    root: '/api/referees' as const,
+    byId: (id: string | number) => `/api/referees/${id}`,
+  },
   relationships: {
     byId: (id: string | number) => `/api/relationships/${id}`,
   },

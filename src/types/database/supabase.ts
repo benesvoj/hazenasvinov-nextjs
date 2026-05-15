@@ -2097,6 +2097,53 @@ export type Database = {
           },
         ];
       };
+      match_referees: {
+        Row: {
+          match_id: string;
+          order: number;
+          referee_id: string;
+        };
+        Insert: {
+          match_id: string;
+          order: number;
+          referee_id: string;
+        };
+        Update: {
+          match_id?: string;
+          order?: number;
+          referee_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'match_referees_match_id_fkey';
+            columns: ['match_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'match_referees_match_id_fkey';
+            columns: ['match_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches_with_teams_optimized';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'match_referees_match_id_fkey';
+            columns: ['match_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'match_referees_referee_id_fkey';
+            columns: ['referee_id'];
+            isOneToOne: false;
+            referencedRelation: 'referees';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       match_videos: {
         Row: {
           created_at: string | null;
@@ -3507,6 +3554,86 @@ export type Database = {
             isOneToOne: true;
             referencedRelation: 'betting_leaderboard';
             referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      referees: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          is_active: boolean;
+          member_id: string | null;
+          name: string;
+          surname: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          is_active?: boolean;
+          member_id?: string | null;
+          name: string;
+          surname: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          is_active?: boolean;
+          member_id?: string | null;
+          name?: string;
+          surname?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'referees_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'member_fee_status';
+            referencedColumns: ['member_id'];
+          },
+          {
+            foreignKeyName: 'referees_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'referees_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_external';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'referees_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_internal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'referees_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_on_loan';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'referees_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_with_metadata';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'referees_member_id_fkey';
+            columns: ['member_id'];
+            isOneToOne: false;
+            referencedRelation: 'members_with_payment_status';
+            referencedColumns: ['id'];
           },
         ];
       };

@@ -1,7 +1,5 @@
 'use client';
 
-import React, {useEffect, useMemo, useRef, useState} from 'react';
-
 import {Alert, Skeleton, Tab, Tabs} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
@@ -11,21 +9,15 @@ import {hasItems, isEmpty} from '@/utils/arrayHelper';
 import CategoryMatchesAndResults from '@/app/(main)/components/CategoryMatchesAndResults';
 
 import {Heading, LoadingSpinner, UnifiedStandingTable} from '@/components';
-import {
-  useFetchCategories,
-  useFetchSeasons,
-  useOptimizedOwnClubMatches,
-  useSeasonFiltering,
-  useStandings,
-  useUserRoles,
-} from '@/hooks';
+
+import {useMatchScheduleData} from './hooks/useMatchScheduleData';
 
 interface MatchScheduleProps {
   title?: string;
   description?: string;
-  showOnlyAssignedCategories?: boolean; // New prop to control category filtering
   redirectionLinks?: boolean;
-  selectedCategoryId?: string; // External category selection
+  /** When provided, overrides internal category selection and hides the category tabs. */
+  selectedCategoryId?: string;
   onStartResultFlow?: (match: any) => void;
   showResultButton?: boolean;
 }
@@ -33,151 +25,28 @@ interface MatchScheduleProps {
 export default function MatchSchedule({
   title,
   description,
-  showOnlyAssignedCategories = false,
   redirectionLinks = true,
   selectedCategoryId,
   onStartResultFlow,
   showResultButton = false,
 }: MatchScheduleProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [assignedCategoryIds, setAssignedCategoryIds] = useState<string[]>([]);
-  const lastFetchedRef = useRef<{categoryId: string; seasonId: string} | null>(null);
-
-  const {data: seasons, refetch: fetchSeasons} = useFetchSeasons();
-  const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
-  const {data: categories, refetch: fetchCategories} = useFetchCategories();
-
-  // Try to get user roles, but handle case where UserProvider is not available
-  let getCurrentUserCategories: (() => Promise<string[]>) | null = null;
-  try {
-    const userRoles = useUserRoles();
-    getCurrentUserCategories = userRoles.getCurrentUserCategories;
-  } catch (error) {
-    // UserProvider not available (e.g., on public pages)
-  }
-
-  // Filter category based on the prop
-  const availableCategories = showOnlyAssignedCategories
-    ? categories.filter((cat) => assignedCategoryIds.includes(cat.id))
-    : categories;
-
-  // Get the selected category data from available category
-  const selectedCategoryData = availableCategories.find((cat) => cat.id === selectedCategory);
-
-  // Only call the hook when we have valid data
   const {
-    allMatches,
-    loading: matchesLoading,
-    error: matchesError,
-  } = useOptimizedOwnClubMatches(
-    selectedCategoryData?.id || undefined,
-    activeSeason?.id || undefined
-  );
-
-  // Use the standings hook
-  const {
-    standings,
-    loading: standingsLoading,
-    error: standingsError,
-    fetchStandings,
-  } = useStandings();
-  const [fetchedCategoryId, setFetchedCategoryId] = useState<string | null>(null);
-
-  // Fetch active season and category on mount
-  useEffect(() => {
-    fetchSeasons();
-    fetchCategories();
-  }, [fetchSeasons, fetchCategories]);
-
-  // Fetch assigned category if needed for coach portal
-  useEffect(() => {
-    if (showOnlyAssignedCategories && getCurrentUserCategories) {
-      const fetchAssignedCategories = async () => {
-        try {
-          const categories = await getCurrentUserCategories();
-          setAssignedCategoryIds(categories);
-        } catch (error) {
-          console.error('Error fetching assigned category:', error);
-          setAssignedCategoryIds([]);
-        }
-      };
-      fetchAssignedCategories();
-    } else if (showOnlyAssignedCategories && !getCurrentUserCategories) {
-      // If UserProvider is not available, use all category
-      setAssignedCategoryIds(categories.map((cat) => cat.id));
-    }
-  }, [showOnlyAssignedCategories, getCurrentUserCategories, categories]);
-
-  // Update selected category when available category change or external category is provided
-  useEffect(() => {
-    if (selectedCategoryId) {
-      // Use external category selection
-      setSelectedCategory(selectedCategoryId);
-    } else if (hasItems(availableCategories)) {
-      // If no category is selected or current selected category is not available, select the first available one
-      if (!selectedCategory || !availableCategories.some((cat) => cat.id === selectedCategory)) {
-        setSelectedCategory(availableCategories[0].id);
-      }
-    }
-  }, [availableCategories, selectedCategory, selectedCategoryId]);
-
-  // Fetch standings when category or active season changes
-  useEffect(() => {
-    if (hasItems(availableCategories) && activeSeason && selectedCategoryData) {
-      const categoryId = selectedCategoryData.id;
-      const seasonId = activeSeason.id;
-
-      // Check if we've already fetched for this combination
-      const lastFetched = lastFetchedRef.current;
-      if (
-        lastFetched &&
-        lastFetched.categoryId === categoryId &&
-        lastFetched.seasonId === seasonId
-      ) {
-        return; // Already fetched for this combination
-      }
-
-      // Update the ref and fetch
-      lastFetchedRef.current = {categoryId, seasonId};
-      setFetchedCategoryId(categoryId);
-      fetchStandings(categoryId, seasonId);
-    }
-  }, [
     selectedCategory,
-    activeSeason?.id,
-    selectedCategoryData?.id,
-    activeSeason,
-    availableCategories.length,
-    fetchStandings,
+    setSelectedCategory,
+    categories,
     selectedCategoryData,
-  ]);
+    activeSeason,
+    allMatches,
+    upcomingMatches,
+    recentResults,
+    matchesLoading,
+    matchesError,
+    categoryStandings,
+    standingsLoading,
+    standingsError,
+    refereesByMatchId,
+  } = useMatchScheduleData({selectedCategoryId});
 
-  // allMatches is already provided by the hook
-
-  const upcomingMatches = useMemo(() => {
-    return allMatches.filter((match) => match.status === 'upcoming').slice(0, 3);
-  }, [allMatches]);
-
-  const recentResults = useMemo(() => {
-    return allMatches
-      .filter((match) => match.status === 'completed')
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 3);
-  }, [allMatches]);
-
-  // Filter standings by selected category - only show standings for the category we actually fetched
-  const categoryStandings = useMemo(() => {
-    if (!selectedCategoryData?.id || !fetchedCategoryId) return [];
-
-    // Only show standings if we fetched them for this specific category
-    if (fetchedCategoryId !== selectedCategoryData.id) return [];
-
-    return standings.filter((standing) => standing.category_id === selectedCategoryData.id);
-  }, [standings, selectedCategoryData?.id, fetchedCategoryId]);
-
-  const loading = matchesLoading || standingsLoading;
-
-  // Don't render if we don't have the necessary data
   if (!selectedCategoryData || !activeSeason) {
     return (
       <section className="bg-gray-50 dark:bg-gray-900">
@@ -215,13 +84,12 @@ export default function MatchSchedule({
               </p>
             </div>
           )}
-          {isEmpty(allMatches) && !loading && !matchesError && (
+          {isEmpty(allMatches) && !matchesLoading && !matchesError && (
             <Skeleton className="w-full h-full" />
           )}
         </div>
 
-        {/* Category Tabs - only show if no external category is provided */}
-        {!selectedCategoryId && hasItems(availableCategories) ? (
+        {!selectedCategoryId && hasItems(categories) && (
           <Tabs
             selectedKey={selectedCategory}
             onSelectionChange={(key) => setSelectedCategory(key as string)}
@@ -229,27 +97,20 @@ export default function MatchSchedule({
             color="primary"
             variant="underlined"
           >
-            {availableCategories.map((category) => (
+            {categories.map((category) => (
               <Tab key={category.id} title={category.name} />
             ))}
           </Tabs>
-        ) : !selectedCategoryId && showOnlyAssignedCategories ? (
-          <div className="text-center py-8 mb-8">
-            <p className="text-gray-600 mb-2">Nemáte přiřazené žádné kategorie</p>
-            <p className="text-sm text-gray-500">
-              Pro testování trenérského portálu použijte simulaci kategorií v administraci
-            </p>
-          </div>
-        ) : !selectedCategoryId ? (
+        )}
+
+        {!selectedCategoryId && !hasItems(categories) && (
           <div className="text-center py-8 mb-8">
             <p className="text-gray-600">Žádné kategorie nejsou k dispozici</p>
           </div>
-        ) : null}
+        )}
 
-        {/* Content */}
-        {hasItems(availableCategories) && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Matches and Results */}
+        {hasItems(categories) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <CategoryMatchesAndResults
               loading={matchesLoading}
               selectedCategory={selectedCategory}
@@ -259,9 +120,8 @@ export default function MatchSchedule({
               redirectionLinks={redirectionLinks}
               onStartResultFlow={onStartResultFlow}
               showResultButton={showResultButton}
+              refereesByMatchId={refereesByMatchId}
             />
-
-            {/* Right Column - Standings */}
             <UnifiedStandingTable standings={categoryStandings} loading={standingsLoading} />
           </div>
         )}

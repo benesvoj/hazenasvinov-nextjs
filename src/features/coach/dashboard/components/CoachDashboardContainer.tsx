@@ -46,7 +46,6 @@ export default function CoachDashboardContainer() {
         <Grid columns={2}>
           <GridItem span={2}>
             <MatchSchedule
-              showOnlyAssignedCategories={true}
               redirectionLinks={false}
               onStartResultFlow={state.handleStartResultFlow}
               showResultButton={true}
