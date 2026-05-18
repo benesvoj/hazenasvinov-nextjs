@@ -171,7 +171,7 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
   },
   blog_posts: {
     tableName: blogPostQueries.DB_TABLE,
-    sortBy: [{column: 'published_at', ascending: false}],
+    sortBy: [{column: 'created_at', ascending: false}],
     requiresAdmin: true, // Write operations require admin
     isPublic: true, // Read operations are public (for blog listing page)
     queryLayer: {
