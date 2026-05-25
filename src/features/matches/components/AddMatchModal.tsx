@@ -5,6 +5,7 @@ import {Button, Input, Select, SelectItem} from '@heroui/react';
 import {translations} from '@/lib/translations';
 
 import {Choice, UnifiedModal} from '@/components';
+import {MatchPhase} from '@/enums';
 import {AddMatchFormData} from '@/types';
 import {isEmpty} from '@/utils';
 
@@ -136,6 +137,22 @@ export default function AddMatchModal({
             })
           }
         />
+        <div>
+          <Select
+            label={translations.matches.matchPhase}
+            placeholder={translations.matches.matchPhasePlaceholder}
+            selectedKeys={formData.match_phase ? [formData.match_phase] : [MatchPhase.REGULAR]}
+            onSelectionChange={(keys) => {
+              const selected = Array.from(keys)[0] as MatchPhase;
+              setFormData({...formData, match_phase: selected ?? MatchPhase.REGULAR});
+            }}
+            className="w-full"
+          >
+            {Object.entries(translations.matches.matchPhases).map(([key, label]) => (
+              <SelectItem key={key}>{label}</SelectItem>
+            ))}
+          </Select>
+        </div>
       </div>
     </UnifiedModal>
   );

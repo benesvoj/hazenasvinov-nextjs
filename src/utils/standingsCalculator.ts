@@ -30,15 +30,16 @@ export async function calculateStandings(
   }
 
   try {
-    // Get completed league matches for the selected category and season
-    // tournament_id IS NULL ensures tournament matches are excluded from league standings
+    // Get completed regular-season matches only.
+    // Excludes tournament matches (tournament_id IS NULL) and playoff matches (match_phase = 'regular').
     let {data: completedMatches, error: matchesError} = await supabase
       .from('matches')
       .select('*')
       .eq('category_id', categoryId)
       .eq('season_id', seasonId)
       .eq('status', 'completed')
-      .is('tournament_id', null);
+      .is('tournament_id', null)
+      .eq('match_phase', 'regular');
 
     if (matchesError) throw matchesError;
     if (!completedMatches) completedMatches = [];
@@ -50,7 +51,8 @@ export async function calculateStandings(
       .select('home_team_id, away_team_id')
       .eq('category_id', categoryId)
       .eq('season_id', seasonId)
-      .is('tournament_id', null);
+      .is('tournament_id', null)
+      .eq('match_phase', 'regular');
 
     if (allMatchesError) throw allMatchesError;
 

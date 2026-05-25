@@ -27,6 +27,7 @@ export interface MatchSchema {
   id: string;
   is_home: boolean | null;
   match_number: string | null;
+  match_phase: string;
   matchweek: number | null;
   post_id: string | null;
   round: number | null;

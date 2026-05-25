@@ -1,4 +1,4 @@
-import {MatchStatus} from '@/enums';
+import {MatchPhase, MatchStatus} from '@/enums';
 
 /**
  * Data required to insert a new match
@@ -16,6 +16,7 @@ export interface MatchInsertData {
   status: MatchStatus;
   matchweek: number | null;
   match_number: number | null;
+  match_phase?: MatchPhase;
   video_ids?: string[];
   tournament_id?: string | null;
   round?: number | null;
@@ -37,6 +38,7 @@ export interface MatchUpdateData {
   away_score?: number;
   home_score_halftime?: number;
   away_score_halftime?: number;
+  match_phase?: MatchPhase;
   video_ids?: string[];
   updated_at?: string;
 }

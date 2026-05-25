@@ -1,6 +1,6 @@
 import {getCategoryInfo} from '@/helpers/getCategoryInfo';
 
-import {MatchStatus} from '@/enums';
+import {MatchPhase, MatchStatus} from '@/enums';
 import {MatchInsertData, MatchUpdateData} from '@/queries/matches';
 import {AddMatchFormData, EditMatchFormData, Category} from '@/types';
 import {isNotNilOrEmpty, isValidPositiveNumber, isNilOrZero} from '@/utils';
@@ -26,6 +26,7 @@ export function buildMatchInsertData(
     status: MatchStatus.UPCOMING,
     matchweek: null,
     match_number: null,
+    match_phase: formData.match_phase ?? MatchPhase.REGULAR,
   };
 
   // Handle matchweek
@@ -54,6 +55,7 @@ export function buildMatchUpdateData(formData: EditMatchFormData): MatchUpdateDa
     status: formData.status,
     matchweek: null,
     match_number: 0,
+    match_phase: formData.match_phase,
   };
 
   // Handle matchweek

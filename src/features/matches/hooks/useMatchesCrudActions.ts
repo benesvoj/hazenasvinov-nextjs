@@ -4,7 +4,7 @@ import {useCallback, useState} from 'react';
 
 import {API_ROUTES} from '@/lib/api-routes';
 
-import {MatchStatus} from '@/enums';
+import {MatchPhase, MatchStatus} from '@/enums';
 import {useMatchFormTeams} from '@/hooks';
 import {AddMatchFormData, Category, EditMatchFormData, Match} from '@/types';
 import {
@@ -27,6 +27,7 @@ const INITIAL_FORM_DATA: AddMatchFormData = {
   season_id: '',
   matchweek: undefined,
   match_number: undefined,
+  match_phase: MatchPhase.REGULAR,
   video_ids: [],
   referee_id_1: null,
   referee_id_2: null,
@@ -45,6 +46,7 @@ const INITIAL_EDIT_DATA: EditMatchFormData = {
   status: MatchStatus.COMPLETED,
   matchweek: 0,
   match_number: 0,
+  match_phase: MatchPhase.REGULAR,
   category_id: '',
   video_ids: [],
   referee_id_1: null,
@@ -207,6 +209,7 @@ export function useMatchesCrudActions({
         status: match.status,
         matchweek: isNilOrZero(match.matchweek) ? 0 : match.matchweek,
         match_number: match.match_number ? match.match_number : 0,
+        match_phase: match.match_phase ?? MatchPhase.REGULAR,
         category_id: match.category_id,
         referee_id_1,
         referee_id_2,

@@ -4,6 +4,9 @@ import {Button} from '@heroui/react';
 
 import {ChevronDownIcon, ChevronUpIcon} from '@heroicons/react/24/outline';
 
+import {translations} from '@/lib/translations';
+
+import {isPlayoffPhase, MatchPhase, PLAYOFF_PHASES} from '@/enums';
 import {Match, Category} from '@/types';
 
 import {CategoryMatchRow} from './CategoryMatchRow';
@@ -37,9 +40,29 @@ export default function CategoryMatches({
   isSeasonClosed,
   refereesByMatchId,
 }: CategoryMatchesProps) {
+  // Playoff matches grouped by phase in declaration order
+  const playoffByPhase = useMemo(() => {
+    const grouped = new Map<MatchPhase, Match[]>();
+    PLAYOFF_PHASES.forEach((phase) => grouped.set(phase, []));
+    matches
+      .filter((m) => m.category_id === category.id && isPlayoffPhase(m.match_phase))
+      .forEach((m) => {
+        const phase = m.match_phase as MatchPhase;
+        grouped.get(phase)!.push(m);
+      });
+    return grouped;
+  }, [matches, category.id]);
+
+  const hasPlayoffMatches = useMemo(
+    () => PLAYOFF_PHASES.some((phase) => playoffByPhase.get(phase)!.length > 0),
+    [playoffByPhase]
+  );
+
   // Memoize the grouped matches calculation to avoid unnecessary re-computations
   const {groupedMatches, sortedMatchweeks} = useMemo(() => {
-    const matchesForCategory = matches.filter((match) => match.category_id === category.id);
+    const matchesForCategory = matches.filter(
+      (match) => match.category_id === category.id && !isPlayoffPhase(match.match_phase)
+    );
     const grouped = new Map<number, Match[]>();
 
     // Group by matchweek, put matches without matchweek at the end
@@ -193,6 +216,44 @@ export default function CategoryMatches({
           );
         })}
       </div>
+
+      {/* Playoff Section */}
+      {hasPlayoffMatches && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+            {translations.matches.playoff.sectionTitle}
+          </h3>
+          <div className="space-y-6">
+            {PLAYOFF_PHASES.map((phase) => {
+              const phaseMatches = playoffByPhase.get(phase)!;
+              if (phaseMatches.length === 0) return null;
+              const phaseLabel = translations.matches.matchPhases[phase];
+              return (
+                <div key={phase} className="border rounded-lg p-4 bg-amber-50">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">
+                    {phaseLabel} ({phaseMatches.length})
+                  </h4>
+                  <div className="space-y-3">
+                    {phaseMatches.map((match) => (
+                      <CategoryMatchRow
+                        key={match.id}
+                        match={match}
+                        onAddResult={onAddResult}
+                        onEditMatch={onEditMatch}
+                        onLineupModalOpen={onLineupModalOpen}
+                        onDeleteClick={onDeleteClick}
+                        onMatchActionsOpen={onMatchActionsOpen}
+                        isSeasonClosed={isSeasonClosed}
+                        referees={refereesByMatchId?.get(match.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
