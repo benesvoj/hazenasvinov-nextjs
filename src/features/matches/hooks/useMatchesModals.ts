@@ -13,7 +13,8 @@ export function useMatchesModals() {
     'lineup',
     'excelImport',
     'matchProcess',
-    'deleteAllConfirm'
+    'deleteAllConfirm',
+    'pointDeductions'
   );
   const deleteConfirm = useModalWithItem<Match>();
   const matchActions = useModalWithItem<Match>();

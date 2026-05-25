@@ -175,8 +175,31 @@ export async function calculateStandings(
       }
     });
 
-    // Convert to array and sort by points, then goal difference
-    const standingsArray = Array.from(standingsMap.values()).sort((a, b) => {
+    // Fetch point deductions for this category/season
+    const {data: deductionsData} = await supabase
+      .from('point_deductions')
+      .select('team_id, points')
+      .eq('category_id', categoryId)
+      .eq('season_id', seasonId);
+
+    // Build a map: team_id → total deduction (sum of all deductions, always ≤ 0)
+    const deductionMap = new Map<string, number>();
+    (deductionsData || []).forEach((d: {team_id: string; points: number}) => {
+      deductionMap.set(d.team_id, (deductionMap.get(d.team_id) ?? 0) + d.points);
+    });
+
+    // Apply deductions and build final array
+    const standingsArray = Array.from(standingsMap.values()).map((s) => {
+      const deduction = deductionMap.get(s.team_id) ?? 0;
+      return {
+        ...s,
+        points: s.points + deduction,
+        points_deduction: Math.abs(deduction),
+      };
+    });
+
+    // Sort by net points, then goal difference
+    standingsArray.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
       const aGoalDiff = a.goals_for - a.goals_against;
       const bGoalDiff = b.goals_for - b.goals_against;

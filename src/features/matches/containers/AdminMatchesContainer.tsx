@@ -29,6 +29,7 @@ import {
   ExcelImportModal,
   MatchActionsModal,
   MatchProcessWizardModal,
+  PointDeductionsModal,
 } from '../components';
 import {getMatchweekOptions} from '../helpers';
 import {useMatchesPageLogic} from '../hooks';
@@ -80,6 +81,7 @@ export function AdminMatchesContainer() {
     standingsLoading,
     hasStandings,
     error,
+    refresh: refreshStandings,
     handleResetAndRecalculate,
     handleStandingsAction,
   } = standingsApi;
@@ -121,6 +123,14 @@ export function AdminMatchesContainer() {
           buttonType: ActionTypes.DELETE,
           color: 'warning',
           isDisabled: isSeasonClosed,
+          priority: 'secondary',
+        },
+        {
+          label: translations.pointDeductions.title,
+          onClick: modal.pointDeductions.onOpen,
+          buttonType: ActionTypes.UPDATE,
+          color: 'secondary',
+          isDisabled: !selectedCategoryId || !selectedSeasonId,
           priority: 'secondary',
         },
         {
@@ -354,6 +364,15 @@ export function AdminMatchesContainer() {
         isOpen={modal.matchProcess.isOpen}
         onClose={modal.matchProcess.onClose}
         match={selectedMatch}
+      />
+
+      <PointDeductionsModal
+        isOpen={modal.pointDeductions.isOpen}
+        onClose={modal.pointDeductions.onClose}
+        categoryId={selectedCategoryId || ''}
+        seasonId={selectedSeasonId || ''}
+        teams={filteredTeams}
+        onDeductionsChanged={refreshStandings}
       />
 
       <DeleteConfirmationModal

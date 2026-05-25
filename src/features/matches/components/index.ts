@@ -1,4 +1,5 @@
 export {default as AddMatchModal} from './AddMatchModal';
+export {default as PointDeductionsModal} from './PointDeductionsModal';
 export {default as AddResultModal} from './AddResultModal';
 export {default as BulkUpdateMatchweekModal} from './BulkUpdateMatchweekModal';
 export {CategoryMatchRow} from './CategoryMatchRow';

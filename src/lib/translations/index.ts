@@ -25,6 +25,7 @@ import {memberFunctionsTranslations} from './memberFunctions';
 import {membersTranslations} from './members';
 import {membershipFeesTranslations} from './membershipFees';
 import {photoGalleryTranslations} from './photoGallery';
+import {pointDeductionsTranslations} from './pointDeductions';
 import {publicTranslations} from './public';
 import {refereesTranslations} from './referees';
 import {seasonsTranslations} from './seasons';
@@ -76,4 +77,5 @@ export const translations = {
   userRoles: userRolesTranslations,
   tournaments: tournamentsTranslations,
   referees: refereesTranslations,
+  pointDeductions: pointDeductionsTranslations,
 } as const;

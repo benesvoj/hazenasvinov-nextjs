@@ -117,6 +117,10 @@ export const API_ROUTES = {
   trainingSessions: {
     bulk: '/api/training-sessions/bulk' as const,
   },
+  pointDeductions: {
+    root: '/api/point-deductions' as const,
+    byId: (id: string | number) => `/api/point-deductions/${id}`,
+  },
   userProfiles: '/api/user-profiles' as const,
   users: '/api/users' as const,
 } as const;
