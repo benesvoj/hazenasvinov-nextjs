@@ -149,6 +149,56 @@ export function useMembers() {
   }, []);
 
   /**
+   * Activate / deactivate a member (soft removal).
+   *
+   * Deactivated members stay in the database and remain visible in historical
+   * records (matches, lineups), but are filtered out of every selection list.
+   */
+  const setMemberActive = useCallback(
+    async (memberId: string, isActive: boolean): Promise<void> => {
+      setIsLoading(true);
+
+      try {
+        const response = await fetch(API_ROUTES.members.byId(memberId), {
+          method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({is_active: isActive}),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.error ||
+              (isActive
+                ? tMembers.toasts.memberActivationFailed
+                : tMembers.toasts.memberDeactivationFailed)
+          );
+        }
+
+        showToast.success(
+          isActive
+            ? tMembers.toasts.memberActivatedSuccessfully
+            : tMembers.toasts.memberDeactivatedSuccessfully
+        );
+      } catch (error) {
+        console.error('Error changing member active state:', error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : isActive
+              ? tMembers.toasts.memberActivationFailed
+              : tMembers.toasts.memberDeactivationFailed;
+        showToast.danger(errorMessage);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  /**
    * Delete a member
    */
   const deleteMember = useCallback(async (memberId: string): Promise<void> => {
@@ -250,6 +300,7 @@ export function useMembers() {
     // CRUD Operations
     createMember,
     updateMember,
+    setMemberActive,
     deleteMember,
     createInternalMember,
 

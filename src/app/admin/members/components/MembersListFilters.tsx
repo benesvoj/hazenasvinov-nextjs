@@ -10,7 +10,7 @@ import {getMemberFunctionOptions} from '@/enums/getMemberFunctionOptions';
 
 import {translations} from '@/lib/translations';
 
-import {GenderFilter, Search} from '@/components';
+import {Choice, GenderFilter, Search} from '@/components';
 import {Genders} from '@/enums';
 import {Category, MemberTableFilters} from '@/types';
 
@@ -32,7 +32,22 @@ export function MembersListFilters({
   categories,
 }: MembersListFiltersProps) {
   const t = translations.members;
-  const hasActiveFilters = searchTerm || filters.gender || filters.category_id || filters.function;
+  const hasActiveFilters =
+    searchTerm ||
+    filters.gender ||
+    filters.category_id ||
+    filters.function ||
+    filters.isActive !== true;
+
+  /** Tri-state: `'active'` | `'inactive'` | `'all'` mapped onto `filters.isActive`. */
+  const statusValue =
+    filters.isActive === true ? 'active' : filters.isActive === false ? 'inactive' : 'all';
+
+  const handleStatusChange = (value: string) =>
+    onFiltersChange({
+      ...filters,
+      isActive: value === 'all' ? undefined : value === 'active',
+    });
 
   return (
     <div className="flex flex-col gap-4">
@@ -111,6 +126,23 @@ export function MembersListFilters({
                 </SelectItem>
               ))}
             </Select>
+          </div>
+
+          {/* Membership state filter (active / deactivated / all) */}
+          <div className="w-full sm:w-48">
+            <Choice
+              ariaLabel={t.table.filters.status.ariaLabel}
+              items={[
+                {key: 'active', label: t.table.filters.status.active},
+                {key: 'inactive', label: t.table.filters.status.inactive},
+                {key: 'all', label: t.table.filters.status.all},
+              ]}
+              value={statusValue}
+              onChange={handleStatusChange}
+              disallowEmptySelection
+              size="sm"
+              className="w-full"
+            />
           </div>
 
           {/* Clear Filters Button */}

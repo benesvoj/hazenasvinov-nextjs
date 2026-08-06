@@ -19,6 +19,14 @@ export const membersTranslations = {
         placeholder: 'Všechny funkce',
         ariaLabel: 'Filtrovat podle funkce',
       },
+      status: {
+        title: 'Stav',
+        placeholder: 'Všichni členové',
+        ariaLabel: 'Filtrovat podle stavu členství',
+        active: 'Aktivní členové',
+        inactive: 'Vyřazení členové',
+        all: 'Všichni členové',
+      },
     },
     noMembersFound: 'Žádní členové nebyli nalezeni',
     noFunctionsFound: 'Žádné funkce',
@@ -39,6 +47,10 @@ export const membersTranslations = {
       openDetail: 'Otevřít detail člena',
       openEdit: 'Editace člena',
       openDelete: 'Smazání člena',
+    },
+    actions: {
+      deactivate: 'Vyřadit člena',
+      activate: 'Obnovit členství',
     },
   },
   membersList: 'Seznam členů',
@@ -68,6 +80,10 @@ export const membersTranslations = {
     memberUpdatedSuccessfully: 'Člen byl úspěšně aktualizován',
     memberDeleteFailed: 'Chyba při mazání člena',
     memberDeletedSuccessfully: 'Člen byl úspěšně smazán',
+    memberDeactivatedSuccessfully: 'Člen byl vyřazen ze systému',
+    memberActivatedSuccessfully: 'Členství bylo obnoveno',
+    memberDeactivationFailed: 'Chyba při vyřazování člena',
+    memberActivationFailed: 'Chyba při obnovování členství',
   },
   buttons: {
     bulkChange: 'Hromadná změna',
@@ -84,8 +100,14 @@ export const membersTranslations = {
       addMember: 'Přidat člena',
       editMember: 'Upravit člena',
       deleteMember: 'Smazat člena',
+      deactivateMember: 'Vyřadit člena',
+      activateMember: 'Obnovit členství',
     },
     deleteMemberMessage: 'Opravdu chcete smazat člena? Tato akce je nevratná.',
+    deactivateMemberMessage:
+      'Opravdu chcete vyřadit člena ze systému? Člen zůstane v historických záznamech (zápasy, soupisky), ale nebude ho již možné nikde vybírat. Vyřazení lze kdykoli vrátit zpět.',
+    activateMemberMessage:
+      'Opravdu chcete obnovit členství? Člen bude znovu nabízen ve všech výběrech.',
     memberForm: {
       registrationNumber: 'Registrační číslo',
       registrationNumberHelper:

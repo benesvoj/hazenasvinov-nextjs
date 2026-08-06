@@ -107,6 +107,10 @@ export default function UnifiedTable<T = any>({
         return 'success';
       case ActionTypes.UNBLOCK:
         return 'danger';
+      case ActionTypes.DEACTIVATE:
+        return 'warning';
+      case ActionTypes.ACTIVATE:
+        return 'success';
       default:
         return 'default';
     }

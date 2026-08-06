@@ -9,8 +9,9 @@ import {QueryContext} from '@/queries/shared/types';
  * an option means "no restriction" for that dimension, not "match falsy rows".
  *
  * **`isActive` semantics:**
- * - `isActive === true`             → `WHERE is_active = true` (active members only)
- * - `isActive === false / undefined` → filter not applied (all members returned)
+ * - `isActive === true`      → `WHERE is_active = true` (active members only)
+ * - `isActive === false`     → `WHERE is_active = false` (deactivated members only)
+ * - `isActive === undefined` → filter not applied (all members returned)
  *
  * Results are always ordered alphabetically by surname then name.
  *
@@ -31,7 +32,7 @@ export function buildMembersViewQuery(
     query = query.or(
       `name.ilike.%${search}%,surname.ilike.%${search}%,registration_number.ilike.%${search}%`
     );
-  if (isActive) query = query.eq('is_active', true);
+  if (isActive !== undefined) query = query.eq('is_active', isActive);
   if (sex && sex !== Genders.EMPTY) query = query.eq('sex', sex);
   if (categoryId) query = query.eq('category_id', categoryId);
   if (memberFunctions) query = query.contains('functions', [memberFunctions]);

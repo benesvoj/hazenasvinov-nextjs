@@ -58,8 +58,8 @@ export interface GetMembersOptions {
   memberFunctions?: MemberFunction;
 
   /**
-   * When `true`, only active members are returned (`WHERE is_active = true`).
-   * `false` and `undefined` both mean no filter — all members are returned.
+   * Membership state filter. `true` returns only active members, `false` only
+   * deactivated (vyřazené) ones, `undefined` means no filter — all members.
    */
   isActive?: boolean;
 }

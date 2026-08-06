@@ -26,7 +26,7 @@ const EMPTY_FORM: RefereeFormData = {
 export function RefereesAdminContainer() {
   const {data: refereesData, loading: refereesLoading, refetch} = useFetchReferees();
   const {data: members} = useFetchMembersInternal({
-    filters: {function: MemberFunction.REFEREE},
+    filters: {function: MemberFunction.REFEREE, isActive: true},
     limit: 200,
   });
   const {loading: crudLoading, createReferee, updateReferee, deleteReferee} = useReferees();

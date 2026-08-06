@@ -21,25 +21,37 @@ export const getInternalMemberColumns = (
     onPayment?: (member: MemberInternal) => void;
     onDelete?: (member: MemberInternal) => void;
     onEdit?: (member: MemberInternal) => void;
+    /** Soft removal — deactivates an active member, reactivates a deactivated one. */
+    onToggleActive?: (member: MemberInternal) => void;
   }
 ): ColumnType<MemberInternal>[] => {
-  const actionItems = [
-    actions.onPayment && {type: ActionTypes.PAYMENT, onPress: actions.onPayment},
-    actions.onEdit && {type: ActionTypes.UPDATE, onPress: actions.onEdit},
-    actions.onDelete && {type: ActionTypes.DELETE, onPress: actions.onDelete},
-  ].filter((a): a is ActionConfig<MemberInternal> => Boolean(a));
+  const buildActions = (member: MemberInternal) =>
+    [
+      actions.onPayment && {type: ActionTypes.PAYMENT, onPress: actions.onPayment},
+      actions.onEdit && {type: ActionTypes.UPDATE, onPress: actions.onEdit},
+      actions.onToggleActive && {
+        type: member.is_active ? ActionTypes.DEACTIVATE : ActionTypes.ACTIVATE,
+        onPress: actions.onToggleActive,
+        title: member.is_active ? t.table.actions.deactivate : t.table.actions.activate,
+      },
+      actions.onDelete && {type: ActionTypes.DELETE, onPress: actions.onDelete},
+    ].filter((a): a is ActionConfig<MemberInternal> => Boolean(a));
+
+  const hasActions = Boolean(
+    actions.onPayment || actions.onEdit || actions.onToggleActive || actions.onDelete
+  );
 
   return [
     ...getCommonMemberColumns(t),
     {key: 'membershipFee', label: t.table.columns.membershipFee}, // Payment column
-    ...(actionItems.length > 0
+    ...(hasActions
       ? [
           {
             key: 'actions',
             label: t.table.columns.actions,
             align: ColumnAlignType.CENTER,
             isActionColumn: true,
-            actions: actionItems,
+            actions: buildActions,
           },
         ]
       : []),

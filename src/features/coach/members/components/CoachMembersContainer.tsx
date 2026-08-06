@@ -86,7 +86,8 @@ export default function CoachMembersContainer() {
           onDelete={state.isAdmin ? state.openDeleteInternal : undefined}
           searchTerm={state.searchTerm}
           pageSize={10}
-          filters={{isActive: state.isActiveOnly}}
+          // `undefined` = no filter (all members); `true` = active only.
+          filters={{isActive: state.isActiveOnly || undefined}}
         />
       </AppPageLayout>
 

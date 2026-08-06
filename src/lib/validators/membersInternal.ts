@@ -26,8 +26,8 @@ export const MembersInternalQuerySchema = z.object({
   category_id: z.string().uuid().optional(),
   function: z.nativeEnum(MemberFunction).optional(),
   /**
-   * Active-only flag. Only `'true'` triggers the filter; `'false'` and absent
-   * both resolve to `false` (show all members). See `buildMembersViewQuery`.
+   * Membership state filter. `'true'` → active only, `'false'` → deactivated
+   * only, absent → no filter (all members). See `buildMembersViewQuery`.
    */
   isActive: z
     .enum(['true', 'false'])

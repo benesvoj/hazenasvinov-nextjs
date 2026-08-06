@@ -72,7 +72,8 @@ export const useFetchMembersInternal = (options: MembersInternalOptions = {}) =>
         if (debouncedSex) url.searchParams.set('sex', debouncedSex);
         if (debouncedCatId) url.searchParams.set('category_id', debouncedCatId);
         if (debouncedFn) url.searchParams.set('function', debouncedFn);
-        if (filters?.isActive) url.searchParams.set('isActive', 'true');
+        if (filters?.isActive !== undefined)
+          url.searchParams.set('isActive', String(filters.isActive));
 
         const response = await fetch(url.toString(), {
           signal: abortControllerRef.current.signal,

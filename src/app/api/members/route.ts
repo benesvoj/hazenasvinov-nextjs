@@ -6,13 +6,22 @@ import {getMembersAll} from '@/queries/members';
 import {MemberInsert} from '@/types';
 
 /**
- * GET /api/members - List all members (already rexists via other routes, optional without any condition)
- * @param request
- * @constructor
+ * GET /api/members - List members.
+ *
+ * Returns only active members by default — deactivated (vyřazení) members must
+ * not appear in selection lists. Pass `?includeInactive=true` to get everyone.
  */
 export async function GET(request: NextRequest) {
   return withAuth(async (user, supabase) => {
-    const result = await getMembersAll({supabase});
+    const includeInactive = request.nextUrl.searchParams.get('includeInactive') === 'true';
+
+    const result = await getMembersAll(
+      {supabase},
+      {
+        limit: 1000,
+        ...(includeInactive ? {} : {isActive: true}),
+      }
+    );
 
     if (result.error) {
       throw new Error(result.error);
