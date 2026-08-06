@@ -196,8 +196,10 @@ export const useExcelImport = () => {
             continue;
           }
 
-          // Check for duplicate matches
-          const {data: existingMatch} = await supabase
+          // Check for duplicate matches. maybeSingle(), not single(): finding
+          // nothing is the expected outcome here, and single() answers that
+          // with a PGRST116 error and an HTTP 406 for every imported row.
+          const {data: existingMatch, error: duplicateCheckError} = await supabase
             .from('matches')
             .select('id')
             .eq('category_id', category.id)
@@ -206,7 +208,15 @@ export const useExcelImport = () => {
             .eq('away_team_id', awayTeam.id)
             .eq('date', formattedDate)
             .eq('time', match.time)
-            .single();
+            .maybeSingle();
+
+          if (duplicateCheckError) {
+            result.failed++;
+            result.errors.push(
+              `Nepodařilo se ověřit duplicitu zápasu ${match.matchNumber}: ${duplicateCheckError.message}`
+            );
+            continue;
+          }
 
           if (existingMatch) {
             result.failed++;
