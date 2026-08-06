@@ -55,6 +55,7 @@ export function AdminMatchesContainer() {
     categories,
     sortedSeasons,
     members,
+    teams,
     filteredTeams,
     matches,
     seasonalMatches,
@@ -337,7 +338,7 @@ export function AdminMatchesContainer() {
         onClose={modal.excelImport.onClose}
         onImport={handleExcelImport}
         categories={categories}
-        teams={[]}
+        teams={teams}
         selectedSeason={selectedSeasonId}
       />
 
