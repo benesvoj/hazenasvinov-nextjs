@@ -106,8 +106,18 @@ export function useMatchesBulkActions({
           showToast.success(translations.matches.toasts.matchSuccessImport);
         }
         if (hasItems(result.errors)) {
+          console.error('Chyby při importu zápasů:', result.errors);
+
+          // The same failure usually repeats on every row, so a few distinct
+          // messages say more than a pointer to the console
+          const distinctErrors = Array.from(new Set(result.errors));
+          const shown = distinctErrors.slice(0, 3).join(' • ');
+          const remaining = distinctErrors.length - 3;
+
           setError(
-            `Import dokončen s chybami. Úspěšně: ${result.success}, Selhalo: ${result.failed}. Zkontrolujte konzoli pro detaily.`
+            `Import dokončen s chybami. Úspěšně: ${result.success}, Selhalo: ${result.failed}. ${shown}${
+              remaining > 0 ? ` • …a další (${remaining})` : ''
+            }`
           );
         }
       } catch (err) {
