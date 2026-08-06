@@ -32,28 +32,36 @@ export const MemberFormModal = ({
   categories,
   showPaymentsTab,
 }: MemberFormModalProps) => {
-  const {formData, updateFormData, handleSubmit, isLoading, openAddMode, openEditMode} =
-    useMemberForm();
+  const {
+    formData,
+    updateFormData,
+    handleSubmit,
+    isLoading,
+    isMetadataLoading,
+    openAddMode,
+    openEditModeWithMetadata,
+  } = useMemberForm();
 
   const isEditMode = isNotNilOrEmpty(member);
 
   useEffect(() => {
     if (!isOpen) return;
     if (member) {
-      openEditMode(member);
+      // Loads the member row plus its metadata (contact, parent, medical, …)
+      void openEditModeWithMetadata(member);
     } else {
       openAddMode();
-      if (hasItems(categories)) {
-        updateFormData({category_id: categories[0].id});
-      }
     }
   }, [isOpen, member]);
 
+  // Preselect the first category for NEW members only — in edit mode the
+  // member's own category must never be overwritten by the default.
   useEffect(() => {
+    if (!isOpen || isEditMode) return;
     if (hasItems(categories) && !formData.category_id) {
       updateFormData({category_id: categories[0].id});
     }
-  }, [categories]);
+  }, [isOpen, isEditMode, categories, formData.category_id]);
 
   const handleInputChange = (field: keyof MemberMetadataFormData, value: string) => {
     updateFormData({[field]: value} as Partial<MemberMetadataFormData>);
@@ -82,7 +90,7 @@ export const MemberFormModal = ({
         }
       }}
       title={title}
-      isLoading={isLoading}
+      isLoading={isLoading || isMetadataLoading}
       size={sizeOption}
       scrollBehavior="inside"
     >
