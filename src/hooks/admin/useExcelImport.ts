@@ -10,13 +10,14 @@ import {
 import {CompetitionTypes} from '@/enums';
 import {useSupabaseClient} from '@/hooks';
 
-/** Row shape of the `teams` view — every column is nullable there. */
-interface TeamViewRow {
-  id: string | null;
-  name: string | null;
-  short_name: string | null;
-  category_id: string | null;
-  season_id: string | null;
+interface ClubCategoryTeamRow {
+  id: string;
+  team_suffix: string;
+  club_category: {
+    category_id: string;
+    season_id: string;
+    club: {name: string; short_name: string | null};
+  };
 }
 
 interface ExcelMatch {
@@ -66,15 +67,30 @@ export const useExcelImport = () => {
         errors: [],
       };
 
-      // Get category and teams for mapping. Teams are scoped to the target
-      // season — the view holds one row per team, category and season, so an
-      // unscoped lookup can resolve to a previous season's team id.
-      const {data: categories} = await supabase.from('categories').select('id, name');
+      const {data: categories, error: categoriesError} = await supabase
+        .from('categories')
+        .select('id, name');
 
-      const {data: teams} = await supabase
-        .from('teams')
-        .select('id, name, short_name, category_id, season_id')
-        .eq('season_id', seasonId);
+      // Read teams from club_category_teams rather than the `teams` view: that
+      // view sits on the teams_with_details materialized view, whose refresh
+      // triggers only pg_notify() and therefore never actually refresh it. The
+      // preview in ExcelImportModal reads this same live data, so both sides
+      // must agree on which teams exist.
+      const {data: teams, error: teamsError} = await supabase
+        .from('club_category_teams')
+        .select(
+          `
+          id,
+          team_suffix,
+          club_category:club_categories!inner(
+            category_id,
+            season_id,
+            club:clubs!inner(name, short_name)
+          )
+        `
+        )
+        .eq('is_active', true)
+        .eq('club_category.season_id', seasonId);
 
       // Get season start date for matchweek calculation
       const {data: season} = await supabase
@@ -83,26 +99,29 @@ export const useExcelImport = () => {
         .eq('id', seasonId)
         .single();
 
-      if (!categories || !teams) {
-        result.errors.push('Nepodařilo se načíst kategorie nebo týmy');
+      if (categoriesError || teamsError || !categories || !teams) {
+        result.errors.push(
+          `Nepodařilo se načíst kategorie nebo týmy: ${categoriesError?.message || teamsError?.message || 'prázdná odpověď'}`
+        );
         return result;
       }
 
-      // The view exposes every column as nullable — drop incomplete rows so the
-      // shared resolver can work with plain strings.
-      const teamCandidates: ImportTeamCandidate[] = (teams as TeamViewRow[]).flatMap((team) =>
-        team.id && team.name
-          ? [
-              {
-                id: team.id,
-                name: team.name,
-                short_name: team.short_name,
-                category_id: team.category_id,
-                season_id: team.season_id,
-              },
-            ]
-          : []
+      // Names must be built exactly like useTeams does, since that is what the
+      // preview validated the file against.
+      const teamCandidates: ImportTeamCandidate[] = (teams as unknown as ClubCategoryTeamRow[]).map(
+        (team) => ({
+          id: team.id,
+          name: `${team.club_category.club.name} ${team.team_suffix}`,
+          short_name: `${team.club_category.club.short_name || team.club_category.club.name} ${team.team_suffix}`,
+          category_id: team.club_category.category_id,
+          season_id: team.club_category.season_id,
+        })
       );
+
+      if (teamCandidates.length === 0) {
+        result.errors.push('Pro vybranou sezónu nejsou evidovány žádné týmy');
+        return result;
+      }
 
       // Process each match
       for (const match of matches) {
