@@ -7,6 +7,72 @@
  * team. Keeping the lookup here is what guarantees they stay in sync.
  */
 
+/**
+ * The single description of the file format: it drives the header validation,
+ * the CSV example and the help shown in the import dialog, so the three cannot
+ * drift apart. Order matters — rows are read by column position, not by name.
+ */
+export const IMPORT_COLUMNS = [
+  {name: 'date', format: 'DD.MM.RRRR', example: '14.09.2025', required: true},
+  {name: 'time', format: 'HH:MM (24h)', example: '10:30', required: true},
+  {name: 'matchNumber', format: 'text', example: 'A1234', required: true},
+  {name: 'homeTeam', format: 'název týmu', example: 'TJ Sokol Svinov', required: true},
+  {name: 'awayTeam', format: 'název týmu', example: 'TJ Sokol Poruba', required: true},
+  {name: 'category', format: 'název kategorie', example: 'Muži', required: true},
+  {name: 'matchweek', format: 'celé číslo, nepovinné', example: '3', required: false},
+];
+
+/** Columns the file must contain. Optional ones are appended after these. */
+export const REQUIRED_IMPORT_HEADERS = IMPORT_COLUMNS.filter((column) => column.required).map(
+  (column) => column.name
+);
+
+export const IMPORT_CSV_EXAMPLE = [
+  IMPORT_COLUMNS.map((column) => column.name).join(';'),
+  IMPORT_COLUMNS.map((column) => column.example).join(';'),
+].join('\n');
+
+/**
+ * Compares header spelling only, so "matchNumber", "match_number" and
+ * "Match Number" are all accepted. Cells can be numbers in Excel, hence String().
+ */
+const normalizeHeader = (header: unknown) =>
+  String(header ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+
+/**
+ * Rows are read by column position, so headers must be validated by position
+ * too — a file carrying the right names in the wrong order would otherwise
+ * import every value into the wrong field.
+ */
+export function validateImportHeaders(headers: unknown[]): {isValid: boolean; errors: string[]} {
+  const errors: string[] = [];
+
+  IMPORT_COLUMNS.forEach((column, index) => {
+    const actual = normalizeHeader(headers[index]);
+
+    if (!actual) {
+      // Trailing optional columns may simply be absent
+      if (column.required) {
+        errors.push(`Chybí ${index + 1}. sloupec: ${column.name}`);
+      }
+      return;
+    }
+
+    if (actual !== normalizeHeader(column.name)) {
+      errors.push(
+        `${index + 1}. sloupec má být "${column.name}", nalezeno "${String(headers[index])}"`
+      );
+    }
+  });
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
 export interface ImportTeamCandidate {
   id: string;
   name: string;

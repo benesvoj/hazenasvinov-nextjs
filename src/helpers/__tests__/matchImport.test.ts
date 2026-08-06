@@ -1,10 +1,13 @@
 import {describe, it, expect} from 'vitest';
 
 import {
+  IMPORT_COLUMNS,
   ImportTeamCandidate,
+  REQUIRED_IMPORT_HEADERS,
   parseImportMatchweek,
   resolveImportCategory,
   resolveImportTeam,
+  validateImportHeaders,
 } from '../matchImport';
 
 const MEN = 'category-men';
@@ -21,6 +24,77 @@ const team = (overrides: Partial<ImportTeamCandidate> & {id: string; name: strin
 
 const resolveHomeTeam = (teams: ImportTeamCandidate[], name: string) =>
   resolveImportTeam(teams, {name, label: 'Domácí tým', categoryId: MEN, seasonId: SEASON});
+
+describe('validateImportHeaders', () => {
+  const ALL_HEADERS = IMPORT_COLUMNS.map((column) => column.name);
+
+  it('should accept the documented header row', () => {
+    expect(validateImportHeaders(ALL_HEADERS)).toEqual({isValid: true, errors: []});
+  });
+
+  it('should accept a file without the optional matchweek column', () => {
+    expect(validateImportHeaders(REQUIRED_IMPORT_HEADERS).isValid).toBe(true);
+  });
+
+  it('should ignore case, separators and surrounding whitespace', () => {
+    const headers = ['Date', ' TIME ', 'match_number', 'Home Team', 'away-team', 'CATEGORY'];
+
+    expect(validateImportHeaders(headers).isValid).toBe(true);
+  });
+
+  it('should report numeric header cells rather than throwing', () => {
+    // Excel hands over raw numbers, which have no .toLowerCase()
+    const result = validateImportHeaders([1, 2, 3, 4, 5, 6]);
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toContain('1. sloupec má být "date", nalezeno "1"');
+  });
+
+  it('should reject an empty header cell instead of treating it as a match', () => {
+    // 'date'.includes('') is true — an empty cell used to satisfy every column
+    const headers = ['', 'time', 'matchNumber', 'homeTeam', 'awayTeam', 'category'];
+    const result = validateImportHeaders(headers);
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toContain('Chybí 1. sloupec: date');
+  });
+
+  it('should reject a header row that is completely empty', () => {
+    const result = validateImportHeaders([]);
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(REQUIRED_IMPORT_HEADERS.length);
+  });
+
+  it('should reject the right names in the wrong order', () => {
+    // Values are read by position, so swapped columns would import garbage
+    const headers = ['time', 'date', 'matchNumber', 'homeTeam', 'awayTeam', 'category'];
+    const result = validateImportHeaders(headers);
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toContain('1. sloupec má být "date", nalezeno "time"');
+    expect(result.errors).toContain('2. sloupec má být "time", nalezeno "date"');
+  });
+
+  it('should reject a substring of an expected name', () => {
+    // "team" used to satisfy both homeTeam and awayTeam
+    const headers = ['date', 'time', 'matchNumber', 'team', 'team', 'category'];
+
+    expect(validateImportHeaders(headers).isValid).toBe(false);
+  });
+
+  it('should reject an unexpected name in the optional column position', () => {
+    const result = validateImportHeaders([...REQUIRED_IMPORT_HEADERS, 'venue']);
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toContain('7. sloupec má být "matchweek", nalezeno "venue"');
+  });
+
+  it('should list every required column before the optional ones', () => {
+    // Positional parsing only works if optional columns are a trailing suffix
+    expect(ALL_HEADERS.slice(0, REQUIRED_IMPORT_HEADERS.length)).toEqual(REQUIRED_IMPORT_HEADERS);
+  });
+});
 
 describe('resolveImportTeam', () => {
   it('should match a name exactly', () => {
