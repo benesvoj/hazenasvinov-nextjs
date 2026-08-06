@@ -14,6 +14,7 @@ export interface Standing {
   goals_for: number;
   goals_against: number;
   points: number;
+  points_deduction?: number;
   club?: Club;
   team?: {
     id: string;
@@ -25,6 +26,7 @@ export interface Standing {
 }
 
 export interface EnhancedStanding extends Omit<Standing, 'club' | 'team'> {
+  points_deduction: number;
   team: {
     id: string;
     team_suffix: string;

@@ -88,6 +88,7 @@ export * from './entities/player/useExternalPlayerCreation';
 export * from './entities/player/usePlayerLoans';
 export * from './entities/player/usePlayerStats';
 export * from './entities/player/useUnifiedPlayers';
+export * from './entities/point-deduction/state/usePointDeduction';
 export * from './entities/referee/data/useFetchReferees';
 export * from './entities/referee/state/useReferees';
 export * from './entities/roleDefinition/data/useFetchRoleDefinitions';

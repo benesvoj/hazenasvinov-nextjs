@@ -27,7 +27,18 @@ import {
 
 import * as XLSX from 'xlsx';
 
-import {Category, Team} from '@/types';
+import {
+  IMPORT_COLUMNS,
+  IMPORT_CSV_EXAMPLE,
+  ImportTeamCandidate,
+  REQUIRED_IMPORT_HEADERS,
+  parseImportMatchweek,
+  resolveImportCategory,
+  resolveImportTeam,
+  validateImportHeaders,
+} from '@/helpers/matchImport';
+
+import {Category} from '@/types';
 
 interface ExcelMatch {
   date: string;
@@ -36,6 +47,8 @@ interface ExcelMatch {
   homeTeam: string;
   awayTeam: string;
   category: string;
+  /** Optional 7th column — derived from the match date when left empty. */
+  matchweek?: string;
   status: 'valid' | 'invalid' | 'duplicate';
   errors?: string[];
 }
@@ -45,7 +58,7 @@ interface ExcelImportModalProps {
   onClose: () => void;
   onImport: (matches: ExcelMatch[]) => Promise<void>;
   categories: Array<Category>;
-  teams: Array<Team>;
+  teams: Array<ImportTeamCandidate>;
   selectedSeason: string;
 }
 
@@ -82,74 +95,17 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       resetState();
-
-      // Debug: Log what props we received
-      console.log('🔍 ExcelImportModal opened with props:', {
-        categoriesCount: categories.length,
-        teamsCount: teams.length,
-        selectedSeason,
-        categories: categories.slice(0, 3), // First 3 category
-        teams: teams.slice(0, 3), // First 3 teams
-      });
-
-      // Additional debug: Check if props are actually accessible
-      console.log('🔍 Props debug:', {
-        teamsProp: teams,
-        categoriesProp: categories,
-        teamsType: typeof teams,
-        categoriesType: typeof categories,
-        teamsConstructor: teams?.constructor?.name,
-        categoriesConstructor: categories?.constructor?.name,
-        teamsIsArray: Array.isArray(teams),
-        categoriesIsArray: Array.isArray(categories),
-      });
-
-      // Check if data is actually loaded
-      setTimeout(() => {
-        console.log('🔍 Delayed props check (after 100ms):', {
-          categoriesCount: categories.length,
-          teamsCount: teams.length,
-          categories: categories,
-          teams: teams,
-        });
-      }, 100);
     }
-  }, [isOpen, resetState, categories, teams, selectedSeason]);
+  }, [isOpen, resetState]);
 
   // Define validateMatch function that takes data as parameters
   const validateMatch = (
     match: ExcelMatch,
-    teamsData: any[],
-    categoriesData: any[]
+    teamsData: ImportTeamCandidate[],
+    categoriesData: Array<Category>,
+    seasonId: string
   ): {isValid: boolean; errors: string[]} => {
-    // Debug: Always log the data being passed to validation
-    console.log('🔍 validateMatch called with data:', {
-      teamsDataLength: teamsData?.length || 'undefined',
-      categoriesDataLength: categoriesData?.length || 'undefined',
-      teamsData: teamsData,
-      categoriesData: categoriesData,
-    });
-
     const errors: string[] = [];
-
-    // Debug: Log what we're validating (only once per validation)
-    if (match.homeTeam === 'TJ Sokol Svinov' && match.awayTeam === 'TJ Sokol Podlázky') {
-      console.log('🔍 Validating match:', {
-        match,
-        availableTeams: teamsData.map((t) => ({name: t.name, short_name: t.short_name})),
-        availableCategories: categoriesData.map((c) => ({name: c.name, id: c.id})),
-      });
-
-      // Also log the raw arrays to see if they're actually empty
-      console.log('🔍 Raw arrays check:', {
-        teamsLength: teamsData.length,
-        categoriesLength: categoriesData.length,
-        teamsIsArray: Array.isArray(teamsData),
-        categoriesIsArray: Array.isArray(categoriesData),
-        teamsFirstItem: teamsData[0],
-        categoriesFirstItem: categoriesData[0],
-      });
-    }
 
     // Validate date
     if (!match.date) {
@@ -188,103 +144,46 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       errors.push('Chybí číslo zápasu');
     }
 
-    // Validate home team
-    if (!match.homeTeam) {
-      errors.push('Chybí domácí tým');
-    } else {
-      const searchTerm = match.homeTeam.trim().toLowerCase();
-      const foundTeam = teamsData.find((team) => {
-        const teamNameLower = team.name.trim().toLowerCase();
-        const teamShortNameLower = team.short_name?.trim().toLowerCase();
+    // Matchweek is optional — only a filled-in value can be wrong
+    const {error: matchweekError} = parseImportMatchweek(match.matchweek);
 
-        const isMatch =
-          teamNameLower === searchTerm ||
-          teamShortNameLower === searchTerm ||
-          teamNameLower.includes(searchTerm) ||
-          searchTerm.includes(teamNameLower) ||
-          (teamShortNameLower &&
-            (teamShortNameLower.includes(searchTerm) || searchTerm.includes(teamShortNameLower)));
-
-        // Debug: Log each team check (only for first few teams to avoid spam)
-        if (teamsData.indexOf(team) < 3) {
-          console.log(`🏠 Checking home team "${match.homeTeam}":`, {
-            searchTerm,
-            teamName: team.name,
-            teamShortName: team.short_name,
-            isMatch,
-          });
-        }
-
-        return isMatch;
-      });
-
-      if (!foundTeam) {
-        errors.push(`Domácí tým "${match.homeTeam}" nebyl nalezen`);
-      }
+    if (matchweekError) {
+      errors.push(matchweekError);
     }
 
-    // Validate away team
-    if (!match.awayTeam) {
-      errors.push('Chybí hostující tým');
-    } else {
-      const searchTerm = match.awayTeam.trim().toLowerCase();
-      const foundTeam = teamsData.find((team) => {
-        const teamNameLower = team.name.trim().toLowerCase();
-        const teamShortNameLower = team.short_name?.trim().toLowerCase();
+    // Validate category first — team lookup is scoped by the resolved category
+    const {match: foundCategory, error: categoryError} = resolveImportCategory(
+      categoriesData,
+      match.category
+    );
 
-        const isMatch =
-          teamNameLower === searchTerm ||
-          teamShortNameLower === searchTerm ||
-          teamNameLower.includes(searchTerm) ||
-          searchTerm.includes(teamNameLower) ||
-          (teamShortNameLower &&
-            (teamShortNameLower.includes(searchTerm) || searchTerm.includes(teamShortNameLower)));
-
-        // Debug: Log each team check (only for first few teams to avoid spam)
-        if (teamsData.indexOf(team) < 3) {
-          console.log(`✈️ Checking away team "${match.awayTeam}":`, {
-            searchTerm,
-            teamName: team.name,
-            teamShortName: team.short_name,
-            isMatch,
-          });
-        }
-
-        return isMatch;
-      });
-
-      if (!foundTeam) {
-        errors.push(`Hostující tým "${match.awayTeam}" nebyl nalezen`);
-      }
+    if (categoryError) {
+      errors.push(categoryError);
     }
 
-    // Validate category
-    if (!match.category) {
-      errors.push('Chybí kategorie');
-    } else {
-      const searchTerm = match.category.trim().toLowerCase();
-      const foundCategory = categoriesData.find((cat) => {
-        const catNameLower = cat.name.trim().toLowerCase();
-
-        const isMatch =
-          catNameLower === searchTerm ||
-          catNameLower.includes(searchTerm) ||
-          searchTerm.includes(catNameLower);
-
-        // Debug: Log each category check (only for first few category to avoid spam)
-        if (categoriesData.indexOf(cat) < 3) {
-          console.log(`🏷️ Checking category "${match.category}":`, {
-            searchTerm,
-            catName: cat.name,
-            isMatch,
-          });
-        }
-
-        return isMatch;
+    // Teams are only resolvable once we know which category and season they
+    // belong to, so skip the lookup when the category itself failed.
+    if (foundCategory) {
+      const homeResult = resolveImportTeam(teamsData, {
+        name: match.homeTeam,
+        label: 'Domácí tým',
+        categoryId: foundCategory.id,
+        seasonId,
       });
 
-      if (!foundCategory) {
-        errors.push(`Kategorie "${match.category}" nebyla nalezena`);
+      if (homeResult.error) {
+        errors.push(homeResult.error);
+      }
+
+      const awayResult = resolveImportTeam(teamsData, {
+        name: match.awayTeam,
+        label: 'Hostující tým',
+        categoryId: foundCategory.id,
+        seasonId,
+      });
+
+      if (awayResult.error) {
+        errors.push(awayResult.error);
       }
     }
 
@@ -295,15 +194,6 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       match.homeTeam.toLowerCase() === match.awayTeam.toLowerCase()
     ) {
       errors.push('Domácí a hostující tým nemohou být stejné');
-    }
-
-    // Debug: Log validation result (only for first few matches to avoid spam)
-    if (match.homeTeam === 'TJ Sokol Svinov' && match.awayTeam === 'TJ Sokol Podlázky') {
-      console.log(`✅ Validation result for "${match.homeTeam}" vs "${match.awayTeam}":`, {
-        isValid: errors.length === 0,
-        errors,
-        match,
-      });
     }
 
     return {
@@ -368,19 +258,12 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           const headers = parseCSVLine(lines[0], separator);
 
           // Validate headers
-          const expectedHeaders = [
-            'date',
-            'time',
-            'matchNumber',
-            'homeTeam',
-            'awayTeam',
-            'category',
-          ];
-          const headerValidation = validateHeaders(headers, expectedHeaders);
+          const headerValidation = validateImportHeaders(headers);
 
           if (!headerValidation.isValid) {
             setValidationErrors([
-              `Nesprávná struktura CSV souboru. Očekávané sloupce: ${expectedHeaders.join(', ')}. Nalezené sloupce: ${headers.join(', ')}. Použitý oddělovač: ${separator}`,
+              `Nesprávná struktura CSV souboru (použitý oddělovač: ${separator}). Očekávané pořadí sloupců: ${REQUIRED_IMPORT_HEADERS.join(', ')}. Nalezené sloupce: ${headers.join(', ')}.`,
+              ...headerValidation.errors,
             ]);
             return;
           }
@@ -401,35 +284,14 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               homeTeam: row[3]?.toString() || '',
               awayTeam: row[4]?.toString() || '',
               category: row[5]?.toString() || '',
+              matchweek: row[6]?.toString() || '',
               status: 'valid',
             };
 
-            // Debug: Log the raw data being processed
-            console.log('Processing CSV row:', {
-              rawRow: row,
-              processedMatch: match,
-              rowIndex: i,
-              separator: separator,
-            });
-
-            // Validate match data
-            console.log('🔍 About to call validateMatch with CSV data:', {
-              match,
-              teamsLength: teams?.length || 'undefined',
-              categoriesLength: categories?.length || 'undefined',
-              teams: teams,
-              categories: categories,
-            });
-            const validation = validateMatch(match, teams, categories);
+            const validation = validateMatch(match, teams, categories, selectedSeason);
             match.status = validation.isValid ? 'valid' : 'invalid';
             if (!validation.isValid) {
               match.errors = validation.errors;
-              // Debug: Log validation errors
-              console.log('Validation failed for row:', {
-                rowIndex: i,
-                match,
-                errors: validation.errors,
-              });
             }
 
             processedData.push(match);
@@ -444,7 +306,7 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       };
       reader.readAsText(file);
     },
-    [categories, teams]
+    [categories, teams, selectedSeason]
   );
 
   const processExcelFile = useCallback(
@@ -466,22 +328,15 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           }
 
           // Extract headers (first row)
-          const headers = jsonData[0] as string[];
+          const headers = jsonData[0] as unknown[];
 
           // Validate headers
-          const expectedHeaders = [
-            'date',
-            'time',
-            'matchNumber',
-            'homeTeam',
-            'awayTeam',
-            'category',
-          ];
-          const headerValidation = validateHeaders(headers, expectedHeaders);
+          const headerValidation = validateImportHeaders(headers);
 
           if (!headerValidation.isValid) {
             setValidationErrors([
-              `Nesprávná struktura Excel souboru. Očekávané sloupce: ${expectedHeaders.join(', ')}. Nalezené sloupce: ${headers.join(', ')}`,
+              `Nesprávná struktura Excel souboru. Očekávané pořadí sloupců: ${REQUIRED_IMPORT_HEADERS.join(', ')}. Nalezené sloupce: ${headers.join(', ')}.`,
+              ...headerValidation.errors,
             ]);
             return;
           }
@@ -499,34 +354,14 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               homeTeam: row[3]?.toString() || '',
               awayTeam: row[4]?.toString() || '',
               category: row[5]?.toString() || '',
+              matchweek: row[6]?.toString() || '',
               status: 'valid',
             };
 
-            // Debug: Log the raw data being processed
-            console.log('Processing Excel row:', {
-              rawRow: row,
-              processedMatch: match,
-              rowIndex: i,
-            });
-
-            // Validate match data
-            console.log('🔍 About to call validateMatch with Excel data:', {
-              match,
-              teamsLength: teams?.length || 'undefined',
-              categoriesLength: categories?.length || 'undefined',
-              teams: teams,
-              categories: categories,
-            });
-            const validation = validateMatch(match, teams, categories);
+            const validation = validateMatch(match, teams, categories, selectedSeason);
             match.status = validation.isValid ? 'valid' : 'invalid';
             if (!validation.isValid) {
               match.errors = validation.errors;
-              // Debug: Log validation errors
-              console.log('Validation failed for row:', {
-                rowIndex: i,
-                match,
-                errors: validation.errors,
-              });
             }
 
             processedData.push(match);
@@ -541,32 +376,8 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       };
       reader.readAsArrayBuffer(file);
     },
-    [categories, teams]
+    [categories, teams, selectedSeason]
   );
-
-  const validateHeaders = (
-    headers: string[],
-    expected: string[]
-  ): {isValid: boolean; errors: string[]} => {
-    const errors: string[] = [];
-
-    for (const expectedHeader of expected) {
-      if (
-        !headers.some(
-          (header) =>
-            header.toLowerCase().includes(expectedHeader.toLowerCase()) ||
-            expectedHeader.toLowerCase().includes(header.toLowerCase())
-        )
-      ) {
-        errors.push(`Chybí sloupec: ${expectedHeader}`);
-      }
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
-  };
 
   // Define handleFileChange after the processing functions to avoid dependency issues
   const handleFileChange = useCallback(
@@ -641,6 +452,64 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
         <ModalBody>
           <div className="space-y-6">
+            {/* Expected file format */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-gray-800">Jak má soubor vypadat</h4>
+
+              <p className="text-sm text-gray-600">
+                První řádek musí být hlavička, další řádky jsou zápasy.{' '}
+                <strong>Na pořadí sloupců záleží</strong> – data se čtou podle pozice, ne podle
+                názvu hlavičky.
+              </p>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="text-left text-gray-500">
+                      <th className="py-1 pr-4 font-medium">#</th>
+                      <th className="py-1 pr-4 font-medium">Sloupec</th>
+                      <th className="py-1 pr-4 font-medium">Formát</th>
+                      <th className="py-1 font-medium">Příklad</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-gray-700">
+                    {IMPORT_COLUMNS.map((column, index) => (
+                      <tr key={column.name} className="border-t border-gray-200">
+                        <td className="py-1 pr-4">{index + 1}</td>
+                        <td className="py-1 pr-4 font-mono">{column.name}</td>
+                        <td className="py-1 pr-4">{column.format}</td>
+                        <td className="py-1 font-mono text-gray-500">{column.example}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                <li>
+                  <strong>matchweek</strong> je nepovinný. Když sloupec chybí nebo je prázdný, kolo
+                  se dopočítá z data zápasu podle začátku sezóny.
+                </li>
+                <li>
+                  Názvy týmů a kategorií musí odpovídat evidenci pro vybranou sezónu. Pokud má klub
+                  v kategorii víc týmů, uveďte i označení (např. „A“, „B“).
+                </li>
+                <li>U CSV se oddělovač rozpozná sám – funguje čárka i středník.</li>
+                <li>U Excelu se čte pouze první list sešitu.</li>
+                <li>
+                  Sezóna se nebere ze souboru, použije se ta vybraná v administraci. Prázdné řádky
+                  se přeskakují.
+                </li>
+              </ul>
+
+              <div className="text-xs">
+                <p className="text-gray-500 mb-1">Ukázka CSV:</p>
+                <pre className="bg-white border border-gray-200 rounded p-2 overflow-x-auto font-mono text-gray-700">
+                  {IMPORT_CSV_EXAMPLE}
+                </pre>
+              </div>
+            </div>
+
             {/* File Upload */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
               <input
@@ -726,6 +595,7 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                       <TableColumn>Domácí tým</TableColumn>
                       <TableColumn>Hostující tým</TableColumn>
                       <TableColumn>Kategorie</TableColumn>
+                      <TableColumn>Kolo</TableColumn>
                       <TableColumn>Chyby</TableColumn>
                     </TableHeader>
                     <TableBody>
@@ -743,6 +613,11 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                           <TableCell>{match.homeTeam}</TableCell>
                           <TableCell>{match.awayTeam}</TableCell>
                           <TableCell>{match.category}</TableCell>
+                          <TableCell>
+                            {match.matchweek || (
+                              <span className="text-gray-400 text-xs">z data</span>
+                            )}
+                          </TableCell>
                           <TableCell>
                             {match.errors && match.errors.length > 0 ? (
                               <ul className="text-xs text-red-600 space-y-1">

@@ -9,6 +9,7 @@ export * from './competitionTypes';
 export * from './genders';
 export * from './lineupCoachRole';
 export * from './lineupErrorType';
+export * from './matchPhase';
 export * from './matchStatus';
 export * from './memberFunction';
 export * from './modalMode';

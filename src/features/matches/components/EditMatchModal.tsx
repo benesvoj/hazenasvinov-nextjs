@@ -10,6 +10,7 @@ import {translations} from '@/lib/translations';
 
 import {UnifiedModal, Heading, showToast, Choice} from '@/components';
 import {matchStatuses} from '@/constants';
+import {MatchPhase} from '@/enums';
 import {useTeamClub, useMatchVideos, useFetchReferees} from '@/hooks';
 import {Match, Video, EditMatchFormData} from '@/types';
 
@@ -222,6 +223,28 @@ export default function EditMatchModal({
                     >
                       {Object.entries(matchStatuses).map(([key, value]) => (
                         <SelectItem key={key}>{value}</SelectItem>
+                      ))}
+                    </Select>
+                  </div>
+                  <div>
+                    <Select
+                      label={t.matchPhase}
+                      placeholder={t.matchPhasePlaceholder}
+                      selectedKeys={
+                        editData.match_phase ? [editData.match_phase] : [MatchPhase.REGULAR]
+                      }
+                      onSelectionChange={(keys) => {
+                        const selected = Array.from(keys)[0] as MatchPhase;
+                        onEditDataChange({
+                          ...editData,
+                          match_phase: selected ?? MatchPhase.REGULAR,
+                        });
+                      }}
+                      className="w-full"
+                      isDisabled={isSeasonClosed}
+                    >
+                      {Object.entries(t.matchPhases).map(([key, label]) => (
+                        <SelectItem key={key}>{label}</SelectItem>
                       ))}
                     </Select>
                   </div>

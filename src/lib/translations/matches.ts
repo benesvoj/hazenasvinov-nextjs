@@ -113,6 +113,19 @@ export const matchesTranslations = {
   venuePlaceholder: 'Místo konání se automaticky vyplní podle domácího týmu',
   matchweek: 'Kolo',
   matchweekPlaceholder: 'Vyberte kolo',
+  matchPhase: 'Fáze soutěže',
+  matchPhasePlaceholder: 'Vyberte fázi',
+  matchPhases: {
+    regular: 'Základní část',
+    quarterfinal: 'Čtvrtfinále',
+    semifinal: 'Semifinále',
+    final: 'Finále',
+  },
+  playoff: {
+    sectionTitle: 'Playoff',
+    noMatches: 'Žádné playoff zápasy',
+    tabTitle: 'Playoff',
+  },
   statuses: {
     upcoming: 'Nadcházející',
     completed: 'Dokončený',

@@ -1,4 +1,4 @@
-import {MatchStatus} from '@/enums';
+import {MatchPhase, MatchStatus} from '@/enums';
 import {Category, Nullish, Team} from '@/types';
 
 export interface Match {
@@ -15,6 +15,7 @@ export interface Match {
   competition: string;
   is_home: boolean;
   status: MatchStatus;
+  match_phase: MatchPhase;
   home_score?: number | Nullish;
   away_score?: number | Nullish;
   home_score_halftime?: number | Nullish;

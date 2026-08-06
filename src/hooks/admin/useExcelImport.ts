@@ -1,7 +1,23 @@
 import {useCallback} from 'react';
 
+import {
+  ImportTeamCandidate,
+  parseImportMatchweek,
+  resolveImportCategory,
+  resolveImportTeam,
+} from '@/helpers/matchImport';
+
 import {CompetitionTypes} from '@/enums';
 import {useSupabaseClient} from '@/hooks';
+
+/** Row shape of the `teams` view — every column is nullable there. */
+interface TeamViewRow {
+  id: string | null;
+  name: string | null;
+  short_name: string | null;
+  category_id: string | null;
+  season_id: string | null;
+}
 
 interface ExcelMatch {
   date: string;
@@ -10,6 +26,8 @@ interface ExcelMatch {
   homeTeam: string;
   awayTeam: string;
   category: string;
+  /** Optional 7th column — derived from the match date when left empty. */
+  matchweek?: string;
   status: 'valid' | 'invalid' | 'duplicate';
   errors?: string[];
 }
@@ -48,10 +66,15 @@ export const useExcelImport = () => {
         errors: [],
       };
 
-      // Get category and teams for mapping
+      // Get category and teams for mapping. Teams are scoped to the target
+      // season — the view holds one row per team, category and season, so an
+      // unscoped lookup can resolve to a previous season's team id.
       const {data: categories} = await supabase.from('categories').select('id, name');
 
-      const {data: teams} = await supabase.from('teams').select('id, name, short_name');
+      const {data: teams} = await supabase
+        .from('teams')
+        .select('id, name, short_name, category_id, season_id')
+        .eq('season_id', seasonId);
 
       // Get season start date for matchweek calculation
       const {data: season} = await supabase
@@ -65,94 +88,64 @@ export const useExcelImport = () => {
         return result;
       }
 
+      // The view exposes every column as nullable — drop incomplete rows so the
+      // shared resolver can work with plain strings.
+      const teamCandidates: ImportTeamCandidate[] = (teams as TeamViewRow[]).flatMap((team) =>
+        team.id && team.name
+          ? [
+              {
+                id: team.id,
+                name: team.name,
+                short_name: team.short_name,
+                category_id: team.category_id,
+                season_id: team.season_id,
+              },
+            ]
+          : []
+      );
+
       // Process each match
       for (const match of matches) {
         try {
           // Find category ID
-          const category = categories.find(
-            (cat: any) => cat.name.toLowerCase() === match.category.toLowerCase()
+          const {match: category, error: categoryError} = resolveImportCategory(
+            categories,
+            match.category
           );
 
           if (!category) {
             result.failed++;
-            result.errors.push(
-              `Kategorie "${match.category}" nebyla nalezena pro zápas ${match.matchNumber}`
-            );
+            result.errors.push(`${categoryError} pro zápas ${match.matchNumber}`);
             continue;
           }
 
-          // Find team IDs with better matching and debugging
-          const cleanHomeTeam = match.homeTeam.trim().toLowerCase();
-          const cleanAwayTeam = match.awayTeam.trim().toLowerCase();
-
-          // Debug: Log what we're looking for
-          console.log('Looking for home team:', {
-            searchTerm: cleanHomeTeam,
-            availableTeams: teams.map((t: any) => ({
-              name: t.name,
-              short_name: t.short_name,
-              nameLower: t.name.toLowerCase(),
-              shortNameLower: t.short_name?.toLowerCase(),
-            })),
-          });
-
-          const homeTeam = teams.find((team: any) => {
-            const teamNameLower = team.name.trim().toLowerCase();
-            const teamShortNameLower = team.short_name?.trim().toLowerCase();
-
-            return (
-              teamNameLower === cleanHomeTeam ||
-              teamShortNameLower === cleanHomeTeam ||
-              teamNameLower.includes(cleanHomeTeam) ||
-              cleanHomeTeam.includes(teamNameLower) ||
-              (teamShortNameLower &&
-                (teamShortNameLower.includes(cleanHomeTeam) ||
-                  cleanHomeTeam.includes(teamShortNameLower)))
-            );
-          });
-
-          const awayTeam = teams.find((team: any) => {
-            const teamNameLower = team.name.trim().toLowerCase();
-            const teamShortNameLower = team.short_name?.trim().toLowerCase();
-
-            return (
-              teamNameLower === cleanAwayTeam ||
-              teamShortNameLower === cleanAwayTeam ||
-              teamNameLower.includes(cleanAwayTeam) ||
-              cleanAwayTeam.includes(teamNameLower) ||
-              (teamShortNameLower &&
-                (teamShortNameLower.includes(cleanAwayTeam) ||
-                  cleanAwayTeam.includes(teamShortNameLower)))
-            );
+          // Resolve teams within the row's category so a club playing several
+          // categories cannot resolve to the wrong team id.
+          const {match: homeTeam, error: homeTeamError} = resolveImportTeam(teamCandidates, {
+            name: match.homeTeam,
+            label: 'Domácí tým',
+            categoryId: category.id,
+            seasonId,
           });
 
           if (!homeTeam) {
             result.failed++;
-            const availableTeamNames = teams
-              .map((t: any) => `"${t.name}"${t.short_name ? ` (${t.short_name})` : ''}`)
-              .join(', ');
-            result.errors.push(
-              `Domácí tým "${match.homeTeam}" nebyl nalezen. Dostupné týmy: ${availableTeamNames}`
-            );
+            result.errors.push(`${homeTeamError} (zápas ${match.matchNumber})`);
             continue;
           }
+
+          const {match: awayTeam, error: awayTeamError} = resolveImportTeam(teamCandidates, {
+            name: match.awayTeam,
+            label: 'Hostující tým',
+            categoryId: category.id,
+            seasonId,
+          });
 
           if (!awayTeam) {
             result.failed++;
-            const availableTeamNames = teams
-              .map((t: any) => `"${t.name}"${t.short_name ? ` (${t.short_name})` : ''}`)
-              .join(', ');
-            result.errors.push(
-              `Hostující tým "${match.awayTeam}" nebyl nalezen. Dostupné týmy: ${availableTeamNames}`
-            );
+            result.errors.push(`${awayTeamError} (zápas ${match.matchNumber})`);
             continue;
           }
-
-          // Debug: Log what we found
-          console.log('Teams found:', {
-            homeTeam: {id: homeTeam.id, name: homeTeam.name, short_name: homeTeam.short_name},
-            awayTeam: {id: awayTeam.id, name: awayTeam.name, short_name: awayTeam.short_name},
-          });
 
           // Parse date and time - handle European date format (DD.MM.YYYY)
           let dateObj: Date;
@@ -162,19 +155,6 @@ export const useExcelImport = () => {
             // Create date string in YYYY-MM-DD format to avoid timezone issues
             const dateString = `${parseInt(year)}-${String(parseInt(month)).padStart(2, '0')}-${String(parseInt(day)).padStart(2, '0')}`;
             dateObj = new Date(dateString + 'T00:00:00');
-
-            // Debug: Log date parsing details
-            console.log('🔍 Date parsing debug:', {
-              originalDate: match.date,
-              parsedComponents: {day, month, year},
-              dateString: dateString,
-              dateObj: dateObj,
-              dateObjLocal: dateObj.toLocaleDateString('cs-CZ'),
-              dateObjISO: dateObj.toISOString(),
-              getFullYear: dateObj.getFullYear(),
-              getMonth: dateObj.getMonth() + 1,
-              getDate: dateObj.getDate(),
-            });
           } else {
             // Standard format
             dateObj = new Date(match.date);
@@ -188,14 +168,6 @@ export const useExcelImport = () => {
 
           // Format date for database (YYYY-MM-DD) - avoid timezone conversion
           const formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-
-          // Debug: Log final formatted date
-          console.log('🔍 Final date debug:', {
-            originalDate: match.date,
-            formattedDate: formattedDate,
-            dateObj: dateObj,
-            dateObjLocal: dateObj.toLocaleDateString('cs-CZ'),
-          });
 
           // Validate time format
           const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
@@ -225,8 +197,19 @@ export const useExcelImport = () => {
             continue;
           }
 
-          // Determine matchweek from date
-          const matchweek = determineMatchweek(dateObj, season?.start_date);
+          // Prefer the matchweek stated in the file; deriving it from the date
+          // is only a rough fallback for files that omit the column.
+          const {match: parsedMatchweek, error: matchweekError} = parseImportMatchweek(
+            match.matchweek
+          );
+
+          if (matchweekError) {
+            result.failed++;
+            result.errors.push(`${matchweekError} (zápas ${match.matchNumber})`);
+            continue;
+          }
+
+          const matchweek = parsedMatchweek ?? determineMatchweek(dateObj, season?.start_date);
 
           // Insert match with both matchweek and match_number
           const {error: insertError} = await supabase.from('matches').insert({
@@ -240,7 +223,7 @@ export const useExcelImport = () => {
             competition: CompetitionTypes.LEAGUE, // Default competition type
             is_home: false, // Default value
             status: 'upcoming', // Default status
-            matchweek: matchweek, // Calculated from date
+            matchweek: matchweek, // From the file, or derived from the date
             match_number: match.matchNumber, // Direct from Excel
           });
 

@@ -3,7 +3,7 @@ import {useCallback, useEffect, useState} from 'react';
 
 import {translations} from '@/lib/translations/index';
 
-import {MatchStatus} from '@/enums';
+import {MatchPhase, MatchStatus} from '@/enums';
 import {useSupabaseClient} from '@/hooks';
 import {Category, Season, Team} from '@/types';
 
@@ -23,6 +23,7 @@ interface TransformedMatch {
   away_team_id: string;
   venue: string;
   competition: string;
+  match_phase: MatchPhase;
   home_score?: number;
   away_score?: number;
   status: MatchStatus;
@@ -153,6 +154,7 @@ export function useFetchMatch(matchId: string | null) {
         is_home: true, // Default value, can be determined based on your logic
         competition: data.competition || 'Neznámá soutěž',
         status: (data.status as 'upcoming' | 'completed') || 'upcoming',
+        match_phase: (data.match_phase as MatchPhase) ?? MatchPhase.REGULAR,
         home_team: {
           id: data.home_team?.id,
           name: getTeamDisplayNameSafe(

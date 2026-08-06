@@ -18,10 +18,12 @@ import {
 } from '@heroui/react';
 
 import {APP_ROUTES} from '@/lib/app-routes';
+import {translations} from '@/lib/translations';
 
 import {isEmpty} from '@/utils/arrayHelper';
 
 import {LoadingSpinner} from '@/components';
+import {isPlayoffPhase, MatchPhase, PLAYOFF_PHASES} from '@/enums';
 import {formatDateString, formatTime} from '@/helpers';
 import {Match} from '@/types';
 
@@ -33,6 +35,7 @@ interface CategoryMatchesProps {
   matches: {
     autumn: Match[];
     spring: Match[];
+    playoff?: Match[];
   };
   matchweeks: number;
 }
@@ -189,10 +192,39 @@ export function CategoryMatches({
     );
   }
 
+  const playoffMatches = matches.playoff ?? [];
+  const hasPlayoff = playoffMatches.length > 0;
+
   // Check if there are any matches at all
-  if (isEmpty(matches.autumn) && isEmpty(matches.spring)) {
+  if (isEmpty(matches.autumn) && isEmpty(matches.spring) && !hasPlayoff) {
     return <CategoryMatchesFallback categoryName={categoryName} />;
   }
+
+  const renderPlayoffTab = () => {
+    const byPhase = new Map<MatchPhase, Match[]>();
+    PLAYOFF_PHASES.forEach((phase) => byPhase.set(phase, []));
+    playoffMatches.forEach((m) => {
+      const phase = m.match_phase as MatchPhase;
+      if (isPlayoffPhase(phase)) byPhase.get(phase)!.push(m);
+    });
+
+    return (
+      <div className="pt-4 space-y-6">
+        {PLAYOFF_PHASES.map((phase) => {
+          const phaseMatches = byPhase.get(phase)!;
+          if (phaseMatches.length === 0) return null;
+          return (
+            <div key={phase}>
+              <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                {translations.matches.matchPhases[phase]}
+              </h3>
+              {renderMatchesTable(phaseMatches, translations.matches.matchPhases[phase])}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <Card>
@@ -207,6 +239,11 @@ export function CategoryMatches({
           <Tab key="spring" title="Jaro">
             <div className="pt-4">{renderMatchesTable(matches.spring, 'jaro')}</div>
           </Tab>
+          {hasPlayoff && (
+            <Tab key="playoff" title={translations.matches.playoff.tabTitle}>
+              {renderPlayoffTab()}
+            </Tab>
+          )}
         </Tabs>
       </CardBody>
     </Card>

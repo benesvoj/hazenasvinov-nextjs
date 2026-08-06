@@ -29,6 +29,7 @@ import {
   ExcelImportModal,
   MatchActionsModal,
   MatchProcessWizardModal,
+  PointDeductionsModal,
 } from '../components';
 import {getMatchweekOptions} from '../helpers';
 import {useMatchesPageLogic} from '../hooks';
@@ -54,6 +55,7 @@ export function AdminMatchesContainer() {
     categories,
     sortedSeasons,
     members,
+    teams,
     filteredTeams,
     matches,
     seasonalMatches,
@@ -80,6 +82,8 @@ export function AdminMatchesContainer() {
     standingsLoading,
     hasStandings,
     error,
+    setError,
+    refresh: refreshStandings,
     handleResetAndRecalculate,
     handleStandingsAction,
   } = standingsApi;
@@ -93,7 +97,10 @@ export function AdminMatchesContainer() {
       actions={[
         {
           label: translations.matches.actions.addMatch,
-          onClick: modal.addMatch.onOpen,
+          onClick: () => {
+            setError('');
+            modal.addMatch.onOpen();
+          },
           variant: 'solid',
           buttonType: ActionTypes.CREATE,
           isDisabled: isSeasonClosed,
@@ -121,6 +128,14 @@ export function AdminMatchesContainer() {
           buttonType: ActionTypes.DELETE,
           color: 'warning',
           isDisabled: isSeasonClosed,
+          priority: 'secondary',
+        },
+        {
+          label: translations.pointDeductions.title,
+          onClick: modal.pointDeductions.onOpen,
+          buttonType: ActionTypes.UPDATE,
+          color: 'secondary',
+          isDisabled: !selectedCategoryId || !selectedSeasonId,
           priority: 'secondary',
         },
         {
@@ -186,7 +201,7 @@ export function AdminMatchesContainer() {
         />
       )}
 
-      {error && (
+      {error && !modal.addMatch.isOpen && (
         <Alert color="danger" description={error} title={translations.common.alerts.error} />
       )}
 
@@ -262,7 +277,10 @@ export function AdminMatchesContainer() {
 
       <AddMatchModal
         isOpen={modal.addMatch.isOpen}
-        onClose={modal.addMatch.onClose}
+        onClose={() => {
+          setError('');
+          modal.addMatch.onClose();
+        }}
         onAddMatch={handleAddMatch}
         formData={formData}
         setFormData={setFormData}
@@ -270,6 +288,7 @@ export function AdminMatchesContainer() {
         selectedCategory={selectedCategory}
         selectedSeason={selectedSeasonId}
         getMatchweekOptions={getMatchweekOptions}
+        error={error}
       />
 
       <AddResultModal
@@ -319,7 +338,7 @@ export function AdminMatchesContainer() {
         onClose={modal.excelImport.onClose}
         onImport={handleExcelImport}
         categories={categories}
-        teams={[]}
+        teams={teams}
         selectedSeason={selectedSeasonId}
       />
 
@@ -354,6 +373,15 @@ export function AdminMatchesContainer() {
         isOpen={modal.matchProcess.isOpen}
         onClose={modal.matchProcess.onClose}
         match={selectedMatch}
+      />
+
+      <PointDeductionsModal
+        isOpen={modal.pointDeductions.isOpen}
+        onClose={modal.pointDeductions.onClose}
+        categoryId={selectedCategoryId || ''}
+        seasonId={selectedSeasonId || ''}
+        teams={filteredTeams}
+        onDeductionsChanged={refreshStandings}
       />
 
       <DeleteConfirmationModal

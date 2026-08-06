@@ -5,7 +5,19 @@ import {beforeEach, afterEach, describe, it, expect, vi} from 'vitest';
 
 import {createDataFetchHook} from '@/hooks/factories';
 
-// Mock showToast
+// Mock showToast — the hook imports the default export from this deep path,
+// so the spy must live there for assertions to register.
+vi.mock('@/components/ui/feedback/Toast', () => ({
+  default: {
+    danger: vi.fn(),
+    success: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+  },
+}));
+
+// Also mock the '@/components' barrel — importing the real barrel here pulls in
+// a circular dependency chain that leaves factory hooks undefined at eval time.
 vi.mock('@/components', () => ({
   showToast: {
     danger: vi.fn(),
@@ -108,7 +120,7 @@ describe('createDataFetchHook', () => {
 
   describe('Error Handling', () => {
     it('should handle network errors', async () => {
-      const {showToast} = await import('@/components');
+      const {default: showToast} = await import('@/components/ui/feedback/Toast');
       (global.fetch as any).mockRejectedValue(new Error('Network error'));
 
       const useFetch = createDataFetchHook({
@@ -129,7 +141,7 @@ describe('createDataFetchHook', () => {
     });
 
     it('should handle non-200 HTTP responses', async () => {
-      const {showToast} = await import('@/components');
+      const {default: showToast} = await import('@/components/ui/feedback/Toast');
       (global.fetch as any).mockResolvedValue({
         ok: false,
         json: async () => ({error: 'Not found'}),
@@ -170,7 +182,7 @@ describe('createDataFetchHook', () => {
     });
 
     it('should not show toast when showErrorToast is false', async () => {
-      const {showToast} = await import('@/components');
+      const {default: showToast} = await import('@/components/ui/feedback/Toast');
       (global.fetch as any).mockRejectedValue(new Error('Test error'));
 
       const useFetch = createDataFetchHook({
@@ -337,7 +349,7 @@ describe('createDataFetchHook', () => {
     });
 
     it('should ignore abort errors', async () => {
-      const {showToast} = await import('@/components');
+      const {default: showToast} = await import('@/components/ui/feedback/Toast');
       const abortError = new Error('Aborted');
       abortError.name = 'AbortError';
 

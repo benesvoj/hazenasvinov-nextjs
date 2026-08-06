@@ -1,10 +1,11 @@
 import React from 'react';
 
-import {Button, Input, Select, SelectItem} from '@heroui/react';
+import {Alert, Button, Input, Select, SelectItem} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
 import {Choice, UnifiedModal} from '@/components';
+import {MatchPhase} from '@/enums';
 import {AddMatchFormData} from '@/types';
 import {isEmpty} from '@/utils';
 
@@ -25,6 +26,7 @@ interface AddMatchModalProps {
   selectedCategory: string;
   selectedSeason: string;
   getMatchweekOptions: (categoryId: string) => Array<{value: string; label: string}>;
+  error?: string;
 }
 
 export default function AddMatchModal({
@@ -37,6 +39,7 @@ export default function AddMatchModal({
   selectedCategory,
   selectedSeason,
   getMatchweekOptions,
+  error,
 }: AddMatchModalProps) {
   const footer = (
     <>
@@ -67,6 +70,9 @@ export default function AddMatchModal({
       footer={footer}
     >
       <div className="space-y-4">
+        {error && (
+          <Alert color="danger" title={translations.common.alerts.error} description={error} />
+        )}
         <Input
           label={translations.common.labels.date}
           type="date"
@@ -136,6 +142,22 @@ export default function AddMatchModal({
             })
           }
         />
+        <div>
+          <Select
+            label={translations.matches.matchPhase}
+            placeholder={translations.matches.matchPhasePlaceholder}
+            selectedKeys={formData.match_phase ? [formData.match_phase] : [MatchPhase.REGULAR]}
+            onSelectionChange={(keys) => {
+              const selected = Array.from(keys)[0] as MatchPhase;
+              setFormData({...formData, match_phase: selected ?? MatchPhase.REGULAR});
+            }}
+            className="w-full"
+          >
+            {Object.entries(translations.matches.matchPhases).map(([key, label]) => (
+              <SelectItem key={key}>{label}</SelectItem>
+            ))}
+          </Select>
+        </div>
       </div>
     </UnifiedModal>
   );

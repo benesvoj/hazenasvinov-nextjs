@@ -7,7 +7,7 @@ import {translations} from '@/lib/translations';
 import {createClubTeamCountsMap, getTeamDisplayNameSafe} from '@/utils/teamDisplay';
 
 import {Heading, UnifiedTable} from '@/components';
-import {EnhancedStanding, UnifiedStandingsTable, ColumnType} from '@/types';
+import {ColumnType, EnhancedStanding, UnifiedStandingsTable} from '@/types';
 
 const t = translations.components.unifiedStandingTable;
 
@@ -21,7 +21,7 @@ const columns = [
   {key: 'draws', label: t.draws, align: 'center', className: 'hidden md:table-cell'},
   {key: 'losses', label: t.losses, align: 'center', className: 'hidden md:table-cell'},
   {key: 'score', label: t.score, align: 'center'},
-  {key: 'points', label: t.points, align: 'end'},
+  {key: 'points', label: t.points, align: 'start'},
 ];
 
 const renderTeamCell = (item: EnhancedStanding, standings: EnhancedStanding[]) => {
@@ -112,7 +112,14 @@ const renderCell = (
     case 'losses':
       return item.losses;
     case 'points':
-      return item.points;
+      return item.points_deduction > 0 ? (
+        <span className="flex items-center justify-start gap-1">
+          <span>{item.points}</span>
+          <span className="text-xs text-red-500 font-normal">(-{item.points_deduction})</span>
+        </span>
+      ) : (
+        item.points
+      );
     default:
       return '-';
   }
@@ -121,13 +128,6 @@ const renderCell = (
 export default function UnifiedStandingTable({
   standings,
   loading,
-  categoryId,
-  categoryName,
-  showGenerateButton,
-  onGenerateStandings,
-  isSeasonClosed,
-  ownClubId,
-  responsive,
   emptyContent,
 }: UnifiedStandingsTable) {
   const topContent = (

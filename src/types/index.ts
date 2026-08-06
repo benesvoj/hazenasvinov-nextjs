@@ -80,6 +80,8 @@ export * from './entities/memberFunctions/schema/memberFunctionsSchema';
 export * from './entities/membershipFeePayment/data/memberPaymentStatus';
 export * from './entities/membershipFeePayment/data/membershipFeePayment';
 export * from './entities/membershipFeePayment/schema/membershipFeePaymentsSchema';
+export * from './entities/pointDeduction/data/pointDeduction';
+export * from './entities/pointDeduction/schema/pointDeductionSchema';
 export * from './entities/referee/data/referee';
 export * from './entities/referee/schema/refereeSchema';
 export * from './entities/roleDefinition/schema/roleDefinitionsSchema';

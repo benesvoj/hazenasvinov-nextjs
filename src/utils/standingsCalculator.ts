@@ -30,15 +30,16 @@ export async function calculateStandings(
   }
 
   try {
-    // Get completed league matches for the selected category and season
-    // tournament_id IS NULL ensures tournament matches are excluded from league standings
+    // Get completed regular-season matches only.
+    // Excludes tournament matches (tournament_id IS NULL) and playoff matches (match_phase = 'regular').
     let {data: completedMatches, error: matchesError} = await supabase
       .from('matches')
       .select('*')
       .eq('category_id', categoryId)
       .eq('season_id', seasonId)
       .eq('status', 'completed')
-      .is('tournament_id', null);
+      .is('tournament_id', null)
+      .eq('match_phase', 'regular');
 
     if (matchesError) throw matchesError;
     if (!completedMatches) completedMatches = [];
@@ -50,7 +51,8 @@ export async function calculateStandings(
       .select('home_team_id, away_team_id')
       .eq('category_id', categoryId)
       .eq('season_id', seasonId)
-      .is('tournament_id', null);
+      .is('tournament_id', null)
+      .eq('match_phase', 'regular');
 
     if (allMatchesError) throw allMatchesError;
 
@@ -175,8 +177,31 @@ export async function calculateStandings(
       }
     });
 
-    // Convert to array and sort by points, then goal difference
-    const standingsArray = Array.from(standingsMap.values()).sort((a, b) => {
+    // Fetch point deductions for this category/season
+    const {data: deductionsData} = await supabase
+      .from('point_deductions')
+      .select('team_id, points')
+      .eq('category_id', categoryId)
+      .eq('season_id', seasonId);
+
+    // Build a map: team_id → total deduction (sum of all deductions, always ≤ 0)
+    const deductionMap = new Map<string, number>();
+    (deductionsData || []).forEach((d: {team_id: string; points: number}) => {
+      deductionMap.set(d.team_id, (deductionMap.get(d.team_id) ?? 0) + d.points);
+    });
+
+    // Apply deductions and build final array
+    const standingsArray = Array.from(standingsMap.values()).map((s) => {
+      const deduction = deductionMap.get(s.team_id) ?? 0;
+      return {
+        ...s,
+        points: s.points + deduction,
+        points_deduction: Math.abs(deduction),
+      };
+    });
+
+    // Sort by net points, then goal difference
+    standingsArray.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
       const aGoalDiff = a.goals_for - a.goals_against;
       const bGoalDiff = b.goals_for - b.goals_against;
