@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Button, Input, Select, SelectItem} from '@heroui/react';
+import {Alert, Button, Input, Select, SelectItem} from '@heroui/react';
 
 import {translations} from '@/lib/translations';
 
@@ -26,6 +26,7 @@ interface AddMatchModalProps {
   selectedCategory: string;
   selectedSeason: string;
   getMatchweekOptions: (categoryId: string) => Array<{value: string; label: string}>;
+  error?: string;
 }
 
 export default function AddMatchModal({
@@ -38,6 +39,7 @@ export default function AddMatchModal({
   selectedCategory,
   selectedSeason,
   getMatchweekOptions,
+  error,
 }: AddMatchModalProps) {
   const footer = (
     <>
@@ -68,6 +70,9 @@ export default function AddMatchModal({
       footer={footer}
     >
       <div className="space-y-4">
+        {error && (
+          <Alert color="danger" title={translations.common.alerts.error} description={error} />
+        )}
         <Input
           label={translations.common.labels.date}
           type="date"
