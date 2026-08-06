@@ -1,6 +1,11 @@
 import {useCallback} from 'react';
 
-import {ImportTeamCandidate, resolveImportCategory, resolveImportTeam} from '@/helpers/matchImport';
+import {
+  ImportTeamCandidate,
+  parseImportMatchweek,
+  resolveImportCategory,
+  resolveImportTeam,
+} from '@/helpers/matchImport';
 
 import {CompetitionTypes} from '@/enums';
 import {useSupabaseClient} from '@/hooks';
@@ -21,6 +26,8 @@ interface ExcelMatch {
   homeTeam: string;
   awayTeam: string;
   category: string;
+  /** Optional 7th column — derived from the match date when left empty. */
+  matchweek?: string;
   status: 'valid' | 'invalid' | 'duplicate';
   errors?: string[];
 }
@@ -190,8 +197,19 @@ export const useExcelImport = () => {
             continue;
           }
 
-          // Determine matchweek from date
-          const matchweek = determineMatchweek(dateObj, season?.start_date);
+          // Prefer the matchweek stated in the file; deriving it from the date
+          // is only a rough fallback for files that omit the column.
+          const {match: parsedMatchweek, error: matchweekError} = parseImportMatchweek(
+            match.matchweek
+          );
+
+          if (matchweekError) {
+            result.failed++;
+            result.errors.push(`${matchweekError} (zápas ${match.matchNumber})`);
+            continue;
+          }
+
+          const matchweek = parsedMatchweek ?? determineMatchweek(dateObj, season?.start_date);
 
           // Insert match with both matchweek and match_number
           const {error: insertError} = await supabase.from('matches').insert({
@@ -205,7 +223,7 @@ export const useExcelImport = () => {
             competition: CompetitionTypes.LEAGUE, // Default competition type
             is_home: false, // Default value
             status: 'upcoming', // Default status
-            matchweek: matchweek, // Calculated from date
+            matchweek: matchweek, // From the file, or derived from the date
             match_number: match.matchNumber, // Direct from Excel
           });
 

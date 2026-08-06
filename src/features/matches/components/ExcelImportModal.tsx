@@ -27,7 +27,12 @@ import {
 
 import * as XLSX from 'xlsx';
 
-import {ImportTeamCandidate, resolveImportCategory, resolveImportTeam} from '@/helpers/matchImport';
+import {
+  ImportTeamCandidate,
+  parseImportMatchweek,
+  resolveImportCategory,
+  resolveImportTeam,
+} from '@/helpers/matchImport';
 
 import {Category} from '@/types';
 
@@ -38,9 +43,36 @@ interface ExcelMatch {
   homeTeam: string;
   awayTeam: string;
   category: string;
+  /** Optional 7th column — derived from the match date when left empty. */
+  matchweek?: string;
   status: 'valid' | 'invalid' | 'duplicate';
   errors?: string[];
 }
+
+/**
+ * The single description of the file format: it drives both the header
+ * validation and the help shown in the dialog, so the two cannot drift apart.
+ * Order matters — rows are read by column position, not by header name.
+ */
+const FORMAT_DOCUMENTATION = [
+  {name: 'date', format: 'DD.MM.RRRR', example: '14.09.2025', required: true},
+  {name: 'time', format: 'HH:MM (24h)', example: '10:30', required: true},
+  {name: 'matchNumber', format: 'text', example: 'A1234', required: true},
+  {name: 'homeTeam', format: 'název týmu', example: 'TJ Sokol Svinov', required: true},
+  {name: 'awayTeam', format: 'název týmu', example: 'TJ Sokol Poruba', required: true},
+  {name: 'category', format: 'název kategorie', example: 'Muži', required: true},
+  {name: 'matchweek', format: 'celé číslo, nepovinné', example: '3', required: false},
+];
+
+/** Columns the file must contain. Optional ones are appended after these. */
+const REQUIRED_HEADERS = FORMAT_DOCUMENTATION.filter((column) => column.required).map(
+  (column) => column.name
+);
+
+const CSV_EXAMPLE = [
+  FORMAT_DOCUMENTATION.map((column) => column.name).join(';'),
+  FORMAT_DOCUMENTATION.map((column) => column.example).join(';'),
+].join('\n');
 
 interface ExcelImportModalProps {
   isOpen: boolean;
@@ -131,6 +163,13 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     // Validate match number
     if (!match.matchNumber) {
       errors.push('Chybí číslo zápasu');
+    }
+
+    // Matchweek is optional — only a filled-in value can be wrong
+    const {error: matchweekError} = parseImportMatchweek(match.matchweek);
+
+    if (matchweekError) {
+      errors.push(matchweekError);
     }
 
     // Validate category first — team lookup is scoped by the resolved category
@@ -240,19 +279,11 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           const headers = parseCSVLine(lines[0], separator);
 
           // Validate headers
-          const expectedHeaders = [
-            'date',
-            'time',
-            'matchNumber',
-            'homeTeam',
-            'awayTeam',
-            'category',
-          ];
-          const headerValidation = validateHeaders(headers, expectedHeaders);
+          const headerValidation = validateHeaders(headers, REQUIRED_HEADERS);
 
           if (!headerValidation.isValid) {
             setValidationErrors([
-              `Nesprávná struktura CSV souboru. Očekávané sloupce: ${expectedHeaders.join(', ')}. Nalezené sloupce: ${headers.join(', ')}. Použitý oddělovač: ${separator}`,
+              `Nesprávná struktura CSV souboru. Očekávané sloupce: ${REQUIRED_HEADERS.join(', ')}. Nalezené sloupce: ${headers.join(', ')}. Použitý oddělovač: ${separator}`,
             ]);
             return;
           }
@@ -273,6 +304,7 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               homeTeam: row[3]?.toString() || '',
               awayTeam: row[4]?.toString() || '',
               category: row[5]?.toString() || '',
+              matchweek: row[6]?.toString() || '',
               status: 'valid',
             };
 
@@ -319,19 +351,11 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           const headers = jsonData[0] as string[];
 
           // Validate headers
-          const expectedHeaders = [
-            'date',
-            'time',
-            'matchNumber',
-            'homeTeam',
-            'awayTeam',
-            'category',
-          ];
-          const headerValidation = validateHeaders(headers, expectedHeaders);
+          const headerValidation = validateHeaders(headers, REQUIRED_HEADERS);
 
           if (!headerValidation.isValid) {
             setValidationErrors([
-              `Nesprávná struktura Excel souboru. Očekávané sloupce: ${expectedHeaders.join(', ')}. Nalezené sloupce: ${headers.join(', ')}`,
+              `Nesprávná struktura Excel souboru. Očekávané sloupce: ${REQUIRED_HEADERS.join(', ')}. Nalezené sloupce: ${headers.join(', ')}`,
             ]);
             return;
           }
@@ -349,6 +373,7 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               homeTeam: row[3]?.toString() || '',
               awayTeam: row[4]?.toString() || '',
               category: row[5]?.toString() || '',
+              matchweek: row[6]?.toString() || '',
               status: 'valid',
             };
 
@@ -470,6 +495,64 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
         <ModalBody>
           <div className="space-y-6">
+            {/* Expected file format */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-gray-800">Jak má soubor vypadat</h4>
+
+              <p className="text-sm text-gray-600">
+                První řádek musí být hlavička, další řádky jsou zápasy.{' '}
+                <strong>Na pořadí sloupců záleží</strong> – data se čtou podle pozice, ne podle
+                názvu hlavičky.
+              </p>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="text-left text-gray-500">
+                      <th className="py-1 pr-4 font-medium">#</th>
+                      <th className="py-1 pr-4 font-medium">Sloupec</th>
+                      <th className="py-1 pr-4 font-medium">Formát</th>
+                      <th className="py-1 font-medium">Příklad</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-gray-700">
+                    {FORMAT_DOCUMENTATION.map((column, index) => (
+                      <tr key={column.name} className="border-t border-gray-200">
+                        <td className="py-1 pr-4">{index + 1}</td>
+                        <td className="py-1 pr-4 font-mono">{column.name}</td>
+                        <td className="py-1 pr-4">{column.format}</td>
+                        <td className="py-1 font-mono text-gray-500">{column.example}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                <li>
+                  <strong>matchweek</strong> je nepovinný. Když sloupec chybí nebo je prázdný, kolo
+                  se dopočítá z data zápasu podle začátku sezóny.
+                </li>
+                <li>
+                  Názvy týmů a kategorií musí odpovídat evidenci pro vybranou sezónu. Pokud má klub
+                  v kategorii víc týmů, uveďte i označení (např. „A“, „B“).
+                </li>
+                <li>U CSV se oddělovač rozpozná sám – funguje čárka i středník.</li>
+                <li>U Excelu se čte pouze první list sešitu.</li>
+                <li>
+                  Sezóna se nebere ze souboru, použije se ta vybraná v administraci. Prázdné řádky
+                  se přeskakují.
+                </li>
+              </ul>
+
+              <div className="text-xs">
+                <p className="text-gray-500 mb-1">Ukázka CSV:</p>
+                <pre className="bg-white border border-gray-200 rounded p-2 overflow-x-auto font-mono text-gray-700">
+                  {CSV_EXAMPLE}
+                </pre>
+              </div>
+            </div>
+
             {/* File Upload */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
               <input
@@ -555,6 +638,7 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                       <TableColumn>Domácí tým</TableColumn>
                       <TableColumn>Hostující tým</TableColumn>
                       <TableColumn>Kategorie</TableColumn>
+                      <TableColumn>Kolo</TableColumn>
                       <TableColumn>Chyby</TableColumn>
                     </TableHeader>
                     <TableBody>
@@ -572,6 +656,11 @@ const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                           <TableCell>{match.homeTeam}</TableCell>
                           <TableCell>{match.awayTeam}</TableCell>
                           <TableCell>{match.category}</TableCell>
+                          <TableCell>
+                            {match.matchweek || (
+                              <span className="text-gray-400 text-xs">z data</span>
+                            )}
+                          </TableCell>
                           <TableCell>
                             {match.errors && match.errors.length > 0 ? (
                               <ul className="text-xs text-red-600 space-y-1">

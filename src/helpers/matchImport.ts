@@ -105,6 +105,24 @@ export function resolveImportTeam<T extends ImportTeamCandidate>(
   };
 }
 
+/**
+ * The matchweek column is optional. An empty value is not an error — it means
+ * the caller should fall back to deriving the matchweek from the match date.
+ */
+export function parseImportMatchweek(value: string | undefined): ResolveResult<number> {
+  const raw = (value ?? '').trim();
+
+  if (!raw) {
+    return {match: null, error: null};
+  }
+
+  if (!/^\d+$/.test(raw) || Number(raw) < 1) {
+    return {match: null, error: `Neplatné kolo "${raw}" – zadejte celé kladné číslo`};
+  }
+
+  return {match: Number(raw), error: null};
+}
+
 export function resolveImportCategory<T extends ImportCategoryCandidate>(
   categories: T[],
   name: string
