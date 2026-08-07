@@ -112,8 +112,12 @@ export async function GET(request: Request, {params}: {params: Promise<{id: stri
  * PATCH /api/members/[id] - Update member
  *
  * Admins may update any member. Everyone else (coaches) may only touch members
- * of a category listed in their `assigned_categories`, and may not move a member
- * into — or out of — a category they do not manage.
+ * of a category listed in their `assigned_categories`.
+ *
+ * Moving a member to a category the coach does not manage is allowed — that is
+ * how a player moves up an age group (dorostenka → ženy), and the target
+ * category always belongs to a different coach. Clearing the category is not:
+ * a member without a category is invisible to every coach.
  */
 export async function PATCH(request: Request, {params}: {params: Promise<{id: string}>}) {
   const {id} = await params;
@@ -125,18 +129,13 @@ export async function PATCH(request: Request, {params}: {params: Promise<{id: st
 
     if (!access.allowed) return access.response;
 
-    // Reassigning a category is only allowed between managed categories —
-    // clearing it would also move the member out of the coach's reach.
-    if (!access.isAdminUser && 'category_id' in body) {
-      if (body.category_id !== access.member.category_id) {
-        const targetAllowed = body.category_id
-          ? await hasCategoryAccess(supabase, user.id, body.category_id)
-          : false;
-
-        if (!targetAllowed) {
-          return errorResponse(t.noTargetCategoryAccess, 403);
-        }
-      }
+    if (
+      !access.isAdminUser &&
+      'category_id' in body &&
+      !body.category_id &&
+      access.member.category_id
+    ) {
+      return errorResponse(t.noTargetCategoryAccess, 403);
     }
 
     const {data, error} = await supabaseAdmin

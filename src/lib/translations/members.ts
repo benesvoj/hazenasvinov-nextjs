@@ -183,7 +183,7 @@ export const membersTranslations = {
     memberWithSameRegNumberExists: 'Člen s tímto registračním číslem již existuje',
     memberNotFound: 'Člen nebyl nalezen',
     noCategoryAccess: 'Nemáte oprávnění upravovat členy v této kategorii',
-    noTargetCategoryAccess: 'Nemáte oprávnění přiřadit člena do této kategorie',
+    noTargetCategoryAccess: 'Členovi nelze odebrat kategorii',
   },
   labels: {
     basicInfoSection: {

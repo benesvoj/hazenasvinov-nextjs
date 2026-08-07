@@ -124,7 +124,9 @@ export default function CoachMembersContainer() {
         onClose={state.changeCategoryModal.closeAndClear}
         onSubmit={state.handleChangeCategory}
         member={state.changeCategoryModal.selectedItem}
-        categories={state.availableCategories || []}
+        // All club categories, not just the coach's own — moving a player up
+        // (dorostenka → ženy) targets a category run by somebody else.
+        categories={categoriesData || []}
         isLoading={state.isDeleteLoading}
       />
 
