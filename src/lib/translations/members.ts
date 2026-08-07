@@ -19,6 +19,14 @@ export const membersTranslations = {
         placeholder: 'Všechny funkce',
         ariaLabel: 'Filtrovat podle funkce',
       },
+      status: {
+        title: 'Stav',
+        placeholder: 'Všichni členové',
+        ariaLabel: 'Filtrovat podle stavu členství',
+        active: 'Aktivní členové',
+        inactive: 'Vyřazení členové',
+        all: 'Všichni členové',
+      },
     },
     noMembersFound: 'Žádní členové nebyli nalezeni',
     noFunctionsFound: 'Žádné funkce',
@@ -39,6 +47,11 @@ export const membersTranslations = {
       openDetail: 'Otevřít detail člena',
       openEdit: 'Editace člena',
       openDelete: 'Smazání člena',
+    },
+    actions: {
+      deactivate: 'Vyřadit člena',
+      activate: 'Obnovit členství',
+      changeCategory: 'Změnit kategorii',
     },
   },
   membersList: 'Seznam členů',
@@ -68,6 +81,10 @@ export const membersTranslations = {
     memberUpdatedSuccessfully: 'Člen byl úspěšně aktualizován',
     memberDeleteFailed: 'Chyba při mazání člena',
     memberDeletedSuccessfully: 'Člen byl úspěšně smazán',
+    memberDeactivatedSuccessfully: 'Člen byl vyřazen ze systému',
+    memberActivatedSuccessfully: 'Členství bylo obnoveno',
+    memberDeactivationFailed: 'Chyba při vyřazování člena',
+    memberActivationFailed: 'Chyba při obnovování členství',
   },
   buttons: {
     bulkChange: 'Hromadná změna',
@@ -84,8 +101,14 @@ export const membersTranslations = {
       addMember: 'Přidat člena',
       editMember: 'Upravit člena',
       deleteMember: 'Smazat člena',
+      deactivateMember: 'Vyřadit člena',
+      activateMember: 'Obnovit členství',
     },
     deleteMemberMessage: 'Opravdu chcete smazat člena? Tato akce je nevratná.',
+    deactivateMemberMessage:
+      'Opravdu chcete vyřadit člena ze systému? Člen zůstane v historických záznamech (zápasy, soupisky), ale nebude ho již možné nikde vybírat. Vyřazení lze kdykoli vrátit zpět.',
+    activateMemberMessage:
+      'Opravdu chcete obnovit členství? Člen bude znovu nabízen ve všech výběrech.',
     memberForm: {
       registrationNumber: 'Registrační číslo',
       registrationNumberHelper:
@@ -111,6 +134,30 @@ export const membersTranslations = {
       functions: 'Funkce',
     },
   },
+  changeCategory: {
+    title: 'Změnit kategorii člena',
+    currentCategory: 'Současná kategorie',
+    newCategory: 'Nová kategorie',
+    hint: 'Nabízeny jsou kategorie odpovídající pohlaví člena a smíšené kategorie (přípravky a mladší).',
+    noCategoriesAvailable: 'Pro tohoto člena není dostupná žádná jiná kategorie.',
+    submit: 'Přesunout',
+    noCategory: 'Bez kategorie',
+    toasts: {
+      categoryChanged: 'Kategorie člena byla změněna',
+    },
+  },
+  audit: {
+    createdBy: 'Vytvořil',
+    updatedBy: 'Naposledy upravil',
+    unknownUser: 'neznámý uživatel',
+  },
+  duplicates: {
+    title: 'Podobný člen již v systému existuje',
+    description:
+      'Shodné jméno je možné — zkontrolujte prosím, že nezakládáte duplicitní záznam. Uložení tím není blokováno.',
+    unknownCategory: 'bez kategorie',
+    inactive: 'vyřazený',
+  },
   validations: {
     mandatoryName: 'Jméno je povinné',
     mandatorySurname: 'Příjmení je povinné',
@@ -134,6 +181,9 @@ export const membersTranslations = {
   responseMessages: {
     membersFetchFailed: 'Chyba při načítání členů',
     memberWithSameRegNumberExists: 'Člen s tímto registračním číslem již existuje',
+    memberNotFound: 'Člen nebyl nalezen',
+    noCategoryAccess: 'Nemáte oprávnění upravovat členy v této kategorii',
+    noTargetCategoryAccess: 'Členovi nelze odebrat kategorii',
   },
   labels: {
     basicInfoSection: {

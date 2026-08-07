@@ -11,8 +11,10 @@ import {
   ContentCard,
   DeleteDialog,
   FULL_EDIT,
+  MemberCategoryChangeDialog,
   MemberFormModal,
   MembersInternalSection,
+  MemberToggleActiveDialog,
   PaymentFormModal,
   Search,
   Show,
@@ -83,10 +85,13 @@ export default function CoachMembersContainer() {
             state.memberModal.openWith(member as unknown as import('@/types').Member)
           }
           onPayment={state.openPaymentInternal}
+          onToggleActive={state.toggleActiveModal.openWith}
+          onChangeCategory={state.changeCategoryModal.openWith}
           onDelete={state.isAdmin ? state.openDeleteInternal : undefined}
           searchTerm={state.searchTerm}
           pageSize={10}
-          filters={{isActive: state.isActiveOnly}}
+          // `undefined` = no filter (all members); `true` = active only.
+          filters={{isActive: state.isActiveOnly || undefined}}
         />
       </AppPageLayout>
 
@@ -113,13 +118,33 @@ export default function CoachMembersContainer() {
         />
       )}
 
+      <MemberCategoryChangeDialog
+        key={state.changeCategoryModal.selectedItem?.id ?? 'category-change'}
+        isOpen={state.changeCategoryModal.isOpen}
+        onClose={state.changeCategoryModal.closeAndClear}
+        onSubmit={state.handleChangeCategory}
+        member={state.changeCategoryModal.selectedItem}
+        // All club categories, not just the coach's own — moving a player up
+        // (dorostenka → ženy) targets a category run by somebody else.
+        categories={categoriesData || []}
+        isLoading={state.isMemberMutating}
+      />
+
+      <MemberToggleActiveDialog
+        isOpen={state.toggleActiveModal.isOpen}
+        onClose={state.toggleActiveModal.closeAndClear}
+        onSubmit={state.handleToggleActive}
+        member={state.toggleActiveModal.selectedItem}
+        isLoading={state.isMemberMutating}
+      />
+
       <DeleteDialog
         isOpen={state.modals.deleteModal.isOpen}
         onClose={state.modals.deleteModal.onClose}
         onSubmit={state.handleDeleteMember}
         title={translations.members.modals.titles.deleteMember}
         message={translations.members.modals.deleteMemberMessage}
-        isLoading={state.isDeleteLoading}
+        isLoading={state.isMemberMutating}
       />
     </>
   );

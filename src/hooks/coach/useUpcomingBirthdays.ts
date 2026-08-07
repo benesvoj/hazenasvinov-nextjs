@@ -80,7 +80,11 @@ export function useUpcomingBirthdays(
       setError(null);
 
       // Build query based on filtering requirements
-      let query = supabase.from('members').select('*').not('date_of_birth', 'is', null);
+      let query = supabase
+        .from('members')
+        .select('*')
+        .eq('is_active', true)
+        .not('date_of_birth', 'is', null);
 
       // Filter by specific category or assigned category
       if (categoryId) {

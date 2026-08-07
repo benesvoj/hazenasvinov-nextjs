@@ -41,7 +41,8 @@ export function useAttendance() {
         const {data: members, error: membersError} = await supabase
           .from('members')
           .select('id, name, surname')
-          .eq('category_id', categoryId);
+          .eq('category_id', categoryId)
+          .eq('is_active', true);
 
         if (membersError) {
           throw membersError;
@@ -399,7 +400,8 @@ export function useAttendance() {
         const {data: members, error: membersError} = await supabase
           .from('members')
           .select('id, name, surname')
-          .eq('category_id', categoryId);
+          .eq('category_id', categoryId)
+          .eq('is_active', true);
 
         if (membersError) throw membersError;
 
@@ -595,7 +597,8 @@ export function useAttendance() {
         const {data: members, error: membersError} = await supabase
           .from('members')
           .select('id')
-          .eq('category_id', categoryId);
+          .eq('category_id', categoryId)
+          .eq('is_active', true);
 
         if (membersError) throw membersError;
 

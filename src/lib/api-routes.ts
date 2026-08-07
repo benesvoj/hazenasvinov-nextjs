@@ -79,6 +79,7 @@ export const API_ROUTES = {
   memberPaymentStatus: '/api/member-payment-status' as const,
   members: {
     root: '/api/members' as const,
+    duplicates: '/api/members/duplicates' as const,
     external: '/api/members/external' as const,
     internal: '/api/members/internal' as const,
     membersWithPaymentStatus: '/api/members/members-with-payment-status' as const,

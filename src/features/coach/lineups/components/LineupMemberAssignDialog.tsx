@@ -67,7 +67,7 @@ export default function LineupMemberAssignDialog({
   const newMemberModal = useModal();
 
   const {data: members, loading: membersLoading} = useFetchMembersInternal({
-    filters: showAll ? {} : {category_id: selectedCategoryId},
+    filters: showAll ? {isActive: true} : {category_id: selectedCategoryId, isActive: true},
     search: searchTerm,
     enabled: isOpen,
     limit: 100,

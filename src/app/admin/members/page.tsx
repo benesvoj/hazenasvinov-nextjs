@@ -6,7 +6,12 @@ import {useModalWithItem} from '@/hooks/shared/useModals';
 
 import {useCategoryMap} from '@/components/shared/members/hooks/useCategoryMap';
 import {MembersInternalSection} from '@/components/shared/members/MembersInternalSection';
-import {FULL_EDIT, MemberFormModal, PaymentFormModal} from '@/components/shared/members/modals';
+import {
+  FULL_EDIT,
+  MemberFormModal,
+  MemberToggleActiveDialog,
+  PaymentFormModal,
+} from '@/components/shared/members/modals';
 
 import {translations} from '@/lib/translations';
 
@@ -40,11 +45,11 @@ import {
 } from '@/types';
 import {genderOptions} from '@/utils';
 
-const FILTER_DEFAULTS = {
-  sex: Genders.EMPTY,
+const FILTER_DEFAULTS: MemberTableFilters = {
+  gender: Genders.EMPTY,
   category_id: '',
   function: MemberFunction.PLAYER,
-  is_active: true,
+  isActive: true,
 };
 
 const BULK_DEFAULTS: BulkEditFormData = {
@@ -72,9 +77,10 @@ export default function MembersAdminPage() {
   } = useFetchMembersInternal({limit: 1000});
   const {refresh: refreshExternal, loading: membersExternalLoading} = useFetchMembersExternal();
   const {refresh: refreshOnLoan, loading: membersOnLoanLoading} = useFetchMembersOnLoan();
-  const {deleteMember, isLoading: isDeleteLoading} = useMembers();
+  const {deleteMember, setMemberActive, isLoading: isMemberMutating} = useMembers();
   const modals = useMemberModals<BaseMember>();
   const memberModal = useModalWithItem<Member>();
+  const toggleActiveModal = useModalWithItem<MemberInternal>();
   const {bulkEditMembers} = useBulkEditMembers({
     onSuccess: refreshInternal,
   });
@@ -121,6 +127,19 @@ export default function MembersAdminPage() {
     else if (activeTab === 'members-on-loan') refreshOnLoan();
   };
 
+  const handleToggleActive = async () => {
+    const member = toggleActiveModal.selectedItem;
+    if (!member?.id) return;
+
+    try {
+      await setMemberActive(member.id, !member.is_active);
+      toggleActiveModal.closeAndClear();
+      refreshInternal();
+    } catch {
+      // Toast already shown by useMembers — keep the dialog open
+    }
+  };
+
   const handleBulkEdit = async () => {
     const success = await bulkEditMembers(Array.from(selectedMembers), bulkEditFormData);
 
@@ -147,6 +166,7 @@ export default function MembersAdminPage() {
                 filters={filters}
                 onPayment={openPaymentInternal}
                 onEdit={(member) => memberModal.openWith(member as unknown as Member)}
+                onToggleActive={toggleActiveModal.openWith}
                 onDelete={openDeleteInternal}
                 enableSelection
                 selectedItems={selectedMembers}
@@ -253,13 +273,21 @@ export default function MembersAdminPage() {
         sections={FULL_EDIT}
       />
 
+      <MemberToggleActiveDialog
+        isOpen={toggleActiveModal.isOpen}
+        onClose={toggleActiveModal.closeAndClear}
+        onSubmit={handleToggleActive}
+        member={toggleActiveModal.selectedItem}
+        isLoading={isMemberMutating}
+      />
+
       <DeleteDialog
         isOpen={modals.deleteModal.isOpen}
         onClose={modals.deleteModal.onClose}
         onSubmit={handleDeleteMember}
         title={t.modals.titles.deleteMember}
         message={t.modals.deleteMemberMessage}
-        isLoading={isDeleteLoading}
+        isLoading={isMemberMutating}
       />
 
       <BulkEditModal

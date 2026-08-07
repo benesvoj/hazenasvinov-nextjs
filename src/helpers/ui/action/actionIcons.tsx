@@ -9,8 +9,11 @@ import {
   LockOpenIcon,
   PencilIcon,
   PlusCircleIcon,
+  ArrowsRightLeftIcon,
   Square3Stack3DIcon,
   TrashIcon,
+  UserMinusIcon,
+  UserPlusIcon,
   WalletIcon,
   XMarkIcon,
 } from '@heroicons/react/24/solid';
@@ -57,6 +60,15 @@ export const getDefaultActionIcon = (type: ActionTypes) => {
   }
   if (type === ActionTypes.UNBLOCK) {
     return <LockClosedIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.MOVE) {
+    return <ArrowsRightLeftIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.DEACTIVATE) {
+    return <UserMinusIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.ACTIVATE) {
+    return <UserPlusIcon className="w-4 h-4" />;
   }
   if (type === ActionTypes.PASSWORD_RESET) {
     return <KeyIcon className="w-4 h-4" />;

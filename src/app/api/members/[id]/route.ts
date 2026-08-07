@@ -1,126 +1,186 @@
 import {NextResponse} from 'next/server';
 
+import type {SupabaseClient} from '@supabase/supabase-js';
+
+import {translations} from '@/lib/translations';
+
 import supabaseAdmin from '@/utils/supabase/admin';
-import {supabaseServerClient} from '@/utils/supabase/server';
+import {
+  errorResponse,
+  prepareUpdateData,
+  successResponse,
+  withAdminAuth,
+  withAuth,
+} from '@/utils/supabase/apiHelpers';
+import {hasCategoryAccess, isAdmin} from '@/utils/supabase/coachAuth';
+
+const t = translations.members.responseMessages;
+
+/** Never accepted from the request body — see PATCH. */
+const AUDIT_FIELDS = ['id', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+
+type MemberRow = {id: string; category_id: string | null} & Record<string, any>;
+
+type MemberAccess =
+  | {allowed: true; member: MemberRow; isAdminUser: boolean}
+  | {allowed: false; response: NextResponse};
 
 /**
- * GET /api/members/[id] - Get single member
+ * Loads a member and verifies the caller may act on it.
+ *
+ * Admins pass unconditionally. Everyone else (coaches) needs the member's
+ * category in their `assigned_categories` — members without a category are
+ * admin-only, since there is nothing to authorize against.
+ */
+async function loadAuthorizedMember(
+  supabase: SupabaseClient,
+  userId: string,
+  memberId: string
+): Promise<MemberAccess> {
+  const {data: member, error} = await supabase
+    .from('members')
+    .select('*')
+    .eq('id', memberId)
+    .single();
+
+  if (error || !member) {
+    return {allowed: false, response: errorResponse(t.memberNotFound, 404)};
+  }
+
+  const isAdminUser = await isAdmin(supabase, userId);
+
+  if (!isAdminUser) {
+    const hasAccess = member.category_id
+      ? await hasCategoryAccess(supabase, userId, member.category_id)
+      : false;
+
+    if (!hasAccess) {
+      return {allowed: false, response: errorResponse(t.noCategoryAccess, 403)};
+    }
+  }
+
+  return {allowed: true, member, isAdminUser};
+}
+
+/**
+ * Resolves author ids to display names.
+ *
+ * Reads through the admin client: the caller is already authorized for the
+ * member, and profile RLS would otherwise hide colleagues' names, leaving the
+ * audit trail showing "neznámý" for everyone.
+ */
+async function resolveAuthorNames(ids: (string | null)[]): Promise<Record<string, string>> {
+  const authorIds = [...new Set(ids.filter((id): id is string => Boolean(id)))];
+
+  if (authorIds.length === 0) return {};
+
+  const {data: profiles} = await supabaseAdmin
+    .from('profiles')
+    .select('user_id, display_name, email')
+    .in('user_id', authorIds);
+
+  return Object.fromEntries(
+    (profiles ?? []).map((profile) => [
+      profile.user_id,
+      profile.display_name || profile.email || '',
+    ])
+  );
+}
+
+/**
+ * GET /api/members/[id] - Get single member, including its audit trail
+ *
+ * Restricted to admins and coaches managing the member's category.
  */
 export async function GET(request: Request, {params}: {params: Promise<{id: string}>}) {
-  try {
-    const {id} = await params;
-    const supabase = await supabaseServerClient();
+  const {id} = await params;
 
-    // Check authentication
-    const {
-      data: {user},
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({error: 'Unauthorized'}, {status: 401});
-    }
+  return withAuth(async (user, supabase) => {
+    const access = await loadAuthorizedMember(supabase, user.id, id);
 
-    const {data, error} = await supabase.from('members').select('*').eq('id', id).single();
+    if (!access.allowed) return access.response;
 
-    if (error) {
-      console.error('Error fetching member:', error);
-      return NextResponse.json({error: error.message}, {status: 500});
-    }
+    const {member} = access;
+    const names = await resolveAuthorNames([member.created_by, member.updated_by]);
 
-    return NextResponse.json({data, error: null});
-  } catch (error: any) {
-    console.error('Unexpected error:', error);
-    return NextResponse.json({error: error.message || 'Internal server error'}, {status: 500});
-  }
+    return successResponse({
+      ...member,
+      created_by_name: (member.created_by && names[member.created_by]) || null,
+      updated_by_name: (member.updated_by && names[member.updated_by]) || null,
+    });
+  });
 }
 
 /**
  * PATCH /api/members/[id] - Update member
- * @param request
- * @param params
- * @constructor
+ *
+ * Admins may update any member. Everyone else (coaches) may only touch members
+ * of a category listed in their `assigned_categories`.
+ *
+ * Moving a member to a category the coach does not manage is allowed — that is
+ * how a player moves up an age group (dorostenka → ženy), and the target
+ * category always belongs to a different coach. Clearing the category is not:
+ * a member without a category is invisible to every coach.
  */
 export async function PATCH(request: Request, {params}: {params: Promise<{id: string}>}) {
-  try {
-    const {id} = await params;
-    const supabase = await supabaseServerClient();
+  const {id} = await params;
 
-    // Check authentication
-    const {
-      data: {user},
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({error: 'Unauthorized'}, {status: 401});
-    }
-
+  return withAuth(async (user, supabase) => {
     const body = await request.json();
 
-    // Filter out undefined values to avoid Supabase errors
-    const updateData: Record<string, any> = {
-      updated_at: new Date().toISOString(),
-    };
+    const access = await loadAuthorizedMember(supabase, user.id, id);
 
-    // Only include fields that are not undefined
-    Object.keys(body).forEach((key) => {
-      const value = body[key];
-      if (value !== undefined && key !== 'id') {
-        updateData[key] = value;
-      }
-    });
+    if (!access.allowed) return access.response;
+
+    if (
+      !access.isAdminUser &&
+      'category_id' in body &&
+      !body.category_id &&
+      access.member.category_id
+    ) {
+      return errorResponse(t.noTargetCategoryAccess, 403);
+    }
 
     const {data, error} = await supabaseAdmin
       .from('members')
-      .update(updateData)
+      // Audit columns are not client-writable. The trigger already freezes
+      // created_* on update, but stripping them here keeps the guarantee from
+      // resting on the database alone. The admin client has no auth context, so
+      // the author has to be passed explicitly.
+      .update({...prepareUpdateData(body, AUDIT_FIELDS), updated_by: user.id})
       .eq('id', id)
       .select()
       .single();
 
     if (error) {
       console.error('Error updating member:', error);
-      return NextResponse.json(
-        {error: `Chyba při aktualizaci člena: ${error.message}`},
-        {status: 500}
-      );
+      return errorResponse(`Chyba při aktualizaci člena: ${error.message}`, 500);
     }
 
-    return NextResponse.json({data, error: null});
-  } catch (error: any) {
-    console.error('Unexpected error:', error);
-    return NextResponse.json({error: error.message || 'Internal server error'}, {status: 500});
-  }
+    return successResponse(data);
+  });
 }
 
 /**
  * DELETE /api/members/[id] - Delete member
- * @param request
- * @param params
- * @constructor
+ *
+ * Admin-only, matching the UI: coaches deactivate members (PATCH `is_active`)
+ * instead of deleting them, so history stays intact.
  */
 export async function DELETE(request: Request, {params}: {params: Promise<{id: string}>}) {
-  try {
-    const {id} = await params;
-    const supabase = await supabaseServerClient();
+  const {id} = await params;
 
-    // Check authentication
-    const {
-      data: {user},
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({error: 'Unauthorized'}, {status: 401});
-    }
+  return withAdminAuth(async (user, supabase, admin) => {
+    await admin.from('member_club_relationships').delete().eq('member_id', id);
+    await admin.from('member_metadata').delete().eq('member_id', id);
 
-    await supabaseAdmin.from('member_club_relationships').delete().eq('member_id', id);
-    await supabaseAdmin.from('member_metadata').delete().eq('member_id', id);
-
-    const {error} = await supabaseAdmin.from('members').delete().eq('id', id);
+    const {error} = await admin.from('members').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting member:', error);
-      return NextResponse.json({error: `Chyba při mazání člena: ${error.message}`}, {status: 500});
+      return errorResponse(`Chyba při mazání člena: ${error.message}`, 500);
     }
 
     return NextResponse.json({success: true, error: null});
-  } catch (error: any) {
-    console.error('Unexpected error:', error);
-    return NextResponse.json({error: error.message || 'Internal server error'}, {status: 500});
-  }
+  });
 }

@@ -9,6 +9,7 @@
 export {
   getMembersAll,
   getMemberById,
+  getMemberDuplicates,
   getMemberWithRelations,
   getMembersByCategory,
 } from './queries';

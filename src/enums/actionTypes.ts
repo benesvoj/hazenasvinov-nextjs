@@ -19,4 +19,7 @@ export enum ActionTypes {
   PASSWORD_RESET = 'password-reset',
   BLOCKED = 'blocked',
   UNBLOCK = 'unblock',
+  ACTIVATE = 'activate',
+  DEACTIVATE = 'deactivate',
+  MOVE = 'move',
 }

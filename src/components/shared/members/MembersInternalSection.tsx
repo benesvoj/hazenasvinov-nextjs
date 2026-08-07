@@ -27,6 +27,10 @@ interface MembersInternalSectionProps {
   onPayment?: (member: MemberInternal) => void;
   onDelete?: (member: MemberInternal) => void;
   onEdit?: (member: MemberInternal) => void;
+  /** Soft removal — deactivates an active member, reactivates a deactivated one. */
+  onToggleActive?: (member: MemberInternal) => void;
+  /** Moves the member to another category. */
+  onChangeCategory?: (member: MemberInternal) => void;
 
   // Selection (admin-only feature)
   enableSelection?: boolean;
@@ -48,6 +52,8 @@ export const MembersInternalSection = ({
   onPayment,
   onDelete,
   onEdit,
+  onToggleActive,
+  onChangeCategory,
   enableSelection,
   selectedItems,
   onSelectionChange,
@@ -56,7 +62,13 @@ export const MembersInternalSection = ({
 }: MembersInternalSectionProps) => {
   const {data, loading, pagination, goToPage, refresh} = useFetchMembersInternal({
     search: searchTerm,
-    filters: {...filters, category_id: categoryId ?? filters?.category_id},
+    // `MemberTableFilters.gender` maps onto the `sex` column used by the query layer.
+    filters: {
+      sex: filters?.gender,
+      category_id: categoryId ?? filters?.category_id,
+      function: filters?.function,
+      isActive: filters?.isActive,
+    },
     limit: pageSize,
   });
 
@@ -75,6 +87,8 @@ export const MembersInternalSection = ({
     onPayment,
     onDelete,
     onEdit,
+    onToggleActive,
+    onChangeCategory,
   });
 
   const renderCell = (member: MemberInternal, columnKey: string) =>
