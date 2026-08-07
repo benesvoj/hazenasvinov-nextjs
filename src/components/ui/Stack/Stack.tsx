@@ -2,6 +2,7 @@ import {AriaRole, ReactNode} from 'react';
 
 import {twMerge} from 'tailwind-merge';
 
+import {cn} from '@/shared/lib/cn';
 import {
   FlexboxAlign,
   FlexboxDirection,
@@ -11,7 +12,6 @@ import {
   paddingClasses,
   Spacing,
 } from '@/types';
-import {cn} from "@/shared/lib/cn";
 
 export interface StackProps {
   role?: AriaRole;
