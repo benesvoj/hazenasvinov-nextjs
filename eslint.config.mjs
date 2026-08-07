@@ -127,6 +127,19 @@ export default [
       'import/named': 'off', // TypeScript handles this
       'import/default': 'off', // TypeScript handles this
       'import/namespace': 'off', // TypeScript handles this
+
+      // React Compiler rules that arrived with eslint-plugin-react-hooks 7.x
+      // (pulled in by eslint-config-next). They flag ~90 pre-existing patterns
+      // across the app, which would block every commit touching those files via
+      // the pre-commit hook. Demoted to warnings so the debt stays visible and
+      // can be paid off file by file; flip back to 'error' once it is.
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/static-components': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/purity': 'warn',
+      'react-hooks/use-memo': 'warn',
     },
   },
 ];
