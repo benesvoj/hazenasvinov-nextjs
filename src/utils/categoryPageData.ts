@@ -3,6 +3,7 @@
  * Please use the new data fetching utilities in src/lib/data instead.
  * @todo REFACTOR: This file is getting quite large and complex. Consider breaking it down into smaller modules. Consider if it is still needed.
  */
+import supabaseAdmin from '@/utils/supabase/admin';
 import {supabaseServerClient} from '@/utils/supabase/server';
 
 import {isPlayoffPhase} from '@/enums';
@@ -423,7 +424,14 @@ export async function getCategoryPageData(
     springMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     playoffMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    const coachCardsResult = await getPublishedCoachCardsByCategory({supabase}, category.id);
+    // Service role, not the request client: `coach_cards_with_categories` is no
+    // longer readable by anon, so an anonymous visitor's client returns nothing
+    // here. The published-categories filter inside the query is what keeps
+    // unpublished cards out.
+    const coachCardsResult = await getPublishedCoachCardsByCategory(
+      {supabase: supabaseAdmin},
+      category.id
+    );
 
     return {
       category: category as any,
