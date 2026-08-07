@@ -16,7 +16,8 @@ export function useCoachMembersPageLogic() {
   const modals = useMemberModals<MemberInternal>();
   const memberModal = useModalWithItem<Member>();
   const toggleActiveModal = useModalWithItem<MemberInternal>();
-  const {deleteMember, setMemberActive, isLoading: isDeleteLoading} = useMembers();
+  const changeCategoryModal = useModalWithItem<MemberInternal>();
+  const {deleteMember, setMemberActive, updateMember, isLoading: isDeleteLoading} = useMembers();
   const {handleSave} = useMemberSave(memberModal, () => setRefreshKey((k) => k + 1));
 
   const openDeleteInternal = (member: MemberInternal) => {
@@ -50,6 +51,19 @@ export function useCoachMembersPageLogic() {
     }
   };
 
+  const handleChangeCategory = async (categoryId: string) => {
+    const selectedItem = changeCategoryModal.selectedItem;
+    if (!selectedItem?.id || !categoryId) return;
+
+    try {
+      await updateMember({id: selectedItem.id, category_id: categoryId});
+      changeCategoryModal.closeAndClear();
+      setRefreshKey((k) => k + 1);
+    } catch {
+      // Toast already shown by useMembers — keep the dialog open
+    }
+  };
+
   const triggerRefresh = () => setRefreshKey((k) => k + 1);
 
   return {
@@ -70,6 +84,7 @@ export function useCoachMembersPageLogic() {
     modals,
     memberModal,
     toggleActiveModal,
+    changeCategoryModal,
     handleSave,
 
     // Actions
@@ -77,6 +92,7 @@ export function useCoachMembersPageLogic() {
     openPaymentInternal,
     handleDeleteMember,
     handleToggleActive,
+    handleChangeCategory,
     triggerRefresh,
 
     // Misc

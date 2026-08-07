@@ -29,6 +29,8 @@ interface MembersInternalSectionProps {
   onEdit?: (member: MemberInternal) => void;
   /** Soft removal — deactivates an active member, reactivates a deactivated one. */
   onToggleActive?: (member: MemberInternal) => void;
+  /** Moves the member to another category. */
+  onChangeCategory?: (member: MemberInternal) => void;
 
   // Selection (admin-only feature)
   enableSelection?: boolean;
@@ -51,6 +53,7 @@ export const MembersInternalSection = ({
   onDelete,
   onEdit,
   onToggleActive,
+  onChangeCategory,
   enableSelection,
   selectedItems,
   onSelectionChange,
@@ -85,6 +88,7 @@ export const MembersInternalSection = ({
     onDelete,
     onEdit,
     onToggleActive,
+    onChangeCategory,
   });
 
   const renderCell = (member: MemberInternal, columnKey: string) =>

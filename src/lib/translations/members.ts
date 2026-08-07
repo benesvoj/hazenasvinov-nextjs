@@ -51,6 +51,7 @@ export const membersTranslations = {
     actions: {
       deactivate: 'Vyřadit člena',
       activate: 'Obnovit členství',
+      changeCategory: 'Změnit kategorii',
     },
   },
   membersList: 'Seznam členů',
@@ -131,6 +132,18 @@ export const membersTranslations = {
       dateOfBirth: 'Datum narození',
       sex: 'Pohlaví',
       functions: 'Funkce',
+    },
+  },
+  changeCategory: {
+    title: 'Změnit kategorii člena',
+    currentCategory: 'Současná kategorie',
+    newCategory: 'Nová kategorie',
+    hint: 'Nabízeny jsou kategorie odpovídající pohlaví člena a smíšené kategorie (přípravky a mladší).',
+    noCategoriesAvailable: 'Pro tohoto člena není dostupná žádná jiná kategorie.',
+    submit: 'Přesunout',
+    noCategory: 'Bez kategorie',
+    toasts: {
+      categoryChanged: 'Kategorie člena byla změněna',
     },
   },
   audit: {

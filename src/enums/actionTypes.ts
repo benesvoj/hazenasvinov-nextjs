@@ -21,4 +21,5 @@ export enum ActionTypes {
   UNBLOCK = 'unblock',
   ACTIVATE = 'activate',
   DEACTIVATE = 'deactivate',
+  MOVE = 'move',
 }

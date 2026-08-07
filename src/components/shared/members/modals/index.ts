@@ -3,6 +3,7 @@
 // Folder: modals
 
 export {MemberAuditInfo} from './MemberAuditInfo';
+export {MemberCategoryChangeDialog} from './MemberCategoryChangeDialog';
 export {MemberDuplicateWarning} from './MemberDuplicateWarning';
 export {MemberFormModal} from './MemberFormModal';
 export {default as MemberInfoForm} from './MemberInfoForm';

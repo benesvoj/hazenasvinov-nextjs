@@ -11,6 +11,7 @@ import {
   ContentCard,
   DeleteDialog,
   FULL_EDIT,
+  MemberCategoryChangeDialog,
   MemberFormModal,
   MembersInternalSection,
   MemberToggleActiveDialog,
@@ -85,6 +86,7 @@ export default function CoachMembersContainer() {
           }
           onPayment={state.openPaymentInternal}
           onToggleActive={state.toggleActiveModal.openWith}
+          onChangeCategory={state.changeCategoryModal.openWith}
           onDelete={state.isAdmin ? state.openDeleteInternal : undefined}
           searchTerm={state.searchTerm}
           pageSize={10}
@@ -115,6 +117,16 @@ export default function CoachMembersContainer() {
           onSuccess={state.triggerRefresh}
         />
       )}
+
+      <MemberCategoryChangeDialog
+        key={state.changeCategoryModal.selectedItem?.id ?? 'category-change'}
+        isOpen={state.changeCategoryModal.isOpen}
+        onClose={state.changeCategoryModal.closeAndClear}
+        onSubmit={state.handleChangeCategory}
+        member={state.changeCategoryModal.selectedItem}
+        categories={state.availableCategories || []}
+        isLoading={state.isDeleteLoading}
+      />
 
       <MemberToggleActiveDialog
         isOpen={state.toggleActiveModal.isOpen}

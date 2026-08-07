@@ -23,12 +23,19 @@ export const getInternalMemberColumns = (
     onEdit?: (member: MemberInternal) => void;
     /** Soft removal — deactivates an active member, reactivates a deactivated one. */
     onToggleActive?: (member: MemberInternal) => void;
+    /** Moves the member to another category. */
+    onChangeCategory?: (member: MemberInternal) => void;
   }
 ): ColumnType<MemberInternal>[] => {
   const buildActions = (member: MemberInternal) =>
     [
       actions.onPayment && {type: ActionTypes.PAYMENT, onPress: actions.onPayment},
       actions.onEdit && {type: ActionTypes.UPDATE, onPress: actions.onEdit},
+      actions.onChangeCategory && {
+        type: ActionTypes.MOVE,
+        onPress: actions.onChangeCategory,
+        title: t.table.actions.changeCategory,
+      },
       actions.onToggleActive && {
         type: member.is_active ? ActionTypes.DEACTIVATE : ActionTypes.ACTIVATE,
         onPress: actions.onToggleActive,
@@ -38,7 +45,11 @@ export const getInternalMemberColumns = (
     ].filter((a): a is ActionConfig<MemberInternal> => Boolean(a));
 
   const hasActions = Boolean(
-    actions.onPayment || actions.onEdit || actions.onToggleActive || actions.onDelete
+    actions.onPayment ||
+    actions.onEdit ||
+    actions.onChangeCategory ||
+    actions.onToggleActive ||
+    actions.onDelete
   );
 
   return [

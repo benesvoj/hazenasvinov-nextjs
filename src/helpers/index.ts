@@ -7,6 +7,7 @@ export * from './todoIcons';
 export * from './comments';
 export * from './commentIcons';
 export * from './ui/action/actionIcons';
+export * from './getAssignableCategories';
 export * from './getCategoryInfo';
 export * from './getCategoryMatchweek';
 export * from './monthUtils';

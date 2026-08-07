@@ -9,6 +9,7 @@ import {
   LockOpenIcon,
   PencilIcon,
   PlusCircleIcon,
+  ArrowsRightLeftIcon,
   Square3Stack3DIcon,
   TrashIcon,
   UserMinusIcon,
@@ -59,6 +60,9 @@ export const getDefaultActionIcon = (type: ActionTypes) => {
   }
   if (type === ActionTypes.UNBLOCK) {
     return <LockClosedIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.MOVE) {
+    return <ArrowsRightLeftIcon className="w-4 h-4" />;
   }
   if (type === ActionTypes.DEACTIVATE) {
     return <UserMinusIcon className="w-4 h-4" />;
