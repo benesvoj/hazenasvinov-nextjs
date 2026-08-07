@@ -39,7 +39,9 @@ export async function POST(request: NextRequest) {
     const body: MemberInsert = await request.json();
     const {data, error} = await admin
       .from('members')
-      .insert({...body})
+      // The admin client has no auth context, so the audit trigger cannot infer
+      // the author — it has to be passed explicitly.
+      .insert({...body, created_by: user.id, updated_by: user.id})
       .select()
       .single();
 

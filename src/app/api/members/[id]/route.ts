@@ -60,7 +60,32 @@ async function loadAuthorizedMember(
 }
 
 /**
- * GET /api/members/[id] - Get single member
+ * Resolves author ids to display names.
+ *
+ * Reads through the admin client: the caller is already authorized for the
+ * member, and profile RLS would otherwise hide colleagues' names, leaving the
+ * audit trail showing "neznámý" for everyone.
+ */
+async function resolveAuthorNames(ids: (string | null)[]): Promise<Record<string, string>> {
+  const authorIds = [...new Set(ids.filter((id): id is string => Boolean(id)))];
+
+  if (authorIds.length === 0) return {};
+
+  const {data: profiles} = await supabaseAdmin
+    .from('profiles')
+    .select('user_id, display_name, email')
+    .in('user_id', authorIds);
+
+  return Object.fromEntries(
+    (profiles ?? []).map((profile) => [
+      profile.user_id,
+      profile.display_name || profile.email || '',
+    ])
+  );
+}
+
+/**
+ * GET /api/members/[id] - Get single member, including its audit trail
  *
  * Restricted to admins and coaches managing the member's category.
  */
@@ -72,7 +97,14 @@ export async function GET(request: Request, {params}: {params: Promise<{id: stri
 
     if (!access.allowed) return access.response;
 
-    return successResponse(access.member);
+    const {member} = access;
+    const names = await resolveAuthorNames([member.created_by, member.updated_by]);
+
+    return successResponse({
+      ...member,
+      created_by_name: (member.created_by && names[member.created_by]) || null,
+      updated_by_name: (member.updated_by && names[member.updated_by]) || null,
+    });
   });
 }
 
@@ -109,7 +141,9 @@ export async function PATCH(request: Request, {params}: {params: Promise<{id: st
 
     const {data, error} = await supabaseAdmin
       .from('members')
-      .update(prepareUpdateData(body))
+      // The admin client has no auth context, so the audit trigger cannot infer
+      // the author — it has to be passed explicitly.
+      .update({...prepareUpdateData(body), updated_by: user.id})
       .eq('id', id)
       .select()
       .single();

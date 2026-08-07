@@ -133,6 +133,18 @@ export const membersTranslations = {
       functions: 'Funkce',
     },
   },
+  audit: {
+    createdBy: 'Vytvořil',
+    updatedBy: 'Naposledy upravil',
+    unknownUser: 'neznámý uživatel',
+  },
+  duplicates: {
+    title: 'Podobný člen již v systému existuje',
+    description:
+      'Shodné jméno je možné — zkontrolujte prosím, že nezakládáte duplicitní záznam. Uložení tím není blokováno.',
+    unknownCategory: 'bez kategorie',
+    inactive: 'vyřazený',
+  },
   validations: {
     mandatoryName: 'Jméno je povinné',
     mandatorySurname: 'Příjmení je povinné',

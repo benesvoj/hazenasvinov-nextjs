@@ -14,12 +14,14 @@ import {
   Grid,
   GridItem,
   MedicalSection,
+  MemberAuditInfo,
+  MemberDuplicateWarning,
   MemberPaymentsTab,
   ParentSection,
   QUICK_CREATE,
   Show,
 } from '@/components';
-import {useMemberForm} from '@/hooks';
+import {useFetchMemberAudit, useFetchMemberDuplicates, useMemberForm} from '@/hooks';
 import {MemberFormModalProps, MemberMetadataFormData} from '@/types';
 import {hasItems, isNotNilOrEmpty} from '@/utils';
 
@@ -63,6 +65,17 @@ export const MemberFormModal = ({
     }
   }, [isOpen, isEditMode, categories, formData.category_id]);
 
+  const {data: audit} = useFetchMemberAudit(isOpen && member ? member.id : null);
+
+  // Namesakes in other categories are invisible from this form — warn about
+  // them while typing, without ever blocking the save.
+  const {data: duplicates} = useFetchMemberDuplicates({
+    name: formData.name,
+    surname: formData.surname,
+    excludeId: member?.id,
+    enabled: isOpen,
+  });
+
   const handleInputChange = (field: keyof MemberMetadataFormData, value: string) => {
     updateFormData({[field]: value} as Partial<MemberMetadataFormData>);
   };
@@ -96,6 +109,7 @@ export const MemberFormModal = ({
     >
       <Tabs>
         <Tab key="basic_info" title={translations.members.modals.tabs.info}>
+          <MemberDuplicateWarning duplicates={duplicates} categories={categories || []} />
           <Grid columns={sections === QUICK_CREATE ? 1 : 2} gap={'sm'}>
             <GridItem>
               <BasicInfoSection
@@ -125,6 +139,9 @@ export const MemberFormModal = ({
               </GridItem>
             </Show>
           </Grid>
+          <Show when={isEditMode}>
+            <MemberAuditInfo audit={audit} />
+          </Show>
         </Tab>
         {isNotNilOrEmpty(member) && showPaymentsTab && (
           <Tab key="payments" title={translations.members.modals.tabs.membershipFees}>

@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     const {data: member, error: memberError} = await supabase
       .from('members')
-      .insert({...body, registration_number})
+      .insert({...body, registration_number, created_by: user.id, updated_by: user.id})
       .select()
       .single();
 
