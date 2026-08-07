@@ -13,6 +13,7 @@ import {
   FULL_EDIT,
   MemberFormModal,
   MembersInternalSection,
+  MemberToggleActiveDialog,
   PaymentFormModal,
   Search,
   Show,
@@ -83,6 +84,7 @@ export default function CoachMembersContainer() {
             state.memberModal.openWith(member as unknown as import('@/types').Member)
           }
           onPayment={state.openPaymentInternal}
+          onToggleActive={state.toggleActiveModal.openWith}
           onDelete={state.isAdmin ? state.openDeleteInternal : undefined}
           searchTerm={state.searchTerm}
           pageSize={10}
@@ -113,6 +115,14 @@ export default function CoachMembersContainer() {
           onSuccess={state.triggerRefresh}
         />
       )}
+
+      <MemberToggleActiveDialog
+        isOpen={state.toggleActiveModal.isOpen}
+        onClose={state.toggleActiveModal.closeAndClear}
+        onSubmit={state.handleToggleActive}
+        member={state.toggleActiveModal.selectedItem}
+        isLoading={state.isDeleteLoading}
+      />
 
       <DeleteDialog
         isOpen={state.modals.deleteModal.isOpen}

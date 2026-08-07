@@ -6,7 +6,12 @@ import {useModalWithItem} from '@/hooks/shared/useModals';
 
 import {useCategoryMap} from '@/components/shared/members/hooks/useCategoryMap';
 import {MembersInternalSection} from '@/components/shared/members/MembersInternalSection';
-import {FULL_EDIT, MemberFormModal, PaymentFormModal} from '@/components/shared/members/modals';
+import {
+  FULL_EDIT,
+  MemberFormModal,
+  MemberToggleActiveDialog,
+  PaymentFormModal,
+} from '@/components/shared/members/modals';
 
 import {translations} from '@/lib/translations';
 
@@ -18,7 +23,7 @@ import MembersCsvImport from '@/app/admin/members/components/MembersCsvImport';
 import {MembersListFilters} from '@/app/admin/members/components/MembersListFilters';
 import MembersStatisticTab from '@/app/admin/members/components/MembersStatisticTab';
 
-import {AdminContainer, DeleteDialog, Dialog} from '@/components';
+import {AdminContainer, DeleteDialog} from '@/components';
 import {ActionTypes, Genders, MemberFunction} from '@/enums';
 import {currentYear} from '@/helpers';
 import {
@@ -268,33 +273,13 @@ export default function MembersAdminPage() {
         sections={FULL_EDIT}
       />
 
-      <Dialog
+      <MemberToggleActiveDialog
         isOpen={toggleActiveModal.isOpen}
         onClose={toggleActiveModal.closeAndClear}
         onSubmit={handleToggleActive}
-        title={
-          toggleActiveModal.selectedItem?.is_active
-            ? t.modals.titles.deactivateMember
-            : t.modals.titles.activateMember
-        }
-        subtitle={
-          toggleActiveModal.selectedItem
-            ? `${toggleActiveModal.selectedItem.surname} ${toggleActiveModal.selectedItem.name}`
-            : undefined
-        }
-        submitButtonLabel={
-          toggleActiveModal.selectedItem?.is_active
-            ? t.table.actions.deactivate
-            : t.table.actions.activate
-        }
-        dangerAction={Boolean(toggleActiveModal.selectedItem?.is_active)}
+        member={toggleActiveModal.selectedItem}
         isLoading={isDeleteLoading}
-        size="md"
-      >
-        {toggleActiveModal.selectedItem?.is_active
-          ? t.modals.deactivateMemberMessage
-          : t.modals.activateMemberMessage}
-      </Dialog>
+      />
 
       <DeleteDialog
         isOpen={modals.deleteModal.isOpen}

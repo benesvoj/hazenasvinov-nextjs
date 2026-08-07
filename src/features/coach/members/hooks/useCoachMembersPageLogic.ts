@@ -15,7 +15,8 @@ export function useCoachMembersPageLogic() {
   const {selectedCategory, setSelectedCategory, availableCategories, isAdmin} = useCoachCategory();
   const modals = useMemberModals<MemberInternal>();
   const memberModal = useModalWithItem<Member>();
-  const {deleteMember, isLoading: isDeleteLoading} = useMembers();
+  const toggleActiveModal = useModalWithItem<MemberInternal>();
+  const {deleteMember, setMemberActive, isLoading: isDeleteLoading} = useMembers();
   const {handleSave} = useMemberSave(memberModal, () => setRefreshKey((k) => k + 1));
 
   const openDeleteInternal = (member: MemberInternal) => {
@@ -33,6 +34,20 @@ export function useCoachMembersPageLogic() {
     await deleteMember(selectedItem.id);
     modals.deleteModal.closeAndClear();
     setRefreshKey((k) => k + 1);
+  };
+
+  /** Soft removal — the member stays in historical records but is no longer selectable. */
+  const handleToggleActive = async () => {
+    const selectedItem = toggleActiveModal.selectedItem;
+    if (!selectedItem?.id) return;
+
+    try {
+      await setMemberActive(selectedItem.id, !selectedItem.is_active);
+      toggleActiveModal.closeAndClear();
+      setRefreshKey((k) => k + 1);
+    } catch {
+      // Toast already shown by useMembers — keep the dialog open
+    }
   };
 
   const triggerRefresh = () => setRefreshKey((k) => k + 1);
@@ -54,12 +69,14 @@ export function useCoachMembersPageLogic() {
     // Modals
     modals,
     memberModal,
+    toggleActiveModal,
     handleSave,
 
     // Actions
     openDeleteInternal,
     openPaymentInternal,
     handleDeleteMember,
+    handleToggleActive,
     triggerRefresh,
 
     // Misc
