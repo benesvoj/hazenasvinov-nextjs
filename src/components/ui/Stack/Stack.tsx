@@ -1,7 +1,5 @@
 import {AriaRole, ReactNode} from 'react';
 
-import {twMerge} from 'tailwind-merge';
-
 import {cn} from '@/shared/lib/cn';
 import {
   FlexboxAlign,
