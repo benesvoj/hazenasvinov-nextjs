@@ -127,7 +127,7 @@ export default function CoachMembersContainer() {
         // All club categories, not just the coach's own — moving a player up
         // (dorostenka → ženy) targets a category run by somebody else.
         categories={categoriesData || []}
-        isLoading={state.isDeleteLoading}
+        isLoading={state.isMemberMutating}
       />
 
       <MemberToggleActiveDialog
@@ -135,7 +135,7 @@ export default function CoachMembersContainer() {
         onClose={state.toggleActiveModal.closeAndClear}
         onSubmit={state.handleToggleActive}
         member={state.toggleActiveModal.selectedItem}
-        isLoading={state.isDeleteLoading}
+        isLoading={state.isMemberMutating}
       />
 
       <DeleteDialog
@@ -144,7 +144,7 @@ export default function CoachMembersContainer() {
         onSubmit={state.handleDeleteMember}
         title={translations.members.modals.titles.deleteMember}
         message={translations.members.modals.deleteMemberMessage}
-        isLoading={state.isDeleteLoading}
+        isLoading={state.isMemberMutating}
       />
     </>
   );

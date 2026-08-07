@@ -93,10 +93,21 @@ export function useMemberForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMetadataLoading, setIsMetadataLoading] = useState<boolean>(false);
 
-  const {openEditMode, updateFormData} = form;
+  const {openAddMode: openAddModeBase, openEditMode, updateFormData} = form;
 
   /** Guards against a late metadata response overwriting a newer selection. */
   const editedMemberIdRef = useRef<string | null>(null);
+
+  /**
+   * Starts a blank form and disowns any metadata request still in flight —
+   * otherwise a slow response could pour the previous member's details into
+   * the new one.
+   */
+  const openAddMode = useCallback(() => {
+    editedMemberIdRef.current = null;
+    setIsMetadataLoading(false);
+    openAddModeBase();
+  }, [openAddModeBase]);
 
   /**
    * Opens edit mode and loads the member's `member_metadata` row into the form.
@@ -206,6 +217,8 @@ export function useMemberForm() {
 
   return {
     ...form,
+    // Overrides the factory's version — see above.
+    openAddMode,
     openEditModeWithMetadata,
     isMetadataLoading,
     isLoading,

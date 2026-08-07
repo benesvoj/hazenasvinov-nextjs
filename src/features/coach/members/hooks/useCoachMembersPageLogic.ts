@@ -17,7 +17,7 @@ export function useCoachMembersPageLogic() {
   const memberModal = useModalWithItem<Member>();
   const toggleActiveModal = useModalWithItem<MemberInternal>();
   const changeCategoryModal = useModalWithItem<MemberInternal>();
-  const {deleteMember, setMemberActive, updateMember, isLoading: isDeleteLoading} = useMembers();
+  const {deleteMember, setMemberActive, updateMember, isLoading: isMemberMutating} = useMembers();
   const {handleSave} = useMemberSave(memberModal, () => setRefreshKey((k) => k + 1));
 
   const openDeleteInternal = (member: MemberInternal) => {
@@ -96,7 +96,7 @@ export function useCoachMembersPageLogic() {
     triggerRefresh,
 
     // Misc
-    isDeleteLoading,
+    isMemberMutating,
     currentYear,
   };
 }

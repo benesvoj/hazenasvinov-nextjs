@@ -5,6 +5,7 @@ import React from 'react';
 import {translations} from '@/lib/translations';
 
 import {Dialog} from '@/components';
+import {getMemberFullName} from '@/helpers';
 
 /** Minimal shape needed to render the dialog — matches every member view type. */
 interface ToggleActiveMember {
@@ -44,7 +45,7 @@ export const MemberToggleActiveDialog = ({
       onClose={onClose}
       onSubmit={onSubmit}
       title={isActive ? t.modals.titles.deactivateMember : t.modals.titles.activateMember}
-      subtitle={member ? `${member.surname} ${member.name}` : undefined}
+      subtitle={getMemberFullName(member) || undefined}
       submitButtonLabel={isActive ? t.table.actions.deactivate : t.table.actions.activate}
       dangerAction={isActive}
       isLoading={isLoading}

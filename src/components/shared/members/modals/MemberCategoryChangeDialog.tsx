@@ -5,7 +5,7 @@ import React, {useState} from 'react';
 import {translations} from '@/lib/translations';
 
 import {Choice, Dialog, VStack} from '@/components';
-import {getAssignableCategories} from '@/helpers';
+import {getAssignableCategories, getMemberFullName} from '@/helpers';
 import {Category, MemberInternal} from '@/types';
 import {isEmpty} from '@/utils';
 
@@ -54,7 +54,7 @@ export const MemberCategoryChangeDialog = ({
       onClose={onClose}
       onSubmit={() => onSubmit(selectedCategory)}
       title={t.title}
-      subtitle={member ? `${member.surname} ${member.name}` : undefined}
+      subtitle={getMemberFullName(member) || undefined}
       submitButtonLabel={t.submit}
       isDisabled={hasNoOptions || isUnchanged}
       isLoading={isLoading}

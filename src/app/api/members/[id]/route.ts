@@ -16,6 +16,9 @@ import {hasCategoryAccess, isAdmin} from '@/utils/supabase/coachAuth';
 
 const t = translations.members.responseMessages;
 
+/** Never accepted from the request body — see PATCH. */
+const AUDIT_FIELDS = ['id', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+
 type MemberRow = {id: string; category_id: string | null} & Record<string, any>;
 
 type MemberAccess =
@@ -140,9 +143,11 @@ export async function PATCH(request: Request, {params}: {params: Promise<{id: st
 
     const {data, error} = await supabaseAdmin
       .from('members')
-      // The admin client has no auth context, so the audit trigger cannot infer
-      // the author — it has to be passed explicitly.
-      .update({...prepareUpdateData(body), updated_by: user.id})
+      // Audit columns are not client-writable. The trigger already freezes
+      // created_* on update, but stripping them here keeps the guarantee from
+      // resting on the database alone. The admin client has no auth context, so
+      // the author has to be passed explicitly.
+      .update({...prepareUpdateData(body, AUDIT_FIELDS), updated_by: user.id})
       .eq('id', id)
       .select()
       .single();

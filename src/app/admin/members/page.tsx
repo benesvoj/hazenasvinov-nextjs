@@ -77,7 +77,7 @@ export default function MembersAdminPage() {
   } = useFetchMembersInternal({limit: 1000});
   const {refresh: refreshExternal, loading: membersExternalLoading} = useFetchMembersExternal();
   const {refresh: refreshOnLoan, loading: membersOnLoanLoading} = useFetchMembersOnLoan();
-  const {deleteMember, setMemberActive, isLoading: isDeleteLoading} = useMembers();
+  const {deleteMember, setMemberActive, isLoading: isMemberMutating} = useMembers();
   const modals = useMemberModals<BaseMember>();
   const memberModal = useModalWithItem<Member>();
   const toggleActiveModal = useModalWithItem<MemberInternal>();
@@ -278,7 +278,7 @@ export default function MembersAdminPage() {
         onClose={toggleActiveModal.closeAndClear}
         onSubmit={handleToggleActive}
         member={toggleActiveModal.selectedItem}
-        isLoading={isDeleteLoading}
+        isLoading={isMemberMutating}
       />
 
       <DeleteDialog
@@ -287,7 +287,7 @@ export default function MembersAdminPage() {
         onSubmit={handleDeleteMember}
         title={t.modals.titles.deleteMember}
         message={t.modals.deleteMemberMessage}
-        isLoading={isDeleteLoading}
+        isLoading={isMemberMutating}
       />
 
       <BulkEditModal

@@ -9,6 +9,7 @@ export * from './commentIcons';
 export * from './ui/action/actionIcons';
 export * from './getAssignableCategories';
 export * from './getCategoryInfo';
+export * from './getMemberFullName';
 export * from './getCategoryMatchweek';
 export * from './monthUtils';
 export * from './attendance/helpers';
