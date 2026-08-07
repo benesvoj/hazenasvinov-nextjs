@@ -17,6 +17,7 @@ export * from './isValidPositiveNumber';
 export * from './isNilOrZero';
 export * from './isNotNilOrEmpty';
 export * from './copyToClipboard';
+export * from './normalizeSearchTerm';
 
 /** Builders and validators **/
 export * from './builders/matchDataBuilder';

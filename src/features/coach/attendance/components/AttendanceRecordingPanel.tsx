@@ -17,6 +17,7 @@ import {translations} from '@/lib/translations';
 import {ContentCard, HStack} from '@/components';
 import {AttendanceStatuses} from '@/enums';
 import {BaseTrainingSession, MemberAttendanceWithMember, MemberSchema} from '@/types';
+import {normalizeSearchTerm} from '@/utils';
 
 import {getStatusColor} from '../helpers';
 
@@ -176,9 +177,9 @@ export function AttendanceRecordingPanel({
   const filteredRecords = useMemo<AttendanceWithMember[]>(() => {
     let list = validRecords;
     if (searchTerm.trim()) {
-      const q = searchTerm.toLowerCase();
+      const q = normalizeSearchTerm(searchTerm);
       list = list.filter((r) => {
-        const fullName = `${r.member.name} ${r.member.surname}`.toLowerCase();
+        const fullName = normalizeSearchTerm(`${r.member.name} ${r.member.surname}`);
         return fullName.includes(q);
       });
     }
