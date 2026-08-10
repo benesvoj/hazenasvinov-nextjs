@@ -119,7 +119,13 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 # Scripts
-scripts/
+# Local one-off diagnostics, dumps and setup scripts stay out of the repo.
+# The codegen generators are the exception: package.json and CLAUDE.md require
+# them (npm run generate:*), so a fresh clone has to get them.
+# Note the glob — an ignored `scripts/` directory cannot be re-included by a
+# later negation, because git never descends into it.
+scripts/*
+!scripts/generate-api-routes.mjs
 
 # DOCUMENTS
 # Local Supabase dumps/notes — not shared

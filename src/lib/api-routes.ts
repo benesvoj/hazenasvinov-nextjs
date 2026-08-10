@@ -9,12 +9,13 @@
 
 export const API_ROUTES = {
   admin: {
+    refreshMaterializedView: '/api/admin/refresh-materialized-view' as const,
     updateMaterializedView: '/api/admin/update-materialized-view' as const,
   },
   attendance: {
-    statistics: '/api/attendance/statistics' as const,
     memberHistory: '/api/attendance/member-history' as const,
-    bulk: (trainingId: string) => `/api/attendance/${trainingId}/bulk`,
+    statistics: '/api/attendance/statistics' as const,
+    bulk: (trainingId: string | number) => `/api/attendance/${trainingId}/bulk`,
   },
   auth: {
     confirm: '/api/auth/confirm' as const,
@@ -52,7 +53,6 @@ export const API_ROUTES = {
   },
   logLogin: '/api/log-login' as const,
   matches: {
-    referees: (id: string | number) => `/api/matches/${id}/referees`,
     lineupById: (id: string | number, lineupId: string | number) =>
       `/api/matches/${id}/lineups/${lineupId}`,
     lineupByIdCoacheById: (
@@ -70,6 +70,7 @@ export const API_ROUTES = {
     lineupByIdPlayers: (id: string | number, lineupId: string | number) =>
       `/api/matches/${id}/lineups/${lineupId}/players`,
     lineups: (id: string | number) => `/api/matches/${id}/lineups`,
+    referees: (id: string | number) => `/api/matches/${id}/referees`,
   },
   memberFunctions: {
     root: '/api/member-functions' as const,
@@ -88,6 +89,10 @@ export const API_ROUTES = {
     relationships: (id: string | number) => `/api/members/${id}/relationships`,
   },
   pageVisibility: '/api/page-visibility' as const,
+  pointDeductions: {
+    root: '/api/point-deductions' as const,
+    byId: (id: string | number) => `/api/point-deductions/${id}`,
+  },
   referees: {
     root: '/api/referees' as const,
     byId: (id: string | number) => `/api/referees/${id}`,
@@ -109,6 +114,9 @@ export const API_ROUTES = {
     byId: (id: string | number) => `/api/todos/${id}`,
   },
   tournaments: {
+    bySlug: {
+      root: (slug: string | number) => `/api/tournaments/by-slug/${slug}`,
+    },
     matches: (id: string | number) => `/api/tournaments/${id}/matches`,
     scheduleGenerate: (id: string | number) => `/api/tournaments/${id}/schedule/generate`,
     teamById: (id: string | number, teamId: string | number) =>
@@ -117,10 +125,6 @@ export const API_ROUTES = {
   },
   trainingSessions: {
     bulk: '/api/training-sessions/bulk' as const,
-  },
-  pointDeductions: {
-    root: '/api/point-deductions' as const,
-    byId: (id: string | number) => `/api/point-deductions/${id}`,
   },
   userProfiles: '/api/user-profiles' as const,
   users: '/api/users' as const,

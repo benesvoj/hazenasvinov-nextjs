@@ -1,18 +1,16 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {withAuth} from '@/utils/supabase/apiHelpers';
+import {withAdminAuth} from '@/utils/supabase/apiHelpers';
 
+/**
+ * Rebuilds the own_club_matches materialized view.
+ *
+ * Admin-only, and executed with the service role: this runs DDL through
+ * `exec_sql`, which no longer grants EXECUTE to `authenticated` — arbitrary SQL
+ * reachable with any signed-in session was a full database compromise.
+ */
 export async function POST(request: NextRequest) {
-  return withAuth(async (_user, supabase) => {
-    const {
-      data: {user},
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({error: 'Unauthorized'}, {status: 401});
-    }
-
+  return withAdminAuth(async (_user, _supabase, admin) => {
     console.log('🔄 Updating own_club_matches materialized view...');
 
     // SQL script to update the materialized view
@@ -91,7 +89,7 @@ export async function POST(request: NextRequest) {
     `;
 
     // Execute the SQL script
-    const {error} = await supabase.rpc('exec_sql', {sql: updateScript});
+    const {error} = await admin.rpc('exec_sql', {sql: updateScript});
 
     if (error) {
       console.error('❌ Error updating materialized view:', error);

@@ -1,50 +1,35 @@
-import {supabaseBrowserClient} from '@/utils/supabase/client';
+import {API_ROUTES} from '@/lib/api-routes';
 
 /**
- * Centralized function to refresh the own_club_matches materialized view
- * This ensures all match operations use the same refresh logic
+ * Refreshes the own_club_matches materialized view.
+ *
+ * Goes through an admin API route that holds the service role. The browser used
+ * to call `refresh_materialized_view` — falling back to `exec_sql` with a raw
+ * REFRESH statement — using the signed-in user's session; both functions have
+ * since lost EXECUTE for `authenticated`, because arbitrary SQL reachable from
+ * any session meant anyone signed in could rewrite the database.
+ *
+ * @returns whether the view was actually refreshed. Callers treat `false` as a
+ *          soft failure: the data is stale, not wrong.
  */
 export async function refreshOwnClubMatchesView(): Promise<boolean> {
-  const supabase = supabaseBrowserClient();
-
-  // console.log('Refreshing own_club_matches materialized view...');
-
   try {
-    // First try RPC function
-    // console.log('Attempting RPC refresh...');
-    const {error: rpcError} = await supabase.rpc('refresh_materialized_view', {
-      view_name: 'own_club_matches',
+    const response = await fetch(API_ROUTES.admin.refreshMaterializedView, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({viewName: 'own_club_matches'}),
     });
 
-    if (!rpcError) {
-      // console.log('✅ Materialized view refreshed successfully via RPC');
-      return true;
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      console.warn('Materialized view refresh failed:', result?.error ?? response.status);
+      return false;
     }
 
-    console.warn('RPC refresh failed, trying exec_sql approach:', rpcError);
-
-    // Fallback: Use exec_sql to run REFRESH MATERIALIZED VIEW directly
-    const {error: sqlError} = await supabase.rpc('exec_sql', {
-      sql: 'REFRESH MATERIALIZED VIEW own_club_matches;',
-    });
-
-    if (!sqlError) {
-      // console.log('✅ Materialized view refreshed successfully via exec_sql');
-      return true;
-    }
-
-    console.warn('exec_sql refresh also failed:', sqlError);
-
-    // Last resort: Try to force refresh by querying the view
-    // This doesn't actually refresh but can help with some caching issues
-    // console.log('Trying fallback query approach...');
-    await supabase.from('own_club_matches').select('id').limit(1);
-
-    // console.log('⚠️ Materialized view refresh attempted via fallback method');
-    return false; // Indicate fallback was used
+    return true;
   } catch (error) {
     console.error('❌ Materialized view refresh failed with error:', error);
-    return false; // Indicate failure
+    return false;
   }
 }
 
