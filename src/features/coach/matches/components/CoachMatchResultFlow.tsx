@@ -30,6 +30,7 @@ import {showToast} from '@/components/ui/feedback/Toast';
 import {translations} from '@/lib/translations';
 
 import {autoRecalculateStandings} from '@/utils/autoStandingsRecalculation';
+import {refreshOwnClubMatchesView} from '@/utils/refreshMaterializedView';
 
 import {invalidateMatchCache} from '@/services/optimizedMatchQueries';
 
@@ -286,14 +287,10 @@ const CoachMatchResultFlow: React.FC<CoachMatchResultFlowProps> = ({
         showToast.warning('Výsledek zápasu byl uložen, ale nepodařilo se přepočítat tabulku');
       }
 
-      try {
-        const {error: refreshError} = await supabase.rpc('refresh_materialized_view', {
-          view_name: 'own_club_matches',
-        });
-      } catch (error) {
-        console.warn('Materialized view refresh failed:', error);
-        // Continue anyway - the cache invalidation should still work
-      }
+      // Goes through the admin API route: the browser lost EXECUTE on
+      // refresh_materialized_view. A stale view is survivable here — the cache
+      // invalidation below still brings fresh rows from the source tables.
+      await refreshOwnClubMatchesView();
 
       // Invalidate cache to ensure fresh data
       if (match?.category_id && match?.season_id) {

@@ -1,6 +1,8 @@
 import {NextRequest} from 'next/server';
 
-import {errorResponse, successResponse, withAdminAuth} from '@/utils/supabase/apiHelpers';
+import supabaseAdmin from '@/utils/supabase/admin';
+import {errorResponse, successResponse, withAuth} from '@/utils/supabase/apiHelpers';
+import {hasCoachRole, isAdmin} from '@/utils/supabase/coachAuth';
 
 /**
  * Views this endpoint is allowed to refresh.
@@ -15,6 +17,12 @@ const REFRESHABLE_VIEWS = [
   'attendance_statistics_summary',
 ] as const;
 
+type RefreshableView = (typeof REFRESHABLE_VIEWS)[number];
+
+function isRefreshableView(value: unknown): value is RefreshableView {
+  return REFRESHABLE_VIEWS.includes(value as RefreshableView);
+}
+
 /**
  * POST /api/admin/refresh-materialized-view
  *
@@ -22,17 +30,29 @@ const REFRESHABLE_VIEWS = [
  * `refresh_materialized_view` — and `exec_sql` as a fallback — directly with the
  * user's session; both now grant EXECUTE to the backend only, because arbitrary
  * SQL reachable from any signed-in session was a full database compromise.
+ *
+ * Open to admins and coaches: coaches enter match results too, and their save
+ * path has to refresh `own_club_matches` the same way the admin one does.
  */
 export async function POST(request: NextRequest) {
-  return withAdminAuth(async (_user, _supabase, admin) => {
+  return withAuth(async (user, supabase) => {
+    const [admin, coach] = await Promise.all([
+      isAdmin(supabase, user.id),
+      hasCoachRole(supabase, user.id),
+    ]);
+
+    if (!admin && !coach) {
+      return errorResponse('Forbidden', 403);
+    }
+
     const body = await request.json().catch(() => ({}));
     const viewName = body?.viewName;
 
-    if (!REFRESHABLE_VIEWS.includes(viewName)) {
+    if (!isRefreshableView(viewName)) {
       return errorResponse(`Neznámý materializovaný pohled: ${viewName}`, 400);
     }
 
-    const {error} = await admin.rpc('refresh_materialized_view', {view_name: viewName});
+    const {error} = await supabaseAdmin.rpc('refresh_materialized_view', {view_name: viewName});
 
     if (error) {
       console.error('Error refreshing materialized view:', viewName, error);
