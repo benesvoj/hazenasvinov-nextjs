@@ -126,6 +126,10 @@ fabric.properties
 # later negation, because git never descends into it.
 scripts/*
 !scripts/generate-api-routes.mjs
+!scripts/generate-component-exports.mjs
+!scripts/generate-enum-exports.mjs
+!scripts/generate-hook-exports.mjs
+!scripts/generate-type-exports.mjs
 
 # DOCUMENTS
 # Local Supabase dumps/notes — not shared
