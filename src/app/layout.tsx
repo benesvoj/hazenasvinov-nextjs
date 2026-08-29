@@ -52,7 +52,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+    // lang is cs, not en: every user-facing string in this app is Czech. Declared
+    // as English, Chrome sees Czech text on a page claiming to be English and
+    // translates it — and the translation engine rewrites text nodes underneath
+    // React, which then finds the DOM somewhere other than where it left it and
+    // throws "Failed to execute 'insertBefore' on 'Node'". Reported from the
+    // coach portal on 2026-08-29 by a coach whose Chrome runs in Czech.
+    <html lang="cs" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={inter.className}>
         <ConditionalProviders>{children}</ConditionalProviders>
       </body>
