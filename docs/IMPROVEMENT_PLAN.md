@@ -11,7 +11,7 @@ items are done. A stale plan is worse than none.
 
 ## 1. The database schema exists on one laptop — 34 migrations outside the repo
 
-**Status:** in progress
+**Status:** done — 2026-08-29
 
 `.gitignore` excludes all of `scripts/`, so 34 of 36 migrations — including the
 ones that create tables — have a single copy, on one machine.
@@ -30,16 +30,25 @@ from `supabase/migrations` alone, so the `verify` job proves the migrations
 
 **Steps**
 
-- [ ] Track the 34 historical migrations. They are already applied to production
-      and must NOT go into `supabase/migrations`, or `db push` would replay
-      `CREATE TABLE` against a live database. They belong in the repo as history.
-- [ ] Add a baseline migration holding the current schema, so a from-scratch
-      build reproduces production.
-- [ ] `supabase migration repair --status applied <baseline version>` against
-      production, so the baseline is never applied there.
-- [ ] Confirm `supabase db reset` then produces a schema matching production.
+- [x] Tracked the 34 historical migrations, in `scripts/migrations/` with a
+      README saying they are never run. Checked for secrets first; the four
+      files matching password/secret/key/token match on those words in comments
+      only.
+- [x] Added `supabase/migrations/00000000000000_baseline.sql` — 66 tables, 76
+      functions, 225 policies, no data. Dumped from the local copy of
+      production, so production itself was never touched to produce it.
+- [x] `supabase migration repair --status applied 00000000000000` against
+      production. Its history now lists all three migrations with local ==
+      remote, and `db push --dry-run` reports `upToDate: true` with nothing
+      pending — merging cannot make CI apply the baseline to a live database.
+- [x] Confirmed: `supabase db reset` builds baseline + the two migrations and
+      the resulting schema is **byte-identical** to production's. The `verify`
+      job now proves migrations reproduce production, not merely that they
+      apply.
 
-**Do this first.** Everything below is friction; this one is a one-off loss.
+Left deliberately: the baseline was dumped from production *before* the two
+2026-08-29 migrations, so baseline + both = production today. That is why the
+comparison is exact rather than approximate.
 
 ---
 
