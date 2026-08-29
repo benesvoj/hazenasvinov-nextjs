@@ -106,9 +106,9 @@ export const membersTranslations = {
     },
     deleteMemberMessage: 'Opravdu chcete smazat člena? Tato akce je nevratná.',
     deactivateMemberMessage:
-      'Opravdu chcete vyřadit člena ze systému? Člen zůstane v historických záznamech (zápasy, soupisky), ale nebude ho již možné nikde vybírat. Vyřazení lze kdykoli vrátit zpět.',
+      'Opravdu chcete vyřadit člena ze systému? Člen zmizí ze soupisek a nebude ho již možné nikde vybírat. V historických záznamech (odehrané zápasy) zůstane zachován. Vyřazení lze kdykoli vrátit zpět.',
     activateMemberMessage:
-      'Opravdu chcete obnovit členství? Člen bude znovu nabízen ve všech výběrech.',
+      'Opravdu chcete obnovit členství? Člen bude znovu nabízen ve všech výběrech a vrátí se do soupisek, ve kterých byl veden.',
     memberForm: {
       registrationNumber: 'Registrační číslo',
       registrationNumberHelper:

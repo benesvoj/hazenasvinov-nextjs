@@ -13,6 +13,7 @@ import {useAppData} from '@/contexts/AppDataContext';
 
 import {showToast} from '@/components';
 import {AttendanceStatuses, AttendanceTabs, TrainingSessionStatusEnum} from '@/enums';
+import {resolveAttendanceMemberIds} from '@/features/coach/attendance/helpers';
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {
   useAttendance,
@@ -108,15 +109,15 @@ export function useCoachAttendancePageLogic() {
   const lineupId = activeLineup?.category_id === selectedCategory ? activeLineup.id : '';
   const {data: lineupMembers} = useFetchCategoryLineupMembers({lineupId});
 
-  const resolveMemberIds = useCallback((): string[] => {
-    const fromLineup = lineupMembers
-      .map((lm) => lm.members?.id)
-      .filter((id): id is string => Boolean(id));
-
-    if (hasItems(fromLineup)) return fromLineup;
-
-    return members.filter((m) => m.category_id === selectedCategory).map((m) => m.id);
-  }, [lineupMembers, members, selectedCategory]);
+  const resolveMemberIds = useCallback(
+    (): string[] =>
+      resolveAttendanceMemberIds({
+        lineupMembers,
+        categoryMembers: members,
+        categoryId: selectedCategory,
+      }),
+    [lineupMembers, members, selectedCategory]
+  );
 
   useEffect(() => {
     if (selectedSession) {
