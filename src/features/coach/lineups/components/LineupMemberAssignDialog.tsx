@@ -3,10 +3,9 @@
 import React, {useEffect, useMemo, useState} from 'react';
 
 import {Button} from '@heroui/button';
-import {Checkbox} from '@heroui/checkbox';
 import {Chip} from '@heroui/chip';
 import {Pagination} from '@heroui/pagination';
-import {Switch} from '@heroui/react';
+import {Selection, Switch} from '@heroui/react';
 import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@heroui/table';
 
 import {UserPlusIcon} from '@heroicons/react/24/outline';
@@ -65,6 +64,14 @@ export default function LineupMemberAssignDialog({
   }, [isOpen]);
 
   const newMemberModal = useModal();
+
+  // Single selection, so the set holds at most one key; an empty set means the
+  // row was toggled off.
+  const handleSelectionChange = (keys: Selection) => {
+    if (keys === 'all') return;
+    const [first] = Array.from(keys);
+    setSelectedMember(first ? String(first) : '');
+  };
 
   const {data: members, loading: membersLoading} = useFetchMembersInternal({
     filters: showAll ? {isActive: true} : {category_id: selectedCategoryId, isActive: true},
@@ -192,9 +199,10 @@ export default function LineupMemberAssignDialog({
             aria-label={translations.lineupMembers.labels.availableMembers}
             className="w-full h-max-60"
             selectionMode="single"
+            selectedKeys={selectedMember ? [selectedMember] : []}
+            onSelectionChange={handleSelectionChange}
           >
             <TableHeader>
-              <TableColumn>{translations.lineupMembers.labels.select}</TableColumn>
               <TableColumn>{translations.lineupMembers.labels.member}</TableColumn>
               <TableColumn>{translations.lineupMembers.labels.registrationNumber}</TableColumn>
               <TableColumn>{translations.categories.labels.category}</TableColumn>
@@ -202,21 +210,20 @@ export default function LineupMemberAssignDialog({
             {/*
               `items` + a render function, not an array of <TableRow> built with
               .map(). HeroUI's table is a react-stately collection: the array
-              form rebuilds the collection from scratch whenever the array
-              identity changes, which here is every keystroke in the search box
-              and every page change, and React 19 can fail that reconciliation
-              with "Failed to execute 'insertBefore' on 'Node'". The items form
-              lets the collection diff by key instead.
+              form rebuilds the collection whenever the array identity changes —
+              every keystroke in the search box, every page change — which React
+              19 can fail with "Failed to execute 'insertBefore' on 'Node'".
+
+              The catch, and the reason the checkbox in this cell was replaced by
+              the table's own selection: the collection is memoised on `items`,
+              so a row is not re-rendered when unrelated state changes. A
+              hand-rolled `isSelected={selectedMember === member.id}` never
+              updated — the click registered, the tick never appeared. Selection
+              state belongs to the table, which knows when to redraw a row.
             */}
             <TableBody items={paginatedMembers}>
               {(member) => (
                 <TableRow key={member.id ?? member.registration_number ?? ''}>
-                  <TableCell>
-                    <Checkbox
-                      isSelected={selectedMember === member.id}
-                      onValueChange={(checked) => setSelectedMember(checked ? member.id || '' : '')}
-                    />
-                  </TableCell>
                   <TableCell>
                     <div className="font-medium">
                       {member.name} {member.surname}

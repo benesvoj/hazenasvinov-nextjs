@@ -172,6 +172,41 @@ is wrong.
 
 ---
 
+## 8. Ten tables build their HeroUI collection from an array
+
+**Status:** open
+
+```bash
+# TableBody with children built by .map() rather than items + a render function
+src/app/admin/sponsorship/components/{Business,Media,Main}PartnersTab.tsx
+src/app/admin/members/components/MembersStatisticTab.tsx
+src/app/(main)/categories/components/CategoryMatches.tsx
+src/features/matches/components/{ExcelImportModal,VideoSelectionModal}.tsx
+src/features/coach/attendance/components/AttendanceRecordingTable.tsx
+src/features/coach/matches/components/RecentMatchDetails.tsx
+src/components/features/betting/LeaderboardTable.tsx
+```
+
+HeroUI's table is a react-stately collection. The array form rebuilds it
+whenever the array identity changes, which React 19 can fail with "Failed to
+execute 'insertBefore' on 'Node'" — the error reported from the lineup dialog on
+2026-08-29.
+
+**Do not convert them in bulk.** Converting that one dialog broke selection in
+the same afternoon: the items form memoises rows on `items`, so a row is not
+re-rendered when unrelated state changes, and a hand-rolled
+`isSelected={selected === row.id}` froze — the click registered and the tick
+never appeared. Per-row interactive state has to move to the table
+(`selectedKeys` / `onSelectionChange`) as part of the same change, and each
+conversion needs a test that clicks a row.
+
+**Steps**
+
+- [ ] Convert one at a time, each with a test that exercises the interaction.
+- [ ] Start with the ones that carry per-row controls; read-only tables can wait.
+
+---
+
 ## 7. Smaller things
 
 - [ ] Four empty stub components in coach attendance (7–9 lines each) that
