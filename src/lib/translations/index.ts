@@ -13,6 +13,7 @@ import {commentsTranslations} from './comments';
 import {committeesTranslations} from './committees';
 import {commonTranslations} from './common';
 import {componentsTranslations} from './components';
+import {errorBoundary} from './errorBoundary';
 import {grantCalendarTranslations} from './grantCalendar';
 import {lineupManagerTranslations} from './lineupManager';
 import {lineupMembersTranslations} from './lineupMember';
@@ -39,6 +40,7 @@ import {userRolesTranslations} from './userRoles';
 import {usersTranslations} from './users';
 
 export const translations = {
+  errorBoundary,
   admin: adminTranslations,
   auth: authTranslations,
   common: commonTranslations,
