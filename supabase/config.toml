@@ -58,8 +58,12 @@ enabled = true
 schema_paths = []
 
 [db.seed]
-# If enabled, seeds the database after migrations during a db reset.
-enabled = true
+# Off: the local database is filled from a copy of production
+# (scripts/pull_prod_into_local_docker.sh), not from a seed file. Left on, every
+# `supabase start` and `db reset` logs "no files matched pattern:
+# supabase/seed.sql" — noise that reads like a broken setup. Turn it back on
+# together with adding the file.
+enabled = false
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = ["./seed.sql"]
