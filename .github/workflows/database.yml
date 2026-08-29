@@ -4,10 +4,15 @@ name: Database
 # by hand. A pull request gets them applied to a throwaway local stack and
 # checked; a merge to main pushes them to production.
 #
-# Required repository secrets:
-#   SUPABASE_ACCESS_TOKEN  - personal access token (Account > Access Tokens)
-#   SUPABASE_DB_PASSWORD   - database password of the production project
-#   SUPABASE_PROJECT_ID    - production project ref
+# Required repository secret:
+#   SUPABASE_DB_URL - session-mode pooler connection string for production
+#
+# One secret, and deliberately not a Supabase personal access token. A PAT is an
+# account-wide credential: it reaches every project the account owns, and it can
+# create, pause and delete them. `db push` accepts a connection string instead,
+# which reaches one database and nothing else. Port 5432 is the pooler's session
+# mode — transaction mode (6543) cannot run migrations, and the direct host
+# db.<ref>.supabase.co is IPv6-only, which GitHub runners cannot reach.
 #
 # WHAT PROTECTS PRODUCTION
 #
@@ -84,32 +89,25 @@ jobs:
         with:
           version: latest
 
-      - name: Link production project
-        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-
-      # Prints the plan without touching anything. Runs first so the log
-      # records exactly what the next step is about to apply — if this lists a
-      # migration you did not expect, stop the run.
+      # Prints the plan without touching anything. It runs first, so a wrong
+      # connection string or an unexpected migration list fails here, before
+      # anything is applied.
       - name: Plan (dry run)
-        run: supabase db push --dry-run
+        run: supabase db push --db-url "$SUPABASE_DB_URL" --dry-run
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
       # Applies only migrations not yet recorded in
       # supabase_migrations.schema_migrations.
       - name: Apply migrations
-        run: supabase db push
+        run: supabase db push --db-url "$SUPABASE_DB_URL"
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
-      # No re-check against production here on purpose: it would need the
-      # pooler hostname, and the invariant is already asserted in `verify`
-      # against a database built from these exact migrations from scratch.
-      # Run ./scripts/check_definer_functions.sh with DB_URL pointed at
-      # production if you want to confirm by hand.
+      # Same assertion as in `verify`, but against production itself — the
+      # only place where a grant could exist that no migration in this repo
+      # created.
+      - name: No SECURITY DEFINER function may be callable by anon
+        run: ./scripts/check_definer_functions.sh
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
