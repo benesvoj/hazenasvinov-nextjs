@@ -265,7 +265,12 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
         .single();
       return data?.category_id ?? null;
     },
-    filters: [{paramName: 'lineupId', dbColumn: 'lineup_id'}],
+    filters: [
+      {paramName: 'lineupId', dbColumn: 'lineup_id'},
+      // Deactivated members are hidden from lineups by default; historical
+      // views can opt back in with `?includeInactiveMembers=true`.
+      {paramName: 'includeInactiveMembers', transform: (value) => value === 'true'},
+    ],
     queryLayer: {
       getAll: categoryLineupMembersQueries.getAllCategoryLineupMembers,
       getById: categoryLineupMembersQueries.getCategoryLineupMemberById,

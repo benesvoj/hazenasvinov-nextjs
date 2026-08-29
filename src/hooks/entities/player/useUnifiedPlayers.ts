@@ -318,6 +318,8 @@ export function useUnifiedPlayers() {
         `
         )
         .contains('functions', ['player'])
+        // Deactivated members must never be offered for selection
+        .eq('is_active', true)
         .order('surname');
 
       if (fetchError) {
