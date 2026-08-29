@@ -7,14 +7,10 @@ import {Input} from '@heroui/input';
 import {translations} from '@/lib/translations';
 
 import {Dialog, HStack, VStack} from '@/components';
+import {getTeamName} from '@/helpers';
 import {TournamentMatch} from '@/types';
 
 const t = translations.tournaments;
-
-function getTeamName(team: TournamentMatch['home_team']): string {
-  const club = team.club_category?.club;
-  return `${club?.short_name || club?.name || ''} ${team.team_suffix || ''}`.trim();
-}
 
 interface ScoreFormData {
   homeScore: string;

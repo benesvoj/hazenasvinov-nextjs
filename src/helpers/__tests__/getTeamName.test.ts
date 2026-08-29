@@ -55,6 +55,13 @@ describe('getTeamName', () => {
     expect(getTeamName(team)).toBe('');
   });
 
+  it('should return an empty string when the team itself is missing', () => {
+    // TournamentEmbed renders teams that can be absent; the shared helper took
+    // over its optional chaining, so this must not throw.
+    expect(getTeamName(undefined)).toBe('');
+    expect(getTeamName(null)).toBe('');
+  });
+
   it('should handle missing club_category gracefully', () => {
     const team = {
       id: 'team-1',
