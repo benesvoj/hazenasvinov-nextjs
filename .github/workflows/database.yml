@@ -1,0 +1,90 @@
+name: Database
+
+# Migrations live in supabase/migrations and are applied by this workflow, not
+# by hand. A pull request gets them applied to a throwaway local stack and
+# checked; a merge to main pushes them to production.
+#
+# Required repository secrets:
+#   SUPABASE_ACCESS_TOKEN  - personal access token (Account > Access Tokens)
+#   SUPABASE_DB_PASSWORD   - database password of the production project
+#   SUPABASE_PROJECT_ID    - production project ref
+#
+# Note on history: production has no supabase_migrations.schema_migrations table
+# yet, because everything before this workflow was applied by hand from
+# scripts/migrations. The first `db push` creates that table and applies only
+# what is in supabase/migrations — so the tracked history starts here, and the
+# hand-applied migrations must NOT be copied into supabase/migrations or they
+# will be applied a second time.
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'scripts/check_definer_functions.sh'
+      - '.github/workflows/database.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/database.yml'
+
+jobs:
+  verify:
+    name: Apply to a throwaway stack and check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Starts Postgres and applies everything in supabase/migrations. A
+      # migration that does not apply cleanly fails the build here rather than
+      # against production.
+      - name: Start local stack
+        run: supabase start
+
+      - name: Verify migrations apply from scratch
+        run: supabase db reset
+
+      - name: No SECURITY DEFINER function may be callable by anon
+        run: ./scripts/check_definer_functions.sh
+        env:
+          DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+  deploy:
+    name: Push to production
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: verify
+    runs-on: ubuntu-latest
+    # Point this at a GitHub Environment with a required reviewer if you want a
+    # human to approve every production schema change.
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link production project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      # Applies only migrations not yet recorded in
+      # supabase_migrations.schema_migrations.
+      - name: Apply migrations
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      # No re-check against production here on purpose: it would need the
+      # pooler hostname, and the invariant is already asserted in `verify`
+      # against a database built from these exact migrations from scratch.
+      # Run ./scripts/check_definer_functions.sh with DB_URL pointed at
+      # production if you want to confirm by hand.
