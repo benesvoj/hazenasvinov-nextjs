@@ -8,6 +8,9 @@ interface ActivityFlag {
 interface AttendanceCandidateMember extends ActivityFlag {
   id: string;
   category_id?: string | null;
+  /** Only read to name the members a lineup leaves out. */
+  name?: string | null;
+  surname?: string | null;
 }
 
 interface AttendanceCandidateLineupMember {
@@ -59,4 +62,57 @@ export function resolveAttendanceMemberIds({
   return categoryMembers
     .filter((member) => member.category_id === categoryId && !isDeactivated(member))
     .map((member) => member.id);
+}
+
+export interface LineupCoverage {
+  /** Members a newly generated attendance sheet would cover. */
+  covered: number;
+  /** Active members of the category. */
+  categoryTotal: number;
+  /** Surnames and names of active category members the lineup leaves out. */
+  missing: string[];
+  /**
+   * True when the lineup is what attendance will be built from and it does not
+   * hold the whole squad.
+   */
+  isIncomplete: boolean;
+}
+
+interface DescribeLineupCoverageParams extends ResolveAttendanceMemberIdsParams {
+  /** Used only to name the members left out. */
+  memberName?: (member: AttendanceCandidateMember) => string;
+}
+
+/**
+ * Describes what a newly generated attendance sheet would and would not cover.
+ *
+ * `resolveAttendanceMemberIds` is all-or-nothing on purpose: a lineup holding a
+ * single player wins over a category holding twelve, because the lineup is
+ * meant to be the roster. In practice lineups go stale, and the coach then gets
+ * an attendance sheet for one person with nothing saying why.
+ *
+ * This does not change that behaviour — it makes it visible, so the answer is
+ * to fix the lineup rather than to have the code quietly guess around it.
+ */
+export function describeLineupCoverage({
+  lineupMembers,
+  categoryMembers,
+  categoryId,
+  memberName = (m) => m.id,
+}: DescribeLineupCoverageParams): LineupCoverage {
+  const activeInCategory = categoryMembers.filter(
+    (member) => member.category_id === categoryId && !isDeactivated(member)
+  );
+  const resolved = new Set(
+    resolveAttendanceMemberIds({lineupMembers, categoryMembers, categoryId})
+  );
+
+  const missing = activeInCategory.filter((member) => !resolved.has(member.id)).map(memberName);
+
+  return {
+    covered: resolved.size,
+    categoryTotal: activeInCategory.length,
+    missing,
+    isIncomplete: resolved.size > 0 && missing.length > 0,
+  };
 }
