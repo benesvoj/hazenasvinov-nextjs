@@ -126,6 +126,13 @@ fabric.properties
 # later negation, because git never descends into it.
 scripts/*
 !scripts/generate-api-routes.mjs
+# The codegen generators. package.json and CLAUDE.md require them
+# (npm run generate:*), so a fresh clone has to get them. They were versioned by
+# PR #79 and lost when main stopped containing that merge; restored 2026-08-30.
+# generate-enum-exports.mjs is deliberately NOT among them — see CLAUDE.md.
+!scripts/generate-component-exports.mjs
+!scripts/generate-hook-exports.mjs
+!scripts/generate-type-exports.mjs
 # Run by .github/workflows/database.yml — CI needs it in the repo.
 !scripts/check_definer_functions.sh
 # Schema history. These were applied to production by hand before

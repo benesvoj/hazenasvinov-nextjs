@@ -26,7 +26,7 @@ The following slash command skills are available in `.claude/skills/`. Use them 
 - `/new-entity` — use proactively whenever the user asks to add a new database table, data model, or CRUD feature. Do not scaffold files manually; invoke this skill.
 - `/db-sync` — use proactively after any DB migration is applied or when TypeScript types are out of sync with the database schema.
 - `/new-migration` — use proactively whenever a new table, column, function, view, or RLS policy needs to be created in the database.
-- `/generate-barrels` — use proactively after adding, renaming, or removing any hook, component, type, or enum file. Run before committing.
+- `/generate-barrels` — use proactively after adding, renaming, or removing any hook, component, or type file. Run before committing. It does **not** cover enums; `src/enums/index.ts` is maintained by hand.
 - `/review-pr` — use when the user asks for a code review, PR review, or "check my changes".
 
 # Architecture Conventions
@@ -80,6 +80,11 @@ These files are **auto-generated** — never edit manually, always regenerate:
 - `src/components/index.ts`
 
 These files are **manual** — always update by hand:
+- `src/enums/index.ts` — there was a generator for it; it assumed the enum, its
+  labels and its `getXOptions` all lived in one file. `src/enums` has since been
+  split, so it classified every enum as unready and, left to run, emptied both
+  this barrel and `src/utils/enumHelpers.ts`. Removed rather than restored on
+  2026-08-30; making it match the split structure is a rewrite, not a fix.
 - `src/lib/api-routes.ts`
 - `src/lib/translations/index.ts`
 
