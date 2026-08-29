@@ -9,12 +9,24 @@ name: Database
 #   SUPABASE_DB_PASSWORD   - database password of the production project
 #   SUPABASE_PROJECT_ID    - production project ref
 #
-# Note on history: production has no supabase_migrations.schema_migrations table
-# yet, because everything before this workflow was applied by hand from
-# scripts/migrations. The first `db push` creates that table and applies only
-# what is in supabase/migrations — so the tracked history starts here, and the
-# hand-applied migrations must NOT be copied into supabase/migrations or they
-# will be applied a second time.
+# WHAT PROTECTS PRODUCTION
+#
+# `db push` applies a file only if its version is missing from
+# supabase_migrations.schema_migrations on the remote. The migrations applied by
+# hand before this workflow existed stay in scripts/migrations, which is
+# gitignored — the CLI never sees them, so it cannot re-run them. Do NOT copy
+# them into supabase/migrations: that is the one action that would replay
+# CREATE TABLE / ALTER TABLE / DROP against a live database.
+#
+# If the remote has no history table yet, the first push creates it and applies
+# everything in supabase/migrations. That is safe for what is there today —
+# both files contain only GRANT, REVOKE and CREATE OR REPLACE FUNCTION, so
+# applying them twice changes nothing (verified by running both twice against a
+# copy of production). It will not stay safe once a migration adds a table, so
+# the dry-run step below is what you read before letting a run through.
+#
+# Supabase keeps daily backups and point-in-time recovery; check the dashboard
+# before approving a push that does anything destructive.
 
 on:
   pull_request:
@@ -74,6 +86,15 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      # Prints the plan without touching anything. Runs first so the log
+      # records exactly what the next step is about to apply — if this lists a
+      # migration you did not expect, stop the run.
+      - name: Plan (dry run)
+        run: supabase db push --dry-run
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
       # Applies only migrations not yet recorded in
       # supabase_migrations.schema_migrations.
