@@ -1,0 +1,3 @@
+-- MOVED. This migration now lives in the repo and is applied by CI:
+--   supabase/migrations/20260829110000_exclude_deactivated_members_from_attendance_stats.sql
+-- Do not apply this file by hand; it would be applied a second time.
