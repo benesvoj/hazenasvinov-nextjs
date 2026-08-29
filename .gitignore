@@ -128,6 +128,12 @@ scripts/*
 !scripts/generate-api-routes.mjs
 # Run by .github/workflows/database.yml — CI needs it in the repo.
 !scripts/check_definer_functions.sh
+# Schema history. These were applied to production by hand before
+# supabase/migrations existed; they are tracked so the schema's history is not
+# stored on one laptop. See scripts/migrations/README.md — they are NOT applied
+# by CI and must never be copied into supabase/migrations.
+!scripts/migrations/
+!scripts/migrations/**
 
 # Local production dump
 # Full 1:1 copy of the production database, personal data of members included.
