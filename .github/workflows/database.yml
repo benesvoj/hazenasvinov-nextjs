@@ -61,6 +61,14 @@ jobs:
       # Starts Postgres and applies everything in supabase/migrations. A
       # migration that does not apply cleanly fails the build here rather than
       # against production.
+      #
+      # This database is NOT production's schema: the tracked history starts
+      # with the two migrations in this repo, while production also carries 35
+      # earlier ones applied by hand from scripts/migrations. So this proves the
+      # migrations apply, not that they reproduce production. Making it a true
+      # replica needs a baseline migration holding the current schema, plus
+      # `supabase migration repair --status applied` so production does not try
+      # to run it — worth doing, but a separate change.
       - name: Start local stack
         run: supabase start
 

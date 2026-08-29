@@ -46,50 +46,83 @@
 -- =====================================================
 -- The eleven functions anon can still execute
 -- =====================================================
--- Grants first, so the revoke can never leave a signed-in user without access
--- even if this runs against a database where the explicit grants are missing.
+-- Applied through a loop rather than as flat statements, because a database
+-- built only from supabase/migrations does not have these functions: they were
+-- created by the hand-applied migrations in scripts/migrations, which are not
+-- tracked. A plain GRANT would abort CI's from-scratch build on the first name.
+--
+-- Skipping a missing function cannot hide a hole. The authority on whether
+-- anything is still exposed is scripts/check_definer_functions.sh, which runs
+-- against production right after the push and fails the deploy if any
+-- SECURITY DEFINER function in public is callable by anon — including one this
+-- migration never saw.
 
-GRANT EXECUTE ON FUNCTION public.get_attendance_summary(character varying, uuid) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_current_user_summary() TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_sponsorship_stats() TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_training_session_stats(uuid, uuid) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_user_coach_categories(uuid) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_user_roles(uuid) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_user_summary_by_id(uuid) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.has_admin_access(uuid) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.has_role(uuid, character varying) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.is_admin(uuid) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.user_has_profile(uuid) TO authenticated, service_role;
+DO $$
+DECLARE
+  sig  text;
+  proc regprocedure;
+  -- Grants first, so a revoke can never leave a signed-in user without access
+  -- even on a database where the explicit grants are missing.
+  keep text[] := ARRAY[
+    'public.get_attendance_summary(character varying, uuid)',
+    'public.get_current_user_summary()',
+    'public.get_sponsorship_stats()',
+    'public.get_training_session_stats(uuid, uuid)',
+    'public.get_user_coach_categories(uuid)',
+    'public.get_user_roles(uuid)',
+    'public.get_user_summary_by_id(uuid)',
+    'public.has_admin_access(uuid)',
+    'public.has_role(uuid, character varying)',
+    'public.is_admin(uuid)',
+    'public.user_has_profile(uuid)'
+  ];
+  -- Everything a definer function must not be reachable as. The first eleven
+  -- are the ones 20260810 failed to close; the rest are restated so a restored
+  -- dump, where ALTER DEFAULT PRIVILEGES re-grants anon on every recreated
+  -- function, lands in the same place as production.
+  close_off text[] := ARRAY[
+    'public.get_attendance_summary(character varying, uuid)',
+    'public.get_current_user_summary()',
+    'public.get_sponsorship_stats()',
+    'public.get_training_session_stats(uuid, uuid)',
+    'public.get_user_coach_categories(uuid)',
+    'public.get_user_roles(uuid)',
+    'public.get_user_summary_by_id(uuid)',
+    'public.has_admin_access(uuid)',
+    'public.has_role(uuid, character varying)',
+    'public.is_admin(uuid)',
+    'public.user_has_profile(uuid)',
+    'public.exec_sql(text)',
+    'public.ensure_user_profile(uuid)',
+    'public.force_refresh_attendance_stats()',
+    'public.handle_new_user()',
+    'public.refresh_attendance_statistics_summary()',
+    'public.refresh_materialized_view(text)',
+    'public.scheduled_refresh_attendance_stats()',
+    'public.sync_profiles_on_user_profiles_change()',
+    'public.set_members_audit_fields()',
+    'public.set_metadata_created_by()',
+    'public.trigger_refresh_attendance_stats()'
+  ];
+BEGIN
+  FOREACH sig IN ARRAY keep LOOP
+    proc := to_regprocedure(sig);
+    IF proc IS NULL THEN
+      RAISE NOTICE 'skipping GRANT, no such function: %', sig;
+    ELSE
+      EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO authenticated, service_role', proc);
+    END IF;
+  END LOOP;
 
-REVOKE EXECUTE ON FUNCTION public.get_attendance_summary(character varying, uuid) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.get_current_user_summary() FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.get_sponsorship_stats() FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.get_training_session_stats(uuid, uuid) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.get_user_coach_categories(uuid) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.get_user_roles(uuid) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.get_user_summary_by_id(uuid) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.has_admin_access(uuid) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.has_role(uuid, character varying) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.is_admin(uuid) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.user_has_profile(uuid) FROM PUBLIC, anon;
-
--- The eleven above are the ones whose revoke was swallowed by a PUBLIC grant.
--- These eight were revoked from anon explicitly by 20260807 and 20260810 and
--- carry no PUBLIC grant, but they are restated so a database restored from a
--- dump — where ALTER DEFAULT PRIVILEGES re-grants anon on every recreated
--- function — ends up in the same place as production.
-
-REVOKE EXECUTE ON FUNCTION public.exec_sql(text) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.ensure_user_profile(uuid) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.force_refresh_attendance_stats() FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.refresh_attendance_statistics_summary() FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.refresh_materialized_view(text) FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.scheduled_refresh_attendance_stats() FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.sync_profiles_on_user_profiles_change() FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.set_members_audit_fields() FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.set_metadata_created_by() FROM PUBLIC, anon;
-REVOKE EXECUTE ON FUNCTION public.trigger_refresh_attendance_stats() FROM PUBLIC, anon;
+  FOREACH sig IN ARRAY close_off LOOP
+    proc := to_regprocedure(sig);
+    IF proc IS NULL THEN
+      RAISE NOTICE 'skipping REVOKE, no such function: %', sig;
+    ELSE
+      EXECUTE format('REVOKE EXECUTE ON FUNCTION %s FROM PUBLIC, anon', proc);
+    END IF;
+  END LOOP;
+END $$;
 
 -- =====================================================
 -- Verification
