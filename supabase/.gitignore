@@ -1,6 +1,8 @@
 # Supabase
 .branches
 .temp
+# CLI scratch directory for `supabase snippets`
+snippets
 
 # dotenvx
 .env.keys
