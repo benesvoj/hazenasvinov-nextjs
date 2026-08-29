@@ -18,8 +18,10 @@ name: Database
 # them into supabase/migrations: that is the one action that would replay
 # CREATE TABLE / ALTER TABLE / DROP against a live database.
 #
-# If the remote has no history table yet, the first push creates it and applies
-# everything in supabase/migrations. That is safe for what is there today —
+# Confirmed against production on 2026-08-29: supabase_migrations.schema_migrations
+# does not exist there ("relation ... does not exist"), because every migration
+# so far was applied by hand. The first push therefore creates the table and
+# applies everything in supabase/migrations. That is safe for what is there today —
 # both files contain only GRANT, REVOKE and CREATE OR REPLACE FUNCTION, so
 # applying them twice changes nothing (verified by running both twice against a
 # copy of production). It will not stay safe once a migration adds a table, so
@@ -70,9 +72,11 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: verify
     runs-on: ubuntu-latest
-    # Point this at a GitHub Environment with a required reviewer if you want a
-    # human to approve every production schema change.
-    environment: production
+    # Gated by the `database-production` environment, which requires a review
+    # from @benesvoj before the job starts. Deliberately NOT the `Production`
+    # environment: Vercel deploys through that one, and putting a reviewer on it
+    # would make every website deploy wait for a human too.
+    environment: database-production
     steps:
       - uses: actions/checkout@v4
 
