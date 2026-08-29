@@ -5,26 +5,11 @@ import {useMemo} from 'react';
 import {translations} from '@/lib/translations';
 
 import {ContentCard, EmptyState, Heading, HStack, VStack} from '@/components';
-import {formatTime} from '@/helpers';
+import {formatHalftime, formatScore, formatTime, getTeamName, normalizeMatchTime} from '@/helpers';
 import {TournamentMatch} from '@/types';
 import {isNotNilOrEmpty} from '@/utils';
 
 const t = translations.tournaments;
-
-function getTeamName(team: TournamentMatch['home_team']): string {
-  const club = team?.club_category?.club;
-  return `${club?.short_name || club?.name || ''} ${team?.team_suffix || ''}`.trim();
-}
-
-function formatScore(match: TournamentMatch): string {
-  if (match.home_score === null || match.away_score === null) return '— : —';
-  return `${match.home_score} : ${match.away_score}`;
-}
-
-function formatHalftime(match: TournamentMatch): string | null {
-  if (match.home_score_halftime === null || match.away_score_halftime === null) return null;
-  return `(${match.home_score_halftime}:${match.away_score_halftime})`;
-}
 
 interface TournamentScheduleProps {
   matches: TournamentMatch[];
@@ -54,19 +39,20 @@ export function TournamentSchedule({matches}: TournamentScheduleProps) {
             <VStack spacing={2} align="stretch">
               {roundMatches
                 .sort((a, b) => {
-                  a.time = a.time ?? '00:00:00';
-                  b.time = b.time ?? '00:00:00';
-                  return a.time.localeCompare(b.time);
+                  const timeA = normalizeMatchTime(a.time);
+                  const timeB = normalizeMatchTime(b.time);
+                  return timeA.localeCompare(timeB);
                 })
                 .map((match) => {
                   const halftime = formatHalftime(match);
+                  const normalizedTime = normalizeMatchTime(match.time);
                   return (
                     <div
                       key={match.id}
                       className="flex items-center justify-between rounded-lg border border-default-200 px-4 py-2"
                     >
                       <HStack spacing={3} align="center">
-                        {isNotNilOrEmpty(match.time) && match.time !== '00:00:00' && (
+                        {isNotNilOrEmpty(match.time) && normalizedTime !== '00:00' && (
                           <span className="text-sm min-w-[100px] text-right">
                             {formatTime(match.time)}
                           </span>

@@ -7,15 +7,11 @@ import {TrophyIcon} from '@heroicons/react/24/outline';
 import {API_ROUTES} from '@/lib/api-routes';
 
 import {Heading, HStack, LoadingSpinner, UnifiedStandingTable} from '@/components';
+import {getTeamName} from '@/helpers';
 import {EnhancedStanding, TournamentMatch} from '@/types';
 
 interface TournamentEmbedProps {
   tournamentId: string;
-}
-
-function getTeamName(team: TournamentMatch['home_team']): string {
-  const club = team?.club_category?.club;
-  return `${club?.short_name || club?.name || ''} ${team?.team_suffix || ''}`.trim();
 }
 
 export function TournamentEmbed({tournamentId}: TournamentEmbedProps) {

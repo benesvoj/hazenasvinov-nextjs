@@ -16,3 +16,6 @@ export * from './attendance/helpers';
 export * from './dateRangeGenerator';
 export * from './currentYear';
 export * from './matchImport';
+export * from './normalizeTime';
+export * from './formaters/formatTournamentScore';
+export * from './getTeamName';

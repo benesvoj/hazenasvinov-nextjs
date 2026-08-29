@@ -1,10 +1,12 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 
-import {Tab, Tabs} from '@heroui/react';
+import {Tab, Tabs} from '@heroui/tabs';
 
-import {translations} from '@/lib/translations/index';
+import {sharedTabsProps} from '@/components/ui/tabsStyles';
+
+import {translations} from '@/lib/translations';
 
 import {UnifiedModal} from '@/components';
 import {Genders} from '@/enums';
@@ -63,7 +65,7 @@ export default function MemberModal({
       isFooterWithActions
     >
       {isEditMode && showPaymentsTab ? (
-        <Tabs aria-label={t.tabsAriaLabel}>
+        <Tabs {...sharedTabsProps} aria-label={t.tabsAriaLabel}>
           <Tab key="info" title={t.tabs.info}>
             <MemberInfoForm
               formData={formData}

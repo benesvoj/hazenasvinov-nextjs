@@ -114,7 +114,7 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
   );
 
   // TODO: optimize import by batching inserts and handling errors more gracefully (e.g. show which rows failed)
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+
   const handleImport = useCallback(async () => {
     if (!preview.length) return;
 

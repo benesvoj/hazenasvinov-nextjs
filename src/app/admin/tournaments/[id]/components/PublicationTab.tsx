@@ -111,11 +111,12 @@ export const PublicationTab = ({tournamentId, tournament, refetch}: PublicationT
         <VStack spacing={3} align="stretch">
           <Select
             label={t.labels.blogPost}
+            aria-label={t.labels.blogPost}
             placeholder={t.actions.linkBlogPost}
             selectedKeys={selectedPostId ? [selectedPostId] : []}
             onSelectionChange={(keys) => {
               const key = Array.from(keys)[0] as string;
-              handleLinkPost(key || '');
+              void handleLinkPost(key || '');
             }}
             isLoading={postsLoading}
           >

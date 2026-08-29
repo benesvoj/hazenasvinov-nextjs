@@ -8,8 +8,8 @@ import {ClockIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
-import {ContentCard, DeleteDialog, EmptyState, HStack, VStack} from '@/components';
-import {formatTime} from '@/helpers';
+import {ContentCard, DeleteDialog, EmptyState, Heading, HStack, VStack} from '@/components';
+import {formatHalftime, formatScore, formatTime, getTeamName} from '@/helpers';
 import {
   useFetchTournamentMatches,
   useFetchTournamentTeams,
@@ -25,21 +25,6 @@ import {isNotNilOrEmpty} from '@/utils';
 import {MatchResultModal, MatchTimePickerModal} from './';
 
 const t = translations.tournaments;
-
-function getTeamName(team: TournamentMatch['home_team']): string {
-  const club = team.club_category?.club;
-  return `${club?.short_name || club?.name || ''} ${team.team_suffix || ''}`.trim();
-}
-
-function formatScore(match: TournamentMatch): string {
-  if (match.home_score === null || match.away_score === null) return '— : —';
-  return `${match.home_score} : ${match.away_score}`;
-}
-
-function formatHalftime(match: TournamentMatch): string | null {
-  if (match.home_score_halftime === null || match.away_score_halftime === null) return null;
-  return `(${match.home_score_halftime}:${match.away_score_halftime})`;
-}
 
 interface ScheduleTabProps {
   tournamentId: string;
@@ -113,24 +98,18 @@ export const ScheduleTab = ({tournamentId, tournament}: ScheduleTabProps) => {
     return success;
   };
 
-  if (!hasMatches && !loading) {
-    return (
-      <ContentCard>
-        <EmptyState
-          type="matches"
-          title={t.labels.schedule}
-          description={t.descriptions.scheduleEmpty}
-          action={
-            hasEnoughTeams ? (
-              <Button color="primary" onPress={handleGenerate} isLoading={generatingSchedule}>
-                {t.actions.generateSchedule}
-              </Button>
-            ) : undefined
-          }
-        />
-      </ContentCard>
-    );
-  }
+  const emptyState = (
+    <EmptyState
+      type="matches"
+      title={t.labels.schedule}
+      description={t.descriptions.scheduleEmpty}
+      action={
+        <Button color="primary" onPress={handleGenerate} isLoading={generatingSchedule}>
+          {t.actions.generateSchedule}
+        </Button>
+      }
+    />
+  );
 
   const headerActions = (
     <Button
@@ -146,13 +125,18 @@ export const ScheduleTab = ({tournamentId, tournament}: ScheduleTabProps) => {
 
   return (
     <>
-      <ContentCard title={t.labels.schedule} actions={headerActions} isLoading={loading}>
+      <ContentCard
+        title={t.labels.schedule}
+        actions={headerActions}
+        isLoading={loading}
+        emptyState={!loading && !hasMatches && emptyState}
+      >
         <VStack spacing={6} align="stretch">
           {Array.from(matchesByRound.entries()).map(([round, roundMatches]) => (
             <div key={round}>
-              <h3 className="text-sm font-semibold mb-3">
+              <Heading size={3}>
                 {t.labels.round} {round}
-              </h3>
+              </Heading>
               <VStack spacing={2} align="stretch">
                 {roundMatches.map((match) => {
                   const halftime = formatHalftime(match);
@@ -177,7 +161,9 @@ export const ScheduleTab = ({tournamentId, tournament}: ScheduleTabProps) => {
                           <span className="text-sm font-bold min-w-[60px] text-center">
                             {formatScore(match)}
                           </span>
-                          <span className="text-sm min-w-[120px]">{getTeamName(match.away_team)}</span>
+                          <span className="text-sm min-w-[120px]">
+                            {getTeamName(match.away_team)}
+                          </span>
                           {halftime && <span className="text-xs text-default-400">{halftime}</span>}
                         </HStack>
                       </HStack>

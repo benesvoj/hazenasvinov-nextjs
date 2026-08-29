@@ -5,5 +5,5 @@ interface AdminContentProps {
 }
 
 export const AdminContent = ({children}: AdminContentProps) => {
-  return <div className="w-full space-y-2 md:space-y-4">{children}</div>;
+  return <div className="w-full space-y-2">{children}</div>;
 };
