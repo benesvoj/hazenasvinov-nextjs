@@ -23,6 +23,33 @@ const MIN_ODDS = 1.01;
 const MAX_ODDS = 100.0;
 const DEFAULT_DRAW_PROBABILITY = 0.27; // 27% draw rate in football
 
+// --- Dynamic draw probability -------------------------------------------
+// The three weights below blend into one draw probability and are meant to sum
+// to 1: strength difference dominates, historical draw rate corrects it, the
+// defensive factor nudges it.
+const STRENGTH_DIFF_WEIGHT = 0.6;
+const HISTORICAL_DRAW_RATE_WEIGHT = 0.25;
+const DEFENSE_FACTOR_WEIGHT = 0.15;
+
+// The strength term scales the base probability across this range: a decisive
+// favourite lands at the floor, two evenly matched teams at floor + span.
+const STRENGTH_FACTOR_FLOOR = 0.7;
+const STRENGTH_FACTOR_SPAN = 0.6;
+// Exponential decay applied to the strength difference. Larger = the draw
+// probability survives a bigger gap between the teams.
+const STRENGTH_DIFF_DECAY = 20;
+
+// Goals conceded per match that counts as average; teams below it defend better
+// than average and draw slightly more often.
+const DEFENSIVE_FACTOR_BASE = 1.5;
+const DEFENSIVE_FACTOR_SCALE = 10; // how sharply the deviation is felt
+const DEFENSIVE_FACTOR_MIN = 0.9;
+const DEFENSIVE_FACTOR_MAX = 1.1;
+
+// Whatever the inputs, the result stays inside this band.
+const DRAW_PROBABILITY_MIN = 0.15;
+const DRAW_PROBABILITY_MAX = 0.4;
+
 /**
  * Generate complete odds for a match
  * @param input Odds generation input
@@ -86,6 +113,62 @@ export async function generateMatchOdds(
 }
 
 /**
+ * Draw probability for one match, from how the two teams compare.
+ *
+ * Replaces a flat 27 %: two evenly matched sides draw far more often than a
+ * favourite and a bottom side, and a flat constant priced both the same.
+ *
+ * Three inputs are blended — the strength gap (weighted most), how often each
+ * side has actually drawn this season, and how much they concede. The result is
+ * clamped so no combination of inputs can produce a nonsensical price.
+ *
+ * Exported for tests; `calculateMatchProbabilities` is its only caller.
+ *
+ * @param homeStrength Home team strength, home advantage already added
+ * @param awayStrength Away team strength
+ * @param homeTeam Home team statistics
+ * @param awayTeam Away team statistics
+ */
+export function calculateDynamicDrawProbability(
+  homeStrength: number,
+  awayStrength: number,
+  homeTeam: TeamStats,
+  awayTeam: TeamStats
+): number {
+  // Evenly matched sides keep the factor near 1, a decisive gap decays it to 0.
+  const strengthDiff = Math.abs(homeStrength - awayStrength);
+  const strengthDiffFactor = Math.exp(-strengthDiff / STRENGTH_DIFF_DECAY);
+
+  // matches_played is floored at 1 so a team with no matches yet reads as 0
+  // rather than NaN — this runs before the first round of a season too.
+  const homeDrawRate = homeTeam.draws / Math.max(homeTeam.matches_played, 1);
+  const awayDrawRate = awayTeam.draws / Math.max(awayTeam.matches_played, 1);
+  const avgDrawRate = (homeDrawRate + awayDrawRate) / 2;
+
+  const homeConceded = homeTeam.goals_conceded / Math.max(homeTeam.matches_played, 1);
+  const awayConceded = awayTeam.goals_conceded / Math.max(awayTeam.matches_played, 1);
+  const avgGoalsConceded = (homeConceded + awayConceded) / 2;
+
+  // Conceding less than average pushes this above 1, more pushes it below.
+  const defensiveFactor = Math.max(
+    DEFENSIVE_FACTOR_MIN,
+    Math.min(
+      DEFENSIVE_FACTOR_MAX,
+      1 + (DEFENSIVE_FACTOR_BASE - avgGoalsConceded) / DEFENSIVE_FACTOR_SCALE
+    )
+  );
+
+  const dynamicDrawProb =
+    STRENGTH_DIFF_WEIGHT *
+      DEFAULT_DRAW_PROBABILITY *
+      (STRENGTH_FACTOR_FLOOR + STRENGTH_FACTOR_SPAN * strengthDiffFactor) +
+    HISTORICAL_DRAW_RATE_WEIGHT * avgDrawRate +
+    DEFENSE_FACTOR_WEIGHT * DEFAULT_DRAW_PROBABILITY * defensiveFactor;
+
+  return Math.max(DRAW_PROBABILITY_MIN, Math.min(DRAW_PROBABILITY_MAX, dynamicDrawProb));
+}
+
+/**
  * Calculate match probabilities using statistical model
  * @param homeTeam Home team statistics
  * @param awayTeam Away team statistics
@@ -116,9 +199,13 @@ export function calculateMatchProbabilities(
   // Calculate away win probability (mirror of home)
   let awayWinProb = 1 / (1 + Math.exp(k * strengthDiff));
 
-  // Adjust for draw probability
-  // In football, draws are common (typically 25-30%)
-  const drawProb = DEFAULT_DRAW_PROBABILITY;
+  // Draw probability from the two teams rather than a flat constant.
+  const drawProb = calculateDynamicDrawProbability(
+    adjustedHomeStrength,
+    awayStrength,
+    homeTeam,
+    awayTeam
+  );
 
   // Normalize probabilities
   const totalProb = homeWinProb + awayWinProb + drawProb;
