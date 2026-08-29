@@ -127,6 +127,11 @@ fabric.properties
 scripts/*
 !scripts/generate-api-routes.mjs
 
+# Local production dump
+# Full 1:1 copy of the production database, personal data of members included.
+# Never commit it.
+.local-prod-dump/
+
 # DOCUMENTS
 # Local Supabase dumps/notes — not shared
 /docs/supabase/
