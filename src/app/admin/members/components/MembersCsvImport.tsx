@@ -22,9 +22,12 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
+import {getGenderOptions} from '@/enums/getGenderOptions';
+import {getMemberFunctionOptions} from '@/enums/getMemberFunctionOptions';
+
 import {useModal} from '@/hooks/shared/useModals';
 
-import {Genders, getGenderOptions, getMemberFunctionOptions, MemberFunction} from '@/enums';
+import {Genders, MemberFunction} from '@/enums';
 import {useSupabaseClient} from '@/hooks';
 
 interface CsvMember {
@@ -111,7 +114,7 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
   );
 
   // TODO: optimize import by batching inserts and handling errors more gracefully (e.g. show which rows failed)
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+
   const handleImport = useCallback(async () => {
     if (!preview.length) return;
 

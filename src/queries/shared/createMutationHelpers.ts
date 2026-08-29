@@ -15,7 +15,7 @@ import {QueryContext, QueryResult} from '@/queries/shared/types';
  * @returns Object with create, update, delete functions
  *
  */
-export function createMutationHelpers<TSchema, TInsert extends Record<string, any>>(config: {
+export function createMutationHelpers<TSchema, TInsert extends Record<string, unknown>>(config: {
   tableName: string;
   entityName: string;
 }) {

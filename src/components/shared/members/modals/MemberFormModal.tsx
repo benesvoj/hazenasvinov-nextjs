@@ -16,12 +16,14 @@ import {
   Grid,
   GridItem,
   MedicalSection,
+  MemberAuditInfo,
+  MemberDuplicateWarning,
   MemberPaymentsTab,
   ParentSection,
   QUICK_CREATE,
   Show,
 } from '@/components';
-import {useMemberForm} from '@/hooks';
+import {useFetchMemberAudit, useFetchMemberDuplicates, useMemberForm} from '@/hooks';
 import {MemberFormModalProps, MemberMetadataFormData} from '@/types';
 import {hasItems, isNotNilOrEmpty} from '@/utils';
 
@@ -34,24 +36,47 @@ export const MemberFormModal = ({
   categories,
   showPaymentsTab,
 }: MemberFormModalProps) => {
-  const {formData, updateFormData, handleSubmit, isLoading, openAddMode, openEditMode} =
-    useMemberForm();
+  const {
+    formData,
+    updateFormData,
+    handleSubmit,
+    isLoading,
+    isMetadataLoading,
+    openAddMode,
+    openEditModeWithMetadata,
+  } = useMemberForm();
 
   const isEditMode = isNotNilOrEmpty(member);
 
   useEffect(() => {
+    if (!isOpen) return;
     if (member) {
-      openEditMode(member);
+      // Loads the member row plus its metadata (contact, parent, medical, …)
+      void openEditModeWithMetadata(member);
     } else {
       openAddMode();
     }
-  }, [member]);
+  }, [isOpen, member]);
 
+  // Preselect the first category for NEW members only — in edit mode the
+  // member's own category must never be overwritten by the default.
   useEffect(() => {
+    if (!isOpen || isEditMode) return;
     if (hasItems(categories) && !formData.category_id) {
       updateFormData({category_id: categories[0].id});
     }
-  }, [categories]);
+  }, [isOpen, isEditMode, categories, formData.category_id]);
+
+  const {data: audit} = useFetchMemberAudit(isOpen && member ? member.id : null);
+
+  // Namesakes in other categories are invisible from this form — warn about
+  // them while typing, without ever blocking the save.
+  const {data: duplicates} = useFetchMemberDuplicates({
+    name: formData.name,
+    surname: formData.surname,
+    excludeId: member?.id,
+    enabled: isOpen,
+  });
 
   const handleInputChange = (field: keyof MemberMetadataFormData, value: string) => {
     updateFormData({[field]: value} as Partial<MemberMetadataFormData>);
@@ -80,12 +105,13 @@ export const MemberFormModal = ({
         }
       }}
       title={title}
-      isLoading={isLoading}
+      isLoading={isLoading || isMetadataLoading}
       size={sizeOption}
       scrollBehavior="inside"
     >
       <Tabs {...sharedTabsProps}>
         <Tab key="basic_info" title={translations.members.modals.tabs.info}>
+          <MemberDuplicateWarning duplicates={duplicates} categories={categories || []} />
           <Grid columns={sections === QUICK_CREATE ? 1 : 2} gap={'sm'}>
             <GridItem>
               <BasicInfoSection
@@ -115,6 +141,9 @@ export const MemberFormModal = ({
               </GridItem>
             </Show>
           </Grid>
+          <Show when={isEditMode}>
+            <MemberAuditInfo audit={audit} />
+          </Show>
         </Tab>
         {isNotNilOrEmpty(member) && showPaymentsTab && (
           <Tab key="payments" title={translations.members.modals.tabs.membershipFees}>

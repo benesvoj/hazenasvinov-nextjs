@@ -48,19 +48,19 @@ interface DataFetchHookResult<T> {
 
 **Example Usage**:
 ```typescript
-// src/hooks/entities/video/data/useFetchVideos.ts
+// src/hooks/entities/video/data/useRecordings.ts
 import {createDataFetchHook} from "@/hooks/factories";
 import {API_ROUTES} from "@/lib";
 import {VideoSchema} from "@/types";
 
-export const useFetchVideos = createDataFetchHook<VideoSchema>({
+export const useRecordings = createDataFetchHook<VideoSchema>({
   endpoint: API_ROUTES.entities.root('videos'),
   entityName: 'videos',
   errorMessage: 'Failed to fetch videos',
 });
 
 // Usage in component
-const {data: videos, loading, error, refetch} = useFetchVideos();
+const {data: videos, loading, error, refetch} = useRecordings();
 ```
 
 **Generated Hook Behavior**:
@@ -115,11 +115,11 @@ interface FormHookResult<TEntity, TFormData> {
 
 **Example Usage**:
 ```typescript
-// src/hooks/entities/video/state/useVideoForm.ts
+// src/hooks/entities/video/state/useRecordingForm.ts
 import {createFormHook} from "@/hooks/factories";
 import {VideoSchema, VideoFormData} from "@/types";
 
-export const useVideoForm = createFormHook<VideoSchema, VideoFormData>({
+export const useRecordingForm = createFormHook<VideoSchema, VideoFormData>({
   initialFormData: {
     title: '',
     description: '',
@@ -146,7 +146,7 @@ const {
   openAddMode,
   openEditMode,
   resetForm
-} = useVideoForm();
+} = useRecordingForm();
 ```
 
 **Generated Hook Behavior**:
@@ -200,7 +200,7 @@ interface CRUDHookResult<TEntity, TInsert> {
 
 **Example Usage**:
 ```typescript
-// src/hooks/entities/video/state/useVideos.ts
+// src/hooks/entities/video/state/useRecordingsCrud.ts
 import {createCRUDHook} from "@/hooks/factories";
 import {API_ROUTES} from "@/lib";
 import {VideoSchema, VideoInsert} from "@/types";
@@ -219,7 +219,7 @@ const _useVideos = createCRUDHook<VideoSchema, VideoInsert>({
   },
 });
 
-export function useVideos() {
+export function useRecordingsCrud() {
   const {create, update, deleteItem, loading} = _useVideos();
 
   return {
@@ -231,7 +231,7 @@ export function useVideos() {
 }
 
 // Usage in component
-const {createVideo, updateVideo, deleteVideo, loading} = useVideos();
+const {createVideo, updateVideo, deleteVideo, loading} = useRecordingsCrud();
 await createVideo({title: 'New Video', youtube_url: '...'});
 ```
 
@@ -325,7 +325,7 @@ Sometimes you want to provide a cleaner API:
 const _useCRUD = createCRUDHook<VideoSchema, VideoInsert>({ /* ... */ });
 
 // Public wrapper with better naming
-export function useVideos() {
+export function useRecordingsCrud() {
   const {loading, error, create, update, deleteItem} = _useCRUD();
 
   return {

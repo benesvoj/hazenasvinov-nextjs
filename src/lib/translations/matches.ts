@@ -62,6 +62,7 @@ export const matchesTranslations = {
     generateStandingsDescription: 'Vytvořit nové tabulky pro všechny kategorie',
     recalculateStandings: 'Přepočítat tabulky',
     recalculateStandingsDescription: 'Aktualizovat existující tabulky',
+    resetAndRecalculateStandings: 'Smazat a přepočítat tabulku',
     import: 'Import dat',
     importDescription: 'Importovat zápasy z Excel souboru',
     deleteAllMatches: 'Smazat všechny zápasy',
@@ -112,6 +113,19 @@ export const matchesTranslations = {
   venuePlaceholder: 'Místo konání se automaticky vyplní podle domácího týmu',
   matchweek: 'Kolo',
   matchweekPlaceholder: 'Vyberte kolo',
+  matchPhase: 'Fáze soutěže',
+  matchPhasePlaceholder: 'Vyberte fázi',
+  matchPhases: {
+    regular: 'Základní část',
+    quarterfinal: 'Čtvrtfinále',
+    semifinal: 'Semifinále',
+    final: 'Finále',
+  },
+  playoff: {
+    sectionTitle: 'Playoff',
+    noMatches: 'Žádné playoff zápasy',
+    tabTitle: 'Playoff',
+  },
   statuses: {
     upcoming: 'Nadcházející',
     completed: 'Dokončený',

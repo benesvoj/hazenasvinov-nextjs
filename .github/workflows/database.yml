@@ -1,0 +1,121 @@
+name: Database
+
+# Migrations live in supabase/migrations and are applied by this workflow, not
+# by hand. A pull request gets them applied to a throwaway local stack and
+# checked; a merge to main pushes them to production.
+#
+# Required repository secret:
+#   SUPABASE_DB_URL - session-mode pooler connection string for production
+#
+# One secret, and deliberately not a Supabase personal access token. A PAT is an
+# account-wide credential: it reaches every project the account owns, and it can
+# create, pause and delete them. `db push` accepts a connection string instead,
+# which reaches one database and nothing else. Port 5432 is the pooler's session
+# mode — transaction mode (6543) cannot run migrations, and the direct host
+# db.<ref>.supabase.co is IPv6-only, which GitHub runners cannot reach.
+#
+# WHAT PROTECTS PRODUCTION
+#
+# `db push` applies a file only if its version is missing from
+# supabase_migrations.schema_migrations on the remote. The migrations applied by
+# hand before this workflow existed stay in scripts/migrations, which is
+# gitignored — the CLI never sees them, so it cannot re-run them. Do NOT copy
+# them into supabase/migrations: that is the one action that would replay
+# CREATE TABLE / ALTER TABLE / DROP against a live database.
+#
+# Confirmed against production on 2026-08-29: supabase_migrations.schema_migrations
+# does not exist there ("relation ... does not exist"), because every migration
+# so far was applied by hand. The first push therefore creates the table and
+# applies everything in supabase/migrations. That is safe for what is there today —
+# both files contain only GRANT, REVOKE and CREATE OR REPLACE FUNCTION, so
+# applying them twice changes nothing (verified by running both twice against a
+# copy of production). It will not stay safe once a migration adds a table, so
+# the dry-run step below is what you read before letting a run through.
+#
+# Supabase keeps daily backups and point-in-time recovery; check the dashboard
+# before approving a push that does anything destructive.
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'scripts/check_definer_functions.sh'
+      - '.github/workflows/database.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/database.yml'
+
+jobs:
+  verify:
+    name: Apply to a throwaway stack and check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Starts Postgres and applies everything in supabase/migrations. A
+      # migration that does not apply cleanly fails the build here rather than
+      # against production.
+      #
+      # This database is NOT production's schema: the tracked history starts
+      # with the two migrations in this repo, while production also carries 35
+      # earlier ones applied by hand from scripts/migrations. So this proves the
+      # migrations apply, not that they reproduce production. Making it a true
+      # replica needs a baseline migration holding the current schema, plus
+      # `supabase migration repair --status applied` so production does not try
+      # to run it — worth doing, but a separate change.
+      - name: Start local stack
+        run: supabase start
+
+      - name: Verify migrations apply from scratch
+        run: supabase db reset
+
+      - name: No SECURITY DEFINER function may be callable by anon
+        run: ./scripts/check_definer_functions.sh
+        env:
+          DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+  deploy:
+    name: Push to production
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: verify
+    runs-on: ubuntu-latest
+    # Gated by the `database-production` environment, which requires a review
+    # from @benesvoj before the job starts. Deliberately NOT the `Production`
+    # environment: Vercel deploys through that one, and putting a reviewer on it
+    # would make every website deploy wait for a human too.
+    environment: database-production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Prints the plan without touching anything. It runs first, so a wrong
+      # connection string or an unexpected migration list fails here, before
+      # anything is applied.
+      - name: Plan (dry run)
+        run: supabase db push --db-url "$SUPABASE_DB_URL" --dry-run
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      # Applies only migrations not yet recorded in
+      # supabase_migrations.schema_migrations.
+      - name: Apply migrations
+        run: supabase db push --db-url "$SUPABASE_DB_URL"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      # Same assertion as in `verify`, but against production itself — the
+      # only place where a grant could exist that no migration in this repo
+      # created.
+      - name: No SECURITY DEFINER function may be callable by anon
+        run: ./scripts/check_definer_functions.sh
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}

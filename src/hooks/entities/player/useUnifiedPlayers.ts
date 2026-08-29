@@ -61,6 +61,9 @@ export function useUnifiedPlayers() {
         // Filter to show only player-manager (members with 'player' function)
         query = query.contains('functions', ['player']);
 
+        // Deactivated members must never be offered for selection
+        query = query.eq('is_active', true);
+
         // Apply external filter based on club relationship
         if (filters.is_external !== undefined) {
           if (filters.is_external) {
@@ -202,6 +205,7 @@ export function useUnifiedPlayers() {
         )
         .eq('club_id', clubId)
         .eq('status', 'active')
+        .eq('members.is_active', true)
         .lte('valid_from', new Date().toISOString().split('T')[0])
         .or('valid_to.is.null,valid_to.gte.' + new Date().toISOString().split('T')[0])
         .order('members(surname)');
@@ -314,6 +318,8 @@ export function useUnifiedPlayers() {
         `
         )
         .contains('functions', ['player'])
+        // Deactivated members must never be offered for selection
+        .eq('is_active', true)
         .order('surname');
 
       if (fetchError) {

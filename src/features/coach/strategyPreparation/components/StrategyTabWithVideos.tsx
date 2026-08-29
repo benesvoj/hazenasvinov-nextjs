@@ -1,0 +1,48 @@
+import {RecordingSchema} from '@/features/recordings';
+import {Team, VideoWithMatch} from '@/types';
+
+import {CompactVideoList} from '.';
+
+interface TabWithVideosProps {
+  videosError: string | null;
+  videosLoading: boolean;
+  filteredOpponentVideos: VideoWithMatch[];
+  opponentTeam: Team | null;
+  opponentClubIdMissing: boolean;
+  onEdit?: (video: RecordingSchema) => void;
+}
+export default function StrategyTabWithVideos({
+  videosError,
+  videosLoading,
+  filteredOpponentVideos,
+  opponentTeam,
+  opponentClubIdMissing,
+  onEdit,
+}: TabWithVideosProps) {
+  return (
+    <div className="p-4">
+      {videosError && (
+        <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700 mb-4">
+          <p className="text-xs sm:text-sm text-red-700 dark:text-red-300">
+            Chyba při načítání videí: {videosError}
+          </p>
+        </div>
+      )}
+      {opponentClubIdMissing ? (
+        <div className="p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+          <p className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300">
+            Nepodařilo se identifikovat klub soupeře – videa nelze zobrazit.
+          </p>
+        </div>
+      ) : (
+        <CompactVideoList
+          videos={filteredOpponentVideos}
+          loading={videosLoading}
+          title={`Videa týmu ${opponentTeam?.name || 'soupeře'}`}
+          emptyMessage={`Žádná videa týmu ${opponentTeam?.name || 'soupeře'} nejsou k dispozici`}
+          onEdit={onEdit}
+        />
+      )}
+    </div>
+  );
+}

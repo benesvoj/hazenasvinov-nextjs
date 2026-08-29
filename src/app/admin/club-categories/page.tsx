@@ -157,7 +157,7 @@ export default function ClubCategoriesAdminPage() {
   return (
     <>
       <AdminContainer
-        loading={loading}
+        isLoading={loading}
         filters={filters()}
         actions={[
           {

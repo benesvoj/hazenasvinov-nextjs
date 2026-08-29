@@ -77,22 +77,42 @@ export function useMemberMetadata() {
         setLoading(true);
         setError(null);
 
-        const {data, error} = await supabase
+        const {data: existing} = await supabase
           .from('member_metadata')
-          .upsert({
-            member_id: memberId,
-            ...metadata,
-            updated_at: new Date().toISOString(),
-          })
-          .select()
-          .single();
+          .select('id')
+          .eq('member_id', memberId)
+          .maybeSingle();
 
-        if (error) throw error;
+        const now = new Date().toISOString();
+        const payload = {member_id: memberId, ...metadata, updated_at: now};
+
+        const {data, error} = existing
+          ? await supabase
+              .from('member_metadata')
+              .update(payload)
+              .eq('member_id', memberId)
+              .select()
+              .single()
+          : await supabase
+              .from('member_metadata')
+              .insert({...payload, created_at: now})
+              .select()
+              .single();
+
+        if (error) {
+          console.error(
+            'Error updating member metadata:',
+            error.message,
+            error.code,
+            error.details
+          );
+          throw error;
+        }
 
         return data;
       } catch (err) {
-        console.error('Error updating member metadata:', err);
-        setError(err instanceof Error ? err.message : 'Chyba při aktualizaci metadat člena');
+        const msg = (err as any)?.message ?? 'Chyba při aktualizaci metadat člena';
+        setError(msg);
         return null;
       } finally {
         setLoading(false);

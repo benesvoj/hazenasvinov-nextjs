@@ -30,20 +30,39 @@ export async function calculateStandings(
   }
 
   try {
-    // Get completed matches for the selected category and season
+    // Get completed regular-season matches only.
+    // Excludes tournament matches (tournament_id IS NULL) and playoff matches (match_phase = 'regular').
     let {data: completedMatches, error: matchesError} = await supabase
       .from('matches')
       .select('*')
       .eq('category_id', categoryId)
       .eq('season_id', seasonId)
-      .eq('status', 'completed');
+      .eq('status', 'completed')
+      .is('tournament_id', null)
+      .eq('match_phase', 'regular');
 
     if (matchesError) throw matchesError;
+    if (!completedMatches) completedMatches = [];
 
-    // Note: We can generate standings even without completed matches
-    if (!completedMatches) {
-      completedMatches = [];
-    }
+    // Collect team IDs that appear in any league match (completed or upcoming).
+    // This excludes teams that are only registered for tournaments in this category.
+    const {data: allLeagueMatches, error: allMatchesError} = await supabase
+      .from('matches')
+      .select('home_team_id, away_team_id')
+      .eq('category_id', categoryId)
+      .eq('season_id', seasonId)
+      .is('tournament_id', null)
+      .eq('match_phase', 'regular');
+
+    if (allMatchesError) throw allMatchesError;
+
+    const leagueTeamIds = new Set<string>();
+    (allLeagueMatches || []).forEach(
+      (m: {home_team_id: string | null; away_team_id: string | null}) => {
+        if (m.home_team_id) leagueTeamIds.add(m.home_team_id);
+        if (m.away_team_id) leagueTeamIds.add(m.away_team_id);
+      }
+    );
 
     // Get teams for this category and season
     let teamCategories;
@@ -71,14 +90,19 @@ export async function calculateStandings(
         .eq('is_active', true);
 
       if (clubResult.data && clubResult.data.length > 0) {
-        // New club-based system
-        teamCategories = clubResult.data.flatMap(
-          (cc: any) =>
-            cc.club_category_teams?.map((ct: any) => ({
-              team_id: ct.id,
-              club_id: cc.club_id,
-            })) || []
-        );
+        teamCategories = clubResult.data
+          .flatMap(
+            (cc: any) =>
+              cc.club_category_teams?.map((ct: any) => ({
+                team_id: ct.id,
+                club_id: cc.club_id,
+              })) || []
+            // Only include teams that have at least one league match
+          )
+          .filter(
+            (tc: {team_id: string; club_id: string}) =>
+              leagueTeamIds.size === 0 || leagueTeamIds.has(tc.team_id)
+          );
       }
     } catch (error) {
       teamsError = error;
@@ -153,8 +177,31 @@ export async function calculateStandings(
       }
     });
 
-    // Convert to array and sort by points, then goal difference
-    const standingsArray = Array.from(standingsMap.values()).sort((a, b) => {
+    // Fetch point deductions for this category/season
+    const {data: deductionsData} = await supabase
+      .from('point_deductions')
+      .select('team_id, points')
+      .eq('category_id', categoryId)
+      .eq('season_id', seasonId);
+
+    // Build a map: team_id → total deduction (sum of all deductions, always ≤ 0)
+    const deductionMap = new Map<string, number>();
+    (deductionsData || []).forEach((d: {team_id: string; points: number}) => {
+      deductionMap.set(d.team_id, (deductionMap.get(d.team_id) ?? 0) + d.points);
+    });
+
+    // Apply deductions and build final array
+    const standingsArray = Array.from(standingsMap.values()).map((s) => {
+      const deduction = deductionMap.get(s.team_id) ?? 0;
+      return {
+        ...s,
+        points: s.points + deduction,
+        points_deduction: Math.abs(deduction),
+      };
+    });
+
+    // Sort by net points, then goal difference
+    standingsArray.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
       const aGoalDiff = a.goals_for - a.goals_against;
       const bGoalDiff = b.goals_for - b.goals_against;
@@ -179,4 +226,35 @@ export async function calculateStandings(
     console.error('Error calculating standings:', error);
     return {success: false, error: 'Chyba při výpočtu tabulky'};
   }
+}
+
+/**
+ * Deletes all standings for a category/season and recalculates from scratch
+ * using only league matches (tournament matches excluded).
+ * Use this when standings are corrupted, e.g. after tournament matches were
+ * previously included in calculations.
+ */
+export async function resetAndRecalculateStandings(
+  categoryId: string,
+  seasonId: string,
+  isSeasonClosed: boolean
+): Promise<{success: boolean; error?: string}> {
+  if (isSeasonClosed) {
+    return {success: false, error: 'Nelze přepočítat tabulku pro uzavřenou sezónu'};
+  }
+
+  const supabase = supabaseBrowserClient();
+
+  const {error: deleteError} = await supabase
+    .from('standings')
+    .delete()
+    .eq('category_id', categoryId)
+    .eq('season_id', seasonId);
+
+  if (deleteError) {
+    console.error('Error deleting standings:', deleteError);
+    return {success: false, error: 'Chyba při mazání tabulky'};
+  }
+
+  return calculateStandings(categoryId, seasonId, isSeasonClosed);
 }

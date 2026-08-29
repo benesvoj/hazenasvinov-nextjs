@@ -1,11 +1,11 @@
-'use client';
+import {ReactNode} from 'react';
 
 import {Heading, HStack, VStack} from '@/components';
 
 interface AdminHeaderProps {
   title?: string;
   description?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 }
 
 export const AdminHeader = ({title, description, icon}: AdminHeaderProps) => {

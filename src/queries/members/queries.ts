@@ -1,6 +1,8 @@
+import {normalizeSearchTerm} from '@/utils/normalizeSearchTerm';
+
 import {DB_TABLE} from '@/queries/members';
 import {buildMembersViewQuery} from '@/queries/members/queryHelpers';
-import {Member} from '@/types';
+import {Member, MemberDuplicate} from '@/types';
 
 import {QueryContext, QueryResult} from '../shared/types';
 
@@ -26,6 +28,50 @@ export async function getMembersAll(
     return {data: data as Member[], error: null, count: count ?? 0};
   } catch (err: any) {
     return {data: null, error: err.message || 'Unknown error', count: 0};
+  }
+}
+
+/**
+ * Find members carrying the same first name + surname, across every category.
+ *
+ * Matching runs on the `search_text` computed field, so it ignores diacritics
+ * and letter case — "Jan Novak" finds "Ján Novák". Namesakes are legitimate, so
+ * callers must treat the result as a warning, never as a validation failure.
+ *
+ * @param options.excludeId - Member being edited; kept out of its own results.
+ * @param options.limit     - Maximum matches to return (default 5).
+ */
+export async function getMemberDuplicates(
+  ctx: QueryContext,
+  options: {name: string; surname: string; excludeId?: string; limit?: number}
+): Promise<QueryResult<MemberDuplicate[]>> {
+  const {name, surname, excludeId, limit = 5} = options;
+
+  const term = normalizeSearchTerm(`${name} ${surname}`);
+
+  if (!term) return {data: [], error: null, count: 0};
+
+  try {
+    let query = ctx.supabase
+      .from(DB_TABLE)
+      .select('id, name, surname, registration_number, category_id, is_active')
+      .ilike('search_text', `%${term}%`)
+      .order('surname', {ascending: true})
+      .limit(limit);
+
+    if (excludeId) query = query.neq('id', excludeId);
+
+    const {data, error} = await query;
+
+    if (error) {
+      console.error('Error fetching member duplicates:', error);
+      return {data: null, error: error.message};
+    }
+
+    return {data: data as MemberDuplicate[], error: null, count: data?.length ?? 0};
+  } catch (err: any) {
+    console.error('Exception in getMemberDuplicates:', err);
+    return {data: null, error: err.message || 'Unknown error'};
   }
 }
 

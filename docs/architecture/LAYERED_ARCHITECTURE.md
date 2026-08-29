@@ -77,14 +77,14 @@ This codebase follows a **layered architecture pattern** that separates concerns
 ```typescript
 // ✅ CORRECT: Component uses hooks
 export default function VideosPage() {
-  const {data: videos, loading} = useFetchVideos();
-  const {filters, setFilters, paginatedVideos} = useVideoFiltering({
+  const {data: videos, loading} = useRecordings();
+  const {filters, setFilters, paginatedVideos} = useRecordingFilter({
     videos,
     itemsPerPage: 20,
     currentPage: 1
   });
 
-  return <VideoGrid videos={paginatedVideos} loading={loading} />;
+  return <RecordingGrid videos={paginatedVideos} loading={loading} />;
 }
 
 // ❌ WRONG: Business logic in component
@@ -94,7 +94,7 @@ export default function VideosPage() {
   // ❌ Don't do filtering in component
   const filtered = videos.filter(v => v.is_active);
 
-  return <VideoGrid videos={filtered} />;
+  return <RecordingGrid videos={filtered} />;
 }
 ```
 
@@ -116,9 +116,9 @@ export default function VideosPage() {
 
 **Example:**
 ```typescript
-// src/hooks/entities/video/business/useVideoFiltering.ts
-export const useVideoFiltering = ({videos, itemsPerPage, currentPage}) => {
-  const [filters, setFilters] = useState<VideoFilters>({});
+// src/hooks/entities/video/business/useRecordingFilter.ts
+export const useRecordingFilter = ({videos, itemsPerPage, currentPage}) => {
+  const [filters, setFilters] = useState<RecordingFilters>({});
 
   const { paginatedVideos, totalPages, totalCount } = useMemo(() => {
     // Apply business logic: filtering
@@ -161,8 +161,8 @@ export const useVideoFiltering = ({videos, itemsPerPage, currentPage}) => {
 
 **Example:**
 ```typescript
-// src/hooks/entities/video/state/useVideoForm.ts
-export const useVideoForm = createFormHook<VideoSchema, VideoFormData>({
+// src/hooks/entities/video/state/useRecordingForm.ts
+export const useRecordingForm = createFormHook<VideoSchema, VideoFormData>({
   initialFormData: {
     title: '',
     description: '',
@@ -175,8 +175,8 @@ export const useVideoForm = createFormHook<VideoSchema, VideoFormData>({
   ]
 });
 
-// src/hooks/entities/video/state/useVideos.ts
-export function useVideos() {
+// src/hooks/entities/video/state/useRecordingsCrud.ts
+export function useRecordingsCrud() {
   const {create, update, deleteItem} = createCRUDHook<VideoSchema, VideoInsert>({
     baseEndpoint: API_ROUTES.entities.root('videos'),
     entityName: 'videos',
@@ -208,15 +208,15 @@ export function useVideos() {
 
 **Example:**
 ```typescript
-// src/hooks/entities/video/data/useFetchVideos.ts
-export const useFetchVideos = createDataFetchHook<VideoSchema>({
+// src/hooks/entities/video/data/useRecordings.ts
+export const useRecordings = createDataFetchHook<VideoSchema>({
   endpoint: API_ROUTES.entities.root('videos'),
   entityName: 'videos',
   errorMessage: 'Failed to fetch videos',
 });
 
 // Usage in component
-const {data: videos, loading, error, refetch} = useFetchVideos();
+const {data: videos, loading, error, refetch} = useRecordings();
 ```
 
 ### 5. Query Layer
@@ -280,11 +280,11 @@ export default function VideosPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // 3. DATA ACCESS LAYER: Fetch all videos
-  const {data: allVideos, loading} = useFetchVideos();
+  const {data: allVideos, loading} = useRecordings();
   //   └─> calls API route /api/entities/videos
 
   // 4. BUSINESS LOGIC LAYER: Filter and paginate
-  const {filters, paginatedVideos} = useVideoFiltering({
+  const {filters, paginatedVideos} = useRecordingFilter({
     videos: allVideos,
     currentPage,
     itemsPerPage: 20
@@ -292,7 +292,7 @@ export default function VideosPage() {
   //   └─> applies filtering and pagination logic
 
   // 5. PRESENTATION LAYER: Render filtered data
-  return <VideoGrid videos={paginatedVideos} loading={loading} />;
+  return <RecordingGrid videos={paginatedVideos} loading={loading} />;
 }
 
 // Behind the scenes:
@@ -359,7 +359,7 @@ export default function VideosPage() {
     fetchVideos();
   }, []);
 
-  return <VideoGrid videos={videos} />;
+  return <RecordingGrid videos={videos} />;
 }
 ```
 
@@ -368,17 +368,17 @@ export default function VideosPage() {
 // ✅ NEW PATTERN - Use layered architecture
 export default function VideosPage() {
   // Data Access Layer
-  const {data: videos, loading} = useFetchVideos();
+  const {data: videos, loading} = useRecordings();
 
   // Business Logic Layer
-  const {paginatedVideos} = useVideoFiltering({
+  const {paginatedVideos} = useRecordingFilter({
     videos,
     currentPage: 1,
     itemsPerPage: 20
   });
 
   // Presentation Layer
-  return <VideoGrid videos={paginatedVideos} loading={loading} />;
+  return <RecordingGrid videos={paginatedVideos} loading={loading} />;
 }
 ```
 

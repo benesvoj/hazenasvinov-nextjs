@@ -1,5 +1,7 @@
 import {SupabaseClient} from '@supabase/supabase-js';
 
+import {isEmpty} from '@/utils/arrayHelper';
+
 import {SortOptions, PaginationOptions} from './types';
 
 /**
@@ -50,9 +52,20 @@ export function applyFilters<T>(query: any, filters?: Record<string, any>) {
   let filteredQuery = query;
 
   for (const [key, value] of Object.entries(filters)) {
-    if (value !== undefined && value !== null) {
-      filteredQuery = filteredQuery.eq(key, value);
+    if (value === undefined || value === null) continue;
+
+    if (Array.isArray(value)) {
+      if (isEmpty(value)) continue;
+      filteredQuery = filteredQuery.in(key, value);
+      continue;
     }
+
+    if (typeof value === 'string' && value.includes('%')) {
+      filteredQuery = filteredQuery.ilike(key, value);
+      continue;
+    }
+
+    filteredQuery = filteredQuery.eq(key, value);
   }
 
   return filteredQuery;
@@ -115,7 +128,14 @@ export function buildInsertQuery<T>(
 
   const insertData = addTimestamp ? {...data, created_at: new Date().toISOString()} : data;
 
-  return supabase.from(table).insert(insertData).select(select).single();
+  // supabase-js types insert()/update() with RejectExcessProperties, which cannot
+  // validate an unresolved generic against the `any` row type of an untyped
+  // SupabaseClient. Callers still get their Partial<T> checked at this boundary.
+  return supabase
+    .from(table)
+    .insert(insertData as Record<string, unknown>)
+    .select(select)
+    .single();
 }
 
 /**
@@ -133,7 +153,13 @@ export function buildUpdateQuery<T>(
 ) {
   const {select = '*', idColumn = 'id'} = options;
 
-  return supabase.from(table).update(data).eq(idColumn, id).select(select).single();
+  // See buildInsertQuery for why the payload is widened here.
+  return supabase
+    .from(table)
+    .update(data as Record<string, unknown>)
+    .eq(idColumn, id)
+    .select(select)
+    .single();
 }
 
 /**

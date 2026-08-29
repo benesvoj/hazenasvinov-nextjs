@@ -9,7 +9,7 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2026-03-11
+ * Last generated: 2026-05-14
  */
 
 export interface MatchSchema {
@@ -27,6 +27,7 @@ export interface MatchSchema {
   id: string;
   is_home: boolean | null;
   match_number: string | null;
+  match_phase: string;
   matchweek: number | null;
   post_id: string | null;
   round: number | null;

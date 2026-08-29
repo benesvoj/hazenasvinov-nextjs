@@ -1,3 +1,5 @@
+import {normalizeSearchTerm} from '@/utils/normalizeSearchTerm';
+
 import {Genders} from '@/enums';
 import {GetMembersOptions} from '@/queries/members/types';
 import {QueryContext} from '@/queries/shared/types';
@@ -8,9 +10,15 @@ import {QueryContext} from '@/queries/shared/types';
  * Filters are applied only when the corresponding option is present — omitting
  * an option means "no restriction" for that dimension, not "match falsy rows".
  *
+ * **Search:** matched against the `search_text` computed field, which the
+ * database exposes as `unaccent(lower(name || surname || registration_number))`.
+ * The term is normalised the same way, so search is both case- and
+ * diacritics-insensitive ("cerny" finds "Černý").
+ *
  * **`isActive` semantics:**
- * - `isActive === true`             → `WHERE is_active = true` (active members only)
- * - `isActive === false / undefined` → filter not applied (all members returned)
+ * - `isActive === true`      → `WHERE is_active = true` (active members only)
+ * - `isActive === false`     → `WHERE is_active = false` (deactivated members only)
+ * - `isActive === undefined` → filter not applied (all members returned)
  *
  * Results are always ordered alphabetically by surname then name.
  *
@@ -27,11 +35,10 @@ export function buildMembersViewQuery(
 
   let query = ctx.supabase.from(table).select('*', {count: 'exact'});
 
-  if (search?.trim())
-    query = query.or(
-      `name.ilike.%${search}%,surname.ilike.%${search}%,registration_number.ilike.%${search}%`
-    );
-  if (isActive) query = query.eq('is_active', true);
+  const normalizedSearch = search ? normalizeSearchTerm(search) : '';
+
+  if (normalizedSearch) query = query.ilike('search_text', `%${normalizedSearch}%`);
+  if (isActive !== undefined) query = query.eq('is_active', isActive);
   if (sex && sex !== Genders.EMPTY) query = query.eq('sex', sex);
   if (categoryId) query = query.eq('category_id', categoryId);
   if (memberFunctions) query = query.contains('functions', [memberFunctions]);

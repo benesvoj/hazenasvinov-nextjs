@@ -39,7 +39,7 @@ export default function UserRolesPage() {
   };
 
   return (
-    <AdminContainer loading={loading}>
+    <AdminContainer isLoading={loading}>
       <UnifiedTable
         columns={columns}
         data={roleDefinitions}

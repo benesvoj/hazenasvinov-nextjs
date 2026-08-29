@@ -48,6 +48,11 @@ export async function autoRecalculateStandings(
         };
       }
 
+      // Playoff matches don't affect the regular-season standings table
+      if (match.match_phase && match.match_phase !== 'regular') {
+        return {success: true, recalculated: false};
+      }
+
       finalCategoryId = match.category_id;
       finalSeasonId = match.season_id;
     }

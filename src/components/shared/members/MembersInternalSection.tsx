@@ -1,4 +1,8 @@
-import {translations} from '@/lib/translations/index';
+'use client';
+
+import {useEffect, useRef} from 'react';
+
+import {translations} from '@/lib/translations';
 
 import {MemberTableTab, renderInternalMemberCell} from '@/components';
 import {useFetchMembersInternal} from '@/hooks';
@@ -12,6 +16,9 @@ interface MembersInternalSectionProps {
   categoryId?: string | null; // filter by category (coach portal)
   categoriesData: Category[] | null;
 
+  /** Increment to trigger a data refresh without remounting. */
+  refreshTrigger?: number;
+
   // Search & filter (optional — coach portal may not expose all)
   searchTerm?: string;
   filters?: MemberTableFilters;
@@ -20,6 +27,10 @@ interface MembersInternalSectionProps {
   onPayment?: (member: MemberInternal) => void;
   onDelete?: (member: MemberInternal) => void;
   onEdit?: (member: MemberInternal) => void;
+  /** Soft removal — deactivates an active member, reactivates a deactivated one. */
+  onToggleActive?: (member: MemberInternal) => void;
+  /** Moves the member to another category. */
+  onChangeCategory?: (member: MemberInternal) => void;
 
   // Selection (admin-only feature)
   enableSelection?: boolean;
@@ -35,22 +46,39 @@ interface MembersInternalSectionProps {
 export const MembersInternalSection = ({
   categoryId,
   categoriesData,
+  refreshTrigger,
   searchTerm,
   filters,
   onPayment,
   onDelete,
   onEdit,
+  onToggleActive,
+  onChangeCategory,
   enableSelection,
   selectedItems,
   onSelectionChange,
   ariaLabel,
   pageSize,
 }: MembersInternalSectionProps) => {
-  const {data, loading, pagination, goToPage} = useFetchMembersInternal({
+  const {data, loading, pagination, goToPage, refresh} = useFetchMembersInternal({
     search: searchTerm,
-    filters: {...filters, category_id: categoryId ?? filters?.category_id},
+    // `MemberTableFilters.gender` maps onto the `sex` column used by the query layer.
+    filters: {
+      sex: filters?.gender,
+      category_id: categoryId ?? filters?.category_id,
+      function: filters?.function,
+      isActive: filters?.isActive,
+    },
     limit: pageSize,
   });
+
+  const refreshRef = useRef(refresh);
+  useEffect(() => {
+    refreshRef.current = refresh;
+  }, [refresh]);
+  useEffect(() => {
+    if (refreshTrigger) refreshRef.current();
+  }, [refreshTrigger]);
 
   const categories = useCategoryMap(categoriesData);
   const t = translations.members;
@@ -59,6 +87,8 @@ export const MembersInternalSection = ({
     onPayment,
     onDelete,
     onEdit,
+    onToggleActive,
+    onChangeCategory,
   });
 
   const renderCell = (member: MemberInternal, columnKey: string) =>

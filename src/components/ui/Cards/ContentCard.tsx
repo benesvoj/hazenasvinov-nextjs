@@ -6,7 +6,7 @@ import {Card as HeroCard} from '@heroui/card';
 
 import {twMerge} from 'tailwind-merge';
 
-import {Heading, Hide, LoadingSpinner, Show} from '@/components';
+import {Heading, Hide, HStack, LoadingSpinner, Show, VStack} from '@/components';
 import {ContentCardProps} from '@/types';
 
 import {CardBody, CardFooter, CardHeader} from './components';
@@ -57,14 +57,14 @@ export default function ContentCard({
     >
       <Show when={title}>
         <CardHeader className="flex justify-between items-center">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-row gap-2 items-center">
+          <VStack spacing={2}>
+            <HStack spacing={2} align={'center'}>
               <Heading size={titleSize} className={titleClassName}>
                 {title}
               </Heading>
-            </div>
+            </HStack>
             {subtitle && <div className="text-sm text-gray-500">{subtitle}</div>}
-          </div>
+          </VStack>
           <Show when={actions && !emptyState && !errorState}>{actions}</Show>
         </CardHeader>
       </Show>

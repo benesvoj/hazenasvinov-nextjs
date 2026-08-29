@@ -17,7 +17,7 @@ import {MemberFunction} from '@/enums/memberFunction';
  */
 export const MembersInternalQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(25),
+  limit: z.coerce.number().int().min(1).max(1000).default(25),
   /** Empty string is rejected (min 1) so absent search ≠ empty-string search. */
   search: z.string().min(1).optional(),
   /** Unknown enum values are rejected to prevent silent no-ops. */
@@ -26,8 +26,8 @@ export const MembersInternalQuerySchema = z.object({
   category_id: z.string().uuid().optional(),
   function: z.nativeEnum(MemberFunction).optional(),
   /**
-   * Active-only flag. Only `'true'` triggers the filter; `'false'` and absent
-   * both resolve to `false` (show all members). See `buildMembersViewQuery`.
+   * Membership state filter. `'true'` → active only, `'false'` → deactivated
+   * only, absent → no filter (all members). See `buildMembersViewQuery`.
    */
   isActive: z
     .enum(['true', 'false'])

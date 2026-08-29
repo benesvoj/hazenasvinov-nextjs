@@ -17,7 +17,7 @@ This is the **biggest opportunity** for improvement - better than switching libr
 'use client';  // Everything runs in browser
 
 export default function VideosPage() {
-  const {data: videos, loading} = useFetchVideos(); // Client fetch
+  const {data: videos, loading} = useRecordings(); // Client fetch
 
   if (loading) return <Spinner />;
   return <VideoList videos={videos} />;
@@ -113,7 +113,7 @@ export function VideoList({initialVideos}) {
 
 ### Code Example
 ```typescript
-export function useFetchVideos() {
+export function useRecordings() {
   return useQuery({
     queryKey: ['videos'],
     queryFn: async () => {
@@ -151,7 +151,7 @@ export function useFetchVideos() {
 
 ### Code Example
 ```typescript
-export function useFetchVideos() {
+export function useRecordings() {
   return useSWR('/api/videos', async (url) => {
     const res = await fetch(url);
     return res.json();
@@ -193,7 +193,7 @@ export function useFetchVideos() {
 ```typescript
 import {useQuery} from '@supabase-cache-helpers/postgrest-react-query';
 
-export function useFetchVideos() {
+export function useRecordings() {
   const supabase = createClient();
 
   return useQuery(

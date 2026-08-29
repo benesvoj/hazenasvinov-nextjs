@@ -1,5 +1,7 @@
 import {VideoInsert, VideoSchema} from '@/types';
 
+export type VideoMatchPart = 'first_half' | 'second_half' | 'overtime' | 'full_match';
+
 export interface Video extends VideoSchema {
   category?: {
     id: string;
@@ -29,6 +31,7 @@ export interface VideoFormData {
   recording_date: string | null;
   season_id: string | null;
   is_active: boolean;
+  match_part: VideoMatchPart | null;
 }
 
 export interface VideoFilters {
@@ -44,6 +47,10 @@ export interface VideoFilters {
  * Used when displaying videos in match preparation contexts
  */
 export interface VideoWithMatch extends VideoSchema {
+  seasons?: {
+    id: string;
+    name: string;
+  };
   match?: {
     id: string;
     date: string;
@@ -62,5 +69,10 @@ export interface VideoWithMatch extends VideoSchema {
     away_score?: number | null;
     home_score_halftime?: number | null;
     away_score_halftime?: number | null;
+    referees?: Array<{
+      order: number;
+      name: string;
+      surname: string;
+    }>;
   };
 }

@@ -132,7 +132,7 @@ export default function MemberFunctionsAdminPage() {
   return (
     <>
       <AdminContainer
-        loading={functionsLoading}
+        isLoading={functionsLoading}
         actions={[
           {
             label: tAction.add,

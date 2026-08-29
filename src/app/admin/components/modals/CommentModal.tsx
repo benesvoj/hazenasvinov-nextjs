@@ -2,10 +2,12 @@
 
 import {Textarea} from '@heroui/react';
 
+import {getCommentTypesOptions} from '@/enums/getCommentTypesOptions';
+
 import {translations} from '@/lib/translations';
 
 import {Choice, Dialog} from '@/components';
-import {CommentTypes, getCommentTypesOptions, ModalMode} from '@/enums';
+import {CommentTypes, ModalMode} from '@/enums';
 import {CommentModalProps} from '@/types';
 
 export const CommentModal = ({

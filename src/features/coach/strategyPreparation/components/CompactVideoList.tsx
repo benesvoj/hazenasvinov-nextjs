@@ -1,0 +1,207 @@
+'use client';
+
+import React, {useState} from 'react';
+
+import Image from 'next/image';
+
+import {Card, CardHeader, CardBody, Button} from '@heroui/react';
+
+import {
+  VideoCameraIcon,
+  PlayIcon,
+  LinkIcon,
+  CheckIcon,
+  PencilSquareIcon,
+} from '@heroicons/react/24/outline';
+
+import {LoadingSpinner} from '@/components';
+import {useCopyRecordingUrl} from '@/features/recordings';
+import type {RecordingSchema} from '@/features/recordings';
+import {getMatchPartLabel} from '@/features/recordings/utils/matchPartLabel';
+import {formatDateString} from '@/helpers';
+import {openInNewTab} from '@/shared/browser';
+import {VideoWithMatch} from '@/types';
+
+interface CompactVideoListProps {
+  videos: VideoWithMatch[];
+  loading: boolean;
+  title: string;
+  emptyMessage?: string;
+  onEdit?: (video: RecordingSchema) => void;
+}
+
+export default function CompactVideoList({
+  videos,
+  loading,
+  title,
+  emptyMessage = 'Žádná videa k dispozici',
+  onEdit,
+}: CompactVideoListProps) {
+  const [copiedVideoId, setCopiedVideoId] = useState<string | null>(null);
+
+  const copyUrl = useCopyRecordingUrl();
+
+  return (
+    <Card className="h-full mx-1 sm:mx-2">
+      <CardHeader className="flex items-center gap-2 px-3 sm:px-4">
+        <VideoCameraIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 flex-shrink-0" />
+        <h3 className="text-base sm:text-lg font-semibold truncate">{title}</h3>
+      </CardHeader>
+      <CardBody className="p-0">
+        {loading ? (
+          <div className="p-3 sm:p-4">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <div className="max-h-400 overflow-y-auto scrollbar-hide">
+            <div className="space-y-2 p-1 sm:p-2">
+              {videos.length === 0 ? (
+                <div className="text-center py-4 sm:py-6 text-gray-500">
+                  <VideoCameraIcon className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-xs sm:text-sm">{emptyMessage}</p>
+                </div>
+              ) : (
+                videos.map((video) => (
+                  <div
+                    key={video.id}
+                    className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                    onClick={() => openInNewTab(video.youtube_url)}
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative w-12 h-9 sm:w-16 sm:h-12 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden flex-shrink-0">
+                      {video.thumbnail_url ? (
+                        <Image
+                          src={video.thumbnail_url}
+                          alt={video.title}
+                          className="w-full h-full object-cover"
+                          width={64}
+                          height={48}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                          <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                        </div>
+                      )}
+                      {/* Play overlay */}
+                      <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+                        <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                      </div>
+                    </div>
+
+                    {/* Video info */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {video.title}
+                      </h4>
+
+                      {/* Match information */}
+                      {video.match && (
+                        <div className="mt-1 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-700">
+                          <div className="text-xs font-medium text-blue-900 dark:text-blue-100 mb-1">
+                            {video.match.home_team.name} vs {video.match.away_team.name}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300">
+                            <span>{new Date(video.match.date).toLocaleDateString('cs-CZ')}</span>
+                            {video.match.status === 'completed' && (
+                              <>
+                                <span className="font-medium">
+                                  {video.match.home_score || 0} : {video.match.away_score || 0}
+                                </span>
+                                {(video.match.home_score_halftime !== undefined ||
+                                  video.match.away_score_halftime !== undefined) && (
+                                  <span className="text-gray-500">
+                                    ({video.match.home_score_halftime || 0} :{' '}
+                                    {video.match.away_score_halftime || 0})
+                                  </span>
+                                )}
+                              </>
+                            )}
+                            {video.match.status === 'upcoming' && (
+                              <span className="text-orange-600 dark:text-orange-400 font-medium">
+                                Nadcházející
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {video.description && (
+                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1 hidden sm:block">
+                          Poznámka: {video.description}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+                        {video.recording_date && (
+                          <span className="text-xs text-gray-500">
+                            {formatDateString(video.recording_date)}
+                          </span>
+                        )}
+                        {video.seasons?.name && (
+                          <span className="text-xs text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 px-1.5 py-0.5 rounded">
+                            {video.seasons.name}
+                          </span>
+                        )}
+                        {video.match_part && (
+                          <span className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded font-medium">
+                            {getMatchPartLabel(video.match_part)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-1">
+                      {/* Copy link button */}
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        color={copiedVideoId === video.id ? 'success' : 'default'}
+                        className="shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+                        onPress={() => copyUrl(video.youtube_url)}
+                        title={copiedVideoId === video.id ? 'Link zkopírován!' : 'Zkopírovat odkaz'}
+                      >
+                        {copiedVideoId === video.id ? (
+                          <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                        ) : (
+                          <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                        )}
+                      </Button>
+
+                      {/* Play button */}
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        className="shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+                        title="Přehrát video"
+                        onPress={() => openInNewTab(video.youtube_url)}
+                      >
+                        <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </Button>
+
+                      {/* Edit button */}
+                      {onEdit && (
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          color="primary"
+                          className="shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+                          title="Upravit video"
+                          onPress={() => onEdit(video as unknown as RecordingSchema)}
+                        >
+                          <PencilSquareIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </CardBody>
+    </Card>
+  );
+}

@@ -18,7 +18,6 @@ import * as todoQueries from '@/queries/todos';
 import * as tournamentsQueries from '@/queries/tournaments';
 import * as trainingSessionsQueries from '@/queries/trainingSessions';
 import * as userQueries from '@/queries/users';
-import * as videoQueries from '@/queries/videos';
 
 export interface EntityQueryLayer<T = any, Options = any> {
   getAll?: (ctx: QueryContext, options?: Options) => Promise<QueryResult<T[]>>;
@@ -172,7 +171,7 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
   },
   blog_posts: {
     tableName: blogPostQueries.DB_TABLE,
-    sortBy: [{column: 'published_at', ascending: false}],
+    sortBy: [{column: 'created_at', ascending: false}],
     requiresAdmin: true, // Write operations require admin
     isPublic: true, // Read operations are public (for blog listing page)
     queryLayer: {
@@ -205,19 +204,6 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
       create: todoQueries.createTodo,
       update: todoQueries.updateTodo,
       delete: todoQueries.deleteTodo,
-    },
-  },
-  videos: {
-    tableName: videoQueries.DB_TABLE,
-    sortBy: [{column: 'recording_date', ascending: false}],
-    requiresAdmin: false,
-    coachWritable: true,
-    queryLayer: {
-      getAll: videoQueries.getAllVideos,
-      getById: videoQueries.getVideoById,
-      create: videoQueries.createVideo,
-      update: videoQueries.updateVideo,
-      delete: videoQueries.deleteVideo,
     },
   },
   training_sessions: {
@@ -279,7 +265,12 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
         .single();
       return data?.category_id ?? null;
     },
-    filters: [{paramName: 'lineupId', dbColumn: 'lineup_id'}],
+    filters: [
+      {paramName: 'lineupId', dbColumn: 'lineup_id'},
+      // Deactivated members are hidden from lineups by default; historical
+      // views can opt back in with `?includeInactiveMembers=true`.
+      {paramName: 'includeInactiveMembers', transform: (value) => value === 'true'},
+    ],
     queryLayer: {
       getAll: categoryLineupMembersQueries.getAllCategoryLineupMembers,
       getById: categoryLineupMembersQueries.getCategoryLineupMemberById,

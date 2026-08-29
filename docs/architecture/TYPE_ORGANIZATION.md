@@ -152,7 +152,7 @@ export interface VideoFormData {
 /**
  * Filter criteria for videos
  */
-export interface VideoFilters {
+export interface RecordingFilters {
   category_id?: string;
   club_id?: string;
   season_id?: string;
@@ -243,7 +243,7 @@ Use form data types for user input:
 
 ```typescript
 // ✅ Form hook
-export const useVideoForm = createFormHook<VideoSchema, VideoFormData>({
+export const useRecordingForm = createFormHook<VideoSchema, VideoFormData>({
   initialFormData: {
     title: '',
     description: '',
@@ -295,7 +295,7 @@ Video              // With standard relations
 VideoWithMatch     // With match data
 VideoWithMetadata  // With metadata
 VideoFormData      // Form data
-VideoFilters       // Filter criteria
+RecordingFilters       // Filter criteria
 ```
 
 ## Type Extension Patterns
@@ -356,7 +356,7 @@ src/types/entities/video/
 │       - Video (with standard relations)
 │       - VideoWithMatch (with match data)
 │       - VideoFormData (form input)
-│       - VideoFilters (filter criteria)
+│       - RecordingFilters (filter criteria)
 └── index.ts
     - Re-exports all types
 ```

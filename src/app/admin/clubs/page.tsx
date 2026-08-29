@@ -168,7 +168,7 @@ export default function ClubsAdminPage() {
             buttonType: ActionTypes.CREATE,
           },
         ]}
-        loading={fetchLoading}
+        isLoading={fetchLoading}
         filters={filters}
       >
         <UnifiedTable

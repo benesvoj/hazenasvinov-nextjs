@@ -5,23 +5,43 @@ import {BaseCategoryLineupMember} from '@/types';
 
 interface GetCategoryLineupMembersOptions extends GetEntitiesOptions {
   filters?: {
-    categoryId?: string;
-    lineupId?: string;
-    includeMemberDetails: boolean;
+    /** Column filters applied directly to `category_lineup_members` rows. */
+    lineup_id?: string;
+    category_id?: string;
+    /**
+     * Include members that were deactivated (soft-removed) in the members list.
+     *
+     * Defaults to `false`: a deactivated player must disappear from the rosters
+     * coaches work with, while their row stays in the table so historical
+     * records (past seasons, match lineups) remain intact and reactivating the
+     * member brings them back to the lineup.
+     */
+    includeInactiveMembers?: boolean;
   };
 }
+
+/** Member columns joined into every lineup member row. */
+const MEMBER_SELECT =
+  '*, members!inner(id, name, surname, registration_number, category_id, is_active)';
 
 export async function getAllCategoryLineupMembers(
   ctx: QueryContext,
   options?: GetCategoryLineupMembersOptions
 ): Promise<QueryResult<BaseCategoryLineupMember[]>> {
   try {
-    const query = buildSelectQuery(ctx.supabase, DB_TABLE, {
-      select: '*, members!inner(id, name, surname, registration_number, category_id)',
+    const {includeInactiveMembers = false, ...columnFilters} = options?.filters ?? {};
+
+    let query = buildSelectQuery(ctx.supabase, DB_TABLE, {
+      select: MEMBER_SELECT,
       sorting: options?.sorting,
       pagination: options?.pagination,
-      filters: options?.filters,
+      filters: columnFilters,
     });
+
+    // Filtering on the embedded resource works because the join is `!inner`.
+    if (!includeInactiveMembers) {
+      query = query.eq('members.is_active', true);
+    }
 
     const {data, error, count} = await query;
 

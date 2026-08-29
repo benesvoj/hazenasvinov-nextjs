@@ -1,0 +1,688 @@
+src
+├── app
+│   ├── (betting)
+│   │   ├── betting
+│   │   └── layout.tsx
+│   ├── (main)
+│   │   ├── 100
+│   │   ├── about
+│   │   ├── blog
+│   │   ├── categories
+│   │   ├── celebration
+│   │   ├── chronicle
+│   │   ├── components
+│   │   ├── contact
+│   │   ├── downloads
+│   │   ├── layout.tsx
+│   │   ├── matches
+│   │   ├── page.tsx
+│   │   ├── photo-gallery
+│   │   └── tournaments
+│   ├── admin
+│   │   ├── AI_Guide.md
+│   │   ├── betting
+│   │   ├── categories
+│   │   ├── club-categories
+│   │   ├── club-config
+│   │   ├── clubs
+│   │   ├── committees
+│   │   ├── components
+│   │   ├── grant-calendar
+│   │   ├── layout.tsx
+│   │   ├── matches
+│   │   ├── meeting-minutes
+│   │   ├── member-functions
+│   │   ├── members
+│   │   ├── page.tsx
+│   │   ├── photo-gallery
+│   │   ├── posts
+│   │   ├── seasons
+│   │   ├── sponsorship
+│   │   ├── tournaments
+│   │   ├── user-roles
+│   │   ├── users
+│   │   └── videos
+│   ├── api
+│   │   ├── README.md
+│   │   ├── admin
+│   │   ├── attendance
+│   │   ├── auth
+│   │   ├── betting
+│   │   ├── blog
+│   │   ├── blog-posts-published
+│   │   ├── categories
+│   │   ├── category-membership-fees
+│   │   ├── check-user
+│   │   ├── club-config
+│   │   ├── clubs
+│   │   ├── coach-cards
+│   │   ├── entities
+│   │   ├── log-login
+│   │   ├── matches
+│   │   ├── member-functions
+│   │   ├── member-payment-status
+│   │   ├── member-payments
+│   │   ├── members
+│   │   ├── page-visibility
+│   │   ├── relationships
+│   │   ├── sponsorship
+│   │   ├── status
+│   │   ├── todos
+│   │   ├── tournaments
+│   │   ├── training-sessions
+│   │   ├── user-profiles
+│   │   └── users
+│   ├── auth
+│   │   └── callback
+│   ├── blocked
+│   │   └── page.tsx
+│   ├── coaches
+│   │   ├── CLAUDE.md
+│   │   ├── LAYER2_IMPLEMENTATION.md
+│   │   ├── attendance
+│   │   ├── components
+│   │   ├── dashboard
+│   │   ├── layout.tsx
+│   │   ├── lineups
+│   │   ├── login
+│   │   ├── matches
+│   │   ├── meeting-minutes
+│   │   ├── members
+│   │   ├── profile
+│   │   ├── statistics
+│   │   └── videos
+│   ├── constants
+│   │   ├── getMatchStatusText.ts
+│   │   ├── index.ts
+│   │   ├── lineupValidationRules.ts
+│   │   └── memberFunctions.ts
+│   ├── error.tsx
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── loading.tsx
+│   ├── login
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── not-found.tsx
+│   ├── reset-password
+│   │   └── page.tsx
+│   ├── set-password
+│   │   └── page.tsx
+│   └── theme-providers.tsx
+├── components
+│   ├── CONTAINER_MERGE_ANALYSIS.md
+│   ├── boundaries
+│   │   ├── ChunkErrorBoundary.tsx
+│   │   ├── DatabaseErrorBoundary.tsx
+│   │   └── index.ts
+│   ├── docs
+│   │   ├── MobileActionsMenu.md
+│   │   └── README.md
+│   ├── entities
+│   ├── features
+│   │   ├── admin
+│   │   ├── betting
+│   │   ├── blog
+│   │   ├── coaches
+│   │   ├── index.ts
+│   │   ├── loaning
+│   │   ├── meeting-minutes
+│   │   ├── release-notes
+│   │   └── videos
+│   ├── index.ts
+│   ├── providers
+│   │   ├── ConditionalProviders.tsx
+│   │   ├── QueryProvider.tsx
+│   │   └── index.ts
+│   ├── routes
+│   │   ├── ProtectedCoachRoute.tsx
+│   │   ├── ProtectedRoute.tsx
+│   │   └── index.ts
+│   ├── shared
+│   │   ├── contacts-section
+│   │   ├── index.ts
+│   │   ├── match
+│   │   ├── members
+│   │   ├── player-manager
+│   │   ├── profile-card
+│   │   ├── standing-table
+│   │   └── tournament
+│   └── ui
+│       ├── Cards
+│       ├── Grid
+│       ├── HStack
+│       ├── Stack
+│       ├── VStack
+│       ├── chips
+│       ├── client
+│       ├── containers
+│       ├── dialog
+│       ├── dropdown-menu
+│       ├── feedback
+│       ├── heading
+│       ├── hide
+│       ├── index.ts
+│       ├── layout
+│       ├── link
+│       ├── modals
+│       ├── navigation
+│       ├── radio
+│       ├── server
+│       ├── show
+│       └── text
+├── constants
+│   ├── club.ts
+│   ├── environment.ts
+│   ├── index.ts
+│   ├── match.ts
+│   ├── months.ts
+│   ├── posts.ts
+│   └── roleOptions.ts
+├── contexts
+│   ├── AdminCategorySimulationContext.tsx
+│   ├── AppDataContext.tsx
+│   ├── UserContext.tsx
+│   └── index.ts
+├── data
+│   └── siteMetadata.ts
+├── enums
+│   ├── README_enum_generator.md
+│   ├── actionTypes.ts
+│   ├── ageGroups.ts
+│   ├── attendanceStatuses.ts
+│   ├── attendanceTabs.ts
+│   ├── blogPostStatutes.ts
+│   ├── columnAlignType.ts
+│   ├── commentTypes.ts
+│   ├── competitionTypes.ts
+│   ├── emptyStateTypes.ts
+│   ├── genders.ts
+│   ├── index.ts
+│   ├── lineupCoachRole.ts
+│   ├── lineupErrorType.ts
+│   ├── lineupRole.ts
+│   ├── matchStatus.ts
+│   ├── memberFunction.ts
+│   ├── membershipFeeStatus.ts
+│   ├── modalMode.ts
+│   ├── playerPosition.ts
+│   ├── portal.ts
+│   ├── relationshipStatus.ts
+│   ├── relationshipType.ts
+│   ├── teamTypes.ts
+│   ├── todoCategories.ts
+│   ├── todoFilter.ts
+│   ├── todoPriorities.ts
+│   ├── todoStatuses.ts
+│   ├── tournamentStatuses.ts
+│   ├── trainingSessionStatus.ts
+│   └── userRoles.ts
+├── helpers
+│   ├── __tests__
+│   │   ├── dateRangeGenerator.test.ts
+│   │   ├── formatDate.test.ts
+│   │   └── formatTime.test.ts
+│   ├── attendance
+│   │   └── recordingMutations.ts
+│   ├── commentIcons.tsx
+│   ├── comments.ts
+│   ├── currentYear.ts
+│   ├── dateRangeGenerator.ts
+│   ├── formatDate.ts
+│   ├── formatMonth.ts
+│   ├── formatTime.ts
+│   ├── getCategoryInfo.ts
+│   ├── getCategoryMatchweek.ts
+│   ├── helper.ts
+│   ├── index.ts
+│   ├── lineupError.ts
+│   ├── monthUtils.ts
+│   ├── todoIcons.tsx
+│   ├── todos.ts
+│   └── ui
+│       ├── action
+│       ├── button
+│       ├── categoryDisplayHelpers.ts
+│       ├── index.ts
+│       └── todoDisplayHelpers.ts
+├── hooks
+│   ├── README_CACHING_MIGRATION.md
+│   ├── admin
+│   │   ├── useExcelImport.ts
+│   │   └── usePerformanceMonitoring.ts
+│   ├── auth
+│   │   ├── useAuth.ts
+│   │   └── useAuthNew.ts
+│   ├── coach
+│   │   ├── useStrategyPreparation.ts
+│   │   └── useUpcomingBirthdays.ts
+│   ├── context
+│   ├── entities
+│   │   ├── HOOKS_README.md
+│   │   ├── README.md
+│   │   ├── attendance
+│   │   ├── blog
+│   │   ├── category
+│   │   ├── category-lineup-members
+│   │   ├── category-lineups
+│   │   ├── category-membership-fee
+│   │   ├── club
+│   │   ├── club-category
+│   │   ├── club-config
+│   │   ├── coach-card
+│   │   ├── comment
+│   │   ├── committee
+│   │   ├── grant
+│   │   ├── lineup
+│   │   ├── match
+│   │   ├── meeting-minute
+│   │   ├── member
+│   │   ├── member-function
+│   │   ├── membershipFee
+│   │   ├── player
+│   │   ├── roleDefinition
+│   │   ├── season
+│   │   ├── settings
+│   │   ├── standings
+│   │   ├── team
+│   │   ├── todo
+│   │   ├── tournament
+│   │   ├── tournamentStandings
+│   │   ├── tournamentTeams
+│   │   ├── training-session
+│   │   ├── user
+│   │   └── video
+│   ├── factories
+│   │   ├── __tests__
+│   │   ├── createCRUDHook.ts
+│   │   ├── createDataFetchHook.ts
+│   │   ├── createFormHook.ts
+│   │   ├── createSingleEntityFetchHook.ts
+│   │   ├── index.ts
+│   │   └── types.ts
+│   ├── features
+│   │   └── betting
+│   ├── index.ts
+│   └── shared
+│       ├── queries
+│       ├── useDebounce.ts
+│       ├── useModals.ts
+│       ├── usePageVisibility.ts
+│       ├── usePortalAccess.ts
+│       └── useSupabaseClient.ts
+├── lib
+│   ├── api-routes-recordingMutations.ts
+│   ├── api-routes.ts
+│   ├── app-routes.ts
+│   ├── cacheUtils.ts
+│   ├── getQueryClient.ts
+│   ├── icons
+│   │   ├── AwardIcon.tsx
+│   │   ├── BallIcon.tsx
+│   │   ├── BlankIcon.tsx
+│   │   ├── CalendarDaysIcon.tsx
+│   │   ├── CalendarIcon.tsx
+│   │   ├── CheckIcon.tsx
+│   │   ├── ChevronLeftIcon.tsx
+│   │   ├── ChevronRightIcon.tsx
+│   │   ├── DollarIcon.tsx
+│   │   ├── EditIcon.tsx
+│   │   ├── EnvelopeIcon.tsx
+│   │   ├── EyeIcon.tsx
+│   │   ├── HistoryIcon.tsx
+│   │   ├── LockIcon.tsx
+│   │   ├── LogOutIcon.tsx
+│   │   ├── MapPinIcon.tsx
+│   │   ├── MonitorIcon.tsx
+│   │   ├── MoonIcon.tsx
+│   │   ├── PlusIcon.tsx
+│   │   ├── RedCardIcon.tsx
+│   │   ├── SearchIcon.tsx
+│   │   ├── ShoppingBagIcon.tsx
+│   │   ├── ShoppingCartIcon.tsx
+│   │   ├── SunIcon.tsx
+│   │   ├── TrashIcon.tsx
+│   │   ├── TrendingDown.tsx
+│   │   ├── TrendingUp.tsx
+│   │   ├── TrophyIcon.tsx
+│   │   ├── Wallet.tsx
+│   │   ├── XMarkIcon.tsx
+│   │   ├── YellowCardIcon.tsx
+│   │   ├── index.ts
+│   │   └── types.ts
+│   ├── index.ts
+│   ├── navigation.ts
+│   ├── performanceCache.ts
+│   ├── queryClient.ts
+│   ├── queryKeys.ts
+│   ├── translations
+│   │   ├── admin.ts
+│   │   ├── attendance.ts
+│   │   ├── auth.ts
+│   │   ├── betting.ts
+│   │   ├── blogPosts.ts
+│   │   ├── categories.ts
+│   │   ├── clubCategories.ts
+│   │   ├── clubConfig.ts
+│   │   ├── clubs.ts
+│   │   ├── coachCards.ts
+│   │   ├── coachPortal.ts
+│   │   ├── comments.ts
+│   │   ├── committees.ts
+│   │   ├── common.ts
+│   │   ├── components.ts
+│   │   ├── grantCalendar.ts
+│   │   ├── index.ts
+│   │   ├── lineupManager.ts
+│   │   ├── lineupMember.ts
+│   │   ├── lineups.ts
+│   │   ├── matchRecordings.ts
+│   │   ├── matches.ts
+│   │   ├── meetingMinutes.ts
+│   │   ├── memberClubRelationship.ts
+│   │   ├── memberFunctions.ts
+│   │   ├── members.ts
+│   │   ├── membershipFees.ts
+│   │   ├── photoGallery.ts
+│   │   ├── public.ts
+│   │   ├── seasons.ts
+│   │   ├── sponsorship.ts
+│   │   ├── teams.ts
+│   │   ├── todos.ts
+│   │   ├── topBar.ts
+│   │   ├── tournaments.ts
+│   │   ├── trainingSession.ts
+│   │   ├── userRoles.ts
+│   │   └── users.ts
+│   ├── translations.old.ts
+│   ├── validators
+│   │   └── membersInternal.ts
+│   └── zod.ts
+├── proxy.ts
+├── queries
+│   ├── QUERIES_README.md
+│   ├── blogPosts
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── categories
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── categoryLineupMembers
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── categoryLineups
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── categoryMembershipFees
+│   ├── clubCategories
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── clubConfig
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── clubs
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── coachCards
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── comments
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── committees
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── grants
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── index.ts
+│   ├── matches
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   ├── queries.ts
+│   │   └── types.ts
+│   ├── memberAttendance
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── members
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   ├── queries.ts
+│   │   ├── queryHelpers.ts
+│   │   └── types.ts
+│   ├── membersExternal
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   └── queries.ts
+│   ├── membersInternal
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   └── queries.ts
+│   ├── membersOnLoan
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   └── queries.tsx
+│   ├── membershipFeePayments
+│   │   ├── constants.ts
+│   │   └── index.ts
+│   ├── roleDefinitions
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── seasons
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── shared
+│   │   ├── createMutationHelpers.ts
+│   │   ├── filters.ts
+│   │   ├── index.ts
+│   │   ├── pagination.ts
+│   │   ├── queryBuilder.ts
+│   │   ├── types.ts
+│   │   └── utils.ts
+│   ├── todos
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── tournamentTeams
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── tournaments
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── trainingSessions
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── userProfiles
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   ├── users
+│   │   ├── constants.ts
+│   │   ├── index.ts
+│   │   ├── mutations.ts
+│   │   └── queries.ts
+│   └── videos
+│       ├── constants.ts
+│       ├── index.ts
+│       ├── mutations.ts
+│       └── queries.ts
+├── routes
+│   └── dynamicRoutes.ts
+├── services
+│   ├── entities
+│   │   └── member
+│   ├── features
+│   │   └── betting
+│   ├── index.ts
+│   ├── matchQueries.ts
+│   └── optimizedMatchQueries.ts
+├── test
+│   ├── mocks
+│   │   ├── handlers.ts
+│   │   └── server.ts
+│   ├── setup.ts
+│   └── utils.tsx
+├── types
+│   ├── README.md
+│   ├── TYPES_REORGANIZATION_COMPLETE.md
+│   ├── components
+│   │   ├── Integer.ts
+│   │   ├── actionItem.ts
+│   │   ├── actionsProps.ts
+│   │   ├── adminContainer.ts
+│   │   ├── contentCard.ts
+│   │   ├── emptyState.ts
+│   │   ├── flexbox.ts
+│   │   ├── mobileActionsMenuProps.ts
+│   │   ├── padding.ts
+│   │   ├── spacing.ts
+│   │   └── toast.ts
+│   ├── database
+│   │   ├── README.md
+│   │   └── supabase.ts
+│   ├── entities
+│   │   ├── TYPES_README.md
+│   │   ├── attendance
+│   │   ├── blog
+│   │   ├── category
+│   │   ├── categoryMembershipFee
+│   │   ├── club
+│   │   ├── clubCategory
+│   │   ├── clubConfig
+│   │   ├── coachCard
+│   │   ├── comment
+│   │   ├── committee
+│   │   ├── grant
+│   │   ├── match
+│   │   ├── member
+│   │   ├── memberFunctions
+│   │   ├── membershipFeePayment
+│   │   ├── roleDefinition
+│   │   ├── season
+│   │   ├── team
+│   │   ├── todo
+│   │   ├── tournament
+│   │   ├── tournamentStanding
+│   │   ├── tournamentTeam
+│   │   ├── trainingSession
+│   │   ├── user
+│   │   └── video
+│   ├── features
+│   │   ├── betting
+│   │   ├── blog
+│   │   ├── gallery
+│   │   ├── meetings
+│   │   ├── profileCard
+│   │   └── releases
+│   ├── index.ts
+│   ├── shared
+│   │   ├── Nullish.ts
+│   │   ├── ValueByDevice.ts
+│   │   ├── pageVisibility.ts
+│   │   ├── standing-table
+│   │   ├── supabase.ts
+│   │   ├── unknownErrorShape.ts
+│   │   ├── user.ts
+│   │   └── userRoles.ts
+│   └── ui
+│       └── unifiedTable.ts
+└── utils
+    ├── __tests__
+    │   ├── copyToClipboard.test.ts
+    │   ├── roundRobinGenerator.test.ts
+    │   └── tournamentStandingsCalculator.test.ts
+    ├── arrayHelper.ts
+    ├── autoStandingsRecalculation.ts
+    ├── blogPosts
+    │   └── blogTransforms.ts
+    ├── builders
+    │   └── matchDataBuilder.ts
+    ├── categoryPageData.ts
+    ├── contentSearch.ts
+    ├── copyToClipboard.ts
+    ├── enumHelpers.ts
+    ├── fetchCSVdata.ts
+    ├── index.ts
+    ├── isNilOrZero.ts
+    ├── isNotNilOrEmpty.ts
+    ├── isValidPositiveNumber.ts
+    ├── loginLogger.ts
+    ├── matchQueryBuilder.ts
+    ├── matchTransformers.ts
+    ├── performanceTesting.ts
+    ├── prefetch.ts
+    ├── refreshMaterializedView.ts
+    ├── releaseNotes.ts
+    ├── roundRobinGenerator.ts
+    ├── slugGenerator.ts
+    ├── standingsCalculator.ts
+    ├── standingsGenerator.ts
+    ├── supabase
+    │   ├── actions.ts
+    │   ├── admin.ts
+    │   ├── apiHelpers.ts
+    │   ├── bettingAuth.ts
+    │   ├── client.ts
+    │   ├── coachAuth.ts
+    │   ├── docs
+    │   ├── index.ts
+    │   ├── middleware.ts
+    │   ├── photoGallery.ts
+    │   ├── queryHelpers.ts
+    │   ├── script.ts
+    │   ├── server.ts
+    │   └── storage.ts
+    ├── supabaseBatching.ts
+    ├── teamDisplay.ts
+    ├── testMaterializedView.ts
+    ├── texts.ts
+    ├── tournamentStandingsCalculator.ts
+    ├── url.ts
+    ├── userRoles.ts
+    ├── uuid.ts
+    ├── validation
+    │   ├── __tests__
+    │   └── matchValidation.ts
+    └── video
+        └── transformToRecordingInsert.ts
+
+275 directories, 411 files

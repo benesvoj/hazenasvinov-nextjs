@@ -2,11 +2,13 @@ import {Chip, Badge, Avatar, Card, CardBody, CardHeader} from '@heroui/react';
 
 import {UserIcon, UserGroupIcon} from '@heroicons/react/24/outline';
 
+import {getLineupCoachRoleOptions} from '@/enums/getLineupCoachRoleOptions';
+
 import {BallIcon, YellowCardIcon, RedCardIcon} from '@/lib/icons';
 import {translations} from '@/lib/translations';
 
 import {LoadingSpinner, Heading} from '@/components';
-import {getLineupCoachRoleOptions, PlayerPosition, TeamTypes} from '@/enums';
+import {PlayerPosition, TeamTypes} from '@/enums';
 import {LineupPlayer, LineupCardProps} from '@/types';
 
 export default function LineupCard({match, lineup, lineupLoading, teamType}: LineupCardProps) {

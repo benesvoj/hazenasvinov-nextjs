@@ -9,10 +9,13 @@
 
 export const API_ROUTES = {
   admin: {
+    refreshMaterializedView: '/api/admin/refresh-materialized-view' as const,
     updateMaterializedView: '/api/admin/update-materialized-view' as const,
   },
   attendance: {
+    memberHistory: '/api/attendance/member-history' as const,
     statistics: '/api/attendance/statistics' as const,
+    bulk: (trainingId: string | number) => `/api/attendance/${trainingId}/bulk`,
   },
   auth: {
     confirm: '/api/auth/confirm' as const,
@@ -67,6 +70,7 @@ export const API_ROUTES = {
     lineupByIdPlayers: (id: string | number, lineupId: string | number) =>
       `/api/matches/${id}/lineups/${lineupId}/players`,
     lineups: (id: string | number) => `/api/matches/${id}/lineups`,
+    referees: (id: string | number) => `/api/matches/${id}/referees`,
   },
   memberFunctions: {
     root: '/api/member-functions' as const,
@@ -76,6 +80,7 @@ export const API_ROUTES = {
   memberPaymentStatus: '/api/member-payment-status' as const,
   members: {
     root: '/api/members' as const,
+    duplicates: '/api/members/duplicates' as const,
     external: '/api/members/external' as const,
     internal: '/api/members/internal' as const,
     membersWithPaymentStatus: '/api/members/members-with-payment-status' as const,
@@ -84,6 +89,14 @@ export const API_ROUTES = {
     relationships: (id: string | number) => `/api/members/${id}/relationships`,
   },
   pageVisibility: '/api/page-visibility' as const,
+  pointDeductions: {
+    root: '/api/point-deductions' as const,
+    byId: (id: string | number) => `/api/point-deductions/${id}`,
+  },
+  referees: {
+    root: '/api/referees' as const,
+    byId: (id: string | number) => `/api/referees/${id}`,
+  },
   relationships: {
     byId: (id: string | number) => `/api/relationships/${id}`,
   },
@@ -101,6 +114,9 @@ export const API_ROUTES = {
     byId: (id: string | number) => `/api/todos/${id}`,
   },
   tournaments: {
+    bySlug: {
+      root: (slug: string | number) => `/api/tournaments/by-slug/${slug}`,
+    },
     matches: (id: string | number) => `/api/tournaments/${id}/matches`,
     scheduleGenerate: (id: string | number) => `/api/tournaments/${id}/schedule/generate`,
     teamById: (id: string | number, teamId: string | number) =>

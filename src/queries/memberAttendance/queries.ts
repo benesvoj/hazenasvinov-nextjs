@@ -5,7 +5,13 @@ import {MemberAttendanceWithMember} from '@/types';
 
 interface GetMembersAttendanceOptions extends GetEntitiesOptions {
   filters?: {
-    trainingSessionId?: string;
+    /**
+     * Column filter applied directly to `member_attendance`. The name is the DB
+     * column, not the query parameter: the entities route maps `?trainingSessionId`
+     * onto `training_session_id` via `dbColumn` before it gets here, and
+     * `applyFilters` passes whatever key it is given straight to `.eq()`.
+     */
+    training_session_id?: string;
   };
 }
 

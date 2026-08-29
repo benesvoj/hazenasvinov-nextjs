@@ -18,6 +18,7 @@ export const matchRecordingsTranslations = {
     description: 'Popis videa',
     active: 'Aktivní',
     activeOnly: 'Pouze aktivní',
+    matchPart: 'Část utkání',
   },
   placeholders: {
     title: 'Zadejte název videa',
@@ -30,6 +31,13 @@ export const matchRecordingsTranslations = {
     allClubs: 'Všechny kluby',
     allCategories: 'Všechny kategorie',
     allSeasons: 'Všechny sezóny',
+    matchPart: 'Vyberte část utkání',
+  },
+  matchPartOptions: {
+    first_half: '1. poločas',
+    second_half: '2. poločas',
+    overtime: 'Nastavení',
+    full_match: 'Celé utkání',
   },
   helpers: {
     youtubeUrl: 'Zadejte plnou URL adresu YouTube videa',
@@ -60,6 +68,26 @@ export const matchRecordingsTranslations = {
       copyUrl: 'Kopírovat URL',
       edit: 'Upravit video',
       delete: 'Smazat video',
+    },
+    table: {
+      ariaLabel: 'Tabulka záznamů zápasů',
+      noRecordings: 'Žádné záznamy k zobrazení',
+      columns: {
+        title: 'Název',
+        category: 'Kategorie',
+        club: 'Klub',
+        season: 'Sezóna',
+        recordingDate: 'Datum záznamu',
+        matchPart: 'Část utkání',
+        status: 'Stav',
+        actions: 'Akce',
+      },
+      actions: {
+        play: 'Přehrát video',
+        copyUrl: 'Kopírovat URL',
+        edit: 'Upravit video',
+        delete: 'Smazat video',
+      },
     },
   },
 };

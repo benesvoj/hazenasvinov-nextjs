@@ -49,7 +49,7 @@ export default function TournamentDetailPage() {
       tabs={tabs || []}
       activeTab={activeTab}
       onTabChange={setActiveTab}
-      loading={loading}
+      isLoading={loading}
     />
   );
 }

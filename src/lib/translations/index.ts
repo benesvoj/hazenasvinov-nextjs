@@ -25,7 +25,9 @@ import {memberFunctionsTranslations} from './memberFunctions';
 import {membersTranslations} from './members';
 import {membershipFeesTranslations} from './membershipFees';
 import {photoGalleryTranslations} from './photoGallery';
+import {pointDeductionsTranslations} from './pointDeductions';
 import {publicTranslations} from './public';
+import {refereesTranslations} from './referees';
 import {seasonsTranslations} from './seasons';
 import {sponsorshipTranslations} from './sponsorship';
 import {teamsTranslations} from './teams';
@@ -74,4 +76,6 @@ export const translations = {
   photoGallery: photoGalleryTranslations,
   userRoles: userRolesTranslations,
   tournaments: tournamentsTranslations,
+  referees: refereesTranslations,
+  pointDeductions: pointDeductionsTranslations,
 } as const;

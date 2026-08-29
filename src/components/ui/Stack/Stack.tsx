@@ -1,7 +1,6 @@
 import {AriaRole, ReactNode} from 'react';
 
-import {twMerge} from 'tailwind-merge';
-
+import {cn} from '@/shared/lib/cn';
 import {
   FlexboxAlign,
   FlexboxDirection,
@@ -53,7 +52,7 @@ export function Stack(props: StackProps) {
   return (
     <div
       role={props.role}
-      className={twMerge(
+      className={cn(
         'flex',
         directionClasses[props.direction ?? 'row'],
         justifyClasses[props.justify ?? 'start'],
@@ -68,3 +67,5 @@ export function Stack(props: StackProps) {
     </div>
   );
 }
+
+Stack.displayName = 'Stack';

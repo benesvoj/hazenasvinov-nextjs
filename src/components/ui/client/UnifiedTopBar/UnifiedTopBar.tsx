@@ -8,8 +8,8 @@ import {CoachPortalCategoryDialog, ReleaseNotesModal} from '@/components/feature
 import {UserProfileModal} from '@/components/ui/modals';
 
 import {APP_ROUTES} from '@/lib/app-routes';
+import {isAdminPortal, PortalVariant} from '@/lib/portal';
 
-import {UserRoles} from '@/enums';
 import {useAuth, usePortalAccess} from '@/hooks';
 import {getReleaseNotes} from '@/utils';
 
@@ -17,7 +17,7 @@ import {LogoutOverlay, TopBarActions, TopBarPageInfo, TopBarUserDropdown} from '
 import {useLogout} from './hooks/useLogout';
 import {getContentClasses, getHeaderClasses} from './utils';
 
-export type variantType = UserRoles.ADMIN | UserRoles.COACH;
+export type variantType = PortalVariant;
 
 export type userProfileType = {
   role?: string;
@@ -33,7 +33,7 @@ export type sidebarContextType = {
 };
 
 interface UnifiedTopBarProps {
-  variant: variantType;
+  variant: PortalVariant;
   sidebarContext?: sidebarContextType;
   pageTitle?: string;
   pageDescription?: string;
@@ -50,6 +50,8 @@ export const UnifiedTopBar = ({
   const router = useRouter();
   const {user} = useAuth();
   const {hasCoachAccess, hasAdminAccess} = usePortalAccess();
+
+  const isAdmin = isAdminPortal(variant);
 
   const [showReleaseNotes, setShowReleaseNotes] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
@@ -70,7 +72,7 @@ export const UnifiedTopBar = ({
   };
 
   const handleSwitchToCoachPortal = () => {
-    if (variant === 'admin') {
+    if (isAdmin) {
       // Show category selection dialog first
       setShowCoachPortalDialog(true);
     } else {
@@ -93,7 +95,7 @@ export const UnifiedTopBar = ({
 
   // Determine if we should show portal switch
   const shouldShowPortalSwitch = (): boolean => {
-    if (variant === UserRoles.ADMIN) {
+    if (isAdmin) {
       // Admin users can switch to coach portal if they have coach access OR if they're admin (admin can access coach portal)
       return hasCoachAccess || hasAdminAccess;
     } else {
@@ -142,7 +144,7 @@ export const UnifiedTopBar = ({
         showReleaseNotes={showReleaseNotes}
         setShowReleaseNotes={setShowReleaseNotes}
       />
-      {variant === UserRoles.ADMIN && (
+      {isAdmin && (
         <CoachPortalCategoryDialog
           isOpen={showCoachPortalDialog}
           onClose={() => setShowCoachPortalDialog(false)}

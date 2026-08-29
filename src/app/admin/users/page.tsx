@@ -146,7 +146,7 @@ export default function UsersPage() {
   return (
     <>
       <AdminContainer
-        loading={loading}
+        isLoading={loading}
         tabs={[
           {
             key: 'users',

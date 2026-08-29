@@ -8,12 +8,10 @@ import {ArrowPathIcon, CheckIcon, PlusIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
-import CreateExternalPlayerModal from '@/app/admin/matches/components/CreateExternalPlayerModal';
-import CreateMemberModal from '@/app/admin/matches/components/CreateMemberModal';
-
 import {PlayerLoanModal} from '@/components';
 import {getClubName} from '@/constants';
 import {PlayerPosition} from '@/enums';
+import {CreateExternalPlayerModal, CreateMemberModal} from '@/features/lineupManager';
 import {useUnifiedPlayers} from '@/hooks';
 import {PlayerSearchFilters, PlayerSearchResult, UnifiedPlayerManagerProps} from '@/types';
 

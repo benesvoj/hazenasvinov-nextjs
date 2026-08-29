@@ -86,6 +86,7 @@ export function useStandings() {
 
         return {
           ...standing,
+          points_deduction: standing.points_deduction ?? 0,
           team: team
             ? {
                 ...team,

@@ -1,0 +1,168 @@
+import React from 'react';
+
+import {Alert, Button, Input, Select, SelectItem} from '@heroui/react';
+
+import {translations} from '@/lib/translations';
+
+import {Choice, UnifiedModal} from '@/components';
+import {MatchPhase} from '@/enums';
+import {AddMatchFormData} from '@/types';
+import {isEmpty} from '@/utils';
+
+interface FilteredTeam {
+  id: string;
+  name: string;
+  display_name?: string;
+  venue?: string;
+}
+
+interface AddMatchModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAddMatch: () => void;
+  formData: AddMatchFormData;
+  setFormData: (data: AddMatchFormData) => void;
+  filteredTeams: FilteredTeam[];
+  selectedCategory: string;
+  selectedSeason: string;
+  getMatchweekOptions: (categoryId: string) => Array<{value: string; label: string}>;
+  error?: string;
+}
+
+export default function AddMatchModal({
+  isOpen,
+  onClose,
+  onAddMatch,
+  formData,
+  setFormData,
+  filteredTeams,
+  selectedCategory,
+  selectedSeason,
+  getMatchweekOptions,
+  error,
+}: AddMatchModalProps) {
+  const footer = (
+    <>
+      <Button variant="ghost" onPress={onClose}>
+        {translations.common.actions.cancel}
+      </Button>
+      <Button color="primary" onPress={onAddMatch}>
+        {translations.common.actions.add}
+      </Button>
+    </>
+  );
+
+  return (
+    <UnifiedModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={translations.matches.modal.titles.addMatch}
+      size="2xl"
+      classNames={{
+        base: 'mx-2',
+        wrapper: 'items-center justify-center p-2 sm:p-4',
+        body: 'px-4 py-4',
+        header: 'px-4 py-4',
+        footer: 'px-4 py-4',
+      }}
+      placement="center"
+      scrollBehavior="inside"
+      footer={footer}
+    >
+      <div className="space-y-4">
+        {error && (
+          <Alert color="danger" title={translations.common.alerts.error} description={error} />
+        )}
+        <Input
+          label={translations.common.labels.date}
+          type="date"
+          value={formData.date}
+          onChange={(e) => setFormData({...formData, date: e.target.value})}
+        />
+        <Input
+          label={translations.common.labels.time}
+          type="time"
+          value={formData.time}
+          onChange={(e) => setFormData({...formData, time: e.target.value})}
+        />
+        <div>
+          <Choice
+            items={filteredTeams.map((c) => ({key: c.id, label: c.name}))}
+            value={formData.home_team_id}
+            onChange={(id) => setFormData({...formData, home_team_id: id ?? ''})}
+            label={translations.matches.homeTeam}
+            placeholder={translations.matches.homeTeamPlaceholder}
+            isRequired
+          />
+          {isEmpty(filteredTeams) && selectedCategory && selectedSeason && <NoTeamsAvailable />}
+        </div>
+        <div>
+          <Choice
+            items={filteredTeams.map((c) => ({key: c.id, label: c.name}))}
+            value={formData.away_team_id}
+            onChange={(id) => setFormData({...formData, away_team_id: id ?? ''})}
+            label={translations.matches.awayTeam}
+            placeholder={translations.matches.awayTeamPlaceholder}
+          />
+          {isEmpty(filteredTeams) && selectedCategory && selectedSeason && <NoTeamsAvailable />}
+        </div>
+        <Input
+          label={translations.matches.venue}
+          value={formData.venue}
+          onChange={(e) => setFormData({...formData, venue: e.target.value})}
+          placeholder={translations.matches.venuePlaceholder}
+        />
+        <div>
+          <Select
+            label={translations.matches.matchweek}
+            placeholder={translations.matches.matchweekPlaceholder}
+            selectedKeys={formData.matchweek ? [String(formData.matchweek)] : []}
+            onSelectionChange={(keys) => {
+              const selectedMatchweek = Array.from(keys)[0] as string;
+              setFormData({
+                ...formData,
+                matchweek: selectedMatchweek ? parseInt(selectedMatchweek, 10) : undefined,
+              });
+            }}
+            className="w-full"
+          >
+            {getMatchweekOptions(formData.category_id).map((option) => (
+              <SelectItem key={option.value}>{option.label}</SelectItem>
+            ))}
+          </Select>
+        </div>
+        <Input
+          label={translations.matches.matchNumber}
+          placeholder={translations.matches.matchNumberPlaceholder}
+          value={formData.match_number?.toString() || ''}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              match_number: e.target.value ? Number(e.target.value) : undefined,
+            })
+          }
+        />
+        <div>
+          <Select
+            label={translations.matches.matchPhase}
+            placeholder={translations.matches.matchPhasePlaceholder}
+            selectedKeys={formData.match_phase ? [formData.match_phase] : [MatchPhase.REGULAR]}
+            onSelectionChange={(keys) => {
+              const selected = Array.from(keys)[0] as MatchPhase;
+              setFormData({...formData, match_phase: selected ?? MatchPhase.REGULAR});
+            }}
+            className="w-full"
+          >
+            {Object.entries(translations.matches.matchPhases).map(([key, label]) => (
+              <SelectItem key={key}>{label}</SelectItem>
+            ))}
+          </Select>
+        </div>
+      </div>
+    </UnifiedModal>
+  );
+}
+
+const NoTeamsAvailable = () => {
+  return <p className="text-sm text-red-600 mt-1">{translations.matches.noTeamForSelection}</p>;
+};

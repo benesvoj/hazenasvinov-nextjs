@@ -44,14 +44,6 @@ export function validateAddMatchForm(formData: AddMatchFormData): ValidationMatc
     };
   }
 
-  if (!formData.venue) {
-    return {
-      valid: false,
-      error: translations.matches.validationRules.venueRequired,
-      field: 'venue',
-    };
-  }
-
   if (formData.home_team_id === formData.away_team_id) {
     return {
       valid: false,
@@ -73,14 +65,6 @@ export function validateEditMatchForm(formData: EditMatchFormData): ValidationMa
 
   if (!formData.time) {
     return {valid: false, error: translations.matches.toasts.mandatoryFieldsMissing, field: 'time'};
-  }
-
-  if (!formData.venue) {
-    return {
-      valid: false,
-      error: translations.matches.toasts.mandatoryFieldsMissing,
-      field: 'venue',
-    };
   }
 
   if (!formData.home_team_id || !formData.away_team_id) {

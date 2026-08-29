@@ -32,6 +32,7 @@ import {translations} from '@/lib/translations/index';
 
 import {useFetchMembers} from '@/hooks';
 import {MeetingAttendeeFormData} from '@/types';
+import {normalizeSearchTerm} from '@/utils';
 
 interface AttendeesModalProps {
   isOpen: boolean;
@@ -61,9 +62,9 @@ export function AttendeesModal({
     if (!searchTerm) return members;
 
     return members.filter((member) => {
-      const fullName = `${member.name} ${member.surname}`.toLowerCase();
-      const registrationNumber = member.registration_number.toLowerCase();
-      const searchQuery = searchTerm.toLowerCase();
+      const fullName = normalizeSearchTerm(`${member.name} ${member.surname}`);
+      const registrationNumber = normalizeSearchTerm(member.registration_number);
+      const searchQuery = normalizeSearchTerm(searchTerm);
 
       return fullName.includes(searchQuery) || registrationNumber.includes(searchQuery);
     });

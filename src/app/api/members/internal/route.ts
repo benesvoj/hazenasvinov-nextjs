@@ -4,6 +4,7 @@ import {translations} from '@/lib/translations';
 import {MembersInternalQuerySchema} from '@/lib/validators/membersInternal';
 
 import {errorResponse, successResponse, withAuth} from '@/utils/supabase/apiHelpers';
+import {hasCategoryAccess, isAdmin} from '@/utils/supabase/coachAuth';
 
 import {getMembersInternal} from '@/queries/membersInternal';
 import {MemberInsert} from '@/types';
@@ -18,12 +19,21 @@ export async function GET(request: NextRequest) {
       return errorResponse(JSON.stringify(parsed.error.flatten().fieldErrors), 400);
     }
 
+    const categoryId = parsed.data.category_id;
+    if (categoryId) {
+      const adminUser = await isAdmin(supabase, user.id);
+      if (!adminUser) {
+        const allowed = await hasCategoryAccess(supabase, user.id, categoryId);
+        if (!allowed) return errorResponse('Forbidden', 403);
+      }
+    }
+
     const result = await getMembersInternal(
       {supabase},
       {
         ...parsed.data,
         categoryId: parsed.data.category_id,
-        // memberFunctions: parsed.data.function -> this is currently not supported, different structure TODO
+        memberFunctions: parsed.data.function,
       }
     );
 
@@ -52,9 +62,13 @@ export async function POST(request: NextRequest) {
       throw new Error('Own club not found');
     }
 
+    const registration_number =
+      body.registration_number?.trim() ||
+      `TMP-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
     const {data: member, error: memberError} = await supabase
       .from('members')
-      .insert({...body})
+      .insert({...body, registration_number, created_by: user.id, updated_by: user.id})
       .select()
       .single();
 
