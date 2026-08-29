@@ -199,9 +199,18 @@ export default function LineupMemberAssignDialog({
               <TableColumn>{translations.lineupMembers.labels.registrationNumber}</TableColumn>
               <TableColumn>{translations.categories.labels.category}</TableColumn>
             </TableHeader>
-            <TableBody>
-              {paginatedMembers.map((member) => (
-                <TableRow key={member.id}>
+            {/*
+              `items` + a render function, not an array of <TableRow> built with
+              .map(). HeroUI's table is a react-stately collection: the array
+              form rebuilds the collection from scratch whenever the array
+              identity changes, which here is every keystroke in the search box
+              and every page change, and React 19 can fail that reconciliation
+              with "Failed to execute 'insertBefore' on 'Node'". The items form
+              lets the collection diff by key instead.
+            */}
+            <TableBody items={paginatedMembers}>
+              {(member) => (
+                <TableRow key={member.id ?? member.registration_number ?? ''}>
                   <TableCell>
                     <Checkbox
                       isSelected={selectedMember === member.id}
@@ -224,7 +233,7 @@ export default function LineupMemberAssignDialog({
                     </Chip>
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
           {totalPages > 1 && (

@@ -217,6 +217,12 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
       {paramName: 'seasonId', dbColumn: 'season_id'},
     ],
     requiresAdmin: false,
+    // Coaches run training sessions; without this every write fell through to
+    // withAdminAuth and a coach got 403 from the attendance page. No
+    // categoryResolver is needed — the table has category_id, which is what the
+    // default resolution reads on create and on the existing row when updating
+    // or deleting, so a coach is still confined to their own categories.
+    coachWritable: true,
     queryLayer: {
       getAll: trainingSessionsQueries.getAllTrainingSessions,
       getById: trainingSessionsQueries.getTrainingSessionById,

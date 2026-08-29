@@ -16,6 +16,12 @@ export const attendanceTranslations = {
         'Opravdu chcete smazat tento trénink? Tato akce je nevratná a může ovlivnit související data.',
     },
   },
+  lineupIncomplete: {
+    title: (covered: number, total: number) =>
+      `Soupiska obsahuje ${covered} z ${total} členů kategorie`,
+    description:
+      'Docházka se zakládá podle soupisky, takže nová docházka bude jen pro ně. Doplňte soupisku, pokud mají být i ostatní. Chybí:',
+  },
   labels: {
     newSession: 'Nový trénink',
     newSessionShort: 'Nový',

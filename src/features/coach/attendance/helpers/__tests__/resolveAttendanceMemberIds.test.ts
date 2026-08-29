@@ -1,6 +1,9 @@
 import {describe, expect, it} from 'vitest';
 
-import {resolveAttendanceMemberIds} from '@/features/coach/attendance/helpers';
+import {
+  describeLineupCoverage,
+  resolveAttendanceMemberIds,
+} from '@/features/coach/attendance/helpers';
 
 const CATEGORY = 'category-1';
 
@@ -119,5 +122,82 @@ describe('resolveAttendanceMemberIds', () => {
         })
       ).toEqual(['a']);
     });
+  });
+});
+
+describe('describeLineupCoverage', () => {
+  const named = (id: string, surname: string, isActive = true) => ({
+    id,
+    category_id: CATEGORY,
+    is_active: isActive,
+    surname,
+  });
+  const name = (m: {surname?: string | null; id: string}) => m.surname ?? m.id;
+
+  it('flags a lineup that holds a fraction of the squad', () => {
+    // The shape reported from production: Dorostenky had 12 active members and
+    // one player on the active lineup.
+    const coverage = describeLineupCoverage({
+      lineupMembers: [lineupMember('a')],
+      categoryMembers: [named('a', 'Na soupisce'), named('b', 'Chybi1'), named('c', 'Chybi2')],
+      categoryId: CATEGORY,
+      memberName: name,
+    });
+
+    expect(coverage.covered).toBe(1);
+    expect(coverage.categoryTotal).toBe(3);
+    expect(coverage.missing).toEqual(['Chybi1', 'Chybi2']);
+    expect(coverage.isIncomplete).toBe(true);
+  });
+
+  it('does not flag a lineup that holds the whole squad', () => {
+    const coverage = describeLineupCoverage({
+      lineupMembers: [lineupMember('a'), lineupMember('b')],
+      categoryMembers: [named('a', 'A'), named('b', 'B')],
+      categoryId: CATEGORY,
+      memberName: name,
+    });
+
+    expect(coverage.isIncomplete).toBe(false);
+    expect(coverage.missing).toEqual([]);
+  });
+
+  it('does not flag the fallback — an empty lineup already covers everyone', () => {
+    const coverage = describeLineupCoverage({
+      lineupMembers: [],
+      categoryMembers: [named('a', 'A'), named('b', 'B')],
+      categoryId: CATEGORY,
+      memberName: name,
+    });
+
+    expect(coverage.covered).toBe(2);
+    expect(coverage.isIncomplete).toBe(false);
+  });
+
+  it('does not count deactivated members as missing', () => {
+    const coverage = describeLineupCoverage({
+      lineupMembers: [lineupMember('a')],
+      categoryMembers: [named('a', 'A'), named('gone', 'Vyrazena', false)],
+      categoryId: CATEGORY,
+      memberName: name,
+    });
+
+    expect(coverage.categoryTotal).toBe(1);
+    expect(coverage.isIncomplete).toBe(false);
+  });
+
+  it('ignores members of other categories', () => {
+    const coverage = describeLineupCoverage({
+      lineupMembers: [lineupMember('a')],
+      categoryMembers: [
+        named('a', 'A'),
+        {id: 'other', category_id: 'category-2', is_active: true, surname: 'Jinde'},
+      ],
+      categoryId: CATEGORY,
+      memberName: name,
+    });
+
+    expect(coverage.categoryTotal).toBe(1);
+    expect(coverage.isIncomplete).toBe(false);
   });
 });

@@ -13,8 +13,12 @@ import {useAppData} from '@/contexts/AppDataContext';
 
 import {showToast} from '@/components';
 import {AttendanceStatuses, AttendanceTabs, TrainingSessionStatusEnum} from '@/enums';
-import {resolveAttendanceMemberIds} from '@/features/coach/attendance/helpers';
+import {
+  describeLineupCoverage,
+  resolveAttendanceMemberIds,
+} from '@/features/coach/attendance/helpers';
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
+import {getMemberFullName} from '@/helpers';
 import {
   useAttendance,
   useFetchAttendanceStatistics,
@@ -115,6 +119,19 @@ export function useCoachAttendancePageLogic() {
         lineupMembers,
         categoryMembers: members,
         categoryId: selectedCategory,
+      }),
+    [lineupMembers, members, selectedCategory]
+  );
+
+  // A lineup with one player wins over a category with twelve, by design. Shown
+  // rather than worked around, so the answer is to fix the lineup.
+  const lineupCoverage = useMemo(
+    () =>
+      describeLineupCoverage({
+        lineupMembers,
+        categoryMembers: members,
+        categoryId: selectedCategory,
+        memberName: (member) => getMemberFullName(member) || '',
       }),
     [lineupMembers, members, selectedCategory]
   );
@@ -310,6 +327,7 @@ export function useCoachAttendancePageLogic() {
     handleCreateAttendanceForSession,
     handleBulkUpdate,
     resolveMemberIds,
+    lineupCoverage,
     refetchSessions,
   };
 }

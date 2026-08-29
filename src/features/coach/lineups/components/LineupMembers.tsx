@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect} from 'react';
+import React from 'react';
 
 import {Button, Chip} from '@heroui/react';
 
@@ -10,7 +10,7 @@ import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
 
-import {ContentCard, DeleteDialog, EmptyState, UnifiedTable} from '@/components';
+import {ContentCard, DeleteDialog, EmptyState, LoadingSpinner, UnifiedTable} from '@/components';
 import {useUser} from '@/contexts';
 import {ActionTypes, ColumnAlignType} from '@/enums';
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
@@ -54,13 +54,6 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
   const handleAddMemberToLineup = () => {
     modal.onOpen();
   };
-
-  // Fetch lineup members when lineup changes
-  useEffect(() => {
-    if (lineupId) {
-      void fetchLineupMembers();
-    }
-  }, [lineupId, fetchLineupMembers]);
 
   const handleAddMember = async (memberData: CreateCategoryLineupMemberModal) => {
     if (!categoryId) {
@@ -188,12 +181,14 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
 
   return (
     <>
-      <ContentCard
-        title={title}
-        actions={lineupId && actions}
-        padding={'none'}
-        isLoading={loadingLineupMembers}
-      >
+      {/*
+        isLoading is deliberately not passed here. ContentCard swaps its children
+        for a spinner while loading, so the table below was unmounted and rebuilt
+        on every refetch — including the one right after adding a member, while
+        the dialog's portal was closing. The table renders its own loading state
+        instead, and stays mounted.
+      */}
+      <ContentCard title={title} actions={lineupId && actions} padding={'none'}>
         <UnifiedTable
           columns={columns}
           renderCell={renderCells}
@@ -201,6 +196,7 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
           getKey={(member: CategoryLineupMemberWithMember) => member.id}
           ariaLabel={t.table.ariaLabel}
           isLoading={loadingLineupMembers}
+          loadingContent={<LoadingSpinner />}
           emptyContent={t.noLineupMembers}
           isStriped
         />

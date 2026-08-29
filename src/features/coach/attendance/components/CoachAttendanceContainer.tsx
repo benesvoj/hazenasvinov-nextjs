@@ -3,6 +3,7 @@
 import {useState} from 'react';
 
 import {
+  Alert,
   Button,
   Modal,
   ModalBody,
@@ -135,6 +136,23 @@ export default function CoachAttendanceContainer() {
         }
       >
         <div className="flex flex-col gap-4">
+          {/*
+            A lineup with one player wins over a category with twelve — that is
+            how a new attendance sheet is built, on purpose. Said out loud here,
+            because otherwise a stale lineup silently produces a sheet for a
+            fraction of the squad and there is nothing on screen to explain it.
+          */}
+          {state.lineupCoverage.isIncomplete && (
+            <Alert
+              color="warning"
+              title={translations.attendance.lineupIncomplete.title(
+                state.lineupCoverage.covered,
+                state.lineupCoverage.categoryTotal
+              )}
+              description={`${translations.attendance.lineupIncomplete.description} ${state.lineupCoverage.missing.join(', ')}`}
+            />
+          )}
+
           {/* Stats row */}
           <AttendanceStatsCards
             sessions={state.sessions}
