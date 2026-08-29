@@ -1,4 +1,32 @@
 // Helper functions (moved from client)
+
+/**
+ * Narrows attendance statistics to the members an insight or a recommendation
+ * may still be raised about.
+ *
+ * `get_member_attendance_stats` deliberately keeps a deactivated (vyřazený)
+ * member as long as they have a record, so their history stays readable. That
+ * is right for the statistics table, and wrong for everything derived from it
+ * that points forward: a player who left the club still scores low, so they end
+ * up in "Low Attendance Alert" and in the "Contact Members" recommendation, and
+ * the coach is told to ring someone who is no longer in the squad.
+ *
+ * History is read from the full stats; anything actionable is read from this.
+ *
+ * @param memberStats     Rows as returned by `get_member_attendance_stats`.
+ * @param activeMemberIds Ids of the members still active in the club.
+ */
+function selectActionableMemberStats<T extends {member_id: string}>(
+  memberStats: T[],
+  activeMemberIds: Iterable<string>
+): T[] {
+  const active = new Set(activeMemberIds);
+  return memberStats.filter((stat) => active.has(stat.member_id));
+}
+
+/**
+ * @param memberStats Actionable members only — see `selectActionableMemberStats`.
+ */
 function generateInsights(memberStats: any[], trends: any[]) {
   const insights = [];
 
@@ -46,6 +74,9 @@ function generateInsights(memberStats: any[], trends: any[]) {
   return insights;
 }
 
+/**
+ * @param memberStats Actionable members only — see `selectActionableMemberStats`.
+ */
 function generateRecommendations(memberStats: any[], summary: any) {
   const recommendations = [];
 
@@ -79,4 +110,4 @@ function generateRecommendations(memberStats: any[], summary: any) {
   return recommendations;
 }
 
-export {generateInsights, generateRecommendations};
+export {generateInsights, generateRecommendations, selectActionableMemberStats};
