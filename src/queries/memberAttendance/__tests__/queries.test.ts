@@ -32,12 +32,17 @@ describe('getAllMembersOfTrainingSession', () => {
   it('never filters on member activity — an existing record stays readable', async () => {
     const {ctx, calls} = createSupabaseMock({data: [], error: null, count: 0});
 
-    await getAllMembersOfTrainingSession(ctx, {filters: {trainingSessionId: 'session-1'}});
+    await getAllMembersOfTrainingSession(ctx, {filters: {training_session_id: 'session-1'}});
 
     const filteredColumns = calls
       .filter((call) => call.method === 'eq')
       .map((call) => call.args[0]);
 
+    // The route hands this layer DB column names, and applyFilters passes the
+    // key straight to .eq() — a camelCase key here would silently filter on a
+    // column that does not exist.
+    expect(filteredColumns).toContain('training_session_id');
+    expect(filteredColumns).not.toContain('trainingSessionId');
     expect(filteredColumns).not.toContain('member.is_active');
     expect(filteredColumns).not.toContain('members.is_active');
     expect(filteredColumns).not.toContain('is_active');
@@ -48,7 +53,7 @@ describe('getAllMembersOfTrainingSession', () => {
     const {ctx} = createSupabaseMock({data: rows, error: null, count: rows.length});
 
     const result = await getAllMembersOfTrainingSession(ctx, {
-      filters: {trainingSessionId: 'session-1'},
+      filters: {training_session_id: 'session-1'},
     });
 
     expect(result.error).toBeNull();
@@ -61,7 +66,7 @@ describe('getAllMembersOfTrainingSession', () => {
   it('uses a nullable join so a record survives even without member details', async () => {
     const {ctx, calls} = createSupabaseMock({data: [], error: null, count: 0});
 
-    await getAllMembersOfTrainingSession(ctx, {filters: {trainingSessionId: 'session-1'}});
+    await getAllMembersOfTrainingSession(ctx, {filters: {training_session_id: 'session-1'}});
 
     const [selectCall] = calls.filter((call) => call.method === 'select');
     expect(selectCall.args[0]).toContain('member:members(');
