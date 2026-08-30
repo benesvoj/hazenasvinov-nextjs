@@ -22,11 +22,11 @@ function generateTypeExports(dir, basePath = '') {
       }
 
       // Recursively process subdirectories
-      const subExports = generateTypeExports(fullPath, path.join(basePath, file));
+      const subExports = generateTypeExports(fullPath, path.posix.join(basePath, file));
       exports.push(...subExports);
     } else if (file.endsWith('.ts') && !file.startsWith('index') && file !== 'README.md') {
       // Generate export statement
-      const relativePath = path.join(basePath, file.replace('.ts', ''));
+      const relativePath = path.posix.join(basePath, file.replace('.ts', ''));
       const exportPath = `./${relativePath}`;
 
       // Check for potential conflicts and handle them

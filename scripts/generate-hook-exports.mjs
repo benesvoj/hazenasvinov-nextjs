@@ -21,12 +21,12 @@ function generateExports(dir, basePath = '') {
         return;
       }
       // Recursively process subdirectories
-      const subExports = generateExports(fullPath, path.join(basePath, file));
+      const subExports = generateExports(fullPath, path.posix.join(basePath, file));
       exports.push(...subExports);
     } else if (file.endsWith('.ts') && !file.startsWith('index') && !file.endsWith('.test.ts') && !file.endsWith('.spec.ts')) {
 
       // Generate export statement
-      const relativePath = path.join(basePath, file.replace('.ts', ''));
+      const relativePath = path.posix.join(basePath, file.replace('.ts', ''));
       const exportPath = `./${relativePath}`;
       
       // Check for potential conflicts and handle them
