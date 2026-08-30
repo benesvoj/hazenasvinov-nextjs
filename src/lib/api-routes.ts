@@ -10,7 +10,6 @@
 export const API_ROUTES = {
   admin: {
     refreshMaterializedView: '/api/admin/refresh-materialized-view' as const,
-    updateMaterializedView: '/api/admin/update-materialized-view' as const,
   },
   attendance: {
     memberHistory: '/api/attendance/member-history' as const,

@@ -8,8 +8,8 @@ import {refreshOwnClubMatchesView} from './refreshMaterializedView';
  * Refreshes through the admin API route and then reads both the view and its
  * source table so the two can be compared in the console. It used to probe
  * `pg_proc` and call `refresh_materialized_view` / `exec_sql` over RPC straight
- * from the browser; those functions no longer grant EXECUTE to `authenticated`,
- * so all of it did was log failures.
+ * from the browser; the first no longer grants EXECUTE to `authenticated` and
+ * the second no longer exists, so all of it did was log failures.
  */
 export async function testMaterializedViewRefresh() {
   const supabase = supabaseBrowserClient();

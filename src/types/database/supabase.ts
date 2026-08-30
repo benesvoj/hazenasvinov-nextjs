@@ -5953,7 +5953,6 @@ export type Database = {
     };
     Functions: {
       ensure_user_profile: {Args: {input_user_id: string}; Returns: string};
-      exec_sql: {Args: {sql: string}; Returns: string};
       force_refresh_attendance_stats: {Args: never; Returns: undefined};
       generate_teams_for_club_category: {
         Args: {p_club_category_id: string; p_max_teams?: number};
