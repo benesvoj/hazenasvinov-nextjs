@@ -33,7 +33,15 @@ type RowOf<T extends QueryableTable> = T extends keyof PublicSchema['Tables']
  * }
  */
 export type ColumnFilters<T extends QueryableTable> = Partial<{
-  [K in keyof RowOf<T>]: RowOf<T>[K] | NonNullable<RowOf<T>[K]>[];
+  [K in keyof RowOf<T>]: NonNullable<RowOf<T>[K]> extends readonly unknown[]
+    ? // An array column takes its own type and nothing else. The list form
+      // below means "`.in()` over these values", and offering it here would
+      // type `string[][]` as a legal filter on a `text[]` column — a query that
+      // cannot be built.
+      RowOf<T>[K]
+    : // A scalar column takes a value, or a list of them for `.in()`, which is
+      // what applyFilters does with an array.
+      RowOf<T>[K] | NonNullable<RowOf<T>[K]>[];
 }>;
 
 /**
