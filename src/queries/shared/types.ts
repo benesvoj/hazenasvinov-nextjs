@@ -1,5 +1,49 @@
 import {SupabaseClient} from '@supabase/supabase-js';
 
+import {Database} from '@/types/database/supabase';
+
+type PublicSchema = Database['public'];
+
+/** Every table and view the query layer can read. */
+export type QueryableTable = keyof PublicSchema['Tables'] | keyof PublicSchema['Views'];
+
+type RowOf<T extends QueryableTable> = T extends keyof PublicSchema['Tables']
+  ? PublicSchema['Tables'][T]['Row']
+  : T extends keyof PublicSchema['Views']
+    ? PublicSchema['Views'][T]['Row']
+    : never;
+
+/**
+ * Column filters for one table, keyed by its actual columns.
+ *
+ * `applyFilters` puts whatever key it is given straight into `.eq(key, value)`,
+ * so a filter name is a column name — there is no mapping layer underneath. The
+ * entities route already translates `?categoryId` into `category_id` via
+ * `dbColumn` before the query layer sees it, which made it easy to declare the
+ * camelCase parameter name here and filter on a column that does not exist:
+ * silently, because the interface said otherwise. It happened in four query
+ * files.
+ *
+ * Deriving the keys from the generated schema means the compiler now refuses
+ * the camelCase name.
+ *
+ * @example
+ * interface GetTrainingSessionsOptions extends GetEntitiesOptions {
+ *   filters?: ColumnFilters<'training_sessions'>;
+ * }
+ */
+export type ColumnFilters<T extends QueryableTable> = Partial<{
+  [K in keyof RowOf<T>]: NonNullable<RowOf<T>[K]> extends readonly unknown[]
+    ? // An array column takes its own type and nothing else. The list form
+      // below means "`.in()` over these values", and offering it here would
+      // type `string[][]` as a legal filter on a `text[]` column — a query that
+      // cannot be built.
+      RowOf<T>[K]
+    : // A scalar column takes a value, or a list of them for `.in()`, which is
+      // what applyFilters does with an array.
+      RowOf<T>[K] | NonNullable<RowOf<T>[K]>[];
+}>;
+
 /**
  * Standard query result wrapper
  */

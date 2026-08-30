@@ -52,33 +52,43 @@ comparison is exact rather than approximate.
 
 ---
 
-## 2. The camelCase / snake_case filter trap, still in two query files
+## 2. The camelCase / snake_case filter trap
 
-**Status:** open
+**Status:** done — 2026-08-30
 
 `src/app/api/entities/config.ts` maps query parameters onto DB columns, so the
-query layer receives snake_case. Two files still declare camelCase:
+query layer receives snake_case. Two files still declared camelCase
+(`categoryLineups`, `trainingSessions`), after the same thing was fixed in
+`categoryLineupMembers` and — Copilot caught it — `memberAttendance`.
 
-| file | declares | route actually sends |
-|---|---|---|
-| `src/queries/categoryLineups/queries.ts` | `categoryId`, `seasonId` | `category_id`, `season_id` |
-| `src/queries/trainingSessions/queries.ts` | `categoryId`, `seasonId` | `category_id`, `season_id` |
-
-Both then do `filters: options?.filters`, and `applyFilters` puts the key
-straight into `.eq(key, value)`. Anyone who follows the declared type filters on
-a column that does not exist — silently, because the interface says otherwise.
-
-Fixed today in `categoryLineupMembers` and (after Copilot caught it)
-`memberAttendance`. Two left.
-
-The root cause is that `applyFilters` accepts any string as a column name, so
-neither a typo nor the wrong convention has anywhere to fail.
+Both then did `filters: options?.filters`, and `applyFilters` puts the key
+straight into `.eq(key, value)`. Anyone following the declared type filtered on a
+column that does not exist, silently.
 
 **Steps**
 
-- [ ] Rename the filter keys in both files to the DB column names.
-- [ ] Derive the filter type from the generated DB schema in
-      `src/types/database/supabase.ts` so this cannot be written wrong again.
+- [x] Renamed the filter keys in both files.
+- [x] Derived the filter type from the generated schema:
+      `ColumnFilters<'training_sessions'>` in `src/queries/shared/types.ts`, and
+      `buildSelectQuery` is generic over the table so the constraint is actually
+      enforced. Declaring `categoryId` is now a compile error — checked by
+      writing it back and watching tsc fail. The type alone was not enough: a
+      wrong declaration is self-consistent until something compares it against
+      the table.
+
+Turned up by making the types real:
+
+- `src/queries/users/` queried `public.users`, **which does not exist** — users
+  live in `auth.users` and `/api/users` reads them through
+  `supabaseAdmin.auth.admin.listUsers()`. The module and its `ENTITY_CONFIGS`
+  entry were dead: nothing called `/api/entities/users`. Removed.
+- `coachCards` declared `published_categories?: string` against a `text[]`
+  column, described as "filter by cards published to a specific category" —
+  `.eq()` on an array never matches. Nothing passed it. Filtering by one
+  published category needs `.contains()`, which `applyFilters` does not do.
+- `createFeatureQuery` passed the row type as `buildSelectQuery`'s type
+  argument, where the table name belongs. The old signature had an unused
+  phantom parameter, so neither the table nor the filters were checked.
 
 ---
 

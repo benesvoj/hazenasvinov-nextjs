@@ -3,10 +3,17 @@
 import {useCallback, useEffect, useState} from 'react';
 
 import {buildSelectQuery} from '@/queries/shared/queryBuilder';
+import {ColumnFilters, QueryableTable} from '@/queries/shared/types';
 import {useQueryContext} from '@/shared/hooks/useQueryContext';
 
-type FeatureQueryConfig<TFilters = Record<string, any>> = {
-  table: string;
+type FeatureQueryConfig<TTable extends QueryableTable> = {
+  /**
+   * Constrained to a real table or view, because it decides the shape of the
+   * filters below. It was `string`, and the phantom type argument passed to
+   * buildSelectQuery was the row type rather than the table — so neither the
+   * table name nor the filter keys were checked against anything.
+   */
+  table: TTable;
   entityName: string;
   errorMessage: string;
   select?: string;
@@ -22,10 +29,11 @@ type FeatureQueryParams<TFilters = any> = {
   }[];
 };
 
-export function createFeatureQuery<TData, TFilters = any>(
-  config: FeatureQueryConfig,
-  mapFilters?: (filters?: TFilters) => Record<string, any>
-) {
+export function createFeatureQuery<
+  TData,
+  TFilters = any,
+  TTable extends QueryableTable = QueryableTable,
+>(config: FeatureQueryConfig<TTable>, mapFilters?: (filters?: TFilters) => ColumnFilters<TTable>) {
   return function useFeatureQuery(params?: FeatureQueryParams<TFilters>) {
     const ctx = useQueryContext();
 
@@ -52,7 +60,7 @@ export function createFeatureQuery<TData, TFilters = any>(
             }
           : undefined;
 
-        const query = buildSelectQuery<TData>(ctx.supabase, config.table, {
+        const query = buildSelectQuery(ctx.supabase, config.table, {
           select: config.select,
           filters,
           sorting: parsedParams?.sort,

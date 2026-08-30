@@ -1,13 +1,10 @@
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
 import {DB_TABLE, ENTITY} from '@/queries/categoryLineups';
-import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
+import {ColumnFilters, GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
 import {CategoryLineup} from '@/types';
 
 interface GetCategoryLineupOptions extends GetEntitiesOptions {
-  filters?: {
-    categoryId?: string;
-    seasonId?: string;
-  };
+  filters?: ColumnFilters<'category_lineups'>;
 }
 
 export async function getAllCategoryLineups(
