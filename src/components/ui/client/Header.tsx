@@ -18,15 +18,23 @@ import {MenuItem} from '@/lib/navigation';
 import {texts} from '@/utils/texts'; // TODO: remove this, put it into db
 
 import {DropdownMenu} from '@/components';
+import {useFetchActiveCategories} from '@/hooks';
 import {buildMenuFromPages} from '@/routes/dynamicRoutes';
 import {hasItems} from '@/utils';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const {visiblePages, loading} = useVisiblePages();
+  const {data: activeCategories} = useFetchActiveCategories();
+
+  const activeCategorySlugs = new Set(
+    activeCategories.map((category) => category.slug).filter(Boolean) as string[]
+  );
 
   // Build menu items from visible pages, with fallback to static routes
-  const menuItems: MenuItem[] = loading ? [] : buildMenuFromPages(visiblePages);
+  const menuItems: MenuItem[] = loading
+    ? []
+    : buildMenuFromPages(visiblePages, activeCategorySlugs);
 
   // Use dynamic menu items if available, otherwise fallback
   const displayMenuItems = hasItems(menuItems) ? menuItems : [];

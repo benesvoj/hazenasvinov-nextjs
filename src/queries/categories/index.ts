@@ -1,4 +1,4 @@
-export {getAllCategories, getCategoryById} from './queries';
+export {getAllCategories, getCategoryById, getOwnClubActiveSeasonCategories} from './queries';
 
 export {createCategory, updateCategory, deleteCategory} from './mutations';
 

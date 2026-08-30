@@ -21,7 +21,6 @@ export * from './entities/category/data/category';
 export * from './entities/category/data/categoryGender';
 export * from './entities/category/data/categoryLineup';
 export * from './entities/category/data/categoryLineupMember';
-export * from './entities/category/data/categorySeason';
 export * from './entities/category/schema/categoriesSchema';
 export * from './entities/category/schema/categoryLineupMembersSchema';
 export * from './entities/category/schema/categoryLineupsSchema';

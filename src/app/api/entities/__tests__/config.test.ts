@@ -17,7 +17,6 @@ const CATEGORY_SCOPED_TABLES = new Set([
   'members',
   'matches',
   'tournaments',
-  'category_seasons',
   'category_membership_fees',
 ]);
 
