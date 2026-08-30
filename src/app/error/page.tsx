@@ -44,13 +44,11 @@ function ErrorPageContent() {
       ? new URLSearchParams(window.location.hash.substring(1)).get('error_description')
       : null);
 
-  // Debug logging
-  console.log('Error page parameters:', {
-    error,
-    errorCode,
-    errorDescription,
-    hash: typeof window !== 'undefined' ? window.location.hash : 'N/A',
-  });
+  // No logging here. This used to print window.location.hash to the console,
+  // and on an auth redirect that hash carries access_token and refresh_token —
+  // auth/callback reads them from exactly there. An error in the middle of that
+  // flow would have put a live token in the browser console. Everything worth
+  // seeing is on screen already.
 
   // Handle specific password reset errors
   if (errorCode === 'otp_expired') {
@@ -176,7 +174,7 @@ function ErrorPageContent() {
         <CardBody className="text-center py-12">
           <ExclamationTriangleIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Oops! Něco se pokazilo
+            Něco se pokazilo
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
             {errorDescription || 'Došlo k neočekávané chybě. Zkuste to prosím znovu.'}
