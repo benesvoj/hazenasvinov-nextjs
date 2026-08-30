@@ -141,22 +141,40 @@ options as `any`, so the mismatch has nowhere to surface.
 
 ## 5. `exec_sql` still exists
 
-**Status:** open
+**Status:** done — 2026-08-30
 
-A function that executes arbitrary SQL. `anon` and `authenticated` lost EXECUTE
-on 2026-08-07 and 2026-08-29, but the function is still in the database and
-`src/app/api/admin/update-materialized-view/route.ts:92` calls it through the
-admin client.
-
-While it exists it is one authorization mistake away from full control of the
-database. What it is used for can be written as a specific function with fixed
-SQL.
+A function that executed arbitrary SQL as its owner. Its privileges were
+narrowed twice — away from `anon` and `authenticated` on 2026-08-07, and from
+PUBLIC on 2026-08-29 — but narrowing a function that runs arbitrary SQL only
+moves the problem: while it existed, one authorization mistake was the distance
+between a bug and full control of the database.
 
 **Steps**
 
-- [ ] Replace the `exec_sql` call in `update-materialized-view` with a purpose-built
-      function.
-- [ ] `DROP FUNCTION public.exec_sql(text)`.
+- [x] Removed its last caller, `/api/admin/update-materialized-view`. It handed
+      `exec_sql` a fixed script that dropped and recreated the
+      `own_club_matches` materialized view. Nothing in the app called that route
+      — it appeared only in `api-routes.ts` — and rebuilding a view definition
+      from a web request is a schema change, which is what migrations are for.
+      Its copy of the definition was compared with the baseline before removal:
+      38 columns each, identical.
+- [x] `DROP FUNCTION public.exec_sql(text)` in
+      `supabase/migrations/20260830090000_drop_exec_sql.sql`. Verified against a
+      copy of production: the function is gone, `refresh_materialized_view`
+      still there, and no other SECURITY DEFINER function in `public` executes
+      a SQL string.
+
+Deliberately not replaced. A purpose-built `rebuild_own_club_matches()` would
+put the view's definition in two places, so a later migration altering the view
+could be silently reverted by whoever called the function next. Refreshing is
+covered by `refresh_materialized_view(text)`; redefining is a migration, and
+those apply through CI behind a review.
+
+One line of `src/types/database/supabase.ts` was edited by hand to drop the
+`exec_sql` entry. That file is generated from the **remote** project, which will
+not have the migration until this merges, and regenerating from the local copy
+produced a 10 000-line diff from a different CLI version. The next real
+regeneration produces the same single-line result.
 
 ---
 

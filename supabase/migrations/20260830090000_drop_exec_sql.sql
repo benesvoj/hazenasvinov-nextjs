@@ -1,0 +1,57 @@
+-- =====================================================
+-- Migration: Drop exec_sql
+-- Date: 2026-08-30
+-- Description: `exec_sql(text)` runs whatever SQL it is handed, as its owner.
+--              Its privileges have been narrowed twice — away from anon and
+--              authenticated on 2026-08-07, and from PUBLIC on 2026-08-29 —
+--              but narrowing a function that executes arbitrary SQL only moves
+--              the problem: while it exists, one authorization mistake is the
+--              distance between a bug and full control of the database.
+--              Its last caller is removed in the same change, so it goes.
+-- Dependencies: exec_sql(text)
+-- =====================================================
+--
+-- WHAT USED TO CALL IT
+--
+-- /api/admin/update-materialized-view, which handed it a fixed script that
+-- dropped and recreated the own_club_matches materialized view. Nothing in the
+-- app called that route — it appeared only in api-routes.ts — and rebuilding a
+-- view definition from a web request is a schema change, which is what
+-- migrations are for. Both the route and the entry are removed alongside this.
+--
+-- The definition it carried was checked against the baseline before removing
+-- it: 38 columns on each side, identical. Nothing is lost that is not already
+-- in supabase/migrations/00000000000000_baseline.sql.
+--
+-- WHAT REPLACES IT
+--
+-- Nothing, deliberately. Two capabilities covered the real needs and both
+-- remain:
+--
+--   * refresh_materialized_view(text) — refreshes a view by name. Narrow, and
+--     still what /api/admin/refresh-materialized-view uses.
+--   * this directory — changing a view's definition is a migration, and since
+--     2026-08-29 those apply through CI behind a review.
+--
+-- A purpose-built rebuild_own_club_matches() was considered and rejected: it
+-- would put the view's definition in two places, so a later migration altering
+-- the view could be silently reverted by whoever called the function next.
+
+DROP FUNCTION IF EXISTS public.exec_sql(text);
+
+-- =====================================================
+-- Verification
+-- =====================================================
+-- Must return zero rows:
+--
+-- SELECT p.oid::regprocedure
+-- FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+-- WHERE n.nspname = 'public' AND p.proname = 'exec_sql';
+--
+-- And nothing else may have started executing arbitrary SQL in the meantime:
+--
+-- SELECT p.oid::regprocedure
+-- FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+-- WHERE n.nspname = 'public'
+--   AND p.prosecdef
+--   AND pg_get_functiondef(p.oid) ~* 'EXECUTE\s+(\$?\w*\$?)?\s*(sql|query|statement)\b';

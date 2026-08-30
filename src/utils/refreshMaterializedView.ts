@@ -5,9 +5,10 @@ import {API_ROUTES} from '@/lib/api-routes';
  *
  * Goes through an admin API route that holds the service role. The browser used
  * to call `refresh_materialized_view` — falling back to `exec_sql` with a raw
- * REFRESH statement — using the signed-in user's session; both functions have
- * since lost EXECUTE for `authenticated`, because arbitrary SQL reachable from
- * any session meant anyone signed in could rewrite the database.
+ * REFRESH statement — using the signed-in user's session. Both lost EXECUTE for
+ * `authenticated` first, because arbitrary SQL reachable from any session meant
+ * anyone signed in could rewrite the database; `exec_sql` was then dropped
+ * outright on 2026-08-30.
  *
  * @returns whether the view was actually refreshed. Callers treat `false` as a
  *          soft failure: the data is stale, not wrong.
