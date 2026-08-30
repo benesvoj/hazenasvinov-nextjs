@@ -1,17 +1,22 @@
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
-import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
+import {ColumnFilters, GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
 import {CoachCard, CoachCardWithCategories} from '@/types';
 
 import {DB_TABLE, ENTITY} from './constants';
 
 interface GetCoachCardsOptions extends GetEntitiesOptions {
-  filters?: {
-    user_id?: string;
-    /**
-     * Filter by cards published to a specific category
-     */
-    published_categories?: string;
-  };
+  /**
+   * `published_categories` used to be declared here as a `string`, described as
+   * "filter by cards published to a specific category". The column is
+   * `text[]`, and `applyFilters` would have turned that into
+   * `.eq('published_categories', '<id>')` — an array compared to a scalar,
+   * which never matches. Nothing passed it, so nothing broke.
+   *
+   * Filtering by one published category needs `.contains()`, which
+   * `applyFilters` does not do; it maps an array value to `.in()`, which is a
+   * different question. Add it deliberately if it is ever needed.
+   */
+  filters?: ColumnFilters<'coach_cards'>;
 }
 
 /**

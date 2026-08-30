@@ -1,13 +1,10 @@
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
-import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
+import {ColumnFilters, GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
 import {DB_TABLE, ENTITY} from '@/queries/trainingSessions';
 import {BaseTrainingSession} from '@/types';
 
 interface GetTrainingSessionsOptions extends GetEntitiesOptions {
-  filters?: {
-    categoryId?: string;
-    seasonId?: string;
-  };
+  filters?: ColumnFilters<'training_sessions'>;
 }
 
 export async function getAllTrainingSessions(

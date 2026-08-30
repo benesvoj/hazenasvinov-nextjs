@@ -2,7 +2,7 @@ import {SupabaseClient} from '@supabase/supabase-js';
 
 import {isEmpty} from '@/utils/arrayHelper';
 
-import {SortOptions, PaginationOptions} from './types';
+import {ColumnFilters, PaginationOptions, QueryableTable, SortOptions} from './types';
 
 /**
  * Apply sorting to a Supabase query
@@ -74,12 +74,23 @@ export function applyFilters<T>(query: any, filters?: Record<string, any>) {
 /**
  * Build a standard select query with common options
  */
-export function buildSelectQuery<T>(
+export function buildSelectQuery<T extends QueryableTable>(
   supabase: SupabaseClient,
-  table: string,
+  table: T,
   options: {
     select?: string;
-    filters?: Record<string, any>;
+    /**
+     * Keyed by column name, because that is what it becomes: `applyFilters`
+     * puts the key straight into `.eq(key, value)`. Typing it against the table
+     * is what stops the mistake this signature used to allow — the entities
+     * route maps `?categoryId` onto `category_id` before the query layer sees
+     * it, so declaring the camelCase name here filtered on a column that does
+     * not exist, silently. `Record<string, any>` had nothing to say about it.
+     *
+     * A filter the table has no column for — `includeInactiveMembers`, say —
+     * is destructured out before it reaches here.
+     */
+    filters?: ColumnFilters<T>;
     sorting?: SortOptions[];
     pagination?: PaginationOptions;
   } = {}

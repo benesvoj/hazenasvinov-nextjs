@@ -17,7 +17,6 @@ import {QueryContext, QueryResult} from '@/queries/shared/types';
 import * as todoQueries from '@/queries/todos';
 import * as tournamentsQueries from '@/queries/tournaments';
 import * as trainingSessionsQueries from '@/queries/trainingSessions';
-import * as userQueries from '@/queries/users';
 
 export interface EntityQueryLayer<T = any, Options = any> {
   getAll?: (ctx: QueryContext, options?: Options) => Promise<QueryResult<T[]>>;
@@ -292,14 +291,6 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     queryLayer: {
       getAll: roleDefinitionsQueries.getAllRoleDefinitions,
       getById: roleDefinitionsQueries.getRoleDefinitionById,
-    },
-  },
-  users: {
-    tableName: userQueries.DB_TABLE,
-    sortBy: [{column: 'email', ascending: true}],
-    requiresAdmin: true,
-    queryLayer: {
-      getAll: userQueries.getAllUsers,
     },
   },
   tournaments: {

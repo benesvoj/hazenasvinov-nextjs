@@ -15,4 +15,4 @@ export const recordingsConfig = {
   },
 
   messages: translations.matchRecordings.responseMessages,
-};
+} as const;
