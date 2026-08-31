@@ -1,0 +1,59 @@
+-- =====================================================
+-- Migration: Drop category_seasons
+-- Date: 2026-08-30
+-- Description: A junction table meant to say which categories run in which
+--              season, with per-season matchweek count, competition type and
+--              team count. Nothing ever read it, and it stopped being written
+--              after 2025/2026 — the active season has no rows at all. The
+--              question it was for is answered by club_categories, which is
+--              maintained and which the public site now uses.
+-- Dependencies: category_seasons
+-- =====================================================
+--
+-- WHY IT IS SAFE TO DROP
+--
+-- Checked before writing this:
+--
+--   * No code reads the table. The only references were a `CategorySeason`
+--     type with no users, an `EditCategoryModalProps` interface with no users,
+--     and `getCategoryMatchweeks`, which read `matchweek_count` from
+--     `categories` — a column that table does not have. It carried a fallback
+--     for exactly that failure and returned 20 every time; nothing called it.
+--     All three are removed in the same change.
+--   * Nothing in the database points at it: no foreign key references it, and
+--     no view selects from it. Its own two foreign keys, into categories and
+--     seasons, go with it.
+--   * Its data has stopped: 9 rows for 2025/2026 and none for any other
+--     season, including the active 2026/2027.
+--
+-- WHAT ANSWERS THE QUESTION INSTEAD
+--
+-- club_categories — a row per club, category and season, written when a
+-- category is entered. It has 39 rows for the active season, and for the own
+-- club it returns exactly the seven categories that have matches and standings.
+-- That is what /api/categories/active reads.
+--
+-- The per-season settings the table also held (matchweek_count,
+-- competition_type, team_count, allow_team_duplicates) were never read by
+-- anything either. If they are wanted later they belong on club_categories,
+-- which already carries team_count.
+
+DROP TABLE IF EXISTS public.category_seasons;
+
+-- =====================================================
+-- Verification
+-- =====================================================
+-- Must return zero rows:
+--
+-- SELECT tablename FROM pg_tables
+-- WHERE schemaname = 'public' AND tablename = 'category_seasons';
+--
+-- And the categories the public site shows should be the ones with matches:
+--
+-- SELECT DISTINCT c.name
+-- FROM club_categories cc
+-- JOIN categories c ON c.id = cc.category_id
+-- JOIN clubs cl ON cl.id = cc.club_id AND cl.is_own_club
+-- JOIN seasons s ON s.id = cc.season_id AND s.is_active
+-- WHERE cc.is_active
+-- ORDER BY c.name;

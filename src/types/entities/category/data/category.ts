@@ -1,4 +1,4 @@
-import {CategoryInsert, CategorySchema, CategoryUpdate, CategorySeason} from '@/types';
+import {CategoryInsert, CategorySchema, CategoryUpdate} from '@/types';
 /**
  * Enhanced Category interface for the new category system with URL-friendly routing.
  *
@@ -25,18 +25,6 @@ export interface AddCategoryModalProps {
   onAddCategory: () => void;
   formData: Category;
   setFormData: (data: Category) => void;
-}
-
-export interface EditCategoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onUpdateCategory: () => void;
-  onAddSeason: () => void;
-  onEditSeason: (categorySeason: CategorySeason) => void;
-  onRemoveSeason: (seasonId: string) => void;
-  formData: Category;
-  setFormData: (data: Category) => void;
-  categorySeasons: CategorySeason[];
 }
 
 export interface UseCategoriesFilters {

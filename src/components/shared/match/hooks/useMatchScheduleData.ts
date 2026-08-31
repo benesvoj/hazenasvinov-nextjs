@@ -6,7 +6,7 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 
 import {
-  useFetchCategories,
+  useFetchActiveCategories,
   useFetchSeasons,
   useOptimizedOwnClubMatches,
   useSeasonFiltering,
@@ -33,7 +33,10 @@ export function useMatchScheduleData({selectedCategoryId}: UseMatchScheduleDataO
 
   const {data: seasons, refetch: fetchSeasons} = useFetchSeasons();
   const {activeSeason} = useSeasonFiltering({seasons: seasons || []});
-  const {data: categories, refetch: fetchCategories} = useFetchCategories();
+  // Only the categories the club is fielding this season. Fetching every row
+  // gave Ženy a tab in a season the club is not entering, and clicking it
+  // rendered an empty standings table with nothing to explain why.
+  const {data: categories, refetch: fetchCategories} = useFetchActiveCategories();
 
   const selectedCategoryData = categories.find((cat) => cat.id === selectedCategory);
 

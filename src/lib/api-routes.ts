@@ -46,6 +46,9 @@ export const API_ROUTES = {
     public: '/api/coach-cards/public' as const,
     byId: (id: string | number) => `/api/coach-cards/${id}`,
   },
+  /** Categories the own club fields in the active season. Public. */
+  activeCategories: '/api/categories/active' as const,
+
   entities: {
     byId: (entity: string | number, id: string | number) => `/api/entities/${entity}/${id}`,
     root: (entity: string | number) => `/api/entities/${entity}`,

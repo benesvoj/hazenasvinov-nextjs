@@ -15,6 +15,7 @@ export * from './entities/blog/state/useBlogPost';
 export * from './entities/blog/state/useBlogPostForm';
 export * from './entities/category/business/useCategoryFiltering';
 export * from './entities/category/business/useCategoryPageData';
+export * from './entities/category/data/useFetchActiveCategories';
 export * from './entities/category/data/useFetchCategories';
 export * from './entities/category/data/useFetchCategoryPosts';
 export * from './entities/category/state/useCategories';
