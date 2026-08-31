@@ -1,5 +1,5 @@
 import {render, screen} from '@testing-library/react';
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 const {mockUseAllCategoriesOwnClubMatches} = vi.hoisted(() => ({
   mockUseAllCategoriesOwnClubMatches: vi.fn(),
@@ -20,21 +20,46 @@ import LatestResultsSection from '@/app/(main)/components/LatestResultsSection';
 
 const match = (id: string) => ({id, category: {name: 'Muži'}});
 
-/** jsdom reports 0 for every layout box, so overflow has to be simulated. */
-const setWidths = ({content, viewport}: {content: number; viewport: number}) => {
-  Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
-    configurable: true,
-    get() {
-      return this.getAttribute('aria-hidden') === null && this.className.includes('flex gap-2')
-        ? content
-        : 0;
-    },
-  });
-  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
-    configurable: true,
-    get: () => viewport,
+// jsdom has no ResizeObserver and reports 0 for every layout box, so both have
+// to be supplied. Everything patched here is restored in afterEach: these are
+// properties on HTMLElement.prototype and on globalThis, and leaving them in
+// place would follow the worker into other test files.
+const patched: (() => void)[] = [];
+
+const patchPrototype = (property: 'scrollWidth' | 'clientWidth', get: () => number) => {
+  const original = Object.getOwnPropertyDescriptor(HTMLElement.prototype, property);
+  Object.defineProperty(HTMLElement.prototype, property, {configurable: true, get});
+  patched.push(() => {
+    if (original) Object.defineProperty(HTMLElement.prototype, property, original);
+    else delete (HTMLElement.prototype as unknown as Record<string, unknown>)[property];
   });
 };
+
+/** Simulates the results being `content` wide inside a `viewport` wide box. */
+const setWidths = ({content, viewport}: {content: number; viewport: number}) => {
+  patchPrototype('scrollWidth', function (this: HTMLElement) {
+    return this.getAttribute('aria-hidden') === null && this.className.includes('flex gap-2')
+      ? content
+      : 0;
+  });
+  patchPrototype('clientWidth', () => viewport);
+};
+
+beforeEach(() => {
+  const originalObserver = globalThis.ResizeObserver;
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+  patched.push(() => {
+    globalThis.ResizeObserver = originalObserver;
+  });
+});
+
+afterEach(() => {
+  while (patched.length) patched.pop()!();
+});
 
 describe('LatestResultsSection', () => {
   beforeEach(() => {

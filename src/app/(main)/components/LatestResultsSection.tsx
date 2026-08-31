@@ -27,20 +27,24 @@ export default function LatestResultsSection() {
   const [shouldLoop, setShouldLoop] = useState(false);
 
   useEffect(() => {
-    const measure = () => {
-      const viewport = viewportRef.current;
-      const results = resultsRef.current;
-      if (!viewport || !results) return;
+    const viewport = viewportRef.current;
+    const results = resultsRef.current;
+    if (!viewport || !results) return;
 
-      // resultsRef wraps the first set only, so this stays accurate whether or
-      // not the duplicate is currently rendered.
-      setShouldLoop(results.scrollWidth > viewport.clientWidth);
-    };
-
+    // resultsRef wraps the first set only, so this stays accurate whether or
+    // not the duplicate is currently rendered.
+    const measure = () => setShouldLoop(results.scrollWidth > viewport.clientWidth);
     measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [latestMatches.length]);
+
+    // A ResizeObserver rather than a window resize listener: it also catches
+    // the cases a listener misses — a different set of results that happens to
+    // have the same count, a web font finishing loading and changing the card
+    // widths, the container being resized by something other than the window.
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    observer.observe(results);
+    return () => observer.disconnect();
+  }, [latestMatches]);
 
   if (loading) {
     return (
