@@ -9,12 +9,13 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2026-05-14
+ * Last generated: 2026-08-31
  */
 
 export interface MemberSchema {
   category_id: string | null;
   created_at: string | null;
+  created_by: string | null;
   date_of_birth: string | null;
   functions: string[] | null;
   id: string;
@@ -24,6 +25,7 @@ export interface MemberSchema {
   sex: string;
   surname: string;
   updated_at: string | null;
+  updated_by: string | null;
 }
 
 /**

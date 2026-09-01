@@ -27,6 +27,8 @@ const MEMBER_INITIAL_DATA: Member = {
   is_active: true,
   created_at: null,
   updated_at: null,
+  created_by: null,
+  updated_by: null,
 };
 
 interface MemberModalProps {

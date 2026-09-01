@@ -139,7 +139,9 @@ export function useUnifiedPlayers() {
           date_of_birth,
           sex,
           created_at,
-          updated_at
+          updated_at,
+          created_by,
+          updated_by
         `
         )
         .eq('id', playerId)
@@ -167,6 +169,8 @@ export function useUnifiedPlayers() {
         is_active: true, // This will be determined by club relationship status
         created_at: data.created_at || new Date().toISOString(),
         updated_at: data.updated_at || new Date().toISOString(),
+        created_by: data.created_by,
+        updated_by: data.updated_by,
         current_club_name: getClubName(), // Get club name from configuration
       };
     } catch (err) {

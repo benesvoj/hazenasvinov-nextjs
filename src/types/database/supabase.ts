@@ -4,7 +4,32 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '13.0.4';
+    PostgrestVersion: '14.5';
+  };
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
   public: {
     Tables: {
@@ -110,15 +135,7 @@ export type Database = {
           updated_at?: string;
           user_id?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'betting_bets_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
+        Relationships: [];
       };
       betting_odds: {
         Row: {
@@ -284,13 +301,6 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: 'betting_transactions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
             foreignKeyName: 'betting_transactions_wallet_id_fkey';
             columns: ['wallet_id'];
             isOneToOne: false;
@@ -324,15 +334,7 @@ export type Database = {
           updated_at?: string;
           user_id?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'betting_wallets_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: true;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
+        Relationships: [];
       };
       blog_posts: {
         Row: {
@@ -378,13 +380,6 @@ export type Database = {
           updated_at?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: 'blog_posts_author_id_fkey';
-            columns: ['author_id'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'blog_posts_category_id_fkey';
             columns: ['category_id'];
@@ -584,13 +579,6 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: 'category_lineup_members_added_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
             foreignKeyName: 'category_lineup_members_lineup_id_fkey';
             columns: ['lineup_id'];
             isOneToOne: false;
@@ -645,13 +633,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'category_lineup_members_updated_by_fkey';
-            columns: ['updated_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -724,13 +705,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'teams_with_details';
             referencedColumns: ['category_id'];
-          },
-          {
-            foreignKeyName: 'category_lineups_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'category_lineups_season_id_fkey';
@@ -840,123 +814,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'teams_with_details';
             referencedColumns: ['category_id'];
-          },
-          {
-            foreignKeyName: 'category_membership_fees_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'category_membership_fees_updated_by_fkey';
-            columns: ['updated_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
-      };
-      category_seasons: {
-        Row: {
-          allow_team_duplicates: boolean | null;
-          category_id: string | null;
-          competition_type: string | null;
-          created_at: string | null;
-          id: string;
-          is_active: boolean | null;
-          matchweek_count: number | null;
-          season_id: string | null;
-          team_count: number | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          allow_team_duplicates?: boolean | null;
-          category_id?: string | null;
-          competition_type?: string | null;
-          created_at?: string | null;
-          id?: string;
-          is_active?: boolean | null;
-          matchweek_count?: number | null;
-          season_id?: string | null;
-          team_count?: number | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          allow_team_duplicates?: boolean | null;
-          category_id?: string | null;
-          competition_type?: string | null;
-          created_at?: string | null;
-          id?: string;
-          is_active?: boolean | null;
-          matchweek_count?: number | null;
-          season_id?: string | null;
-          team_count?: number | null;
-          updated_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'category_seasons_category_id_fkey';
-            columns: ['category_id'];
-            isOneToOne: false;
-            referencedRelation: 'categories';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'category_seasons_category_id_fkey';
-            columns: ['category_id'];
-            isOneToOne: false;
-            referencedRelation: 'club_category_details';
-            referencedColumns: ['category_id'];
-          },
-          {
-            foreignKeyName: 'category_seasons_category_id_fkey';
-            columns: ['category_id'];
-            isOneToOne: false;
-            referencedRelation: 'own_club_matches';
-            referencedColumns: ['category_id_full'];
-          },
-          {
-            foreignKeyName: 'category_seasons_category_id_fkey';
-            columns: ['category_id'];
-            isOneToOne: false;
-            referencedRelation: 'teams';
-            referencedColumns: ['category_id'];
-          },
-          {
-            foreignKeyName: 'category_seasons_category_id_fkey';
-            columns: ['category_id'];
-            isOneToOne: false;
-            referencedRelation: 'teams_with_details';
-            referencedColumns: ['category_id'];
-          },
-          {
-            foreignKeyName: 'category_seasons_season_id_fkey';
-            columns: ['season_id'];
-            isOneToOne: false;
-            referencedRelation: 'own_club_matches';
-            referencedColumns: ['season_id_full'];
-          },
-          {
-            foreignKeyName: 'category_seasons_season_id_fkey';
-            columns: ['season_id'];
-            isOneToOne: false;
-            referencedRelation: 'seasons';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'category_seasons_season_id_fkey';
-            columns: ['season_id'];
-            isOneToOne: false;
-            referencedRelation: 'teams';
-            referencedColumns: ['season_id'];
-          },
-          {
-            foreignKeyName: 'category_seasons_season_id_fkey';
-            columns: ['season_id'];
-            isOneToOne: false;
-            referencedRelation: 'teams_with_details';
-            referencedColumns: ['season_id'];
           },
         ];
       };
@@ -1339,15 +1196,7 @@ export type Database = {
           updated_at?: string | null;
           user_id?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'coach_cards_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: true;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
+        Relationships: [];
       };
       coach_categories: {
         Row: {
@@ -1407,20 +1256,6 @@ export type Database = {
             referencedRelation: 'teams_with_details';
             referencedColumns: ['category_id'];
           },
-          {
-            foreignKeyName: 'coach_categories_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'coach_categories_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
         ];
       };
       coach_category_assignments: {
@@ -1446,13 +1281,6 @@ export type Database = {
           user_profile_id?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: 'coach_category_assignments_assigned_by_fkey';
-            columns: ['assigned_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'coach_category_assignments_category_id_fkey';
             columns: ['category_id'];
@@ -1627,15 +1455,7 @@ export type Database = {
           name?: string;
           updated_at?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'grants_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
+        Relationships: [];
       };
       lineup_coaches: {
         Row: {
@@ -2213,6 +2033,7 @@ export type Database = {
           id: string;
           is_home: boolean | null;
           match_number: string | null;
+          match_phase: string;
           matchweek: number | null;
           post_id: string | null;
           round: number | null;
@@ -2238,6 +2059,7 @@ export type Database = {
           id?: string;
           is_home?: boolean | null;
           match_number?: string | null;
+          match_phase?: string;
           matchweek?: number | null;
           post_id?: string | null;
           round?: number | null;
@@ -2263,6 +2085,7 @@ export type Database = {
           id?: string;
           is_home?: boolean | null;
           match_number?: string | null;
+          match_phase?: string;
           matchweek?: number | null;
           post_id?: string | null;
           round?: number | null;
@@ -2643,13 +2466,6 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: 'meeting_minutes_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
             foreignKeyName: 'meeting_minutes_season_id_fkey';
             columns: ['season_id'];
             isOneToOne: false;
@@ -2676,20 +2492,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'teams_with_details';
             referencedColumns: ['season_id'];
-          },
-          {
-            foreignKeyName: 'meeting_minutes_updated_by_fkey';
-            columns: ['updated_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'meeting_minutes_wrote_by_fkey';
-            columns: ['wrote_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -2776,13 +2578,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'member_attendance_recorded_by_fkey';
-            columns: ['recorded_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'member_attendance_training_session_id_fkey';
@@ -2889,13 +2684,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'teams_with_details';
             referencedColumns: ['club_id'];
-          },
-          {
-            foreignKeyName: 'member_club_relationships_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'member_club_relationships_member_id_fkey';
@@ -3098,6 +2886,7 @@ export type Database = {
         Row: {
           category_id: string | null;
           created_at: string | null;
+          created_by: string | null;
           date_of_birth: string | null;
           functions: string[] | null;
           id: string;
@@ -3107,10 +2896,12 @@ export type Database = {
           sex: string;
           surname: string;
           updated_at: string | null;
+          updated_by: string | null;
         };
         Insert: {
           category_id?: string | null;
           created_at?: string | null;
+          created_by?: string | null;
           date_of_birth?: string | null;
           functions?: string[] | null;
           id?: string;
@@ -3120,10 +2911,12 @@ export type Database = {
           sex: string;
           surname: string;
           updated_at?: string | null;
+          updated_by?: string | null;
         };
         Update: {
           category_id?: string | null;
           created_at?: string | null;
+          created_by?: string | null;
           date_of_birth?: string | null;
           functions?: string[] | null;
           id?: string;
@@ -3133,6 +2926,7 @@ export type Database = {
           sex?: string;
           surname?: string;
           updated_at?: string | null;
+          updated_by?: string | null;
         };
         Relationships: [
           {
@@ -3264,13 +3058,6 @@ export type Database = {
             referencedColumns: ['category_id'];
           },
           {
-            foreignKeyName: 'membership_fee_payments_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
             foreignKeyName: 'membership_fee_payments_member_id_fkey';
             columns: ['member_id'];
             isOneToOne: false;
@@ -3318,13 +3105,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'members_with_payment_status';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'membership_fee_payments_updated_by_fkey';
-            columns: ['updated_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -3425,15 +3205,7 @@ export type Database = {
           title?: string;
           updated_at?: string | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'photo_albums_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
+        Relationships: [];
       };
       photos: {
         Row: {
@@ -3495,12 +3267,154 @@ export type Database = {
             referencedRelation: 'photo_albums';
             referencedColumns: ['id'];
           },
+        ];
+      };
+      point_deductions: {
+        Row: {
+          category_id: string;
+          created_at: string | null;
+          created_by: string | null;
+          id: string;
+          points: number;
+          reason: string | null;
+          season_id: string;
+          team_id: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          category_id: string;
+          created_at?: string | null;
+          created_by?: string | null;
+          id?: string;
+          points: number;
+          reason?: string | null;
+          season_id: string;
+          team_id: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          category_id?: string;
+          created_at?: string | null;
+          created_by?: string | null;
+          id?: string;
+          points?: number;
+          reason?: string | null;
+          season_id?: string;
+          team_id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
           {
-            foreignKeyName: 'photos_uploaded_by_fkey';
-            columns: ['uploaded_by'];
+            foreignKeyName: 'point_deductions_category_id_fkey';
+            columns: ['category_id'];
             isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['category_id_full'];
+          },
+          {
+            foreignKeyName: 'point_deductions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['category_id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'own_club_matches';
+            referencedColumns: ['season_id_full'];
+          },
+          {
+            foreignKeyName: 'point_deductions_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'seasons';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['season_id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['season_id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'club_category_teams';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches_with_teams_optimized';
+            referencedColumns: ['away_team_club_category_id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches_with_teams_optimized';
+            referencedColumns: ['home_team_club_category_id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'team_details';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'team_suffix_helper';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'point_deductions_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams_with_details';
+            referencedColumns: ['team_id'];
           },
         ];
       };
@@ -3547,15 +3461,7 @@ export type Database = {
           updated_at?: string | null;
           user_id?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'profiles_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: true;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
+        Relationships: [];
       };
       referees: {
         Row: {
@@ -3754,6 +3660,7 @@ export type Database = {
           losses: number | null;
           matches: number | null;
           points: number | null;
+          points_deduction: number;
           position: number;
           season_id: string | null;
           team_id: string | null;
@@ -3771,6 +3678,7 @@ export type Database = {
           losses?: number | null;
           matches?: number | null;
           points?: number | null;
+          points_deduction?: number;
           position: number;
           season_id?: string | null;
           team_id?: string | null;
@@ -3788,6 +3696,7 @@ export type Database = {
           losses?: number | null;
           matches?: number | null;
           points?: number | null;
+          points_deduction?: number;
           position?: number;
           season_id?: string | null;
           team_id?: string | null;
@@ -4008,15 +3917,7 @@ export type Database = {
           updated_at?: string | null;
           user_email?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'todos_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
+        Relationships: [];
       };
       tournament_standings: {
         Row: {
@@ -4071,13 +3972,6 @@ export type Database = {
           wins?: number;
         };
         Relationships: [
-          {
-            foreignKeyName: 'tournament_standings_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'tournament_standings_team_id_fkey';
             columns: ['team_id'];
@@ -4134,13 +4028,6 @@ export type Database = {
             referencedRelation: 'tournaments';
             referencedColumns: ['id'];
           },
-          {
-            foreignKeyName: 'tournament_standings_updated_by_fkey';
-            columns: ['updated_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
         ];
       };
       tournament_teams: {
@@ -4175,13 +4062,6 @@ export type Database = {
           updated_by?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: 'tournament_teams_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'tournament_teams_team_id_fkey';
             columns: ['team_id'];
@@ -4237,13 +4117,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'tournaments';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'tournament_teams_updated_by_fkey';
-            columns: ['updated_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -4339,13 +4212,6 @@ export type Database = {
             referencedColumns: ['category_id'];
           },
           {
-            foreignKeyName: 'tournaments_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
             foreignKeyName: 'tournaments_post_id_fkey';
             columns: ['post_id'];
             isOneToOne: false;
@@ -4379,13 +4245,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'teams_with_details';
             referencedColumns: ['season_id'];
-          },
-          {
-            foreignKeyName: 'tournaments_updated_by_fkey';
-            columns: ['updated_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -4472,13 +4331,6 @@ export type Database = {
             referencedColumns: ['category_id'];
           },
           {
-            foreignKeyName: 'training_sessions_coach_id_fkey';
-            columns: ['coach_id'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
             foreignKeyName: 'training_sessions_season_id_fkey';
             columns: ['season_id'];
             isOneToOne: false;
@@ -4544,41 +4396,7 @@ export type Database = {
             referencedRelation: 'role_definitions';
             referencedColumns: ['id'];
           },
-          {
-            foreignKeyName: 'user_profiles_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
         ];
-      };
-      user_profiles_backup_20240127: {
-        Row: {
-          assigned_categories: string[] | null;
-          created_at: string | null;
-          id: string | null;
-          role: string | null;
-          updated_at: string | null;
-          user_id: string | null;
-        };
-        Insert: {
-          assigned_categories?: string[] | null;
-          created_at?: string | null;
-          id?: string | null;
-          role?: string | null;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
-        Update: {
-          assigned_categories?: string[] | null;
-          created_at?: string | null;
-          id?: string | null;
-          role?: string | null;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
-        Relationships: [];
       };
       user_roles: {
         Row: {
@@ -4602,22 +4420,7 @@ export type Database = {
           role?: string;
           user_id?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'user_roles_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_roles_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
+        Relationships: [];
       };
       videos: {
         Row: {
@@ -4770,13 +4573,6 @@ export type Database = {
             referencedColumns: ['club_id'];
           },
           {
-            foreignKeyName: 'videos_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-          {
             foreignKeyName: 'videos_season_id_fkey';
             columns: ['season_id'];
             isOneToOne: false;
@@ -4803,13 +4599,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'teams_with_details';
             referencedColumns: ['season_id'];
-          },
-          {
-            foreignKeyName: 'videos_updated_by_fkey';
-            columns: ['updated_by'];
-            isOneToOne: false;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -4965,15 +4754,7 @@ export type Database = {
           updated_at: string | null;
           user_id: string | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'coach_cards_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: true;
-            referencedRelation: 'betting_leaderboard';
-            referencedColumns: ['user_id'];
-          },
-        ];
+        Relationships: [];
       };
       match_stats: {
         Row: {
@@ -6200,6 +5981,7 @@ export type Database = {
         Args: {role_name: string; user_uuid: string};
         Returns: boolean;
       };
+      immutable_unaccent: {Args: {input: string}; Returns: string};
       is_admin: {Args: {user_uuid?: string}; Returns: boolean};
       listen_for_attendance_stats_refresh: {Args: never; Returns: undefined};
       populate_profiles_additional_fields: {
@@ -6241,6 +6023,37 @@ export type Database = {
           surname: string;
         }[];
       };
+      search_text:
+        | {
+            Args: {member: Database['public']['Tables']['members']['Row']};
+            Returns: {
+              error: true;
+            } & 'Could not choose the best candidate function between: public.search_text(member => members), public.search_text(member => members_external), public.search_text(member => members_on_loan), public.search_text(member => members_internal). Try renaming the parameters or the function itself in the database so function overloading can be resolved';
+          }
+        | {
+            Args: {
+              member: Database['public']['Views']['members_external']['Row'];
+            };
+            Returns: {
+              error: true;
+            } & 'Could not choose the best candidate function between: public.search_text(member => members), public.search_text(member => members_external), public.search_text(member => members_on_loan), public.search_text(member => members_internal). Try renaming the parameters or the function itself in the database so function overloading can be resolved';
+          }
+        | {
+            Args: {
+              member: Database['public']['Views']['members_internal']['Row'];
+            };
+            Returns: {
+              error: true;
+            } & 'Could not choose the best candidate function between: public.search_text(member => members), public.search_text(member => members_external), public.search_text(member => members_on_loan), public.search_text(member => members_internal). Try renaming the parameters or the function itself in the database so function overloading can be resolved';
+          }
+        | {
+            Args: {
+              member: Database['public']['Views']['members_on_loan']['Row'];
+            };
+            Returns: {
+              error: true;
+            } & 'Could not choose the best candidate function between: public.search_text(member => members), public.search_text(member => members_external), public.search_text(member => members_on_loan), public.search_text(member => members_internal). Try renaming the parameters or the function itself in the database so function overloading can be resolved';
+          };
       set_album_cover_photo: {
         Args: {album_uuid: string};
         Returns: undefined;
@@ -6392,6 +6205,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

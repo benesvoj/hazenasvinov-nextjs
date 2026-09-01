@@ -9,7 +9,7 @@
  *   1. Run database migrations
  *   2. Run: npm run generate:types
  *
- * Last generated: 2026-05-14
+ * Last generated: 2026-08-31
  */
 
 type Json = string | number | boolean | null | {[key: string]: Json | undefined} | Json[];
