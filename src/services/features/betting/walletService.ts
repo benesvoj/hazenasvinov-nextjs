@@ -1,3 +1,5 @@
+import type {Json} from '@/types/database/supabase';
+
 import {
   CreateTransactionInput,
   Currency,
@@ -33,7 +35,7 @@ export async function getOrCreateWallet(userId: string): Promise<Wallet | null> 
       .single();
 
     if (existingWallet && !fetchError) {
-      return existingWallet;
+      return existingWallet as Wallet;
     }
 
     // Create new wallet if it doesn't exist
@@ -58,7 +60,7 @@ export async function getOrCreateWallet(userId: string): Promise<Wallet | null> 
       return null;
     }
 
-    return newWallet;
+    return newWallet as Wallet;
   } catch (error) {
     console.error('Error in getOrCreateWallet:', {
       error,
@@ -116,7 +118,7 @@ export async function createTransaction(
         description: input.description,
         reference_id: input.reference_id,
         status: 'COMPLETED',
-        metadata: input.metadata,
+        metadata: (input.metadata ?? null) as Json,
       })
       .select()
       .single();
@@ -142,7 +144,7 @@ export async function createTransaction(
       return null;
     }
 
-    return transaction;
+    return transaction as Transaction;
   } catch (error) {
     console.error('Error in createTransaction:', error);
     return null;
@@ -239,7 +241,7 @@ export async function getTransactionHistory(
       return [];
     }
 
-    return data || [];
+    return (data || []) as Transaction[];
   } catch (error) {
     console.error('Error in getTransactionHistory:', error);
     return [];
@@ -274,7 +276,7 @@ export async function getTransactionsByType(
       return [];
     }
 
-    return data || [];
+    return (data || []) as Transaction[];
   } catch (error) {
     console.error('Error in getTransactionsByType:', error);
     return [];
@@ -311,7 +313,7 @@ export async function getWalletSummary(userId: string): Promise<WalletSummary | 
     let totalWagered = 0;
     let totalWon = 0;
 
-    transactions?.forEach((tx: Transaction) => {
+    transactions?.forEach((tx) => {
       switch (tx.type) {
         case 'DEPOSIT':
           totalDeposited += tx.amount;

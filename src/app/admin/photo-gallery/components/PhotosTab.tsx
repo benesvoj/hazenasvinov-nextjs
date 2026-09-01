@@ -386,7 +386,9 @@ export default function PhotosTab() {
                         </div>
                       )}
                       <div className="text-gray-500 text-xs">
-                        {new Date(photo.created_at).toLocaleDateString('cs-CZ')}
+                        {photo.created_at
+                          ? new Date(photo.created_at).toLocaleDateString('cs-CZ')
+                          : '—'}
                       </div>
                     </div>
                   </div>

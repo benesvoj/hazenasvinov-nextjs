@@ -24,7 +24,6 @@ export function useTeamClub(teamIdOrOptions?: string | UseTeamClubOptions) {
       let query = supabase.from('club_category_teams').select(`
           id,
           team_suffix,
-          is_primary,
           is_active,
           club_category:club_categories!inner(
             club_id,
@@ -61,9 +60,8 @@ export function useTeamClub(teamIdOrOptions?: string | UseTeamClubOptions) {
           team_id: data.id,
           club_id: data.club_category.club_id,
           club_name: data.club_category.club.name,
-          club_short_name: data.club_category.club.short_name,
+          club_short_name: data.club_category.club.short_name ?? undefined,
           team_suffix: data.team_suffix,
-          is_primary: data.is_primary,
         };
         setTeamClub(teamClubData);
       } else {

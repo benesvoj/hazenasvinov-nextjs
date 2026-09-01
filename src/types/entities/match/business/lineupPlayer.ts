@@ -6,13 +6,13 @@ export interface LineupPlayer {
   lineup_id?: string;
   member_id?: string;
   position: string;
-  is_captain?: boolean;
-  jersey_number?: number;
-  goals?: number;
-  yellow_cards?: number;
-  red_cards_5min?: number;
-  red_cards_10min?: number;
-  red_cards_personal?: number;
+  is_captain?: boolean | null;
+  jersey_number?: number | null;
+  goals?: number | null;
+  yellow_cards?: number | null;
+  red_cards_5min?: number | null;
+  red_cards_10min?: number | null;
+  red_cards_personal?: number | null;
   /* Enhanced player information */
   member?: Member;
   memberClubRelationship?: ClubMemberRelationship;

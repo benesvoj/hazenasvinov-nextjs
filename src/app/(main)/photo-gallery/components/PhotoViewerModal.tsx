@@ -173,7 +173,11 @@ export default function PhotoViewerModal({
                 <div className="flex items-center space-x-4 text-sm text-gray-300">
                   <div className="flex items-center space-x-1">
                     <CalendarIcon className="w-4 h-4" />
-                    <span>{new Date(currentPhoto.created_at).toLocaleDateString('cs-CZ')}</span>
+                    <span>
+                      {currentPhoto.created_at
+                        ? new Date(currentPhoto.created_at).toLocaleDateString('cs-CZ')
+                        : '—'}
+                    </span>
                   </div>
 
                   {currentPhoto.is_featured && (

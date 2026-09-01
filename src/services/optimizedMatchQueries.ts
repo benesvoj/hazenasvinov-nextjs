@@ -187,7 +187,9 @@ export async function getMatchesBasicOptimized(
         return {data: [], error: error.message, count: 0};
       }
 
-      return {data: data || [], error: null, count: count || 0};
+      // The basic select omits the team joins that `Match` declares; callers of
+      // this variant only read the scalar columns.
+      return {data: (data || []) as unknown as Match[], error: null, count: count || 0};
     },
     2 * 60 * 1000 // 2 minutes TTL
   );

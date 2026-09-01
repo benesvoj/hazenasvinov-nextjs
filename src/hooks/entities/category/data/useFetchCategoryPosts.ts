@@ -36,8 +36,8 @@ export const useFetchCategoryPosts = (categorySlug: string, limit: number = 3) =
       // First, try to get the category ID from the category slug
       const {data: categoryData, error: categoryError} = await supabase
         .from('categories')
-        .select('id, name, code')
-        .eq('code', categorySlug)
+        .select('id, name, slug')
+        .eq('slug', categorySlug)
         .single();
 
       if (categoryError) {

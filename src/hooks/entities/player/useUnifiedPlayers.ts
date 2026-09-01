@@ -161,10 +161,10 @@ export function useUnifiedPlayers() {
         surname: data.surname,
         registration_number: data.registration_number,
         category_id: data.category_id,
-        functions: data.functions,
+        functions: (data.functions ?? []) as UnifiedPlayer['functions'],
         date_of_birth: data.date_of_birth,
         position: '', // Position is set when adding to lineup, not a member attribute,
-        sex: data.sex,
+        sex: data.sex as UnifiedPlayer['sex'],
         is_external: false, // This will be determined by club relationship
         is_active: true, // This will be determined by club relationship status
         created_at: data.created_at || new Date().toISOString(),
@@ -235,6 +235,9 @@ export function useUnifiedPlayers() {
           is_active: true, // This will be determined by club relationship status
           created_at: member.created_at,
           updated_at: member.updated_at,
+          created_by: member.created_by,
+          updated_by: member.updated_by,
+          position: '', // Position is set when adding to lineup, not a member attribute
           current_club_name: getClubName(), // Get club name from configuration
         };
       });
@@ -258,7 +261,7 @@ export function useUnifiedPlayers() {
 
         const {data, error: saveError} = await supabase
           .from('members')
-          .upsert(playerData, {onConflict: 'id'})
+          .upsert(playerData as never, {onConflict: 'id'})
           .select()
           .single();
 
@@ -267,7 +270,9 @@ export function useUnifiedPlayers() {
           throw saveError;
         }
 
-        return data;
+        // `position` and the club fields are not columns of `members`; they are
+        // supplied by the caller's context, not by the upsert.
+        return {...data, position: playerData.position ?? ''} as UnifiedPlayer;
       } catch (err) {
         console.error('Error in savePlayer:', err);
         setError(err instanceof Error ? err.message : 'Failed to save player');
@@ -345,6 +350,9 @@ export function useUnifiedPlayers() {
         is_active: true, // This will be determined by club relationship status
         created_at: member.created_at,
         updated_at: member.updated_at,
+        created_by: member.created_by,
+        updated_by: member.updated_by,
+        position: '', // Position is set when adding to lineup, not a member attribute
         current_club_name: getClubName(), // Get club name from configuration
       }));
 

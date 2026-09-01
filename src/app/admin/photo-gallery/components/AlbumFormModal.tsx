@@ -31,8 +31,8 @@ export default function AlbumFormModal({isOpen, onClose, onSubmit, album}: Album
       setFormData({
         title: album.title,
         description: album.description || '',
-        is_public: album.is_public,
-        sort_order: album.sort_order,
+        is_public: album.is_public ?? true,
+        sort_order: album.sort_order ?? 0,
       });
     } else {
       setFormData({

@@ -495,7 +495,7 @@ export function useAttendance() {
             excused_count: excusedCount,
             attendance_percentage: attendancePercentage,
             recent_trend: trend,
-            last_attendance_date: lastAttendance?.recorded_at,
+            last_attendance_date: lastAttendance?.recorded_at ?? undefined,
             consecutive_absences: consecutiveAbsences,
             consecutive_present: consecutivePresent,
           });

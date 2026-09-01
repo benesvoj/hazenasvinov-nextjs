@@ -3,6 +3,7 @@
 // Folder: shared
 
 export {default as ContactsSection} from './contacts-section/ContactsSection';
+export {ErrorBoundaryFallback} from './errors/ErrorBoundaryFallback';
 export * from './match';
 export {MemberTableTab} from './members/MemberTableTab';
 export {MembersInternalSection} from './members/MembersInternalSection';

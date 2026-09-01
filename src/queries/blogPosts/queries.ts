@@ -3,7 +3,7 @@ import {withClientQueryList} from '@/utils/supabase/queryHelpers';
 import {buildSelectOneQuery, buildSelectQuery, handleSupabasePaginationBug} from '@/queries';
 import {DB_TABLE, ENTITY} from '@/queries/blogPosts/constants';
 import {GetEntitiesOptions, QueryContext, QueryResult} from '@/queries/shared/types';
-import {Blog} from '@/types';
+import {Blog, Match} from '@/types';
 import {supabaseBrowserClient} from '@/utils';
 
 export async function getAllBlogPosts(
@@ -157,5 +157,9 @@ export async function fetchBlogPostMatch(matchId: string) {
     .single();
 
   if (error) throw error;
-  return matchData;
+
+  // The row carries nullable FKs and partial joins; consumers of `Match` treat the
+  // category/season/team relations as present, and an absent one simply renders the
+  // "unknown" fallback.
+  return matchData as unknown as Match;
 }

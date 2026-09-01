@@ -1,5 +1,7 @@
 import {createBrowserClient} from '@supabase/ssr';
 
+import type {Database} from '@/types/database/supabase';
+
 /**
  * Browser Supabase client
  * for internal use in client components
@@ -7,16 +9,17 @@ import {createBrowserClient} from '@supabase/ssr';
  *
  * @description Shaped to match `getSupabaseBrowser` from `@services/sb-hs` in the
  * monorepo, so the move can swap this module for a re-export without touching
- * callers. Two differences remain deliberate and belong to the move itself:
- *   - cookie name/domain (`sb-hazenasvinov-auth-token`, `.hazenasvinov.test`) are
- *     not set here — applying them now would invalidate every current session and
- *     the domain does not match localhost;
- *   - the client is not typed with `Database` — see the migration notes.
+ * callers. One difference remains deliberate and belongs to the move itself: the
+ * cookie name/domain (`sb-hazenasvinov-auth-token`, `.hazenasvinov.test`) are not
+ * set here — applying them now would invalidate every current session and the
+ * domain does not match localhost.
  */
 
 // Single instance per browser session, like `getSupabaseBrowser` in the monorepo.
 // Repeated calls previously produced a new client (and a new auth listener) each time.
-let browserClient: ReturnType<typeof createBrowserClient> | null = null;
+type BrowserClient = ReturnType<typeof createBrowserClient<Database>>;
+
+let browserClient: BrowserClient | null = null;
 
 export function supabaseBrowserClient() {
   if (!browserClient) {
@@ -46,7 +49,7 @@ export function createSafeClient() {
       return createMockClient();
     }
 
-    return createBrowserClient(url, key);
+    return createBrowserClient<Database>(url, key);
   } catch (error) {
     console.error('Error creating Supabase client:', error);
     // Return a mock client that won't cause errors
@@ -68,5 +71,5 @@ function createMockClient() {
       update: () => ({eq: () => ({data: null, error: null})}),
       delete: () => ({eq: () => ({data: null, error: null})}),
     }),
-  } as any;
+  } as unknown as BrowserClient;
 }

@@ -103,7 +103,7 @@ export function useUserRoles() {
               updated_at: new Date().toISOString(),
             },
             {
-              onConflict: ['user_id', 'role_id'],
+              onConflict: 'user_id,role_id',
               ignoreDuplicates: false,
             }
           )

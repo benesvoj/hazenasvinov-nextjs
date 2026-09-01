@@ -44,7 +44,7 @@ async function getLeaderboard(query: LeaderboardQuery): Promise<LeaderboardEntry
       }
     >();
 
-    bets?.forEach((bet: Bet) => {
+    bets?.forEach((bet) => {
       const stats = userStats.get(bet.user_id) || {
         total_bets: 0,
         won_bets: 0,
@@ -175,9 +175,9 @@ async function getLeaderboardStats(period: LeaderboardPeriod): Promise<Leaderboa
       return null;
     }
 
-    const uniqueUsers = new Set(bets?.map((b: Bet) => b.user_id) || []).size;
+    const uniqueUsers = new Set(bets?.map((b) => b.user_id) || []).size;
     const totalBets: number = bets?.length || 0;
-    const totalWagered: number = bets?.reduce((sum: number, b: Bet) => sum + b.stake, 0) || 0;
+    const totalWagered: number = bets?.reduce((sum, b) => sum + b.stake, 0) || 0;
     const averageBetSize: number = totalBets > 0 ? totalWagered / totalBets : 0;
 
     // Get entries for additional stats

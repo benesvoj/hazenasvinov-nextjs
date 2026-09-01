@@ -127,8 +127,8 @@ export async function calculateTournamentStandings(
     .eq('status', 'completed');
 
   const standings = computeTournamentStandings(
-    teams.map((t: {team_id: string}) => t.team_id),
-    matches
+    (teams ?? []).map((t: {team_id: string}) => t.team_id),
+    (matches ?? []) as TournamentMatchForStandings[]
   );
 
   const rows = standings.map((s) => ({

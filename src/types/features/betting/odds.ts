@@ -27,17 +27,18 @@ export interface Odds {
 }
 
 // Odds history entry
+/** Read shape of `betting_odds_history`. Nullability mirrors the database. */
 export interface OddsHistory {
   id: string;
-  odds_id: string;
+  odds_id: string | null;
   match_id: string;
   bet_type: BetTypeId;
   selection: BetSelection;
-  old_odds: number;
-  new_odds: number;
-  change_percentage: number;
-  changed_at: string;
-  reason: string;
+  old_odds: number | null;
+  new_odds: number | null;
+  change_percentage: number | null;
+  changed_at: string | null;
+  reason: string | null;
 }
 
 // Structured odds for a match

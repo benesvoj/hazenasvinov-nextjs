@@ -161,11 +161,11 @@ export async function createBet(input: CreateBetInput): Promise<Bet | null> {
     type MatchData = {
       id: string;
       date: string;
-      home_team?: {club_category?: {club?: {name: string}}};
-      away_team?: {club_category?: {club?: {name: string}}};
+      home_team: {club_category: {club: {name: string}}} | null;
+      away_team: {club_category: {club: {name: string}}} | null;
     };
     const matchMap = new Map<string, MatchData>(
-      matches?.map((match: MatchData) => [match.id, match]) || []
+      matches?.map((match) => [match.id, match] as const) || []
     );
 
     // Map legs with match data
@@ -217,7 +217,7 @@ export async function createBet(input: CreateBetInput): Promise<Bet | null> {
     return {
       ...bet,
       legs: createdLegs,
-    };
+    } as Bet;
   } catch (error) {
     console.error('Error in createBet:', error);
     return null;
@@ -257,7 +257,7 @@ export async function getBetById(betId: string): Promise<Bet | null> {
     return {
       ...bet,
       legs: legs || [],
-    };
+    } as Bet;
   } catch (error) {
     console.error('Error in getBetById:', error);
     return null;
@@ -381,11 +381,11 @@ export async function getUserBets(
         type MatchData = {
           id: string;
           date: string;
-          home_team?: {club_category?: {club?: {name: string}}};
-          away_team?: {club_category?: {club?: {name: string}}};
+          home_team: {club_category: {club: {name: string}}} | null;
+          away_team: {club_category: {club: {name: string}}} | null;
         };
         const matchMap = new Map<string, MatchData>(
-          matches?.map((match: MatchData) => [match.id, match]) || []
+          matches?.map((match) => [match.id, match] as const) || []
         );
 
         // Update legs with match data
@@ -478,7 +478,7 @@ export async function settleBet(
     return {
       ...updatedBet,
       legs: legs || [],
-    };
+    } as Bet;
   } catch (error) {
     console.error('Error in settleBet:', error);
     return null;
@@ -513,7 +513,7 @@ export async function settleBetLeg(
       return null;
     }
 
-    return data;
+    return data as BetLeg;
   } catch (error) {
     console.error('Error in settleBetLeg:', error);
     return null;
@@ -574,12 +574,12 @@ export async function getUserBetStats(userId: string): Promise<UserBetStats | nu
 
     const stats: UserBetStats = {
       total_bets: bets?.length || 0,
-      pending_bets: bets?.filter((b: Bet) => b.status === 'PENDING').length || 0,
-      won_bets: bets?.filter((b: Bet) => b.status === 'WON').length || 0,
-      lost_bets: bets?.filter((b: Bet) => b.status === 'LOST').length || 0,
-      void_bets: bets?.filter((b: Bet) => b.status === 'VOID').length || 0,
-      total_staked: bets?.reduce((sum: number, b: Bet) => sum + b.stake, 0) || 0,
-      total_returned: bets?.reduce((sum: number, b: Bet) => sum + (b.payout || 0), 0) || 0,
+      pending_bets: bets?.filter((b) => b.status === 'PENDING').length || 0,
+      won_bets: bets?.filter((b) => b.status === 'WON').length || 0,
+      lost_bets: bets?.filter((b) => b.status === 'LOST').length || 0,
+      void_bets: bets?.filter((b) => b.status === 'VOID').length || 0,
+      total_staked: bets?.reduce((sum, b) => sum + b.stake, 0) || 0,
+      total_returned: bets?.reduce((sum, b) => sum + (b.payout || 0), 0) || 0,
       net_profit: 0,
       win_rate: 0,
       average_odds: 0,
@@ -594,7 +594,7 @@ export async function getUserBetStats(userId: string): Promise<UserBetStats | nu
     }
 
     if (bets && bets.length > 0) {
-      stats.average_odds = bets.reduce((sum: number, b: Bet) => sum + b.odds, 0) / bets.length;
+      stats.average_odds = bets.reduce((sum, b) => sum + b.odds, 0) / bets.length;
     }
 
     if (stats.total_staked > 0) {
@@ -648,7 +648,7 @@ export async function getBetsForMatch(matchId: string): Promise<Bet[]> {
       return [];
     }
 
-    const betIds = [...new Set(legs.map((leg: BetLeg) => leg.bet_id))];
+    const betIds = [...new Set(legs.map((leg) => leg.bet_id))];
 
     if (betIds.length === 0) {
       return [];
@@ -680,12 +680,10 @@ export async function getBetsForMatch(matchId: string): Promise<Bet[]> {
       return [];
     }
 
-    return (
-      bets?.map((bet: Bets) => ({
-        ...bet,
-        legs: bet.betting_bet_legs || [],
-      })) || []
-    );
+    return (bets?.map((bet) => ({
+      ...bet,
+      legs: bet.betting_bet_legs || [],
+    })) || []) as Bet[];
   } catch (error) {
     console.error('Error in getBetsForMatch:', error);
     return [];

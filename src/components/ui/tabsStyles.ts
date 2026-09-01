@@ -1,3 +1,4 @@
+// @barrel-ignore
 import {TabsProps} from '@heroui/tabs';
 
 // Shared visual defaults to keep tabs readable across light/dark themes.

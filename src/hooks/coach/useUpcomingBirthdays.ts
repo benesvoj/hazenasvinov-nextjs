@@ -101,8 +101,8 @@ export function useUpcomingBirthdays(
 
       // Filter and calculate birthdays
       const membersWithBirthdays: BirthdayMember[] = (data || [])
-        .filter((member: Member) => member.date_of_birth)
-        .map((member: Member) => {
+        .filter((member) => member.date_of_birth)
+        .map((member) => {
           const birthdayInfo = calculateDaysUntilBirthday(member.date_of_birth!);
           return {
             ...member,
@@ -112,7 +112,7 @@ export function useUpcomingBirthdays(
           };
         })
         .sort((a: any, b: any) => a.daysUntilBirthday - b.daysUntilBirthday)
-        .slice(0, limit);
+        .slice(0, limit) as BirthdayMember[];
 
       setBirthdays(membersWithBirthdays);
     } catch (err: any) {

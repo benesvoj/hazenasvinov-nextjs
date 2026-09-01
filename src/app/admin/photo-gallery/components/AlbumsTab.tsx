@@ -222,7 +222,9 @@ export default function AlbumsTab() {
                   </TableCell>
                   <TableCell>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(album.created_at).toLocaleDateString('cs-CZ')}
+                      {album.created_at
+                        ? new Date(album.created_at).toLocaleDateString('cs-CZ')
+                        : '—'}
                     </span>
                   </TableCell>
                   <TableCell>

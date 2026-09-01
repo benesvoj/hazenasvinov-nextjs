@@ -99,6 +99,17 @@ export async function fetchTournamentPageData(slug: string) {
 
 async function fetchTournamentMatches(slug: string) {
   const supabase = supabaseBrowserClient();
+
+  const {data: tournament} = await supabase
+    .from('tournaments')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (!tournament) return [];
+
+  const tournamentId = tournament.id;
+
   const {data, error} = await supabase
     .from('matches')
     .select(
@@ -108,10 +119,7 @@ async function fetchTournamentMatches(slug: string) {
       away_team:club_category_teams!away_team_id(id, team_suffix, club_category:club_categories(club:clubs(id, name, short_name, logo_url)))
     `
     )
-    .eq(
-      'tournament_id',
-      (await supabase.from('tournaments').select('id').eq('slug', slug).single()).data?.id
-    )
+    .eq('tournament_id', tournamentId)
     .order('round', {ascending: true})
     .order('date', {ascending: true});
 

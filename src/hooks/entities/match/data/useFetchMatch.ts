@@ -86,7 +86,7 @@ export function useFetchMatch(matchId: string | null) {
             )
           ),
           category:categories(id, name, description),
-          season:seasons(name)
+          season:seasons(id, name)
         `
         )
         .eq('id', matchId)
@@ -151,33 +151,44 @@ export function useFetchMatch(matchId: string | null) {
       // Transform match data to use centralized team display logic
       const transformedMatch: TransformedMatch = {
         ...data,
+        category: (data.category ?? {id: '', name: ''}) as Category,
+        season: (data.season ?? {id: '', name: ''}) as Season,
+        category_id: data.category_id ?? '',
+        season_id: data.season_id ?? '',
+        home_team_id: data.home_team_id ?? '',
+        away_team_id: data.away_team_id ?? '',
+        home_score: data.home_score ?? undefined,
+        away_score: data.away_score ?? undefined,
+        matchweek: data.matchweek ?? undefined,
         is_home: true, // Default value, can be determined based on your logic
         competition: data.competition || 'Neznámá soutěž',
-        status: (data.status as 'upcoming' | 'completed') || 'upcoming',
+        status: (data.status as MatchStatus) ?? MatchStatus.UPCOMING,
         match_phase: (data.match_phase as MatchPhase) ?? MatchPhase.REGULAR,
         home_team: {
-          id: data.home_team?.id,
+          id: data.home_team?.id ?? '',
           name: getTeamDisplayNameSafe(
             data.home_team?.club_category?.club?.name,
             data.home_team?.team_suffix || 'A',
             homeTeamCount,
             translations.matches.unknownTeam
           ),
-          short_name: data.home_team?.club_category?.club?.short_name,
-          logo_url: data.home_team?.club_category?.club?.logo_url,
+          short_name: data.home_team?.club_category?.club?.short_name ?? undefined,
+          logo_url: data.home_team?.club_category?.club?.logo_url ?? undefined,
           is_own_club: data.home_team?.club_category?.club?.is_own_club || false,
+          team_suffix: data.home_team?.team_suffix || 'A',
         },
         away_team: {
-          id: data.away_team?.id,
+          id: data.away_team?.id ?? '',
           name: getTeamDisplayNameSafe(
             data.away_team?.club_category?.club?.name,
             data.away_team?.team_suffix || 'A',
             awayTeamCount,
             translations.matches.unknownTeam
           ),
-          short_name: data.away_team?.club_category?.club?.short_name,
-          logo_url: data.away_team?.club_category?.club?.logo_url,
+          short_name: data.away_team?.club_category?.club?.short_name ?? undefined,
+          logo_url: data.away_team?.club_category?.club?.logo_url ?? undefined,
           is_own_club: data.away_team?.club_category?.club?.is_own_club || false,
+          team_suffix: data.away_team?.team_suffix || 'A',
         },
       };
 

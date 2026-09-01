@@ -198,12 +198,27 @@ export function useLineupDataManager({
         const currentTeamId = isHome ? homeTeamId : awayTeamId;
         const lineupData = await fetchLineup(matchId, currentTeamId);
 
-        const updatedFormData = {
+        // The rows carry the nullable columns of `lineup_players`; the form state
+        // uses optionals, so drop the nulls on the way in.
+        const updatedFormData: LineupFormData = {
           match_id: matchId,
           team_id: currentTeamId,
           is_home_team: isHome,
-          players: lineupData.players || [],
-          coaches: lineupData.coaches || [],
+          players: (lineupData.players || []).map((player) => ({
+            ...player,
+            is_captain: player.is_captain ?? undefined,
+            jersey_number: player.jersey_number ?? undefined,
+            goals: player.goals ?? undefined,
+            yellow_cards: player.yellow_cards ?? undefined,
+            red_cards_5min: player.red_cards_5min ?? undefined,
+            red_cards_10min: player.red_cards_10min ?? undefined,
+            red_cards_personal: player.red_cards_personal ?? undefined,
+          })),
+          coaches: (lineupData.coaches || []).map((coach) => ({
+            ...coach,
+            // `role` is a text column holding the app's own value set
+            role: coach.role as LineupCoachRole,
+          })),
         };
 
         if (isHome) {
