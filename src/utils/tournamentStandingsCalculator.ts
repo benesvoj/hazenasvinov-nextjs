@@ -115,16 +115,24 @@ export async function calculateTournamentStandings(
 ): Promise<{success: boolean; error?: string}> {
   const supabase = supabaseBrowserClient();
 
-  const {data: teams} = await supabase
+  const {data: teams, error: teamsError} = await supabase
     .from('tournament_teams')
     .select('team_id')
     .eq('tournament_id', tournamentId);
 
-  const {data: matches} = await supabase
+  if (teamsError) {
+    return {success: false, error: teamsError.message};
+  }
+
+  const {data: matches, error: matchesError} = await supabase
     .from('matches')
     .select('home_team_id, away_team_id, home_score, away_score')
     .eq('tournament_id', tournamentId)
     .eq('status', 'completed');
+
+  if (matchesError) {
+    return {success: false, error: matchesError.message};
+  }
 
   const standings = computeTournamentStandings(
     (teams ?? []).map((t: {team_id: string}) => t.team_id),
@@ -136,7 +144,13 @@ export async function calculateTournamentStandings(
     ...s,
   }));
 
-  await supabase.from('tournament_standings').upsert(rows, {onConflict: 'tournament_id, team_id'});
+  const {error: upsertError} = await supabase
+    .from('tournament_standings')
+    .upsert(rows, {onConflict: 'tournament_id, team_id'});
+
+  if (upsertError) {
+    return {success: false, error: upsertError.message};
+  }
 
   return {
     success: true,

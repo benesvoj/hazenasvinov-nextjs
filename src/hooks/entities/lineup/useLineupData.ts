@@ -14,6 +14,15 @@ export const useLineupData = () => {
   const supabase = useSupabaseClient();
   // Fetch lineup data
   const fetchLineup = useCallback(async (matchId: string, teamId: string) => {
+    // Zápas nemusí mít oba týmy vyplněné. Prázdné id by Postgres odmítl jako
+    // "invalid input syntax for type uuid" a volající to spolkne v catch.
+    if (!matchId || !teamId) {
+      return {
+        players: [],
+        coaches: [],
+      };
+    }
+
     try {
       setLoading(true);
       setError(null);

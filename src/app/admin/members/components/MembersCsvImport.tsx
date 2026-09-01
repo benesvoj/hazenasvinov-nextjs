@@ -232,7 +232,7 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Select
                     label="Výchozí kategorie"
-                    selectedKeys={[defaultCategory]}
+                    selectedKeys={defaultCategory ? [defaultCategory] : []}
                     onSelectionChange={(keys) => setDefaultCategory(Array.from(keys)[0] as string)}
                   >
                     {Object.entries(categories).map(([key, value]) => (

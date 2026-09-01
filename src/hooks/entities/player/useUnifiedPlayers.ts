@@ -203,7 +203,9 @@ export function useUnifiedPlayers() {
             date_of_birth,
             sex,
             created_at,
-            updated_at
+            updated_at,
+            created_by,
+            updated_by
           )
         `
         )
@@ -259,9 +261,25 @@ export function useUnifiedPlayers() {
         setLoading(true);
         setError(null);
 
+        // UnifiedPlayer nese i pole, která nejsou sloupce `members`
+        // (position, is_external, current_club_name, …). PostgREST by takový
+        // payload odmítl 400, takže se posílají jen skutečné sloupce.
+        const memberRow = {
+          ...(playerData.id !== undefined && {id: playerData.id}),
+          ...(playerData.name !== undefined && {name: playerData.name}),
+          ...(playerData.surname !== undefined && {surname: playerData.surname}),
+          ...(playerData.registration_number !== undefined && {
+            registration_number: playerData.registration_number,
+          }),
+          ...(playerData.date_of_birth !== undefined && {date_of_birth: playerData.date_of_birth}),
+          ...(playerData.category_id !== undefined && {category_id: playerData.category_id}),
+          ...(playerData.sex !== undefined && {sex: playerData.sex}),
+          ...(playerData.functions !== undefined && {functions: playerData.functions}),
+        };
+
         const {data, error: saveError} = await supabase
           .from('members')
-          .upsert(playerData as never, {onConflict: 'id'})
+          .upsert(memberRow as never, {onConflict: 'id'})
           .select()
           .single();
 
