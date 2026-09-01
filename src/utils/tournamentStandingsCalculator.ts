@@ -134,9 +134,19 @@ export async function calculateTournamentStandings(
     return {success: false, error: matchesError.message};
   }
 
+  // Zápas může být 'completed' a přesto nemít vyplněné skóre nebo týmy;
+  // computeTournamentStandings takový řádek započítá jako remízu 0:0.
+  const scoredMatches = (matches ?? []).filter(
+    (m): m is TournamentMatchForStandings =>
+      m.home_team_id !== null &&
+      m.away_team_id !== null &&
+      m.home_score !== null &&
+      m.away_score !== null
+  );
+
   const standings = computeTournamentStandings(
     (teams ?? []).map((t: {team_id: string}) => t.team_id),
-    (matches ?? []) as TournamentMatchForStandings[]
+    scoredMatches
   );
 
   const rows = standings.map((s) => ({
