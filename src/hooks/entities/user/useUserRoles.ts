@@ -21,7 +21,7 @@ export function useUserRoles() {
 
   const supabase = useSupabaseClient();
   const {user, userProfile, userCategories, refreshProfile} = useUser();
-  const fetchUserRoleSummariesRef = useRef<() => Promise<void>>();
+  const fetchUserRoleSummariesRef = useRef<(() => Promise<void>) | undefined>(undefined);
   const supabaseRef = useRef(supabase);
   supabaseRef.current = supabase;
 
