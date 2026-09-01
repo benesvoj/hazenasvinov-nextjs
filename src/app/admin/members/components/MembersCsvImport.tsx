@@ -136,6 +136,15 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
           continue;
         }
 
+        // registration_number je NOT NULL a UNIQUE — prázdná hodnota by se u
+        // prvního řádku tiše uložila a u dalšího spadla na unikát.
+        const registrationNumber = member.regNumber.trim();
+        if (!registrationNumber) {
+          result.failed++;
+          result.errors.push(`Chybí registrační číslo pro: ${member.surname} ${member.firstName}`);
+          continue;
+        }
+
         // Parse date (optional)
         let parsedDate: string | null = null;
         if (member.dateOfBirth && member.dateOfBirth.trim()) {
@@ -151,7 +160,7 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
 
         // Insert member
         const {error} = await supabase.from('members').insert({
-          registration_number: member.regNumber,
+          registration_number: registrationNumber,
           name: member.firstName,
           surname: member.surname,
           date_of_birth: parsedDate, // Can be null if not provided
