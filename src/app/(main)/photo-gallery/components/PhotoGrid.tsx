@@ -54,7 +54,7 @@ export default function PhotoGrid({photos, onPhotoClick}: PhotoGridProps) {
                   </div>
                 )}
                 <div className="text-xs opacity-90 drop-shadow-md">
-                  {new Date(photo.created_at).toLocaleDateString('cs-CZ')}
+                  {photo.created_at ? new Date(photo.created_at).toLocaleDateString('cs-CZ') : '—'}
                 </div>
               </div>
             </div>

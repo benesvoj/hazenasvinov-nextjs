@@ -44,8 +44,8 @@ export default function PhotoFormModal({
         description: photo.description || '',
         file_path: photo.file_path,
         file_url: photo.file_url,
-        sort_order: photo.sort_order,
-        is_featured: photo.is_featured,
+        sort_order: photo.sort_order ?? 0,
+        is_featured: photo.is_featured ?? false,
       });
     } else {
       setFormData({

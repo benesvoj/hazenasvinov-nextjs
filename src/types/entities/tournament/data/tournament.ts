@@ -10,18 +10,18 @@ export type TournamentFormData = Omit<Tournament, 'id' | 'created_at' | 'updated
 
 export interface TournamentMatch {
   id: string;
-  round: number;
+  round: number | null;
   date: string;
   time: string;
   venue: string | null;
-  status: string;
+  status: string | null;
   home_score: number | null;
   away_score: number | null;
   home_score_halftime: number | null;
   away_score_halftime: number | null;
-  home_team_id: string;
-  away_team_id: string;
-  tournament_id: string;
+  home_team_id: string | null;
+  away_team_id: string | null;
+  tournament_id: string | null;
   home_team: {
     id: string;
     team_suffix: string | null;
@@ -33,7 +33,7 @@ export interface TournamentMatch {
         logo_url: string | null;
       };
     };
-  };
+  } | null;
   away_team: {
     id: string;
     team_suffix: string | null;
@@ -45,5 +45,5 @@ export interface TournamentMatch {
         logo_url: string | null;
       };
     };
-  };
+  } | null;
 }

@@ -14,6 +14,8 @@ import {
   UserPlusIcon,
 } from '@heroicons/react/24/outline';
 
+import type {User} from '@supabase/supabase-js';
+
 import {APP_ROUTES} from '@/lib/app-routes';
 
 import {useSupabaseClient} from '@/hooks';
@@ -28,7 +30,7 @@ function SetPasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [passwordStrength, setPasswordStrength] = useState({
     length: false,
     uppercase: false,
@@ -144,11 +146,14 @@ function SetPasswordContent() {
       setTimeout(async () => {
         try {
           // Get user profile to determine redirect
-          const {data: userProfile, error: profileError} = await supabase
-            .from('user_profiles')
-            .select('role')
-            .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-            .single();
+          const currentUserId = (await supabase.auth.getUser()).data.user?.id;
+          const {data: userProfile, error: profileError} = currentUserId
+            ? await supabase
+                .from('user_profiles')
+                .select('role')
+                .eq('user_id', currentUserId)
+                .single()
+            : {data: null, error: null};
 
           if (profileError || !userProfile) {
             // If no profile found, user has no role - redirect to login with message

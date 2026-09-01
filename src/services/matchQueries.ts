@@ -114,7 +114,9 @@ export async function getMatchesBasic(options: MatchQueryOptions = {}): Promise<
       return {data: [], error: error.message};
     }
 
-    return {data: data || [], error: null, count: count || 0};
+    // Nullable FKs and partial joins; consumers of `Match` render the "unknown"
+    // fallback when a relation is absent.
+    return {data: (data || []) as unknown as Match[], error: null, count: count || 0};
   } catch (error) {
     return {
       data: [],

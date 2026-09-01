@@ -66,7 +66,12 @@ export function useMatchMutations(options: UseMatchMutationsOptions): UseMatchMu
       setError(null);
 
       try {
-        const {error: insertError} = await supabase.from('matches').insert(data);
+        // `video_ids` is not a column on `matches` — the relation lives in
+        // `match_videos` — and `match_number` is a text column there.
+        const {video_ids: _videoIds, ...matchRow} = data;
+        const {error: insertError} = await supabase
+          .from('matches')
+          .insert({...matchRow, match_number: data.match_number?.toString() ?? null});
 
         if (insertError) throw insertError;
 
@@ -91,7 +96,18 @@ export function useMatchMutations(options: UseMatchMutationsOptions): UseMatchMu
       setError(null);
 
       try {
-        const {error: updateError} = await supabase.from('matches').update(data).eq('id', matchId);
+        const {video_ids: _videoIds, match_number, ...matchRow} = data;
+        // Only rewrite match_number when the caller actually set it — adding it
+        // unconditionally would blank the column on every other update.
+        const updateRow =
+          match_number === undefined
+            ? matchRow
+            : {...matchRow, match_number: match_number?.toString() ?? null};
+
+        const {error: updateError} = await supabase
+          .from('matches')
+          .update(updateRow)
+          .eq('id', matchId);
 
         if (updateError) throw updateError;
 

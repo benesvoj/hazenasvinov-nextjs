@@ -59,7 +59,7 @@ export async function getTeamStats(
     const formArray: string[] = [];
 
     // Process each match
-    matches.forEach((match: Match) => {
+    matches.forEach((match) => {
       const isHome = match.home_team_id === teamId;
       const homeScore = match.home_score ?? 0;
       const awayScore = match.away_score ?? 0;
@@ -271,7 +271,7 @@ export async function getHeadToHeadStats(
     let draws = 0;
     let totalGoals = 0;
 
-    matches.forEach((match: Match) => {
+    matches.forEach((match) => {
       const team1IsHome = match.home_team_id === team1Id;
       const homeScore = match.home_score ?? 0;
       const awayScore = match.away_score ?? 0;

@@ -139,7 +139,9 @@ export function useUnifiedPlayers() {
           date_of_birth,
           sex,
           created_at,
-          updated_at
+          updated_at,
+          created_by,
+          updated_by
         `
         )
         .eq('id', playerId)
@@ -159,14 +161,16 @@ export function useUnifiedPlayers() {
         surname: data.surname,
         registration_number: data.registration_number,
         category_id: data.category_id,
-        functions: data.functions,
+        functions: (data.functions ?? []) as UnifiedPlayer['functions'],
         date_of_birth: data.date_of_birth,
         position: '', // Position is set when adding to lineup, not a member attribute,
-        sex: data.sex,
+        sex: data.sex as UnifiedPlayer['sex'],
         is_external: false, // This will be determined by club relationship
         is_active: true, // This will be determined by club relationship status
         created_at: data.created_at || new Date().toISOString(),
         updated_at: data.updated_at || new Date().toISOString(),
+        created_by: data.created_by,
+        updated_by: data.updated_by,
         current_club_name: getClubName(), // Get club name from configuration
       };
     } catch (err) {
@@ -199,7 +203,9 @@ export function useUnifiedPlayers() {
             date_of_birth,
             sex,
             created_at,
-            updated_at
+            updated_at,
+            created_by,
+            updated_by
           )
         `
         )
@@ -231,6 +237,9 @@ export function useUnifiedPlayers() {
           is_active: true, // This will be determined by club relationship status
           created_at: member.created_at,
           updated_at: member.updated_at,
+          created_by: member.created_by,
+          updated_by: member.updated_by,
+          position: '', // Position is set when adding to lineup, not a member attribute
           current_club_name: getClubName(), // Get club name from configuration
         };
       });
@@ -252,9 +261,25 @@ export function useUnifiedPlayers() {
         setLoading(true);
         setError(null);
 
+        // UnifiedPlayer nese i pole, která nejsou sloupce `members`
+        // (position, is_external, current_club_name, …). PostgREST by takový
+        // payload odmítl 400, takže se posílají jen skutečné sloupce.
+        const memberRow = {
+          ...(playerData.id !== undefined && {id: playerData.id}),
+          ...(playerData.name !== undefined && {name: playerData.name}),
+          ...(playerData.surname !== undefined && {surname: playerData.surname}),
+          ...(playerData.registration_number !== undefined && {
+            registration_number: playerData.registration_number,
+          }),
+          ...(playerData.date_of_birth !== undefined && {date_of_birth: playerData.date_of_birth}),
+          ...(playerData.category_id !== undefined && {category_id: playerData.category_id}),
+          ...(playerData.sex !== undefined && {sex: playerData.sex}),
+          ...(playerData.functions !== undefined && {functions: playerData.functions}),
+        };
+
         const {data, error: saveError} = await supabase
           .from('members')
-          .upsert(playerData, {onConflict: 'id'})
+          .upsert(memberRow as never, {onConflict: 'id'})
           .select()
           .single();
 
@@ -263,7 +288,9 @@ export function useUnifiedPlayers() {
           throw saveError;
         }
 
-        return data;
+        // `position` and the club fields are not columns of `members`; they are
+        // supplied by the caller's context, not by the upsert.
+        return {...data, position: playerData.position ?? ''} as UnifiedPlayer;
       } catch (err) {
         console.error('Error in savePlayer:', err);
         setError(err instanceof Error ? err.message : 'Failed to save player');
@@ -341,6 +368,9 @@ export function useUnifiedPlayers() {
         is_active: true, // This will be determined by club relationship status
         created_at: member.created_at,
         updated_at: member.updated_at,
+        created_by: member.created_by,
+        updated_by: member.updated_by,
+        position: '', // Position is set when adding to lineup, not a member attribute
         current_club_name: getClubName(), // Get club name from configuration
       }));
 

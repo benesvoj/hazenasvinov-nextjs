@@ -33,7 +33,7 @@ export interface HeadingProps {
 }
 
 export function Heading(props: HeadingProps) {
-  const HeadingComponent = `h${props.size}` as keyof JSX.IntrinsicElements;
+  const HeadingComponent = `h${props.size}` as `h${HeadingLevel}`;
 
   const headingClass = useMemo(() => {
     switch (props.size) {
@@ -63,7 +63,7 @@ export function Heading(props: HeadingProps) {
         props.overflowWrap && `overflow-wrap-${props.overflowWrap}`,
         props.align && `text-${props.align}`,
         props.isInline ? 'inline' : 'block',
-        props.className,
+        props.className
       )}
     >
       {props.children}

@@ -14,6 +14,15 @@ export const useLineupData = () => {
   const supabase = useSupabaseClient();
   // Fetch lineup data
   const fetchLineup = useCallback(async (matchId: string, teamId: string) => {
+    // Zápas nemusí mít oba týmy vyplněné. Prázdné id by Postgres odmítl jako
+    // "invalid input syntax for type uuid" a volající to spolkne v catch.
+    if (!matchId || !teamId) {
+      return {
+        players: [],
+        coaches: [],
+      };
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -62,7 +71,7 @@ export const useLineupData = () => {
         };
       }
 
-      const processedPlayers = (playersData || []).map((lineupPlayer: LineupPlayer) => {
+      const processedPlayers = (playersData || []).map((lineupPlayer) => {
         if (lineupPlayer) {
           return {
             ...lineupPlayer,
@@ -94,7 +103,7 @@ export const useLineupData = () => {
       }
 
       // Process coaches data to match LineupCoachFormData format
-      const processedCoaches = (coachesData || []).map((coach: LineupCoach) => ({
+      const processedCoaches = (coachesData || []).map((coach) => ({
         ...coach,
         member_name: coach.member?.name,
         member_surname: coach.member?.surname,
@@ -385,7 +394,10 @@ export const useLineupData = () => {
 
         // Insert player-manager - use different strategies based on skipValidation
         const playersToInsert = formData.players
-          .filter((player) => player.member_id) // All player-manager should have member_id now
+          // Narrowing predicate, not just a filter: the insert requires member_id.
+          .filter((player): player is typeof player & {member_id: string} =>
+            Boolean(player.member_id)
+          )
           .map((player) => ({
             lineup_id: finalLineupId,
             member_id: player.member_id,

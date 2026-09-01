@@ -166,7 +166,7 @@ export function useDeleteMatchMetadata() {
         queryClient.invalidateQueries({
           queryKey: matchMetadataKeys.byMatchAndType(
             data.metadata.match_id,
-            data.metadata.metadata_type
+            data.metadata.metadata_type as MetadataType
           ),
         });
       }

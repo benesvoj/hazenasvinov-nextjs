@@ -54,7 +54,7 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
   const [preview, setPreview] = useState<CsvMember[]>([]);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
-  const [defaultCategory, setDefaultCategory] = useState(Genders.MALE);
+  const [defaultCategory, setDefaultCategory] = useState<string>('');
   const [defaultSex, setDefaultSex] = useState<Genders>(Genders.MALE);
   const [defaultFunctions, setDefaultFunctions] = useState<string[]>([MemberFunction.PLAYER]);
 
@@ -151,11 +151,11 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
 
         // Insert member
         const {error} = await supabase.from('members').insert({
-          registration_number: member.regNumber || undefined,
+          registration_number: member.regNumber,
           name: member.firstName,
           surname: member.surname,
           date_of_birth: parsedDate, // Can be null if not provided
-          category: defaultCategory,
+          category_id: defaultCategory || null,
           sex: defaultSex,
           functions: defaultFunctions,
         });
@@ -232,8 +232,8 @@ export default function MembersCsvImport({onImportComplete, categories}: Members
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Select
                     label="Výchozí kategorie"
-                    selectedKeys={[defaultCategory]}
-                    onSelectionChange={(keys) => setDefaultCategory(Array.from(keys)[0] as Genders)}
+                    selectedKeys={defaultCategory ? [defaultCategory] : []}
+                    onSelectionChange={(keys) => setDefaultCategory(Array.from(keys)[0] as string)}
                   >
                     {Object.entries(categories).map(([key, value]) => (
                       <SelectItem key={key}>{value}</SelectItem>

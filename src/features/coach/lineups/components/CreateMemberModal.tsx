@@ -103,7 +103,7 @@ export default function CreateMemberModal({
           registration_number: registrationNumber,
           date_of_birth: formData.date_of_birth,
           sex: formData.sex,
-          functions: formData.functions || null,
+          functions: formData.functions ? [formData.functions] : null,
           category_id: selectedCategoryId,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),

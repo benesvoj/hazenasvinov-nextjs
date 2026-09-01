@@ -25,7 +25,7 @@ export async function autoRecalculateStandings(
     if (!finalCategoryId || !finalSeasonId) {
       const {data: match, error: matchError} = await supabase
         .from('matches')
-        .select('category_id, season_id, tournament_id')
+        .select('category_id, season_id, tournament_id, match_phase')
         .eq('id', matchId)
         .single();
 
@@ -53,8 +53,8 @@ export async function autoRecalculateStandings(
         return {success: true, recalculated: false};
       }
 
-      finalCategoryId = match.category_id;
-      finalSeasonId = match.season_id;
+      finalCategoryId = match.category_id ?? undefined;
+      finalSeasonId = match.season_id ?? undefined;
     }
 
     if (!finalCategoryId || !finalSeasonId) {
@@ -102,7 +102,11 @@ export async function autoRecalculateStandings(
       `Recalculating standings for category ${finalCategoryId} and season ${finalSeasonId}`
     );
 
-    const result = await calculateStandings(finalCategoryId, finalSeasonId, season?.is_closed);
+    const result = await calculateStandings(
+      finalCategoryId,
+      finalSeasonId,
+      season?.is_closed ?? false
+    );
 
     if (result.success) {
       console.log('Standings recalculated successfully');

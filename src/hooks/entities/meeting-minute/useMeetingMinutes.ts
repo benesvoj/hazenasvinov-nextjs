@@ -30,9 +30,12 @@ export function useMeetingMinutes() {
           ),
           attendees:meeting_attendees (
             id,
+            meeting_minutes_id,
             user_id,
             status,
-            notes
+            notes,
+            created_at,
+            updated_at
           )
         `
         )
@@ -66,7 +69,7 @@ export function useMeetingMinutes() {
 
       // Fetch user data for wrote_by (still using users for who wrote the minutes)
       const wroteByUserIds = new Set<string>();
-      data?.forEach((item: MeetingMinutes) => {
+      data?.forEach((item) => {
         if (item.wrote_by) wroteByUserIds.add(item.wrote_by);
       });
 
@@ -86,7 +89,7 @@ export function useMeetingMinutes() {
 
       // Fetch members data for attendees
       const memberIds = new Set<string>();
-      data?.forEach((item: MeetingMinutes) => {
+      data?.forEach((item) => {
         item.attendees?.forEach((attendee) => {
           if (attendee.user_id) memberIds.add(attendee.user_id);
         });
@@ -110,12 +113,14 @@ export function useMeetingMinutes() {
 
       // Transform the data to include user and member information
       const transformedData =
-        data?.map((item: MeetingMinutes) => ({
+        data?.map((item) => ({
           ...item,
           wrote_by_user: wroteByUsersData.find((u) => u.id === item.wrote_by) || null,
           attendees:
-            item.attendees?.map((attendee: MeetingAttendee) => ({
+            item.attendees?.map((attendee) => ({
               ...attendee,
+              // `status` is a text column holding the app's own value set
+              status: attendee.status as MeetingAttendee['status'],
               member: membersData.find((m) => m.id === attendee.user_id) || null,
             })) || [],
         })) || [];

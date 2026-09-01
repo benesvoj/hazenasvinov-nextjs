@@ -62,11 +62,7 @@ export function useCategoryPageData(
 
       // Batch 1: Get category and active season in parallel
       const [categoryResult, seasonResult] = await Promise.all([
-        supabase
-          .from('categories')
-          .select('id, name, description, is_active, sort_order')
-          .eq('slug', categorySlug)
-          .single(),
+        supabase.from('categories').select('*').eq('slug', categorySlug).single(),
         supabase.from('seasons').select('id, name, is_active').eq('is_active', true).single(),
       ]);
 
@@ -82,7 +78,7 @@ export function useCategoryPageData(
       const season = seasonResult.data;
 
       // Batch 2: Prepare all remaining queries based on what we need
-      const queries: Promise<any>[] = [];
+      const queries: PromiseLike<any>[] = [];
 
       // Posts query - filter by category
       if (includePosts) {

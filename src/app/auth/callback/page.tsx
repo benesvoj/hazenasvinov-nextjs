@@ -76,7 +76,7 @@ export default function AuthCallbackPage() {
             }
 
             // Ensure user has a profile before proceeding
-            if (result.data && result.data.user) {
+            if (result?.data?.user) {
               try {
                 // Use the safe profile function to ensure profile exists
                 const {error: profileError} = await supabase.rpc('get_user_profile_safe', {

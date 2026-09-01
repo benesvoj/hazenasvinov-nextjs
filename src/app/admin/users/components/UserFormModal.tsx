@@ -305,7 +305,11 @@ export default function UserFormModal({
           <span className="text-sm text-gray-400">Žádné</span>
         );
       case 'assignedAt':
-        return <span className="text-sm">{formatDateString(item.created_at)}</span>;
+        return (
+          <span className="text-sm">
+            {item.created_at ? formatDateString(item.created_at) : '—'}
+          </span>
+        );
     }
   };
 

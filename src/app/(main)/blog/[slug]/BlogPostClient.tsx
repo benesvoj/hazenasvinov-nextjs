@@ -42,12 +42,23 @@ export function BlogPostClient({slug}: BlogPostClientProps) {
     enabled: !!data?.post?.match_id,
   });
 
-  const {data: linkedTournament} = supabase
-    .from('tournaments')
-    .select('id')
-    .eq('post_id', data?.post?.id)
-    .eq('status', 'published')
-    .single();
+  // The builder was never awaited, so `linkedTournament` was always undefined and
+  // the embed below never rendered. Run it through the same query client as the
+  // rest of this component.
+  const {data: linkedTournament} = useQuery({
+    queryKey: ['blog-post-tournament', data?.post?.id],
+    queryFn: async () => {
+      const {data: tournament} = await supabase
+        .from('tournaments')
+        .select('id')
+        .eq('post_id', data!.post.id)
+        .eq('status', 'published')
+        .maybeSingle();
+
+      return tournament;
+    },
+    enabled: !!data?.post?.id,
+  });
 
   // Handle loading state (should rarely show due to server prefetch)
   if (isLoading || !data) {

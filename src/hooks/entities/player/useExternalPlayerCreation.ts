@@ -35,7 +35,7 @@ export function useExternalPlayerCreation() {
           return null;
         }
 
-        return category.gender;
+        return category.gender as Genders | null;
       } catch (error) {
         console.error('Error fetching category gender:', error);
         return null;
@@ -97,7 +97,7 @@ export function useExternalPlayerCreation() {
           name: formData.name.trim(),
           surname: formData.surname.trim(),
           registration_number: formData.registration_number.trim(),
-          functions: MemberFunction.PLAYER, // External player-manager are player-manager
+          functions: [MemberFunction.PLAYER], // External player-manager are player-manager
           sex: formData.sex, // Use explicit gender selection from form
           category_id: categoryId, // Set category_id from the match category
         })

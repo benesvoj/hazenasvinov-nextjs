@@ -135,8 +135,9 @@ export async function calculateStandings(
     });
 
     // Calculate standings from matches
-    completedMatches.forEach((match: Match) => {
+    completedMatches.forEach((match) => {
       if (match.home_score === null || match.away_score === null) return;
+      if (!match.home_team_id || !match.away_team_id) return;
 
       const homeStanding = standingsMap.get(match.home_team_id);
       const awayStanding = standingsMap.get(match.away_team_id);

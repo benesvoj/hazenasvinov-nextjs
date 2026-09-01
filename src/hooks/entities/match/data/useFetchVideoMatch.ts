@@ -38,16 +38,16 @@ export function useFetchVideoMatch(videoId: string | null): UseFetchVideoMatchRe
 
         // First, get the match_id from the video
         const {data: videoData, error: videoError} = await supabase
-          .from('videos')
+          .from('match_videos')
           .select('match_id')
-          .eq('id', videoId)
-          .single();
+          .eq('video_id', videoId)
+          .maybeSingle();
 
         if (videoError) {
           throw videoError;
         }
 
-        if (!videoData.match_id) {
+        if (!videoData?.match_id) {
           setMatch(null);
           return;
         }
@@ -90,7 +90,7 @@ export function useFetchVideoMatch(videoId: string | null): UseFetchVideoMatchRe
           throw matchError;
         }
 
-        setMatch(matchData);
+        setMatch(matchData as unknown as Match);
       } catch (err) {
         console.error('Error fetching video match:', err);
         setError(err instanceof Error ? err.message : 'Chyba při načítání zápasu');

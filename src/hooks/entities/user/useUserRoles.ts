@@ -21,7 +21,7 @@ export function useUserRoles() {
 
   const supabase = useSupabaseClient();
   const {user, userProfile, userCategories, refreshProfile} = useUser();
-  const fetchUserRoleSummariesRef = useRef<() => Promise<void>>();
+  const fetchUserRoleSummariesRef = useRef<(() => Promise<void>) | undefined>(undefined);
   const supabaseRef = useRef(supabase);
   supabaseRef.current = supabase;
 
@@ -103,7 +103,7 @@ export function useUserRoles() {
               updated_at: new Date().toISOString(),
             },
             {
-              onConflict: ['user_id', 'role_id'],
+              onConflict: 'user_id,role_id',
               ignoreDuplicates: false,
             }
           )

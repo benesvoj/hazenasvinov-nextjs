@@ -71,7 +71,9 @@ export default function AlbumCard({album, onAlbumClick}: AlbumCardProps) {
           <div className="flex items-center justify-between text-sm text-gray-500 pt-3 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center space-x-2">
               <CalendarIcon className="w-4 h-4" />
-              <span>{new Date(album.created_at).toLocaleDateString('cs-CZ')}</span>
+              <span>
+                {album.created_at ? new Date(album.created_at).toLocaleDateString('cs-CZ') : '—'}
+              </span>
             </div>
 
             <div className="flex items-center space-x-2">

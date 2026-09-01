@@ -57,8 +57,8 @@ export interface UserProfile {
   /** FK to role_definitions **/
   role_id: string | null;
   assigned_categories: string[] | null;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 /** Input for role assignment */

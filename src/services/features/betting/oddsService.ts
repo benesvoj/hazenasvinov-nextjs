@@ -159,7 +159,7 @@ export async function getOddsForMatch(matchId: string): Promise<MatchOdds | null
     const matchOdds: MatchOdds = {
       match_id: matchId,
       '1X2': {'1': 0, X: 0, '2': 0},
-      last_updated: oddsData[0].created_at,
+      last_updated: oddsData[0].created_at ?? new Date().toISOString(),
     };
 
     oddsData.forEach((odd: any) => {
@@ -308,7 +308,7 @@ export async function getOddsHistory(matchId: string, limit: number = 50): Promi
       return [];
     }
 
-    return data || [];
+    return (data || []) as OddsHistory[];
   } catch (error) {
     console.error('Error in getOddsHistory:', error);
     return [];
@@ -343,6 +343,10 @@ export async function generateOddsForUpcomingMatches(dayLimit: number = 7): Prom
     let successCount = 0;
 
     for (const match of matches) {
+      if (!match.home_team_id || !match.away_team_id) {
+        continue;
+      }
+
       const success = await generateAndSaveOdds({
         match_id: match.id,
         home_team_id: match.home_team_id,
@@ -435,7 +439,7 @@ export async function getMatchesWithOdds(limit: number = 100): Promise<string[]>
     }
 
     // Get unique match IDs
-    const matchIds = data?.map((item: BettingOdd) => item.match_id) || [];
+    const matchIds = data?.map((item) => item.match_id) || [];
     return [...new Set(matchIds)] as string[];
   } catch (error) {
     console.error('Error in getMatchesWithOdds:', error);

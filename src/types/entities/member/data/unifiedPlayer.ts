@@ -1,4 +1,4 @@
-import {Member, PlayerLoan} from '@/types';
+import {Member} from '@/types';
 
 export interface UnifiedPlayer extends Member {
   is_external?: boolean;

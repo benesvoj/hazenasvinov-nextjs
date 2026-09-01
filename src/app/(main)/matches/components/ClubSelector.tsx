@@ -8,7 +8,10 @@ import {Button, Image} from '@heroui/react';
 import {BuildingOfficeIcon} from '@heroicons/react/24/outline';
 
 import {useFetchCategories, useFetchSeasons, useSeasonFiltering, useSupabaseClient} from '@/hooks';
-import {ClubWithTeams} from '@/types';
+import {Club, Team} from '@/types';
+
+/** Only the club fields this picker selects and renders. */
+type ClubOption = Pick<Club, 'id' | 'name' | 'short_name' | 'logo_url'> & {teams: Team[]};
 
 interface ClubSelectorProps {
   selectedCategory?: string;
@@ -25,7 +28,7 @@ export default function ClubSelector({
   onClubDataChange,
   className = '',
 }: ClubSelectorProps) {
-  const [clubs, setClubs] = useState<ClubWithTeams[]>([]);
+  const [clubs, setClubs] = useState<ClubOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -140,12 +143,9 @@ export default function ClubSelector({
           throw new Error(`Failed to fetch club categories: ${clubCategoriesError.message}`);
         }
 
-        if (clubError) {
-          throw new Error(`Failed to fetch clubs: ${clubError.message}`);
-        }
-
-        // Transform the data to match our Club interface
-        const transformedClubs: ClubWithTeams[] = (clubData || []).map((club: any) => {
+        // Transform the data to match our Club interface. The select is deliberately
+        // partial — only the fields the picker renders.
+        const transformedClubs: ClubOption[] = (clubData || []).map((club: any) => {
           // Find all club category for this club
           const clubCategories =
             clubCategoriesData?.filter((cc: any) => cc.club_id === club.id) || [];
