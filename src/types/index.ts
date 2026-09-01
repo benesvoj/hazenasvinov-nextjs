@@ -55,7 +55,6 @@ export * from './entities/match/schema/matchesSchema';
 export * from './entities/match/state/standing';
 export * from './entities/member/business/clubMemberRelationship';
 export * from './entities/member/business/memberClubRelationship';
-export * from './entities/member/business/playerLoan';
 export * from './entities/member/converters/memberConverters';
 export * from './entities/member/data/baseMember';
 export * from './entities/member/data/externalPlayer';

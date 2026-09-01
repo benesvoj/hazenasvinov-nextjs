@@ -4,11 +4,10 @@ import {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 
 import {Select, SelectItem, Button, Input} from '@heroui/react';
 
-import {ArrowPathIcon, CheckIcon, PlusIcon} from '@heroicons/react/24/outline';
+import {CheckIcon, PlusIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
-import {PlayerLoanModal} from '@/components';
 import {getClubName} from '@/constants';
 import {PlayerPosition} from '@/enums';
 import {CreateExternalPlayerModal, CreateMemberModal} from '@/features/lineupManager';
@@ -38,7 +37,6 @@ export default function UnifiedPlayerManager({
     return players.filter((player) => !excludePlayerIds.includes(player.id));
   }, [players, excludePlayerIds]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showLoanModal, setShowLoanModal] = useState(false);
   const [showCreateMemberModal, setShowCreateMemberModal] = useState(false);
   const [showCreateExternalPlayerModal, setShowCreateExternalPlayerModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerSearchResult | null>(null);
@@ -125,13 +123,11 @@ export default function UnifiedPlayerManager({
     setFilters((prev) => ({...prev, ...newFilters}));
   };
 
-  const handlePlayerAction = (player: PlayerSearchResult, action: 'select' | 'loan') => {
+  const handlePlayerAction = (player: PlayerSearchResult, action: 'select') => {
     setSelectedPlayer(player);
 
     if (action === 'select') {
       onPlayerSelected?.(player);
-    } else if (action === 'loan') {
-      setShowLoanModal(true);
     }
   };
 
@@ -314,30 +310,12 @@ export default function UnifiedPlayerManager({
                     startContent={<CheckIcon className="w-4 h-4" />}
                     aria-label="Vybrat hráče"
                   />
-                  <Button
-                    onPress={() => handlePlayerAction(player, 'loan')}
-                    isIconOnly
-                    size="sm"
-                    startContent={<ArrowPathIcon className="w-4 h-4" />}
-                    aria-label="Půjčit hráče"
-                  />
                 </div>
               </div>
             </div>
           ))
         )}
       </div>
-
-      {/* Loan Modal */}
-      <PlayerLoanModal
-        isOpen={showLoanModal}
-        onClose={() => setShowLoanModal(false)}
-        playerId={selectedPlayer?.id}
-        onLoanCreated={() => {
-          setShowLoanModal(false);
-          setSelectedPlayer(null);
-        }}
-      />
 
       {/* Create Member Modal */}
       <CreateMemberModal

@@ -6,6 +6,5 @@ export * from './admin';
 export * from './betting';
 export * from './blog';
 export * from './coaches';
-export * from './loaning';
 export * from './meeting-minutes';
 export {ReleaseNotesModal} from './release-notes/ReleaseNotesModal';

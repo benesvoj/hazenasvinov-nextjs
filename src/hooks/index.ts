@@ -88,7 +88,6 @@ export * from './entities/member-function/state/useMemberFunctions';
 export * from './entities/membershipFee/business/usePaymentStatus';
 export * from './entities/membershipFee/state/useMemberPayments';
 export * from './entities/player/useExternalPlayerCreation';
-export * from './entities/player/usePlayerLoans';
 export * from './entities/player/usePlayerStats';
 export * from './entities/player/useUnifiedPlayers';
 export * from './entities/point-deduction/state/usePointDeduction';
