@@ -153,6 +153,20 @@ export default function CoachAttendanceContainer() {
             />
           )}
 
+          {/*
+            Statistiky se počítají jen z tréninků označených jako Proběhlo.
+            Generátor zakládá všechno jako Naplánováno, takže trenér, který stav
+            nemění, vidí v dlaždicích nuly, i když docházku zapisuje. Řečeno
+            nahlas, jinak to na stránce nic nevysvětluje.
+          */}
+          {state.unmarkedPastSessions > 0 && (
+            <Alert
+              color="warning"
+              title={translations.attendance.unmarkedPastSessions.title(state.unmarkedPastSessions)}
+              description={translations.attendance.unmarkedPastSessions.description}
+            />
+          )}
+
           {/* Stats row */}
           <AttendanceStatsCards
             sessions={state.sessions}

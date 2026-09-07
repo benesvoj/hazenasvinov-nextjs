@@ -27,6 +27,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       awayTeamName,
       members,
       categoryId,
+      lockedTeam,
       onClose,
       onMemberCreated,
     },
@@ -73,6 +74,7 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
       awayTeamName,
       members,
       categoryId,
+      initialTeam: lockedTeam,
       onClose,
       onMemberCreated,
     });
@@ -197,16 +199,22 @@ const LineupManager = forwardRef<LineupManagerRef, LineupManagerProps>(
     return (
       <LineupErrorBoundary>
         <div className="space-y-6">
-          <TeamSelector
-            selectedTeam={selectedTeam}
-            onTeamSelect={setSelectedTeam}
-            homeTeamName={homeTeamName}
-            awayTeamName={awayTeamName}
-            homeFormData={homeFormData}
-            awayFormData={awayFormData}
-            calculateLocalSummary={calculateLocalSummary}
-            t={t}
-          />
+          {/*
+            Trenér otevírá manažera zamčeného na náš klub — přepínač domácí/hosté
+            by mu dovolil přepsat soupisku soupeře. Admin ho dostává dál.
+          */}
+          {!lockedTeam && (
+            <TeamSelector
+              selectedTeam={selectedTeam}
+              onTeamSelect={setSelectedTeam}
+              homeTeamName={homeTeamName}
+              awayTeamName={awayTeamName}
+              homeFormData={homeFormData}
+              awayFormData={awayFormData}
+              calculateLocalSummary={calculateLocalSummary}
+              t={t}
+            />
+          )}
 
           {/* Lineup Management */}
           {loading ? (

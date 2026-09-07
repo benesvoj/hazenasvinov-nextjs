@@ -22,6 +22,16 @@ export const attendanceTranslations = {
     description:
       'Docházka se zakládá podle soupisky, takže nová docházka bude jen pro ně. Doplňte soupisku, pokud mají být i ostatní. Chybí:',
   },
+  unmarkedPastSessions: {
+    title: (count: number) =>
+      count === 1
+        ? '1 trénink, který už proběhl, je stále ve stavu Naplánováno'
+        : count >= 2 && count <= 4
+          ? `${count} tréninky, které už proběhly, jsou stále ve stavu Naplánováno`
+          : `${count} tréninků, které už proběhly, je stále ve stavu Naplánováno`,
+    description:
+      'Statistiky se počítají jen z tréninků označených jako Proběhlo, takže docházka z těchto tréninků se do nich nezapočítá. Změňte jim stav přes nabídku u tréninku.',
+  },
   labels: {
     newSession: 'Nový trénink',
     newSessionShort: 'Nový',

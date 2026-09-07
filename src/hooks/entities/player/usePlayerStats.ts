@@ -1,6 +1,8 @@
 'use client';
 
-import {useState, useEffect, useMemo} from 'react';
+import {useMemo} from 'react';
+
+import {useQuery} from '@tanstack/react-query';
 
 import {useUser} from '@/contexts';
 import {useSupabaseClient} from '@/hooks';
@@ -23,6 +25,16 @@ export interface PlayerStats {
   average_goals_per_match: number;
 }
 
+/**
+ * Prefix stačí na invalidaci všech kategorií a sezón najednou — po uložení
+ * sestavy se neví, které karty jsou zrovna namontované.
+ */
+export const PLAYER_STATS_QUERY_KEY = 'player-stats';
+
+export function playerStatsQueryKey(userId?: string, categoryId?: string, seasonId?: string) {
+  return [PLAYER_STATS_QUERY_KEY, userId ?? null, categoryId ?? null, seasonId ?? null] as const;
+}
+
 export interface UsePlayerStatsResult {
   topScorers: PlayerStats[];
   yellowCardPlayers: PlayerStats[];
@@ -31,27 +43,34 @@ export interface UsePlayerStatsResult {
   error: string | null;
 }
 
-export function usePlayerStats(categoryId?: string): UsePlayerStatsResult {
-  const [playerStats, setPlayerStats] = useState<PlayerStats[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const {user, userCategories, getCurrentUserCategories} = useUser();
+/**
+ * Statistiky hráčů (góly, karty) pro dashboardové karty.
+ *
+ * `seasonId` je povinný v tom smyslu, že bez něj hook nevrací nic. Dotaz dřív
+ * filtroval jen podle kategorie a stavu zápasu, takže sčítal všechny sezóny
+ * dohromady — trenér Mužů viděl 150 gólů z 2025/2026 jako by patřily aktuální
+ * sezóně. Prázdný výsledek je tu lepší než součet přes historii.
+ */
+export function usePlayerStats(categoryId?: string, seasonId?: string): UsePlayerStatsResult {
+  const {user, getCurrentUserCategories} = useUser();
 
   const supabase = useSupabaseClient();
 
-  useEffect(() => {
-    const fetchPlayerStats = async () => {
-      if (!user?.id) return;
+  // Přes react-query, ne přes useState/useEffect. Dva důvody: po zapsání gólů
+  // v manažeru sestav je potřeba dlaždice zneplatnit (dřív držely stará čísla
+  // až do reloadu prohlížeče) a tři karty na dashboardu volají tenhle hook se
+  // stejnými argumenty — teď se dotaz odešle jednou, ne třikrát.
+  const query = useQuery({
+    queryKey: playerStatsQueryKey(user?.id, categoryId, seasonId),
+    queryFn: async (): Promise<PlayerStats[]> => {
+      // `enabled` níž tohle zaručuje; guard je tu, aby to věděl i TypeScript.
+      if (!seasonId) return [];
 
-      try {
-        setLoading(true);
-        setError(null);
-
+      {
         // Get user's assigned category
         const assignedCategoryIds = await getCurrentUserCategories();
         if (assignedCategoryIds.length === 0) {
-          setPlayerStats([]);
-          return;
+          return [];
         }
 
         // If categoryId is provided, filter by that category, otherwise use all assigned category
@@ -82,16 +101,13 @@ export function usePlayerStats(categoryId?: string): UsePlayerStatsResult {
           `
           )
           .eq('lineup.match.status', 'completed')
+          .eq('lineup.match.season_id', seasonId)
           .in('lineup.match.category_id', categoryIdsToUse);
 
-        if (lineupPlayersError) {
-          setPlayerStats([]);
-          return;
-        }
+        if (lineupPlayersError) throw lineupPlayersError;
 
         if (!lineupPlayers || lineupPlayers.length === 0) {
-          setPlayerStats([]);
-          return;
+          return [];
         }
 
         // Process each player's statistics
@@ -157,18 +173,18 @@ export function usePlayerStats(categoryId?: string): UsePlayerStatsResult {
             stats.matches_played > 0 ? stats.goals / stats.matches_played : 0,
         }));
 
-        setPlayerStats(statsArray);
-      } catch (err) {
-        console.error('Error fetching player statistics:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error occurred');
-        setPlayerStats([]);
-      } finally {
-        setLoading(false);
+        return statsArray;
       }
-    };
+    },
+    // Karty se montují až po `AppPageLayout isLoading`, tedy až je sezóna
+    // načtená. Bez sezóny se raději nedotazujeme, než abychom spadli zpět na
+    // součet přes všechny sezóny.
+    enabled: !!user?.id && !!seasonId,
+  });
 
-    fetchPlayerStats();
-  }, [user?.id, getCurrentUserCategories, categoryId]);
+  const playerStats = useMemo(() => query.data ?? [], [query.data]);
+  const loading = query.isPending && !!user?.id && !!seasonId;
+  const error = query.error ? ((query.error as Error).message ?? 'Unknown error occurred') : null;
 
   // Memoize the sorted results
   const topScorers = useMemo(() => {

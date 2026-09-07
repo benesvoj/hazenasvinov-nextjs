@@ -5,6 +5,7 @@ import {useRef} from 'react';
 import {translations} from '@/lib/translations';
 
 import {UnifiedModal} from '@/components';
+import {TeamTypes} from '@/enums';
 import {Match, Member, LineupManagerRef} from '@/types';
 
 import LineupManager from './LineupManager';
@@ -14,6 +15,8 @@ interface LineupManagerModalProps {
   onClose: () => void;
   selectedMatch: Match | null;
   members: Member[];
+  /** Zamkne manažera na jeden tým a schová přepínač domácí/hosté. */
+  lockedTeam?: TeamTypes;
   onMemberCreated?: () => void; // Callback when a new member is created
 }
 
@@ -22,6 +25,7 @@ export default function LineupManagerModal({
   onClose,
   selectedMatch,
   members,
+  lockedTeam,
   onMemberCreated,
 }: LineupManagerModalProps) {
   const lineupManagerRef = useRef<LineupManagerRef>(null);
@@ -37,6 +41,7 @@ export default function LineupManagerModal({
     awayTeamName: selectedMatch.away_team?.name || 'Neznámý tým',
     members: members,
     categoryId: selectedMatch.category_id,
+    lockedTeam: lockedTeam,
     onClose: onClose,
     onMemberCreated: onMemberCreated,
     ref: lineupManagerRef,

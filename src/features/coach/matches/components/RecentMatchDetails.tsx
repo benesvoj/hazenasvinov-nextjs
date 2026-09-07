@@ -16,6 +16,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Chip,
 } from '@heroui/react';
 
 import {ArrowDownTrayIcon} from '@heroicons/react/16/solid';
@@ -31,28 +32,38 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 
+import {getLineupCoachRoleOptions} from '@/enums/getLineupCoachRoleOptions';
+
+import type {MatchLineupPlayer} from '@/hooks/entities/lineup/useFetchMatchLineup';
+
+import {BallIcon, RedCardIcon, YellowCardIcon} from '@/lib/icons';
+
+import {useAppData} from '@/contexts/AppDataContext';
+
 import {LoadingSpinner, showToast} from '@/components';
+import {PlayerPosition, TeamTypes} from '@/enums';
+import {LineupManagerModal} from '@/features/lineupManager';
 import {
   useMatchMetadata,
   useAddMatchMetadata,
   useDeleteMatchMetadata,
+  useFetchMatchLineup,
   useSetPrimaryMatchMetadata,
 } from '@/hooks';
-import {
-  Match,
-  isPhotoMetadata,
-  isNoteMetadata,
-  isLineupMetadata,
-  isDocumentMetadata,
-} from '@/types';
+import {Match, isPhotoMetadata, isNoteMetadata, isDocumentMetadata} from '@/types';
 
 interface RecentMatchDetailsProps {
   selectedMatch: Match;
   onClose: () => void;
 }
 
+/** Trest 5 min, 10 min i osobní se v přehledu zobrazují jako jedna červená. */
+const totalRedCards = (player: MatchLineupPlayer) =>
+  (player.red_cards_5min ?? 0) + (player.red_cards_10min ?? 0) + (player.red_cards_personal ?? 0);
+
 export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatchDetailsProps) {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [isLineupManagerOpen, setIsLineupManagerOpen] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -68,11 +79,34 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
     isLoading: notesLoading,
     error: notesError,
   } = useMatchMetadata(selectedMatch.id, 'note');
+
+  // Který tým je náš klub. Zápas cizích týmů se sem přes soupis trenéra
+  // nedostane, ale flagy jsou na Match volitelné, tak se s tím počítá.
+  const ownTeamType = selectedMatch.home_team_is_own_club
+    ? TeamTypes.HOME
+    : selectedMatch.away_team_is_own_club
+      ? TeamTypes.AWAY
+      : null;
+  const ownTeamId =
+    ownTeamType === TeamTypes.HOME
+      ? selectedMatch.home_team_id
+      : ownTeamType === TeamTypes.AWAY
+        ? selectedMatch.away_team_id
+        : undefined;
+  const ownTeamName =
+    (ownTeamType === TeamTypes.HOME
+      ? selectedMatch.home_team?.name
+      : selectedMatch.away_team?.name) || 'Náš tým';
+
   const {
-    data: lineups = [],
-    isLoading: lineupsLoading,
-    error: lineupsError,
-  } = useMatchMetadata(selectedMatch.id, 'lineup');
+    lineup: ownTeamLineup,
+    isLoading: lineupLoading,
+    error: lineupError,
+  } = useFetchMatchLineup(selectedMatch.id, ownTeamId);
+
+  const {
+    members: {data: members},
+  } = useAppData();
   const {
     data: documents = [],
     isLoading: documentsLoading,
@@ -122,7 +156,6 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
   // Get primary items
   const primaryPhoto = photos.find((photo) => photo.is_primary && isPhotoMetadata(photo));
   const primaryNote = notes.find((note) => note.is_primary && isNoteMetadata(note));
-  const primaryLineup = lineups.find((lineup) => lineup.is_primary && isLineupMetadata(lineup));
   const primaryDocument = documents.find((doc) => doc.is_primary && isDocumentMetadata(doc));
 
   // Mutations
@@ -249,676 +282,663 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
   };
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0">
-          <ClipboardDocumentListIcon className="w-5 h-5 text-purple-600 flex-shrink-0" />
-          <h3 className="text-lg sm:text-xl font-semibold truncate">Detail zápasu</h3>
-        </div>
-        <Button isIconOnly variant="light" size="sm" onPress={onClose} className="flex-shrink-0">
-          <XMarkIcon className="w-4 h-4" />
-        </Button>
-      </CardHeader>
-      <CardBody className="p-0">
-        <div className="p-3 sm:p-4 space-y-6">
-          {/* Match Photos */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <PhotoIcon className="w-5 h-5 text-blue-600" />
-                <h4 className="font-semibold text-base">
-                  Zápis utkání
-                  {photos.length > 0 && (
-                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                      ({photos.length})
-                    </span>
-                  )}
-                </h4>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
-                <Button
-                  size="sm"
-                  variant="flat"
-                  color="primary"
-                  onPress={() => fileInputRef.current?.click()}
-                  startContent={<PlusIcon className="w-4 h-4" />}
-                  isLoading={isUploadingPhoto}
-                  className="text-xs"
-                >
-                  {isUploadingPhoto ? 'Nahrávání...' : 'Přidat fotku'}
-                </Button>
-              </div>
-            </div>
-
-            {photosLoading ? (
-              <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                <LoadingSpinner />
-              </div>
-            ) : photosError ? (
-              <div className="w-full h-48 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center border border-red-200 dark:border-red-800">
-                <div className="text-center text-red-600 dark:text-red-400">
-                  <PhotoIcon className="w-8 h-8 mx-auto mb-2" />
-                  <p className="text-sm">Chyba při načítání fotek</p>
-                  <p className="text-xs mt-1">Zkuste to prosím znovu</p>
+    <>
+      <Card className="h-full">
+        <CardHeader className="flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0">
+            <ClipboardDocumentListIcon className="w-5 h-5 text-purple-600 flex-shrink-0" />
+            <h3 className="text-lg sm:text-xl font-semibold truncate">Detail zápasu</h3>
+          </div>
+          <Button isIconOnly variant="light" size="sm" onPress={onClose} className="flex-shrink-0">
+            <XMarkIcon className="w-4 h-4" />
+          </Button>
+        </CardHeader>
+        <CardBody className="p-0">
+          <div className="p-3 sm:p-4 space-y-6">
+            {/* Match Photos */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <PhotoIcon className="w-5 h-5 text-blue-600" />
+                  <h4 className="font-semibold text-base">
+                    Zápis utkání
+                    {photos.length > 0 && (
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                        ({photos.length})
+                      </span>
+                    )}
+                  </h4>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    color="primary"
+                    onPress={() => fileInputRef.current?.click()}
+                    startContent={<PlusIcon className="w-4 h-4" />}
+                    isLoading={isUploadingPhoto}
+                    className="text-xs"
+                  >
+                    {isUploadingPhoto ? 'Nahrávání...' : 'Přidat fotku'}
+                  </Button>
                 </div>
               </div>
-            ) : photos.length > 0 ? (
-              <div className="space-y-3">
-                {/* Photos Table */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <Table className="w-full" aria-label="Photos table">
-                    <TableHeader>
-                      <TableColumn>Náhled</TableColumn>
-                      <TableColumn>Název souboru</TableColumn>
-                      <TableColumn>Velikost</TableColumn>
-                      <TableColumn>Typ</TableColumn>
-                      <TableColumn>Akce</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                      {photos.map((photo) => (
-                        <TableRow
-                          key={photo.id}
-                          className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                        >
-                          <TableCell>
-                            <div className="w-16 h-12 bg-gray-100 dark:bg-gray-600 rounded overflow-hidden relative">
-                              <Image
-                                src={getSafeImageUrl(photo.file_url, photo.metadata)}
-                                alt={photo.file_name || 'Fotografie'}
-                                width={64}
-                                height={48}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.src = '/placeholder-image.jpg';
-                                }}
-                              />
-                              {photo.file_url?.startsWith('blob:') && (
-                                <div className="absolute inset-0 bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-                                  <div className="text-center">
-                                    <div className="text-red-600 dark:text-red-400 text-xs">⚠️</div>
-                                    <div className="text-red-600 dark:text-red-400 text-xs">
-                                      Invalid
+
+              {photosLoading ? (
+                <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                  <LoadingSpinner />
+                </div>
+              ) : photosError ? (
+                <div className="w-full h-48 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center border border-red-200 dark:border-red-800">
+                  <div className="text-center text-red-600 dark:text-red-400">
+                    <PhotoIcon className="w-8 h-8 mx-auto mb-2" />
+                    <p className="text-sm">Chyba při načítání fotek</p>
+                    <p className="text-xs mt-1">Zkuste to prosím znovu</p>
+                  </div>
+                </div>
+              ) : photos.length > 0 ? (
+                <div className="space-y-3">
+                  {/* Photos Table */}
+                  <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <Table className="w-full" aria-label="Photos table">
+                      <TableHeader>
+                        <TableColumn>Náhled</TableColumn>
+                        <TableColumn>Název souboru</TableColumn>
+                        <TableColumn>Velikost</TableColumn>
+                        <TableColumn>Typ</TableColumn>
+                        <TableColumn>Akce</TableColumn>
+                      </TableHeader>
+                      <TableBody>
+                        {photos.map((photo) => (
+                          <TableRow
+                            key={photo.id}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                          >
+                            <TableCell>
+                              <div className="w-16 h-12 bg-gray-100 dark:bg-gray-600 rounded overflow-hidden relative">
+                                <Image
+                                  src={getSafeImageUrl(photo.file_url, photo.metadata)}
+                                  alt={photo.file_name || 'Fotografie'}
+                                  width={64}
+                                  height={48}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.src = '/placeholder-image.jpg';
+                                  }}
+                                />
+                                {photo.file_url?.startsWith('blob:') && (
+                                  <div className="absolute inset-0 bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                                    <div className="text-center">
+                                      <div className="text-red-600 dark:text-red-400 text-xs">
+                                        ⚠️
+                                      </div>
+                                      <div className="text-red-600 dark:text-red-400 text-xs">
+                                        Invalid
+                                      </div>
                                     </div>
                                   </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {photo.file_name || 'Bez názvu'}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(photo.created_at).toLocaleDateString('cs-CZ')}
+                              </div>
+                              {photo.file_url?.startsWith('blob:') && (
+                                <div className="text-xs text-red-600 dark:text-red-400 mt-1">
+                                  ⚠️ Invalid URL - Please re-upload
                                 </div>
                               )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                              {photo.file_name || 'Bez názvu'}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {new Date(photo.created_at).toLocaleDateString('cs-CZ')}
-                            </div>
-                            {photo.file_url?.startsWith('blob:') && (
-                              <div className="text-xs text-red-600 dark:text-red-400 mt-1">
-                                ⚠️ Invalid URL - Please re-upload
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm text-gray-900 dark:text-gray-100">
+                                {photo.file_size
+                                  ? `${Math.round(photo.file_size / 1024)} KB`
+                                  : 'Neznámá'}
                               </div>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm text-gray-900 dark:text-gray-100">
-                              {photo.file_size
-                                ? `${Math.round(photo.file_size / 1024)} KB`
-                                : 'Neznámá'}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm text-gray-900 dark:text-gray-100">
-                              {photo.mime_type || 'Neznámý'}
-                            </div>
-                          </TableCell>
-                          <TableCell className="relative flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="light"
-                              color="primary"
-                              onPress={() => {
-                                // Open photo in full view
-                                const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
-                                window.open(imageUrl, '_blank');
-                              }}
-                              title="Otevřít v novém okně"
-                              className="text-xs"
-                            >
-                              <PhotoIcon className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="light"
-                              color="primary"
-                              onPress={() => {
-                                // Download photo
-                                const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
-                                const link = document.createElement('a');
-                                link.href = imageUrl;
-                                link.download = photo.file_name || 'photo.jpg';
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                              }}
-                              title="Stáhnout"
-                              className="text-xs"
-                            >
-                              <ArrowDownTrayIcon className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="light"
-                              color="danger"
-                              onPress={() => deleteMetadata.mutate(photo.id)}
-                              title="Smazat"
-                              className="text-xs"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            ) : (
-              <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
-                <div className="text-center text-gray-500 dark:text-gray-400">
-                  <PhotoIcon className="w-12 h-12 mx-auto mb-2" />
-                  <p className="text-sm">Žádné fotografie nejsou k dispozici</p>
-                  <p className="text-xs mt-1">Klikněte na &quot;Přidat fotku&quot; pro nahrání</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Match Statistics */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <ChartBarIcon className="w-5 h-5 text-green-600" />
-              <h4 className="font-semibold text-base">Statistiky zápasu</h4>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                <h5 className="font-medium text-sm text-gray-600 dark:text-gray-400 mb-2">
-                  {selectedMatch.home_team?.name || 'Domácí'}
-                </h5>
-                <div className="space-y-1 text-sm">
-                  <p>
-                    Góly: <span className="font-semibold">{selectedMatch.home_score}</span>
-                  </p>
-                  <p>
-                    Poločas:{' '}
-                    <span className="font-semibold">
-                      {selectedMatch.home_score_halftime || '-'}
-                    </span>
-                  </p>
-                  <p>
-                    Střely: <span className="font-semibold">-</span>
-                  </p>
-                  <p>
-                    Fauly: <span className="font-semibold">-</span>
-                  </p>
-                </div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                <h5 className="font-medium text-sm text-gray-600 dark:text-gray-400 mb-2">
-                  {selectedMatch.away_team?.name || 'Hosté'}
-                </h5>
-                <div className="space-y-1 text-sm">
-                  <p>
-                    Góly: <span className="font-semibold">{selectedMatch.away_score}</span>
-                  </p>
-                  <p>
-                    Poločas:{' '}
-                    <span className="font-semibold">
-                      {selectedMatch.away_score_halftime || '-'}
-                    </span>
-                  </p>
-                  <p>
-                    Střely: <span className="font-semibold">-</span>
-                  </p>
-                  <p>
-                    Fauly: <span className="font-semibold">-</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Lineups */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <UserGroupIcon className="w-5 h-5 text-purple-600" />
-                <h4 className="font-semibold text-base">
-                  Sestavy
-                  {lineups.length > 0 && (
-                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                      ({lineups.length})
-                    </span>
-                  )}
-                </h4>
-              </div>
-              <Button
-                size="sm"
-                variant="light"
-                onPress={() => {
-                  // TODO: Open lineup editor
-                }}
-                className="text-xs"
-              >
-                Upravit sestavy
-              </Button>
-            </div>
-
-            {lineupsLoading ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg flex items-center justify-center h-32">
-                  <LoadingSpinner />
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg flex items-center justify-center h-32">
-                  <LoadingSpinner />
-                </div>
-              </div>
-            ) : lineupsError ? (
-              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex items-center justify-center h-32 border border-red-200 dark:border-red-800">
-                <div className="text-center text-red-600 dark:text-red-400">
-                  <UserGroupIcon className="w-8 h-8 mx-auto mb-2" />
-                  <p className="text-sm">Chyba při načítání sestav</p>
-                  <p className="text-xs mt-1">Zkuste to prosím znovu</p>
-                </div>
-              </div>
-            ) : lineups.length > 0 ? (
-              <div className="space-y-4">
-                {lineups.map((lineup) => (
-                  <div key={lineup.id} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <h5 className="font-medium text-sm text-gray-600 dark:text-gray-400">
-                          {lineup.metadata?.formation || 'Sestava'}
-                        </h5>
-                        {lineup.is_primary && (
-                          <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded">
-                            Hlavní
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-1">
-                        {!lineup.is_primary && (
-                          <Button
-                            size="sm"
-                            variant="light"
-                            color="primary"
-                            onPress={() =>
-                              setPrimaryMetadata.mutate({
-                                id: lineup.id,
-                                matchId: selectedMatch.id,
-                                type: 'lineup',
-                              })
-                            }
-                            className="text-xs"
-                          >
-                            Hlavní
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="light"
-                          color="danger"
-                          onPress={() => deleteMetadata.mutate(lineup.id)}
-                          className="text-xs"
-                        >
-                          Smazat
-                        </Button>
-                      </div>
-                    </div>
-
-                    {lineup.metadata?.players ? (
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          {lineup.metadata.players.slice(0, 6).map((player: any, index: number) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 p-2 bg-white dark:bg-gray-700 rounded"
-                            >
-                              <span className="w-6 h-6 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full flex items-center justify-center text-xs font-semibold">
-                                {player.jersey_number}
-                              </span>
-                              <span className="truncate">{player.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                        {lineup.metadata.players.length > 6 && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            +{lineup.metadata.players.length - 6} dalších hráčů
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Detailní sestava není k dispozici
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Home Team Lineup */}
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                  <h5 className="font-medium text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    {selectedMatch.home_team?.name || 'Domácí tým'}
-                  </h5>
-                  <div className="space-y-2">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Sestava není k dispozici
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="light"
-                      className="text-xs w-full"
-                      onPress={() => {
-                        // TODO: Open lineup editor for home team
-                      }}
-                    >
-                      Upravit sestavu
-                    </Button>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm text-gray-900 dark:text-gray-100">
+                                {photo.mime_type || 'Neznámý'}
+                              </div>
+                            </TableCell>
+                            <TableCell className="relative flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="light"
+                                color="primary"
+                                onPress={() => {
+                                  // Open photo in full view
+                                  const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
+                                  window.open(imageUrl, '_blank');
+                                }}
+                                title="Otevřít v novém okně"
+                                className="text-xs"
+                              >
+                                <PhotoIcon className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="light"
+                                color="primary"
+                                onPress={() => {
+                                  // Download photo
+                                  const imageUrl = getSafeImageUrl(photo.file_url, photo.metadata);
+                                  const link = document.createElement('a');
+                                  link.href = imageUrl;
+                                  link.download = photo.file_name || 'photo.jpg';
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                }}
+                                title="Stáhnout"
+                                className="text-xs"
+                              >
+                                <ArrowDownTrayIcon className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="light"
+                                color="danger"
+                                onPress={() => deleteMetadata.mutate(photo.id)}
+                                title="Smazat"
+                                className="text-xs"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
-
-                {/* Away Team Lineup */}
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                  <h5 className="font-medium text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    {selectedMatch.away_team?.name || 'Hostující tým'}
-                  </h5>
-                  <div className="space-y-2">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Sestava není k dispozici
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="light"
-                      className="text-xs w-full"
-                      onPress={() => {
-                        // TODO: Open lineup editor for away team
-                      }}
-                    >
-                      Upravit sestavu
-                    </Button>
+              ) : (
+                <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <PhotoIcon className="w-12 h-12 mx-auto mb-2" />
+                    <p className="text-sm">Žádné fotografie nejsou k dispozici</p>
+                    <p className="text-xs mt-1">Klikněte na &quot;Přidat fotku&quot; pro nahrání</p>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Match Documents */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <DocumentIcon className="w-5 h-5 text-indigo-600" />
-                <h4 className="font-semibold text-base">
-                  Dokumenty a zprávy
-                  {documents.length > 0 && (
-                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                      ({documents.length})
-                    </span>
-                  )}
-                </h4>
-              </div>
-              <Button
-                size="sm"
-                variant="light"
-                onPress={() => {
-                  // TODO: Open document uploader
-                }}
-                className="text-xs"
-              >
-                Přidat dokument
-              </Button>
-            </div>
-
-            {documentsLoading ? (
-              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg flex items-center justify-center h-32">
-                <LoadingSpinner />
-              </div>
-            ) : documentsError ? (
-              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex items-center justify-center h-32 border border-red-200 dark:border-red-800">
-                <div className="text-center text-red-600 dark:text-red-400">
-                  <DocumentIcon className="w-8 h-8 mx-auto mb-2" />
-                  <p className="text-sm">Chyba při načítání dokumentů</p>
-                  <p className="text-xs mt-1">Zkuste to prosím znovu</p>
-                </div>
-              </div>
-            ) : documents.length > 0 ? (
-              <div className="space-y-3">
-                {documents.map((document) => (
-                  <div key={document.id} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <DocumentIcon className="w-4 h-4 text-indigo-600" />
-                        <div>
-                          <h5 className="font-medium text-sm text-gray-900 dark:text-white">
-                            {document.file_name}
-                          </h5>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {document.mime_type} •{' '}
-                            {document.file_size
-                              ? `${Math.round(document.file_size / 1024)} KB`
-                              : 'Neznámá velikost'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        {document.is_primary && (
-                          <span className="bg-indigo-600 text-white text-xs px-2 py-1 rounded">
-                            Hlavní
-                          </span>
-                        )}
-                        {!document.is_primary && (
-                          <Button
-                            size="sm"
-                            variant="light"
-                            color="primary"
-                            onPress={() =>
-                              setPrimaryMetadata.mutate({
-                                id: document.id,
-                                matchId: selectedMatch.id,
-                                type: 'document',
-                              })
-                            }
-                            className="text-xs"
-                          >
-                            Hlavní
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="light"
-                          color="primary"
-                          onPress={() => window.open(document.file_url, '_blank')}
-                          className="text-xs"
-                        >
-                          Otevřít
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="light"
-                          color="danger"
-                          onPress={() => deleteMetadata.mutate(document.id)}
-                          className="text-xs"
-                        >
-                          Smazat
-                        </Button>
-                      </div>
-                    </div>
-                    {document.metadata?.document_type && (
-                      <div className="flex gap-2">
-                        <span className="bg-gray-600 text-white text-xs px-2 py-1 rounded">
-                          {document.metadata.document_type === 'report' && 'Zpráva'}
-                          {document.metadata.document_type === 'statistics' && 'Statistiky'}
-                          {document.metadata.document_type === 'analysis' && 'Analýza'}
-                        </span>
-                        {document.metadata.pages && (
-                          <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded">
-                            {document.metadata.pages} stránek
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg flex items-center justify-center h-32">
-                <div className="text-center text-gray-500 dark:text-gray-400">
-                  <DocumentIcon className="w-8 h-8 mx-auto mb-2" />
-                  <p className="text-sm">Žádné dokumenty nejsou k dispozici</p>
-                  <p className="text-xs mt-1">
-                    Klikněte na &quot;Přidat dokument&quot; pro nahrání
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Match Notes */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <DocumentTextIcon className="w-5 h-5 text-orange-600" />
-                <h4 className="font-semibold text-base">
-                  Poznámky k zápasu
-                  {notes.length > 0 && (
-                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                      ({notes.length})
-                    </span>
-                  )}
-                </h4>
-              </div>
-              {!isEditingNotes && (
-                <Button
-                  size="sm"
-                  variant="light"
-                  onPress={() => setIsEditingNotes(true)}
-                  className="text-xs"
-                >
-                  Přidat poznámku
-                </Button>
               )}
             </div>
 
-            {isEditingNotes ? (
-              <div className="space-y-3">
-                <Textarea
-                  placeholder="Zadejte poznámky k zápasu..."
-                  value={editingNote}
-                  onChange={(e) => setEditingNote(e.target.value)}
-                  minRows={4}
-                  maxRows={8}
-                />
-                <div className="flex gap-2 justify-end">
-                  <Button size="sm" variant="light" onPress={handleCancelNotes}>
-                    Zrušit
-                  </Button>
+            {/* Match Statistics */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <ChartBarIcon className="w-5 h-5 text-green-600" />
+                <h4 className="font-semibold text-base">Statistiky zápasu</h4>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                  <h5 className="font-medium text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    {selectedMatch.home_team?.name || 'Domácí'}
+                  </h5>
+                  <div className="space-y-1 text-sm">
+                    <p>
+                      Góly: <span className="font-semibold">{selectedMatch.home_score}</span>
+                    </p>
+                    <p>
+                      Poločas:{' '}
+                      <span className="font-semibold">
+                        {selectedMatch.home_score_halftime || '-'}
+                      </span>
+                    </p>
+                    <p>
+                      Střely: <span className="font-semibold">-</span>
+                    </p>
+                    <p>
+                      Fauly: <span className="font-semibold">-</span>
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                  <h5 className="font-medium text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    {selectedMatch.away_team?.name || 'Hosté'}
+                  </h5>
+                  <div className="space-y-1 text-sm">
+                    <p>
+                      Góly: <span className="font-semibold">{selectedMatch.away_score}</span>
+                    </p>
+                    <p>
+                      Poločas:{' '}
+                      <span className="font-semibold">
+                        {selectedMatch.away_score_halftime || '-'}
+                      </span>
+                    </p>
+                    <p>
+                      Střely: <span className="font-semibold">-</span>
+                    </p>
+                    <p>
+                      Fauly: <span className="font-semibold">-</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/*
+            Sestava našeho klubu. Dřív se tu četla `match_metadata` typu
+            'lineup' a všechna tři tlačítka "Upravit sestavu" byla prázdná TODO
+            — trenér tedy neměl jak zapsat góly ani karty. Skutečná data leží v
+            lineups / lineup_players a zapisuje je LineupManager, který admin
+            používá od začátku; tady je otevřený zamčený na náš tým.
+          */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <UserGroupIcon className="w-5 h-5 text-purple-600" />
+                  <h4 className="font-semibold text-base">
+                    Sestava
+                    {ownTeamLineup.players.length > 0 && (
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                        ({ownTeamLineup.players.length})
+                      </span>
+                    )}
+                  </h4>
+                </div>
+                {ownTeamType && (
                   <Button
                     size="sm"
-                    color="primary"
-                    onPress={handleSaveNotes}
-                    isLoading={addMetadata.isPending}
+                    variant="light"
+                    onPress={() => setIsLineupManagerOpen(true)}
+                    startContent={<PlusIcon className="w-4 h-4" />}
+                    className="text-xs"
                   >
-                    Uložit
+                    Upravit sestavu
                   </Button>
+                )}
+              </div>
+
+              {!ownTeamType ? (
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-xs text-gray-500 dark:text-gray-400">
+                  Ani jeden tým tohoto zápasu není náš klub, sestavu tu zapsat nelze.
                 </div>
-              </div>
-            ) : notesLoading ? (
-              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg min-h-[100px] flex items-center justify-center">
-                <LoadingSpinner />
-              </div>
-            ) : notesError ? (
-              <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg min-h-[100px] flex items-center justify-center border border-red-200 dark:border-red-800">
-                <div className="text-center text-red-600 dark:text-red-400">
-                  <DocumentTextIcon className="w-8 h-8 mx-auto mb-2" />
-                  <p className="text-sm">Chyba při načítání poznámek</p>
-                  <p className="text-xs mt-1">Zkuste to prosím znovu</p>
+              ) : lineupLoading ? (
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg flex items-center justify-center h-32">
+                  <LoadingSpinner />
                 </div>
+              ) : lineupError ? (
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex items-center justify-center h-32 border border-red-200 dark:border-red-800">
+                  <div className="text-center text-red-600 dark:text-red-400">
+                    <UserGroupIcon className="w-8 h-8 mx-auto mb-2" />
+                    <p className="text-sm">Chyba při načítání sestavy</p>
+                    <p className="text-xs mt-1">Zkuste to prosím znovu</p>
+                  </div>
+                </div>
+              ) : ownTeamLineup.players.length === 0 && ownTeamLineup.coaches.length === 0 ? (
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Sestava zatím není zapsaná. Přidejte hráče ze soupisky a zaznamenejte jim góly a
+                    karty.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-4">
+                  <h5 className="font-medium text-sm text-gray-600 dark:text-gray-400">
+                    {ownTeamName}
+                  </h5>
+
+                  {ownTeamLineup.players.length > 0 && (
+                    <div className="space-y-2">
+                      {ownTeamLineup.players.map((player) => (
+                        <div
+                          key={player.id}
+                          className="flex items-center justify-between gap-3 p-2 bg-white dark:bg-gray-700 rounded"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="w-6 h-6 shrink-0 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full flex items-center justify-center text-xs font-semibold">
+                              {player.jersey_number ?? '-'}
+                            </span>
+                            <span className="text-sm truncate">
+                              {player.member
+                                ? `${player.member.surname} ${player.member.name}`
+                                : 'Neznámý hráč'}
+                            </span>
+                            {player.position === PlayerPosition.GOALKEEPER && (
+                              <Chip size="sm" variant="flat" color="success">
+                                B
+                              </Chip>
+                            )}
+                            {player.is_captain && (
+                              <Chip size="sm" variant="flat" color="secondary">
+                                C
+                              </Chip>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 text-xs">
+                            {!!player.goals && (
+                              <span className="flex items-center gap-1" title="Góly">
+                                <BallIcon />
+                                {player.goals}
+                              </span>
+                            )}
+                            {!!player.yellow_cards && (
+                              <span className="flex items-center gap-1" title="Žluté karty">
+                                <YellowCardIcon />
+                                {player.yellow_cards}
+                              </span>
+                            )}
+                            {!!totalRedCards(player) && (
+                              <span className="flex items-center gap-1" title="Červené karty">
+                                <RedCardIcon />
+                                {totalRedCards(player)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {ownTeamLineup.coaches.length > 0 && (
+                    <div className="space-y-2">
+                      <h6 className="text-xs text-gray-500 dark:text-gray-400">Trenéři</h6>
+                      {ownTeamLineup.coaches.map((coach) => (
+                        <div
+                          key={coach.id}
+                          className="flex items-center justify-between gap-3 p-2 bg-white dark:bg-gray-700 rounded"
+                        >
+                          <span className="text-sm truncate">
+                            {coach.member
+                              ? `${coach.member.surname} ${coach.member.name}`
+                              : 'Neznámý trenér'}
+                          </span>
+                          <Chip size="sm" variant="flat" color="secondary">
+                            {getLineupCoachRoleOptions().find((role) => role.value === coach.role)
+                              ?.label ?? coach.role}
+                          </Chip>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Match Documents */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <DocumentIcon className="w-5 h-5 text-indigo-600" />
+                  <h4 className="font-semibold text-base">
+                    Dokumenty a zprávy
+                    {documents.length > 0 && (
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                        ({documents.length})
+                      </span>
+                    )}
+                  </h4>
+                </div>
+                <Button
+                  size="sm"
+                  variant="light"
+                  onPress={() => {
+                    // TODO: Open document uploader
+                  }}
+                  className="text-xs"
+                >
+                  Přidat dokument
+                </Button>
               </div>
-            ) : notes.length > 0 ? (
-              <div className="space-y-3">
-                {notes.map((note) => (
-                  <div key={note.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {new Date(note.created_at).toLocaleDateString('cs-CZ')}
-                        </span>
-                        {note.is_primary && (
-                          <span className="bg-orange-600 text-white text-xs px-2 py-1 rounded">
-                            Hlavní
-                          </span>
-                        )}
-                        {note.metadata?.note_type && (
-                          <span className="bg-gray-600 text-white text-xs px-2 py-1 rounded">
-                            {note.metadata.note_type === 'tactical' && 'Taktické'}
-                            {note.metadata.note_type === 'post_match' && 'Po zápase'}
-                            {note.metadata.note_type === 'pre_match' && 'Před zápasem'}
-                            {note.metadata.note_type === 'general' && 'Obecné'}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-1">
-                        {!note.is_primary && (
+
+              {documentsLoading ? (
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg flex items-center justify-center h-32">
+                  <LoadingSpinner />
+                </div>
+              ) : documentsError ? (
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex items-center justify-center h-32 border border-red-200 dark:border-red-800">
+                  <div className="text-center text-red-600 dark:text-red-400">
+                    <DocumentIcon className="w-8 h-8 mx-auto mb-2" />
+                    <p className="text-sm">Chyba při načítání dokumentů</p>
+                    <p className="text-xs mt-1">Zkuste to prosím znovu</p>
+                  </div>
+                </div>
+              ) : documents.length > 0 ? (
+                <div className="space-y-3">
+                  {documents.map((document) => (
+                    <div key={document.id} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <DocumentIcon className="w-4 h-4 text-indigo-600" />
+                          <div>
+                            <h5 className="font-medium text-sm text-gray-900 dark:text-white">
+                              {document.file_name}
+                            </h5>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {document.mime_type} •{' '}
+                              {document.file_size
+                                ? `${Math.round(document.file_size / 1024)} KB`
+                                : 'Neznámá velikost'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          {document.is_primary && (
+                            <span className="bg-indigo-600 text-white text-xs px-2 py-1 rounded">
+                              Hlavní
+                            </span>
+                          )}
+                          {!document.is_primary && (
+                            <Button
+                              size="sm"
+                              variant="light"
+                              color="primary"
+                              onPress={() =>
+                                setPrimaryMetadata.mutate({
+                                  id: document.id,
+                                  matchId: selectedMatch.id,
+                                  type: 'document',
+                                })
+                              }
+                              className="text-xs"
+                            >
+                              Hlavní
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="light"
                             color="primary"
-                            onPress={() =>
-                              setPrimaryMetadata.mutate({
-                                id: note.id,
-                                matchId: selectedMatch.id,
-                                type: 'note',
-                              })
-                            }
+                            onPress={() => window.open(document.file_url, '_blank')}
                             className="text-xs"
                           >
-                            Hlavní
+                            Otevřít
                           </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="light"
-                          color="danger"
-                          onPress={() => deleteMetadata.mutate(note.id)}
-                          className="text-xs"
-                        >
-                          Smazat
-                        </Button>
+                          <Button
+                            size="sm"
+                            variant="light"
+                            color="danger"
+                            onPress={() => deleteMetadata.mutate(document.id)}
+                            className="text-xs"
+                          >
+                            Smazat
+                          </Button>
+                        </div>
                       </div>
+                      {document.metadata?.document_type && (
+                        <div className="flex gap-2">
+                          <span className="bg-gray-600 text-white text-xs px-2 py-1 rounded">
+                            {document.metadata.document_type === 'report' && 'Zpráva'}
+                            {document.metadata.document_type === 'statistics' && 'Statistiky'}
+                            {document.metadata.document_type === 'analysis' && 'Analýza'}
+                          </span>
+                          {document.metadata.pages && (
+                            <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded">
+                              {document.metadata.pages} stránek
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg min-h-[100px] flex items-center justify-center">
-                <div className="text-center text-gray-500 dark:text-gray-400">
-                  <DocumentTextIcon className="w-8 h-8 mx-auto mb-2" />
-                  <p className="text-sm">Žádné poznámky nejsou k dispozici</p>
-                  <p className="text-xs mt-1">
-                    Klikněte na &quot;Přidat poznámku&quot; pro přidání
-                  </p>
+                  ))}
                 </div>
+              ) : (
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg flex items-center justify-center h-32">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <DocumentIcon className="w-8 h-8 mx-auto mb-2" />
+                    <p className="text-sm">Žádné dokumenty nejsou k dispozici</p>
+                    <p className="text-xs mt-1">
+                      Klikněte na &quot;Přidat dokument&quot; pro nahrání
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Match Notes */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <DocumentTextIcon className="w-5 h-5 text-orange-600" />
+                  <h4 className="font-semibold text-base">
+                    Poznámky k zápasu
+                    {notes.length > 0 && (
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                        ({notes.length})
+                      </span>
+                    )}
+                  </h4>
+                </div>
+                {!isEditingNotes && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    onPress={() => setIsEditingNotes(true)}
+                    className="text-xs"
+                  >
+                    Přidat poznámku
+                  </Button>
+                )}
               </div>
-            )}
+
+              {isEditingNotes ? (
+                <div className="space-y-3">
+                  <Textarea
+                    placeholder="Zadejte poznámky k zápasu..."
+                    value={editingNote}
+                    onChange={(e) => setEditingNote(e.target.value)}
+                    minRows={4}
+                    maxRows={8}
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <Button size="sm" variant="light" onPress={handleCancelNotes}>
+                      Zrušit
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="primary"
+                      onPress={handleSaveNotes}
+                      isLoading={addMetadata.isPending}
+                    >
+                      Uložit
+                    </Button>
+                  </div>
+                </div>
+              ) : notesLoading ? (
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg min-h-[100px] flex items-center justify-center">
+                  <LoadingSpinner />
+                </div>
+              ) : notesError ? (
+                <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg min-h-[100px] flex items-center justify-center border border-red-200 dark:border-red-800">
+                  <div className="text-center text-red-600 dark:text-red-400">
+                    <DocumentTextIcon className="w-8 h-8 mx-auto mb-2" />
+                    <p className="text-sm">Chyba při načítání poznámek</p>
+                    <p className="text-xs mt-1">Zkuste to prosím znovu</p>
+                  </div>
+                </div>
+              ) : notes.length > 0 ? (
+                <div className="space-y-3">
+                  {notes.map((note) => (
+                    <div key={note.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(note.created_at).toLocaleDateString('cs-CZ')}
+                          </span>
+                          {note.is_primary && (
+                            <span className="bg-orange-600 text-white text-xs px-2 py-1 rounded">
+                              Hlavní
+                            </span>
+                          )}
+                          {note.metadata?.note_type && (
+                            <span className="bg-gray-600 text-white text-xs px-2 py-1 rounded">
+                              {note.metadata.note_type === 'tactical' && 'Taktické'}
+                              {note.metadata.note_type === 'post_match' && 'Po zápase'}
+                              {note.metadata.note_type === 'pre_match' && 'Před zápasem'}
+                              {note.metadata.note_type === 'general' && 'Obecné'}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-1">
+                          {!note.is_primary && (
+                            <Button
+                              size="sm"
+                              variant="light"
+                              color="primary"
+                              onPress={() =>
+                                setPrimaryMetadata.mutate({
+                                  id: note.id,
+                                  matchId: selectedMatch.id,
+                                  type: 'note',
+                                })
+                              }
+                              className="text-xs"
+                            >
+                              Hlavní
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="light"
+                            color="danger"
+                            onPress={() => deleteMetadata.mutate(note.id)}
+                            className="text-xs"
+                          >
+                            Smazat
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg min-h-[100px] flex items-center justify-center">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <DocumentTextIcon className="w-8 h-8 mx-auto mb-2" />
+                    <p className="text-sm">Žádné poznámky nejsou k dispozici</p>
+                    <p className="text-xs mt-1">
+                      Klikněte na &quot;Přidat poznámku&quot; pro přidání
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </CardBody>
-    </Card>
+        </CardBody>
+      </Card>
+
+      {ownTeamType && (
+        <LineupManagerModal
+          isOpen={isLineupManagerOpen}
+          onClose={() => setIsLineupManagerOpen(false)}
+          selectedMatch={selectedMatch}
+          members={members}
+          lockedTeam={ownTeamType}
+        />
+      )}
+    </>
   );
 }

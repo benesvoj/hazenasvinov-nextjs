@@ -53,7 +53,7 @@ error.tsx
 - Categories filtered to assigned ones via `useUserRoles().getCurrentUserCategories()`
 - Tab-based UI when multiple categories available
 - `useOptimizedOwnClubMatches()` and `useStandings()` both receive `selectedCategory`
-- `usePlayerStats()` in `MatchStatisticsZone` properly validates category access via `getCurrentUserCategories()`
+- `MatchStatisticsZone` uses `useMatchLineupStats(completedMatches)`, not `usePlayerStats()`. The matches come from `useOptimizedOwnClubMatches(categoryId, seasonId)`, so category and season are already scoped on the way in.
 
 ## Issues & Technical Debt
 

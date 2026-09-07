@@ -14,6 +14,7 @@ import {useAppData} from '@/contexts/AppDataContext';
 import {showToast} from '@/components';
 import {AttendanceStatuses, AttendanceTabs, TrainingSessionStatusEnum} from '@/enums';
 import {
+  countUnmarkedPastSessions,
   describeLineupCoverage,
   resolveAttendanceMemberIds,
 } from '@/features/coach/attendance/helpers';
@@ -136,6 +137,11 @@ export function useCoachAttendancePageLogic() {
     [lineupMembers, members, selectedCategory]
   );
 
+  // Tréninky, které už proběhly, ale zůstaly Naplánované. Statistiky je
+  // ignorují, takže dokud tohle číslo není nula, jsou dlaždice níž na stránce
+  // nižší, než odpovídá zapsané docházce.
+  const unmarkedPastSessions = useMemo(() => countUnmarkedPastSessions(sessions), [sessions]);
+
   useEffect(() => {
     if (selectedSession) {
       void fetchAttendanceRecords();
@@ -205,6 +211,13 @@ export function useCoachAttendancePageLogic() {
 
     try {
       await updateTrainingSessionStatus(statusDialog.selectedItem.id, status, reason);
+      // updateTrainingSessionStatus přepisuje jen vnitřní stav useAttendance,
+      // který tahle stránka nikde nerenderuje — seznam tréninků chodí z
+      // useFetchTrainingSessions a statistiky z react-query. Bez těchhle dvou
+      // řádků zůstane karta tréninku na původním stavu a dlaždice na starých
+      // číslech až do ručního refreshe.
+      await refetchSessions();
+      invalidateStatistics();
     } catch (err) {
       showToast.danger(
         `${translations.attendance.responseMessages.sessionStateUpdateFailed}: ${err}`
@@ -328,6 +341,7 @@ export function useCoachAttendancePageLogic() {
     handleBulkUpdate,
     resolveMemberIds,
     lineupCoverage,
+    unmarkedPastSessions,
     refetchSessions,
   };
 }
