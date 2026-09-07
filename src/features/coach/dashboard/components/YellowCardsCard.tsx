@@ -17,10 +17,11 @@ import {YellowCardsCardItem} from './YellowCardsCardItem';
 
 interface YellowCardsCardProps {
   categoryId?: string;
+  seasonId?: string;
 }
 
-export default function YellowCardsCard({categoryId}: YellowCardsCardProps) {
-  const {yellowCardPlayers, loading, error} = usePlayerStats(categoryId);
+export default function YellowCardsCard({categoryId, seasonId}: YellowCardsCardProps) {
+  const {yellowCardPlayers, loading, error} = usePlayerStats(categoryId, seasonId);
 
   const title = (
     <div className="flex items-center gap-2">

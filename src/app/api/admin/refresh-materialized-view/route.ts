@@ -10,12 +10,7 @@ import {hasCoachRole, isAdmin} from '@/utils/supabase/coachAuth';
  * The underlying `refresh_materialized_view(text)` function interpolates the
  * name into DDL, so the caller must never get to choose it freely.
  */
-const REFRESHABLE_VIEWS = [
-  'own_club_matches',
-  'match_stats',
-  'teams_with_details',
-  'attendance_statistics_summary',
-] as const;
+const REFRESHABLE_VIEWS = ['own_club_matches', 'match_stats', 'teams_with_details'] as const;
 
 type RefreshableView = (typeof REFRESHABLE_VIEWS)[number];
 

@@ -51,6 +51,7 @@ export * from './entities/committee/state/useCommittees';
 export * from './entities/grant/data/useFetchGrants';
 export * from './entities/grant/state/useGrantForm';
 export * from './entities/grant/state/useGrants';
+export * from './entities/lineup/useFetchMatchLineup';
 export * from './entities/lineup/useLineupData';
 export * from './entities/lineup/useLineupManager';
 export * from './entities/lineup/useMatchLineupStats';

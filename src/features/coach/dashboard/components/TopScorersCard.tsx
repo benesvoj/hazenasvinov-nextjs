@@ -17,10 +17,11 @@ import {TopScorersCardItem} from './TopScorersCardItem';
 
 interface TopScorersCardProps {
   categoryId?: string;
+  seasonId?: string;
 }
 
-export default function TopScorersCard({categoryId}: TopScorersCardProps) {
-  const {topScorers, loading, error} = usePlayerStats(categoryId);
+export default function TopScorersCard({categoryId, seasonId}: TopScorersCardProps) {
+  const {topScorers, loading, error} = usePlayerStats(categoryId, seasonId);
 
   const title = (
     <HStack spacing={2}>

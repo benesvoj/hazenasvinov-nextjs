@@ -10,8 +10,8 @@ Overview page for coaches showing quick stats and upcoming information: birthday
 |---|---|
 | `error.tsx` | Master page — category selection tabs, error boundary, layout grid |
 | `components/BirthdayCard.tsx` | Upcoming birthdays for selected category (next 3) |
-| `components/TopScorersCard.tsx` | Top 5 goal scorers via `usePlayerStats(categoryId)` |
-| `components/YellowCardsCard.tsx` | Top 5 yellow card recipients via `usePlayerStats(categoryId)` |
+| `components/TopScorersCard.tsx` | Top 5 goal scorers via `usePlayerStats(categoryId, seasonId)` |
+| `components/YellowCardsCard.tsx` | Top 5 yellow card recipients via `usePlayerStats(categoryId, seasonId)` |
 | `components/RedCardsCard.tsx` | Top 5 red card recipients with breakdown by type |
 | `components/index.ts` | Barrel exports |
 
@@ -29,12 +29,12 @@ error.tsx
 ├── Grid layout:
 │   ├── BirthdayCard(categoryId)
 │   │   └── useUpcomingBirthdays(3, true, categoryId)
-│   ├── TopScorersCard(categoryId)
-│   │   └── usePlayerStats(categoryId) → topScorers
-│   ├── YellowCardsCard(categoryId)
-│   │   └── usePlayerStats(categoryId) → yellowCardPlayers
-│   ├── RedCardsCard(categoryId)
-│   │   └── usePlayerStats(categoryId) → redCardPlayers
+│   ├── TopScorersCard(categoryId, seasonId)
+│   │   └── usePlayerStats(categoryId, seasonId) → topScorers
+│   ├── YellowCardsCard(categoryId, seasonId)
+│   │   └── usePlayerStats(categoryId, seasonId) → yellowCardPlayers
+│   ├── RedCardsCard(categoryId, seasonId)
+│   │   └── usePlayerStats(categoryId, seasonId) → redCardPlayers
 │   └── MatchSchedule(selectedCategoryId, showOnlyAssignedCategories=true)
 │       └── Upcoming matches with "Record result" button
 │
@@ -46,6 +46,10 @@ error.tsx
 - Standard pattern: `getCurrentUserCategories()` → filter → tabs → pass to children
 - All dashboard cards receive `selectedCategory` as prop and scope their queries
 - `usePlayerStats()` hook properly validates category access via `getCurrentUserCategories()` internally
+- `usePlayerStats()` also scopes to `seasonId` (from `useCoachCategory().selectedSeason`). Until
+  2026-09-07 it filtered by category and match status only, so the cards summed every season the
+  category had ever played — a coach saw last season's totals as if they were the current ones.
+  Without a season the hook deliberately returns nothing rather than falling back to all-time.
 - `MatchSchedule` receives both `selectedCategoryId` and `showOnlyAssignedCategories={true}`
 
 ## Issues & Technical Debt
@@ -64,7 +68,7 @@ error.tsx
 
 5. **Magic numbers** — Top scorers shows 5 items, birthdays show 3 — these should be named constants.
 
-6. **`usePlayerStats` is called 3 times** (by TopScorers, YellowCards, RedCards) with the same `categoryId` — TanStack Query deduplicates identical requests, so this is fine functionally, but the data could also be fetched once and passed down.
+6. **`usePlayerStats` is called 3 times** (by TopScorers, YellowCards, RedCards) with the same `categoryId` and `seasonId`. This note used to claim TanStack Query deduplicated them; until 2026-09-07 it did not, because the hook was a hand-rolled `useState` + `useEffect` and each card fired its own identical Supabase query. It is a `useQuery` now, so the dedup is real. The data could still be fetched once and passed down.
 
 ## Improvement Proposals
 

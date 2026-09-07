@@ -1,5 +1,10 @@
 import {useState, useCallback, useMemo} from 'react';
 
+import {useQueryClient} from '@tanstack/react-query';
+
+import {matchLineupQueryKey} from '@/hooks/entities/lineup/useFetchMatchLineup';
+import {PLAYER_STATS_QUERY_KEY} from '@/hooks/entities/player/usePlayerStats';
+
 import {showToast} from '@/components';
 import {TeamTypes, LineupCoachRole, MemberFunction, PlayerPosition, LineupErrorType} from '@/enums';
 import {classifyLineupError} from '@/helpers';
@@ -20,6 +25,8 @@ interface UseLineupDataManagerProps {
   awayTeamName: string;
   members: any[];
   categoryId?: string;
+  /** Se kterým týmem se otevře. Zamčený manažer ho pak nemění. */
+  initialTeam?: TeamTypes;
   onClose?: () => void;
   onMemberCreated?: () => void;
 }
@@ -95,11 +102,12 @@ export function useLineupDataManager({
   awayTeamName,
   members,
   categoryId,
+  initialTeam = TeamTypes.HOME,
   onClose,
   onMemberCreated,
 }: UseLineupDataManagerProps): UseLineupDataManagerReturn {
   // State management
-  const [selectedTeam, setSelectedTeam] = useState<TeamTypes>(TeamTypes.HOME);
+  const [selectedTeam, setSelectedTeam] = useState<TeamTypes>(initialTeam);
   const [homeFormData, setHomeFormData] = useState<LineupFormData>({
     match_id: matchId,
     team_id: homeTeamId,
@@ -120,7 +128,25 @@ export function useLineupDataManager({
   const [editingCoachIndex, setEditingCoachIndex] = useState<number | null>(null);
 
   // Hooks
+  const queryClient = useQueryClient();
   const {getOrCreateLineupId, findLineupId} = useLineupManager();
+
+  /**
+   * Jediné místo, kudy prochází každý zápis sestavy, takže i jediné, kde se
+   * musí zneplatnit odvozená data. Bez toho držely dlaždice na dashboardu
+   * (střelci, žluté, červené) stará čísla až do reloadu prohlížeče — góly se
+   * zapisují tady, ale čtou se úplně jinde.
+   *
+   * `player-stats` se maže prefixem: v době ukládání se neví, na které
+   * kategorii a sezóně jsou karty zrovna namontované.
+   */
+  const invalidateLineupDerivedData = useCallback(
+    (teamId: string) => {
+      void queryClient.invalidateQueries({queryKey: matchLineupQueryKey(matchId, teamId)});
+      void queryClient.invalidateQueries({queryKey: [PLAYER_STATS_QUERY_KEY]});
+    },
+    [queryClient, matchId]
+  );
   const {fetchLineup, saveLineup, deleteLineup, validateLineupData, loading, error} =
     useLineupData();
 
@@ -265,6 +291,8 @@ export function useLineupDataManager({
           is_home_team: isHome,
         });
 
+        invalidateLineupDerivedData(currentTeamId);
+
         // Show success message
         showToast.success('Sestava byla úspěšně uložena!');
 
@@ -315,6 +343,7 @@ export function useLineupDataManager({
       awayFormData,
       getOrCreateLineupId,
       saveLineup,
+      invalidateLineupDerivedData,
       onClose,
     ]
   );
@@ -348,6 +377,8 @@ export function useLineupDataManager({
 
       await deleteLineup(lineupId);
 
+      invalidateLineupDerivedData(currentTeamId);
+
       // Reset form data
       const emptyFormData = {
         match_id: matchId,
@@ -367,7 +398,15 @@ export function useLineupDataManager({
       const errorMessage = error instanceof Error ? error.message : 'Neznámá chyba';
       showToast.danger(`Chyba při mazání sestavy: ${errorMessage}`);
     }
-  }, [matchId, homeTeamId, awayTeamId, selectedTeam, findLineupId, deleteLineup]);
+  }, [
+    matchId,
+    homeTeamId,
+    awayTeamId,
+    selectedTeam,
+    findLineupId,
+    deleteLineup,
+    invalidateLineupDerivedData,
+  ]);
 
   // Player operations
   const handleAddPlayer = useCallback(() => {

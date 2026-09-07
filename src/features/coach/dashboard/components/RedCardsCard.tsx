@@ -16,10 +16,11 @@ import {RedCardsCardItem} from './RedCardsCardItem';
 
 interface RedCardsCardProps {
   categoryId?: string;
+  seasonId?: string;
 }
 
-export default function RedCardsCard({categoryId}: RedCardsCardProps) {
-  const {redCardPlayers, loading, error} = usePlayerStats(categoryId);
+export default function RedCardsCard({categoryId, seasonId}: RedCardsCardProps) {
+  const {redCardPlayers, loading, error} = usePlayerStats(categoryId, seasonId);
 
   if (error) {
     return (

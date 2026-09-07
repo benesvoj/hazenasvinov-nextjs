@@ -38,9 +38,13 @@ export default function CoachDashboardContainer() {
           <div className="hidden sm:block md:col-span-2 xl:col-span-1">
             <BirthdayCard categoryId={state.selectedCategory} />
           </div>
-          <TopScorersCard categoryId={state.selectedCategory} />
-          <YellowCardsCard categoryId={state.selectedCategory} />
-          <RedCardsCard categoryId={state.selectedCategory} />
+          {/*
+            Sezóna musí jít do karet spolu s kategorií — bez ní hook sčítal góly
+            a karty přes všechny sezóny, co kdy kategorie odehrála.
+          */}
+          <TopScorersCard categoryId={state.selectedCategory} seasonId={state.selectedSeason} />
+          <YellowCardsCard categoryId={state.selectedCategory} seasonId={state.selectedSeason} />
+          <RedCardsCard categoryId={state.selectedCategory} seasonId={state.selectedSeason} />
         </Grid>
 
         <Grid columns={2}>

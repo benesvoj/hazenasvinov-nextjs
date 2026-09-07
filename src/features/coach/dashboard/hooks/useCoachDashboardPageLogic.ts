@@ -9,7 +9,7 @@ export function useCoachDashboardPageLogic() {
   const [resultFlowMatch, setResultFlowMatch] = useState<Match | null>(null);
   const [isResultFlowOpen, setIsResultFlowOpen] = useState(false);
 
-  const {availableCategories, selectedCategory, setSelectedCategory, isLoading} =
+  const {availableCategories, selectedCategory, setSelectedCategory, selectedSeason, isLoading} =
     useCoachCategory();
 
   const handleStartResultFlow = (match: Match) => {
@@ -26,6 +26,7 @@ export function useCoachDashboardPageLogic() {
     availableCategories,
     selectedCategory,
     setSelectedCategory,
+    selectedSeason,
     isLoading,
     resultFlowMatch,
     isResultFlowOpen,
