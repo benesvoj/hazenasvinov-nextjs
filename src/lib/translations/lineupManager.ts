@@ -38,8 +38,6 @@ export const lineupManagerTranslations = {
   unifiedPlayerManager: {
     error: 'Chyba při načítání hráčů',
     showOtherCategories: 'Zobrazit i hráče z jiné kategorie',
-    showOtherCategoriesHint: 'Nabídne všechny hráče klubu se stejným pohlavím kategorie zápasu.',
-    categoryFilter: 'Kategorie',
     categoryFilterAll: 'Všechny kategorie',
   },
 };

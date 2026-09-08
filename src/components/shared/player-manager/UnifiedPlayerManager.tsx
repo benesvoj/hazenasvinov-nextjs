@@ -2,7 +2,7 @@
 
 import {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 
-import {Select, SelectItem, Button, Input, Switch} from '@heroui/react';
+import {Select, SelectItem, Button, Chip, Input, Switch} from '@heroui/react';
 
 import {CheckIcon, PlusIcon} from '@heroicons/react/24/outline';
 
@@ -68,12 +68,7 @@ export default function UnifiedPlayerManager({
     return callUpCategoryId ? {category_id: callUpCategoryId} : {category_ids: callUpCategoryIds};
   }, [showOtherCategories, callUpCategoryId, callUpCategoryIds, categoryId]);
 
-  /*
-    One flat list rather than a lone <SelectItem> beside a mapped fragment:
-    HeroUI's select is a react-stately collection and reads its children
-    structurally, so a fragment in the middle is not a reliable way to add
-    options.
-  */
+  /** "All" is one of the chips, not a separate control, so it lives in the list. */
   const categoryFilterOptions = useMemo(
     () => [
       {key: '', label: tPlayers.categoryFilterAll},
@@ -361,22 +356,25 @@ export default function UnifiedPlayerManager({
         </Switch>
       )}
       {canCallUp && showOtherCategories && (
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <Select
-            className="sm:max-w-xs"
-            size="sm"
-            label={tPlayers.categoryFilter}
-            selectedKeys={callUpCategoryId ? [callUpCategoryId] : ['']}
-            onSelectionChange={(keys) => {
-              const [first] = Array.from(keys);
-              setCallUpCategoryId(first === undefined ? '' : String(first));
-            }}
-          >
-            {categoryFilterOptions.map((option) => (
-              <SelectItem key={option.key}>{option.label}</SelectItem>
-            ))}
-          </Select>
-          <p className="text-xs text-gray-500">{tPlayers.showOtherCategoriesHint}</p>
+        <div className="flex flex-wrap gap-2">
+          {categoryFilterOptions.map((option) => {
+            const isSelected = option.key === callUpCategoryId;
+
+            return (
+              <Chip
+                key={option.key}
+                as="button"
+                type="button"
+                size="sm"
+                color={isSelected ? 'primary' : 'default'}
+                variant={isSelected ? 'solid' : 'flat'}
+                onClick={() => setCallUpCategoryId(option.key)}
+                aria-pressed={isSelected}
+              >
+                {option.label}
+              </Chip>
+            );
+          })}
         </div>
       )}
 
