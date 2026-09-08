@@ -2,7 +2,7 @@
 
 import {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 
-import {Select, SelectItem, Button, Input, Switch} from '@heroui/react';
+import {Select, SelectItem, Button, Chip, Input, Switch} from '@heroui/react';
 
 import {CheckIcon, PlusIcon} from '@heroicons/react/24/outline';
 
@@ -39,21 +39,49 @@ export default function UnifiedPlayerManager({
   /** Widens the search from this category to every category of the same gender. */
   const [showOtherCategories, setShowOtherCategories] = useState(false);
 
-  const callUpCategoryIds = useMemo(
-    () => getCallUpCategories(categories ?? [], categoryId).map((category) => category.id),
+  /** Categories the widened search may draw from, in the club's own order. */
+  const callUpCategories = useMemo(
+    () => getCallUpCategories(categories ?? [], categoryId),
     [categories, categoryId]
+  );
+  const callUpCategoryIds = useMemo(
+    () => callUpCategories.map((category) => category.id),
+    [callUpCategories]
   );
 
   /** No categories to widen into means no switch — an inert toggle is worse than none. */
   const canCallUp = allowOtherCategories && hasItems(callUpCategoryIds);
 
-  const categoryFilter = useMemo(
-    (): Pick<PlayerSearchFilters, 'category_id' | 'category_ids'> =>
-      showOtherCategories && hasItems(callUpCategoryIds)
-        ? {category_ids: callUpCategoryIds}
-        : {category_id: categoryId},
-    [showOtherCategories, callUpCategoryIds, categoryId]
+  /**
+   * One of `callUpCategories`, or empty for all of them.
+   *
+   * Widening the search to every category of the same gender can return well
+   * over a hundred players, which is a long way to scroll for a coach who knows
+   * they want a Starší žačka. The filter narrows that back down without
+   * forcing them to remember a name to type.
+   */
+  const [callUpCategoryId, setCallUpCategoryId] = useState('');
+
+  const categoryFilter = useMemo((): Pick<PlayerSearchFilters, 'category_id' | 'category_ids'> => {
+    if (!showOtherCategories || !hasItems(callUpCategoryIds)) return {category_id: categoryId};
+
+    return callUpCategoryId ? {category_id: callUpCategoryId} : {category_ids: callUpCategoryIds};
+  }, [showOtherCategories, callUpCategoryId, callUpCategoryIds, categoryId]);
+
+  /** "All" is one of the chips, not a separate control, so it lives in the list. */
+  const categoryFilterOptions = useMemo(
+    () => [
+      {key: '', label: tPlayers.categoryFilterAll},
+      ...callUpCategories.map((category) => ({key: category.id, label: category.name})),
+    ],
+    [callUpCategories]
   );
+
+  /** Turning the switch off drops the narrowing with it, so it cannot linger unseen. */
+  const handleShowOtherCategories = (show: boolean) => {
+    setShowOtherCategories(show);
+    if (!show) setCallUpCategoryId('');
+  };
 
   const [players, setPlayers] = useState<PlayerSearchResult[]>([]);
   const [filters, setFilters] = useState<PlayerSearchFilters>({
@@ -321,14 +349,33 @@ export default function UnifiedPlayerManager({
         <Switch
           size="sm"
           isSelected={showOtherCategories}
-          onValueChange={setShowOtherCategories}
+          onValueChange={handleShowOtherCategories}
           aria-label={tPlayers.showOtherCategories}
         >
           <span className="text-sm">{tPlayers.showOtherCategories}</span>
         </Switch>
       )}
       {canCallUp && showOtherCategories && (
-        <p className="text-xs text-gray-500">{tPlayers.showOtherCategoriesHint}</p>
+        <div className="flex flex-wrap gap-2">
+          {categoryFilterOptions.map((option) => {
+            const isSelected = option.key === callUpCategoryId;
+
+            return (
+              <Chip
+                key={option.key}
+                as="button"
+                type="button"
+                size="sm"
+                color={isSelected ? 'primary' : 'default'}
+                variant={isSelected ? 'solid' : 'flat'}
+                onClick={() => setCallUpCategoryId(option.key)}
+                aria-pressed={isSelected}
+              >
+                {option.label}
+              </Chip>
+            );
+          })}
+        </div>
       )}
 
       {/* Create Player Button - Different for internal vs external */}

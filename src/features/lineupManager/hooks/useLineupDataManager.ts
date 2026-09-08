@@ -5,6 +5,8 @@ import {useQueryClient} from '@tanstack/react-query';
 import {matchLineupQueryKey} from '@/hooks/entities/lineup/useFetchMatchLineup';
 import {PLAYER_STATS_QUERY_KEY} from '@/hooks/entities/player/usePlayerStats';
 
+import {translations} from '@/lib/translations';
+
 import {showToast} from '@/components';
 import {TeamTypes, LineupCoachRole, MemberFunction, PlayerPosition, LineupErrorType} from '@/enums';
 import {classifyLineupError} from '@/helpers';
@@ -604,12 +606,23 @@ export function useLineupDataManager({
   );
 
   // Utility functions
+  /**
+   * Names a member already in the lineup.
+   *
+   * Searches `members`, not `filteredMembers`: the filtered list exists to
+   * populate the pickers with the match's own category, but a lineup can hold a
+   * player called up from another one — the coach of the Dorostenky fields
+   * Starší žačky. Looking those up in the category-scoped list turned every
+   * called-up player into „Neznámý člen". Both callers pass the club's whole
+   * member list, and `filteredMembers` is a subset of it, so nothing that
+   * resolved before stops resolving.
+   */
   const getMemberName = useCallback(
     (memberId: string) => {
-      const member = filteredMembers.find((m) => m.id === memberId);
-      return member ? `${member.surname} ${member.name}` : 'Neznámý člen';
+      const member = members.find((m) => m.id === memberId);
+      return member ? `${member.surname} ${member.name}` : translations.lineupManager.unknownPlayer;
     },
-    [filteredMembers]
+    [members]
   );
 
   const calculateLocalSummary = useCallback((formData: LineupFormData): LineupSummary => {
