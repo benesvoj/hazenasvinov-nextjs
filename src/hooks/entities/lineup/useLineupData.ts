@@ -127,6 +127,16 @@ export const useLineupData = () => {
 
   // Fetch lineup data by lineup ID
   const fetchLineupById = useCallback(async (lineupId: string) => {
+    // Same reason as fetchLineup: an empty id reaches Postgres as
+    // "invalid input syntax for type uuid", and the caller swallows it in a
+    // catch that reports a failure which never happened.
+    if (!lineupId) {
+      return {
+        players: [],
+        coaches: [],
+      };
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -478,8 +488,13 @@ export const useLineupData = () => {
           }
         }
 
-        // Refresh data
-        await fetchLineupById(lineupId);
+        // `finalLineupId`, not `lineupId`: when the caller passes an empty id the
+        // lineup is created here, and refreshing the argument meant querying
+        // `lineups` for id '' — which Postgres rejects, so a save that had in
+        // fact succeeded ended in a thrown error. Every existing caller resolves
+        // the id first (getOrCreateLineupId), so for them the two are the same
+        // value and this changes nothing.
+        await fetchLineupById(finalLineupId);
       } catch (error: any) {
         if (error.code === '42P01') {
           throw new Error(

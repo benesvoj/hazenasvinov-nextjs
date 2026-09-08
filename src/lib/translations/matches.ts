@@ -1,4 +1,13 @@
 export const matchesTranslations = {
+  lineupGeneration: {
+    action: 'Vygenerovat ze soupisky',
+    dialogTitle: 'Vybrat soupisku',
+    dialogMessage: 'Ze které soupisky se má sestava k zápasu vytvořit?',
+    generated: (count: number) =>
+      count === 1 ? 'Do sestavy přidán 1 hráč' : `Do sestavy přidáno ${count} hráčů`,
+    emptyCategoryLineup: 'Vybraná soupiska nemá žádného aktivního hráče.',
+    failed: 'Sestavu se nepodařilo vygenerovat',
+  },
   page: {
     title: 'Zápasy',
     description: 'Správa zápasů, výsledků a tabulek pro všechny kategorie',

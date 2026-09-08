@@ -8,6 +8,7 @@ import {ClipboardDocumentListIcon, XMarkIcon} from '@heroicons/react/24/outline'
 
 import {useAppData} from '@/contexts/AppDataContext';
 
+import {MatchLineupPanel} from '@/features/coach/matches/components/MatchLineupPanel';
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {type RecordingSchema, useRecordingForm, useRecordingsCrud} from '@/features/recordings';
 import {RecordingFormModal} from '@/features/recordings/components/RecordingFormModal';
@@ -135,6 +136,18 @@ export default function StrategyPreparationZone({
           >
             <Tab key="strategy" title="Strategie">
               <TabWithStrategy />
+            </Tab>
+
+            {/*
+              Sestavu šlo do #99 poskládat až po odehrání zápasu — tenhle panel
+              ji neměl vůbec, kdežto detail odehraného zápasu ano. Je to tentýž
+              panel, takže se z něj dá i před zápasem vygenerovat sestava ze
+              soupisky.
+            */}
+            <Tab key="lineup" title="Sestava">
+              <div className="pb-4">
+                <MatchLineupPanel selectedMatch={selectedMatch} />
+              </div>
             </Tab>
 
             <Tab key="videos-timeline" title="Přehled videí">

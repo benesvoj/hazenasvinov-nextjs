@@ -4,3 +4,4 @@ export {default as MatchStatisticsZone} from './MatchStatisticsZone';
 export {default as RecentMatchDetails} from './RecentMatchDetails';
 export {default as RecentResultsCard} from './RecentResultsCard';
 export {default as UpcomingMatchesCard} from './UpcomingMatchesCard';
+export * from './MatchLineupPanel';

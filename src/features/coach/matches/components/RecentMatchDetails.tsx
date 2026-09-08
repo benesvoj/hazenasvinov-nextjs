@@ -42,7 +42,7 @@ import {useAppData} from '@/contexts/AppDataContext';
 
 import {LoadingSpinner, showToast} from '@/components';
 import {PlayerPosition, TeamTypes} from '@/enums';
-import {LineupManagerModal} from '@/features/lineupManager';
+import {MatchLineupPanel} from '@/features/coach/matches/components/MatchLineupPanel';
 import {
   useMatchMetadata,
   useAddMatchMetadata,
@@ -529,143 +529,11 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
             </div>
 
             {/*
-            Sestava našeho klubu. Dřív se tu četla `match_metadata` typu
-            'lineup' a všechna tři tlačítka "Upravit sestavu" byla prázdná TODO
-            — trenér tedy neměl jak zapsat góly ani karty. Skutečná data leží v
-            lineups / lineup_players a zapisuje je LineupManager, který admin
-            používá od začátku; tady je otevřený zamčený na náš tým.
-          */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <UserGroupIcon className="w-5 h-5 text-purple-600" />
-                  <h4 className="font-semibold text-base">
-                    Sestava
-                    {ownTeamLineup.players.length > 0 && (
-                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                        ({ownTeamLineup.players.length})
-                      </span>
-                    )}
-                  </h4>
-                </div>
-                {ownTeamType && (
-                  <Button
-                    size="sm"
-                    variant="light"
-                    onPress={() => setIsLineupManagerOpen(true)}
-                    startContent={<PlusIcon className="w-4 h-4" />}
-                    className="text-xs"
-                  >
-                    Upravit sestavu
-                  </Button>
-                )}
-              </div>
-
-              {!ownTeamType ? (
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-xs text-gray-500 dark:text-gray-400">
-                  Ani jeden tým tohoto zápasu není náš klub, sestavu tu zapsat nelze.
-                </div>
-              ) : lineupLoading ? (
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg flex items-center justify-center h-32">
-                  <LoadingSpinner />
-                </div>
-              ) : lineupError ? (
-                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex items-center justify-center h-32 border border-red-200 dark:border-red-800">
-                  <div className="text-center text-red-600 dark:text-red-400">
-                    <UserGroupIcon className="w-8 h-8 mx-auto mb-2" />
-                    <p className="text-sm">Chyba při načítání sestavy</p>
-                    <p className="text-xs mt-1">Zkuste to prosím znovu</p>
-                  </div>
-                </div>
-              ) : ownTeamLineup.players.length === 0 && ownTeamLineup.coaches.length === 0 ? (
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-2">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Sestava zatím není zapsaná. Přidejte hráče ze soupisky a zaznamenejte jim góly a
-                    karty.
-                  </p>
-                </div>
-              ) : (
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-4">
-                  <h5 className="font-medium text-sm text-gray-600 dark:text-gray-400">
-                    {ownTeamName}
-                  </h5>
-
-                  {ownTeamLineup.players.length > 0 && (
-                    <div className="space-y-2">
-                      {ownTeamLineup.players.map((player) => (
-                        <div
-                          key={player.id}
-                          className="flex items-center justify-between gap-3 p-2 bg-white dark:bg-gray-700 rounded"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="w-6 h-6 shrink-0 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full flex items-center justify-center text-xs font-semibold">
-                              {player.jersey_number ?? '-'}
-                            </span>
-                            <span className="text-sm truncate">
-                              {player.member
-                                ? `${player.member.surname} ${player.member.name}`
-                                : 'Neznámý hráč'}
-                            </span>
-                            {player.position === PlayerPosition.GOALKEEPER && (
-                              <Chip size="sm" variant="flat" color="success">
-                                B
-                              </Chip>
-                            )}
-                            {player.is_captain && (
-                              <Chip size="sm" variant="flat" color="secondary">
-                                C
-                              </Chip>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0 text-xs">
-                            {!!player.goals && (
-                              <span className="flex items-center gap-1" title="Góly">
-                                <BallIcon />
-                                {player.goals}
-                              </span>
-                            )}
-                            {!!player.yellow_cards && (
-                              <span className="flex items-center gap-1" title="Žluté karty">
-                                <YellowCardIcon />
-                                {player.yellow_cards}
-                              </span>
-                            )}
-                            {!!totalRedCards(player) && (
-                              <span className="flex items-center gap-1" title="Červené karty">
-                                <RedCardIcon />
-                                {totalRedCards(player)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {ownTeamLineup.coaches.length > 0 && (
-                    <div className="space-y-2">
-                      <h6 className="text-xs text-gray-500 dark:text-gray-400">Trenéři</h6>
-                      {ownTeamLineup.coaches.map((coach) => (
-                        <div
-                          key={coach.id}
-                          className="flex items-center justify-between gap-3 p-2 bg-white dark:bg-gray-700 rounded"
-                        >
-                          <span className="text-sm truncate">
-                            {coach.member
-                              ? `${coach.member.surname} ${coach.member.name}`
-                              : 'Neznámý trenér'}
-                          </span>
-                          <Chip size="sm" variant="flat" color="secondary">
-                            {getLineupCoachRoleOptions().find((role) => role.value === coach.role)
-                              ?.label ?? coach.role}
-                          </Chip>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+              Sestava našeho klubu. Vytažená do MatchLineupPanel, protože ji
+              potřebuje i příprava na nadcházející zápas — tam dřív chyběla
+              úplně, takže sestavu šlo poskládat až po odehrání.
+            */}
+            <MatchLineupPanel selectedMatch={selectedMatch} />
 
             {/* Match Documents */}
             <div>
@@ -929,16 +797,6 @@ export default function RecentMatchDetails({selectedMatch, onClose}: RecentMatch
           </div>
         </CardBody>
       </Card>
-
-      {ownTeamType && (
-        <LineupManagerModal
-          isOpen={isLineupManagerOpen}
-          onClose={() => setIsLineupManagerOpen(false)}
-          selectedMatch={selectedMatch}
-          members={members}
-          lockedTeam={ownTeamType}
-        />
-      )}
     </>
   );
 }
