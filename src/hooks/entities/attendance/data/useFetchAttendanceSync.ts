@@ -1,5 +1,7 @@
 'use client';
 
+import {useMemo} from 'react';
+
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 import {API_ROUTES} from '@/lib/api-routes';
@@ -65,9 +67,18 @@ export function useFetchAttendanceSync({
 
   const summary = query.data ?? EMPTY_SUMMARY;
 
-  /** Per-member lookup, so a table row does not have to scan the array. */
-  const byMemberId = new Map<string, MemberAttendanceSync>(
-    summary.members.map((member) => [member.memberId, member])
+  /**
+   * Per-member lookup, so a table row does not have to scan the array.
+   *
+   * Memoised on the summary, not rebuilt every render: callers key their own
+   * memos off this map, and a fresh Map on every render would defeat them.
+   */
+  const byMemberId = useMemo(
+    () =>
+      new Map<string, MemberAttendanceSync>(
+        summary.members.map((member) => [member.memberId, member])
+      ),
+    [summary]
   );
 
   const invalidateAttendanceSync = () =>

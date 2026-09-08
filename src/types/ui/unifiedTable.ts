@@ -27,6 +27,16 @@ export type ColumnType<T = any> = {
   isRowHeader?: boolean;
   textValue?: string;
   isActionColumn?: boolean;
+  /**
+   * A function form decides the actions per row — use it to show an action only
+   * where it applies.
+   *
+   * It must derive everything it needs from `item`. The table is a react-stately
+   * collection and memoises rows on the `data` array, so a callback that reads
+   * async state from a closure keeps drawing the value that state had when the
+   * rows were first built. Put that state on the row and rebuild `data` when it
+   * arrives.
+   */
   actions?: ActionConfig<T>[] | ((item: T) => ActionConfig<T>[]);
   className?: string;
 };

@@ -54,6 +54,20 @@ interface LineupMembersProps {
 const t = translations.lineupMembers;
 const tSync = t.attendanceSync;
 
+/**
+ * A lineup row with its attendance figures attached.
+ *
+ * They travel on the row rather than being looked up in the render callback,
+ * because HeroUI's table is a react-stately collection: it memoises rows on the
+ * `items` array, so a row is not re-rendered when unrelated state changes. The
+ * lineup loads before the sync summary does, so a callback that read the
+ * summary from a closure drew every row while it was still empty and never
+ * redrew them — the header showed "docházka nesedí u 1 člena" while no row
+ * offered the action. Rebuilding the array when the summary lands is what makes
+ * the collection rebuild with it.
+ */
+type LineupRow = CategoryLineupMemberWithMember & {attendanceSync: MemberAttendanceSync};
+
 /** Empty per-member sync figures, used before the summary has loaded. */
 const NO_SYNC: MemberAttendanceSync = {
   memberId: '',
@@ -85,8 +99,8 @@ export const LineupMembers = ({
   } = useCategoryLineupMembers();
 
   const modal = useModal();
-  const removeModal = useModalWithItem<CategoryLineupMemberWithMember>();
-  const syncModal = useModalWithItem<CategoryLineupMemberWithMember>();
+  const removeModal = useModalWithItem<LineupRow>();
+  const syncModal = useModalWithItem<LineupRow>();
   const syncAllModal = useModal();
 
   const memberIds = useMemo(() => lineupMembers.map((member) => member.member_id), [lineupMembers]);
@@ -105,7 +119,14 @@ export const LineupMembers = ({
     loading: syncLoading,
   } = useSyncAttendanceWithLineup();
 
-  const syncFor = (memberId: string): MemberAttendanceSync => byMemberId.get(memberId) ?? NO_SYNC;
+  const rows = useMemo(
+    (): LineupRow[] =>
+      lineupMembers.map((member) => ({
+        ...member,
+        attendanceSync: byMemberId.get(member.member_id) ?? NO_SYNC,
+      })),
+    [lineupMembers, byMemberId]
+  );
 
   const handleAddMemberToLineup = () => {
     modal.onOpen();
@@ -196,7 +217,7 @@ export const LineupMembers = ({
     [summary]
   );
 
-  const columns: ColumnType<CategoryLineupMemberWithMember>[] = [
+  const columns: ColumnType<LineupRow>[] = [
     {key: 'member', label: t.table.columns.member, align: 'left' as ColumnAlignType},
     {key: 'position', label: t.table.columns.position, align: 'left' as ColumnAlignType},
     {
@@ -216,21 +237,21 @@ export const LineupMembers = ({
         sits before the destructive one, which is always last.
       */
       actions: (member) => {
-        const missing = syncFor(member.member_id).missingTotal;
+        const missing = member.attendanceSync.missingTotal;
 
         return [
           ...(isActiveLineup && missing > 0
             ? [
                 {
                   type: ActionTypes.SYNC,
-                  onPress: (item: CategoryLineupMemberWithMember) => syncModal.openWith(item),
+                  onPress: (item: LineupRow) => syncModal.openWith(item),
                   title: tSync.outOfSyncTooltip(missing),
                 },
               ]
             : []),
           {
             type: ActionTypes.DELETE,
-            onPress: (item: CategoryLineupMemberWithMember) => removeModal.openWith(item),
+            onPress: (item: LineupRow) => removeModal.openWith(item),
             title: translations.lineupMembers.buttons.removeMember,
           },
         ];
@@ -238,7 +259,7 @@ export const LineupMembers = ({
     },
   ];
 
-  const renderCells = (member: CategoryLineupMemberWithMember, columnKey: string) => {
+  const renderCells = (member: LineupRow, columnKey: string) => {
     switch (columnKey) {
       case 'member':
         return (
@@ -289,9 +310,15 @@ export const LineupMembers = ({
     </>
   );
 
+  /*
+    Only worth a button when it saves the coach repeated trips: with a single
+    row out of sync, the icon on that row is the shorter way to the same dialog.
+  */
+  const showSyncAll = summary.membersOutOfSync > 1;
+
   const actions = (
     <HStack spacing={2} align="center">
-      {summary.membersOutOfSync > 0 && (
+      {showSyncAll && (
         <Button
           size="sm"
           color="warning"
@@ -330,7 +357,7 @@ export const LineupMembers = ({
         actions={lineupId && actions}
         padding={'none'}
         subtitle={
-          summary.membersOutOfSync > 0
+          showSyncAll
             ? tSync.summaryChip(summary.membersOutOfSync, summary.missingRecords)
             : undefined
         }
@@ -338,8 +365,8 @@ export const LineupMembers = ({
         <UnifiedTable
           columns={columns}
           renderCell={renderCells}
-          data={lineupMembers}
-          getKey={(member: CategoryLineupMemberWithMember) => member.id}
+          data={rows}
+          getKey={(member: LineupRow) => member.id}
           ariaLabel={t.table.ariaLabel}
           isLoading={loadingLineupMembers}
           loadingContent={<LoadingSpinner />}
@@ -364,10 +391,10 @@ export const LineupMembers = ({
           onClose={syncModal.closeAndClear}
           onSubmit={handleSyncMember}
           isLoading={syncLoading}
-          totals={syncFor(selectedForSync.member_id)}
+          totals={selectedForSync.attendanceSync}
           intro={tSync.dialog.intro(
             getMemberFullName(selectedForSync.members) || '',
-            syncFor(selectedForSync.member_id).missingTotal
+            selectedForSync.attendanceSync.missingTotal
           )}
         />
       )}
@@ -389,8 +416,8 @@ export const LineupMembers = ({
           onSubmit={handleRemoveMemberFromLineup}
           isLoading={CRUDLoading || syncLoading}
           memberName={getMemberFullName(selectedForRemoval.members) || ''}
-          recordedInPlanned={syncFor(selectedForRemoval.member_id).recordedInPlanned}
-          recordedInPlannedPast={syncFor(selectedForRemoval.member_id).recordedInPlannedPast}
+          recordedInPlanned={selectedForRemoval.attendanceSync.recordedInPlanned}
+          recordedInPlannedPast={selectedForRemoval.attendanceSync.recordedInPlannedPast}
         />
       )}
     </>
