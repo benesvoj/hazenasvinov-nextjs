@@ -248,18 +248,14 @@ export const LineupMembers = ({
       align: ColumnAlignType.END,
       /*
         Per row, because the sync action is itself the notification: it appears
-        only where the attendance sheets have fallen behind this member, and
-        sits before the destructive one, which is always last.
+        only where the attendance sheets have fallen behind this member. It goes
+        first, so the rows that need attention are the only ones whose actions
+        start with it; the destructive one is always last.
       */
       actions: (member) => {
         const missing = member.attendanceSync.missingTotal;
 
         return [
-          {
-            type: ActionTypes.UPDATE,
-            onPress: (item: LineupRow) => editModal.openWith(item),
-            title: t.editLineupMemberDialog.action,
-          },
           ...(isActiveLineup && missing > 0
             ? [
                 {
@@ -269,6 +265,11 @@ export const LineupMembers = ({
                 },
               ]
             : []),
+          {
+            type: ActionTypes.UPDATE,
+            onPress: (item: LineupRow) => editModal.openWith(item),
+            title: t.editLineupMemberDialog.action,
+          },
           {
             type: ActionTypes.DELETE,
             onPress: (item: LineupRow) => removeModal.openWith(item),
