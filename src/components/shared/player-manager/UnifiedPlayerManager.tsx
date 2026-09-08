@@ -39,21 +39,54 @@ export default function UnifiedPlayerManager({
   /** Widens the search from this category to every category of the same gender. */
   const [showOtherCategories, setShowOtherCategories] = useState(false);
 
-  const callUpCategoryIds = useMemo(
-    () => getCallUpCategories(categories ?? [], categoryId).map((category) => category.id),
+  /** Categories the widened search may draw from, in the club's own order. */
+  const callUpCategories = useMemo(
+    () => getCallUpCategories(categories ?? [], categoryId),
     [categories, categoryId]
+  );
+  const callUpCategoryIds = useMemo(
+    () => callUpCategories.map((category) => category.id),
+    [callUpCategories]
   );
 
   /** No categories to widen into means no switch — an inert toggle is worse than none. */
   const canCallUp = allowOtherCategories && hasItems(callUpCategoryIds);
 
-  const categoryFilter = useMemo(
-    (): Pick<PlayerSearchFilters, 'category_id' | 'category_ids'> =>
-      showOtherCategories && hasItems(callUpCategoryIds)
-        ? {category_ids: callUpCategoryIds}
-        : {category_id: categoryId},
-    [showOtherCategories, callUpCategoryIds, categoryId]
+  /**
+   * One of `callUpCategories`, or empty for all of them.
+   *
+   * Widening the search to every category of the same gender can return well
+   * over a hundred players, which is a long way to scroll for a coach who knows
+   * they want a Starší žačka. The filter narrows that back down without
+   * forcing them to remember a name to type.
+   */
+  const [callUpCategoryId, setCallUpCategoryId] = useState('');
+
+  const categoryFilter = useMemo((): Pick<PlayerSearchFilters, 'category_id' | 'category_ids'> => {
+    if (!showOtherCategories || !hasItems(callUpCategoryIds)) return {category_id: categoryId};
+
+    return callUpCategoryId ? {category_id: callUpCategoryId} : {category_ids: callUpCategoryIds};
+  }, [showOtherCategories, callUpCategoryId, callUpCategoryIds, categoryId]);
+
+  /*
+    One flat list rather than a lone <SelectItem> beside a mapped fragment:
+    HeroUI's select is a react-stately collection and reads its children
+    structurally, so a fragment in the middle is not a reliable way to add
+    options.
+  */
+  const categoryFilterOptions = useMemo(
+    () => [
+      {key: '', label: tPlayers.categoryFilterAll},
+      ...callUpCategories.map((category) => ({key: category.id, label: category.name})),
+    ],
+    [callUpCategories]
   );
+
+  /** Turning the switch off drops the narrowing with it, so it cannot linger unseen. */
+  const handleShowOtherCategories = (show: boolean) => {
+    setShowOtherCategories(show);
+    if (!show) setCallUpCategoryId('');
+  };
 
   const [players, setPlayers] = useState<PlayerSearchResult[]>([]);
   const [filters, setFilters] = useState<PlayerSearchFilters>({
@@ -321,14 +354,30 @@ export default function UnifiedPlayerManager({
         <Switch
           size="sm"
           isSelected={showOtherCategories}
-          onValueChange={setShowOtherCategories}
+          onValueChange={handleShowOtherCategories}
           aria-label={tPlayers.showOtherCategories}
         >
           <span className="text-sm">{tPlayers.showOtherCategories}</span>
         </Switch>
       )}
       {canCallUp && showOtherCategories && (
-        <p className="text-xs text-gray-500">{tPlayers.showOtherCategoriesHint}</p>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Select
+            className="sm:max-w-xs"
+            size="sm"
+            label={tPlayers.categoryFilter}
+            selectedKeys={callUpCategoryId ? [callUpCategoryId] : ['']}
+            onSelectionChange={(keys) => {
+              const [first] = Array.from(keys);
+              setCallUpCategoryId(first === undefined ? '' : String(first));
+            }}
+          >
+            {categoryFilterOptions.map((option) => (
+              <SelectItem key={option.key}>{option.label}</SelectItem>
+            ))}
+          </Select>
+          <p className="text-xs text-gray-500">{tPlayers.showOtherCategoriesHint}</p>
+        </div>
       )}
 
       {/* Create Player Button - Different for internal vs external */}
