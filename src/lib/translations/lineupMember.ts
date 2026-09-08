@@ -61,6 +61,12 @@ export const lineupMembersTranslations = {
       jerseyNumber: 'Vyberte číslo dresu',
     },
   },
+  editLineupMemberDialog: {
+    title: 'Upravit člena soupisky',
+    action: 'Upravit údaje na soupisce',
+    updateSuccess: 'Údaje člena soupisky upraveny',
+    updateError: 'Údaje se nepodařilo uložit',
+  },
   deleteLineupMemberDialog: {
     title: 'Odebrat člena ze soupisky',
     message: 'Opravdu chcete odebrat tohoto člena ze soupisky?',

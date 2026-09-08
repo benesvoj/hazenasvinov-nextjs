@@ -6,3 +6,4 @@ export * from './LineupsList';
 export * from './LineupMembers';
 export * from './AttendanceSyncDialog';
 export * from './LineupMemberRemoveDialog';
+export * from './LineupMemberEditDialog';

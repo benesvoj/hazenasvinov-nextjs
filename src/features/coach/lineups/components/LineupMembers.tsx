@@ -37,6 +37,7 @@ import {getPositionColor, getPositionText} from '../helpers/helpers';
 
 import {AttendanceSyncDialog} from './AttendanceSyncDialog';
 import LineupMemberAssignDialog from './LineupMemberAssignDialog';
+import {LineupMemberEditDialog, LineupMemberSetupPatch} from './LineupMemberEditDialog';
 import {LineupMemberRemoveDialog} from './LineupMemberRemoveDialog';
 
 interface LineupMembersProps {
@@ -94,11 +95,13 @@ export const LineupMembers = ({
 
   const {
     createCategoryLineupMember,
+    updateCategoryLineupMember,
     removeCategoryLineupMember,
     loading: CRUDLoading,
   } = useCategoryLineupMembers();
 
   const modal = useModal();
+  const editModal = useModalWithItem<LineupRow>();
   const removeModal = useModalWithItem<LineupRow>();
   const syncModal = useModalWithItem<LineupRow>();
   const syncAllModal = useModal();
@@ -184,6 +187,18 @@ export const LineupMembers = ({
     await fetchLineupMembers();
   };
 
+  const handleEditMember = async (patch: LineupMemberSetupPatch) => {
+    const selectedItem = editModal.selectedItem;
+    if (!selectedItem) return;
+
+    await updateCategoryLineupMember(selectedItem.id, {
+      ...patch,
+      updated_by: user?.id || '',
+    });
+    editModal.closeAndClear();
+    await fetchLineupMembers();
+  };
+
   const handleSyncMember = async (scope: AttendanceSyncScope, status: AttendanceStatuses) => {
     const selectedItem = syncModal.selectedItem;
     if (!selectedItem) return;
@@ -240,6 +255,11 @@ export const LineupMembers = ({
         const missing = member.attendanceSync.missingTotal;
 
         return [
+          {
+            type: ActionTypes.UPDATE,
+            onPress: (item: LineupRow) => editModal.openWith(item),
+            title: t.editLineupMemberDialog.action,
+          },
           ...(isActiveLineup && missing > 0
             ? [
                 {
@@ -340,6 +360,7 @@ export const LineupMembers = ({
     </HStack>
   );
 
+  const selectedForEdit = editModal.selectedItem;
   const selectedForSync = syncModal.selectedItem;
   const selectedForRemoval = removeModal.selectedItem;
 
@@ -384,6 +405,21 @@ export const LineupMembers = ({
         existingJerseyNumbers={existingJerseyNumbers}
         categories={availableCategories}
       />
+
+      {selectedForEdit && (
+        <LineupMemberEditDialog
+          isOpen={editModal.isOpen}
+          onClose={editModal.closeAndClear}
+          onSubmit={handleEditMember}
+          isLoading={CRUDLoading}
+          member={selectedForEdit}
+          // The member's own number must stay selectable; only the rest of the
+          // lineup blocks a number.
+          existingJerseyNumbers={existingJerseyNumbers.filter(
+            (number) => number !== selectedForEdit.jersey_number
+          )}
+        />
+      )}
 
       {selectedForSync && (
         <AttendanceSyncDialog
