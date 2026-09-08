@@ -22,4 +22,5 @@ export enum ActionTypes {
   ACTIVATE = 'activate',
   DEACTIVATE = 'deactivate',
   MOVE = 'move',
+  SYNC = 'sync',
 }

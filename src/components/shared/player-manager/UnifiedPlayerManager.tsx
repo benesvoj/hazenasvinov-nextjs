@@ -205,9 +205,9 @@ export default function UnifiedPlayerManager({
   };
 
   /**
-   * Names the player's category, and marks it when it is not the one the match
-   * belongs to — otherwise a call-up is indistinguishable from a squad player
-   * in a list that no longer filters by category.
+   * Names the player's category. With the switch on, the list no longer filters
+   * by category, so without this a call-up is indistinguishable from a squad
+   * player. Colour carries the distinction; the label stays just the name.
    */
   const getCategoryBadge = (player: PlayerSearchResult) => {
     if (!player.category_name) return null;
@@ -220,7 +220,7 @@ export default function UnifiedPlayerManager({
           isCallUp ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-700'
         }`}
       >
-        {isCallUp ? `${tPlayers.calledUp}: ${player.category_name}` : player.category_name}
+        {player.category_name}
       </span>
     );
   };
@@ -324,9 +324,7 @@ export default function UnifiedPlayerManager({
           onValueChange={setShowOtherCategories}
           aria-label={tPlayers.showOtherCategories}
         >
-          <span className="text-sm">
-            {showOtherCategories ? tPlayers.showOtherCategories : tPlayers.ownCategoryOnly}
-          </span>
+          <span className="text-sm">{tPlayers.showOtherCategories}</span>
         </Switch>
       )}
       {canCallUp && showOtherCategories && (

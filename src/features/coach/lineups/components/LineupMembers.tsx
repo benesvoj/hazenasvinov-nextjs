@@ -2,7 +2,7 @@
 
 import React, {useMemo} from 'react';
 
-import {Button, Chip, Tooltip} from '@heroui/react';
+import {Button, Chip} from '@heroui/react';
 
 import {ArrowPathIcon, UserPlusIcon} from '@heroicons/react/24/outline';
 
@@ -205,27 +205,36 @@ export const LineupMembers = ({
       align: 'center' as ColumnAlignType,
     },
     {key: 'functions', label: t.table.columns.functions, align: 'center' as ColumnAlignType},
-    ...(isActiveLineup
-      ? [
-          {
-            key: 'attendance',
-            label: tSync.columnLabel,
-            align: 'center' as ColumnAlignType,
-          },
-        ]
-      : []),
     {
       key: 'actions',
       label: t.table.columns.actions,
       isActionColumn: true,
-      align: 'center' as ColumnAlignType,
-      actions: [
-        {
-          type: ActionTypes.DELETE,
-          onPress: (member) => removeModal.openWith(member),
-          title: translations.lineupMembers.buttons.removeMember,
-        },
-      ],
+      align: ColumnAlignType.END,
+      /*
+        Per row, because the sync action is itself the notification: it appears
+        only where the attendance sheets have fallen behind this member, and
+        sits before the destructive one, which is always last.
+      */
+      actions: (member) => {
+        const missing = syncFor(member.member_id).missingTotal;
+
+        return [
+          ...(isActiveLineup && missing > 0
+            ? [
+                {
+                  type: ActionTypes.SYNC,
+                  onPress: (item: CategoryLineupMemberWithMember) => syncModal.openWith(item),
+                  title: tSync.outOfSyncTooltip(missing),
+                },
+              ]
+            : []),
+          {
+            type: ActionTypes.DELETE,
+            onPress: (item: CategoryLineupMemberWithMember) => removeModal.openWith(item),
+            title: translations.lineupMembers.buttons.removeMember,
+          },
+        ];
+      },
     },
   ];
 
@@ -271,26 +280,6 @@ export const LineupMembers = ({
             )}
           </div>
         );
-      case 'attendance': {
-        // The icon is the notification: a row whose attendance already matches
-        // the lineup offers no action, so nothing is drawn for it.
-        const missing = syncFor(member.member_id).missingTotal;
-        if (missing === 0) return null;
-
-        return (
-          <Tooltip content={tSync.outOfSyncTooltip(missing)}>
-            <Button
-              size="sm"
-              isIconOnly
-              variant="flat"
-              color="warning"
-              aria-label={tSync.outOfSyncTooltip(missing)}
-              onPress={() => syncModal.openWith(member)}
-              startContent={<ArrowPathIcon className="w-4 h-4" />}
-            />
-          </Tooltip>
-        );
-      }
     }
   };
 

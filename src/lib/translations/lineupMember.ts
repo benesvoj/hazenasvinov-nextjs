@@ -71,8 +71,6 @@ export const lineupMembersTranslations = {
     confirm: 'Odebrat',
   },
   attendanceSync: {
-    columnLabel: 'Docházka',
-    inSync: 'Docházka sedí',
     outOfSyncTooltip: (count: number) =>
       `Chybí v ${count === 1 ? '1 tréninku' : `${count} trénincích`}`,
     summaryChip: (members: number, records: number) =>
