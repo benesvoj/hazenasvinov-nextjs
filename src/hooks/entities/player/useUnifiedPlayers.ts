@@ -31,6 +31,7 @@ export function useUnifiedPlayers() {
             registration_number,
             category_id,
             functions,
+            categories(id, name),
             member_club_relationships!inner(
               club_id,
               clubs!inner(
@@ -53,8 +54,12 @@ export function useUnifiedPlayers() {
           query = query.eq('member_club_relationships.club_id', filters.club_id);
         }
 
-        // Apply category filter
-        if (filters.category_id) {
+        // Apply category filter. `category_ids` is the call-up case — a coach
+        // picking from every category of the same gender — and wins over the
+        // single-category filter when both are present.
+        if (filters.category_ids?.length) {
+          query = query.in('category_id', filters.category_ids);
+        } else if (filters.category_id) {
           query = query.eq('category_id', filters.category_id);
         }
 
@@ -101,6 +106,8 @@ export function useUnifiedPlayers() {
             is_external: isExternal,
             is_active: isActive, // Use status from member_club_relationships
             current_club_name: clubRelationship?.clubs?.name || 'Neznámý klub',
+            category_id: player.category_id ?? undefined,
+            category_name: player.categories?.name ?? undefined,
             display_name: `${player.surname} ${player.name} (${player.registration_number})`,
           };
         });

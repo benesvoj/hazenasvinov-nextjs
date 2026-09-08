@@ -52,6 +52,8 @@ export default function CoachLineupsContainer() {
             <LineupMembers
               lineupId={state.selectedLineup?.id ?? ''}
               categoryId={state.selectedCategory}
+              seasonId={state.selectedSeason}
+              isActiveLineup={state.selectedLineup?.is_active ?? false}
             />
           </GridItem>
         </Grid>

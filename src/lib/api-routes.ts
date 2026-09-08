@@ -14,6 +14,8 @@ export const API_ROUTES = {
   attendance: {
     memberHistory: '/api/attendance/member-history' as const,
     statistics: '/api/attendance/statistics' as const,
+    /** Reconciles a category lineup with the attendance sheets of its season. */
+    sync: '/api/attendance/sync' as const,
     bulk: (trainingId: string | number) => `/api/attendance/${trainingId}/bulk`,
   },
   auth: {

@@ -27,6 +27,12 @@ export interface PlayerSearchFilters {
   is_active?: boolean;
   has_active_loan?: boolean;
   category_id?: string;
+  /**
+   * Restricts the search to several categories at once — how a coach calls up
+   * players from another age group. Takes precedence over `category_id`; when
+   * both are absent the search spans every category.
+   */
+  category_ids?: string[];
 }
 
 export interface PlayerSearchResult {
@@ -40,6 +46,9 @@ export interface PlayerSearchResult {
   jersey_number?: number;
   display_name: string;
   is_captain?: boolean;
+  /** Category the member belongs to — shown so a call-up is visible as one. */
+  category_id?: string;
+  category_name?: string;
 }
 
 export interface PlayerStats {
@@ -71,4 +80,9 @@ export interface UnifiedPlayerManagerProps {
   teamName?: string;
   excludePlayerIds?: string[]; // IDs of player-manager already in the lineup
   onMemberCreated?: () => void; // Callback when a new member is created
+  /**
+   * Offers a switch that widens the search from `categoryId` to every category
+   * of the same gender, so a coach can call up a younger age group.
+   */
+  allowOtherCategories?: boolean;
 }

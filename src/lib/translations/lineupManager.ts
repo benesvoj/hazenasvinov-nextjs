@@ -37,5 +37,10 @@ export const lineupManagerTranslations = {
   //TODO:
   unifiedPlayerManager: {
     error: 'Chyba při načítání hráčů',
+    showOtherCategories: 'Zobrazit i hráče z jiných kategorií',
+    showOtherCategoriesHint: 'Nabídne všechny hráče klubu se stejným pohlavím kategorie zápasu.',
+    ownCategoryOnly: 'Jen hráči této kategorie',
+    category: 'Kategorie',
+    calledUp: 'Povolán',
   },
 };

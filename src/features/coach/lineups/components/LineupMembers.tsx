@@ -1,39 +1,75 @@
 'use client';
 
-import React from 'react';
+import React, {useMemo} from 'react';
 
-import {Button, Chip} from '@heroui/react';
+import {Button, Chip, Tooltip} from '@heroui/react';
 
-import {UserPlusIcon} from '@heroicons/react/24/outline';
+import {ArrowPathIcon, UserPlusIcon} from '@heroicons/react/24/outline';
 
 import {useModal, useModalWithItem} from '@/hooks/shared/useModals';
 
 import {translations} from '@/lib/translations';
 
-import {ContentCard, DeleteDialog, EmptyState, LoadingSpinner, UnifiedTable} from '@/components';
+import {ContentCard, HStack, LoadingSpinner, UnifiedTable} from '@/components';
 import {useUser} from '@/contexts';
-import {ActionTypes, ColumnAlignType} from '@/enums';
+import {ActionTypes, AttendanceStatuses, ColumnAlignType} from '@/enums';
+import {
+  AttendanceSyncScope,
+  MemberAttendanceSync,
+} from '@/features/coach/lineups/helpers/describeAttendanceSync';
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
-import {useCategoryLineupMembers, useFetchCategoryLineupMembers} from '@/hooks';
+import {getMemberFullName} from '@/helpers';
+import {
+  useCategoryLineupMembers,
+  useFetchAttendanceSync,
+  useFetchCategoryLineupMembers,
+  useSyncAttendanceWithLineup,
+} from '@/hooks';
 import {
   CategoryLineupMemberWithMember,
   ColumnType,
   CreateCategoryLineupMember,
   CreateCategoryLineupMemberModal,
 } from '@/types';
+import {hasItems} from '@/utils';
 
 import {getPositionColor, getPositionText} from '../helpers/helpers';
 
+import {AttendanceSyncDialog} from './AttendanceSyncDialog';
 import LineupMemberAssignDialog from './LineupMemberAssignDialog';
+import {LineupMemberRemoveDialog} from './LineupMemberRemoveDialog';
 
 interface LineupMembersProps {
   lineupId: string;
   categoryId: string;
+  seasonId: string;
+  /**
+   * Only the active lineup is what attendance is generated from, so it is the
+   * only one worth reconciling against. Syncing from an archived lineup would
+   * write the wrong squad into the sheets.
+   */
+  isActiveLineup: boolean;
 }
 
 const t = translations.lineupMembers;
+const tSync = t.attendanceSync;
 
-export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
+/** Empty per-member sync figures, used before the summary has loaded. */
+const NO_SYNC: MemberAttendanceSync = {
+  memberId: '',
+  missingPlanned: 0,
+  missingOther: 0,
+  missingTotal: 0,
+  recordedInPlanned: 0,
+  recordedInPlannedPast: 0,
+};
+
+export const LineupMembers = ({
+  lineupId,
+  categoryId,
+  seasonId,
+  isActiveLineup,
+}: LineupMembersProps) => {
   const {availableCategories} = useCoachCategory();
   const {user} = useUser();
   const {
@@ -49,7 +85,27 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
   } = useCategoryLineupMembers();
 
   const modal = useModal();
-  const deleteModal = useModalWithItem<CategoryLineupMemberWithMember>();
+  const removeModal = useModalWithItem<CategoryLineupMemberWithMember>();
+  const syncModal = useModalWithItem<CategoryLineupMemberWithMember>();
+  const syncAllModal = useModal();
+
+  const memberIds = useMemo(() => lineupMembers.map((member) => member.member_id), [lineupMembers]);
+
+  // The lineup query already drops deactivated members, so these ids are the
+  // squad attendance should cover.
+  const {summary, byMemberId} = useFetchAttendanceSync({
+    categoryId: isActiveLineup ? categoryId : '',
+    seasonId: isActiveLineup ? seasonId : '',
+    memberIds,
+  });
+
+  const {
+    addToAttendance,
+    removeFromAttendance,
+    loading: syncLoading,
+  } = useSyncAttendanceWithLineup();
+
+  const syncFor = (memberId: string): MemberAttendanceSync => byMemberId.get(memberId) ?? NO_SYNC;
 
   const handleAddMemberToLineup = () => {
     modal.onOpen();
@@ -83,15 +139,62 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
     .map((member) => member.jersey_number)
     .filter((num) => num !== null && num !== undefined) as number[];
 
-  const handleRemoveMemberFromLineup = async () => {
-    const selectedItemId = deleteModal.selectedItem?.id;
+  /**
+   * Attendance is removed first. If the second step then fails, the member is
+   * still on the lineup and shows up as out of sync — visible and repairable.
+   * The other order would leave deleted attendance behind a member who is gone
+   * from the roster, with nothing pointing at it.
+   */
+  const handleRemoveMemberFromLineup = async (alsoRemoveAttendance: boolean) => {
+    const selectedItem = removeModal.selectedItem;
+    if (!selectedItem) return;
 
-    if (!selectedItemId) return;
+    if (alsoRemoveAttendance) {
+      await removeFromAttendance({
+        categoryId,
+        seasonId,
+        memberIds: [selectedItem.member_id],
+        scope: AttendanceSyncScope.PLANNED,
+      });
+    }
 
-    await removeCategoryLineupMember(selectedItemId);
-    deleteModal.closeAndClear();
+    await removeCategoryLineupMember(selectedItem.id);
+    removeModal.closeAndClear();
     await fetchLineupMembers();
   };
+
+  const handleSyncMember = async (scope: AttendanceSyncScope, status: AttendanceStatuses) => {
+    const selectedItem = syncModal.selectedItem;
+    if (!selectedItem) return;
+
+    await addToAttendance({
+      categoryId,
+      seasonId,
+      memberIds: [selectedItem.member_id],
+      scope,
+      status,
+    });
+    syncModal.closeAndClear();
+  };
+
+  const handleSyncAll = async (scope: AttendanceSyncScope, status: AttendanceStatuses) => {
+    const outOfSync = summary.members
+      .filter((member) => member.missingTotal > 0)
+      .map((member) => member.memberId);
+
+    if (!hasItems(outOfSync)) return;
+
+    await addToAttendance({categoryId, seasonId, memberIds: outOfSync, scope, status});
+    syncAllModal.onClose();
+  };
+
+  const bulkTotals = useMemo(
+    () => ({
+      missingTotal: summary.missingRecords,
+      missingPlanned: summary.members.reduce((sum, member) => sum + member.missingPlanned, 0),
+    }),
+    [summary]
+  );
 
   const columns: ColumnType<CategoryLineupMemberWithMember>[] = [
     {key: 'member', label: t.table.columns.member, align: 'left' as ColumnAlignType},
@@ -102,6 +205,15 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
       align: 'center' as ColumnAlignType,
     },
     {key: 'functions', label: t.table.columns.functions, align: 'center' as ColumnAlignType},
+    ...(isActiveLineup
+      ? [
+          {
+            key: 'attendance',
+            label: tSync.columnLabel,
+            align: 'center' as ColumnAlignType,
+          },
+        ]
+      : []),
     {
       key: 'actions',
       label: t.table.columns.actions,
@@ -110,7 +222,7 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
       actions: [
         {
           type: ActionTypes.DELETE,
-          onPress: (member) => deleteModal.openWith(member),
+          onPress: (member) => removeModal.openWith(member),
           title: translations.lineupMembers.buttons.removeMember,
         },
       ],
@@ -159,6 +271,26 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
             )}
           </div>
         );
+      case 'attendance': {
+        // The icon is the notification: a row whose attendance already matches
+        // the lineup offers no action, so nothing is drawn for it.
+        const missing = syncFor(member.member_id).missingTotal;
+        if (missing === 0) return null;
+
+        return (
+          <Tooltip content={tSync.outOfSyncTooltip(missing)}>
+            <Button
+              size="sm"
+              isIconOnly
+              variant="flat"
+              color="warning"
+              aria-label={tSync.outOfSyncTooltip(missing)}
+              onPress={() => syncModal.openWith(member)}
+              startContent={<ArrowPathIcon className="w-4 h-4" />}
+            />
+          </Tooltip>
+        );
+      }
     }
   };
 
@@ -169,15 +301,31 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
   );
 
   const actions = (
-    <Button
-      size="sm"
-      color="primary"
-      startContent={<UserPlusIcon className="w-4 h-4" />}
-      onPress={handleAddMemberToLineup}
-    >
-      {t.addMember}
-    </Button>
+    <HStack spacing={2} align="center">
+      {summary.membersOutOfSync > 0 && (
+        <Button
+          size="sm"
+          color="warning"
+          variant="flat"
+          startContent={<ArrowPathIcon className="w-4 h-4" />}
+          onPress={syncAllModal.onOpen}
+        >
+          {tSync.syncAll}
+        </Button>
+      )}
+      <Button
+        size="sm"
+        color="primary"
+        startContent={<UserPlusIcon className="w-4 h-4" />}
+        onPress={handleAddMemberToLineup}
+      >
+        {t.addMember}
+      </Button>
+    </HStack>
   );
+
+  const selectedForSync = syncModal.selectedItem;
+  const selectedForRemoval = removeModal.selectedItem;
 
   return (
     <>
@@ -188,7 +336,16 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
         the dialog's portal was closing. The table renders its own loading state
         instead, and stays mounted.
       */}
-      <ContentCard title={title} actions={lineupId && actions} padding={'none'}>
+      <ContentCard
+        title={title}
+        actions={lineupId && actions}
+        padding={'none'}
+        subtitle={
+          summary.membersOutOfSync > 0
+            ? tSync.summaryChip(summary.membersOutOfSync, summary.missingRecords)
+            : undefined
+        }
+      >
         <UnifiedTable
           columns={columns}
           renderCell={renderCells}
@@ -212,14 +369,41 @@ export const LineupMembers = ({lineupId, categoryId}: LineupMembersProps) => {
         categories={availableCategories}
       />
 
-      <DeleteDialog
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.closeAndClear}
-        onSubmit={handleRemoveMemberFromLineup}
-        title={translations.lineupMembers.deleteLineupMemberDialog.title}
-        message={translations.lineupMembers.deleteLineupMemberDialog.message}
-        isLoading={CRUDLoading}
+      {selectedForSync && (
+        <AttendanceSyncDialog
+          isOpen={syncModal.isOpen}
+          onClose={syncModal.closeAndClear}
+          onSubmit={handleSyncMember}
+          isLoading={syncLoading}
+          totals={syncFor(selectedForSync.member_id)}
+          intro={tSync.dialog.intro(
+            getMemberFullName(selectedForSync.members) || '',
+            syncFor(selectedForSync.member_id).missingTotal
+          )}
+        />
+      )}
+
+      <AttendanceSyncDialog
+        isOpen={syncAllModal.isOpen}
+        onClose={syncAllModal.onClose}
+        onSubmit={handleSyncAll}
+        isLoading={syncLoading}
+        totals={bulkTotals}
+        intro={tSync.dialog.introAll(summary.membersOutOfSync, summary.missingRecords)}
+        isBulk
       />
+
+      {selectedForRemoval && (
+        <LineupMemberRemoveDialog
+          isOpen={removeModal.isOpen}
+          onClose={removeModal.closeAndClear}
+          onSubmit={handleRemoveMemberFromLineup}
+          isLoading={CRUDLoading || syncLoading}
+          memberName={getMemberFullName(selectedForRemoval.members) || ''}
+          recordedInPlanned={syncFor(selectedForRemoval.member_id).recordedInPlanned}
+          recordedInPlannedPast={syncFor(selectedForRemoval.member_id).recordedInPlannedPast}
+        />
+      )}
     </>
   );
 };

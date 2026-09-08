@@ -65,6 +65,9 @@ export default function LineupPlayerSelectionModal({
         teamName={teamName}
         excludePlayerIds={excludePlayerIds}
         onMemberCreated={onMemberCreated}
+        // A coach of the Dorostenky fields Starší žačky and records their goals
+        // and cards; the lineup has to be able to hold them.
+        allowOtherCategories
       />
     </UnifiedModal>
   );
