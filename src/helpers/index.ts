@@ -8,6 +8,7 @@ export * from './comments';
 export * from './commentIcons';
 export * from './ui/action/actionIcons';
 export * from './getAssignableCategories';
+export * from './getCallUpCategories';
 export * from './getCategoryInfo';
 export * from './getMemberFullName';
 export * from './monthUtils';

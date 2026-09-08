@@ -17,9 +17,19 @@ import {translations} from '@/lib/translations';
 
 import {isEmpty} from '@/utils/arrayHelper';
 
-import {ActionTypes} from '@/enums';
+import {ActionTypes, ColumnAlignType} from '@/enums';
 import {getDefaultActionIcon} from '@/helpers';
 import {ActionConfig, ColumnType, UnifiedTableProps} from '@/types';
+
+/**
+ * Tailwind does not build classes from interpolated strings, so the mapping is
+ * a static lookup — same rule the layout components follow.
+ */
+const ACTION_JUSTIFY: Record<ColumnAlignType, string> = {
+  [ColumnAlignType.START]: 'justify-start',
+  [ColumnAlignType.CENTER]: 'justify-center',
+  [ColumnAlignType.END]: 'justify-end',
+};
 
 export default function UnifiedTable<T = any>({
   columns,
@@ -111,6 +121,8 @@ export default function UnifiedTable<T = any>({
         return 'warning';
       case ActionTypes.MOVE:
         return 'primary';
+      case ActionTypes.SYNC:
+        return 'warning';
       case ActionTypes.ACTIVATE:
         return 'success';
       default:
@@ -124,8 +136,13 @@ export default function UnifiedTable<T = any>({
 
     if (isEmpty(actions)) return null;
 
+    // Follows the column's own alignment, so a table can put its actions on the
+    // right edge without every other table moving with it. Centred by default,
+    // which is what every existing caller already gets.
+    const justify = ACTION_JUSTIFY[column.align ?? ColumnAlignType.CENTER];
+
     return (
-      <div className="flex justify-center gap-2">
+      <div className={`flex ${justify} gap-2`}>
         {actions?.map((action, index) => {
           const isDisabled = action.disabled ? action.disabled(item) : false;
           const icon = action.icon || getDefaultIcon(action.type);

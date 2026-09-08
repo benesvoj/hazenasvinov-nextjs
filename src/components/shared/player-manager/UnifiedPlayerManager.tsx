@@ -2,17 +2,22 @@
 
 import {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 
-import {Select, SelectItem, Button, Input} from '@heroui/react';
+import {Select, SelectItem, Button, Input, Switch} from '@heroui/react';
 
 import {CheckIcon, PlusIcon} from '@heroicons/react/24/outline';
 
 import {translations} from '@/lib/translations';
 
 import {getClubName} from '@/constants';
+import {useAppDataSafe} from '@/contexts';
 import {PlayerPosition} from '@/enums';
 import {CreateExternalPlayerModal, CreateMemberModal} from '@/features/lineupManager';
+import {getCallUpCategories} from '@/helpers';
 import {useUnifiedPlayers} from '@/hooks';
 import {PlayerSearchFilters, PlayerSearchResult, UnifiedPlayerManagerProps} from '@/types';
+import {hasItems} from '@/utils';
+
+const tPlayers = translations.lineupManager.unifiedPlayerManager;
 
 export default function UnifiedPlayerManager({
   clubId,
@@ -22,8 +27,33 @@ export default function UnifiedPlayerManager({
   teamName,
   excludePlayerIds = [],
   onMemberCreated,
+  allowOtherCategories = false,
 }: UnifiedPlayerManagerProps) {
   const {searchPlayers, getPlayersByClub, loading, error} = useUnifiedPlayers();
+  // Safe variant: this component also renders under /matches, which mounts no
+  // AppDataProvider. Without the category list the call-up switch simply has
+  // nothing to offer and stays hidden, rather than throwing.
+  const appData = useAppDataSafe();
+  const categories = appData?.categories.data;
+
+  /** Widens the search from this category to every category of the same gender. */
+  const [showOtherCategories, setShowOtherCategories] = useState(false);
+
+  const callUpCategoryIds = useMemo(
+    () => getCallUpCategories(categories ?? [], categoryId).map((category) => category.id),
+    [categories, categoryId]
+  );
+
+  /** No categories to widen into means no switch — an inert toggle is worse than none. */
+  const canCallUp = allowOtherCategories && hasItems(callUpCategoryIds);
+
+  const categoryFilter = useMemo(
+    (): Pick<PlayerSearchFilters, 'category_id' | 'category_ids'> =>
+      showOtherCategories && hasItems(callUpCategoryIds)
+        ? {category_ids: callUpCategoryIds}
+        : {category_id: categoryId},
+    [showOtherCategories, callUpCategoryIds, categoryId]
+  );
 
   const [players, setPlayers] = useState<PlayerSearchResult[]>([]);
   const [filters, setFilters] = useState<PlayerSearchFilters>({
@@ -45,14 +75,14 @@ export default function UnifiedPlayerManager({
   const loadPlayers = useCallback(async () => {
     const searchFilters = {
       ...filters,
+      ...categoryFilter,
       search_term: searchTerm,
       club_id: clubId || filters.club_id,
-      category_id: categoryId || filters.category_id,
     };
 
     const data = await searchPlayers(searchFilters);
     setPlayers(data);
-  }, [filters, searchTerm, clubId, categoryId, searchPlayers]);
+  }, [filters, categoryFilter, searchTerm, clubId, searchPlayers]);
 
   // Separate function for search that doesn't depend on loadPlayers
   const performSearch = useCallback(
@@ -71,14 +101,14 @@ export default function UnifiedPlayerManager({
       const searchFilters = {
         club_id: clubId,
         is_external: isExternalFilter,
-        category_id: categoryId,
+        ...categoryFilter,
         search_term: term,
       };
 
       const data = await searchPlayers(searchFilters);
       setPlayers(data);
     },
-    [clubId, filters.is_external, categoryId, searchPlayers, showExternalPlayers]
+    [clubId, filters.is_external, categoryFilter, searchPlayers, showExternalPlayers]
   );
 
   // Load initial player-manager
@@ -174,6 +204,27 @@ export default function UnifiedPlayerManager({
     }
   };
 
+  /**
+   * Names the player's category. With the switch on, the list no longer filters
+   * by category, so without this a call-up is indistinguishable from a squad
+   * player. Colour carries the distinction; the label stays just the name.
+   */
+  const getCategoryBadge = (player: PlayerSearchResult) => {
+    if (!player.category_name) return null;
+
+    const isCallUp = Boolean(categoryId) && player.category_id !== categoryId;
+
+    return (
+      <span
+        className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+          isCallUp ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-700'
+        }`}
+      >
+        {player.category_name}
+      </span>
+    );
+  };
+
   const getPlayerTypeBadge = (isExternal: boolean) => {
     if (isExternal) {
       return (
@@ -261,6 +312,25 @@ export default function UnifiedPlayerManager({
         )}
       </div>
 
+      {/*
+        Off by default: the coach's own category is the normal case, and a list
+        of every player in the club would bury it. Turning it on is what a
+        call-up looks like.
+      */}
+      {canCallUp && (
+        <Switch
+          size="sm"
+          isSelected={showOtherCategories}
+          onValueChange={setShowOtherCategories}
+          aria-label={tPlayers.showOtherCategories}
+        >
+          <span className="text-sm">{tPlayers.showOtherCategories}</span>
+        </Switch>
+      )}
+      {canCallUp && showOtherCategories && (
+        <p className="text-xs text-gray-500">{tPlayers.showOtherCategoriesHint}</p>
+      )}
+
       {/* Create Player Button - Different for internal vs external */}
       <div className="flex justify-end">
         <Button
@@ -288,6 +358,7 @@ export default function UnifiedPlayerManager({
                 <div className="flex-1">
                   <div className="flex items-center space-x-3">
                     <h3 className="text-sm font-medium text-gray-900">{player.display_name}</h3>
+                    {getCategoryBadge(player)}
                     {getPlayerTypeBadge(player.is_external)}
                     {getPositionBadge(player.position)}
                     {player.jersey_number && (

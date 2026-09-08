@@ -8,7 +8,6 @@ import {translations} from '@/lib/translations';
 
 import {Choice, ContentCard, Grid, GridItem, Heading} from '@/components';
 import {PlayerPosition} from '@/enums';
-import {MemberInternal} from '@/types';
 
 export interface LineupMemberSetupData {
   position: PlayerPosition.GOALKEEPER | PlayerPosition.FIELD_PLAYER;
@@ -24,11 +23,28 @@ export const DEFAULT_SETUP_DATA: LineupMemberSetupData = {
   isViceCaptain: false,
 };
 
+/**
+ * Only the three fields the summary block prints.
+ *
+ * Narrower than `MemberInternal` on purpose: the card is used both when picking
+ * a member (which has `MemberInternal`) and when editing one already on the
+ * lineup (which has `Member`, joined from `category_lineup_members`). Those two
+ * types do not overlap, and neither needs widening for a card that reads a name
+ * and a registration number.
+ */
+interface LineupMemberSetupSubject {
+  name?: string | null;
+  surname?: string | null;
+  registration_number?: string | null;
+}
+
 interface LineupMemberSetupCardProps {
   existingJerseyNumbers: number[];
-  selectedMemberData: MemberInternal;
+  selectedMemberData: LineupMemberSetupSubject;
   value: LineupMemberSetupData;
   onChange: (data: LineupMemberSetupData) => void;
+  /** Hidden while editing, where the dialog title already names the member. */
+  hideSummary?: boolean;
 }
 
 export const LineupMemberSetupCard = ({
@@ -36,6 +52,7 @@ export const LineupMemberSetupCard = ({
   selectedMemberData,
   value,
   onChange,
+  hideSummary = false,
 }: LineupMemberSetupCardProps) => {
   const t = translations.lineupMembers.lineupMemberSetupCard;
 
@@ -105,7 +122,7 @@ export const LineupMemberSetupCard = ({
         </CheckboxGroup>
       </div>
 
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+      <div className={`mt-4 p-3 bg-gray-50 rounded-lg ${hideSummary ? 'hidden' : ''}`}>
         <Heading size={4}>{t.labels.selectedMemberTitle}</Heading>
         <Grid columns={2}>
           <GridItem span={1}>

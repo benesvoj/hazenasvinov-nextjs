@@ -57,7 +57,12 @@ export default function ContentCard({
     >
       <Show when={title}>
         <CardHeader className="flex justify-between items-center">
-          <VStack spacing={2}>
+          {/*
+            align="start", not the VStack default of "center": the title is
+            usually shorter than the subtitle, and centring the two against each
+            other pushed the heading visibly to the right of the text under it.
+          */}
+          <VStack spacing={2} align="start">
             <HStack spacing={2} align={'center'}>
               <Heading size={titleSize} className={titleClassName}>
                 {title}

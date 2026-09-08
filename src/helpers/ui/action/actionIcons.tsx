@@ -1,5 +1,6 @@
 import {
   ArrowLeftEndOnRectangleIcon,
+  ArrowPathIcon,
   BookmarkIcon,
   CheckIcon,
   Cog6ToothIcon,
@@ -60,6 +61,9 @@ export const getDefaultActionIcon = (type: ActionTypes) => {
   }
   if (type === ActionTypes.UNBLOCK) {
     return <LockClosedIcon className="w-4 h-4" />;
+  }
+  if (type === ActionTypes.SYNC) {
+    return <ArrowPathIcon className="w-4 h-4" />;
   }
   if (type === ActionTypes.MOVE) {
     return <ArrowsRightLeftIcon className="w-4 h-4" />;
