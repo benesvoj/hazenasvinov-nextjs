@@ -9,6 +9,8 @@ import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 import {cacheKeys} from '@/lib/performanceCache';
 
+import {splitMatchesByResult} from '@/utils/splitMatchesByResult';
+
 import type {
   MatchQueryOptions,
   MatchQueryResult,
@@ -150,19 +152,9 @@ export function useOptimizedOwnClubMatches(
     return [...(query.data.autumn || []), ...(query.data.spring || [])];
   }, [query.data]);
 
-  // Memoized upcoming matches
-  const upcomingMatches = useMemo(() => {
-    const now = new Date();
-    return allMatches.filter((match) => match.status === 'upcoming' && new Date(match.date) >= now);
-  }, [allMatches]);
-
-  // Memoized recent results
-  const recentResults = useMemo(() => {
-    const now = new Date();
-    return allMatches
-      .filter((match) => match.status === 'completed' && new Date(match.date) <= now)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10); // Limit to 10 most recent
+  const {upcomingMatches, recentResults} = useMemo(() => {
+    const {pending, completed} = splitMatchesByResult(allMatches);
+    return {upcomingMatches: pending, recentResults: completed.slice(0, 10)};
   }, [allMatches]);
 
   return {

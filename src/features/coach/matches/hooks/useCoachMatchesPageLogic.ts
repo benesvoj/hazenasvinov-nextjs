@@ -6,6 +6,8 @@ import {useQuery} from '@tanstack/react-query';
 
 import {translations} from '@/lib/translations';
 
+import {splitMatchesByResult} from '@/utils/splitMatchesByResult';
+
 import {useCoachCategory} from '@/features/coach/providers/CategoryProvider';
 import {useOptimizedOwnClubMatches, useStandings, useSupabaseClient} from '@/hooks';
 import {Match} from '@/types';
@@ -46,17 +48,12 @@ export function useCoachMatchesPageLogic() {
     }
   }, [selectedCategoryData?.id, activeSeason?.id, fetchStandings]);
 
-  const upcomingMatches = useMemo(() => {
-    const now = new Date();
-    return allMatches.filter((match) => match.status === 'upcoming' && new Date(match.date) >= now);
-  }, [allMatches]);
-
-  const recentResults = useMemo(() => {
-    const now = new Date();
-    return allMatches
-      .filter((match) => match.status === 'completed' && new Date(match.date) <= now)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [allMatches]);
+  // Proběhlé zápasy bez výsledku zůstávají mezi nadcházejícími — jen odtud jde
+  // výsledek zapsat. Podrobnosti u `splitMatchesByResult`.
+  const {pending: upcomingMatches, completed: recentResults} = useMemo(
+    () => splitMatchesByResult(allMatches),
+    [allMatches]
+  );
 
   const allMatchIds = useMemo(
     () => allMatches.map((m) => m.id),

@@ -2,9 +2,11 @@
 
 import React from 'react';
 
-import {Card, CardHeader, CardBody, Button} from '@heroui/react';
+import {Card, CardHeader, CardBody, Button, Chip} from '@heroui/react';
 
 import {CalendarIcon, TrophyIcon} from '@heroicons/react/24/outline';
+
+import {isAwaitingResult} from '@/utils/splitMatchesByResult';
 
 import {MatchRow, LoadingSpinner} from '@/components';
 
@@ -55,7 +57,12 @@ export default function UpcomingMatchesCard({
                       referees={refereesByMatchId?.get(match.id)}
                     />
                   </div>
-                  <div className="mt-3 flex justify-end">
+                  <div className="mt-3 flex items-center justify-end gap-2">
+                    {isAwaitingResult(match) && (
+                      <Chip color="warning" variant="flat" size="sm" className="mr-auto">
+                        Čeká na výsledek
+                      </Chip>
+                    )}
                     <Button
                       size="sm"
                       color="success"

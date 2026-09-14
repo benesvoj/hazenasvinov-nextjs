@@ -29,3 +29,4 @@ export * from './userRoles';
 /** Tournament utilities **/
 export * from './roundRobinGenerator';
 export * from './tournamentStandingsCalculator';
+export * from './splitMatchesByResult';
